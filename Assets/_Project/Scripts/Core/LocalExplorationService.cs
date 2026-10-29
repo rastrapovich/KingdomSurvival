@@ -57,6 +57,13 @@ public static class LocalExplorationService
     // Можно ли сейчас войти: отряд стоит у этого места, ничем не занят.
     public static bool CanEnter(GameState state, LocalLocationDefinition definition, out string reason)
     {
+        return CanEnter(state, definition, out reason, null);
+    }
+
+    // 12Т: hostLocationId — место, у которого отряд стоит («Прогуляться» по
+    // поселению, чья локальная карта не привязана к ID места генератора).
+    public static bool CanEnter(GameState state, LocalLocationDefinition definition, out string reason, string hostLocationId)
+    {
         reason = string.Empty;
         if (state == null || definition == null)
         {
@@ -69,7 +76,7 @@ public static class LocalExplorationService
             return false;
         }
         ExpeditionData expedition = state.ActiveExpedition;
-        if (expedition.Phase != CommanderState.AtLocation || expedition.LocationId != definition.WorldLocationId)
+        if (expedition.Phase != CommanderState.AtLocation || expedition.LocationId != (hostLocationId ?? definition.WorldLocationId))
         {
             reason = "Сначала дойдите до входа.";
             return false;
@@ -87,9 +94,10 @@ public static class LocalExplorationService
         return true;
     }
 
-    public static bool Enter(GameState state, LocalLocationDefinition definition, string entranceId, out string reason)
+    public static bool Enter(GameState state, LocalLocationDefinition definition, string entranceId, out string reason,
+        string hostLocationId = null)
     {
-        if (!CanEnter(state, definition, out reason))
+        if (!CanEnter(state, definition, out reason, hostLocationId))
             return false;
 
         LocalExplorationStateData data = Data(state);

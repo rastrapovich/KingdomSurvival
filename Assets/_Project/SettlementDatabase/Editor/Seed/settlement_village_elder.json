@@ -1,0 +1,132 @@
+{
+  "id": "settlement_village_elder",
+  "title": "12Т — Староста деревни",
+  "category": 4,
+  "status": 1,
+  "developerComment": "12Т [РАБОЧЕЕ][KINGDOM SURVIVAL]. Староста профиля «Деревня у дороги». Слух о броде (знание settlement.knowledge.ford_mud). Шаг поручения «Весть из городка»: при settlement.town.message.accepted — передать весть (флаг settlement.town.message.delivered).",
+  "startNodeId": "settlement.elder.start",
+  "tags": [
+    "поселения",
+    "12Т"
+  ],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "settlement.elder.start",
+      "speakerId": "village_elder",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "settlement.elder.start.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Староста чинит хомут прямо на завалинке и смотрит на отряд так, будто прикидывает, сколько вы съедите."
+        },
+        {
+          "blockId": "settlement.elder.start.line",
+          "kind": 0,
+          "text": "— Проезжие? Ну, садитесь. Только коней к колодцу не пускайте — колодец один, а кони, известно, без совести."
+        }
+      ],
+      "choices": [
+        {
+          "choiceId": "settlement.elder.road",
+          "text": "Как дорога дальше?",
+          "kind": 0,
+          "nextNodeId": "settlement.elder.road"
+        },
+        {
+          "choiceId": "settlement.elder.message",
+          "text": "Тебе весть из городка — от Миланы, жены сторожа.",
+          "kind": 0,
+          "nextNodeId": "settlement.elder.message",
+          "conditions": {
+            "Combinator": 0,
+            "Conditions": [
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.accepted"
+              },
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.delivered",
+                "Negate": true
+              },
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.failed",
+                "Negate": true
+              }
+            ]
+          }
+        },
+        {
+          "choiceId": "settlement.elder.bye",
+          "text": "Бывай, староста.",
+          "kind": 3,
+          "endsDialogue": true
+        }
+      ]
+    },
+    {
+      "id": "settlement.elder.road",
+      "speakerId": "village_elder",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "settlement.elder.road.line",
+          "kind": 0,
+          "text": "— Дорога как дорога. Брод через старое русло после дождя вязкий — телеги там садятся по ступицу. Кто умный, тот берёт выше, по камням. Кто не умный — тот потом у нас верёвку просит.",
+          "onRevealEffects": [
+            {
+              "EffectExecutionId": "settlement.elder.road.ford",
+              "Type": 2,
+              "StringParam": "settlement.knowledge.ford_mud"
+            }
+          ]
+        }
+      ],
+      "choices": [
+        {
+          "choiceId": "settlement.elder.road.thanks",
+          "text": "Спасибо за совет.",
+          "kind": 3,
+          "endsDialogue": true
+        }
+      ]
+    },
+    {
+      "id": "settlement.elder.message",
+      "speakerId": "village_elder",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "settlement.elder.message.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Староста слушает молча, потом откладывает хомут — впервые за весь разговор."
+        },
+        {
+          "blockId": "settlement.elder.message.line",
+          "kind": 0,
+          "text": "— Значит, сын её жив и к зиме вернётся. Ну… Скажите Милане: пусть не тратится на свечи. Я ей и так верил.",
+          "onRevealEffects": [
+            {
+              "EffectExecutionId": "settlement.elder.message.delivered",
+              "Type": 0,
+              "StringParam": "settlement.town.message.delivered"
+            }
+          ]
+        }
+      ],
+      "choices": [
+        {
+          "choiceId": "settlement.elder.message.bye",
+          "text": "Передам.",
+          "kind": 3,
+          "endsDialogue": true
+        }
+      ]
+    }
+  ]
+}

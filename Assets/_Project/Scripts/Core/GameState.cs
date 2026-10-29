@@ -299,6 +299,11 @@ public class GameState
     // и текущий слой исследования.
     public LocalExplorationStateData LocalExploration = new LocalExplorationStateData();
 
+    // 12Т: посещаемые поселения — выбранный профиль каждого места, кошельки
+    // и остатки торговцев, предложения корчмы, доски и поручения
+    // (SettlementService).
+    public SettlementsStateData Settlements = new SettlementsStateData();
+
     // Канон v1.58 §9.9: карта «Свободной игры», сгенерированная для этой
     // партии. Пусто (или поддельный объект JsonUtility) — авторский мир.
     public GeneratedWorldMap GeneratedMap;

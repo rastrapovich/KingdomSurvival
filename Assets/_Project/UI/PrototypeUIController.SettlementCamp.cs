@@ -8,15 +8,14 @@ using UnityEngine.UIElements;
 // причина»), ночлег в лагере, собраться и продолжить путь. Внутри — обычное
 // содержание места для тех, кто вошёл, и «Вернуться к лагерю». Состояние —
 // GameState.SettlementCamp (SettlementCampService); здесь только показ.
+// 12Т: внутри поселения открывается экран поселения (Settlement.cs); вход
+// всем отрядом тоже записывается в состояние — UI-флага больше нет.
 public partial class PrototypeUIController
 {
     private bool settlementPicking;
-    // Вошли всем отрядом, без лагеря (только на время окна).
-    private bool settlementInsideAll;
     private readonly HashSet<string> settlementEntering = new HashSet<string>(StringComparer.Ordinal);
 
-    private bool IsSettlementInside =>
-        settlementInsideAll || SettlementCampService.IsCommanderInside(gameState);
+    private bool IsSettlementInside => SettlementCampService.IsCommanderInside(gameState);
 
     // True — окно поселения нарисовано здесь (снаружи или выбор группы).
     private bool RenderSettlementChoices(LocationData location)
@@ -44,11 +43,7 @@ public partial class PrototypeUIController
             AddInteractionChoice("ВОЙТИ ВСЕМ ОТРЯДОМ",
                 blocked.Count > 0 ? "Не допускается: " + string.Join("; ", blocked) + "." : "Отряд входит вместе.",
                 blocked.Count == 0,
-                () =>
-                {
-                    settlementInsideAll = true;
-                    RenderLocationInteractionChoices(location);
-                });
+                () => EnterSettlementWith(location, SettlementCampService.Companions(gameState)));
             AddInteractionChoice("РАЗБИТЬ ЛАГЕРЬ СНАРУЖИ", "Выбрать, кто пойдёт с вами, а кто останется в лагере.", true,
                 () => OpenSettlementPicker(location));
         }
@@ -111,19 +106,8 @@ public partial class PrototypeUIController
                 });
         }
 
-        AddInteractionChoice("ВОЙТИ", "Оставшиеся ждут у входа: они в походе, но не рядом с вами.", true, () =>
-        {
-            if (!SettlementCampService.Enter(gameState, settlementEntering, out string reason))
-            {
-                AddReport(reason);
-                return;
-            }
-            settlementPicking = false;
-            settlementInsideAll = !SettlementCampService.HasCamp(gameState);
-            RenderLocationInteractionDescription(location);
-            RenderLocationInteractionChoices(location);
-            Autosave();
-        });
+        AddInteractionChoice("ВОЙТИ", "Оставшиеся ждут у входа: они в походе, но не рядом с вами.", true,
+            () => EnterSettlementWith(location, settlementEntering));
         AddInteractionChoice("НАЗАД", null, true, () =>
         {
             settlementPicking = false;
@@ -131,29 +115,24 @@ public partial class PrototypeUIController
         });
     }
 
-    // Внутри поселения — к обычному содержанию места добавляется выход.
+    // 12Т: вход записывается в состояние (с лагерем или всем отрядом) и
+    // открывает экран поселения; выход — кнопкой на нём.
+    private void EnterSettlementWith(LocationData location, IEnumerable<string> entering)
+    {
+        if (!SettlementCampService.Enter(gameState, entering, out string reason))
+        {
+            AddReport(reason);
+            return;
+        }
+        settlementPicking = false;
+        CloseLocationInteraction();
+        OpenSettlementScreen(location.Id);
+        Autosave();
+    }
+
+    // Внутри поселения окно места не показывается — там экран поселения.
     private void AddSettlementInsideChoices(LocationData location)
     {
-        if (location == null || !location.IsSettlement || !IsSettlementInside)
-            return;
-        if (SettlementCampService.IsCommanderInside(gameState))
-        {
-            AddInteractionChoice("ВЕРНУТЬСЯ К ЛАГЕРЮ", "Ожидающие снова рядом; группу можно сменить.", true, () =>
-            {
-                SettlementCampService.ReturnToCamp(gameState);
-                RenderLocationInteractionDescription(location);
-                RenderLocationInteractionChoices(location);
-                Autosave();
-            });
-        }
-        else
-        {
-            AddInteractionChoice("ВЫЙТИ ИЗ ПОСЕЛЕНИЯ", null, true, () =>
-            {
-                settlementInsideAll = false;
-                RenderLocationInteractionChoices(location);
-            });
-        }
     }
 
     // Строка о лагере под описанием места.
@@ -174,7 +153,6 @@ public partial class PrototypeUIController
     private void ResetSettlementView()
     {
         settlementPicking = false;
-        settlementInsideAll = false;
         settlementEntering.Clear();
     }
 

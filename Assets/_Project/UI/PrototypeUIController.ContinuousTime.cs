@@ -164,6 +164,9 @@ public partial class PrototypeUIController
         RefreshNarrativePresentationFrame();
         // ПР-12К: исследуемое место — и закрытие его экрана, когда партии нет.
         TickLocalExploration(Time.unscaledDeltaTime);
+        // 12Т: экран поселения — пока командир внутри и поверх ничего нет.
+        TickSettlementScreen();
+        TickWorldMapSearchAreas();
 
         if (gameState == null)
             return;

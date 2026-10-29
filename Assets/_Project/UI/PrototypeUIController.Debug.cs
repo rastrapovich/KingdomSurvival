@@ -204,6 +204,12 @@ public partial class PrototypeUIController
             "ТЕХНИЧЕСКОЕ ПОСЕЛЕНИЕ И ЛАГЕРЬ (ПР-12К)",
             DebugSettlementCamp));
 
+        // 12Т: то же техническое поселение с профилем торгового села из Базы
+        // поселений и 60 зол. похода — проверка торговли, корчмы и доски.
+        scroll.Add(CreateDebugActionButton(
+            "ТОРГОВОЕ СЕЛО ДЛЯ ПРОВЕРКИ (12Т)",
+            DebugSettlementTrade));
+
         // ПР-03: черновой вход в бой реальным отрядом похода. Сюжетного боя
         // в главе пока нет — настоящий вход появится в ПР-10.
         scroll.Add(CreateDebugActionButton(
@@ -567,6 +573,22 @@ public partial class PrototypeUIController
         // Окно прежнего места (например, места прибытия) уступает поселению.
         if (IsLocationInteractionActive)
             CloseLocationInteraction();
+        RefreshInterface();
+        TryOpenLocationInteraction(SettlementCampDevFixture.SettlementId);
+    }
+
+    private void DebugSettlementTrade()
+    {
+        if (gameState == null || isGameOver)
+            return;
+        bool ok = SettlementTradeDevFixture.Apply(gameState, SettlementTradeDevFixture.TradingPostProfileId, out string report);
+        AddReport("[DEBUG] " + report);
+        if (!ok)
+            return;
+        if (IsLocationInteractionActive)
+            CloseLocationInteraction();
+        if (IsSettlementScreenOpen)
+            CloseSettlementScreen();
         RefreshInterface();
         TryOpenLocationInteraction(SettlementCampDevFixture.SettlementId);
     }

@@ -17,6 +17,11 @@ public sealed class SettlementCampData
     public bool CommanderInside;
     // Кто ждёт в лагере, пока командир внутри.
     public List<string> WaitingIds = new List<string>();
+    // 12Т: вошли всем отрядом, лагеря снаружи нет. Запись тогда — только
+    // отметка «командир внутри»: единственный источник пребывания в
+    // поселении (переживает сохранение), без второго UI-флага. Старые
+    // сохранения (false) — прежний лагерь.
+    public bool WithoutCamp;
 }
 
 public static partial class SettlementCampService
@@ -29,7 +34,20 @@ public static partial class SettlementCampService
     public static bool HasCamp(GameState state)
     {
         SettlementCampData camp = Get(state);
+        return camp != null && !string.IsNullOrEmpty(camp.SettlementLocationId) && !camp.WithoutCamp;
+    }
+
+    // Есть запись посещения (лагерь или вход всем отрядом).
+    public static bool HasVisit(GameState state)
+    {
+        SettlementCampData camp = Get(state);
         return camp != null && !string.IsNullOrEmpty(camp.SettlementLocationId);
+    }
+
+    // В каком поселении сейчас командир (пусто — снаружи).
+    public static string InsideLocationId(GameState state)
+    {
+        return IsCommanderInside(state) ? state.SettlementCamp.SettlementLocationId : string.Empty;
     }
 
     // Ждёт снаружи, пока командир в поселении.
@@ -40,7 +58,7 @@ public static partial class SettlementCampService
                !string.IsNullOrEmpty(personId) && camp.WaitingIds.Contains(personId);
     }
 
-    public static bool IsCommanderInside(GameState state) => HasCamp(state) && state.SettlementCamp.CommanderInside;
+    public static bool IsCommanderInside(GameState state) => HasVisit(state) && state.SettlementCamp.CommanderInside;
 
     // Отряд стоит у поселения (у его входа) — лагерь здесь возможен.
     public static LocationData SettlementHere(GameState state)
@@ -114,7 +132,19 @@ public static partial class SettlementCampService
         }
 
         if (waiting.Count == 0 && !HasCamp(state))
-            return true; // все вошли вместе — лагерь не нужен
+        {
+            // Все вошли вместе — лагерь не нужен, но пребывание внутри
+            // записывается в состояние (переживает сохранение).
+            state.SettlementCamp = new SettlementCampData
+            {
+                SettlementLocationId = settlement.Id,
+                MapXPercent = state.ActiveExpedition.CurrentMapXPercent,
+                MapYPercent = state.ActiveExpedition.CurrentMapYPercent,
+                CommanderInside = true,
+                WithoutCamp = true
+            };
+            return true;
+        }
 
         if (!HasCamp(state))
         {
@@ -134,7 +164,12 @@ public static partial class SettlementCampService
     // выбрать заново).
     public static void ReturnToCamp(GameState state)
     {
-        if (HasCamp(state))
+        if (!HasVisit(state))
+            return;
+        // Вошедшие всем отрядом просто выходят: записи посещения больше нет.
+        if (state.SettlementCamp.WithoutCamp)
+            state.SettlementCamp = null;
+        else
             state.SettlementCamp.CommanderInside = false;
     }
 
@@ -142,7 +177,7 @@ public static partial class SettlementCampService
     public static List<string> Gather(GameState state)
     {
         List<string> names = new List<string>();
-        if (!HasCamp(state))
+        if (!HasVisit(state))
             return names;
         foreach (string personId in state.SettlementCamp.WaitingIds)
         {
@@ -180,7 +215,12 @@ public static partial class SettlementCampService
         ExpeditionData expedition = state.ActiveExpedition;
         bool stillHere = expedition.Phase == CommanderState.AtLocation &&
                          expedition.LocationId == state.SettlementCamp.SettlementLocationId;
-        if (!stillHere)
+        if (!stillHere && state.SettlementCamp.WithoutCamp)
+        {
+            // Вошли всем отрядом и ушли — лагеря не было, сворачивать нечего.
+            state.SettlementCamp = null;
+        }
+        else if (!stillHere)
         {
             List<string> names = Gather(state);
             reports.Add(names.Count > 0

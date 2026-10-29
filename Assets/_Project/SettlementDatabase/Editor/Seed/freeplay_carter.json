@@ -1,0 +1,136 @@
+{
+  "id": "freeplay_carter",
+  "title": "12Т — Возчик Ждан",
+  "category": 2,
+  "status": 1,
+  "developerComment": "12Т, пилот «Тайник у старого русла» [РАБОЧЕЕ][KINGDOM SURVIVAL]. Возчик в корчме торгового села. Поручение «Нож деда» (ErrandId settlement.errand.carter_knife): принять здесь (флаг freeplay.cache.errand.accepted), на доске или в корчме — состояние общее. Сведения о месте продаются отдельным предложением корчмы (оплата — командой TavernService). Нож — вещь item.carter_token_knife в сумке (ItemPresent); отдать — флаг freeplay.cache.token_returned, код забирает экземпляр. Дед и тайник — рабочий контент, не факт мира.",
+  "startNodeId": "freeplay.carter.start",
+  "tags": ["поселения", "12Т", "тайник"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.carter.start",
+      "speakerId": "carter",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.carter.start.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Возчик сидит боком к столу, чтобы спина не касалась лавки. По тому, как он морщится, дотягиваясь до кружки, спина у него главный собеседник."
+        },
+        {
+          "blockId": "freeplay.carter.start.offer",
+          "kind": 0,
+          "text": "— Дед мой соль возил. Помирая, сказал: у старого русла, под ивой с тремя зарубками, горшок. Серебро — бери кто найдёт, а нож его с медной насечкой — мне. Сам я туда не дойду: спина. Где ива — скажу за двенадцать. Я не жадный, у меня просто дети.",
+          "conditions": { "Combinator": 0, "Conditions": [
+            { "Type": 0, "StringParam": "freeplay.cache.errand.accepted", "Negate": true },
+            { "Type": 0, "StringParam": "freeplay.cache.errand.done", "Negate": true }
+          ] }
+        },
+        {
+          "blockId": "freeplay.carter.start.waiting",
+          "kind": 0,
+          "text": "— Ну что, ива ещё стоит? Я бы сам сходил, да спина говорит: сиди.",
+          "conditions": { "Combinator": 0, "Conditions": [
+            { "Type": 0, "StringParam": "freeplay.cache.errand.accepted" },
+            { "Type": 0, "StringParam": "freeplay.cache.found", "Negate": true }
+          ] }
+        },
+        {
+          "blockId": "freeplay.carter.start.found",
+          "kind": 0,
+          "text": "— По глазам вижу — нашли. Нож при вас?",
+          "conditions": { "Combinator": 0, "Conditions": [
+            { "Type": 0, "StringParam": "freeplay.cache.found" },
+            { "Type": 0, "StringParam": "freeplay.cache.token_returned", "Negate": true }
+          ] }
+        },
+        {
+          "blockId": "freeplay.carter.start.done",
+          "kind": 0,
+          "text": "— Дедов нож теперь на гвозде над дверью. Жена говорит — пыль собирает. А я говорю — память.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 0, "StringParam": "freeplay.cache.token_returned" } ] }
+        }
+      ],
+      "choices": [
+        {
+          "choiceId": "freeplay.carter.accept",
+          "text": "Возьмусь. Нож принесу.",
+          "kind": 0,
+          "nextNodeId": "freeplay.carter.accepted",
+          "conditions": { "Combinator": 0, "Conditions": [
+            { "Type": 0, "StringParam": "freeplay.cache.errand.accepted", "Negate": true },
+            { "Type": 0, "StringParam": "freeplay.cache.errand.done", "Negate": true }
+          ] }
+        },
+        {
+          "choiceId": "freeplay.carter.give",
+          "text": "Отдать нож с медной насечкой.",
+          "kind": 0,
+          "nextNodeId": "freeplay.carter.given",
+          "conditions": { "Combinator": 0, "Conditions": [
+            { "Type": 5, "StringParam": "item.carter_token_knife" },
+            { "Type": 0, "StringParam": "freeplay.cache.token_returned", "Negate": true }
+          ] }
+        },
+        {
+          "choiceId": "freeplay.carter.keep",
+          "text": "Нож пока побудет у меня.",
+          "kind": 3,
+          "endsDialogue": true,
+          "conditions": { "Combinator": 0, "Conditions": [
+            { "Type": 5, "StringParam": "item.carter_token_knife" },
+            { "Type": 0, "StringParam": "freeplay.cache.token_returned", "Negate": true }
+          ] }
+        },
+        { "choiceId": "freeplay.carter.bye", "text": "Не сейчас.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.carter.accepted",
+      "speakerId": "carter",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.carter.accepted.line",
+          "kind": 0,
+          "text": "— Вот и ладно. Про иву спросите — расскажу, как обещал. Двенадцать — это не цена, это уважение к деду.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.carter.accepted.flag", "Type": 0, "StringParam": "freeplay.cache.errand.accepted" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.carter.accepted.bye", "text": "Договорились.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.carter.given",
+      "speakerId": "carter",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.carter.given.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Ждан берёт нож обеими руками, как хлеб, и долго ведёт пальцем по трём виткам меди."
+        },
+        {
+          "blockId": "freeplay.carter.given.line",
+          "kind": 0,
+          "text": "— Его. Точно его. Держите — это от меня, не от деда: дед был бы против.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.carter.given.token", "Type": 0, "StringParam": "freeplay.cache.token_returned" },
+            { "EffectExecutionId": "freeplay.carter.given.done", "Type": 0, "StringParam": "freeplay.cache.errand.done" },
+            { "EffectExecutionId": "freeplay.carter.given.gold", "Type": 15, "IntParam": 10 },
+            { "EffectExecutionId": "freeplay.carter.given.xp", "Type": 12, "IntParam": 10 }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.carter.given.bye", "text": "Пусть память будет.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

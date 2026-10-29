@@ -291,6 +291,40 @@ public static class CampRest
         return true;
     }
 
+    // 12Т: ночлег под крышей поселения (TavernService) — та же остановка,
+    // но командир внутри поселения, поэтому проверка «вернитесь к лагерю»
+    // здесь не нужна. Остальные запреты прежние.
+    public static bool TryStartRestUnchecked(GameState state, double hours, string displayName, out string message)
+    {
+        message = string.Empty;
+        if (state == null || !state.HasActiveExpedition)
+        {
+            message = "Ночлег — в походе.";
+            return false;
+        }
+        if (state.HasPendingExpeditionDecision)
+        {
+            message = "Сначала нужно принять решение.";
+            return false;
+        }
+        ExpeditionData expedition = state.ActiveExpedition;
+        if (expedition.HasTimedActivity)
+        {
+            message = IsResting(state) ? "Отряд уже спит." : "Отряд занят: " + expedition.ActiveActivity.DisplayName + ".";
+            return false;
+        }
+        double total = hours > 0 ? hours : RestHours;
+        expedition.ActiveActivity = new ExpeditionActivityData
+        {
+            Id = RestActivityId,
+            DisplayName = string.IsNullOrWhiteSpace(displayName) ? "НОЧЛЕГ" : displayName,
+            Kind = ExpeditionActivityKind.RoadStop,
+            TotalHours = total,
+            RemainingHours = total
+        };
+        return true;
+    }
+
     // Утро: итог ночлега (вызывает владелец времени по окончании остановки).
     public static void CompleteRest(GameState state, List<string> messages)
     {
@@ -306,6 +340,11 @@ public static class CampRest
                 results.Add(resident.DisplayName + " отоспался");
             }
         }
+
+        // 12Т: оплаченный ночлег в корчме — лучше отдых вошедшим.
+        string lodging = TavernService.CompleteLodging(state);
+        if (!string.IsNullOrEmpty(lodging))
+            results.Add(lodging);
 
         if (night != null)
         {

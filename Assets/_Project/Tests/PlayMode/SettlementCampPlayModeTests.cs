@@ -139,9 +139,15 @@ public sealed class SettlementCampPlayModeTests
         Assert.IsFalse(PartyPresence.IsPresent(campaign, SettlementCampDevFixture.CreatureId));
         Assert.IsTrue(PartyPresence.IsPresent(campaign, "garrick"));
         Assert.IsTrue(PartyPresence.IsPresent(campaign, SettlementCampDevFixture.MercenaryId));
+        // 12Т: внутри — экран поселения, а не окно места.
+        yield return Frames(2);
+        Assert.IsTrue((bool)main.GetType().GetProperty("IsSettlementScreenOpen", AnyInstance).GetValue(main), "Открыт экран поселения.");
+        Assert.IsFalse((bool)main.GetType().GetProperty("IsLocationInteractionActive", AnyInstance).GetValue(main));
         yield return Capture(main, "camp_02_inside");
 
-        yield return Click(Choice(root, "ВЕРНУТЬСЯ К ЛАГЕРЮ"));
+        Button exit = root.Q<Button>("settlement-exit-button");
+        StringAssert.StartsWith("ВЕРНУТЬСЯ К ЛАГЕРЮ", exit.text);
+        yield return Click(exit);
         Assert.IsFalse(SettlementCampService.IsCommanderInside(campaign));
         Assert.IsTrue(PartyPresence.IsPresent(campaign, SettlementCampDevFixture.CreatureId), "У лагеря все рядом.");
         yield return Capture(main, "camp_03_at_camp");

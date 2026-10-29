@@ -1,0 +1,42 @@
+{
+  "id": "settlement_village_hostess",
+  "title": "12Т — Хозяйка постоялого двора",
+  "category": 4,
+  "status": 1,
+  "developerComment": "12Т [РАБОЧЕЕ]. Хозяйка «Избы у дороги» (деревня). Предупреждение о звере у дороги — то же знание, что на доске (settlement.knowledge.wolf_road), пока жив вожак углежогов; после freeplay.coal.leader_killed — новость.",
+  "startNodeId": "settlement.hostess.start",
+  "tags": ["поселения", "12Т"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "settlement.hostess.start",
+      "speakerId": "village_hostess",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "settlement.hostess.start.line",
+          "kind": 0,
+          "text": "— Лавки широкие, клопов мало, щи вчерашние, но честные. Больше в округе этого никто не скажет."
+        },
+        {
+          "blockId": "settlement.hostess.start.wolf",
+          "kind": 0,
+          "text": "— Только к лесу по темноте не ходите. Возчики говорят, старый волк у дороги овец режет — и не боится ни огня, ни крика.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 0, "StringParam": "freeplay.coal.leader_killed", "Negate": true } ] },
+          "onRevealEffects": [
+            { "EffectExecutionId": "settlement.hostess.wolf", "Type": 2, "StringParam": "settlement.knowledge.wolf_road" }
+          ]
+        },
+        {
+          "blockId": "settlement.hostess.start.wolf_gone",
+          "kind": 0,
+          "text": "— Говорят, старого волка у дороги кто-то уложил. Возчики снова ездят засветло и даже поют. Плохо поют, но ездят.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 0, "StringParam": "freeplay.coal.leader_killed" } ] }
+        }
+      ],
+      "choices": [
+        { "choiceId": "settlement.hostess.bye", "text": "Учтём.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

@@ -83,12 +83,26 @@ public static class ItemService
         if (commander == null)
             return;
 
+        InventoryData inventory = Get(state);
         foreach (string itemId in state.Narrative.Items)
         {
             ItemDefinition definition = ItemCatalog.Find(itemId);
-            if (definition == null || FindFirst(state, itemId) != null)
+            if (definition == null)
                 continue;
-            Create(state, itemId, commander.Id);
+            if (definition.IsStory)
+            {
+                if (FindFirst(state, itemId) == null)
+                    Create(state, itemId, commander.Id);
+                continue;
+            }
+            // 12Т: обычная вещь из эффекта GrantItem выдаётся один раз —
+            // проданная или израсходованная не появляется снова.
+            string grant = "narrative.item." + itemId;
+            if (inventory.AppliedGrants.Contains(grant))
+                continue;
+            inventory.AppliedGrants.Add(grant);
+            if (FindFirst(state, itemId) == null)
+                Create(state, itemId, commander.Id);
         }
     }
 
@@ -105,6 +119,35 @@ public static class ItemService
     public static bool HasGrant(GameState state, string grantId)
     {
         return Get(state).AppliedGrants.Contains(grantId);
+    }
+
+    // 12Т: новая вещь из магазинного остатка — новый уникальный в партии
+    // InstanceId выдаётся только при фактической покупке.
+    public static ItemInstanceData CreateInstance(GameState state, string itemId, string ownerPersonId)
+    {
+        return Create(state, itemId, ownerPersonId);
+    }
+
+    // 12Т: вещь переходит к торговцу целиком — экземпляр с прежним
+    // InstanceId и зарядами покидает инвентарь партии (выкуп вернёт его же).
+    public static bool Detach(GameState state, ItemInstanceData item)
+    {
+        if (item == null)
+            return false;
+        string owner = item.OwnerPersonId;
+        item.Slot = ItemSlot.None;
+        bool removed = Get(state).Items.Remove(item);
+        if (removed && !string.IsNullOrEmpty(owner))
+            RefreshMaxHitPoints(state, owner);
+        return removed;
+    }
+
+    // 12Т: выкупленный экземпляр возвращается в сумку героя как был.
+    public static void Attach(GameState state, ItemInstanceData item, string ownerPersonId)
+    {
+        item.OwnerPersonId = ownerPersonId ?? string.Empty;
+        item.Slot = ItemSlot.None;
+        Get(state).Items.Add(item);
     }
 
     private static ItemInstanceData Create(GameState state, string itemId, string ownerPersonId)
@@ -229,12 +272,18 @@ public static class ItemService
             return false;
         if (HomePeopleService.HasDeparted(state))
         {
+            // 12Т: оставленный в лагере у поселения не рядом с командиром —
+            // его вещи не участвуют в сцене, торговле и снаряжении внутри.
+            if (PartyPresence.IsWaitingInCamp(state, personId))
+                return false;
             CommanderData commander = state.GetSelectedCommander();
             return (commander != null && commander.Id == personId) ||
                    HomePeopleService.IsInExpedition(state, personId);
         }
         return resident.IsHomeMember;
     }
+
+    public static bool IsWithHeroPublic(GameState state, string personId) => IsWithHero(state, personId);
 
     public static bool IsReachable(GameState state, ItemInstanceData item)
     {
@@ -443,60 +492,11 @@ public static class ItemService
         return true;
     }
 
-    // Использовать расходуемую вещь. Сушёная рыба — только в походе,
-    // травы — на изнеможённого рядом.
+    // Использовать расходуемую вещь: эффекты — из «Базы предметов»
+    // (ItemUseService), без разбора по ItemId.
     public static bool TryUse(GameState state, string instanceId, string targetPersonId, out string message)
     {
-        ItemInstanceData item = Find(state, instanceId);
-        ItemDefinition definition = item != null ? ItemCatalog.Find(item.ItemId) : null;
-        if (definition == null || !definition.IsConsumable || item.UsesLeft <= 0)
-        {
-            message = "Это нельзя использовать.";
-            return false;
-        }
-        if (!IsReachable(state, item))
-        {
-            message = "Эта вещь сейчас не рядом.";
-            return false;
-        }
-
-        switch (item.ItemId)
-        {
-            case ItemCatalog.DriedFish:
-                if (!state.HasActiveExpedition)
-                {
-                    message = "Рыбу в дорогу едят в походе.";
-                    return false;
-                }
-                state.ArmySupply += 2;
-                message = "Отряд поел сушёной рыбы: +2 припаса.";
-                break;
-
-            case ItemCatalog.UlyanaHerbs:
-                ResidentState target = HomePeopleService.Find(state, targetPersonId);
-                if (target == null || !IsWithHero(state, targetPersonId))
-                {
-                    message = "Отвар нужно дать тому, кто рядом.";
-                    return false;
-                }
-                if (!target.Exhausted)
-                {
-                    message = target.DisplayName + " не изнеможён — отвар не нужен.";
-                    return false;
-                }
-                target.Exhausted = false;
-                message = target.DisplayName + ": отвар Ульяны снял изнеможение.";
-                break;
-
-            default:
-                message = "Это нельзя использовать.";
-                return false;
-        }
-
-        item.UsesLeft--;
-        if (item.UsesLeft <= 0)
-            Get(state).Items.Remove(item);
-        return true;
+        return ItemUseService.TryUse(state, instanceId, targetPersonId, out message);
     }
 
     // Человек погиб: сюжетные вещи — к герою, остальное — в кладовую Дома

@@ -8565,7 +8565,19 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode SandboxBattleLayoutTests (позиции, стены, трудная местность до первого хода; ошибка вместо сдвига), LocalExplorationCoreTests, RoadBattlefieldSelectionTests; PlayMode LocalBattleHostPlayModeTests (бой в основной сцене, союзник из каталога, итог вызывающему), прежние CampaignBattle/BattleSandboxCatalog PlayMode зелёные. EditMode 1360 (1346/0/14), PlayMode 26/26. Вид боя на месте глазами не проверен."
+      implementationNote: "EditMode SandboxBattleLayoutTests (\u043F\u043E\u0437\u0438\u0446\u0438\u0438,
+        \u0441\u0442\u0435\u043D\u044B, \u0442\u0440\u0443\u0434\u043D\u0430\u044F
+        \u043C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u044C \u0434\u043E \u043F\u0435\u0440\u0432\u043E\u0433\u043E
+        \u0445\u043E\u0434\u0430; \u043E\u0448\u0438\u0431\u043A\u0430 \u0432\u043C\u0435\u0441\u0442\u043E
+        \u0441\u0434\u0432\u0438\u0433\u0430), LocalExplorationCoreTests, RoadBattlefieldSelectionTests;
+        PlayMode LocalBattleHostPlayModeTests (\u0431\u043E\u0439 \u0432 \u043E\u0441\u043D\u043E\u0432\u043D\u043E\u0439
+        \u0441\u0446\u0435\u043D\u0435, \u0441\u043E\u044E\u0437\u043D\u0438\u043A
+        \u0438\u0437 \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0430, \u0438\u0442\u043E\u0433
+        \u0432\u044B\u0437\u044B\u0432\u0430\u044E\u0449\u0435\u043C\u0443), \u043F\u0440\u0435\u0436\u043D\u0438\u0435
+        CampaignBattle/BattleSandboxCatalog PlayMode \u0437\u0435\u043B\u0451\u043D\u044B\u0435.
+        EditMode 1360 (1346/0/14), PlayMode 26/26. \u0412\u0438\u0434 \u0431\u043E\u044F
+        \u043D\u0430 \u043C\u0435\u0441\u0442\u0435 \u0433\u043B\u0430\u0437\u0430\u043C\u0438
+        \u043D\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
@@ -8611,7 +8623,19 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode LocalPartyMoverTests, FreePlayMineLocalTests; PlayMode LocalExplorationPlayModeTests (вход вместо текстового окна, ходьба со спутниками, отвалы, бой на том же поле, отход, победа, save/load, выход, повторный вход без зверей и железа); снимки экрана из PlayMode просмотрены. EditMode 1372 (1358/0/14), PlayMode 27/27. Фон — заглушка; ручной проход в Editor не делался."
+      implementationNote: "EditMode LocalPartyMoverTests, FreePlayMineLocalTests;
+        PlayMode LocalExplorationPlayModeTests (\u0432\u0445\u043E\u0434 \u0432\u043C\u0435\u0441\u0442\u043E
+        \u0442\u0435\u043A\u0441\u0442\u043E\u0432\u043E\u0433\u043E \u043E\u043A\u043D\u0430,
+        \u0445\u043E\u0434\u044C\u0431\u0430 \u0441\u043E \u0441\u043F\u0443\u0442\u043D\u0438\u043A\u0430\u043C\u0438,
+        \u043E\u0442\u0432\u0430\u043B\u044B, \u0431\u043E\u0439 \u043D\u0430 \u0442\u043E\u043C
+        \u0436\u0435 \u043F\u043E\u043B\u0435, \u043E\u0442\u0445\u043E\u0434, \u043F\u043E\u0431\u0435\u0434\u0430,
+        save/load, \u0432\u044B\u0445\u043E\u0434, \u043F\u043E\u0432\u0442\u043E\u0440\u043D\u044B\u0439
+        \u0432\u0445\u043E\u0434 \u0431\u0435\u0437 \u0437\u0432\u0435\u0440\u0435\u0439
+        \u0438 \u0436\u0435\u043B\u0435\u0437\u0430); \u0441\u043D\u0438\u043C\u043A\u0438
+        \u044D\u043A\u0440\u0430\u043D\u0430 \u0438\u0437 PlayMode \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u044B.
+        EditMode 1372 (1358/0/14), PlayMode 27/27. \u0424\u043E\u043D \u2014 \u0437\u0430\u0433\u043B\u0443\u0448\u043A\u0430;
+        \u0440\u0443\u0447\u043D\u043E\u0439 \u043F\u0440\u043E\u0445\u043E\u0434
+        \u0432 Editor \u043D\u0435 \u0434\u0435\u043B\u0430\u043B\u0441\u044F."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
@@ -8658,7 +8682,17 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode SettlementCampTests; PlayMode SettlementCampPlayModeTests (окно поселения: выбор группы, существо не допускается и ждёт, возврат к лагерю, сбор); снимки экрана просмотрены. Производственное поселение не подключено (решение пользователя — dev)."
+      implementationNote: "EditMode SettlementCampTests; PlayMode SettlementCampPlayModeTests
+        (\u043E\u043A\u043D\u043E \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F:
+        \u0432\u044B\u0431\u043E\u0440 \u0433\u0440\u0443\u043F\u043F\u044B, \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u043E
+        \u043D\u0435 \u0434\u043E\u043F\u0443\u0441\u043A\u0430\u0435\u0442\u0441\u044F
+        \u0438 \u0436\u0434\u0451\u0442, \u0432\u043E\u0437\u0432\u0440\u0430\u0442
+        \u043A \u043B\u0430\u0433\u0435\u0440\u044E, \u0441\u0431\u043E\u0440); \u0441\u043D\u0438\u043C\u043A\u0438
+        \u044D\u043A\u0440\u0430\u043D\u0430 \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u044B.
+        \u041F\u0440\u043E\u0438\u0437\u0432\u043E\u0434\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0435
+        \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u0435 \u043D\u0435 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u043E
+        (\u0440\u0435\u0448\u0435\u043D\u0438\u0435 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u044F
+        \u2014 dev)."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
@@ -8698,7 +8732,20 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode LocalExplorationCoreTests (настоящий JsonUtility roundtrip места, сохранение формата 2 без новых полей, null-маркер без фиктивной стоянки), SettlementCampTests (roundtrip лагеря); PlayMode LocalExplorationPlayModeTests: сохранение и загрузка в шахте — тот же слой, позиции и итоги, звери не возвращаются; во время боя сохранение запрещено."
+      implementationNote: "EditMode LocalExplorationCoreTests (\u043D\u0430\u0441\u0442\u043E\u044F\u0449\u0438\u0439
+        JsonUtility roundtrip \u043C\u0435\u0441\u0442\u0430, \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435
+        \u0444\u043E\u0440\u043C\u0430\u0442\u0430 2 \u0431\u0435\u0437 \u043D\u043E\u0432\u044B\u0445
+        \u043F\u043E\u043B\u0435\u0439, null-\u043C\u0430\u0440\u043A\u0435\u0440
+        \u0431\u0435\u0437 \u0444\u0438\u043A\u0442\u0438\u0432\u043D\u043E\u0439
+        \u0441\u0442\u043E\u044F\u043D\u043A\u0438), SettlementCampTests (roundtrip
+        \u043B\u0430\u0433\u0435\u0440\u044F); PlayMode LocalExplorationPlayModeTests:
+        \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u0438 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0430
+        \u0432 \u0448\u0430\u0445\u0442\u0435 \u2014 \u0442\u043E\u0442 \u0436\u0435
+        \u0441\u043B\u043E\u0439, \u043F\u043E\u0437\u0438\u0446\u0438\u0438 \u0438
+        \u0438\u0442\u043E\u0433\u0438, \u0437\u0432\u0435\u0440\u0438 \u043D\u0435
+        \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0430\u044E\u0442\u0441\u044F;
+        \u0432\u043E \u0432\u0440\u0435\u043C\u044F \u0431\u043E\u044F \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435
+        \u0437\u0430\u043F\u0440\u0435\u0449\u0435\u043D\u043E."
       completedAt: 2026-10-04
       completedCommit: 
       optionalAutoCheckId: 
@@ -8734,13 +8781,38 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "Автоматическая часть: EditMode 1392 (1378/0/14), PlayMode 30/30, прогон главы в EditMode зелёный; инструкция LOCAL_EXPLORATION_GUIDE.md. Ручной проход шахты в Editor без Debug пользователем не выполнен."
+      implementationNote: "\u0410\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0430\u044F
+        \u0447\u0430\u0441\u0442\u044C: EditMode 1392 (1378/0/14), PlayMode 30/30,
+        \u043F\u0440\u043E\u0433\u043E\u043D \u0433\u043B\u0430\u0432\u044B \u0432
+        EditMode \u0437\u0435\u043B\u0451\u043D\u044B\u0439; \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+        LOCAL_EXPLORATION_GUIDE.md. \u0420\u0443\u0447\u043D\u043E\u0439 \u043F\u0440\u043E\u0445\u043E\u0434
+        \u0448\u0430\u0445\u0442\u044B \u0432 Editor \u0431\u0435\u0437 Debug \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u043C
+        \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12K-T06
-      title: "12К-6 · Движение как на глобальной карте, клетки только в бою"
-      details: "Канон v1.54 §28.3: место — рисунок с разметкой местности, свободное движение командира и спутников по следу; кадр поля Базы полей боя кладётся на рисунок в заданной точке, сетка — настройки поля; общий рендерер Базы локаций в исследовании и бою; окно базы — размер, кисть местности, точки мышью."
+      title: "12\u041A-6 \xB7 \u0414\u0432\u0438\u0436\u0435\u043D\u0438\u0435 \u043A\u0430\u043A
+        \u043D\u0430 \u0433\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u043E\u0439
+        \u043A\u0430\u0440\u0442\u0435, \u043A\u043B\u0435\u0442\u043A\u0438 \u0442\u043E\u043B\u044C\u043A\u043E
+        \u0432 \u0431\u043E\u044E"
+      details: "\u041A\u0430\u043D\u043E\u043D v1.54 \xA728.3: \u043C\u0435\u0441\u0442\u043E
+        \u2014 \u0440\u0438\u0441\u0443\u043D\u043E\u043A \u0441 \u0440\u0430\u0437\u043C\u0435\u0442\u043A\u043E\u0439
+        \u043C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u0438, \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0435
+        \u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435 \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u0430
+        \u0438 \u0441\u043F\u0443\u0442\u043D\u0438\u043A\u043E\u0432 \u043F\u043E
+        \u0441\u043B\u0435\u0434\u0443; \u043A\u0430\u0434\u0440 \u043F\u043E\u043B\u044F
+        \u0411\u0430\u0437\u044B \u043F\u043E\u043B\u0435\u0439 \u0431\u043E\u044F
+        \u043A\u043B\u0430\u0434\u0451\u0442\u0441\u044F \u043D\u0430 \u0440\u0438\u0441\u0443\u043D\u043E\u043A
+        \u0432 \u0437\u0430\u0434\u0430\u043D\u043D\u043E\u0439 \u0442\u043E\u0447\u043A\u0435,
+        \u0441\u0435\u0442\u043A\u0430 \u2014 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438
+        \u043F\u043E\u043B\u044F; \u043E\u0431\u0449\u0438\u0439 \u0440\u0435\u043D\u0434\u0435\u0440\u0435\u0440
+        \u0411\u0430\u0437\u044B \u043B\u043E\u043A\u0430\u0446\u0438\u0439 \u0432
+        \u0438\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u0438
+        \u0438 \u0431\u043E\u044E; \u043E\u043A\u043D\u043E \u0431\u0430\u0437\u044B
+        \u2014 \u0440\u0430\u0437\u043C\u0435\u0440, \u043A\u0438\u0441\u0442\u044C
+        \u043C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u0438, \u0442\u043E\u0447\u043A\u0438
+        \u043C\u044B\u0448\u044C\u044E."
       category: 8
       status: 1
       required: 1
@@ -8751,14 +8823,21 @@ MonoBehaviour:
       dependencies:
       - PR12K-T05
       acceptanceCriteria:
-      - text: "Все тесты зелёные"
+      - text: "\u0412\u0441\u0435 \u0442\u0435\u0441\u0442\u044B \u0437\u0435\u043B\u0451\u043D\u044B\u0435"
         done: 1
-      - text: "Сетка и стены боя шахты совпадают с полем old_mine_01"
+      - text: "\u0421\u0435\u0442\u043A\u0430 \u0438 \u0441\u0442\u0435\u043D\u044B
+          \u0431\u043E\u044F \u0448\u0430\u0445\u0442\u044B \u0441\u043E\u0432\u043F\u0430\u0434\u0430\u044E\u0442
+          \u0441 \u043F\u043E\u043B\u0435\u043C old_mine_01"
         done: 1
-      - text: "Ручная проверка мышью: ходьба, бой, окно базы"
+      - text: "\u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+          \u043C\u044B\u0448\u044C\u044E: \u0445\u043E\u0434\u044C\u0431\u0430, \u0431\u043E\u0439,
+          \u043E\u043A\u043D\u043E \u0431\u0430\u0437\u044B"
         done: 0
       manualChecks:
-      - "Пройти шахту в игре и поправить место в окне «База локаций»"
+      - "\u041F\u0440\u043E\u0439\u0442\u0438 \u0448\u0430\u0445\u0442\u0443 \u0432
+        \u0438\u0433\u0440\u0435 \u0438 \u043F\u043E\u043F\u0440\u0430\u0432\u0438\u0442\u044C
+        \u043C\u0435\u0441\u0442\u043E \u0432 \u043E\u043A\u043D\u0435 \xAB\u0411\u0430\u0437\u0430
+        \u043B\u043E\u043A\u0430\u0446\u0438\u0439\xBB"
       fileReferences:
       - KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_57.md
       - ProjectDocs/LOCAL_EXPLORATION_GUIDE.md
@@ -8767,13 +8846,24 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode 1398 (1384/0/14), PlayMode 31/31; снимки входа, боя и лагеря просмотрены. Ручная проверка мышью в Editor не делалась."
+      implementationNote: "EditMode 1398 (1384/0/14), PlayMode 31/31; \u0441\u043D\u0438\u043C\u043A\u0438
+        \u0432\u0445\u043E\u0434\u0430, \u0431\u043E\u044F \u0438 \u043B\u0430\u0433\u0435\u0440\u044F
+        \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u044B. \u0420\u0443\u0447\u043D\u0430\u044F
+        \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u043C\u044B\u0448\u044C\u044E
+        \u0432 Editor \u043D\u0435 \u0434\u0435\u043B\u0430\u043B\u0430\u0441\u044C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12M-T01
-      title: "12М-1 · Под крышей и свет на фигурах боя"
-      details: "Режим места улица / под крышей; фигуры боя на месте рисует рендерер места — на них действуют свет, огонь и тени."
+      title: "12\u041C-1 \xB7 \u041F\u043E\u0434 \u043A\u0440\u044B\u0448\u0435\u0439
+        \u0438 \u0441\u0432\u0435\u0442 \u043D\u0430 \u0444\u0438\u0433\u0443\u0440\u0430\u0445
+        \u0431\u043E\u044F"
+      details: "\u0420\u0435\u0436\u0438\u043C \u043C\u0435\u0441\u0442\u0430 \u0443\u043B\u0438\u0446\u0430
+        / \u043F\u043E\u0434 \u043A\u0440\u044B\u0448\u0435\u0439; \u0444\u0438\u0433\u0443\u0440\u044B
+        \u0431\u043E\u044F \u043D\u0430 \u043C\u0435\u0441\u0442\u0435 \u0440\u0438\u0441\u0443\u0435\u0442
+        \u0440\u0435\u043D\u0434\u0435\u0440\u0435\u0440 \u043C\u0435\u0441\u0442\u0430
+        \u2014 \u043D\u0430 \u043D\u0438\u0445 \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044E\u0442
+        \u0441\u0432\u0435\u0442, \u043E\u0433\u043E\u043D\u044C \u0438 \u0442\u0435\u043D\u0438."
       category: 8
       status: 1
       required: 1
@@ -8784,25 +8874,38 @@ MonoBehaviour:
       dependencies:
       - PR12K-T06
       acceptanceCriteria:
-      - text: "Тесты зелёные"
+      - text: "\u0422\u0435\u0441\u0442\u044B \u0437\u0435\u043B\u0451\u043D\u044B\u0435"
         done: 1
-      - text: "Ручная проверка: шахта ночью и днём, бой у огня"
+      - text: "\u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430:
+          \u0448\u0430\u0445\u0442\u0430 \u043D\u043E\u0447\u044C\u044E \u0438 \u0434\u043D\u0451\u043C,
+          \u0431\u043E\u0439 \u0443 \u043E\u0433\u043D\u044F"
         done: 0
       manualChecks:
-      - "Проверить в окне «База локаций» и в игре"
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u043E\u043A\u043D\u0435
+        \xAB\u0411\u0430\u0437\u0430 \u043B\u043E\u043A\u0430\u0446\u0438\u0439\xBB
+        \u0438 \u0432 \u0438\u0433\u0440\u0435"
       fileReferences:
       - ProjectDocs/LOCATION_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; снимки теней, нормалей и боя в шахте просмотрены. Ручная проверка в Editor не делалась."
+      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; \u0441\u043D\u0438\u043C\u043A\u0438
+        \u0442\u0435\u043D\u0435\u0439, \u043D\u043E\u0440\u043C\u0430\u043B\u0435\u0439
+        \u0438 \u0431\u043E\u044F \u0432 \u0448\u0430\u0445\u0442\u0435 \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u044B.
+        \u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+        \u0432 Editor \u043D\u0435 \u0434\u0435\u043B\u0430\u043B\u0430\u0441\u044C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12M-T02
-      title: "12М-2 · Солнечные тени"
-      details: "Тень-силуэт по рисунку от точки опоры, направление и длина по часу, луна, тени людей."
+      title: "12\u041C-2 \xB7 \u0421\u043E\u043B\u043D\u0435\u0447\u043D\u044B\u0435
+        \u0442\u0435\u043D\u0438"
+      details: "\u0422\u0435\u043D\u044C-\u0441\u0438\u043B\u0443\u044D\u0442 \u043F\u043E
+        \u0440\u0438\u0441\u0443\u043D\u043A\u0443 \u043E\u0442 \u0442\u043E\u0447\u043A\u0438
+        \u043E\u043F\u043E\u0440\u044B, \u043D\u0430\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435
+        \u0438 \u0434\u043B\u0438\u043D\u0430 \u043F\u043E \u0447\u0430\u0441\u0443,
+        \u043B\u0443\u043D\u0430, \u0442\u0435\u043D\u0438 \u043B\u044E\u0434\u0435\u0439."
       category: 8
       status: 1
       required: 1
@@ -8813,25 +8916,38 @@ MonoBehaviour:
       dependencies:
       - PR12M-T01
       acceptanceCriteria:
-      - text: "Тесты зелёные"
+      - text: "\u0422\u0435\u0441\u0442\u044B \u0437\u0435\u043B\u0451\u043D\u044B\u0435"
         done: 1
-      - text: "Ручная проверка: тени утром, в полдень и вечером"
+      - text: "\u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430:
+          \u0442\u0435\u043D\u0438 \u0443\u0442\u0440\u043E\u043C, \u0432 \u043F\u043E\u043B\u0434\u0435\u043D\u044C
+          \u0438 \u0432\u0435\u0447\u0435\u0440\u043E\u043C"
         done: 0
       manualChecks:
-      - "Проверить в окне «База локаций» и в игре"
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u043E\u043A\u043D\u0435
+        \xAB\u0411\u0430\u0437\u0430 \u043B\u043E\u043A\u0430\u0446\u0438\u0439\xBB
+        \u0438 \u0432 \u0438\u0433\u0440\u0435"
       fileReferences:
       - ProjectDocs/LOCATION_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; снимки теней, нормалей и боя в шахте просмотрены. Ручная проверка в Editor не делалась."
+      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; \u0441\u043D\u0438\u043C\u043A\u0438
+        \u0442\u0435\u043D\u0435\u0439, \u043D\u043E\u0440\u043C\u0430\u043B\u0435\u0439
+        \u0438 \u0431\u043E\u044F \u0432 \u0448\u0430\u0445\u0442\u0435 \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u044B.
+        \u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+        \u0432 Editor \u043D\u0435 \u0434\u0435\u043B\u0430\u043B\u0430\u0441\u044C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12M-T03
-      title: "12М-3 · Тени источников"
-      details: "Тени-силуэты от местных источников (высота, затухание, длина), перекрытие света по основанию, тени людей от огня."
+      title: "12\u041C-3 \xB7 \u0422\u0435\u043D\u0438 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u043E\u0432"
+      details: "\u0422\u0435\u043D\u0438-\u0441\u0438\u043B\u0443\u044D\u0442\u044B
+        \u043E\u0442 \u043C\u0435\u0441\u0442\u043D\u044B\u0445 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u043E\u0432
+        (\u0432\u044B\u0441\u043E\u0442\u0430, \u0437\u0430\u0442\u0443\u0445\u0430\u043D\u0438\u0435,
+        \u0434\u043B\u0438\u043D\u0430), \u043F\u0435\u0440\u0435\u043A\u0440\u044B\u0442\u0438\u0435
+        \u0441\u0432\u0435\u0442\u0430 \u043F\u043E \u043E\u0441\u043D\u043E\u0432\u0430\u043D\u0438\u044E,
+        \u0442\u0435\u043D\u0438 \u043B\u044E\u0434\u0435\u0439 \u043E\u0442 \u043E\u0433\u043D\u044F."
       category: 8
       status: 1
       required: 1
@@ -8842,25 +8958,40 @@ MonoBehaviour:
       dependencies:
       - PR12M-T02
       acceptanceCriteria:
-      - text: "Тесты зелёные"
+      - text: "\u0422\u0435\u0441\u0442\u044B \u0437\u0435\u043B\u0451\u043D\u044B\u0435"
         done: 1
-      - text: "Ручная проверка: тени у костра ночью"
+      - text: "\u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430:
+          \u0442\u0435\u043D\u0438 \u0443 \u043A\u043E\u0441\u0442\u0440\u0430 \u043D\u043E\u0447\u044C\u044E"
         done: 0
       manualChecks:
-      - "Проверить в окне «База локаций» и в игре"
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u043E\u043A\u043D\u0435
+        \xAB\u0411\u0430\u0437\u0430 \u043B\u043E\u043A\u0430\u0446\u0438\u0439\xBB
+        \u0438 \u0432 \u0438\u0433\u0440\u0435"
       fileReferences:
       - ProjectDocs/LOCATION_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; снимки теней, нормалей и боя в шахте просмотрены. Ручная проверка в Editor не делалась."
+      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; \u0441\u043D\u0438\u043C\u043A\u0438
+        \u0442\u0435\u043D\u0435\u0439, \u043D\u043E\u0440\u043C\u0430\u043B\u0435\u0439
+        \u0438 \u0431\u043E\u044F \u0432 \u0448\u0430\u0445\u0442\u0435 \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u044B.
+        \u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+        \u0432 Editor \u043D\u0435 \u0434\u0435\u043B\u0430\u043B\u0430\u0441\u044C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12M-T04
-      title: "12М-4 · Остальной свет Unity и обработка кадра"
-      details: "Конус, своя форма, свет-рисунок, свечение воздуха, смешивание, жизнь огня, обработка кадра, готовые настройки, сравнение суток."
+      title: "12\u041C-4 \xB7 \u041E\u0441\u0442\u0430\u043B\u044C\u043D\u043E\u0439
+        \u0441\u0432\u0435\u0442 Unity \u0438 \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u043A\u0430
+        \u043A\u0430\u0434\u0440\u0430"
+      details: "\u041A\u043E\u043D\u0443\u0441, \u0441\u0432\u043E\u044F \u0444\u043E\u0440\u043C\u0430,
+        \u0441\u0432\u0435\u0442-\u0440\u0438\u0441\u0443\u043D\u043E\u043A, \u0441\u0432\u0435\u0447\u0435\u043D\u0438\u0435
+        \u0432\u043E\u0437\u0434\u0443\u0445\u0430, \u0441\u043C\u0435\u0448\u0438\u0432\u0430\u043D\u0438\u0435,
+        \u0436\u0438\u0437\u043D\u044C \u043E\u0433\u043D\u044F, \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u043A\u0430
+        \u043A\u0430\u0434\u0440\u0430, \u0433\u043E\u0442\u043E\u0432\u044B\u0435
+        \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438, \u0441\u0440\u0430\u0432\u043D\u0435\u043D\u0438\u0435
+        \u0441\u0443\u0442\u043E\u043A."
       category: 8
       status: 1
       required: 1
@@ -8871,25 +9002,37 @@ MonoBehaviour:
       dependencies:
       - PR12M-T03
       acceptanceCriteria:
-      - text: "Тесты зелёные"
+      - text: "\u0422\u0435\u0441\u0442\u044B \u0437\u0435\u043B\u0451\u043D\u044B\u0435"
         done: 1
-      - text: "Ручная проверка вкладки «Свет»"
+      - text: "\u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+          \u0432\u043A\u043B\u0430\u0434\u043A\u0438 \xAB\u0421\u0432\u0435\u0442\xBB"
         done: 0
       manualChecks:
-      - "Проверить в окне «База локаций» и в игре"
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u043E\u043A\u043D\u0435
+        \xAB\u0411\u0430\u0437\u0430 \u043B\u043E\u043A\u0430\u0446\u0438\u0439\xBB
+        \u0438 \u0432 \u0438\u0433\u0440\u0435"
       fileReferences:
       - ProjectDocs/LOCATION_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; снимки теней, нормалей и боя в шахте просмотрены. Ручная проверка в Editor не делалась."
+      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; \u0441\u043D\u0438\u043C\u043A\u0438
+        \u0442\u0435\u043D\u0435\u0439, \u043D\u043E\u0440\u043C\u0430\u043B\u0435\u0439
+        \u0438 \u0431\u043E\u044F \u0432 \u0448\u0430\u0445\u0442\u0435 \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u044B.
+        \u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+        \u0432 Editor \u043D\u0435 \u0434\u0435\u043B\u0430\u043B\u0430\u0441\u044C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12M-T05
-      title: "12М-5 · Карты нормалей"
-      details: "Нормали рисунков мест и кадров анимации (страница нормалей атласа), инструкция Blender; первое существо из Blender."
+      title: "12\u041C-5 \xB7 \u041A\u0430\u0440\u0442\u044B \u043D\u043E\u0440\u043C\u0430\u043B\u0435\u0439"
+      details: "\u041D\u043E\u0440\u043C\u0430\u043B\u0438 \u0440\u0438\u0441\u0443\u043D\u043A\u043E\u0432
+        \u043C\u0435\u0441\u0442 \u0438 \u043A\u0430\u0434\u0440\u043E\u0432 \u0430\u043D\u0438\u043C\u0430\u0446\u0438\u0438
+        (\u0441\u0442\u0440\u0430\u043D\u0438\u0446\u0430 \u043D\u043E\u0440\u043C\u0430\u043B\u0435\u0439
+        \u0430\u0442\u043B\u0430\u0441\u0430), \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+        Blender; \u043F\u0435\u0440\u0432\u043E\u0435 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u043E
+        \u0438\u0437 Blender."
       category: 8
       status: 1
       required: 1
@@ -8900,25 +9043,47 @@ MonoBehaviour:
       dependencies:
       - PR12M-T04
       acceptanceCriteria:
-      - text: "Тесты зелёные"
+      - text: "\u0422\u0435\u0441\u0442\u044B \u0437\u0435\u043B\u0451\u043D\u044B\u0435"
         done: 1
-      - text: "Первое существо с нормалями из Blender: свет костра в месте и в бою"
+      - text: "\u041F\u0435\u0440\u0432\u043E\u0435 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u043E
+          \u0441 \u043D\u043E\u0440\u043C\u0430\u043B\u044F\u043C\u0438 \u0438\u0437
+          Blender: \u0441\u0432\u0435\u0442 \u043A\u043E\u0441\u0442\u0440\u0430
+          \u0432 \u043C\u0435\u0441\u0442\u0435 \u0438 \u0432 \u0431\u043E\u044E"
         done: 0
       manualChecks:
-      - "Проверить в окне «База локаций» и в игре"
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u043E\u043A\u043D\u0435
+        \xAB\u0411\u0430\u0437\u0430 \u043B\u043E\u043A\u0430\u0446\u0438\u0439\xBB
+        \u0438 \u0432 \u0438\u0433\u0440\u0435"
       fileReferences:
       - ProjectDocs/LOCATION_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; снимки теней, нормалей и боя в шахте просмотрены. Ручная проверка в Editor не делалась."
+      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; \u0441\u043D\u0438\u043C\u043A\u0438
+        \u0442\u0435\u043D\u0435\u0439, \u043D\u043E\u0440\u043C\u0430\u043B\u0435\u0439
+        \u0438 \u0431\u043E\u044F \u0432 \u0448\u0430\u0445\u0442\u0435 \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u044B.
+        \u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+        \u0432 Editor \u043D\u0435 \u0434\u0435\u043B\u0430\u043B\u0430\u0441\u044C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12N-T01
-      title: "12Н-1 · Модель Базы ассетов и ссылка экземпляра"
-      details: "Запись с шестью ракурсами, частями, опорой и основанием ракурса; экземпляр места — ID ассета, ракурс, масштаб, переопределения. Разрешение ссылки в рендерере, проходимости и проверке; прежние прямые рисунки работают."
+      title: "12\u041D-1 \xB7 \u041C\u043E\u0434\u0435\u043B\u044C \u0411\u0430\u0437\u044B
+        \u0430\u0441\u0441\u0435\u0442\u043E\u0432 \u0438 \u0441\u0441\u044B\u043B\u043A\u0430
+        \u044D\u043A\u0437\u0435\u043C\u043F\u043B\u044F\u0440\u0430"
+      details: "\u0417\u0430\u043F\u0438\u0441\u044C \u0441 \u0448\u0435\u0441\u0442\u044C\u044E
+        \u0440\u0430\u043A\u0443\u0440\u0441\u0430\u043C\u0438, \u0447\u0430\u0441\u0442\u044F\u043C\u0438,
+        \u043E\u043F\u043E\u0440\u043E\u0439 \u0438 \u043E\u0441\u043D\u043E\u0432\u0430\u043D\u0438\u0435\u043C
+        \u0440\u0430\u043A\u0443\u0440\u0441\u0430; \u044D\u043A\u0437\u0435\u043C\u043F\u043B\u044F\u0440
+        \u043C\u0435\u0441\u0442\u0430 \u2014 ID \u0430\u0441\u0441\u0435\u0442\u0430,
+        \u0440\u0430\u043A\u0443\u0440\u0441, \u043C\u0430\u0441\u0448\u0442\u0430\u0431,
+        \u043F\u0435\u0440\u0435\u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0438\u044F.
+        \u0420\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u0435 \u0441\u0441\u044B\u043B\u043A\u0438
+        \u0432 \u0440\u0435\u043D\u0434\u0435\u0440\u0435\u0440\u0435, \u043F\u0440\u043E\u0445\u043E\u0434\u0438\u043C\u043E\u0441\u0442\u0438
+        \u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0435; \u043F\u0440\u0435\u0436\u043D\u0438\u0435
+        \u043F\u0440\u044F\u043C\u044B\u0435 \u0440\u0438\u0441\u0443\u043D\u043A\u0438
+        \u0440\u0430\u0431\u043E\u0442\u0430\u044E\u0442."
       category: 3
       status: 1
       required: 1
@@ -8929,25 +9094,44 @@ MonoBehaviour:
       dependencies:
       - PR12M-T05
       acceptanceCriteria:
-      - text: "Тесты зелёные"
+      - text: "\u0422\u0435\u0441\u0442\u044B \u0437\u0435\u043B\u0451\u043D\u044B\u0435"
         done: 1
-      - text: "Ручная проверка: старые места и новые экземпляры в Editor"
+      - text: "\u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430:
+          \u0441\u0442\u0430\u0440\u044B\u0435 \u043C\u0435\u0441\u0442\u0430 \u0438
+          \u043D\u043E\u0432\u044B\u0435 \u044D\u043A\u0437\u0435\u043C\u043F\u043B\u044F\u0440\u044B
+          \u0432 Editor"
         done: 0
       manualChecks:
-      - "Проверить в окнах «База ассетов» и «База локаций»"
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u043E\u043A\u043D\u0430\u0445
+        \xAB\u0411\u0430\u0437\u0430 \u0430\u0441\u0441\u0435\u0442\u043E\u0432\xBB
+        \u0438 \xAB\u0411\u0430\u0437\u0430 \u043B\u043E\u043A\u0430\u0446\u0438\u0439\xBB"
       fileReferences:
       - ProjectDocs/ASSET_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; снимки окон просмотрены. Ручная проверка мышью в Editor не делалась."
+      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; \u0441\u043D\u0438\u043C\u043A\u0438
+        \u043E\u043A\u043E\u043D \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u044B.
+        \u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+        \u043C\u044B\u0448\u044C\u044E \u0432 Editor \u043D\u0435 \u0434\u0435\u043B\u0430\u043B\u0430\u0441\u044C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12N-T02
-      title: "12Н-2 · Окно «База ассетов» и загрузка"
-      details: "Холст объектов рядом (игровой размер с человеком / ячейки), галерея, карточка с шестью ячейками; загрузка файлов и папок из Проводника и Project с разбором ракурсов и нормалей, сводкой и откатом по объекту."
+      title: "12\u041D-2 \xB7 \u041E\u043A\u043D\u043E \xAB\u0411\u0430\u0437\u0430
+        \u0430\u0441\u0441\u0435\u0442\u043E\u0432\xBB \u0438 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0430"
+      details: "\u0425\u043E\u043B\u0441\u0442 \u043E\u0431\u044A\u0435\u043A\u0442\u043E\u0432
+        \u0440\u044F\u0434\u043E\u043C (\u0438\u0433\u0440\u043E\u0432\u043E\u0439
+        \u0440\u0430\u0437\u043C\u0435\u0440 \u0441 \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u043E\u043C
+        / \u044F\u0447\u0435\u0439\u043A\u0438), \u0433\u0430\u043B\u0435\u0440\u0435\u044F,
+        \u043A\u0430\u0440\u0442\u043E\u0447\u043A\u0430 \u0441 \u0448\u0435\u0441\u0442\u044C\u044E
+        \u044F\u0447\u0435\u0439\u043A\u0430\u043C\u0438; \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0430
+        \u0444\u0430\u0439\u043B\u043E\u0432 \u0438 \u043F\u0430\u043F\u043E\u043A
+        \u0438\u0437 \u041F\u0440\u043E\u0432\u043E\u0434\u043D\u0438\u043A\u0430
+        \u0438 Project \u0441 \u0440\u0430\u0437\u0431\u043E\u0440\u043E\u043C \u0440\u0430\u043A\u0443\u0440\u0441\u043E\u0432
+        \u0438 \u043D\u043E\u0440\u043C\u0430\u043B\u0435\u0439, \u0441\u0432\u043E\u0434\u043A\u043E\u0439
+        \u0438 \u043E\u0442\u043A\u0430\u0442\u043E\u043C \u043F\u043E \u043E\u0431\u044A\u0435\u043A\u0442\u0443."
       category: 5
       status: 1
       required: 1
@@ -8958,25 +9142,42 @@ MonoBehaviour:
       dependencies:
       - PR12N-T01
       acceptanceCriteria:
-      - text: "Тесты зелёные"
+      - text: "\u0422\u0435\u0441\u0442\u044B \u0437\u0435\u043B\u0451\u043D\u044B\u0435"
         done: 1
-      - text: "Ручная проверка: перетаскивание папки из Проводника и работа мышью на холсте"
+      - text: "\u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430:
+          \u043F\u0435\u0440\u0435\u0442\u0430\u0441\u043A\u0438\u0432\u0430\u043D\u0438\u0435
+          \u043F\u0430\u043F\u043A\u0438 \u0438\u0437 \u041F\u0440\u043E\u0432\u043E\u0434\u043D\u0438\u043A\u0430
+          \u0438 \u0440\u0430\u0431\u043E\u0442\u0430 \u043C\u044B\u0448\u044C\u044E
+          \u043D\u0430 \u0445\u043E\u043B\u0441\u0442\u0435"
         done: 0
       manualChecks:
-      - "Перетащить в окно папку с 6 рисунками и 6 нормалями"
+      - "\u041F\u0435\u0440\u0435\u0442\u0430\u0449\u0438\u0442\u044C \u0432 \u043E\u043A\u043D\u043E
+        \u043F\u0430\u043F\u043A\u0443 \u0441 6 \u0440\u0438\u0441\u0443\u043D\u043A\u0430\u043C\u0438
+        \u0438 6 \u043D\u043E\u0440\u043C\u0430\u043B\u044F\u043C\u0438"
       fileReferences:
       - ProjectDocs/ASSET_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; снимки окон просмотрены. Ручная проверка мышью в Editor не делалась."
+      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; \u0441\u043D\u0438\u043C\u043A\u0438
+        \u043E\u043A\u043E\u043D \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u044B.
+        \u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+        \u043C\u044B\u0448\u044C\u044E \u0432 Editor \u043D\u0435 \u0434\u0435\u043B\u0430\u043B\u0430\u0441\u044C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12N-T03
-      title: "12Н-3 · Размер, опора, части и свет"
-      details: "Общий масштаб ракурсов, опора кликом, основание мышью, части «Основа / Крыша / Крона / Ствол», предпросмотр «под светом» общим рендерером мест."
+      title: "12\u041D-3 \xB7 \u0420\u0430\u0437\u043C\u0435\u0440, \u043E\u043F\u043E\u0440\u0430,
+        \u0447\u0430\u0441\u0442\u0438 \u0438 \u0441\u0432\u0435\u0442"
+      details: "\u041E\u0431\u0449\u0438\u0439 \u043C\u0430\u0441\u0448\u0442\u0430\u0431
+        \u0440\u0430\u043A\u0443\u0440\u0441\u043E\u0432, \u043E\u043F\u043E\u0440\u0430
+        \u043A\u043B\u0438\u043A\u043E\u043C, \u043E\u0441\u043D\u043E\u0432\u0430\u043D\u0438\u0435
+        \u043C\u044B\u0448\u044C\u044E, \u0447\u0430\u0441\u0442\u0438 \xAB\u041E\u0441\u043D\u043E\u0432\u0430
+        / \u041A\u0440\u044B\u0448\u0430 / \u041A\u0440\u043E\u043D\u0430 / \u0421\u0442\u0432\u043E\u043B\xBB,
+        \u043F\u0440\u0435\u0434\u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440
+        \xAB\u043F\u043E\u0434 \u0441\u0432\u0435\u0442\u043E\u043C\xBB \u043E\u0431\u0449\u0438\u043C
+        \u0440\u0435\u043D\u0434\u0435\u0440\u0435\u0440\u043E\u043C \u043C\u0435\u0441\u0442."
       category: 3
       status: 1
       required: 1
@@ -8987,25 +9188,43 @@ MonoBehaviour:
       dependencies:
       - PR12N-T02
       acceptanceCriteria:
-      - text: "Тесты зелёные"
+      - text: "\u0422\u0435\u0441\u0442\u044B \u0437\u0435\u043B\u0451\u043D\u044B\u0435"
         done: 1
-      - text: "Ручная проверка: опора, основание и свет на своём рисунке"
+      - text: "\u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430:
+          \u043E\u043F\u043E\u0440\u0430, \u043E\u0441\u043D\u043E\u0432\u0430\u043D\u0438\u0435
+          \u0438 \u0441\u0432\u0435\u0442 \u043D\u0430 \u0441\u0432\u043E\u0451\u043C
+          \u0440\u0438\u0441\u0443\u043D\u043A\u0435"
         done: 0
       manualChecks:
-      - "Проверить в карточке ассета"
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u043A\u0430\u0440\u0442\u043E\u0447\u043A\u0435
+        \u0430\u0441\u0441\u0435\u0442\u0430"
       fileReferences:
       - ProjectDocs/ASSET_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; снимки окон просмотрены. Ручная проверка мышью в Editor не делалась."
+      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; \u0441\u043D\u0438\u043C\u043A\u0438
+        \u043E\u043A\u043E\u043D \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u044B.
+        \u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+        \u043C\u044B\u0448\u044C\u044E \u0432 Editor \u043D\u0435 \u0434\u0435\u043B\u0430\u043B\u0430\u0441\u044C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12N-T04
-      title: "12Н-4 · Ассеты в Базе локаций"
-      details: "«+ Из Базы ассетов», перетаскивание, палитра, ракурс с миниатюрами, «Заменить ассет», «Открыть в Базе ассетов», «Где используется», запрет удаления используемой записи, перевод прежних предметов."
+      title: "12\u041D-4 \xB7 \u0410\u0441\u0441\u0435\u0442\u044B \u0432 \u0411\u0430\u0437\u0435
+        \u043B\u043E\u043A\u0430\u0446\u0438\u0439"
+      details: "\xAB+ \u0418\u0437 \u0411\u0430\u0437\u044B \u0430\u0441\u0441\u0435\u0442\u043E\u0432\xBB,
+        \u043F\u0435\u0440\u0435\u0442\u0430\u0441\u043A\u0438\u0432\u0430\u043D\u0438\u0435,
+        \u043F\u0430\u043B\u0438\u0442\u0440\u0430, \u0440\u0430\u043A\u0443\u0440\u0441
+        \u0441 \u043C\u0438\u043D\u0438\u0430\u0442\u044E\u0440\u0430\u043C\u0438,
+        \xAB\u0417\u0430\u043C\u0435\u043D\u0438\u0442\u044C \u0430\u0441\u0441\u0435\u0442\xBB,
+        \xAB\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0432 \u0411\u0430\u0437\u0435
+        \u0430\u0441\u0441\u0435\u0442\u043E\u0432\xBB, \xAB\u0413\u0434\u0435 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442\u0441\u044F\xBB,
+        \u0437\u0430\u043F\u0440\u0435\u0442 \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F
+        \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u043C\u043E\u0439
+        \u0437\u0430\u043F\u0438\u0441\u0438, \u043F\u0435\u0440\u0435\u0432\u043E\u0434
+        \u043F\u0440\u0435\u0436\u043D\u0438\u0445 \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u043E\u0432."
       category: 7
       status: 1
       required: 1
@@ -9016,12 +9235,19 @@ MonoBehaviour:
       dependencies:
       - PR12N-T03
       acceptanceCriteria:
-      - text: "Тесты зелёные"
+      - text: "\u0422\u0435\u0441\u0442\u044B \u0437\u0435\u043B\u0451\u043D\u044B\u0435"
         done: 1
-      - text: "Ручная проверка: расстановка, смена ракурса, служебный запуск технического места"
+      - text: "\u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430:
+          \u0440\u0430\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0430, \u0441\u043C\u0435\u043D\u0430
+          \u0440\u0430\u043A\u0443\u0440\u0441\u0430, \u0441\u043B\u0443\u0436\u0435\u0431\u043D\u044B\u0439
+          \u0437\u0430\u043F\u0443\u0441\u043A \u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u043E\u0433\u043E
+          \u043C\u0435\u0441\u0442\u0430"
         done: 0
       manualChecks:
-      - "Меню «Kingdom Survival/Служебное/База ассетов: техническое место» → «Запустить локацию»"
+      - "\u041C\u0435\u043D\u044E \xABKingdom Survival/\u0421\u043B\u0443\u0436\u0435\u0431\u043D\u043E\u0435/\u0411\u0430\u0437\u0430
+        \u0430\u0441\u0441\u0435\u0442\u043E\u0432: \u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u043E\u0435
+        \u043C\u0435\u0441\u0442\u043E\xBB \u2192 \xAB\u0417\u0430\u043F\u0443\u0441\u0442\u0438\u0442\u044C
+        \u043B\u043E\u043A\u0430\u0446\u0438\u044E\xBB"
       fileReferences:
       - ProjectDocs/ASSET_DATABASE_GUIDE.md
       - ProjectDocs/LOCATION_DATABASE_GUIDE.md
@@ -9029,13 +9255,26 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; снимки окон просмотрены. Ручная проверка мышью в Editor не делалась."
+      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; \u0441\u043D\u0438\u043C\u043A\u0438
+        \u043E\u043A\u043E\u043D \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u044B.
+        \u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+        \u043C\u044B\u0448\u044C\u044E \u0432 Editor \u043D\u0435 \u0434\u0435\u043B\u0430\u043B\u0430\u0441\u044C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12N-T05
-      title: "12Н-5 · Приёмка Базы ассетов"
-      details: "EditMode: разбор, ID, перевод, удаление, разрешение ссылок, совместимость; PlayMode: десять экземпляров, шесть ракурсов без сдвига опоры, перекрытие героя, свет по нормалям; технический набор; сборка Player."
+      title: "12\u041D-5 \xB7 \u041F\u0440\u0438\u0451\u043C\u043A\u0430 \u0411\u0430\u0437\u044B
+        \u0430\u0441\u0441\u0435\u0442\u043E\u0432"
+      details: "EditMode: \u0440\u0430\u0437\u0431\u043E\u0440, ID, \u043F\u0435\u0440\u0435\u0432\u043E\u0434,
+        \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u0435, \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u0435
+        \u0441\u0441\u044B\u043B\u043E\u043A, \u0441\u043E\u0432\u043C\u0435\u0441\u0442\u0438\u043C\u043E\u0441\u0442\u044C;
+        PlayMode: \u0434\u0435\u0441\u044F\u0442\u044C \u044D\u043A\u0437\u0435\u043C\u043F\u043B\u044F\u0440\u043E\u0432,
+        \u0448\u0435\u0441\u0442\u044C \u0440\u0430\u043A\u0443\u0440\u0441\u043E\u0432
+        \u0431\u0435\u0437 \u0441\u0434\u0432\u0438\u0433\u0430 \u043E\u043F\u043E\u0440\u044B,
+        \u043F\u0435\u0440\u0435\u043A\u0440\u044B\u0442\u0438\u0435 \u0433\u0435\u0440\u043E\u044F,
+        \u0441\u0432\u0435\u0442 \u043F\u043E \u043D\u043E\u0440\u043C\u0430\u043B\u044F\u043C;
+        \u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u043D\u0430\u0431\u043E\u0440;
+        \u0441\u0431\u043E\u0440\u043A\u0430 Player."
       category: 8
       status: 1
       required: 1
@@ -9046,27 +9285,46 @@ MonoBehaviour:
       dependencies:
       - PR12N-T04
       acceptanceCriteria:
-      - text: "Тесты зелёные"
+      - text: "\u0422\u0435\u0441\u0442\u044B \u0437\u0435\u043B\u0451\u043D\u044B\u0435"
         done: 1
-      - text: "Сборка Player: каталог грузится без Editor API"
+      - text: "\u0421\u0431\u043E\u0440\u043A\u0430 Player: \u043A\u0430\u0442\u0430\u043B\u043E\u0433
+          \u0433\u0440\u0443\u0437\u0438\u0442\u0441\u044F \u0431\u0435\u0437 Editor
+          API"
         done: 0
-      - text: "Ручная проверка художником на своём арте"
+      - text: "\u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+          \u0445\u0443\u0434\u043E\u0436\u043D\u0438\u043A\u043E\u043C \u043D\u0430
+          \u0441\u0432\u043E\u0451\u043C \u0430\u0440\u0442\u0435"
         done: 0
       manualChecks:
-      - "Собрать Player и открыть техническое место"
+      - "\u0421\u043E\u0431\u0440\u0430\u0442\u044C Player \u0438 \u043E\u0442\u043A\u0440\u044B\u0442\u044C
+        \u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u043E\u0435 \u043C\u0435\u0441\u0442\u043E"
       fileReferences:
       - ProjectDocs/ASSET_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; снимки окон просмотрены. Сборка Player не делалась."
+      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; \u0441\u043D\u0438\u043C\u043A\u0438
+        \u043E\u043A\u043E\u043D \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u044B.
+        \u0421\u0431\u043E\u0440\u043A\u0430 Player \u043D\u0435 \u0434\u0435\u043B\u0430\u043B\u0430\u0441\u044C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12O-T01
-      title: "12О-1 · Импорт экспорта Blender (manifest schema 1)"
-      details: "Вкладка «Земля» Базы локаций: manifest или папка, проверка структуры, путей, sha256, размеров и статусов; отчёт и план; транзакционное применение, повтор без дублей, замена участков, отказ несовместимым наборам, ручной путь без manifest."
+      title: "12\u041E-1 \xB7 \u0418\u043C\u043F\u043E\u0440\u0442 \u044D\u043A\u0441\u043F\u043E\u0440\u0442\u0430
+        Blender (manifest schema 1)"
+      details: "\u0412\u043A\u043B\u0430\u0434\u043A\u0430 \xAB\u0417\u0435\u043C\u043B\u044F\xBB
+        \u0411\u0430\u0437\u044B \u043B\u043E\u043A\u0430\u0446\u0438\u0439: manifest
+        \u0438\u043B\u0438 \u043F\u0430\u043F\u043A\u0430, \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+        \u0441\u0442\u0440\u0443\u043A\u0442\u0443\u0440\u044B, \u043F\u0443\u0442\u0435\u0439,
+        sha256, \u0440\u0430\u0437\u043C\u0435\u0440\u043E\u0432 \u0438 \u0441\u0442\u0430\u0442\u0443\u0441\u043E\u0432;
+        \u043E\u0442\u0447\u0451\u0442 \u0438 \u043F\u043B\u0430\u043D; \u0442\u0440\u0430\u043D\u0437\u0430\u043A\u0446\u0438\u043E\u043D\u043D\u043E\u0435
+        \u043F\u0440\u0438\u043C\u0435\u043D\u0435\u043D\u0438\u0435, \u043F\u043E\u0432\u0442\u043E\u0440
+        \u0431\u0435\u0437 \u0434\u0443\u0431\u043B\u0435\u0439, \u0437\u0430\u043C\u0435\u043D\u0430
+        \u0443\u0447\u0430\u0441\u0442\u043A\u043E\u0432, \u043E\u0442\u043A\u0430\u0437
+        \u043D\u0435\u0441\u043E\u0432\u043C\u0435\u0441\u0442\u0438\u043C\u044B\u043C
+        \u043D\u0430\u0431\u043E\u0440\u0430\u043C, \u0440\u0443\u0447\u043D\u043E\u0439
+        \u043F\u0443\u0442\u044C \u0431\u0435\u0437 manifest."
       category: 5
       status: 1
       required: 1
@@ -9077,27 +9335,45 @@ MonoBehaviour:
       dependencies:
       - PR12N-T05
       acceptanceCriteria:
-      - text: "Тесты зелёные"
+      - text: "\u0422\u0435\u0441\u0442\u044B \u0437\u0435\u043B\u0451\u043D\u044B\u0435"
         done: 1
-      - text: "Настоящие экспорты аддона проходят проверку пакета"
+      - text: "\u041D\u0430\u0441\u0442\u043E\u044F\u0449\u0438\u0435 \u044D\u043A\u0441\u043F\u043E\u0440\u0442\u044B
+          \u0430\u0434\u0434\u043E\u043D\u0430 \u043F\u0440\u043E\u0445\u043E\u0434\u044F\u0442
+          \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u043F\u0430\u043A\u0435\u0442\u0430"
         done: 1
-      - text: "Ручной импорт настоящей карты в окне"
+      - text: "\u0420\u0443\u0447\u043D\u043E\u0439 \u0438\u043C\u043F\u043E\u0440\u0442
+          \u043D\u0430\u0441\u0442\u043E\u044F\u0449\u0435\u0439 \u043A\u0430\u0440\u0442\u044B
+          \u0432 \u043E\u043A\u043D\u0435"
         done: 0
       manualChecks:
-      - "Импортировать свой экспорт из Blender во вкладке «Земля»"
+      - "\u0418\u043C\u043F\u043E\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C
+        \u0441\u0432\u043E\u0439 \u044D\u043A\u0441\u043F\u043E\u0440\u0442 \u0438\u0437
+        Blender \u0432\u043E \u0432\u043A\u043B\u0430\u0434\u043A\u0435 \xAB\u0417\u0435\u043C\u043B\u044F\xBB"
       fileReferences:
       - ProjectDocs/LOCATION_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "GroundImportTests 13/13, 18 настоящих экспортов KS Ground Renderer. Ручная проверка мышью не делалась."
+      implementationNote: "GroundImportTests 13/13, 18 \u043D\u0430\u0441\u0442\u043E\u044F\u0449\u0438\u0445
+        \u044D\u043A\u0441\u043F\u043E\u0440\u0442\u043E\u0432 KS Ground Renderer.
+        \u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+        \u043C\u044B\u0448\u044C\u044E \u043D\u0435 \u0434\u0435\u043B\u0430\u043B\u0430\u0441\u044C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12O-T02
-      title: "12О-2 · Карта высот 16 бит и выборка под ногами"
-      details: "Свой декодер PNG16, CPU-данные ushort + покрытие, выборка через швы, невалидное — признак; высота под ногами командира в диагностике без сдвига фигуры."
+      title: "12\u041E-2 \xB7 \u041A\u0430\u0440\u0442\u0430 \u0432\u044B\u0441\u043E\u0442
+        16 \u0431\u0438\u0442 \u0438 \u0432\u044B\u0431\u043E\u0440\u043A\u0430 \u043F\u043E\u0434
+        \u043D\u043E\u0433\u0430\u043C\u0438"
+      details: "\u0421\u0432\u043E\u0439 \u0434\u0435\u043A\u043E\u0434\u0435\u0440
+        PNG16, CPU-\u0434\u0430\u043D\u043D\u044B\u0435 ushort + \u043F\u043E\u043A\u0440\u044B\u0442\u0438\u0435,
+        \u0432\u044B\u0431\u043E\u0440\u043A\u0430 \u0447\u0435\u0440\u0435\u0437
+        \u0448\u0432\u044B, \u043D\u0435\u0432\u0430\u043B\u0438\u0434\u043D\u043E\u0435
+        \u2014 \u043F\u0440\u0438\u0437\u043D\u0430\u043A; \u0432\u044B\u0441\u043E\u0442\u0430
+        \u043F\u043E\u0434 \u043D\u043E\u0433\u0430\u043C\u0438 \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u0430
+        \u0432 \u0434\u0438\u0430\u0433\u043D\u043E\u0441\u0442\u0438\u043A\u0435
+        \u0431\u0435\u0437 \u0441\u0434\u0432\u0438\u0433\u0430 \u0444\u0438\u0433\u0443\u0440\u044B."
       category: 3
       status: 1
       required: 1
@@ -9108,27 +9384,46 @@ MonoBehaviour:
       dependencies:
       - PR12O-T01
       acceptanceCriteria:
-      - text: "32768 и 32769 различаются; min, max, отрицательный диапазон, прозрачный пиксель"
+      - text: "32768 \u0438 32769 \u0440\u0430\u0437\u043B\u0438\u0447\u0430\u044E\u0442\u0441\u044F;
+          min, max, \u043E\u0442\u0440\u0438\u0446\u0430\u0442\u0435\u043B\u044C\u043D\u044B\u0439
+          \u0434\u0438\u0430\u043F\u0430\u0437\u043E\u043D, \u043F\u0440\u043E\u0437\u0440\u0430\u0447\u043D\u044B\u0439
+          \u043F\u0438\u043A\u0441\u0435\u043B\u044C"
         done: 1
-      - text: "Градиент через шов без скачка"
+      - text: "\u0413\u0440\u0430\u0434\u0438\u0435\u043D\u0442 \u0447\u0435\u0440\u0435\u0437
+          \u0448\u043E\u0432 \u0431\u0435\u0437 \u0441\u043A\u0430\u0447\u043A\u0430"
         done: 1
-      - text: "Проверка на настоящей карте с рельефом"
+      - text: "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u043D\u0430 \u043D\u0430\u0441\u0442\u043E\u044F\u0449\u0435\u0439
+          \u043A\u0430\u0440\u0442\u0435 \u0441 \u0440\u0435\u043B\u044C\u0435\u0444\u043E\u043C"
         done: 0
       manualChecks:
-      - "Посмотреть высоту под указателем и под ногами командира на своей карте"
+      - "\u041F\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C \u0432\u044B\u0441\u043E\u0442\u0443
+        \u043F\u043E\u0434 \u0443\u043A\u0430\u0437\u0430\u0442\u0435\u043B\u0435\u043C
+        \u0438 \u043F\u043E\u0434 \u043D\u043E\u0433\u0430\u043C\u0438 \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u0430
+        \u043D\u0430 \u0441\u0432\u043E\u0435\u0439 \u043A\u0430\u0440\u0442\u0435"
       fileReferences:
       - ProjectDocs/LOCATION_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "LocationGroundTests 16/16; Unity LoadImage читает PNG16 как 8 бит — подтверждено тестом."
+      implementationNote: "LocationGroundTests 16/16; Unity LoadImage \u0447\u0438\u0442\u0430\u0435\u0442
+        PNG16 \u043A\u0430\u043A 8 \u0431\u0438\u0442 \u2014 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u043E
+        \u0442\u0435\u0441\u0442\u043E\u043C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12O-T03
-      title: "12О-3 · Земля места из нескольких участков"
-      details: "Участки — SpriteRenderer в общей системе координат места; прежний рисунок места — режим «Один участок»; неполная земля в игру не идёт."
+      title: "12\u041E-3 \xB7 \u0417\u0435\u043C\u043B\u044F \u043C\u0435\u0441\u0442\u0430
+        \u0438\u0437 \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u0438\u0445
+        \u0443\u0447\u0430\u0441\u0442\u043A\u043E\u0432"
+      details: "\u0423\u0447\u0430\u0441\u0442\u043A\u0438 \u2014 SpriteRenderer
+        \u0432 \u043E\u0431\u0449\u0435\u0439 \u0441\u0438\u0441\u0442\u0435\u043C\u0435
+        \u043A\u043E\u043E\u0440\u0434\u0438\u043D\u0430\u0442 \u043C\u0435\u0441\u0442\u0430;
+        \u043F\u0440\u0435\u0436\u043D\u0438\u0439 \u0440\u0438\u0441\u0443\u043D\u043E\u043A
+        \u043C\u0435\u0441\u0442\u0430 \u2014 \u0440\u0435\u0436\u0438\u043C \xAB\u041E\u0434\u0438\u043D
+        \u0443\u0447\u0430\u0441\u0442\u043E\u043A\xBB; \u043D\u0435\u043F\u043E\u043B\u043D\u0430\u044F
+        \u0437\u0435\u043C\u043B\u044F \u0432 \u0438\u0433\u0440\u0443 \u043D\u0435
+        \u0438\u0434\u0451\u0442."
       category: 3
       status: 1
       required: 1
@@ -9139,27 +9434,47 @@ MonoBehaviour:
       dependencies:
       - PR12O-T01
       acceptanceCriteria:
-      - text: "Четыре угла и ориентация X/Y верны; отряд проходит швы без пересборки"
+      - text: "\u0427\u0435\u0442\u044B\u0440\u0435 \u0443\u0433\u043B\u0430 \u0438
+          \u043E\u0440\u0438\u0435\u043D\u0442\u0430\u0446\u0438\u044F X/Y \u0432\u0435\u0440\u043D\u044B;
+          \u043E\u0442\u0440\u044F\u0434 \u043F\u0440\u043E\u0445\u043E\u0434\u0438\u0442
+          \u0448\u0432\u044B \u0431\u0435\u0437 \u043F\u0435\u0440\u0435\u0441\u0431\u043E\u0440\u043A\u0438"
         done: 1
-      - text: "Нормали под светом с четырёх сторон"
+      - text: "\u041D\u043E\u0440\u043C\u0430\u043B\u0438 \u043F\u043E\u0434 \u0441\u0432\u0435\u0442\u043E\u043C
+          \u0441 \u0447\u0435\u0442\u044B\u0440\u0451\u0445 \u0441\u0442\u043E\u0440\u043E\u043D"
         done: 1
-      - text: "Швы на настоящем арте при игровом масштабе"
+      - text: "\u0428\u0432\u044B \u043D\u0430 \u043D\u0430\u0441\u0442\u043E\u044F\u0449\u0435\u043C
+          \u0430\u0440\u0442\u0435 \u043F\u0440\u0438 \u0438\u0433\u0440\u043E\u0432\u043E\u043C
+          \u043C\u0430\u0441\u0448\u0442\u0430\u0431\u0435"
         done: 0
       manualChecks:
-      - "Запустить демо 4×4 и свою карту, пройти через границы участков"
+      - "\u0417\u0430\u043F\u0443\u0441\u0442\u0438\u0442\u044C \u0434\u0435\u043C\u043E
+        4\xD74 \u0438 \u0441\u0432\u043E\u044E \u043A\u0430\u0440\u0442\u0443, \u043F\u0440\u043E\u0439\u0442\u0438
+        \u0447\u0435\u0440\u0435\u0437 \u0433\u0440\u0430\u043D\u0438\u0446\u044B
+        \u0443\u0447\u0430\u0441\u0442\u043A\u043E\u0432"
       fileReferences:
       - ProjectDocs/LOCATION_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "LocationGroundPlayModeTests 5/5."
+      implementationNote: LocationGroundPlayModeTests 5/5.
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12O-T04
-      title: "12О-4 · Камера следует за командиром"
-      details: "Сглаживание, мёртвая зона, смещение, видимая высота, границы карты для всего кадра, мгновенная постановка при входе и телепорте, возврат после кадра боя; прежние места — прежнее поведение."
+      title: "12\u041E-4 \xB7 \u041A\u0430\u043C\u0435\u0440\u0430 \u0441\u043B\u0435\u0434\u0443\u0435\u0442
+        \u0437\u0430 \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u043E\u043C"
+      details: "\u0421\u0433\u043B\u0430\u0436\u0438\u0432\u0430\u043D\u0438\u0435,
+        \u043C\u0451\u0440\u0442\u0432\u0430\u044F \u0437\u043E\u043D\u0430, \u0441\u043C\u0435\u0449\u0435\u043D\u0438\u0435,
+        \u0432\u0438\u0434\u0438\u043C\u0430\u044F \u0432\u044B\u0441\u043E\u0442\u0430,
+        \u0433\u0440\u0430\u043D\u0438\u0446\u044B \u043A\u0430\u0440\u0442\u044B
+        \u0434\u043B\u044F \u0432\u0441\u0435\u0433\u043E \u043A\u0430\u0434\u0440\u0430,
+        \u043C\u0433\u043D\u043E\u0432\u0435\u043D\u043D\u0430\u044F \u043F\u043E\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0430
+        \u043F\u0440\u0438 \u0432\u0445\u043E\u0434\u0435 \u0438 \u0442\u0435\u043B\u0435\u043F\u043E\u0440\u0442\u0435,
+        \u0432\u043E\u0437\u0432\u0440\u0430\u0442 \u043F\u043E\u0441\u043B\u0435
+        \u043A\u0430\u0434\u0440\u0430 \u0431\u043E\u044F; \u043F\u0440\u0435\u0436\u043D\u0438\u0435
+        \u043C\u0435\u0441\u0442\u0430 \u2014 \u043F\u0440\u0435\u0436\u043D\u0435\u0435
+        \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u0435."
       category: 5
       status: 1
       required: 1
@@ -9170,25 +9485,39 @@ MonoBehaviour:
       dependencies:
       - PR12O-T03
       acceptanceCriteria:
-      - text: "30 и 144 кадров в секунду; 16:9, 16:10, 21:9; малая карта по центру"
+      - text: "30 \u0438 144 \u043A\u0430\u0434\u0440\u043E\u0432 \u0432 \u0441\u0435\u043A\u0443\u043D\u0434\u0443;
+          16:9, 16:10, 21:9; \u043C\u0430\u043B\u0430\u044F \u043A\u0430\u0440\u0442\u0430
+          \u043F\u043E \u0446\u0435\u043D\u0442\u0440\u0443"
         done: 1
-      - text: "Плавность на глаз в игре и после боя на месте"
+      - text: "\u041F\u043B\u0430\u0432\u043D\u043E\u0441\u0442\u044C \u043D\u0430
+          \u0433\u043B\u0430\u0437 \u0432 \u0438\u0433\u0440\u0435 \u0438 \u043F\u043E\u0441\u043B\u0435
+          \u0431\u043E\u044F \u043D\u0430 \u043C\u0435\u0441\u0442\u0435"
         done: 0
       manualChecks:
-      - "Пройти по большой карте, вступить в бой на месте и вернуться"
+      - "\u041F\u0440\u043E\u0439\u0442\u0438 \u043F\u043E \u0431\u043E\u043B\u044C\u0448\u043E\u0439
+        \u043A\u0430\u0440\u0442\u0435, \u0432\u0441\u0442\u0443\u043F\u0438\u0442\u044C
+        \u0432 \u0431\u043E\u0439 \u043D\u0430 \u043C\u0435\u0441\u0442\u0435 \u0438
+        \u0432\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F"
       fileReferences:
       - ProjectDocs/LOCATION_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "Тесты камеры зелёные; PlayMode 42/42, включая основную сцену."
+      implementationNote: "\u0422\u0435\u0441\u0442\u044B \u043A\u0430\u043C\u0435\u0440\u044B
+        \u0437\u0435\u043B\u0451\u043D\u044B\u0435; PlayMode 42/42, \u0432\u043A\u043B\u044E\u0447\u0430\u044F
+        \u043E\u0441\u043D\u043E\u0432\u043D\u0443\u044E \u0441\u0446\u0435\u043D\u0443."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12O-T05
-      title: "12О-5 · Приёмка земли из Blender"
-      details: "EditMode и PlayMode проверки; демо 4×4; замер памяти и загрузки; сборка Player без исходной папки Blender."
+      title: "12\u041E-5 \xB7 \u041F\u0440\u0438\u0451\u043C\u043A\u0430 \u0437\u0435\u043C\u043B\u0438
+        \u0438\u0437 Blender"
+      details: "EditMode \u0438 PlayMode \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438;
+        \u0434\u0435\u043C\u043E 4\xD74; \u0437\u0430\u043C\u0435\u0440 \u043F\u0430\u043C\u044F\u0442\u0438
+        \u0438 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0438; \u0441\u0431\u043E\u0440\u043A\u0430
+        Player \u0431\u0435\u0437 \u0438\u0441\u0445\u043E\u0434\u043D\u043E\u0439
+        \u043F\u0430\u043F\u043A\u0438 Blender."
       category: 8
       status: 1
       required: 1
@@ -9199,29 +9528,50 @@ MonoBehaviour:
       dependencies:
       - PR12O-T04
       acceptanceCriteria:
-      - text: "Тесты зелёные"
+      - text: "\u0422\u0435\u0441\u0442\u044B \u0437\u0435\u043B\u0451\u043D\u044B\u0435"
         done: 1
-      - text: "Скрипты Player компилируются"
+      - text: "\u0421\u043A\u0440\u0438\u043F\u0442\u044B Player \u043A\u043E\u043C\u043F\u0438\u043B\u0438\u0440\u0443\u044E\u0442\u0441\u044F"
         done: 1
-      - text: "Полная сборка Player: земля и высота без исходной папки"
+      - text: "\u041F\u043E\u043B\u043D\u0430\u044F \u0441\u0431\u043E\u0440\u043A\u0430
+          Player: \u0437\u0435\u043C\u043B\u044F \u0438 \u0432\u044B\u0441\u043E\u0442\u0430
+          \u0431\u0435\u0437 \u0438\u0441\u0445\u043E\u0434\u043D\u043E\u0439 \u043F\u0430\u043F\u043A\u0438"
         done: 0
-      - text: "Ручная проверка художником на своей карте"
+      - text: "\u0420\u0443\u0447\u043D\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+          \u0445\u0443\u0434\u043E\u0436\u043D\u0438\u043A\u043E\u043C \u043D\u0430
+          \u0441\u0432\u043E\u0435\u0439 \u043A\u0430\u0440\u0442\u0435"
         done: 0
       manualChecks:
-      - "Собрать Player и открыть место с землёй из участков"
+      - "\u0421\u043E\u0431\u0440\u0430\u0442\u044C Player \u0438 \u043E\u0442\u043A\u0440\u044B\u0442\u044C
+        \u043C\u0435\u0441\u0442\u043E \u0441 \u0437\u0435\u043C\u043B\u0451\u0439
+        \u0438\u0437 \u0443\u0447\u0430\u0441\u0442\u043A\u043E\u0432"
       fileReferences:
       - ProjectDocs/LOCATION_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode 1476 (1462/0/14), PlayMode 42/42 (5 новых). Участок 2048² Height16: импорт 0,37 с, загрузка 0,06 с, 12 МиБ."
+      implementationNote: "EditMode 1476 (1462/0/14), PlayMode 42/42 (5 \u043D\u043E\u0432\u044B\u0445).
+        \u0423\u0447\u0430\u0441\u0442\u043E\u043A 2048\xB2 Height16: \u0438\u043C\u043F\u043E\u0440\u0442
+        0,37 \u0441, \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0430 0,06 \u0441,
+        12 \u041C\u0438\u0411."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12P-T01
-      title: "12П-1 · Кадры анимации в Базе ассетов"
-      details: "Кадры после первого у каждой части в каждом ракурсе (рисунок и нормаль), скорость, порядок «по кругу / туда-обратно», своя фаза экземпляра; импорт по номеру в конце имени файла; карточка, сводка импорта, проверка и «Снять кадры»."
+      title: "12\u041F-1 \xB7 \u041A\u0430\u0434\u0440\u044B \u0430\u043D\u0438\u043C\u0430\u0446\u0438\u0438
+        \u0432 \u0411\u0430\u0437\u0435 \u0430\u0441\u0441\u0435\u0442\u043E\u0432"
+      details: "\u041A\u0430\u0434\u0440\u044B \u043F\u043E\u0441\u043B\u0435 \u043F\u0435\u0440\u0432\u043E\u0433\u043E
+        \u0443 \u043A\u0430\u0436\u0434\u043E\u0439 \u0447\u0430\u0441\u0442\u0438
+        \u0432 \u043A\u0430\u0436\u0434\u043E\u043C \u0440\u0430\u043A\u0443\u0440\u0441\u0435
+        (\u0440\u0438\u0441\u0443\u043D\u043E\u043A \u0438 \u043D\u043E\u0440\u043C\u0430\u043B\u044C),
+        \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u044C, \u043F\u043E\u0440\u044F\u0434\u043E\u043A
+        \xAB\u043F\u043E \u043A\u0440\u0443\u0433\u0443 / \u0442\u0443\u0434\u0430-\u043E\u0431\u0440\u0430\u0442\u043D\u043E\xBB,
+        \u0441\u0432\u043E\u044F \u0444\u0430\u0437\u0430 \u044D\u043A\u0437\u0435\u043C\u043F\u043B\u044F\u0440\u0430;
+        \u0438\u043C\u043F\u043E\u0440\u0442 \u043F\u043E \u043D\u043E\u043C\u0435\u0440\u0443
+        \u0432 \u043A\u043E\u043D\u0446\u0435 \u0438\u043C\u0435\u043D\u0438 \u0444\u0430\u0439\u043B\u0430;
+        \u043A\u0430\u0440\u0442\u043E\u0447\u043A\u0430, \u0441\u0432\u043E\u0434\u043A\u0430
+        \u0438\u043C\u043F\u043E\u0440\u0442\u0430, \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+        \u0438 \xAB\u0421\u043D\u044F\u0442\u044C \u043A\u0430\u0434\u0440\u044B\xBB."
       category: 3
       status: 3
       required: 1
@@ -9232,11 +9582,19 @@ MonoBehaviour:
       dependencies:
       - PR12N-T05
       acceptanceCriteria:
-      - text: "Front/0000.png… и трава_Front_001.png — кадры одного ракурса, нормаль к своему кадру"
+      - text: "Front/0000.png\u2026 \u0438 \u0442\u0440\u0430\u0432\u0430_Front_001.png
+          \u2014 \u043A\u0430\u0434\u0440\u044B \u043E\u0434\u043D\u043E\u0433\u043E
+          \u0440\u0430\u043A\u0443\u0440\u0441\u0430, \u043D\u043E\u0440\u043C\u0430\u043B\u044C
+          \u043A \u0441\u0432\u043E\u0435\u043C\u0443 \u043A\u0430\u0434\u0440\u0443"
         done: 1
-      - text: "Одиночный номер и rock_01/rock_02 без ракурса остаются разными объектами"
+      - text: "\u041E\u0434\u0438\u043D\u043E\u0447\u043D\u044B\u0439 \u043D\u043E\u043C\u0435\u0440
+          \u0438 rock_01/rock_02 \u0431\u0435\u0437 \u0440\u0430\u043A\u0443\u0440\u0441\u0430
+          \u043E\u0441\u0442\u0430\u044E\u0442\u0441\u044F \u0440\u0430\u0437\u043D\u044B\u043C\u0438
+          \u043E\u0431\u044A\u0435\u043A\u0442\u0430\u043C\u0438"
         done: 1
-      - text: "Прежние неподвижные ассеты работают без пересборки"
+      - text: "\u041F\u0440\u0435\u0436\u043D\u0438\u0435 \u043D\u0435\u043F\u043E\u0434\u0432\u0438\u0436\u043D\u044B\u0435
+          \u0430\u0441\u0441\u0435\u0442\u044B \u0440\u0430\u0431\u043E\u0442\u0430\u044E\u0442
+          \u0431\u0435\u0437 \u043F\u0435\u0440\u0435\u0441\u0431\u043E\u0440\u043A\u0438"
         done: 1
       manualChecks: []
       fileReferences:
@@ -9245,13 +9603,29 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "ArtAssetImportParserTests (4 новых) и ArtAssetAnimationTests зелёные; EditMode 1490 (1474/0/16)."
+      implementationNote: "ArtAssetImportParserTests (4 \u043D\u043E\u0432\u044B\u0445)
+        \u0438 ArtAssetAnimationTests \u0437\u0435\u043B\u0451\u043D\u044B\u0435;
+        EditMode 1490 (1474/0/16)."
       completedAt: 2026-10-07
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12P-T02
-      title: "12П-2 · Анимированные предметы в местах"
-      details: "Общий рендерер мест меняет кадр по времени места (окно Базы локаций, исследование, бой на месте); нормаль и тень-силуэт — текущего кадра; состояние объекта анимацию основы снимает; техническая трава из четырёх кадров в месте «Ассеты · тест»."
+      title: "12\u041F-2 \xB7 \u0410\u043D\u0438\u043C\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0435
+        \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u044B \u0432 \u043C\u0435\u0441\u0442\u0430\u0445"
+      details: "\u041E\u0431\u0449\u0438\u0439 \u0440\u0435\u043D\u0434\u0435\u0440\u0435\u0440
+        \u043C\u0435\u0441\u0442 \u043C\u0435\u043D\u044F\u0435\u0442 \u043A\u0430\u0434\u0440
+        \u043F\u043E \u0432\u0440\u0435\u043C\u0435\u043D\u0438 \u043C\u0435\u0441\u0442\u0430
+        (\u043E\u043A\u043D\u043E \u0411\u0430\u0437\u044B \u043B\u043E\u043A\u0430\u0446\u0438\u0439,
+        \u0438\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u0435,
+        \u0431\u043E\u0439 \u043D\u0430 \u043C\u0435\u0441\u0442\u0435); \u043D\u043E\u0440\u043C\u0430\u043B\u044C
+        \u0438 \u0442\u0435\u043D\u044C-\u0441\u0438\u043B\u0443\u044D\u0442 \u2014
+        \u0442\u0435\u043A\u0443\u0449\u0435\u0433\u043E \u043A\u0430\u0434\u0440\u0430;
+        \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043E\u0431\u044A\u0435\u043A\u0442\u0430
+        \u0430\u043D\u0438\u043C\u0430\u0446\u0438\u044E \u043E\u0441\u043D\u043E\u0432\u044B
+        \u0441\u043D\u0438\u043C\u0430\u0435\u0442; \u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0430\u044F
+        \u0442\u0440\u0430\u0432\u0430 \u0438\u0437 \u0447\u0435\u0442\u044B\u0440\u0451\u0445
+        \u043A\u0430\u0434\u0440\u043E\u0432 \u0432 \u043C\u0435\u0441\u0442\u0435
+        \xAB\u0410\u0441\u0441\u0435\u0442\u044B \xB7 \u0442\u0435\u0441\u0442\xBB."
       category: 3
       status: 2
       required: 1
@@ -9262,27 +9636,52 @@ MonoBehaviour:
       dependencies:
       - PR12P-T01
       acceptanceCriteria:
-      - text: "Кадр меняется по времени, у двух экземпляров своя фаза (EditMode)"
+      - text: "\u041A\u0430\u0434\u0440 \u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F
+          \u043F\u043E \u0432\u0440\u0435\u043C\u0435\u043D\u0438, \u0443 \u0434\u0432\u0443\u0445
+          \u044D\u043A\u0437\u0435\u043C\u043F\u043B\u044F\u0440\u043E\u0432 \u0441\u0432\u043E\u044F
+          \u0444\u0430\u0437\u0430 (EditMode)"
         done: 1
-      - text: "PlayMode зелёный"
+      - text: "PlayMode \u0437\u0435\u043B\u0451\u043D\u044B\u0439"
         done: 1
-      - text: "Заросль травы качается в окне Базы локаций и в игре, свет по нормалям кадров"
+      - text: "\u0417\u0430\u0440\u043E\u0441\u043B\u044C \u0442\u0440\u0430\u0432\u044B
+          \u043A\u0430\u0447\u0430\u0435\u0442\u0441\u044F \u0432 \u043E\u043A\u043D\u0435
+          \u0411\u0430\u0437\u044B \u043B\u043E\u043A\u0430\u0446\u0438\u0439 \u0438
+          \u0432 \u0438\u0433\u0440\u0435, \u0441\u0432\u0435\u0442 \u043F\u043E
+          \u043D\u043E\u0440\u043C\u0430\u043B\u044F\u043C \u043A\u0430\u0434\u0440\u043E\u0432"
         done: 0
       manualChecks:
-      - "Служебное → «База ассетов: техническое место», посмотреть траву днём и ночью у света"
+      - "\u0421\u043B\u0443\u0436\u0435\u0431\u043D\u043E\u0435 \u2192 \xAB\u0411\u0430\u0437\u0430
+        \u0430\u0441\u0441\u0435\u0442\u043E\u0432: \u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u043E\u0435
+        \u043C\u0435\u0441\u0442\u043E\xBB, \u043F\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C
+        \u0442\u0440\u0430\u0432\u0443 \u0434\u043D\u0451\u043C \u0438 \u043D\u043E\u0447\u044C\u044E
+        \u0443 \u0441\u0432\u0435\u0442\u0430"
       fileReferences:
       - ProjectDocs/ASSET_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "Renderer_ChangesFrameWithLocationTime_PerInstancePhase зелёный; PlayMode 42/42. Глазами в редакторе не проверялось."
+      implementationNote: "Renderer_ChangesFrameWithLocationTime_PerInstancePhase
+        \u0437\u0435\u043B\u0451\u043D\u044B\u0439; PlayMode 42/42. \u0413\u043B\u0430\u0437\u0430\u043C\u0438
+        \u0432 \u0440\u0435\u0434\u0430\u043A\u0442\u043E\u0440\u0435 \u043D\u0435
+        \u043F\u0440\u043E\u0432\u0435\u0440\u044F\u043B\u043E\u0441\u044C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12R-T01
-      title: "12Р-1 · Облик предмета: растяжение, поворот, цвет"
-      details: "Растяжение по ширине, поворот вокруг опоры, сдвиг тона, насыщенность, яркость и подкраска у предмета места; шейдер Location Sprite Adjust под 2D-светом; тень-силуэт повторяет растяжение и поворот."
+      title: "12\u0420-1 \xB7 \u041E\u0431\u043B\u0438\u043A \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u0430:
+        \u0440\u0430\u0441\u0442\u044F\u0436\u0435\u043D\u0438\u0435, \u043F\u043E\u0432\u043E\u0440\u043E\u0442,
+        \u0446\u0432\u0435\u0442"
+      details: "\u0420\u0430\u0441\u0442\u044F\u0436\u0435\u043D\u0438\u0435 \u043F\u043E
+        \u0448\u0438\u0440\u0438\u043D\u0435, \u043F\u043E\u0432\u043E\u0440\u043E\u0442
+        \u0432\u043E\u043A\u0440\u0443\u0433 \u043E\u043F\u043E\u0440\u044B, \u0441\u0434\u0432\u0438\u0433
+        \u0442\u043E\u043D\u0430, \u043D\u0430\u0441\u044B\u0449\u0435\u043D\u043D\u043E\u0441\u0442\u044C,
+        \u044F\u0440\u043A\u043E\u0441\u0442\u044C \u0438 \u043F\u043E\u0434\u043A\u0440\u0430\u0441\u043A\u0430
+        \u0443 \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u0430 \u043C\u0435\u0441\u0442\u0430;
+        \u0448\u0435\u0439\u0434\u0435\u0440 Location Sprite Adjust \u043F\u043E\u0434
+        2D-\u0441\u0432\u0435\u0442\u043E\u043C; \u0442\u0435\u043D\u044C-\u0441\u0438\u043B\u0443\u044D\u0442
+        \u043F\u043E\u0432\u0442\u043E\u0440\u044F\u0435\u0442 \u0440\u0430\u0441\u0442\u044F\u0436\u0435\u043D\u0438\u0435
+        \u0438 \u043F\u043E\u0432\u043E\u0440\u043E\u0442."
       category: 3
       status: 3
       required: 1
@@ -9293,9 +9692,13 @@ MonoBehaviour:
       dependencies:
       - PR12P-T02
       acceptanceCriteria:
-      - text: "Сдвиг тона красного на 120° даёт зелёный (объект и ковёр)"
+      - text: "\u0421\u0434\u0432\u0438\u0433 \u0442\u043E\u043D\u0430 \u043A\u0440\u0430\u0441\u043D\u043E\u0433\u043E
+          \u043D\u0430 120\xB0 \u0434\u0430\u0451\u0442 \u0437\u0435\u043B\u0451\u043D\u044B\u0439
+          (\u043E\u0431\u044A\u0435\u043A\u0442 \u0438 \u043A\u043E\u0432\u0451\u0440)"
         done: 1
-      - text: "Прежние предметы читаются без изменения облика"
+      - text: "\u041F\u0440\u0435\u0436\u043D\u0438\u0435 \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u044B
+          \u0447\u0438\u0442\u0430\u044E\u0442\u0441\u044F \u0431\u0435\u0437 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F
+          \u043E\u0431\u043B\u0438\u043A\u0430"
         done: 1
       manualChecks: []
       fileReferences:
@@ -9304,13 +9707,29 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "LocationScatterPlayModeTests.HueShift…, LocationScatterTests.OldData… зелёные; снимки Logs/Scatter просмотрены."
+      implementationNote: "LocationScatterPlayModeTests.HueShift\u2026, LocationScatterTests.OldData\u2026
+        \u0437\u0435\u043B\u0451\u043D\u044B\u0435; \u0441\u043D\u0438\u043C\u043A\u0438
+        Logs/Scatter \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u044B."
       completedAt: 2026-10-07
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12R-T02
-      title: "12Р-2 · Кисть раскидки в Базе локаций"
-      details: "Вкладка «Раскидка»: слои, ассеты кисти с весами, радиус, плотность, наименьшее расстояние, спад; разброс размера, растяжения, поворота, отражения, ракурса, тона, насыщенности, яркости, подкраски; маска местности; кисть, ластик, перекраска, заливка; один мазок — один Undo."
+      title: "12\u0420-2 \xB7 \u041A\u0438\u0441\u0442\u044C \u0440\u0430\u0441\u043A\u0438\u0434\u043A\u0438
+        \u0432 \u0411\u0430\u0437\u0435 \u043B\u043E\u043A\u0430\u0446\u0438\u0439"
+      details: "\u0412\u043A\u043B\u0430\u0434\u043A\u0430 \xAB\u0420\u0430\u0441\u043A\u0438\u0434\u043A\u0430\xBB:
+        \u0441\u043B\u043E\u0438, \u0430\u0441\u0441\u0435\u0442\u044B \u043A\u0438\u0441\u0442\u0438
+        \u0441 \u0432\u0435\u0441\u0430\u043C\u0438, \u0440\u0430\u0434\u0438\u0443\u0441,
+        \u043F\u043B\u043E\u0442\u043D\u043E\u0441\u0442\u044C, \u043D\u0430\u0438\u043C\u0435\u043D\u044C\u0448\u0435\u0435
+        \u0440\u0430\u0441\u0441\u0442\u043E\u044F\u043D\u0438\u0435, \u0441\u043F\u0430\u0434;
+        \u0440\u0430\u0437\u0431\u0440\u043E\u0441 \u0440\u0430\u0437\u043C\u0435\u0440\u0430,
+        \u0440\u0430\u0441\u0442\u044F\u0436\u0435\u043D\u0438\u044F, \u043F\u043E\u0432\u043E\u0440\u043E\u0442\u0430,
+        \u043E\u0442\u0440\u0430\u0436\u0435\u043D\u0438\u044F, \u0440\u0430\u043A\u0443\u0440\u0441\u0430,
+        \u0442\u043E\u043D\u0430, \u043D\u0430\u0441\u044B\u0449\u0435\u043D\u043D\u043E\u0441\u0442\u0438,
+        \u044F\u0440\u043A\u043E\u0441\u0442\u0438, \u043F\u043E\u0434\u043A\u0440\u0430\u0441\u043A\u0438;
+        \u043C\u0430\u0441\u043A\u0430 \u043C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u0438;
+        \u043A\u0438\u0441\u0442\u044C, \u043B\u0430\u0441\u0442\u0438\u043A, \u043F\u0435\u0440\u0435\u043A\u0440\u0430\u0441\u043A\u0430,
+        \u0437\u0430\u043B\u0438\u0432\u043A\u0430; \u043E\u0434\u0438\u043D \u043C\u0430\u0437\u043E\u043A
+        \u2014 \u043E\u0434\u0438\u043D Undo."
       category: 3
       status: 2
       required: 1
@@ -9321,27 +9740,53 @@ MonoBehaviour:
       dependencies:
       - PR12R-T01
       acceptanceCriteria:
-      - text: "Плотность, наименьшее расстояние, маска, веса и пределы разброса (EditMode)"
+      - text: "\u041F\u043B\u043E\u0442\u043D\u043E\u0441\u0442\u044C, \u043D\u0430\u0438\u043C\u0435\u043D\u044C\u0448\u0435\u0435
+          \u0440\u0430\u0441\u0441\u0442\u043E\u044F\u043D\u0438\u0435, \u043C\u0430\u0441\u043A\u0430,
+          \u0432\u0435\u0441\u0430 \u0438 \u043F\u0440\u0435\u0434\u0435\u043B\u044B
+          \u0440\u0430\u0437\u0431\u0440\u043E\u0441\u0430 (EditMode)"
         done: 1
-      - text: "Вкладка открывается в окне"
+      - text: "\u0412\u043A\u043B\u0430\u0434\u043A\u0430 \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u0442\u0441\u044F
+          \u0432 \u043E\u043A\u043D\u0435"
         done: 1
-      - text: "Рисование мышью, ластик, перекраска и Undo в окне — проверка пользователем"
+      - text: "\u0420\u0438\u0441\u043E\u0432\u0430\u043D\u0438\u0435 \u043C\u044B\u0448\u044C\u044E,
+          \u043B\u0430\u0441\u0442\u0438\u043A, \u043F\u0435\u0440\u0435\u043A\u0440\u0430\u0441\u043A\u0430
+          \u0438 Undo \u0432 \u043E\u043A\u043D\u0435 \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+          \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u043C"
         done: 0
       manualChecks:
-      - "Служебное → «База ассетов: техническое место», вкладка «Раскидка»: порисовать, стереть, перекрасить, Ctrl+Z"
+      - "\u0421\u043B\u0443\u0436\u0435\u0431\u043D\u043E\u0435 \u2192 \xAB\u0411\u0430\u0437\u0430
+        \u0430\u0441\u0441\u0435\u0442\u043E\u0432: \u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u043E\u0435
+        \u043C\u0435\u0441\u0442\u043E\xBB, \u0432\u043A\u043B\u0430\u0434\u043A\u0430
+        \xAB\u0420\u0430\u0441\u043A\u0438\u0434\u043A\u0430\xBB: \u043F\u043E\u0440\u0438\u0441\u043E\u0432\u0430\u0442\u044C,
+        \u0441\u0442\u0435\u0440\u0435\u0442\u044C, \u043F\u0435\u0440\u0435\u043A\u0440\u0430\u0441\u0438\u0442\u044C,
+        Ctrl+Z"
       fileReferences:
       - ProjectDocs/LOCATION_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "LocationScatterTests 9/9. Мышью в окне не проверялось."
+      implementationNote: "LocationScatterTests 9/9. \u041C\u044B\u0448\u044C\u044E
+        \u0432 \u043E\u043A\u043D\u0435 \u043D\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u044F\u043B\u043E\u0441\u044C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12R-T03
-      title: "12Р-3 · Раскидка объектами и ковром в месте"
-      details: "Объекты — как предметы места (сортировка с людьми, кадры, нормали, тени слоя, проходимость «как у ассета»); ковёр — пачкой-сеткой на группу (ассет, ракурс, часть, фаза), слоем, по нормалям; одинаково в окне, исследовании и бою на месте."
+      title: "12\u0420-3 \xB7 \u0420\u0430\u0441\u043A\u0438\u0434\u043A\u0430 \u043E\u0431\u044A\u0435\u043A\u0442\u0430\u043C\u0438
+        \u0438 \u043A\u043E\u0432\u0440\u043E\u043C \u0432 \u043C\u0435\u0441\u0442\u0435"
+      details: "\u041E\u0431\u044A\u0435\u043A\u0442\u044B \u2014 \u043A\u0430\u043A
+        \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u044B \u043C\u0435\u0441\u0442\u0430
+        (\u0441\u043E\u0440\u0442\u0438\u0440\u043E\u0432\u043A\u0430 \u0441 \u043B\u044E\u0434\u044C\u043C\u0438,
+        \u043A\u0430\u0434\u0440\u044B, \u043D\u043E\u0440\u043C\u0430\u043B\u0438,
+        \u0442\u0435\u043D\u0438 \u0441\u043B\u043E\u044F, \u043F\u0440\u043E\u0445\u043E\u0434\u0438\u043C\u043E\u0441\u0442\u044C
+        \xAB\u043A\u0430\u043A \u0443 \u0430\u0441\u0441\u0435\u0442\u0430\xBB);
+        \u043A\u043E\u0432\u0451\u0440 \u2014 \u043F\u0430\u0447\u043A\u043E\u0439-\u0441\u0435\u0442\u043A\u043E\u0439
+        \u043D\u0430 \u0433\u0440\u0443\u043F\u043F\u0443 (\u0430\u0441\u0441\u0435\u0442,
+        \u0440\u0430\u043A\u0443\u0440\u0441, \u0447\u0430\u0441\u0442\u044C, \u0444\u0430\u0437\u0430),
+        \u0441\u043B\u043E\u0435\u043C, \u043F\u043E \u043D\u043E\u0440\u043C\u0430\u043B\u044F\u043C;
+        \u043E\u0434\u0438\u043D\u0430\u043A\u043E\u0432\u043E \u0432 \u043E\u043A\u043D\u0435,
+        \u0438\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u0438
+        \u0438 \u0431\u043E\u044E \u043D\u0430 \u043C\u0435\u0441\u0442\u0435."
       category: 3
       status: 2
       required: 1
@@ -9352,27 +9797,60 @@ MonoBehaviour:
       dependencies:
       - PR12R-T02
       acceptanceCriteria:
-      - text: "Ковёр ложится как объект: опора, поворот, растяжение, отражение (PlayMode)"
+      - text: "\u041A\u043E\u0432\u0451\u0440 \u043B\u043E\u0436\u0438\u0442\u0441\u044F
+          \u043A\u0430\u043A \u043E\u0431\u044A\u0435\u043A\u0442: \u043E\u043F\u043E\u0440\u0430,
+          \u043F\u043E\u0432\u043E\u0440\u043E\u0442, \u0440\u0430\u0441\u0442\u044F\u0436\u0435\u043D\u0438\u0435,
+          \u043E\u0442\u0440\u0430\u0436\u0435\u043D\u0438\u0435 (PlayMode)"
         done: 1
-      - text: "Ковёр виден в предпросмотре окна (EditMode)"
+      - text: "\u041A\u043E\u0432\u0451\u0440 \u0432\u0438\u0434\u0435\u043D \u0432
+          \u043F\u0440\u0435\u0434\u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435
+          \u043E\u043A\u043D\u0430 (EditMode)"
         done: 1
-      - text: "Тысячи штук ковром в игре без провала кадров — проверка пользователем"
+      - text: "\u0422\u044B\u0441\u044F\u0447\u0438 \u0448\u0442\u0443\u043A \u043A\u043E\u0432\u0440\u043E\u043C
+          \u0432 \u0438\u0433\u0440\u0435 \u0431\u0435\u0437 \u043F\u0440\u043E\u0432\u0430\u043B\u0430
+          \u043A\u0430\u0434\u0440\u043E\u0432 \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+          \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u043C"
         done: 0
       manualChecks:
-      - "Залить место ковром травы, пройти отрядом, посмотреть ночью у огня"
+      - "\u0417\u0430\u043B\u0438\u0442\u044C \u043C\u0435\u0441\u0442\u043E \u043A\u043E\u0432\u0440\u043E\u043C
+        \u0442\u0440\u0430\u0432\u044B, \u043F\u0440\u043E\u0439\u0442\u0438 \u043E\u0442\u0440\u044F\u0434\u043E\u043C,
+        \u043F\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C \u043D\u043E\u0447\u044C\u044E
+        \u0443 \u043E\u0433\u043D\u044F"
       fileReferences:
       - ProjectDocs/LOCATION_DATABASE_GUIDE.md
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "LocationScatterPlayModeTests 3/3; ночной снимок: ковёр и объекты освещены огнём по нормалям."
+      implementationNote: "LocationScatterPlayModeTests 3/3; \u043D\u043E\u0447\u043D\u043E\u0439
+        \u0441\u043D\u0438\u043C\u043E\u043A: \u043A\u043E\u0432\u0451\u0440 \u0438
+        \u043E\u0431\u044A\u0435\u043A\u0442\u044B \u043E\u0441\u0432\u0435\u0449\u0435\u043D\u044B
+        \u043E\u0433\u043D\u0451\u043C \u043F\u043E \u043D\u043E\u0440\u043C\u0430\u043B\u044F\u043C."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12S-T01
-      title: "12С-1 · Генератор карты свободной игры и рисунок"
-      details: "Ядро: стадии рельеф → озёра и реки → лес и болота → деревни → приметные места → дороги и тропы (мосты, броды) → поля → слоты; разметка клеток и линии из одного результата по seed. Рисовальщик: подложка-узор на всю карту, слои местности, вода с отмелью и тушью, кромка леса, дороги, знаки (рисунки художника или кодом), обработка."
+      title: "12\u0421-1 \xB7 \u0413\u0435\u043D\u0435\u0440\u0430\u0442\u043E\u0440
+        \u043A\u0430\u0440\u0442\u044B \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0439
+        \u0438\u0433\u0440\u044B \u0438 \u0440\u0438\u0441\u0443\u043D\u043E\u043A"
+      details: "\u042F\u0434\u0440\u043E: \u0441\u0442\u0430\u0434\u0438\u0438 \u0440\u0435\u043B\u044C\u0435\u0444
+        \u2192 \u043E\u0437\u0451\u0440\u0430 \u0438 \u0440\u0435\u043A\u0438 \u2192
+        \u043B\u0435\u0441 \u0438 \u0431\u043E\u043B\u043E\u0442\u0430 \u2192 \u0434\u0435\u0440\u0435\u0432\u043D\u0438
+        \u2192 \u043F\u0440\u0438\u043C\u0435\u0442\u043D\u044B\u0435 \u043C\u0435\u0441\u0442\u0430
+        \u2192 \u0434\u043E\u0440\u043E\u0433\u0438 \u0438 \u0442\u0440\u043E\u043F\u044B
+        (\u043C\u043E\u0441\u0442\u044B, \u0431\u0440\u043E\u0434\u044B) \u2192 \u043F\u043E\u043B\u044F
+        \u2192 \u0441\u043B\u043E\u0442\u044B; \u0440\u0430\u0437\u043C\u0435\u0442\u043A\u0430
+        \u043A\u043B\u0435\u0442\u043E\u043A \u0438 \u043B\u0438\u043D\u0438\u0438
+        \u0438\u0437 \u043E\u0434\u043D\u043E\u0433\u043E \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u0430
+        \u043F\u043E seed. \u0420\u0438\u0441\u043E\u0432\u0430\u043B\u044C\u0449\u0438\u043A:
+        \u043F\u043E\u0434\u043B\u043E\u0436\u043A\u0430-\u0443\u0437\u043E\u0440
+        \u043D\u0430 \u0432\u0441\u044E \u043A\u0430\u0440\u0442\u0443, \u0441\u043B\u043E\u0438
+        \u043C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u0438, \u0432\u043E\u0434\u0430
+        \u0441 \u043E\u0442\u043C\u0435\u043B\u044C\u044E \u0438 \u0442\u0443\u0448\u044C\u044E,
+        \u043A\u0440\u043E\u043C\u043A\u0430 \u043B\u0435\u0441\u0430, \u0434\u043E\u0440\u043E\u0433\u0438,
+        \u0437\u043D\u0430\u043A\u0438 (\u0440\u0438\u0441\u0443\u043D\u043A\u0438
+        \u0445\u0443\u0434\u043E\u0436\u043D\u0438\u043A\u0430 \u0438\u043B\u0438
+        \u043A\u043E\u0434\u043E\u043C), \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u043A\u0430."
       category: 3
       status: 3
       required: 1
@@ -9382,11 +9860,19 @@ MonoBehaviour:
       blockerReason: 1
       dependencies: []
       acceptanceCriteria:
-      - text: "Одинаковый seed — одинаковая карта; стадии — начало полной карты (EditMode)"
+      - text: "\u041E\u0434\u0438\u043D\u0430\u043A\u043E\u0432\u044B\u0439 seed
+          \u2014 \u043E\u0434\u0438\u043D\u0430\u043A\u043E\u0432\u0430\u044F \u043A\u0430\u0440\u0442\u0430;
+          \u0441\u0442\u0430\u0434\u0438\u0438 \u2014 \u043D\u0430\u0447\u0430\u043B\u043E
+          \u043F\u043E\u043B\u043D\u043E\u0439 \u043A\u0430\u0440\u0442\u044B (EditMode)"
         done: 1
-      - text: "Стоянка проходима, деревни и места достижимы на нескольких seed (EditMode)"
+      - text: "\u0421\u0442\u043E\u044F\u043D\u043A\u0430 \u043F\u0440\u043E\u0445\u043E\u0434\u0438\u043C\u0430,
+          \u0434\u0435\u0440\u0435\u0432\u043D\u0438 \u0438 \u043C\u0435\u0441\u0442\u0430
+          \u0434\u043E\u0441\u0442\u0438\u0436\u0438\u043C\u044B \u043D\u0430 \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u0438\u0445
+          seed (EditMode)"
         done: 1
-      - text: "Рисунок любой стадии нужного размера (EditMode)"
+      - text: "\u0420\u0438\u0441\u0443\u043D\u043E\u043A \u043B\u044E\u0431\u043E\u0439
+          \u0441\u0442\u0430\u0434\u0438\u0438 \u043D\u0443\u0436\u043D\u043E\u0433\u043E
+          \u0440\u0430\u0437\u043C\u0435\u0440\u0430 (EditMode)"
         done: 1
       manualChecks: []
       fileReferences:
@@ -9396,13 +9882,35 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "WorldMapGeneratorTests; образцы карт выгружены через WorldMapGeneratorTools.ExportSamplesBatch."
+      implementationNote: "WorldMapGeneratorTests; \u043E\u0431\u0440\u0430\u0437\u0446\u044B
+        \u043A\u0430\u0440\u0442 \u0432\u044B\u0433\u0440\u0443\u0436\u0435\u043D\u044B
+        \u0447\u0435\u0440\u0435\u0437 WorldMapGeneratorTools.ExportSamplesBatch."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12S-T02
-      title: "12С-2 · Окно «Генератор карты»"
-      details: "Блоки настроек со «Сбросить» в духе «Обработки кадра»: масштаб, рельеф, вода, лес, деревни, дороги, приметные места; облик — качество, подложка, местность, тушь, вода, лес, горы, дороги, деревни, знаки, обработка. Сохранённые наборы (всё / генерация / облик), предпросмотр с масштабом и сдвигом, пошаговый показ стадий, наложения разметки и слотов, PNG."
+      title: "12\u0421-2 \xB7 \u041E\u043A\u043D\u043E \xAB\u0413\u0435\u043D\u0435\u0440\u0430\u0442\u043E\u0440
+        \u043A\u0430\u0440\u0442\u044B\xBB"
+      details: "\u0411\u043B\u043E\u043A\u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043A
+        \u0441\u043E \xAB\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C\xBB \u0432
+        \u0434\u0443\u0445\u0435 \xAB\u041E\u0431\u0440\u0430\u0431\u043E\u0442\u043A\u0438
+        \u043A\u0430\u0434\u0440\u0430\xBB: \u043C\u0430\u0441\u0448\u0442\u0430\u0431,
+        \u0440\u0435\u043B\u044C\u0435\u0444, \u0432\u043E\u0434\u0430, \u043B\u0435\u0441,
+        \u0434\u0435\u0440\u0435\u0432\u043D\u0438, \u0434\u043E\u0440\u043E\u0433\u0438,
+        \u043F\u0440\u0438\u043C\u0435\u0442\u043D\u044B\u0435 \u043C\u0435\u0441\u0442\u0430;
+        \u043E\u0431\u043B\u0438\u043A \u2014 \u043A\u0430\u0447\u0435\u0441\u0442\u0432\u043E,
+        \u043F\u043E\u0434\u043B\u043E\u0436\u043A\u0430, \u043C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u044C,
+        \u0442\u0443\u0448\u044C, \u0432\u043E\u0434\u0430, \u043B\u0435\u0441, \u0433\u043E\u0440\u044B,
+        \u0434\u043E\u0440\u043E\u0433\u0438, \u0434\u0435\u0440\u0435\u0432\u043D\u0438,
+        \u0437\u043D\u0430\u043A\u0438, \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u043A\u0430.
+        \u0421\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0435 \u043D\u0430\u0431\u043E\u0440\u044B
+        (\u0432\u0441\u0451 / \u0433\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u044F
+        / \u043E\u0431\u043B\u0438\u043A), \u043F\u0440\u0435\u0434\u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440
+        \u0441 \u043C\u0430\u0441\u0448\u0442\u0430\u0431\u043E\u043C \u0438 \u0441\u0434\u0432\u0438\u0433\u043E\u043C,
+        \u043F\u043E\u0448\u0430\u0433\u043E\u0432\u044B\u0439 \u043F\u043E\u043A\u0430\u0437
+        \u0441\u0442\u0430\u0434\u0438\u0439, \u043D\u0430\u043B\u043E\u0436\u0435\u043D\u0438\u044F
+        \u0440\u0430\u0437\u043C\u0435\u0442\u043A\u0438 \u0438 \u0441\u043B\u043E\u0442\u043E\u0432,
+        PNG."
       category: 5
       status: 2
       required: 1
@@ -9413,12 +9921,25 @@ MonoBehaviour:
       dependencies:
       - PR12S-T01
       acceptanceCriteria:
-      - text: "Окно компилируется, генератор создаётся и подключается к базе карты"
+      - text: "\u041E\u043A\u043D\u043E \u043A\u043E\u043C\u043F\u0438\u043B\u0438\u0440\u0443\u0435\u0442\u0441\u044F,
+          \u0433\u0435\u043D\u0435\u0440\u0430\u0442\u043E\u0440 \u0441\u043E\u0437\u0434\u0430\u0451\u0442\u0441\u044F
+          \u0438 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0430\u0435\u0442\u0441\u044F
+          \u043A \u0431\u0430\u0437\u0435 \u043A\u0430\u0440\u0442\u044B"
         done: 1
-      - text: "Правки, наборы и пошаговый показ работают в открытом редакторе — проверка пользователем"
+      - text: "\u041F\u0440\u0430\u0432\u043A\u0438, \u043D\u0430\u0431\u043E\u0440\u044B
+          \u0438 \u043F\u043E\u0448\u0430\u0433\u043E\u0432\u044B\u0439 \u043F\u043E\u043A\u0430\u0437
+          \u0440\u0430\u0431\u043E\u0442\u0430\u044E\u0442 \u0432 \u043E\u0442\u043A\u0440\u044B\u0442\u043E\u043C
+          \u0440\u0435\u0434\u0430\u043A\u0442\u043E\u0440\u0435 \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+          \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u043C"
         done: 0
       manualChecks:
-      - "Kingdom Survival → Генератор карты: подвигать ползунки, «▶ По шагам», сохранить и применить набор, назначить узор подложки"
+      - "Kingdom Survival \u2192 \u0413\u0435\u043D\u0435\u0440\u0430\u0442\u043E\u0440
+        \u043A\u0430\u0440\u0442\u044B: \u043F\u043E\u0434\u0432\u0438\u0433\u0430\u0442\u044C
+        \u043F\u043E\u043B\u0437\u0443\u043D\u043A\u0438, \xAB\u25B6 \u041F\u043E
+        \u0448\u0430\u0433\u0430\u043C\xBB, \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C
+        \u0438 \u043F\u0440\u0438\u043C\u0435\u043D\u0438\u0442\u044C \u043D\u0430\u0431\u043E\u0440,
+        \u043D\u0430\u0437\u043D\u0430\u0447\u0438\u0442\u044C \u0443\u0437\u043E\u0440
+        \u043F\u043E\u0434\u043B\u043E\u0436\u043A\u0438"
       fileReferences:
       - Assets/_Project/WorldMapVisual/Editor/WorldMapGeneratorWindow.cs
       relatedDialogueIds: []
@@ -9430,8 +9951,28 @@ MonoBehaviour:
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12S-T03
-      title: "12С-3 · Своя карта в каждой партии свободной игры, Дом скрыт"
-      details: "Новая партия свободной игры генерирует карту по своему seed; карта сохраняется в партии и не сверяется с авторским миром; рисунок — фон глобальной карты; места встают в слоты генератора (тег place:<id>). Дом временно скрыт: нет кнопки и экрана Дома, маркера Дома, строки запасов; карта всегда открыта, между походами герой стоит на стоянке."
+      title: "12\u0421-3 \xB7 \u0421\u0432\u043E\u044F \u043A\u0430\u0440\u0442\u0430
+        \u0432 \u043A\u0430\u0436\u0434\u043E\u0439 \u043F\u0430\u0440\u0442\u0438\u0438
+        \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0439 \u0438\u0433\u0440\u044B,
+        \u0414\u043E\u043C \u0441\u043A\u0440\u044B\u0442"
+      details: "\u041D\u043E\u0432\u0430\u044F \u043F\u0430\u0440\u0442\u0438\u044F
+        \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0439 \u0438\u0433\u0440\u044B
+        \u0433\u0435\u043D\u0435\u0440\u0438\u0440\u0443\u0435\u0442 \u043A\u0430\u0440\u0442\u0443
+        \u043F\u043E \u0441\u0432\u043E\u0435\u043C\u0443 seed; \u043A\u0430\u0440\u0442\u0430
+        \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0435\u0442\u0441\u044F \u0432
+        \u043F\u0430\u0440\u0442\u0438\u0438 \u0438 \u043D\u0435 \u0441\u0432\u0435\u0440\u044F\u0435\u0442\u0441\u044F
+        \u0441 \u0430\u0432\u0442\u043E\u0440\u0441\u043A\u0438\u043C \u043C\u0438\u0440\u043E\u043C;
+        \u0440\u0438\u0441\u0443\u043D\u043E\u043A \u2014 \u0444\u043E\u043D \u0433\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u043E\u0439
+        \u043A\u0430\u0440\u0442\u044B; \u043C\u0435\u0441\u0442\u0430 \u0432\u0441\u0442\u0430\u044E\u0442
+        \u0432 \u0441\u043B\u043E\u0442\u044B \u0433\u0435\u043D\u0435\u0440\u0430\u0442\u043E\u0440\u0430
+        (\u0442\u0435\u0433 place:<id>). \u0414\u043E\u043C \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E
+        \u0441\u043A\u0440\u044B\u0442: \u043D\u0435\u0442 \u043A\u043D\u043E\u043F\u043A\u0438
+        \u0438 \u044D\u043A\u0440\u0430\u043D\u0430 \u0414\u043E\u043C\u0430, \u043C\u0430\u0440\u043A\u0435\u0440\u0430
+        \u0414\u043E\u043C\u0430, \u0441\u0442\u0440\u043E\u043A\u0438 \u0437\u0430\u043F\u0430\u0441\u043E\u0432;
+        \u043A\u0430\u0440\u0442\u0430 \u0432\u0441\u0435\u0433\u0434\u0430 \u043E\u0442\u043A\u0440\u044B\u0442\u0430,
+        \u043C\u0435\u0436\u0434\u0443 \u043F\u043E\u0445\u043E\u0434\u0430\u043C\u0438
+        \u0433\u0435\u0440\u043E\u0439 \u0441\u0442\u043E\u0438\u0442 \u043D\u0430
+        \u0441\u0442\u043E\u044F\u043D\u043A\u0435."
       category: 7
       status: 2
       required: 1
@@ -9442,14 +9983,27 @@ MonoBehaviour:
       dependencies:
       - PR12S-T01
       acceptanceCriteria:
-      - text: "Карта переживает сохранение и загрузку; авторская кампания без карты (EditMode)"
+      - text: "\u041A\u0430\u0440\u0442\u0430 \u043F\u0435\u0440\u0435\u0436\u0438\u0432\u0430\u0435\u0442
+          \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u0438 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0443;
+          \u0430\u0432\u0442\u043E\u0440\u0441\u043A\u0430\u044F \u043A\u0430\u043C\u043F\u0430\u043D\u0438\u044F
+          \u0431\u0435\u0437 \u043A\u0430\u0440\u0442\u044B (EditMode)"
         done: 1
-      - text: "Место с привязкой встаёт у своего знака (EditMode)"
+      - text: "\u041C\u0435\u0441\u0442\u043E \u0441 \u043F\u0440\u0438\u0432\u044F\u0437\u043A\u043E\u0439
+          \u0432\u0441\u0442\u0430\u0451\u0442 \u0443 \u0441\u0432\u043E\u0435\u0433\u043E
+          \u0437\u043D\u0430\u043A\u0430 (EditMode)"
         done: 1
-      - text: "Новая свободная игра в Play Mode: своя карта, Дома не видно, поход с клика — проверка пользователем"
+      - text: "\u041D\u043E\u0432\u0430\u044F \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F
+          \u0438\u0433\u0440\u0430 \u0432 Play Mode: \u0441\u0432\u043E\u044F \u043A\u0430\u0440\u0442\u0430,
+          \u0414\u043E\u043C\u0430 \u043D\u0435 \u0432\u0438\u0434\u043D\u043E, \u043F\u043E\u0445\u043E\u0434
+          \u0441 \u043A\u043B\u0438\u043A\u0430 \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+          \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u043C"
         done: 0
       manualChecks:
-      - "Две новые свободные игры подряд — разные карты; сохранить, выйти, загрузить — та же карта"
+      - "\u0414\u0432\u0435 \u043D\u043E\u0432\u044B\u0435 \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u044B\u0435
+        \u0438\u0433\u0440\u044B \u043F\u043E\u0434\u0440\u044F\u0434 \u2014 \u0440\u0430\u0437\u043D\u044B\u0435
+        \u043A\u0430\u0440\u0442\u044B; \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C,
+        \u0432\u044B\u0439\u0442\u0438, \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C
+        \u2014 \u0442\u0430 \u0436\u0435 \u043A\u0430\u0440\u0442\u0430"
       fileReferences:
       - Assets/_Project/UI/PrototypeUIController.FreePlayNoHome.cs
       relatedDialogueIds: []
@@ -9461,8 +10015,30 @@ MonoBehaviour:
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12S-T04
-      title: "12С-4 · Места по лору на сгенерированной карте и иконки"
-      details: "Каталог генератора — 16 типов мест из утверждённых разделов LORE, канона и BESTIARY с источником у каждого; перекрёстки на развилках дорог; деревни и места — настоящие места карты (описание, исследование, итог, скрытые до находки); вход внутрь — через связанную запись Базы карты. Блок «Иконки и рисунки»: деревья, рельеф, мост, стоянка, деревни, знак, варианты и иконка метки каждого места."
+      title: "12\u0421-4 \xB7 \u041C\u0435\u0441\u0442\u0430 \u043F\u043E \u043B\u043E\u0440\u0443
+        \u043D\u0430 \u0441\u0433\u0435\u043D\u0435\u0440\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u043E\u0439
+        \u043A\u0430\u0440\u0442\u0435 \u0438 \u0438\u043A\u043E\u043D\u043A\u0438"
+      details: "\u041A\u0430\u0442\u0430\u043B\u043E\u0433 \u0433\u0435\u043D\u0435\u0440\u0430\u0442\u043E\u0440\u0430
+        \u2014 16 \u0442\u0438\u043F\u043E\u0432 \u043C\u0435\u0441\u0442 \u0438\u0437
+        \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043D\u043D\u044B\u0445
+        \u0440\u0430\u0437\u0434\u0435\u043B\u043E\u0432 LORE, \u043A\u0430\u043D\u043E\u043D\u0430
+        \u0438 BESTIARY \u0441 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u043E\u043C
+        \u0443 \u043A\u0430\u0436\u0434\u043E\u0433\u043E; \u043F\u0435\u0440\u0435\u043A\u0440\u0451\u0441\u0442\u043A\u0438
+        \u043D\u0430 \u0440\u0430\u0437\u0432\u0438\u043B\u043A\u0430\u0445 \u0434\u043E\u0440\u043E\u0433;
+        \u0434\u0435\u0440\u0435\u0432\u043D\u0438 \u0438 \u043C\u0435\u0441\u0442\u0430
+        \u2014 \u043D\u0430\u0441\u0442\u043E\u044F\u0449\u0438\u0435 \u043C\u0435\u0441\u0442\u0430
+        \u043A\u0430\u0440\u0442\u044B (\u043E\u043F\u0438\u0441\u0430\u043D\u0438\u0435,
+        \u0438\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u0435,
+        \u0438\u0442\u043E\u0433, \u0441\u043A\u0440\u044B\u0442\u044B\u0435 \u0434\u043E
+        \u043D\u0430\u0445\u043E\u0434\u043A\u0438); \u0432\u0445\u043E\u0434 \u0432\u043D\u0443\u0442\u0440\u044C
+        \u2014 \u0447\u0435\u0440\u0435\u0437 \u0441\u0432\u044F\u0437\u0430\u043D\u043D\u0443\u044E
+        \u0437\u0430\u043F\u0438\u0441\u044C \u0411\u0430\u0437\u044B \u043A\u0430\u0440\u0442\u044B.
+        \u0411\u043B\u043E\u043A \xAB\u0418\u043A\u043E\u043D\u043A\u0438 \u0438
+        \u0440\u0438\u0441\u0443\u043D\u043A\u0438\xBB: \u0434\u0435\u0440\u0435\u0432\u044C\u044F,
+        \u0440\u0435\u043B\u044C\u0435\u0444, \u043C\u043E\u0441\u0442, \u0441\u0442\u043E\u044F\u043D\u043A\u0430,
+        \u0434\u0435\u0440\u0435\u0432\u043D\u0438, \u0437\u043D\u0430\u043A, \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B
+        \u0438 \u0438\u043A\u043E\u043D\u043A\u0430 \u043C\u0435\u0442\u043A\u0438
+        \u043A\u0430\u0436\u0434\u043E\u0433\u043E \u043C\u0435\u0441\u0442\u0430."
       category: 3
       status: 2
       required: 1
@@ -9473,21 +10049,384 @@ MonoBehaviour:
       dependencies:
       - PR12S-T01
       acceptanceCriteria:
-      - text: "Каталог с источниками, перекрёстки на развилках, места в партии и после загрузки (EditMode)"
+      - text: "\u041A\u0430\u0442\u0430\u043B\u043E\u0433 \u0441 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0430\u043C\u0438,
+          \u043F\u0435\u0440\u0435\u043A\u0440\u0451\u0441\u0442\u043A\u0438 \u043D\u0430
+          \u0440\u0430\u0437\u0432\u0438\u043B\u043A\u0430\u0445, \u043C\u0435\u0441\u0442\u0430
+          \u0432 \u043F\u0430\u0440\u0442\u0438\u0438 \u0438 \u043F\u043E\u0441\u043B\u0435
+          \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0438 (EditMode)"
         done: 1
-      - text: "Старый ассет получает каталог без потери правок автора (EditMode)"
+      - text: "\u0421\u0442\u0430\u0440\u044B\u0439 \u0430\u0441\u0441\u0435\u0442
+          \u043F\u043E\u043B\u0443\u0447\u0430\u0435\u0442 \u043A\u0430\u0442\u0430\u043B\u043E\u0433
+          \u0431\u0435\u0437 \u043F\u043E\u0442\u0435\u0440\u0438 \u043F\u0440\u0430\u0432\u043E\u043A
+          \u0430\u0432\u0442\u043E\u0440\u0430 (EditMode)"
         done: 1
-      - text: "Иконки назначаются в окне и видны на карте игры — проверка пользователем"
+      - text: "\u0418\u043A\u043E\u043D\u043A\u0438 \u043D\u0430\u0437\u043D\u0430\u0447\u0430\u044E\u0442\u0441\u044F
+          \u0432 \u043E\u043A\u043D\u0435 \u0438 \u0432\u0438\u0434\u043D\u044B \u043D\u0430
+          \u043A\u0430\u0440\u0442\u0435 \u0438\u0433\u0440\u044B \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+          \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u043C"
         done: 0
       manualChecks:
-      - "Генератор карты → «Иконки и рисунки»: назначить иконку метки пещеры и рисунок ели; новая свободная игра — найти пещеру и зайти в неё"
+      - "\u0413\u0435\u043D\u0435\u0440\u0430\u0442\u043E\u0440 \u043A\u0430\u0440\u0442\u044B
+        \u2192 \xAB\u0418\u043A\u043E\u043D\u043A\u0438 \u0438 \u0440\u0438\u0441\u0443\u043D\u043A\u0438\xBB:
+        \u043D\u0430\u0437\u043D\u0430\u0447\u0438\u0442\u044C \u0438\u043A\u043E\u043D\u043A\u0443
+        \u043C\u0435\u0442\u043A\u0438 \u043F\u0435\u0449\u0435\u0440\u044B \u0438
+        \u0440\u0438\u0441\u0443\u043D\u043E\u043A \u0435\u043B\u0438; \u043D\u043E\u0432\u0430\u044F
+        \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F \u0438\u0433\u0440\u0430
+        \u2014 \u043D\u0430\u0439\u0442\u0438 \u043F\u0435\u0449\u0435\u0440\u0443
+        \u0438 \u0437\u0430\u0439\u0442\u0438 \u0432 \u043D\u0435\u0451"
       fileReferences:
       - Assets/_Project/Scripts/Core/GeneratedMapPlaces.cs
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "WorldMapGeneratorTests; образец карты seed 31 со скрытыми местами."
+      implementationNote: "WorldMapGeneratorTests; \u043E\u0431\u0440\u0430\u0437\u0435\u0446
+        \u043A\u0430\u0440\u0442\u044B seed 31 \u0441\u043E \u0441\u043A\u0440\u044B\u0442\u044B\u043C\u0438
+        \u043C\u0435\u0441\u0442\u0430\u043C\u0438."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12T-T01
+      title: "12\u0422-1 \xB7 \u0411\u0430\u0437\u0430 \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u043E\u0432
+        \u0438 \u044D\u0444\u0444\u0435\u043A\u0442\u044B \u0438\u0437 \u0434\u0430\u043D\u043D\u044B\u0445"
+      details: "\u041A\u0430\u0442\u0430\u043B\u043E\u0433 \u0432\u0435\u0449\u0435\u0439
+        \u2014 \xAB\u0411\u0430\u0437\u0430 \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u043E\u0432\xBB
+        (Kingdom Survival \u2192 \u0411\u0430\u0437\u0430 \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u043E\u0432);
+        \u043F\u0440\u0435\u0436\u043D\u0438\u0435 ID, \u0432\u043B\u0430\u0434\u0435\u043B\u044C\u0446\u044B,
+        \u0437\u0430\u0440\u044F\u0434\u044B \u0438 \u0432\u044B\u0434\u0430\u0447\u0438
+        \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B; \u044D\u0444\u0444\u0435\u043A\u0442\u044B
+        \xAB\u043F\u043E\u043A\u0430 \u043D\u0430\u0434\u0435\u0442\u043E\xBB \u0438
+        \xAB\u043F\u0440\u0438 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u043D\u0438\u0438\xBB
+        (HP, \u0438\u0437\u043D\u0435\u043C\u043E\u0436\u0435\u043D\u0438\u0435,
+        \u043F\u0440\u0438\u043F\u0430\u0441\u044B, \u0437\u043D\u0430\u043D\u0438\u0435)
+        \u0431\u0435\u0437 switch \u043F\u043E ID; \u0440\u0430\u0431\u043E\u0447\u0438\u0435
+        \u0442\u043E\u0432\u0430\u0440\u044B."
+      category: 3
+      status: 2
+      required: 1
+      order: 63
+      priority: 0
+      verificationType: 1
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0421\u0442\u0430\u0440\u044B\u0435 \u0432\u0435\u0449\u0438 \u0438
+          \u0438\u0445 \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u0435 \u043F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u044B
+          (EditMode)"
+        done: 1
+      - text: "\u041D\u043E\u0432\u044B\u0439 \u0440\u0430\u0441\u0445\u043E\u0434\u043D\u0438\u043A
+          \u0438\u0437 \u0434\u0430\u043D\u043D\u044B\u0445 \u0440\u0430\u0431\u043E\u0442\u0430\u0435\u0442
+          \u0438 \u043D\u0435 \u0442\u0440\u0430\u0442\u0438\u0442 \u0437\u0430\u0440\u044F\u0434
+          \u0431\u0435\u0437 \u043F\u043E\u043B\u044C\u0437\u044B (EditMode)"
+        done: 1
+      - text: "\u041E\u0436\u0438\u0434\u0430\u044E\u0449\u0438\u0439 \u0432 \u043B\u0430\u0433\u0435\u0440\u0435
+          \u043D\u0435 \u0434\u0430\u0451\u0442 \u0432\u0435\u0449\u0435\u0439 \u0441\u0446\u0435\u043D\u0435
+          (EditMode)"
+        done: 1
+      - text: "\u0420\u0435\u0434\u0430\u043A\u0442\u043E\u0440: \u0441\u043E\u0437\u0434\u0430\u0442\u044C,
+          \u0434\u0443\u0431\u043B\u0438\u0440\u043E\u0432\u0430\u0442\u044C, \u043A\u0430\u0440\u0442\u0438\u043D\u043A\u0430,
+          \u044D\u0444\u0444\u0435\u043A\u0442, Undo \u2014 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E
+          \u0440\u0443\u043A\u0430\u043C\u0438"
+        done: 0
+      manualChecks:
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u0438\u0433\u0440\u0435"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      - ProjectDocs/SETTLEMENTS_TRADE_TAVERN_SPEC.md
+      - ProjectDocs/SETTLEMENTS_AUTHOR_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12T-T02
+      title: "12\u0422-2 \xB7 \u0411\u0430\u0437\u0430 \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u0439
+        \u0438 \u044D\u043A\u0440\u0430\u043D \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
+      details: "\u041F\u0440\u043E\u0444\u0438\u043B\u0438, \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B,
+        \u043B\u044E\u0434\u0438, \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F,
+        \u043F\u0440\u0438\u0432\u044F\u0437\u043A\u0430 \u043A \u043C\u0435\u0441\u0442\u0430\u043C
+        \u0438 \u0434\u0435\u0440\u0435\u0432\u043D\u044F\u043C \u0433\u0435\u043D\u0435\u0440\u0430\u0442\u043E\u0440\u0430;
+        \u044D\u043A\u0440\u0430\u043D \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F
+        \u0441 \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0435\u043C\u044B\u043C
+        \u043F\u0440\u0438\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435\u043C
+        (\u0441 \u043B\u0430\u0433\u0435\u0440\u0435\u043C \u0438 \u0431\u0435\u0437);
+        \xAB\u041F\u0440\u043E\u0433\u0443\u043B\u044F\u0442\u044C\u0441\u044F\xBB
+        \u2014 \u0442\u043E\u043B\u044C\u043A\u043E \u044F\u0432\u043D\u044B\u043C
+        \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435\u043C."
+      category: 3
+      status: 2
+      required: 1
+      order: 64
+      priority: 0
+      verificationType: 1
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041F\u0440\u043E\u0444\u0438\u043B\u0438 \u0434\u0435\u0440\u0435\u0432\u0435\u043D\u044C
+          \u0434\u0435\u0442\u0435\u0440\u043C\u0438\u043D\u0438\u0440\u043E\u0432\u0430\u043D\u044B
+          \u0438 \u0432 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0438
+          (EditMode)"
+        done: 1
+      - text: "\u0412\u0445\u043E\u0434 \u2192 \u044D\u043A\u0440\u0430\u043D \u2192
+          \u0432\u044B\u0445\u043E\u0434 \u043A \u043B\u0430\u0433\u0435\u0440\u044E
+          \u0432 \u0441\u0446\u0435\u043D\u0435 (PlayMode)"
+        done: 1
+      - text: "\u0412\u0451\u0440\u0441\u0442\u043A\u0430 1920\xD71080 \u0438 1280\xD7720
+          \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043D\u0430 \u043D\u0430
+          \u0441\u043D\u0438\u043C\u043A\u0430\u0445"
+        done: 1
+      - text: "\u0420\u0435\u0434\u0430\u043A\u0442\u043E\u0440: \u043F\u0440\u0435\u0434\u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440
+          \u043A\u0430\u0434\u0440\u0430, \u0432\u044B\u0431\u043E\u0440 \u0434\u0438\u0430\u043B\u043E\u0433\u0430,
+          \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0441\u0441\u044B\u043B\u043E\u043A
+          \u2014 \u0440\u0443\u043A\u0430\u043C\u0438"
+        done: 0
+      manualChecks:
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u0438\u0433\u0440\u0435"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      - ProjectDocs/SETTLEMENTS_TRADE_TAVERN_SPEC.md
+      - ProjectDocs/SETTLEMENTS_AUTHOR_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12T-T03
+      title: "12\u0422-3 \xB7 \u0422\u043E\u0440\u0433\u043E\u0432\u043B\u044F \u043A\u043E\u0440\u0437\u0438\u043D\u043E\u0439"
+      details: "\u041A\u043E\u0440\u0437\u0438\u043D\u0430, \u043A\u043E\u043D\u0435\u0447\u043D\u044B\u0439
+        \u0437\u0430\u043F\u0430\u0441 \u0438 \u0434\u0435\u043D\u044C\u0433\u0438
+        \u0442\u043E\u0440\u0433\u043E\u0432\u0446\u0430, \u0432\u044B\u043A\u0443\u043F
+        \u0442\u043E\u0433\u043E \u0436\u0435 \u044D\u043A\u0437\u0435\u043C\u043F\u043B\u044F\u0440\u0430,
+        \u043F\u0440\u0438\u043F\u0430\u0441\u044B, \u043E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u0438\u0435
+        \u043F\u043E \u0438\u0433\u0440\u043E\u0432\u044B\u043C \u0447\u0430\u0441\u0430\u043C,
+        \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u0435
+        \xAB\u0432\u0441\u0451 \u0438\u043B\u0438 \u043D\u0438\u0447\u0435\u0433\u043E\xBB,
+        \u0437\u0430\u0449\u0438\u0442\u0430 \u043E\u0442 \u043F\u043E\u0432\u0442\u043E\u0440\u0430."
+      category: 3
+      status: 3
+      required: 1
+      order: 65
+      priority: 0
+      verificationType: 1
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0421\u043C\u0435\u0448\u0430\u043D\u043D\u0430\u044F \u0441\u0434\u0435\u043B\u043A\u0430,
+          \u043D\u0435\u0445\u0432\u0430\u0442\u043A\u0430 \u0434\u0435\u043D\u0435\u0433,
+          \u0441\u043B\u043E\u0442\u044B, \u043D\u0435\u043A\u043E\u0440\u0440\u0435\u043A\u0442\u043D\u044B\u0435
+          \u043A\u043E\u0440\u0437\u0438\u043D\u044B, \u043F\u043E\u0432\u0442\u043E\u0440
+          (EditMode)"
+        done: 1
+      - text: "\u041E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u0438\u0435 \u0442\u043E\u043B\u044C\u043A\u043E
+          \u0438\u0433\u0440\u043E\u0432\u044B\u043C \u0432\u0440\u0435\u043C\u0435\u043D\u0435\u043C,
+          \u0443\u043D\u0438\u043A\u0430\u043B\u044C\u043D\u043E\u0435 \u043D\u0435
+          \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0430\u0435\u0442\u0441\u044F
+          (EditMode)"
+        done: 1
+      - text: "\u0421\u0434\u0435\u043B\u043A\u0430, \u043F\u043E\u0432\u0442\u043E\u0440\u043D\u044B\u0439
+          \u043A\u043B\u0438\u043A \u0438 \u043E\u0442\u043C\u0435\u043D\u0430 \u043A\u043E\u0440\u0437\u0438\u043D\u044B
+          \u0432 \u0441\u0446\u0435\u043D\u0435 (PlayMode)"
+        done: 1
+      manualChecks:
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u0438\u0433\u0440\u0435"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      - ProjectDocs/SETTLEMENTS_TRADE_TAVERN_SPEC.md
+      - ProjectDocs/SETTLEMENTS_AUTHOR_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 2026-10-29
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12T-T04
+      title: "12\u0422-4 \xB7 \u041A\u043E\u0440\u0447\u043C\u0430, \u043F\u043E\u0440\u0443\u0447\u0435\u043D\u0438\u044F,
+        \u043D\u043E\u0447\u043B\u0435\u0433"
+      details: "\u0425\u043E\u0437\u044F\u0438\u043D, \u043F\u043E\u0441\u0435\u0442\u0438\u0442\u0435\u043B\u0438,
+        \u043F\u043B\u0430\u0442\u043D\u044B\u0435 \u0441\u0432\u0435\u0434\u0435\u043D\u0438\u044F
+        (\u043E\u043F\u043B\u0430\u0442\u0430 \u0438 \u0437\u043D\u0430\u043D\u0438\u0435
+        \u0430\u0442\u043E\u043C\u0430\u0440\u043D\u044B), \u043F\u043E\u0440\u0443\u0447\u0435\u043D\u0438\u044F
+        \u0441 \u043E\u0431\u0449\u0438\u043C \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435\u043C,
+        \u0441\u0440\u043E\u043A \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u0438\u044F,
+        \u043D\u043E\u0447\u043B\u0435\u0433 \u043E\u0431\u0449\u0438\u043C \u0432\u0440\u0435\u043C\u0435\u043D\u0435\u043C
+        \u0441 \u043B\u0435\u0447\u0435\u043D\u0438\u0435\u043C \u0442\u043E\u043B\u044C\u043A\u043E
+        \u0432\u043E\u0448\u0435\u0434\u0448\u0438\u0445."
+      category: 3
+      status: 2
+      required: 1
+      order: 66
+      priority: 0
+      verificationType: 1
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0421\u0432\u0435\u0434\u0435\u043D\u0438\u044F \u043D\u0435 \u043F\u0440\u043E\u0434\u0430\u044E\u0442\u0441\u044F
+          \u0434\u0432\u0430\u0436\u0434\u044B; \u043F\u043E\u0440\u0443\u0447\u0435\u043D\u0438\u0435
+          \u043E\u0431\u0449\u0435\u0435 \u0434\u043B\u044F \u0434\u043E\u0441\u043A\u0438
+          \u0438 \u043A\u043E\u0440\u0447\u043C\u044B; \u0441\u0440\u043E\u043A \u0438
+          \u043F\u0440\u043E\u0432\u0430\u043B (EditMode)"
+        done: 1
+      - text: "\u041D\u043E\u0447\u043B\u0435\u0433 \u043F\u043B\u0430\u0442\u0438\u0442\u0441\u044F
+          \u0440\u0430\u0437, \u043B\u0435\u0447\u0438\u0442 \u0442\u043E\u043B\u044C\u043A\u043E
+          \u0432\u043E\u0448\u0435\u0434\u0448\u0438\u0445 (EditMode)"
+        done: 1
+      - text: "\u0421\u0446\u0435\u043D\u0430 \u0440\u0430\u0441\u0441\u043A\u0430\u0437\u0430
+          \u0438 \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0435\u043D\u0438\u0435
+          \u0432 \u043A\u043E\u0440\u0447\u043C\u0443 \u0431\u0435\u0437 \u0445\u043E\u0434\u0430
+          \u0432\u0440\u0435\u043C\u0435\u043D\u0438 (PlayMode)"
+        done: 1
+      - text: "\u041D\u043E\u0447\u043B\u0435\u0433 \u0434\u043E \u0443\u0442\u0440\u0430
+          \u0432 \u0438\u0433\u0440\u0435 \u2014 \u0440\u0443\u043A\u0430\u043C\u0438"
+        done: 0
+      manualChecks:
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u0438\u0433\u0440\u0435"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      - ProjectDocs/SETTLEMENTS_TRADE_TAVERN_SPEC.md
+      - ProjectDocs/SETTLEMENTS_AUTHOR_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12T-T05
+      title: "12\u0422-5 \xB7 \u0414\u043E\u0441\u043A\u0430 \u043E\u0431\u044A\u044F\u0432\u043B\u0435\u043D\u0438\u0439"
+      details: "\u0422\u0438\u043F\u044B \u0438 \u043D\u043E\u0441\u0438\u0442\u0435\u043B\u0438
+        \u043E\u0431\u044A\u044F\u0432\u043B\u0435\u043D\u0438\u0439, \u0441\u0440\u043E\u043A\u0438
+        \u0438 \u043F\u043E\u0432\u0442\u043E\u0440, \u0443\u0441\u043B\u043E\u0432\u0438\u044F
+        \u043F\u043E\u044F\u0432\u043B\u0435\u043D\u0438\u044F \u0438 \u0438\u0441\u0447\u0435\u0437\u043D\u043E\u0432\u0435\u043D\u0438\u044F,
+        \u0442\u043E\u043B\u044C\u043A\u043E \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0451\u043D\u043D\u044B\u0435
+        \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F, \u0447\u0442\u0435\u043D\u0438\u0435
+        \u043D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0435\u0442."
+      category: 3
+      status: 3
+      required: 1
+      order: 67
+      priority: 0
+      verificationType: 1
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041F\u043E\u0441\u043B\u0435\u0434\u0441\u0442\u0432\u0438\u044F
+          \u043C\u0435\u043D\u044F\u044E\u0442 \u0434\u043E\u0441\u043A\u0443, \u0441\u0440\u043E\u043A\u0438
+          \u0438 \u043F\u043E\u0432\u0442\u043E\u0440, \u0437\u043D\u0430\u043D\u0438\u0435
+          \u043E\u0434\u0438\u043D \u0440\u0430\u0437 (EditMode)"
+        done: 1
+      - text: "\u0427\u0442\u0435\u043D\u0438\u0435 \u0432 \u0441\u0446\u0435\u043D\u0435
+          \u043D\u0435 \u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0435\u0442 \u0437\u0430\u0434\u0430\u043D\u0438\u0435
+          (PlayMode)"
+        done: 1
+      manualChecks:
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u0438\u0433\u0440\u0435"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      - ProjectDocs/SETTLEMENTS_TRADE_TAVERN_SPEC.md
+      - ProjectDocs/SETTLEMENTS_AUTHOR_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 2026-10-29
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12T-T06
+      title: "12\u0422-6 \xB7 \u041F\u0438\u043B\u043E\u0442 \xAB\u0422\u0430\u0439\u043D\u0438\u043A
+        \u0443 \u0441\u0442\u0430\u0440\u043E\u0433\u043E \u0440\u0443\u0441\u043B\u0430\xBB"
+      details: "\u0421\u0432\u0435\u0434\u0435\u043D\u0438\u044F \u0443 \u0432\u043E\u0437\u0447\u0438\u043A\u0430
+        \u0438\u043B\u0438 \u0431\u0435\u0440\u0435\u0441\u0442\u043E\u0439, \u043E\u0431\u043B\u0430\u0441\u0442\u044C
+        \u043F\u043E\u0438\u0441\u043A\u0430 \u043D\u0430 \u043A\u0430\u0440\u0442\u0435,
+        \u043D\u0430\u0445\u043E\u0434\u043A\u0430 \u0432 \u0434\u043E\u0441\u0442\u0438\u0436\u0438\u043C\u043E\u0439
+        \u0442\u043E\u0447\u043A\u0435, \u043D\u043E\u0436 \u043E\u0434\u0438\u043D
+        \u0440\u0430\u0437, \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0435\u043D\u0438\u0435
+        \u0438 \u0437\u0430\u043A\u0440\u044B\u0442\u0438\u0435 \u043F\u043E\u0440\u0443\u0447\u0435\u043D\u0438\u044F;
+        \u0442\u0440\u0438 \u0440\u0430\u0431\u043E\u0447\u0438\u0445 \u043F\u0440\u043E\u0444\u0438\u043B\u044F
+        \u0438 \u0441\u0446\u0435\u043D\u044B."
+      category: 3
+      status: 2
+      required: 1
+      order: 68
+      priority: 0
+      verificationType: 1
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0422\u0430\u0439\u043D\u0438\u043A \u0434\u043E\u0441\u0442\u0438\u0436\u0438\u043C,
+          \u043E\u0431\u043B\u0430\u0441\u0442\u044C \u2014 \u043D\u0435 \u0442\u043E\u0447\u043A\u0430,
+          \u043D\u043E\u0436 \u043E\u0434\u0438\u043D \u0440\u0430\u0437, \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435
+          (EditMode)"
+        done: 1
+      - text: "\u0421\u0446\u0435\u043D\u044B \u043F\u0440\u0438\u043C\u0435\u0440\u0430
+          \u0432\u0430\u043B\u0438\u0434\u043D\u044B (EditMode)"
+        done: 1
+      - text: "\u0421\u043A\u0432\u043E\u0437\u043D\u043E\u0439 \u043F\u0440\u043E\u0445\u043E\u0434
+          \u043F\u0438\u043B\u043E\u0442\u0430 \u0432 \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0439
+          \u0438\u0433\u0440\u0435 \u0431\u0435\u0437 Debug \u2014 \u0440\u0443\u043A\u0430\u043C\u0438"
+        done: 0
+      manualChecks:
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u0438\u0433\u0440\u0435"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      - ProjectDocs/SETTLEMENTS_TRADE_TAVERN_SPEC.md
+      - ProjectDocs/SETTLEMENTS_AUTHOR_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12T-T07
+      title: "12\u0422-7 \xB7 \u041F\u0440\u0438\u0451\u043C\u043A\u0430 \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u0439"
+      details: "\u0420\u0443\u0447\u043D\u043E\u0439 \u043F\u0440\u043E\u0445\u043E\u0434
+        \u0441\u0432\u044F\u0437\u043D\u043E\u0433\u043E \u043F\u0438\u043B\u043E\u0442\u0430:
+        \u0433\u0440\u0443\u043F\u043F\u0430, \u0442\u043E\u0440\u0433\u043E\u0432\u043B\u044F,
+        \u043D\u043E\u0432\u044B\u0439 \u043F\u0440\u0435\u0434\u043C\u0435\u0442,
+        \u0441\u043B\u0443\u0445 \u0438 \u043F\u0440\u043E\u0441\u044C\u0431\u0430,
+        \u0441\u0432\u0435\u0434\u0435\u043D\u0438\u044F, \u0442\u0430\u0439\u043D\u0438\u043A,
+        \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0435\u043D\u0438\u0435, \u043D\u043E\u0447\u043B\u0435\u0433,
+        \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u0438 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0430;
+        \u0440\u0435\u0434\u0430\u043A\u0442\u043E\u0440\u044B \u0433\u043B\u0430\u0437\u0430\u043C\u0438
+        \u0430\u0432\u0442\u043E\u0440\u0430."
+      category: 8
+      status: 0
+      required: 1
+      order: 69
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041F\u0438\u043B\u043E\u0442 \u043F\u0440\u043E\u0439\u0434\u0435\u043D
+          \u0440\u0443\u043A\u0430\u043C\u0438"
+        done: 0
+      - text: "\u0410\u0432\u0442\u043E\u0440 \u0431\u0435\u0437 C# \u043D\u0430\u0441\u0442\u0440\u043E\u0438\u043B
+          \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435, \u0442\u043E\u0432\u0430\u0440
+          \u0438 \u043F\u0440\u043E\u0434\u0430\u043B \u0435\u0433\u043E"
+        done: 0
+      manualChecks:
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u0438\u0433\u0440\u0435"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      - ProjectDocs/SETTLEMENTS_TRADE_TAVERN_SPEC.md
+      - ProjectDocs/SETTLEMENTS_AUTHOR_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
@@ -10011,4 +10950,4 @@ MonoBehaviour:
     \u043A\u0430\u043A \u0437\u0430\u0432\u0438\u0441\u0438\u043C\u043E\u0441\u0442\u0438
     \u2014 \u043D\u0435 \u043F\u0435\u0440\u0435\u0438\u043C\u0435\u043D\u043E\u0432\u044B\u0432\u0430\u0442\u044C
     \u0438\u0445 \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0431\u0435\u0437 \u043F\u0435\u0440\u0435\u043D\u043E\u0441\u0430
-    \u0441\u0441\u044B\u043B\u043E\u043A.\n[P13_COUNCIL_V1_SYNCED]\n[PROTOTYPE_ROADMAP_V1_SYNCED]\n[PR06_SPLIT_V1_SYNCED]\n[PR07_SPLIT_V1_SYNCED]\n[PR12_FREE_PLAY_V1_SYNCED]\n[PR12E_FEATURES_V1_SYNCED]\n[PR12J_CREATURE_CATALOG_V1_SYNCED]\n[PR12Z_CREATURE_ANIMATION_V1_SYNCED]\n[PR12I_MAP_MOVEMENT_V1_SYNCED]\n[PR12K_LOCAL_EXPLORATION_V1_SYNCED]"
+    \u0441\u0441\u044B\u043B\u043E\u043A.\n[P13_COUNCIL_V1_SYNCED]\n[PROTOTYPE_ROADMAP_V1_SYNCED]\n[PR06_SPLIT_V1_SYNCED]\n[PR07_SPLIT_V1_SYNCED]\n[PR12_FREE_PLAY_V1_SYNCED]\n[PR12E_FEATURES_V1_SYNCED]\n[PR12J_CREATURE_CATALOG_V1_SYNCED]\n[PR12Z_CREATURE_ANIMATION_V1_SYNCED]\n[PR12I_MAP_MOVEMENT_V1_SYNCED]\n[PR12K_LOCAL_EXPLORATION_V1_SYNCED]\n[PR12T_SETTLEMENTS_V1_SYNCED]"

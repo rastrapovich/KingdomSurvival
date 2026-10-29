@@ -38,7 +38,7 @@ public static class CampaignSaveService
             HasActiveExpedition = hasExpedition,
             HasActiveActivity = hasExpedition && state.ActiveExpedition.ActiveActivity != null,
             HasPendingDecision = hasExpedition && state.ActiveExpedition.PendingDecision != null,
-            HasSettlementCamp = hasExpedition && SettlementCampService.HasCamp(state),
+            HasSettlementCamp = hasExpedition && SettlementCampService.HasVisit(state),
             ClockSnapshot = ContinuousSimulationSystem.ExportSnapshot(state),
             BuildingSnapshot = BuildingSystem.ExportSnapshot(state)
         };
@@ -146,6 +146,13 @@ public static class CampaignSaveService
 
         // ПР-08: вещи — у старых сохранений выдаётся стартовый набор один раз.
         ItemService.EnsureInventory(state);
+
+        // 12Т: поселения — у сохранений до 12Т состояние заводится пустым,
+        // деревни генератора становятся посещаемыми, профили назначаются
+        // один раз (детерминированно по seed и ID места). Кошельки и остатки
+        // уже начатых поселений не трогаются.
+        SettlementService.EnsureState(state);
+        SettlementService.SyncLocations(state);
 
         // ПР-07А-1: у сохранений до подготовки состава её нет.
         if (state.Preparation == null)

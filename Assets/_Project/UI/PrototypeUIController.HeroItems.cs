@@ -302,10 +302,15 @@ public partial class PrototypeUIController
             return false;
         if (definition.Slot != ItemSlot.None)
             return ItemService.CanUseSlotItem(gameState, personId, definition, out _);
-        if (definition.Id == ItemCatalog.UlyanaHerbs)
+        // 12Т: вещь, которую дают человеку (лечение, отвар), подходит тому,
+        // кому она сейчас поможет, — тем же расчётом, что и применение.
+        if (definition.HasUse && ItemUseService.NeedsTarget(definition))
         {
-            ResidentState resident = HomePeopleService.Find(gameState, personId);
-            return resident != null && resident.Exhausted;
+            foreach (ItemInstanceData item in ItemService.Get(gameState).Items)
+            {
+                if (item.ItemId == definition.Id)
+                    return ItemUseService.Preview(gameState, item, personId).CanUse;
+            }
         }
         return false;
     }
@@ -361,6 +366,7 @@ public partial class PrototypeUIController
             case ItemKind.Protection: return "защита";
             case ItemKind.Special: return "особое";
             case ItemKind.Consumable: return "расходное";
+            case ItemKind.TradeGood: return "товар";
             default: return "сюжетное";
         }
     }
@@ -438,9 +444,9 @@ public partial class PrototypeUIController
                 RunHeroCardCommand(ItemService.TryEquip(gameState, instanceId, personId, out string message), message))
                 .AddToClassList("hero-item-button--primary");
         }
-        else if (definition.Id == ItemCatalog.UlyanaHerbs)
+        else if (definition.HasUse && ItemUseService.NeedsTarget(definition))
         {
-            AddHeroItemButton(parent, "Дать отвар", () =>
+            AddHeroItemButton(parent, definition.UseLabel, () =>
                 RunHeroCardCommand(ItemService.TryUse(gameState, instanceId, personId, out string message), message))
                 .AddToClassList("hero-item-button--primary");
         }
@@ -451,11 +457,13 @@ public partial class PrototypeUIController
     private void AddItemActions(VisualElement parent, ItemInstanceData item, ItemDefinition definition, bool inPack)
     {
         string instanceId = item.InstanceId;
-        if (definition.IsConsumable && item.ItemId != ItemCatalog.UlyanaHerbs)
+        // 12Т: «Использовать/Изучить» — только у вещи с эффектами; товар
+        // без применения такой кнопки не показывает.
+        if (definition.HasUse && !ItemUseService.NeedsTarget(definition))
         {
             CommanderData commander = gameState.GetSelectedCommander();
             string commanderId = commander != null ? commander.Id : null;
-            AddHeroItemButton(parent, "Использовать", () =>
+            AddHeroItemButton(parent, definition.UseLabel, () =>
                 RunHeroItemCommand(ItemService.TryUse(gameState, instanceId, commanderId, out string message), message));
         }
 
@@ -512,16 +520,17 @@ public partial class PrototypeUIController
         return row;
     }
 
+    // 12Т: механика вещи — тем же описанием, что в Базе предметов и в
+    // магазине (ItemUseService.Describe). Вещи без механики — для историй и
+    // проверок «вещь рядом»: показываем её описание.
     private static string EffectText(ItemDefinition definition)
     {
-        string modifier = definition.Modifier.Describe();
-        if (modifier.Length > 0)
-            return modifier;
+        string mechanics = ItemUseService.Describe(definition);
+        if (mechanics.Length > 0)
+            return mechanics;
         switch (definition.Id)
         {
             case ItemCatalog.RopeWithHooks: return "У брода и на подъёме — быстрее.";
-            case ItemCatalog.DriedFish: return "В походе: +2 припаса.";
-            case ItemCatalog.UlyanaHerbs: return "Снимает изнеможение.";
             case ItemCatalog.HealerBag: return "Нужна лекарю.";
             default: return string.Empty;
         }

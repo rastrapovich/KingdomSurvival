@@ -163,6 +163,10 @@ public sealed class CampaignSetup
 
         // ПР-12А: однократная настройка режима (его модуль зарегистрирован в CampaignContent).
         CampaignContent.InitializeNewCampaign(state);
+
+        // 12Т: поселения партии — профили деревень генератора и явно
+        // привязанных мест назначаются один раз и фиксируются в сохранении.
+        SettlementService.SyncLocations(state);
         return state;
     }
 }

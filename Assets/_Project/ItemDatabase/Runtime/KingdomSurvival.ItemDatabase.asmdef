@@ -1,0 +1,16 @@
+{
+  "name": "KingdomSurvival.ItemDatabase",
+  "rootNamespace": "KingdomSurvival.ItemDatabase",
+  "references": [
+    "KingdomSurvival.Core"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

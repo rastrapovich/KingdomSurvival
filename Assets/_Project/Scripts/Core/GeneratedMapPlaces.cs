@@ -88,6 +88,9 @@ public static class GeneratedMapPlaces
         {
             if (kinds.TryGetValue(location.Id, out string kind))
                 location.PlaceKind = kind ?? string.Empty;
+            // 12Т: деревня генератора — посещаемое поселение (вход, лагерь,
+            // экран поселения). Поток случайных чисел генератора не меняется.
+            location.IsSettlement = location.PlaceKind == VillageKind;
             state.Locations.Add(location);
         }
     }

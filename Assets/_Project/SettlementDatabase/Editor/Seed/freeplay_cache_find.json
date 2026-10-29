@@ -1,0 +1,37 @@
+{
+  "id": "freeplay_cache_find",
+  "title": "12Т — Тайник под ивой",
+  "category": 2,
+  "status": 1,
+  "developerComment": "12Т [РАБОЧЕЕ]. Вход в место freeplay.cache.old_bed («РАЗРЫТЬ ПОД ИВОЙ»). Флаг freeplay.cache.found: код выдаёт нож item.carter_token_knife один раз; серебро — эффектом. Повторный вход сцены не показывает.",
+  "startNodeId": "freeplay.cache.find.start",
+  "tags": ["поселения", "12Т", "тайник"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.cache.find.start",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.cache.find.scene",
+          "kind": 5,
+          "text": "Корни ивы держат землю, как кулак. Под третьей зарубкой лопата звякает о глину: горшок, обмотанный берестой, а в нём тряпица."
+        },
+        {
+          "blockId": "freeplay.cache.find.inside",
+          "kind": 5,
+          "text": "В тряпице — горсть серебряных обрубков и короткий нож, рукоять обмотана медной проволокой в три витка. Дед возчика был человеком аккуратным: даже тайник у него с узелком.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.cache.find.found", "Type": 0, "StringParam": "freeplay.cache.found" },
+            { "EffectExecutionId": "freeplay.cache.find.silver", "Type": 15, "IntParam": 15 },
+            { "EffectExecutionId": "freeplay.cache.find.xp", "Type": 12, "IntParam": 10 }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.cache.find.bye", "text": "Забрать и засыпать яму.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "id": "settlement_trade_peddler",
+  "title": "12Т — Проезжий торговец",
+  "category": 4,
+  "status": 1,
+  "developerComment": "12Т [РАБОЧЕЕ]. Посетитель корчмы торгового села с собственным прилавком (MerchantId peddler): редкие вещи, в том числе уникальный турий рог. Цепочка тайника от него не зависит.",
+  "startNodeId": "settlement.peddler.start",
+  "tags": ["поселения", "12Т"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "settlement.peddler.start",
+      "speakerId": "peddler",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "settlement.peddler.start.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "У проезжего торговца короб на коленях и такое лицо, будто он сам себе не продал бы и половины."
+        },
+        {
+          "blockId": "settlement.peddler.start.line",
+          "kind": 0,
+          "text": "— Товар у меня редкий, потому и дорогой. Дешёвый — у хозяйки лавки, там и сухари, и мазь. А у меня — вещи с историей. Историю, правда, я рассказываю за отдельную плату."
+        }
+      ],
+      "choices": [
+        { "choiceId": "settlement.peddler.bye", "text": "Посмотрю короб.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

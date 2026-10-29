@@ -36,12 +36,14 @@ namespace KingdomSurvival.FreePlay
             });
             // ПР-12К: исследуемые места режима (пилот — Старая шахта).
             LocalLocationCatalog.RegisterDefault(FreePlayMineLocal.Create());
+            // 12Т: область поиска тайника у старого русла.
+            WorldMapSearchAreas.Register(FreePlayCacheStory.SearchAreas);
         }
 
         public static LocationEntryView LocationEntry(GameState state, string locationId)
         {
             return FreePlayCoalStory.LocationEntry(state, locationId) ?? FreePlayMineStory.LocationEntry(state, locationId) ??
-                   FreePlayKurganStory.LocationEntry(state, locationId);
+                   FreePlayKurganStory.LocationEntry(state, locationId) ?? FreePlayCacheStory.LocationEntry(state, locationId);
         }
 
         public static string HomeAction(GameState state, string actionId)
@@ -89,6 +91,9 @@ namespace KingdomSurvival.FreePlay
             reports.AddRange(FreePlayMineStory.Refresh(state));
             reports.AddRange(FreePlayKurganStory.Refresh(state));
             reports.AddRange(FreePlayCaveStory.Refresh(state));
+            // 12Т: поручения поселений и тайник у старого русла.
+            reports.AddRange(FreePlayCacheStory.Refresh(state));
+            reports.AddRange(ErrandService.Refresh(state));
             reports.AddRange(FreePlaySummary.Refresh(state));
             return reports;
         }
@@ -188,6 +193,9 @@ namespace KingdomSurvival.FreePlay
             JournalGoalViewData cave = FreePlayCaveStory.BuildGoal(state);
             if (cave != null)
                 goals.Add(cave);
+            // 12Т: принятые поручения поселений — одно «Дело» на поручение,
+            // откуда бы его ни взяли (доска, корчма, разговор).
+            goals.AddRange(ErrandService.BuildGoals(state));
             foreach (LocationData location in state.Locations)
             {
                 if (location == null || location.IsWaypoint || !location.IsVisibleOnMap || !location.IsDiscovered)

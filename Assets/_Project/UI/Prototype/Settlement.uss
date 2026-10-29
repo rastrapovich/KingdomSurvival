@@ -1,0 +1,528 @@
+/* ================================================================
+   12Т: ЭКРАН ПОСЕЛЕНИЯ, КОРЧМА, ТОРГОВЛЯ, ДОСКА ОБЪЯВЛЕНИЙ
+   (ProjectDocs/SETTLEMENTS_TRADE_TAVERN_SPEC.md §7, §10, §11, дополнение
+   «Доска объявлений»). Иллюстрация — на весь экран; левая панель ~31%
+   ширины; длинные списки прокручиваются внутри своих областей, итог сделки
+   и кнопки выхода закреплены. Проверено на 1920×1080 и 1280×720 по
+   размерам: минимальные ширины подобраны под 1280.
+   ================================================================ */
+
+.settlement-screen {
+    position: absolute;
+    left: 0px; right: 0px; top: 0px; bottom: 0px;
+    display: none;
+    background-color: rgb(24, 21, 18);
+}
+
+/* Нейтральная заглушка без изображения — тёплый тёмный фон, без ошибок. */
+.settlement-art {
+    position: absolute;
+    left: 0px; right: 0px; top: 0px; bottom: 0px;
+    background-color: rgb(34, 30, 25);
+    overflow: hidden;
+}
+
+.settlement-image {
+    position: absolute;
+    left: 0px; top: 0px; width: 100%; height: 100%;
+}
+
+.settlement-panel {
+    position: absolute;
+    left: 0px; top: 0px; bottom: 54px;
+    width: 31%;
+    min-width: 380px;
+    max-width: 600px;
+    padding-left: 22px; padding-right: 20px; padding-top: 22px; padding-bottom: 14px;
+    background-color: rgba(14, 13, 12, 0.62);
+    border-right-width: 1px;
+    border-right-color: rgb(91, 80, 62);
+}
+
+.settlement-title {
+    font-size: 26px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.settlement-subtitle {
+    font-size: 13px;
+    margin-top: 2px;
+    margin-bottom: 10px;
+}
+
+.settlement-text-scroll {
+    max-height: 150px;
+    flex-shrink: 0;
+}
+
+.settlement-description {
+    font-size: 15px;
+    white-space: normal;
+}
+
+.settlement-link-button {
+    align-self: flex-start;
+    height: 24px;
+    margin-top: 4px;
+    margin-bottom: 10px;
+    padding-left: 10px; padding-right: 10px;
+}
+
+.settlement-actions {
+    flex-grow: 1;
+    margin-top: 6px;
+}
+
+.settlement-action {
+    height: 38px;
+    font-size: 15px;
+    -unity-text-align: middle-left;
+    padding-left: 12px;
+    margin-top: 6px;
+    margin-left: 0px; margin-right: 0px;
+}
+
+.settlement-action--primary {
+    border-left-width: 3px;
+    border-left-color: rgb(221, 181, 99);
+}
+
+.settlement-action-hint {
+    font-size: 12px;
+    color: rgb(156, 154, 148);
+    white-space: normal;
+    margin-left: 12px;
+    margin-top: 2px;
+}
+
+.settlement-action-hint--blocked {
+    color: rgb(214, 160, 120);
+}
+
+.settlement-section-title {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: rgb(221, 181, 99);
+    margin-top: 12px;
+}
+
+.settlement-message {
+    font-size: 13px;
+    white-space: normal;
+    color: rgb(226, 219, 204);
+    margin-top: 8px;
+    min-height: 18px;
+}
+
+/* Полоса людей — внизу иллюстрации, справа от панели. */
+.settlement-people {
+    position: absolute;
+    left: 33%; right: 18px; bottom: 66px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.settlement-person {
+    width: 128px;
+    margin-left: 10px;
+    margin-top: 8px;
+    padding-left: 6px; padding-right: 6px; padding-top: 6px; padding-bottom: 6px;
+    background-color: rgba(14, 13, 12, 0.78);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62);
+    border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62);
+    border-radius: 3px;
+}
+
+.settlement-person:hover {
+    background-color: rgba(38, 34, 28, 0.9);
+    border-left-color: rgb(221, 181, 99); border-right-color: rgb(221, 181, 99);
+    border-top-color: rgb(221, 181, 99); border-bottom-color: rgb(221, 181, 99);
+}
+
+.settlement-person-portrait {
+    height: 120px;
+    background-color: rgb(42, 38, 32);
+    -unity-background-scale-mode: scale-and-crop;
+    justify-content: center;
+}
+
+.settlement-person-initial {
+    font-size: 40px;
+    -unity-text-align: middle-center;
+    color: rgb(120, 104, 80);
+}
+
+.settlement-person-name {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(226, 219, 204);
+    margin-top: 4px;
+    white-space: normal;
+}
+
+.settlement-person-role {
+    font-size: 11px;
+    color: rgb(156, 154, 148);
+    white-space: normal;
+}
+
+.settlement-footer {
+    position: absolute;
+    left: 0px; right: 0px; bottom: 0px;
+    height: 54px;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 22px; padding-right: 18px;
+    background-color: rgba(14, 13, 12, 0.88);
+    border-top-width: 1px;
+    border-top-color: rgb(91, 80, 62);
+}
+
+.settlement-party {
+    flex-grow: 1;
+    font-size: 13px;
+    white-space: normal;
+}
+
+.settlement-exit-button {
+    height: 36px;
+    min-width: 200px;
+    font-size: 14px;
+    margin-left: 12px;
+}
+
+/* ---------------- Дочерние страницы: торговля и доска ---------------- */
+
+.settlement-page {
+    position: absolute;
+    left: 24px; right: 24px; top: 20px; bottom: 20px;
+    display: none;
+    padding-left: 18px; padding-right: 18px; padding-top: 14px; padding-bottom: 12px;
+    background-color: rgba(18, 17, 15, 0.95);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62);
+    border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62);
+}
+
+.settlement-page-header {
+    flex-direction: row;
+    align-items: flex-end;
+    margin-bottom: 10px;
+}
+
+.settlement-page-title {
+    font-size: 22px;
+    -unity-font-style: bold;
+}
+
+.settlement-page-subtitle {
+    font-size: 13px;
+    margin-left: 14px;
+    flex-shrink: 1;
+    white-space: normal;
+}
+
+.trade-columns,
+.board-columns {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0px;
+}
+
+.trade-column {
+    flex-grow: 1;
+    flex-basis: 0px;
+    min-width: 280px;
+}
+
+.trade-filter-row {
+    flex-direction: row;
+    margin-bottom: 6px;
+}
+
+.trade-search { flex-grow: 1; min-width: 120px; }
+.trade-filter { width: 150px; }
+
+.trade-list,
+.board-list {
+    flex-grow: 1;
+    background-color: rgba(10, 10, 9, 0.55);
+}
+
+.trade-row {
+    flex-direction: row;
+    align-items: center;
+    min-height: 54px;
+    padding-left: 6px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(46, 42, 36);
+}
+
+.trade-row:hover { background-color: rgb(34, 31, 27); }
+
+.trade-row--selected {
+    background-color: rgb(52, 46, 36);
+    border-left-width: 3px;
+    border-left-color: rgb(221, 181, 99);
+}
+
+.trade-row--in-cart .trade-row-name { color: rgb(221, 181, 99); }
+
+.trade-row--disabled { opacity: 0.55; }
+
+.trade-row-icon {
+    width: 44px; height: 44px;
+    margin-right: 8px;
+    background-color: rgb(42, 38, 32);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.trade-row-text { flex-grow: 1; flex-shrink: 1; }
+
+.trade-row-name {
+    font-size: 15px;
+    color: rgb(226, 219, 204);
+    white-space: normal;
+}
+
+.trade-row-detail {
+    font-size: 12px;
+    color: rgb(156, 154, 148);
+    white-space: normal;
+}
+
+.trade-row-price {
+    font-size: 15px;
+    color: rgb(221, 181, 99);
+    -unity-text-align: middle-right;
+    min-width: 70px;
+}
+
+.trade-row-cart {
+    font-size: 13px;
+    color: rgb(221, 181, 99);
+    -unity-font-style: bold;
+    margin-left: 8px;
+    min-width: 46px;
+    -unity-text-align: middle-right;
+}
+
+.trade-card {
+    width: 30%;
+    min-width: 300px;
+    max-width: 440px;
+    margin-left: 14px; margin-right: 14px;
+    padding-left: 12px; padding-right: 12px; padding-top: 10px; padding-bottom: 10px;
+    background-color: rgba(30, 27, 23, 0.9);
+}
+
+.trade-card-image {
+    height: 150px;
+    background-color: rgb(42, 38, 32);
+    margin-bottom: 8px;
+}
+
+.trade-card-name { font-size: 19px; -unity-font-style: bold; white-space: normal; }
+.trade-card-meta { font-size: 12px; white-space: normal; margin-bottom: 6px; }
+.trade-card-text-scroll { flex-grow: 1; min-height: 60px; }
+.trade-card-description { font-size: 14px; white-space: normal; }
+.trade-card-mechanics { font-size: 14px; white-space: normal; color: rgb(170, 205, 160); margin-top: 6px; }
+.trade-card-compare { font-size: 13px; white-space: normal; margin-top: 6px; }
+.trade-card-price { font-size: 15px; margin-top: 6px; }
+
+.trade-quantity-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.trade-quantity-button { width: 38px; height: 34px; font-size: 18px; }
+.trade-quantity { width: 46px; font-size: 18px; -unity-text-align: middle-center; }
+.trade-toggle-button { flex-grow: 1; height: 34px; font-size: 14px; margin-left: 10px; }
+
+.trade-card-reason,
+.trade-reason {
+    font-size: 13px;
+    white-space: normal;
+    color: rgb(214, 160, 120);
+    margin-top: 6px;
+}
+
+.trade-footer,
+.board-footer {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top-width: 1px;
+    border-top-color: rgb(91, 80, 62);
+    flex-shrink: 0;
+}
+
+.trade-summary { flex-grow: 1; flex-shrink: 1; }
+.trade-summary-line { font-size: 14px; white-space: normal; }
+.trade-net { font-size: 17px; -unity-font-style: bold; }
+
+.trade-confirm-button {
+    height: 40px;
+    min-width: 170px;
+    font-size: 15px;
+    margin-left: 10px;
+    border-left-color: rgb(221, 181, 99); border-right-color: rgb(221, 181, 99);
+    border-top-color: rgb(221, 181, 99); border-bottom-color: rgb(221, 181, 99);
+}
+
+.trade-footer-button {
+    height: 40px;
+    min-width: 130px;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+/* ---------------- Доска объявлений ---------------- */
+
+.board-list-column {
+    width: 38%;
+    min-width: 320px;
+}
+
+.board-filter { margin-bottom: 6px; }
+
+.board-row {
+    padding-left: 10px; padding-right: 10px; padding-top: 8px; padding-bottom: 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(46, 42, 36);
+}
+
+.board-row:hover { background-color: rgb(34, 31, 27); }
+
+.board-row--selected {
+    background-color: rgb(52, 46, 36);
+    border-left-width: 3px;
+    border-left-color: rgb(221, 181, 99);
+}
+
+.board-row-title {
+    font-size: 15px;
+    color: rgb(226, 219, 204);
+    white-space: normal;
+}
+
+.board-row--unread .board-row-title {
+    -unity-font-style: bold;
+    color: rgb(240, 220, 170);
+}
+
+.board-row-meta {
+    font-size: 12px;
+    color: rgb(156, 154, 148);
+    white-space: normal;
+}
+
+.board-detail {
+    flex-grow: 1;
+    margin-left: 16px;
+    padding-left: 16px; padding-right: 16px; padding-top: 12px; padding-bottom: 12px;
+    background-color: rgba(44, 38, 30, 0.85);
+}
+
+.board-detail-title { font-size: 20px; -unity-font-style: bold; white-space: normal; }
+.board-detail-meta { font-size: 13px; white-space: normal; margin-bottom: 8px; }
+.board-detail-scroll { flex-grow: 1; min-height: 0px; }
+.board-detail-text { font-size: 16px; white-space: normal; }
+.board-detail-status { font-size: 14px; white-space: normal; color: rgb(170, 205, 160); margin-top: 10px; }
+
+.board-detail-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.board-action {
+    height: 36px;
+    font-size: 14px;
+    padding-left: 12px; padding-right: 12px;
+    margin-right: 8px;
+    margin-top: 6px;
+}
+
+/* ---------------- Подтверждение ---------------- */
+
+.settlement-confirm {
+    position: absolute;
+    left: 0px; right: 0px; top: 0px; bottom: 0px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+.settlement-confirm-box {
+    width: 520px;
+    padding-left: 20px; padding-right: 20px; padding-top: 18px; padding-bottom: 16px;
+    background-color: rgb(27, 31, 37);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(221, 181, 99); border-right-color: rgb(221, 181, 99);
+    border-top-color: rgb(221, 181, 99); border-bottom-color: rgb(221, 181, 99);
+}
+
+.settlement-confirm-text { font-size: 15px; white-space: normal; }
+
+.settlement-confirm-buttons {
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-top: 14px;
+}
+
+.settlement-confirm-button { height: 36px; min-width: 120px; font-size: 14px; margin-left: 10px; }
+
+/* ---------------- Область поиска на карте ---------------- */
+
+.world-map-search-area {
+    position: absolute;
+    border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px;
+    border-left-color: rgba(221, 181, 99, 0.85); border-right-color: rgba(221, 181, 99, 0.85);
+    border-top-color: rgba(221, 181, 99, 0.85); border-bottom-color: rgba(221, 181, 99, 0.85);
+    border-radius: 40px;
+    background-color: rgba(221, 181, 99, 0.12);
+    justify-content: center;
+}
+
+.world-map-search-area-label {
+    font-size: 12px;
+    -unity-text-align: middle-center;
+    -unity-font-style: italic;
+    color: rgb(240, 220, 170);
+    white-space: normal;
+}
+
+/* Пока открыта дочерняя страница, основная панель, люди и строка отряда
+   прячутся — текст не просвечивает. */
+.settlement-screen--page .settlement-panel,
+.settlement-screen--page .settlement-people,
+.settlement-screen--page .settlement-footer {
+    display: none;
+}
+
+.settlement-page { background-color: rgb(18, 17, 15); }
+
+/* Поля поиска и отбора — в тёмной теме экрана, а не светлые по умолчанию. */
+.trade-search .unity-text-field__input,
+.trade-search .unity-base-text-field__input,
+.trade-filter .unity-base-popup-field__input,
+.board-filter .unity-base-popup-field__input {
+    background-color: rgb(30, 27, 23);
+    color: rgb(226, 219, 204);
+    border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62);
+    border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62);
+    font-size: 14px;
+    min-height: 28px;
+}
+
+.trade-filter .unity-base-popup-field__text,
+.board-filter .unity-base-popup-field__text {
+    color: rgb(226, 219, 204);
+}

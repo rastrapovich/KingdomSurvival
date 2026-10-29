@@ -211,6 +211,7 @@ public partial class PrototypeUIController
                (IsGameMenuOpen ||
                 IsNarrativeDialogueActive ||
                 IsLocationInteractionActive ||
+                IsSettlementScreenOpen ||
                 IsHeroScreenOpen ||
                 gameState.HasPendingExpeditionDecision ||
                 openedIncident != null ||
@@ -221,7 +222,9 @@ public partial class PrototypeUIController
 
     private bool HasBlockingModalWork()
     {
-        return HasBlockingModalWorkExceptCamp() || IsCampScreenOpen;
+        // 12Т: экран поселения, ушедший на время разговора, вернётся —
+        // время между ними не должно пускаться.
+        return HasBlockingModalWorkExceptCamp() || IsCampScreenOpen || !string.IsNullOrEmpty(settlementSuspendedLocationId);
     }
 
     private void PauseForBlockingModal(bool autoPauseRequested = false)

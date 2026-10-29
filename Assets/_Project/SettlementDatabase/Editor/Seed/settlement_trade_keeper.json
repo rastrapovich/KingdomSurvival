@@ -1,0 +1,39 @@
+{
+  "id": "settlement_trade_keeper",
+  "title": "12Т — Корчмарь у торга",
+  "category": 4,
+  "status": 1,
+  "developerComment": "12Т [РАБОЧЕЕ]. Корчмарь торгового села. Наводит на возчика Ждана (поручение «Нож деда»), не продаёт сведений сам.",
+  "startNodeId": "settlement.tradekeeper.start",
+  "tags": ["поселения", "12Т"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "settlement.tradekeeper.start",
+      "speakerId": "trade_keeper",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "settlement.tradekeeper.start.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Корчмарь протирает кружку рукавом. Кружка от этого чище не становится, рукав — тоже."
+        },
+        {
+          "blockId": "settlement.tradekeeper.start.line",
+          "kind": 0,
+          "text": "— Новости? Новости у нас продаёт вон тот возчик в углу, Ждан. Я продаю квас. Квас, в отличие от Ждана, не врёт."
+        },
+        {
+          "blockId": "settlement.tradekeeper.start.after",
+          "kind": 0,
+          "text": "— Ждан нынче весёлый — говорит, дедов нож ему вернули. Третий раз угощает всех, кто не успел отвернуться.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 0, "StringParam": "freeplay.cache.errand.done" } ] }
+        }
+      ],
+      "choices": [
+        { "choiceId": "settlement.tradekeeper.bye", "text": "Налей квасу.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

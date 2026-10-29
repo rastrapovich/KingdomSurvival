@@ -142,6 +142,16 @@ public static partial class ContinuousSimulationSystem
         };
     }
 
+    // 12Т: общие игровые часы от начала партии (сроки торговцев, объявлений,
+    // поручений). Только игровое время: перезагрузка и реальные сутки его
+    // не двигают.
+    public static double GetAbsoluteHours(GameState state)
+    {
+        if (state == null)
+            return 0.0;
+        return Math.Max(0, state.Day - 1) * 24.0 + GetRuntime(state).HourOfDay;
+    }
+
     public static bool IsPaused(GameState state) => GetRuntime(state).IsPaused;
 
     public static void SetPaused(GameState state, bool paused)

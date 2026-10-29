@@ -1,0 +1,32 @@
+{
+  "id": "settlement_town_hostess",
+  "title": "12Т — Хозяйка корчмы у ворот",
+  "category": 4,
+  "status": 1,
+  "developerComment": "12Т [РАБОЧЕЕ]. Хозяйка корчмы укреплённого городка. Порядок у ворот: зверя-союзника внутрь не пускают (существующее правило допуска участника). Наводит на Милану.",
+  "startNodeId": "settlement.townhostess.start",
+  "tags": ["поселения", "12Т"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "settlement.townhostess.start",
+      "speakerId": "town_hostess",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "settlement.townhostess.start.line",
+          "kind": 0,
+          "text": "— У нас порядок: оружие не вынимать, по лавкам не плясать, зверьё за ворота. Остальное можно, если платите."
+        },
+        {
+          "blockId": "settlement.townhostess.start.hint",
+          "kind": 0,
+          "text": "— Вон Милана, жена сторожа, третий день сидит у окна с одной кружкой. Если идёте к деревне у дороги — спросите её, она обрадуется."
+        }
+      ],
+      "choices": [
+        { "choiceId": "settlement.townhostess.bye", "text": "Понятно.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

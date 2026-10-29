@@ -42,7 +42,11 @@ public enum NarrativeEffectType
 
     // §27.6: наставник/новое знание — потолок практики компетенции героя
     // (StringParam) поднимается до IntParam (4–5).
-    TeachCompetency
+    TeachCompetency,
+
+    // 12Т: изменить деньги похода (ArmyGold) на IntParam — находка в тайнике,
+    // награда за поручение. Не ниже нуля.
+    ChangeArmyGold
 }
 
 [Serializable]
@@ -142,6 +146,10 @@ public sealed class NarrativeEffect
             case NarrativeEffectType.TeachCompetency:
                 if (context.GameState?.GetSelectedCommander() != null)
                     CharacterProgressionService.Teach(context.GameState, context.GameState.GetSelectedCommander().Id, StringParam, IntParam);
+                break;
+            case NarrativeEffectType.ChangeArmyGold:
+                if (context.GameState != null)
+                    context.GameState.ArmyGold = Math.Max(0, context.GameState.ArmyGold + IntParam);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(Type), Type, null);

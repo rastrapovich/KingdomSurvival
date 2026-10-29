@@ -213,6 +213,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     return "ЕДА ДОМА " + (effect.IntParam >= 0 ? "+" : string.Empty) + effect.IntParam.ToString(CultureInfo.InvariantCulture);
                 case NarrativeEffectType.ChangeSupplies:
                     return "ПРИПАСЫ " + (effect.IntParam >= 0 ? "+" : string.Empty) + effect.IntParam.ToString(CultureInfo.InvariantCulture);
+                case NarrativeEffectType.ChangeArmyGold:
+                    return "ЗОЛОТО " + (effect.IntParam >= 0 ? "+" : string.Empty) + effect.IntParam.ToString(CultureInfo.InvariantCulture);
                 case NarrativeEffectType.ShortcutRouteCells:
                     return "ПУТЬ КОРОЧЕ НА " + effect.IntParam.ToString(CultureInfo.InvariantCulture);
                 case NarrativeEffectType.GrantExperience:

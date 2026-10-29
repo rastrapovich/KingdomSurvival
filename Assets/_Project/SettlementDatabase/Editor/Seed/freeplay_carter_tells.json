@@ -1,0 +1,35 @@
+{
+  "id": "freeplay_carter_tells",
+  "title": "12Т — Рассказ возчика об иве",
+  "category": 2,
+  "status": 1,
+  "developerComment": "12Т [РАБОЧЕЕ]. Сцена после оплаты предложения корчмы «Где дед прятал». Знание выдаёт сама команда оплаты; эффект здесь — источник текста для журнала (повтор ничего не даёт).",
+  "startNodeId": "freeplay.carter.tells.start",
+  "tags": ["поселения", "12Т", "тайник"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.carter.tells.start",
+      "speakerId": "carter",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.carter.tells.line",
+          "kind": 0,
+          "text": "— От торга полдня ходу. Старое русло там пересохло, осокой поросло — река давно ушла, а берег остался. Ива у края расколота надвое, на одной половине три зарубки. Корой уже затянуло, но ищите — найдёте.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.carter.tells.knowledge", "Type": 2, "StringParam": "freeplay.cache.knowledge.old_bed" }
+          ]
+        },
+        {
+          "blockId": "freeplay.carter.tells.hint",
+          "kind": 0,
+          "text": "— Точно места не скажу, я там мальчишкой был. Дед говорил: «где вода повернула, там и смотри»."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.carter.tells.bye", "text": "Найдём.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

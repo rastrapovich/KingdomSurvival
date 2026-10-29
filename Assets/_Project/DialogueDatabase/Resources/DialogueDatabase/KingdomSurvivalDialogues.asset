@@ -201,6 +201,65 @@ MonoBehaviour:
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
+  - id: village_elder
+    displayName: "\u0412\u044B\u0448\u0430\u0442\u0430"
+    role: "\u0421\u0442\u0430\u0440\u043E\u0441\u0442\u0430 \u0434\u0435\u0440\u0435\u0432\u043D\u0438
+      \u0443 \u0434\u043E\u0440\u043E\u0433\u0438"
+    portrait: {fileID: 0}
+    overridePortraitFraming: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
+  - id: village_hostess
+    displayName: "\u041C\u043E\u043A\u0440\u0438\u043D\u0430"
+    role: "\u0425\u043E\u0437\u044F\u0439\u043A\u0430 \u0438\u0437\u0431\u044B \u0443
+      \u0434\u043E\u0440\u043E\u0433\u0438"
+    portrait: {fileID: 0}
+    overridePortraitFraming: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
+  - id: trade_keeper
+    displayName: "\u0421\u0442\u043E\u044F\u043D"
+    role: "\u041A\u043E\u0440\u0447\u043C\u0430\u0440\u044C \u0443 \u0442\u043E\u0440\u0433\u0430"
+    portrait: {fileID: 0}
+    overridePortraitFraming: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
+  - id: carter
+    displayName: "\u0416\u0434\u0430\u043D"
+    role: "\u0412\u043E\u0437\u0447\u0438\u043A"
+    portrait: {fileID: 0}
+    overridePortraitFraming: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
+  - id: peddler
+    displayName: "\u0413\u043E\u0441\u0442\u044F\u0442\u0430"
+    role: "\u041F\u0440\u043E\u0435\u0437\u0436\u0438\u0439 \u0442\u043E\u0440\u0433\u043E\u0432\u0435\u0446"
+    portrait: {fileID: 0}
+    overridePortraitFraming: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
+  - id: town_hostess
+    displayName: "\u042F\u0440\u0438\u043D\u0430"
+    role: "\u0425\u043E\u0437\u044F\u0439\u043A\u0430 \u043A\u043E\u0440\u0447\u043C\u044B
+      \u0443 \u0432\u043E\u0440\u043E\u0442"
+    portrait: {fileID: 0}
+    overridePortraitFraming: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
+  - id: town_milana
+    displayName: "\u041C\u0438\u043B\u0430\u043D\u0430"
+    role: "\u0416\u0435\u043D\u0430 \u0441\u0442\u043E\u0440\u043E\u0436\u0430"
+    portrait: {fileID: 0}
+    overridePortraitFraming: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
   dialogues:
   - id: chapter01_dialogue_01_ordinary_morning
     title: "N01 \u2014 \u041E\u0431\u044B\u0447\u043D\u043E\u0435 \u0443\u0442\u0440\u043E
@@ -27086,6 +27145,1815 @@ MonoBehaviour:
         nextNodeId: 
         endsDialogue: 0
         choiceId: cave.old_wall.match.end
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: freeplay_cache_find
+    title: "12\u0422 \u2014 \u0422\u0430\u0439\u043D\u0438\u043A \u043F\u043E\u0434
+      \u0438\u0432\u043E\u0439"
+    category: 2
+    status: 1
+    developerComment: "12\u0422 [\u0420\u0410\u0411\u041E\u0427\u0415\u0415]. \u0412\u0445\u043E\u0434
+      \u0432 \u043C\u0435\u0441\u0442\u043E freeplay.cache.old_bed (\xAB\u0420\u0410\u0417\u0420\u042B\u0422\u042C
+      \u041F\u041E\u0414 \u0418\u0412\u041E\u0419\xBB). \u0424\u043B\u0430\u0433
+      freeplay.cache.found: \u043A\u043E\u0434 \u0432\u044B\u0434\u0430\u0451\u0442
+      \u043D\u043E\u0436 item.carter_token_knife \u043E\u0434\u0438\u043D \u0440\u0430\u0437;
+      \u0441\u0435\u0440\u0435\u0431\u0440\u043E \u2014 \u044D\u0444\u0444\u0435\u043A\u0442\u043E\u043C.
+      \u041F\u043E\u0432\u0442\u043E\u0440\u043D\u044B\u0439 \u0432\u0445\u043E\u0434
+      \u0441\u0446\u0435\u043D\u044B \u043D\u0435 \u043F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0435\u0442."
+    sceneIllustration: {fileID: 0}
+    sceneIllustrationFillFrame: 0
+    sceneIllustrationScale: 1
+    sceneIllustrationOffsetNormalized: {x: 0, y: 0}
+    startNodeId: freeplay.cache.find.start
+    tags:
+    - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
+    - "12\u0422"
+    - "\u0442\u0430\u0439\u043D\u0438\u043A"
+    nodes:
+    - id: freeplay.cache.find.start
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: freeplay.cache.find.scene
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041A\u043E\u0440\u043D\u0438 \u0438\u0432\u044B \u0434\u0435\u0440\u0436\u0430\u0442
+          \u0437\u0435\u043C\u043B\u044E, \u043A\u0430\u043A \u043A\u0443\u043B\u0430\u043A.
+          \u041F\u043E\u0434 \u0442\u0440\u0435\u0442\u044C\u0435\u0439 \u0437\u0430\u0440\u0443\u0431\u043A\u043E\u0439
+          \u043B\u043E\u043F\u0430\u0442\u0430 \u0437\u0432\u044F\u043A\u0430\u0435\u0442
+          \u043E \u0433\u043B\u0438\u043D\u0443: \u0433\u043E\u0440\u0448\u043E\u043A,
+          \u043E\u0431\u043C\u043E\u0442\u0430\u043D\u043D\u044B\u0439 \u0431\u0435\u0440\u0435\u0441\u0442\u043E\u0439,
+          \u0430 \u0432 \u043D\u0451\u043C \u0442\u0440\u044F\u043F\u0438\u0446\u0430."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.cache.find.inside
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0412 \u0442\u0440\u044F\u043F\u0438\u0446\u0435 \u2014 \u0433\u043E\u0440\u0441\u0442\u044C
+          \u0441\u0435\u0440\u0435\u0431\u0440\u044F\u043D\u044B\u0445 \u043E\u0431\u0440\u0443\u0431\u043A\u043E\u0432
+          \u0438 \u043A\u043E\u0440\u043E\u0442\u043A\u0438\u0439 \u043D\u043E\u0436,
+          \u0440\u0443\u043A\u043E\u044F\u0442\u044C \u043E\u0431\u043C\u043E\u0442\u0430\u043D\u0430
+          \u043C\u0435\u0434\u043D\u043E\u0439 \u043F\u0440\u043E\u0432\u043E\u043B\u043E\u043A\u043E\u0439
+          \u0432 \u0442\u0440\u0438 \u0432\u0438\u0442\u043A\u0430. \u0414\u0435\u0434
+          \u0432\u043E\u0437\u0447\u0438\u043A\u0430 \u0431\u044B\u043B \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u043E\u043C
+          \u0430\u043A\u043A\u0443\u0440\u0430\u0442\u043D\u044B\u043C: \u0434\u0430\u0436\u0435
+          \u0442\u0430\u0439\u043D\u0438\u043A \u0443 \u043D\u0435\u0433\u043E \u0441
+          \u0443\u0437\u0435\u043B\u043A\u043E\u043C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.cache.find.found
+          Type: 0
+          StringParam: freeplay.cache.found
+          IntParam: 0
+        - EffectExecutionId: freeplay.cache.find.silver
+          Type: 15
+          StringParam: 
+          IntParam: 15
+        - EffectExecutionId: freeplay.cache.find.xp
+          Type: 12
+          StringParam: 
+          IntParam: 10
+      choices:
+      - text: "\u0417\u0430\u0431\u0440\u0430\u0442\u044C \u0438 \u0437\u0430\u0441\u044B\u043F\u0430\u0442\u044C
+          \u044F\u043C\u0443."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.cache.find.bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: freeplay_carter
+    title: "12\u0422 \u2014 \u0412\u043E\u0437\u0447\u0438\u043A \u0416\u0434\u0430\u043D"
+    category: 2
+    status: 1
+    developerComment: "12\u0422, \u043F\u0438\u043B\u043E\u0442 \xAB\u0422\u0430\u0439\u043D\u0438\u043A
+      \u0443 \u0441\u0442\u0430\u0440\u043E\u0433\u043E \u0440\u0443\u0441\u043B\u0430\xBB
+      [\u0420\u0410\u0411\u041E\u0427\u0415\u0415][KINGDOM SURVIVAL]. \u0412\u043E\u0437\u0447\u0438\u043A
+      \u0432 \u043A\u043E\u0440\u0447\u043C\u0435 \u0442\u043E\u0440\u0433\u043E\u0432\u043E\u0433\u043E
+      \u0441\u0435\u043B\u0430. \u041F\u043E\u0440\u0443\u0447\u0435\u043D\u0438\u0435
+      \xAB\u041D\u043E\u0436 \u0434\u0435\u0434\u0430\xBB (ErrandId settlement.errand.carter_knife):
+      \u043F\u0440\u0438\u043D\u044F\u0442\u044C \u0437\u0434\u0435\u0441\u044C (\u0444\u043B\u0430\u0433
+      freeplay.cache.errand.accepted), \u043D\u0430 \u0434\u043E\u0441\u043A\u0435
+      \u0438\u043B\u0438 \u0432 \u043A\u043E\u0440\u0447\u043C\u0435 \u2014 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435
+      \u043E\u0431\u0449\u0435\u0435. \u0421\u0432\u0435\u0434\u0435\u043D\u0438\u044F
+      \u043E \u043C\u0435\u0441\u0442\u0435 \u043F\u0440\u043E\u0434\u0430\u044E\u0442\u0441\u044F
+      \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u044B\u043C \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u0435\u043C
+      \u043A\u043E\u0440\u0447\u043C\u044B (\u043E\u043F\u043B\u0430\u0442\u0430
+      \u2014 \u043A\u043E\u043C\u0430\u043D\u0434\u043E\u0439 TavernService). \u041D\u043E\u0436
+      \u2014 \u0432\u0435\u0449\u044C item.carter_token_knife \u0432 \u0441\u0443\u043C\u043A\u0435
+      (ItemPresent); \u043E\u0442\u0434\u0430\u0442\u044C \u2014 \u0444\u043B\u0430\u0433
+      freeplay.cache.token_returned, \u043A\u043E\u0434 \u0437\u0430\u0431\u0438\u0440\u0430\u0435\u0442
+      \u044D\u043A\u0437\u0435\u043C\u043F\u043B\u044F\u0440. \u0414\u0435\u0434
+      \u0438 \u0442\u0430\u0439\u043D\u0438\u043A \u2014 \u0440\u0430\u0431\u043E\u0447\u0438\u0439
+      \u043A\u043E\u043D\u0442\u0435\u043D\u0442, \u043D\u0435 \u0444\u0430\u043A\u0442
+      \u043C\u0438\u0440\u0430."
+    sceneIllustration: {fileID: 0}
+    sceneIllustrationFillFrame: 0
+    sceneIllustrationScale: 1
+    sceneIllustrationOffsetNormalized: {x: 0, y: 0}
+    startNodeId: freeplay.carter.start
+    tags:
+    - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
+    - "12\u0422"
+    - "\u0442\u0430\u0439\u043D\u0438\u043A"
+    nodes:
+    - id: freeplay.carter.start
+      speakerId: carter
+      text: 
+      textBlocks:
+      - blockId: freeplay.carter.start.scene
+        kind: 5
+        speakerIdOverride: narrator
+        text: "\u0412\u043E\u0437\u0447\u0438\u043A \u0441\u0438\u0434\u0438\u0442
+          \u0431\u043E\u043A\u043E\u043C \u043A \u0441\u0442\u043E\u043B\u0443, \u0447\u0442\u043E\u0431\u044B
+          \u0441\u043F\u0438\u043D\u0430 \u043D\u0435 \u043A\u0430\u0441\u0430\u043B\u0430\u0441\u044C
+          \u043B\u0430\u0432\u043A\u0438. \u041F\u043E \u0442\u043E\u043C\u0443,
+          \u043A\u0430\u043A \u043E\u043D \u043C\u043E\u0440\u0449\u0438\u0442\u0441\u044F,
+          \u0434\u043E\u0442\u044F\u0433\u0438\u0432\u0430\u044F\u0441\u044C \u0434\u043E
+          \u043A\u0440\u0443\u0436\u043A\u0438, \u0441\u043F\u0438\u043D\u0430 \u0443
+          \u043D\u0435\u0433\u043E \u0433\u043B\u0430\u0432\u043D\u044B\u0439 \u0441\u043E\u0431\u0435\u0441\u0435\u0434\u043D\u0438\u043A."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.carter.start.offer
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0414\u0435\u0434 \u043C\u043E\u0439 \u0441\u043E\u043B\u044C
+          \u0432\u043E\u0437\u0438\u043B. \u041F\u043E\u043C\u0438\u0440\u0430\u044F,
+          \u0441\u043A\u0430\u0437\u0430\u043B: \u0443 \u0441\u0442\u0430\u0440\u043E\u0433\u043E
+          \u0440\u0443\u0441\u043B\u0430, \u043F\u043E\u0434 \u0438\u0432\u043E\u0439
+          \u0441 \u0442\u0440\u0435\u043C\u044F \u0437\u0430\u0440\u0443\u0431\u043A\u0430\u043C\u0438,
+          \u0433\u043E\u0440\u0448\u043E\u043A. \u0421\u0435\u0440\u0435\u0431\u0440\u043E
+          \u2014 \u0431\u0435\u0440\u0438 \u043A\u0442\u043E \u043D\u0430\u0439\u0434\u0451\u0442,
+          \u0430 \u043D\u043E\u0436 \u0435\u0433\u043E \u0441 \u043C\u0435\u0434\u043D\u043E\u0439
+          \u043D\u0430\u0441\u0435\u0447\u043A\u043E\u0439 \u2014 \u043C\u043D\u0435.
+          \u0421\u0430\u043C \u044F \u0442\u0443\u0434\u0430 \u043D\u0435 \u0434\u043E\u0439\u0434\u0443:
+          \u0441\u043F\u0438\u043D\u0430. \u0413\u0434\u0435 \u0438\u0432\u0430 \u2014
+          \u0441\u043A\u0430\u0436\u0443 \u0437\u0430 \u0434\u0432\u0435\u043D\u0430\u0434\u0446\u0430\u0442\u044C.
+          \u042F \u043D\u0435 \u0436\u0430\u0434\u043D\u044B\u0439, \u0443 \u043C\u0435\u043D\u044F
+          \u043F\u0440\u043E\u0441\u0442\u043E \u0434\u0435\u0442\u0438."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: freeplay.cache.errand.accepted
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+          - Type: 0
+            StringParam: freeplay.cache.errand.done
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.carter.start.waiting
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u041D\u0443 \u0447\u0442\u043E, \u0438\u0432\u0430 \u0435\u0449\u0451
+          \u0441\u0442\u043E\u0438\u0442? \u042F \u0431\u044B \u0441\u0430\u043C
+          \u0441\u0445\u043E\u0434\u0438\u043B, \u0434\u0430 \u0441\u043F\u0438\u043D\u0430
+          \u0433\u043E\u0432\u043E\u0440\u0438\u0442: \u0441\u0438\u0434\u0438."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: freeplay.cache.errand.accepted
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+          - Type: 0
+            StringParam: freeplay.cache.found
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.carter.start.found
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u041F\u043E \u0433\u043B\u0430\u0437\u0430\u043C \u0432\u0438\u0436\u0443
+          \u2014 \u043D\u0430\u0448\u043B\u0438. \u041D\u043E\u0436 \u043F\u0440\u0438
+          \u0432\u0430\u0441?"
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: freeplay.cache.found
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+          - Type: 0
+            StringParam: freeplay.cache.token_returned
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.carter.start.done
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0414\u0435\u0434\u043E\u0432 \u043D\u043E\u0436 \u0442\u0435\u043F\u0435\u0440\u044C
+          \u043D\u0430 \u0433\u0432\u043E\u0437\u0434\u0435 \u043D\u0430\u0434 \u0434\u0432\u0435\u0440\u044C\u044E.
+          \u0416\u0435\u043D\u0430 \u0433\u043E\u0432\u043E\u0440\u0438\u0442 \u2014
+          \u043F\u044B\u043B\u044C \u0441\u043E\u0431\u0438\u0440\u0430\u0435\u0442.
+          \u0410 \u044F \u0433\u043E\u0432\u043E\u0440\u044E \u2014 \u043F\u0430\u043C\u044F\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: freeplay.cache.token_returned
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0412\u043E\u0437\u044C\u043C\u0443\u0441\u044C. \u041D\u043E\u0436
+          \u043F\u0440\u0438\u043D\u0435\u0441\u0443."
+        nextNodeId: freeplay.carter.accepted
+        endsDialogue: 0
+        choiceId: freeplay.carter.accept
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: freeplay.cache.errand.accepted
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+          - Type: 0
+            StringParam: freeplay.cache.errand.done
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u041E\u0442\u0434\u0430\u0442\u044C \u043D\u043E\u0436 \u0441 \u043C\u0435\u0434\u043D\u043E\u0439
+          \u043D\u0430\u0441\u0435\u0447\u043A\u043E\u0439."
+        nextNodeId: freeplay.carter.given
+        endsDialogue: 0
+        choiceId: freeplay.carter.give
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 5
+            StringParam: item.carter_token_knife
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+          - Type: 0
+            StringParam: freeplay.cache.token_returned
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u041D\u043E\u0436 \u043F\u043E\u043A\u0430 \u043F\u043E\u0431\u0443\u0434\u0435\u0442
+          \u0443 \u043C\u0435\u043D\u044F."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.carter.keep
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 5
+            StringParam: item.carter_token_knife
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+          - Type: 0
+            StringParam: freeplay.cache.token_returned
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u041D\u0435 \u0441\u0435\u0439\u0447\u0430\u0441."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.carter.bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.carter.accepted
+      speakerId: carter
+      text: 
+      textBlocks:
+      - blockId: freeplay.carter.accepted.line
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0412\u043E\u0442 \u0438 \u043B\u0430\u0434\u043D\u043E. \u041F\u0440\u043E
+          \u0438\u0432\u0443 \u0441\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u2014
+          \u0440\u0430\u0441\u0441\u043A\u0430\u0436\u0443, \u043A\u0430\u043A \u043E\u0431\u0435\u0449\u0430\u043B.
+          \u0414\u0432\u0435\u043D\u0430\u0434\u0446\u0430\u0442\u044C \u2014 \u044D\u0442\u043E
+          \u043D\u0435 \u0446\u0435\u043D\u0430, \u044D\u0442\u043E \u0443\u0432\u0430\u0436\u0435\u043D\u0438\u0435
+          \u043A \u0434\u0435\u0434\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.carter.accepted.flag
+          Type: 0
+          StringParam: freeplay.cache.errand.accepted
+          IntParam: 0
+      choices:
+      - text: "\u0414\u043E\u0433\u043E\u0432\u043E\u0440\u0438\u043B\u0438\u0441\u044C."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.carter.accepted.bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.carter.given
+      speakerId: carter
+      text: 
+      textBlocks:
+      - blockId: freeplay.carter.given.scene
+        kind: 5
+        speakerIdOverride: narrator
+        text: "\u0416\u0434\u0430\u043D \u0431\u0435\u0440\u0451\u0442 \u043D\u043E\u0436
+          \u043E\u0431\u0435\u0438\u043C\u0438 \u0440\u0443\u043A\u0430\u043C\u0438,
+          \u043A\u0430\u043A \u0445\u043B\u0435\u0431, \u0438 \u0434\u043E\u043B\u0433\u043E
+          \u0432\u0435\u0434\u0451\u0442 \u043F\u0430\u043B\u044C\u0446\u0435\u043C
+          \u043F\u043E \u0442\u0440\u0451\u043C \u0432\u0438\u0442\u043A\u0430\u043C
+          \u043C\u0435\u0434\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.carter.given.line
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0415\u0433\u043E. \u0422\u043E\u0447\u043D\u043E \u0435\u0433\u043E.
+          \u0414\u0435\u0440\u0436\u0438\u0442\u0435 \u2014 \u044D\u0442\u043E \u043E\u0442
+          \u043C\u0435\u043D\u044F, \u043D\u0435 \u043E\u0442 \u0434\u0435\u0434\u0430:
+          \u0434\u0435\u0434 \u0431\u044B\u043B \u0431\u044B \u043F\u0440\u043E\u0442\u0438\u0432."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.carter.given.token
+          Type: 0
+          StringParam: freeplay.cache.token_returned
+          IntParam: 0
+        - EffectExecutionId: freeplay.carter.given.done
+          Type: 0
+          StringParam: freeplay.cache.errand.done
+          IntParam: 0
+        - EffectExecutionId: freeplay.carter.given.gold
+          Type: 15
+          StringParam: 
+          IntParam: 10
+        - EffectExecutionId: freeplay.carter.given.xp
+          Type: 12
+          StringParam: 
+          IntParam: 10
+      choices:
+      - text: "\u041F\u0443\u0441\u0442\u044C \u043F\u0430\u043C\u044F\u0442\u044C
+          \u0431\u0443\u0434\u0435\u0442."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.carter.given.bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: freeplay_carter_tells
+    title: "12\u0422 \u2014 \u0420\u0430\u0441\u0441\u043A\u0430\u0437 \u0432\u043E\u0437\u0447\u0438\u043A\u0430
+      \u043E\u0431 \u0438\u0432\u0435"
+    category: 2
+    status: 1
+    developerComment: "12\u0422 [\u0420\u0410\u0411\u041E\u0427\u0415\u0415]. \u0421\u0446\u0435\u043D\u0430
+      \u043F\u043E\u0441\u043B\u0435 \u043E\u043F\u043B\u0430\u0442\u044B \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u044F
+      \u043A\u043E\u0440\u0447\u043C\u044B \xAB\u0413\u0434\u0435 \u0434\u0435\u0434
+      \u043F\u0440\u044F\u0442\u0430\u043B\xBB. \u0417\u043D\u0430\u043D\u0438\u0435
+      \u0432\u044B\u0434\u0430\u0451\u0442 \u0441\u0430\u043C\u0430 \u043A\u043E\u043C\u0430\u043D\u0434\u0430
+      \u043E\u043F\u043B\u0430\u0442\u044B; \u044D\u0444\u0444\u0435\u043A\u0442
+      \u0437\u0434\u0435\u0441\u044C \u2014 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A
+      \u0442\u0435\u043A\u0441\u0442\u0430 \u0434\u043B\u044F \u0436\u0443\u0440\u043D\u0430\u043B\u0430
+      (\u043F\u043E\u0432\u0442\u043E\u0440 \u043D\u0438\u0447\u0435\u0433\u043E
+      \u043D\u0435 \u0434\u0430\u0451\u0442)."
+    sceneIllustration: {fileID: 0}
+    sceneIllustrationFillFrame: 0
+    sceneIllustrationScale: 1
+    sceneIllustrationOffsetNormalized: {x: 0, y: 0}
+    startNodeId: freeplay.carter.tells.start
+    tags:
+    - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
+    - "12\u0422"
+    - "\u0442\u0430\u0439\u043D\u0438\u043A"
+    nodes:
+    - id: freeplay.carter.tells.start
+      speakerId: carter
+      text: 
+      textBlocks:
+      - blockId: freeplay.carter.tells.line
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u041E\u0442 \u0442\u043E\u0440\u0433\u0430 \u043F\u043E\u043B\u0434\u043D\u044F
+          \u0445\u043E\u0434\u0443. \u0421\u0442\u0430\u0440\u043E\u0435 \u0440\u0443\u0441\u043B\u043E
+          \u0442\u0430\u043C \u043F\u0435\u0440\u0435\u0441\u043E\u0445\u043B\u043E,
+          \u043E\u0441\u043E\u043A\u043E\u0439 \u043F\u043E\u0440\u043E\u0441\u043B\u043E
+          \u2014 \u0440\u0435\u043A\u0430 \u0434\u0430\u0432\u043D\u043E \u0443\u0448\u043B\u0430,
+          \u0430 \u0431\u0435\u0440\u0435\u0433 \u043E\u0441\u0442\u0430\u043B\u0441\u044F.
+          \u0418\u0432\u0430 \u0443 \u043A\u0440\u0430\u044F \u0440\u0430\u0441\u043A\u043E\u043B\u043E\u0442\u0430
+          \u043D\u0430\u0434\u0432\u043E\u0435, \u043D\u0430 \u043E\u0434\u043D\u043E\u0439
+          \u043F\u043E\u043B\u043E\u0432\u0438\u043D\u0435 \u0442\u0440\u0438 \u0437\u0430\u0440\u0443\u0431\u043A\u0438.
+          \u041A\u043E\u0440\u043E\u0439 \u0443\u0436\u0435 \u0437\u0430\u0442\u044F\u043D\u0443\u043B\u043E,
+          \u043D\u043E \u0438\u0449\u0438\u0442\u0435 \u2014 \u043D\u0430\u0439\u0434\u0451\u0442\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.carter.tells.knowledge
+          Type: 2
+          StringParam: freeplay.cache.knowledge.old_bed
+          IntParam: 0
+      - blockId: freeplay.carter.tells.hint
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0422\u043E\u0447\u043D\u043E \u043C\u0435\u0441\u0442\u0430
+          \u043D\u0435 \u0441\u043A\u0430\u0436\u0443, \u044F \u0442\u0430\u043C
+          \u043C\u0430\u043B\u044C\u0447\u0438\u0448\u043A\u043E\u0439 \u0431\u044B\u043B.
+          \u0414\u0435\u0434 \u0433\u043E\u0432\u043E\u0440\u0438\u043B: \xAB\u0433\u0434\u0435
+          \u0432\u043E\u0434\u0430 \u043F\u043E\u0432\u0435\u0440\u043D\u0443\u043B\u0430,
+          \u0442\u0430\u043C \u0438 \u0441\u043C\u043E\u0442\u0440\u0438\xBB."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041D\u0430\u0439\u0434\u0451\u043C."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.carter.tells.bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: settlement_town_hostess
+    title: "12\u0422 \u2014 \u0425\u043E\u0437\u044F\u0439\u043A\u0430 \u043A\u043E\u0440\u0447\u043C\u044B
+      \u0443 \u0432\u043E\u0440\u043E\u0442"
+    category: 4
+    status: 1
+    developerComment: "12\u0422 [\u0420\u0410\u0411\u041E\u0427\u0415\u0415]. \u0425\u043E\u0437\u044F\u0439\u043A\u0430
+      \u043A\u043E\u0440\u0447\u043C\u044B \u0443\u043A\u0440\u0435\u043F\u043B\u0451\u043D\u043D\u043E\u0433\u043E
+      \u0433\u043E\u0440\u043E\u0434\u043A\u0430. \u041F\u043E\u0440\u044F\u0434\u043E\u043A
+      \u0443 \u0432\u043E\u0440\u043E\u0442: \u0437\u0432\u0435\u0440\u044F-\u0441\u043E\u044E\u0437\u043D\u0438\u043A\u0430
+      \u0432\u043D\u0443\u0442\u0440\u044C \u043D\u0435 \u043F\u0443\u0441\u043A\u0430\u044E\u0442
+      (\u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u044E\u0449\u0435\u0435 \u043F\u0440\u0430\u0432\u0438\u043B\u043E
+      \u0434\u043E\u043F\u0443\u0441\u043A\u0430 \u0443\u0447\u0430\u0441\u0442\u043D\u0438\u043A\u0430).
+      \u041D\u0430\u0432\u043E\u0434\u0438\u0442 \u043D\u0430 \u041C\u0438\u043B\u0430\u043D\u0443."
+    sceneIllustration: {fileID: 0}
+    sceneIllustrationFillFrame: 0
+    sceneIllustrationScale: 1
+    sceneIllustrationOffsetNormalized: {x: 0, y: 0}
+    startNodeId: settlement.townhostess.start
+    tags:
+    - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
+    - "12\u0422"
+    nodes:
+    - id: settlement.townhostess.start
+      speakerId: town_hostess
+      text: 
+      textBlocks:
+      - blockId: settlement.townhostess.start.line
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0423 \u043D\u0430\u0441 \u043F\u043E\u0440\u044F\u0434\u043E\u043A:
+          \u043E\u0440\u0443\u0436\u0438\u0435 \u043D\u0435 \u0432\u044B\u043D\u0438\u043C\u0430\u0442\u044C,
+          \u043F\u043E \u043B\u0430\u0432\u043A\u0430\u043C \u043D\u0435 \u043F\u043B\u044F\u0441\u0430\u0442\u044C,
+          \u0437\u0432\u0435\u0440\u044C\u0451 \u0437\u0430 \u0432\u043E\u0440\u043E\u0442\u0430.
+          \u041E\u0441\u0442\u0430\u043B\u044C\u043D\u043E\u0435 \u043C\u043E\u0436\u043D\u043E,
+          \u0435\u0441\u043B\u0438 \u043F\u043B\u0430\u0442\u0438\u0442\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: settlement.townhostess.start.hint
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0412\u043E\u043D \u041C\u0438\u043B\u0430\u043D\u0430, \u0436\u0435\u043D\u0430
+          \u0441\u0442\u043E\u0440\u043E\u0436\u0430, \u0442\u0440\u0435\u0442\u0438\u0439
+          \u0434\u0435\u043D\u044C \u0441\u0438\u0434\u0438\u0442 \u0443 \u043E\u043A\u043D\u0430
+          \u0441 \u043E\u0434\u043D\u043E\u0439 \u043A\u0440\u0443\u0436\u043A\u043E\u0439.
+          \u0415\u0441\u043B\u0438 \u0438\u0434\u0451\u0442\u0435 \u043A \u0434\u0435\u0440\u0435\u0432\u043D\u0435
+          \u0443 \u0434\u043E\u0440\u043E\u0433\u0438 \u2014 \u0441\u043F\u0440\u043E\u0441\u0438\u0442\u0435
+          \u0435\u0451, \u043E\u043D\u0430 \u043E\u0431\u0440\u0430\u0434\u0443\u0435\u0442\u0441\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041F\u043E\u043D\u044F\u0442\u043D\u043E."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: settlement.townhostess.bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: settlement_town_milana
+    title: "12\u0422 \u2014 \u041C\u0438\u043B\u0430\u043D\u0430, \u0436\u0435\u043D\u0430
+      \u0441\u0442\u043E\u0440\u043E\u0436\u0430"
+    category: 2
+    status: 1
+    developerComment: "12\u0422 [\u0420\u0410\u0411\u041E\u0427\u0415\u0415][KINGDOM
+      SURVIVAL]. \u041F\u043E\u0441\u0435\u0442\u0438\u0442\u0435\u043B\u044C \u043A\u043E\u0440\u0447\u043C\u044B
+      \u0443\u043A\u0440\u0435\u043F\u043B\u0451\u043D\u043D\u043E\u0433\u043E \u0433\u043E\u0440\u043E\u0434\u043A\u0430.
+      \u041F\u043E\u0440\u0443\u0447\u0435\u043D\u0438\u0435 \xAB\u0412\u0435\u0441\u0442\u044C
+      \u0441\u0442\u0430\u0440\u043E\u0441\u0442\u0435\xBB (ErrandId settlement.errand.town_message)
+      \u2014 \u0442\u043E \u0436\u0435, \u0447\u0442\u043E \u043D\u0430 \u0434\u043E\u0441\u043A\u0435
+      \u0433\u043E\u0440\u043E\u0434\u043A\u0430: \u043F\u0440\u0438\u043D\u044F\u0442\u044C
+      (\u0444\u043B\u0430\u0433 settlement.town.message.accepted) \u2192 \u0441\u0442\u0430\u0440\u043E\u0441\u0442\u0430
+      \u0434\u0435\u0440\u0435\u0432\u043D\u0438 (\u0444\u043B\u0430\u0433 settlement.town.message.delivered)
+      \u2192 \u0432\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F \u0437\u0430
+      \u043F\u043B\u0430\u0442\u043E\u0439 (settlement.town.message.done). \u0421\u0440\u043E\u043A
+      \u043F\u043E\u0440\u0443\u0447\u0435\u043D\u0438\u044F \u2014 \u0432 \u0411\u0430\u0437\u0435
+      \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u0439."
+    sceneIllustration: {fileID: 0}
+    sceneIllustrationFillFrame: 0
+    sceneIllustrationScale: 1
+    sceneIllustrationOffsetNormalized: {x: 0, y: 0}
+    startNodeId: settlement.milana.start
+    tags:
+    - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
+    - "12\u0422"
+    nodes:
+    - id: settlement.milana.start
+      speakerId: town_milana
+      text: 
+      textBlocks:
+      - blockId: settlement.milana.start.scene
+        kind: 5
+        speakerIdOverride: narrator
+        text: "\u0416\u0435\u043D\u0449\u0438\u043D\u0430 \u0443 \u043E\u043A\u043D\u0430
+          \u0434\u0435\u0440\u0436\u0438\u0442 \u043A\u0440\u0443\u0436\u043A\u0443,
+          \u0438\u0437 \u043A\u043E\u0442\u043E\u0440\u043E\u0439 \u043D\u0435 \u043F\u044C\u0451\u0442.
+          \u041A\u0440\u0443\u0436\u043A\u0430 \u043D\u0443\u0436\u043D\u0430, \u0447\u0442\u043E\u0431\u044B
+          \u043A\u043E\u0440\u0447\u043C\u0430\u0440\u044C \u043D\u0435 \u043F\u0440\u043E\u0433\u043D\u0430\u043B."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: settlement.milana.start.ask
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0412\u044B \u0436\u0435 \u043D\u0430 \u0434\u043E\u0440\u043E\u0433\u0443?
+          \u0412 \u0434\u0435\u0440\u0435\u0432\u043D\u0435 \u0443 \u0434\u043E\u0440\u043E\u0433\u0438
+          \u0441\u0442\u0430\u0440\u043E\u0441\u0442\u0430, \u0412\u044B\u0448\u0430\u0442\u0430,
+          \u2014 \u043F\u0435\u0440\u0435\u0434\u0430\u0439\u0442\u0435 \u0435\u043C\u0443:
+          \u0441\u044B\u043D \u043C\u043E\u0439 \u0436\u0438\u0432, \u043A \u0437\u0438\u043C\u0435
+          \u0432\u0435\u0440\u043D\u0451\u0442\u0441\u044F. \u0422\u043E\u043B\u044C\u043A\u043E
+          \u043D\u0435 \u043F\u043E\u0437\u0436\u0435 \u0441\u0435\u0434\u043C\u0438\u0446\u044B:
+          \u043F\u043E\u0442\u043E\u043C \u0441\u0442\u0430\u0440\u043E\u0441\u0442\u0430
+          \u0443\u0439\u0434\u0451\u0442 \u043D\u0430 \u0434\u0430\u043B\u044C\u043D\u0438\u0435
+          \u043F\u043E\u043A\u043E\u0441\u044B, \u0438 \u0438\u0449\u0438 \u0435\u0433\u043E
+          \u0442\u0430\u043C. \u0417\u0430\u043F\u043B\u0430\u0447\u0443, \u043A\u043E\u0433\u0434\u0430
+          \u0432\u0435\u0440\u043D\u0451\u0442\u0435\u0441\u044C, \u2014 \u0434\u0435\u043D\u044C\u0433\u0438
+          \u0443 \u043C\u0443\u0436\u0430, \u0430 \u043C\u0443\u0436 \u043D\u0430
+          \u0432\u043E\u0440\u043E\u0442\u0430\u0445 \u0434\u043E \u043D\u043E\u0447\u0438."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: settlement.town.message.accepted
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+          - Type: 0
+            StringParam: settlement.town.message.done
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: settlement.milana.start.wait
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u041D\u0435 \u0434\u043E\u0448\u043B\u0438 \u0435\u0449\u0451?
+          \u0414\u043E\u0440\u043E\u0433\u0430, \u043E\u043D\u0430 \u0442\u0430\u043A\u0430\u044F.
+          \u042F \u043F\u043E\u0434\u043E\u0436\u0434\u0443."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: settlement.town.message.accepted
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+          - Type: 0
+            StringParam: settlement.town.message.delivered
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+          - Type: 0
+            StringParam: settlement.town.message.failed
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: settlement.milana.start.back
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u041F\u0435\u0440\u0435\u0434\u0430\u043B\u0438? \u0427\u0442\u043E
+          \u043E\u043D \u0441\u043A\u0430\u0437\u0430\u043B?"
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: settlement.town.message.delivered
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+          - Type: 0
+            StringParam: settlement.town.message.done
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+          - Type: 0
+            StringParam: settlement.town.message.failed
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: settlement.milana.start.late
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0421\u0442\u0430\u0440\u043E\u0441\u0442\u0430 \u0443\u0436\u0435
+          \u043D\u0430 \u043F\u043E\u043A\u043E\u0441\u0430\u0445, \u0430 \u0432\u0435\u0441\u0442\u044C
+          \u0442\u0430\u043A \u0438 \u043D\u0435 \u0434\u043E\u0448\u043B\u0430.
+          \u041D\u0443 \u0447\u0442\u043E \u0436. \u041E\u0442\u043F\u0440\u0430\u0432\u043B\u044E
+          \u0441 \u043A\u0435\u043C-\u043D\u0438\u0431\u0443\u0434\u044C \u0435\u0449\u0451."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: settlement.town.message.failed
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+          - Type: 0
+            StringParam: settlement.town.message.done
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: settlement.milana.start.done
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0421\u0432\u0435\u0447\u043A\u0443 \u044F \u0432\u0441\u0451-\u0442\u0430\u043A\u0438
+          \u043F\u043E\u0441\u0442\u0430\u0432\u0438\u043B\u0430. \u041D\u0435 \u0437\u0430
+          \u0441\u044B\u043D\u0430 \u2014 \u0437\u0430 \u0432\u0430\u0441: \u0447\u0442\u043E\u0431\u044B
+          \u0434\u043E\u0440\u043E\u0433\u0438 \u0431\u044B\u043B\u0438 \u043A\u043E\u0440\u043E\u0447\u0435."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: settlement.town.message.done
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041F\u0435\u0440\u0435\u0434\u0430\u043C."
+        nextNodeId: settlement.milana.accepted
+        endsDialogue: 0
+        choiceId: settlement.milana.accept
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: settlement.town.message.accepted
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+          - Type: 0
+            StringParam: settlement.town.message.done
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u0421\u043A\u0430\u0437\u0430\u043B: \u043F\u0443\u0441\u0442\u044C
+          \u043D\u0435 \u0442\u0440\u0430\u0442\u0438\u0442\u0441\u044F \u043D\u0430
+          \u0441\u0432\u0435\u0447\u0438 \u2014 \u043E\u043D \u0438 \u0442\u0430\u043A
+          \u0432\u0435\u0440\u0438\u043B."
+        nextNodeId: settlement.milana.paid
+        endsDialogue: 0
+        choiceId: settlement.milana.report
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: settlement.town.message.delivered
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+          - Type: 0
+            StringParam: settlement.town.message.done
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+          - Type: 0
+            StringParam: settlement.town.message.failed
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u041C\u043D\u0435 \u043F\u043E\u0440\u0430."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: settlement.milana.bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: settlement.milana.accepted
+      speakerId: town_milana
+      text: 
+      textBlocks:
+      - blockId: settlement.milana.accepted.line
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0421\u043F\u0430\u0441\u0438\u0431\u043E. \u0422\u043E\u043B\u044C\u043A\u043E
+          \u0441\u043A\u0430\u0436\u0438\u0442\u0435 \u0441\u0432\u043E\u0438\u043C\u0438
+          \u0441\u043B\u043E\u0432\u0430\u043C\u0438 \u2014 \u043E\u043D \u043D\u0435
+          \u043B\u044E\u0431\u0438\u0442, \u043A\u043E\u0433\u0434\u0430 \u043F\u043E
+          \u0431\u0443\u043C\u0430\u0436\u043A\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: settlement.milana.accepted.flag
+          Type: 0
+          StringParam: settlement.town.message.accepted
+          IntParam: 0
+      choices:
+      - text: "\u0421\u0432\u043E\u0438\u043C\u0438 \u0438 \u0441\u043A\u0430\u0436\u0443."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: settlement.milana.accepted.bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: settlement.milana.paid
+      speakerId: town_milana
+      text: 
+      textBlocks:
+      - blockId: settlement.milana.paid.scene
+        kind: 5
+        speakerIdOverride: narrator
+        text: "\u041C\u0438\u043B\u0430\u043D\u0430 \u043D\u0430\u043A\u043E\u043D\u0435\u0446
+          \u043E\u0442\u043F\u0438\u0432\u0430\u0435\u0442 \u0438\u0437 \u043A\u0440\u0443\u0436\u043A\u0438,
+          \u043C\u043E\u0440\u0449\u0438\u0442\u0441\u044F \u2014 \u043A\u0432\u0430\u0441
+          \u0434\u0430\u0432\u043D\u043E \u0432\u044B\u0434\u043E\u0445\u0441\u044F
+          \u2014 \u0438 \u0441\u043C\u0435\u0451\u0442\u0441\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: settlement.milana.paid.line
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u041F\u043E\u0445\u043E\u0436\u0435 \u043D\u0430 \u043D\u0435\u0433\u043E.
+          \u0412\u043E\u0442, \u043C\u0443\u0436 \u043F\u0435\u0440\u0435\u0434\u0430\u043B,
+          \u043A\u0430\u043A \u043E\u0431\u0435\u0449\u0430\u043B\u0430."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: settlement.milana.paid.done
+          Type: 0
+          StringParam: settlement.town.message.done
+          IntParam: 0
+        - EffectExecutionId: settlement.milana.paid.gold
+          Type: 15
+          StringParam: 
+          IntParam: 8
+        - EffectExecutionId: settlement.milana.paid.xp
+          Type: 12
+          StringParam: 
+          IntParam: 8
+      choices:
+      - text: "\u0414\u043E\u0431\u0440\u043E\u0433\u043E \u0434\u043D\u044F."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: settlement.milana.paid.bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: settlement_trade_keeper
+    title: "12\u0422 \u2014 \u041A\u043E\u0440\u0447\u043C\u0430\u0440\u044C \u0443
+      \u0442\u043E\u0440\u0433\u0430"
+    category: 4
+    status: 1
+    developerComment: "12\u0422 [\u0420\u0410\u0411\u041E\u0427\u0415\u0415]. \u041A\u043E\u0440\u0447\u043C\u0430\u0440\u044C
+      \u0442\u043E\u0440\u0433\u043E\u0432\u043E\u0433\u043E \u0441\u0435\u043B\u0430.
+      \u041D\u0430\u0432\u043E\u0434\u0438\u0442 \u043D\u0430 \u0432\u043E\u0437\u0447\u0438\u043A\u0430
+      \u0416\u0434\u0430\u043D\u0430 (\u043F\u043E\u0440\u0443\u0447\u0435\u043D\u0438\u0435
+      \xAB\u041D\u043E\u0436 \u0434\u0435\u0434\u0430\xBB), \u043D\u0435 \u043F\u0440\u043E\u0434\u0430\u0451\u0442
+      \u0441\u0432\u0435\u0434\u0435\u043D\u0438\u0439 \u0441\u0430\u043C."
+    sceneIllustration: {fileID: 0}
+    sceneIllustrationFillFrame: 0
+    sceneIllustrationScale: 1
+    sceneIllustrationOffsetNormalized: {x: 0, y: 0}
+    startNodeId: settlement.tradekeeper.start
+    tags:
+    - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
+    - "12\u0422"
+    nodes:
+    - id: settlement.tradekeeper.start
+      speakerId: trade_keeper
+      text: 
+      textBlocks:
+      - blockId: settlement.tradekeeper.start.scene
+        kind: 5
+        speakerIdOverride: narrator
+        text: "\u041A\u043E\u0440\u0447\u043C\u0430\u0440\u044C \u043F\u0440\u043E\u0442\u0438\u0440\u0430\u0435\u0442
+          \u043A\u0440\u0443\u0436\u043A\u0443 \u0440\u0443\u043A\u0430\u0432\u043E\u043C.
+          \u041A\u0440\u0443\u0436\u043A\u0430 \u043E\u0442 \u044D\u0442\u043E\u0433\u043E
+          \u0447\u0438\u0449\u0435 \u043D\u0435 \u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u0441\u044F,
+          \u0440\u0443\u043A\u0430\u0432 \u2014 \u0442\u043E\u0436\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: settlement.tradekeeper.start.line
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u041D\u043E\u0432\u043E\u0441\u0442\u0438? \u041D\u043E\u0432\u043E\u0441\u0442\u0438
+          \u0443 \u043D\u0430\u0441 \u043F\u0440\u043E\u0434\u0430\u0451\u0442 \u0432\u043E\u043D
+          \u0442\u043E\u0442 \u0432\u043E\u0437\u0447\u0438\u043A \u0432 \u0443\u0433\u043B\u0443,
+          \u0416\u0434\u0430\u043D. \u042F \u043F\u0440\u043E\u0434\u0430\u044E \u043A\u0432\u0430\u0441.
+          \u041A\u0432\u0430\u0441, \u0432 \u043E\u0442\u043B\u0438\u0447\u0438\u0435
+          \u043E\u0442 \u0416\u0434\u0430\u043D\u0430, \u043D\u0435 \u0432\u0440\u0451\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: settlement.tradekeeper.start.after
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0416\u0434\u0430\u043D \u043D\u044B\u043D\u0447\u0435 \u0432\u0435\u0441\u0451\u043B\u044B\u0439
+          \u2014 \u0433\u043E\u0432\u043E\u0440\u0438\u0442, \u0434\u0435\u0434\u043E\u0432
+          \u043D\u043E\u0436 \u0435\u043C\u0443 \u0432\u0435\u0440\u043D\u0443\u043B\u0438.
+          \u0422\u0440\u0435\u0442\u0438\u0439 \u0440\u0430\u0437 \u0443\u0433\u043E\u0449\u0430\u0435\u0442
+          \u0432\u0441\u0435\u0445, \u043A\u0442\u043E \u043D\u0435 \u0443\u0441\u043F\u0435\u043B
+          \u043E\u0442\u0432\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: freeplay.cache.errand.done
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041D\u0430\u043B\u0435\u0439 \u043A\u0432\u0430\u0441\u0443."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: settlement.tradekeeper.bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: settlement_trade_peddler
+    title: "12\u0422 \u2014 \u041F\u0440\u043E\u0435\u0437\u0436\u0438\u0439 \u0442\u043E\u0440\u0433\u043E\u0432\u0435\u0446"
+    category: 4
+    status: 1
+    developerComment: "12\u0422 [\u0420\u0410\u0411\u041E\u0427\u0415\u0415]. \u041F\u043E\u0441\u0435\u0442\u0438\u0442\u0435\u043B\u044C
+      \u043A\u043E\u0440\u0447\u043C\u044B \u0442\u043E\u0440\u0433\u043E\u0432\u043E\u0433\u043E
+      \u0441\u0435\u043B\u0430 \u0441 \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u044B\u043C
+      \u043F\u0440\u0438\u043B\u0430\u0432\u043A\u043E\u043C (MerchantId peddler):
+      \u0440\u0435\u0434\u043A\u0438\u0435 \u0432\u0435\u0449\u0438, \u0432 \u0442\u043E\u043C
+      \u0447\u0438\u0441\u043B\u0435 \u0443\u043D\u0438\u043A\u0430\u043B\u044C\u043D\u044B\u0439
+      \u0442\u0443\u0440\u0438\u0439 \u0440\u043E\u0433. \u0426\u0435\u043F\u043E\u0447\u043A\u0430
+      \u0442\u0430\u0439\u043D\u0438\u043A\u0430 \u043E\u0442 \u043D\u0435\u0433\u043E
+      \u043D\u0435 \u0437\u0430\u0432\u0438\u0441\u0438\u0442."
+    sceneIllustration: {fileID: 0}
+    sceneIllustrationFillFrame: 0
+    sceneIllustrationScale: 1
+    sceneIllustrationOffsetNormalized: {x: 0, y: 0}
+    startNodeId: settlement.peddler.start
+    tags:
+    - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
+    - "12\u0422"
+    nodes:
+    - id: settlement.peddler.start
+      speakerId: peddler
+      text: 
+      textBlocks:
+      - blockId: settlement.peddler.start.scene
+        kind: 5
+        speakerIdOverride: narrator
+        text: "\u0423 \u043F\u0440\u043E\u0435\u0437\u0436\u0435\u0433\u043E \u0442\u043E\u0440\u0433\u043E\u0432\u0446\u0430
+          \u043A\u043E\u0440\u043E\u0431 \u043D\u0430 \u043A\u043E\u043B\u0435\u043D\u044F\u0445
+          \u0438 \u0442\u0430\u043A\u043E\u0435 \u043B\u0438\u0446\u043E, \u0431\u0443\u0434\u0442\u043E
+          \u043E\u043D \u0441\u0430\u043C \u0441\u0435\u0431\u0435 \u043D\u0435 \u043F\u0440\u043E\u0434\u0430\u043B
+          \u0431\u044B \u0438 \u043F\u043E\u043B\u043E\u0432\u0438\u043D\u044B."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: settlement.peddler.start.line
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0422\u043E\u0432\u0430\u0440 \u0443 \u043C\u0435\u043D\u044F
+          \u0440\u0435\u0434\u043A\u0438\u0439, \u043F\u043E\u0442\u043E\u043C\u0443
+          \u0438 \u0434\u043E\u0440\u043E\u0433\u043E\u0439. \u0414\u0435\u0448\u0451\u0432\u044B\u0439
+          \u2014 \u0443 \u0445\u043E\u0437\u044F\u0439\u043A\u0438 \u043B\u0430\u0432\u043A\u0438,
+          \u0442\u0430\u043C \u0438 \u0441\u0443\u0445\u0430\u0440\u0438, \u0438
+          \u043C\u0430\u0437\u044C. \u0410 \u0443 \u043C\u0435\u043D\u044F \u2014
+          \u0432\u0435\u0449\u0438 \u0441 \u0438\u0441\u0442\u043E\u0440\u0438\u0435\u0439.
+          \u0418\u0441\u0442\u043E\u0440\u0438\u044E, \u043F\u0440\u0430\u0432\u0434\u0430,
+          \u044F \u0440\u0430\u0441\u0441\u043A\u0430\u0437\u044B\u0432\u0430\u044E
+          \u0437\u0430 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u0443\u044E \u043F\u043B\u0430\u0442\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041F\u043E\u0441\u043C\u043E\u0442\u0440\u044E \u043A\u043E\u0440\u043E\u0431."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: settlement.peddler.bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: settlement_village_elder
+    title: "12\u0422 \u2014 \u0421\u0442\u0430\u0440\u043E\u0441\u0442\u0430 \u0434\u0435\u0440\u0435\u0432\u043D\u0438"
+    category: 4
+    status: 1
+    developerComment: "12\u0422 [\u0420\u0410\u0411\u041E\u0427\u0415\u0415][KINGDOM
+      SURVIVAL]. \u0421\u0442\u0430\u0440\u043E\u0441\u0442\u0430 \u043F\u0440\u043E\u0444\u0438\u043B\u044F
+      \xAB\u0414\u0435\u0440\u0435\u0432\u043D\u044F \u0443 \u0434\u043E\u0440\u043E\u0433\u0438\xBB.
+      \u0421\u043B\u0443\u0445 \u043E \u0431\u0440\u043E\u0434\u0435 (\u0437\u043D\u0430\u043D\u0438\u0435
+      settlement.knowledge.ford_mud). \u0428\u0430\u0433 \u043F\u043E\u0440\u0443\u0447\u0435\u043D\u0438\u044F
+      \xAB\u0412\u0435\u0441\u0442\u044C \u0438\u0437 \u0433\u043E\u0440\u043E\u0434\u043A\u0430\xBB:
+      \u043F\u0440\u0438 settlement.town.message.accepted \u2014 \u043F\u0435\u0440\u0435\u0434\u0430\u0442\u044C
+      \u0432\u0435\u0441\u0442\u044C (\u0444\u043B\u0430\u0433 settlement.town.message.delivered)."
+    sceneIllustration: {fileID: 0}
+    sceneIllustrationFillFrame: 0
+    sceneIllustrationScale: 1
+    sceneIllustrationOffsetNormalized: {x: 0, y: 0}
+    startNodeId: settlement.elder.start
+    tags:
+    - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
+    - "12\u0422"
+    nodes:
+    - id: settlement.elder.start
+      speakerId: village_elder
+      text: 
+      textBlocks:
+      - blockId: settlement.elder.start.scene
+        kind: 5
+        speakerIdOverride: narrator
+        text: "\u0421\u0442\u0430\u0440\u043E\u0441\u0442\u0430 \u0447\u0438\u043D\u0438\u0442
+          \u0445\u043E\u043C\u0443\u0442 \u043F\u0440\u044F\u043C\u043E \u043D\u0430
+          \u0437\u0430\u0432\u0430\u043B\u0438\u043D\u043A\u0435 \u0438 \u0441\u043C\u043E\u0442\u0440\u0438\u0442
+          \u043D\u0430 \u043E\u0442\u0440\u044F\u0434 \u0442\u0430\u043A, \u0431\u0443\u0434\u0442\u043E
+          \u043F\u0440\u0438\u043A\u0438\u0434\u044B\u0432\u0430\u0435\u0442, \u0441\u043A\u043E\u043B\u044C\u043A\u043E
+          \u0432\u044B \u0441\u044A\u0435\u0434\u0438\u0442\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: settlement.elder.start.line
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u041F\u0440\u043E\u0435\u0437\u0436\u0438\u0435? \u041D\u0443,
+          \u0441\u0430\u0434\u0438\u0442\u0435\u0441\u044C. \u0422\u043E\u043B\u044C\u043A\u043E
+          \u043A\u043E\u043D\u0435\u0439 \u043A \u043A\u043E\u043B\u043E\u0434\u0446\u0443
+          \u043D\u0435 \u043F\u0443\u0441\u043A\u0430\u0439\u0442\u0435 \u2014 \u043A\u043E\u043B\u043E\u0434\u0435\u0446
+          \u043E\u0434\u0438\u043D, \u0430 \u043A\u043E\u043D\u0438, \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E,
+          \u0431\u0435\u0437 \u0441\u043E\u0432\u0435\u0441\u0442\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041A\u0430\u043A \u0434\u043E\u0440\u043E\u0433\u0430 \u0434\u0430\u043B\u044C\u0448\u0435?"
+        nextNodeId: settlement.elder.road
+        endsDialogue: 0
+        choiceId: settlement.elder.road
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u0422\u0435\u0431\u0435 \u0432\u0435\u0441\u0442\u044C \u0438\u0437
+          \u0433\u043E\u0440\u043E\u0434\u043A\u0430 \u2014 \u043E\u0442 \u041C\u0438\u043B\u0430\u043D\u044B,
+          \u0436\u0435\u043D\u044B \u0441\u0442\u043E\u0440\u043E\u0436\u0430."
+        nextNodeId: settlement.elder.message
+        endsDialogue: 0
+        choiceId: settlement.elder.message
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: settlement.town.message.accepted
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+          - Type: 0
+            StringParam: settlement.town.message.delivered
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+          - Type: 0
+            StringParam: settlement.town.message.failed
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u0411\u044B\u0432\u0430\u0439, \u0441\u0442\u0430\u0440\u043E\u0441\u0442\u0430."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: settlement.elder.bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: settlement.elder.road
+      speakerId: village_elder
+      text: 
+      textBlocks:
+      - blockId: settlement.elder.road.line
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0414\u043E\u0440\u043E\u0433\u0430 \u043A\u0430\u043A \u0434\u043E\u0440\u043E\u0433\u0430.
+          \u0411\u0440\u043E\u0434 \u0447\u0435\u0440\u0435\u0437 \u0441\u0442\u0430\u0440\u043E\u0435
+          \u0440\u0443\u0441\u043B\u043E \u043F\u043E\u0441\u043B\u0435 \u0434\u043E\u0436\u0434\u044F
+          \u0432\u044F\u0437\u043A\u0438\u0439 \u2014 \u0442\u0435\u043B\u0435\u0433\u0438
+          \u0442\u0430\u043C \u0441\u0430\u0434\u044F\u0442\u0441\u044F \u043F\u043E
+          \u0441\u0442\u0443\u043F\u0438\u0446\u0443. \u041A\u0442\u043E \u0443\u043C\u043D\u044B\u0439,
+          \u0442\u043E\u0442 \u0431\u0435\u0440\u0451\u0442 \u0432\u044B\u0448\u0435,
+          \u043F\u043E \u043A\u0430\u043C\u043D\u044F\u043C. \u041A\u0442\u043E \u043D\u0435
+          \u0443\u043C\u043D\u044B\u0439 \u2014 \u0442\u043E\u0442 \u043F\u043E\u0442\u043E\u043C
+          \u0443 \u043D\u0430\u0441 \u0432\u0435\u0440\u0451\u0432\u043A\u0443 \u043F\u0440\u043E\u0441\u0438\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: settlement.elder.road.ford
+          Type: 2
+          StringParam: settlement.knowledge.ford_mud
+          IntParam: 0
+      choices:
+      - text: "\u0421\u043F\u0430\u0441\u0438\u0431\u043E \u0437\u0430 \u0441\u043E\u0432\u0435\u0442."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: settlement.elder.road.thanks
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: settlement.elder.message
+      speakerId: village_elder
+      text: 
+      textBlocks:
+      - blockId: settlement.elder.message.scene
+        kind: 5
+        speakerIdOverride: narrator
+        text: "\u0421\u0442\u0430\u0440\u043E\u0441\u0442\u0430 \u0441\u043B\u0443\u0448\u0430\u0435\u0442
+          \u043C\u043E\u043B\u0447\u0430, \u043F\u043E\u0442\u043E\u043C \u043E\u0442\u043A\u043B\u0430\u0434\u044B\u0432\u0430\u0435\u0442
+          \u0445\u043E\u043C\u0443\u0442 \u2014 \u0432\u043F\u0435\u0440\u0432\u044B\u0435
+          \u0437\u0430 \u0432\u0435\u0441\u044C \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: settlement.elder.message.line
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0417\u043D\u0430\u0447\u0438\u0442, \u0441\u044B\u043D \u0435\u0451
+          \u0436\u0438\u0432 \u0438 \u043A \u0437\u0438\u043C\u0435 \u0432\u0435\u0440\u043D\u0451\u0442\u0441\u044F.
+          \u041D\u0443\u2026 \u0421\u043A\u0430\u0436\u0438\u0442\u0435 \u041C\u0438\u043B\u0430\u043D\u0435:
+          \u043F\u0443\u0441\u0442\u044C \u043D\u0435 \u0442\u0440\u0430\u0442\u0438\u0442\u0441\u044F
+          \u043D\u0430 \u0441\u0432\u0435\u0447\u0438. \u042F \u0435\u0439 \u0438
+          \u0442\u0430\u043A \u0432\u0435\u0440\u0438\u043B."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: settlement.elder.message.delivered
+          Type: 0
+          StringParam: settlement.town.message.delivered
+          IntParam: 0
+      choices:
+      - text: "\u041F\u0435\u0440\u0435\u0434\u0430\u043C."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: settlement.elder.message.bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: settlement_village_hostess
+    title: "12\u0422 \u2014 \u0425\u043E\u0437\u044F\u0439\u043A\u0430 \u043F\u043E\u0441\u0442\u043E\u044F\u043B\u043E\u0433\u043E
+      \u0434\u0432\u043E\u0440\u0430"
+    category: 4
+    status: 1
+    developerComment: "12\u0422 [\u0420\u0410\u0411\u041E\u0427\u0415\u0415]. \u0425\u043E\u0437\u044F\u0439\u043A\u0430
+      \xAB\u0418\u0437\u0431\u044B \u0443 \u0434\u043E\u0440\u043E\u0433\u0438\xBB
+      (\u0434\u0435\u0440\u0435\u0432\u043D\u044F). \u041F\u0440\u0435\u0434\u0443\u043F\u0440\u0435\u0436\u0434\u0435\u043D\u0438\u0435
+      \u043E \u0437\u0432\u0435\u0440\u0435 \u0443 \u0434\u043E\u0440\u043E\u0433\u0438
+      \u2014 \u0442\u043E \u0436\u0435 \u0437\u043D\u0430\u043D\u0438\u0435, \u0447\u0442\u043E
+      \u043D\u0430 \u0434\u043E\u0441\u043A\u0435 (settlement.knowledge.wolf_road),
+      \u043F\u043E\u043A\u0430 \u0436\u0438\u0432 \u0432\u043E\u0436\u0430\u043A
+      \u0443\u0433\u043B\u0435\u0436\u043E\u0433\u043E\u0432; \u043F\u043E\u0441\u043B\u0435
+      freeplay.coal.leader_killed \u2014 \u043D\u043E\u0432\u043E\u0441\u0442\u044C."
+    sceneIllustration: {fileID: 0}
+    sceneIllustrationFillFrame: 0
+    sceneIllustrationScale: 1
+    sceneIllustrationOffsetNormalized: {x: 0, y: 0}
+    startNodeId: settlement.hostess.start
+    tags:
+    - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
+    - "12\u0422"
+    nodes:
+    - id: settlement.hostess.start
+      speakerId: village_hostess
+      text: 
+      textBlocks:
+      - blockId: settlement.hostess.start.line
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u041B\u0430\u0432\u043A\u0438 \u0448\u0438\u0440\u043E\u043A\u0438\u0435,
+          \u043A\u043B\u043E\u043F\u043E\u0432 \u043C\u0430\u043B\u043E, \u0449\u0438
+          \u0432\u0447\u0435\u0440\u0430\u0448\u043D\u0438\u0435, \u043D\u043E \u0447\u0435\u0441\u0442\u043D\u044B\u0435.
+          \u0411\u043E\u043B\u044C\u0448\u0435 \u0432 \u043E\u043A\u0440\u0443\u0433\u0435
+          \u044D\u0442\u043E\u0433\u043E \u043D\u0438\u043A\u0442\u043E \u043D\u0435
+          \u0441\u043A\u0430\u0436\u0435\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: settlement.hostess.start.wolf
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0422\u043E\u043B\u044C\u043A\u043E \u043A \u043B\u0435\u0441\u0443
+          \u043F\u043E \u0442\u0435\u043C\u043D\u043E\u0442\u0435 \u043D\u0435 \u0445\u043E\u0434\u0438\u0442\u0435.
+          \u0412\u043E\u0437\u0447\u0438\u043A\u0438 \u0433\u043E\u0432\u043E\u0440\u044F\u0442,
+          \u0441\u0442\u0430\u0440\u044B\u0439 \u0432\u043E\u043B\u043A \u0443 \u0434\u043E\u0440\u043E\u0433\u0438
+          \u043E\u0432\u0435\u0446 \u0440\u0435\u0436\u0435\u0442 \u2014 \u0438 \u043D\u0435
+          \u0431\u043E\u0438\u0442\u0441\u044F \u043D\u0438 \u043E\u0433\u043D\u044F,
+          \u043D\u0438 \u043A\u0440\u0438\u043A\u0430."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: freeplay.coal.leader_killed
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: settlement.hostess.wolf
+          Type: 2
+          StringParam: settlement.knowledge.wolf_road
+          IntParam: 0
+      - blockId: settlement.hostess.start.wolf_gone
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0413\u043E\u0432\u043E\u0440\u044F\u0442, \u0441\u0442\u0430\u0440\u043E\u0433\u043E
+          \u0432\u043E\u043B\u043A\u0430 \u0443 \u0434\u043E\u0440\u043E\u0433\u0438
+          \u043A\u0442\u043E-\u0442\u043E \u0443\u043B\u043E\u0436\u0438\u043B. \u0412\u043E\u0437\u0447\u0438\u043A\u0438
+          \u0441\u043D\u043E\u0432\u0430 \u0435\u0437\u0434\u044F\u0442 \u0437\u0430\u0441\u0432\u0435\u0442\u043B\u043E
+          \u0438 \u0434\u0430\u0436\u0435 \u043F\u043E\u044E\u0442. \u041F\u043B\u043E\u0445\u043E
+          \u043F\u043E\u044E\u0442, \u043D\u043E \u0435\u0437\u0434\u044F\u0442."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: freeplay.coal.leader_killed
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0423\u0447\u0442\u0451\u043C."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: settlement.hostess.bye
         kind: 3
         conditions:
           Combinator: 0

@@ -1,0 +1,253 @@
+{
+  "id": "settlement_town_milana",
+  "title": "12Т — Милана, жена сторожа",
+  "category": 2,
+  "status": 1,
+  "developerComment": "12Т [РАБОЧЕЕ][KINGDOM SURVIVAL]. Посетитель корчмы укреплённого городка. Поручение «Весть старосте» (ErrandId settlement.errand.town_message) — то же, что на доске городка: принять (флаг settlement.town.message.accepted) → староста деревни (флаг settlement.town.message.delivered) → вернуться за платой (settlement.town.message.done). Срок поручения — в Базе поселений.",
+  "startNodeId": "settlement.milana.start",
+  "tags": [
+    "поселения",
+    "12Т"
+  ],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "settlement.milana.start",
+      "speakerId": "town_milana",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "settlement.milana.start.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Женщина у окна держит кружку, из которой не пьёт. Кружка нужна, чтобы корчмарь не прогнал."
+        },
+        {
+          "blockId": "settlement.milana.start.ask",
+          "kind": 0,
+          "text": "— Вы же на дорогу? В деревне у дороги староста, Вышата, — передайте ему: сын мой жив, к зиме вернётся. Только не позже седмицы: потом староста уйдёт на дальние покосы, и ищи его там. Заплачу, когда вернётесь, — деньги у мужа, а муж на воротах до ночи.",
+          "conditions": {
+            "Combinator": 0,
+            "Conditions": [
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.accepted",
+                "Negate": true
+              },
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.done",
+                "Negate": true
+              }
+            ]
+          }
+        },
+        {
+          "blockId": "settlement.milana.start.wait",
+          "kind": 0,
+          "text": "— Не дошли ещё? Дорога, она такая. Я подожду.",
+          "conditions": {
+            "Combinator": 0,
+            "Conditions": [
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.accepted"
+              },
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.delivered",
+                "Negate": true
+              },
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.failed",
+                "Negate": true
+              }
+            ]
+          }
+        },
+        {
+          "blockId": "settlement.milana.start.back",
+          "kind": 0,
+          "text": "— Передали? Что он сказал?",
+          "conditions": {
+            "Combinator": 0,
+            "Conditions": [
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.delivered"
+              },
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.done",
+                "Negate": true
+              },
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.failed",
+                "Negate": true
+              }
+            ]
+          }
+        },
+        {
+          "blockId": "settlement.milana.start.late",
+          "kind": 0,
+          "text": "— Староста уже на покосах, а весть так и не дошла. Ну что ж. Отправлю с кем-нибудь ещё.",
+          "conditions": {
+            "Combinator": 0,
+            "Conditions": [
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.failed"
+              },
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.done",
+                "Negate": true
+              }
+            ]
+          }
+        },
+        {
+          "blockId": "settlement.milana.start.done",
+          "kind": 0,
+          "text": "— Свечку я всё-таки поставила. Не за сына — за вас: чтобы дороги были короче.",
+          "conditions": {
+            "Combinator": 0,
+            "Conditions": [
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.done"
+              }
+            ]
+          }
+        }
+      ],
+      "choices": [
+        {
+          "choiceId": "settlement.milana.accept",
+          "text": "Передам.",
+          "kind": 0,
+          "nextNodeId": "settlement.milana.accepted",
+          "conditions": {
+            "Combinator": 0,
+            "Conditions": [
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.accepted",
+                "Negate": true
+              },
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.done",
+                "Negate": true
+              }
+            ]
+          }
+        },
+        {
+          "choiceId": "settlement.milana.report",
+          "text": "Сказал: пусть не тратится на свечи — он и так верил.",
+          "kind": 0,
+          "nextNodeId": "settlement.milana.paid",
+          "conditions": {
+            "Combinator": 0,
+            "Conditions": [
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.delivered"
+              },
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.done",
+                "Negate": true
+              },
+              {
+                "Type": 0,
+                "StringParam": "settlement.town.message.failed",
+                "Negate": true
+              }
+            ]
+          }
+        },
+        {
+          "choiceId": "settlement.milana.bye",
+          "text": "Мне пора.",
+          "kind": 3,
+          "endsDialogue": true
+        }
+      ]
+    },
+    {
+      "id": "settlement.milana.accepted",
+      "speakerId": "town_milana",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "settlement.milana.accepted.line",
+          "kind": 0,
+          "text": "— Спасибо. Только скажите своими словами — он не любит, когда по бумажке.",
+          "onRevealEffects": [
+            {
+              "EffectExecutionId": "settlement.milana.accepted.flag",
+              "Type": 0,
+              "StringParam": "settlement.town.message.accepted"
+            }
+          ]
+        }
+      ],
+      "choices": [
+        {
+          "choiceId": "settlement.milana.accepted.bye",
+          "text": "Своими и скажу.",
+          "kind": 3,
+          "endsDialogue": true
+        }
+      ]
+    },
+    {
+      "id": "settlement.milana.paid",
+      "speakerId": "town_milana",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "settlement.milana.paid.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Милана наконец отпивает из кружки, морщится — квас давно выдохся — и смеётся."
+        },
+        {
+          "blockId": "settlement.milana.paid.line",
+          "kind": 0,
+          "text": "— Похоже на него. Вот, муж передал, как обещала.",
+          "onRevealEffects": [
+            {
+              "EffectExecutionId": "settlement.milana.paid.done",
+              "Type": 0,
+              "StringParam": "settlement.town.message.done"
+            },
+            {
+              "EffectExecutionId": "settlement.milana.paid.gold",
+              "Type": 15,
+              "IntParam": 8
+            },
+            {
+              "EffectExecutionId": "settlement.milana.paid.xp",
+              "Type": 12,
+              "IntParam": 8
+            }
+          ]
+        }
+      ],
+      "choices": [
+        {
+          "choiceId": "settlement.milana.paid.bye",
+          "text": "Доброго дня.",
+          "kind": 3,
+          "endsDialogue": true
+        }
+      ]
+    }
+  ]
+}

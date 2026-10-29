@@ -51,7 +51,21 @@ public partial class PrototypeUIController
         // исследованием, а не текстовым входом; оба сразу не показываются.
         if (IsLocalScreenOpen)
             return false;
-        if (TryEnterLocalExploration(location))
+
+        // 12Т: поселение — сначала вход (лагерь, группа), внутри — экран
+        // поселения. Его локальная карта открывается только действием
+        // «Прогуляться», а не перехватывает вход.
+        if (location.IsSettlement)
+        {
+            if (IsSettlementScreenOpen)
+                return false;
+            if (SettlementCampService.InsideLocationId(gameState) == location.Id)
+            {
+                OpenSettlementScreen(location.Id);
+                return true;
+            }
+        }
+        else if (TryEnterLocalExploration(location))
             return true;
 
         locationInteractionActive = true;

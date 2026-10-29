@@ -1,0 +1,21 @@
+{
+  "name": "KingdomSurvival.ItemDatabase.Editor",
+  "rootNamespace": "KingdomSurvival.ItemDatabase.Editor",
+  "references": [
+    "KingdomSurvival.Core",
+    "KingdomSurvival.ItemDatabase",
+    "KingdomSurvival.SettlementDatabase",
+    "KingdomSurvival.DialogueDatabase"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -1099,6 +1099,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 {
                     case NarrativeEffectType.ChangeFood:
                     case NarrativeEffectType.ChangeSupplies:
+                    case NarrativeEffectType.ChangeArmyGold:
                     case NarrativeEffectType.ChangeRelation:
                         text += (string.IsNullOrEmpty(effect.StringParam) ? string.Empty : " «" + effect.StringParam + "»") +
                                 " " + (effect.IntParam >= 0 ? "+" : string.Empty) + effect.IntParam;
@@ -1626,6 +1627,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 case NarrativeEffectType.GrantExperience: return "Дать опыт (герой и бойцы похода)";
                 case NarrativeEffectType.GrantCompetencyPractice: return "Практика компетенции героя";
                 case NarrativeEffectType.TeachCompetency: return "Наставник: поднять потолок компетенции";
+                case NarrativeEffectType.ChangeArmyGold: return "Изменить золото похода";
                 default: return type.ToString();
             }
         }
@@ -1729,7 +1731,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             kind = (NarrativeEffectType)type.enumValueIndex;
             DrawLongIdField(stringParam, EffectStringParamLabel(kind));
             if (kind == NarrativeEffectType.ChangeRelation || kind == NarrativeEffectType.ChangeFood ||
-                kind == NarrativeEffectType.ChangeSupplies)
+                kind == NarrativeEffectType.ChangeSupplies || kind == NarrativeEffectType.ChangeArmyGold)
                 EditorGUILayout.PropertyField(intParam, new GUIContent("Изменение (+/−)"));
             else if (kind == NarrativeEffectType.ShortcutRouteCells)
                 EditorGUILayout.PropertyField(intParam, new GUIContent("Клеток вперёд"));

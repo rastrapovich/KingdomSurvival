@@ -868,6 +868,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="settlement-footer" class="settlement-footer">
                 <ui:Label name="settlement-party" text="" class="settlement-party ks-text" />
+                <ui:Button name="settlement-journal-button" text="ЖУРНАЛ" class="ks-button settlement-exit-button" />
                 <ui:Button name="settlement-exit-button" text="ВЫЙТИ" class="ks-button settlement-exit-button" />
             </ui:VisualElement>
 
@@ -876,44 +877,13 @@
                     <ui:Label name="trade-title" text="" class="settlement-page-title ks-gold-text" />
                     <ui:Label name="trade-subtitle" text="" class="settlement-page-subtitle ks-muted-text" />
                 </ui:VisualElement>
+                <ui:Label name="trade-hint" text="Двойной клик — в сделку · двойной клик по строке сделки — вернуть · правая кнопка — сведения" class="trade-hint ks-muted-text" />
                 <ui:VisualElement class="trade-columns">
-                    <ui:VisualElement class="trade-column">
-                        <ui:VisualElement class="trade-column-head">
-                            <ui:VisualElement name="trade-merchant-portrait" class="trade-portrait" />
-                            <ui:VisualElement class="trade-column-head-text">
-                                <ui:Label text="У ТОРГОВЦА" class="ks-panel-title" />
-                                <ui:Label name="trade-merchant-money" text="" class="trade-column-money ks-text" />
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="trade-filter-row">
-                            <ui:TextField name="trade-merchant-search" class="trade-search" />
-                            <ui:DropdownField name="trade-merchant-filter" class="trade-filter" />
-                        </ui:VisualElement>
-                        <ui:ScrollView name="trade-merchant-list" class="trade-list" />
-                    </ui:VisualElement>
-                    <ui:VisualElement name="trade-card" class="trade-card">
-                        <ui:Image name="trade-card-image" class="trade-card-image" />
-                        <ui:Label name="trade-card-name" text="" class="trade-card-name ks-gold-text" />
-                        <ui:Label name="trade-card-meta" text="" class="trade-card-meta ks-muted-text" />
-                        <ui:ScrollView class="trade-card-text-scroll">
-                            <ui:Label name="trade-card-description" text="" class="trade-card-description ks-text" />
-                            <ui:Label name="trade-card-mechanics" text="" class="trade-card-mechanics" />
-                            <ui:Label name="trade-card-compare" text="" class="trade-card-compare ks-muted-text" />
-                        </ui:ScrollView>
-                        <ui:Label name="trade-card-price" text="" class="trade-card-price ks-text" />
-                        <ui:VisualElement class="trade-quantity-row">
-                            <ui:Button name="trade-minus-button" text="−" class="ks-button trade-quantity-button" />
-                            <ui:Label name="trade-quantity" text="0" class="trade-quantity ks-text" />
-                            <ui:Button name="trade-plus-button" text="+" class="ks-button trade-quantity-button" />
-                            <ui:Button name="trade-toggle-button" text="" class="ks-button trade-toggle-button" />
-                        </ui:VisualElement>
-                        <ui:Label name="trade-card-reason" text="" class="trade-card-reason" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="trade-column">
+                    <ui:VisualElement class="trade-column trade-column--hero">
                         <ui:VisualElement class="trade-column-head">
                             <ui:VisualElement name="trade-hero-portrait" class="trade-portrait" />
                             <ui:VisualElement class="trade-column-head-text">
-                                <ui:Label text="У ОТРЯДА (НЕ НАДЕТО)" class="ks-panel-title" />
+                                <ui:Label text="ВАШИ ВЕЩИ" class="ks-panel-title" />
                                 <ui:Label name="trade-party-money" text="" class="trade-column-money ks-text" />
                             </ui:VisualElement>
                         </ui:VisualElement>
@@ -922,6 +892,30 @@
                             <ui:DropdownField name="trade-party-filter" class="trade-filter" />
                         </ui:VisualElement>
                         <ui:ScrollView name="trade-party-list" class="trade-list" />
+                        <ui:VisualElement class="trade-offer">
+                            <ui:Label text="ВЫ ПРОДАЁТЕ" class="trade-offer-title" />
+                            <ui:ScrollView name="trade-sell-offer" class="trade-offer-list" />
+                            <ui:Label name="trade-sell-total" text="" class="trade-offer-total ks-text" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="trade-column trade-column--merchant">
+                        <ui:VisualElement class="trade-column-head">
+                            <ui:VisualElement name="trade-merchant-portrait" class="trade-portrait" />
+                            <ui:VisualElement class="trade-column-head-text">
+                                <ui:Label text="ТОВАР ТОРГОВЦА" class="ks-panel-title" />
+                                <ui:Label name="trade-merchant-money" text="" class="trade-column-money ks-text" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="trade-filter-row">
+                            <ui:TextField name="trade-merchant-search" class="trade-search" />
+                            <ui:DropdownField name="trade-merchant-filter" class="trade-filter" />
+                        </ui:VisualElement>
+                        <ui:ScrollView name="trade-merchant-list" class="trade-list" />
+                        <ui:VisualElement class="trade-offer">
+                            <ui:Label text="ВЫ ПОКУПАЕТЕ" class="trade-offer-title" />
+                            <ui:ScrollView name="trade-buy-offer" class="trade-offer-list" />
+                            <ui:Label name="trade-buy-total" text="" class="trade-offer-total ks-text" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="trade-footer">
@@ -934,6 +928,22 @@
                     <ui:Button name="trade-confirm-button" text="ПОДТВЕРДИТЬ" class="ks-button trade-confirm-button" />
                     <ui:Button name="trade-cancel-button" text="ОТМЕНИТЬ СДЕЛКУ" class="ks-button trade-footer-button" />
                     <ui:Button name="trade-back-button" text="НАЗАД" class="ks-button trade-footer-button" />
+                </ui:VisualElement>
+                <ui:VisualElement name="trade-item-popup" class="trade-item-popup">
+                    <ui:VisualElement name="trade-item-popup-box" class="trade-item-popup-box">
+                        <ui:VisualElement class="trade-item-popup-head">
+                            <ui:Image name="trade-item-popup-icon" class="trade-item-popup-icon" />
+                            <ui:VisualElement class="trade-item-popup-head-text">
+                                <ui:Label name="trade-item-popup-name" text="" class="trade-card-name ks-gold-text" />
+                                <ui:Label name="trade-item-popup-meta" text="" class="trade-card-meta ks-muted-text" />
+                            </ui:VisualElement>
+                            <ui:Button name="trade-item-popup-close" text="×" class="ks-button trade-item-popup-close" />
+                        </ui:VisualElement>
+                        <ui:Label name="trade-item-popup-text" text="" class="trade-card-description ks-text" />
+                        <ui:Label name="trade-item-popup-mechanics" text="" class="trade-card-mechanics" />
+                        <ui:Label name="trade-item-popup-compare" text="" class="trade-card-compare ks-muted-text" />
+                        <ui:Label name="trade-item-popup-price" text="" class="trade-card-price ks-text" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
 

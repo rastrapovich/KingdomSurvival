@@ -419,10 +419,11 @@ public partial class PrototypeUIController
                 return;
             }
 
-            // Пустое место — таблица ниже сразу показывает свободных.
+            // Пустое место — выбор свободного бойца (бриф правок п. 8).
             if (evt.button == 0 && refs.PersonId == null && ExpeditionPreparation.CanEdit(gameState))
             {
-                SetHeroSquadFilter(HeroSquadFilter.Free);
+                if (!TryOpenHeroFighterPicker())
+                    SetHeroSquadFilter(HeroSquadFilter.Free);
                 evt.StopPropagation();
             }
         });
@@ -521,6 +522,8 @@ public partial class PrototypeUIController
         if (journeySummaryList != null && journeySummaryList.childCount == 0)
             RenderJourneySummary();
         RefreshHeroScreenBadges();
+        // Бриф правок пп. 6–10: согласованный вид страниц героя.
+        ApplyHeroScreenRevision();
     }
 
     // Как в старом RefreshSupplyBlock/ApplyCompactSupplyText экрана «Армия»,
@@ -571,7 +574,8 @@ public partial class PrototypeUIController
         {
             HeroQuality quality = (HeroQuality)i;
             int value = hero != null ? hero.GetQuality(quality) : HeroProfileData.DefaultQualityValue;
-            heroScreenQualityValues[i].text = value + " / " + HeroProfileData.MaxQualityValue;
+            // Бриф правок п. 10: одно число («5»), шкала 1–10 прежняя.
+            heroScreenQualityValues[i].text = value.ToString();
             heroScreenQualityFills[i].style.width = Length.Percent(Mathf.Clamp01((float)value / HeroProfileData.MaxQualityValue) * 100f);
             heroScreenQualityFills[i].EnableInClassList("hero-screen-quality-fill--weak", value <= 3);
             heroScreenQualityFills[i].EnableInClassList("hero-screen-quality-fill--strong", value >= 7);

@@ -115,7 +115,8 @@ public sealed class SettlementCampPlayModeTests
         LocationData target = campaign.Locations.First(location => !location.IsWaypoint && location.IsVisibleOnMap);
         Assert.IsTrue(campaign.TryStartExpedition(target.Id, new List<string> { "garrick" }, out string message, HomePeopleService.OstafiyId), message);
         campaign.ActiveExpedition.RouteIndex = 1;
-        yield return null;
+        // Без кадра между стартом похода и отладочным входом: иначе отряд
+        // успевает пробежать и открыть дорожную встречу (нестабильно в полном прогоне).
 
         Invoke(main, "DebugSettlementCamp");
         yield return Frames(3);

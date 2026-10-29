@@ -174,6 +174,26 @@ public sealed class HomeScreenPlayModeTests
         Assert.AreEqual("Кольчуга из клети", root.Q<Label>("hero-screen-equipment-slot-2-name").text);
         Assert.AreEqual(CombatStatsAssembler.Compute(campaign, heroId).Final.Defense.ToString(),
             root.Q<Label>("hero-screen-unit-card-stat-defense-value").text, "Карточка показывает собранные числа.");
+
+        // Бриф правок п. 5: двойной клик по снятой вещи надевает её обратно,
+        // надетая уходит в сумку — без потерь и дублей.
+        ItemInstanceData coat = campaign.Inventory.Items.First(i => i.Slot == ItemSlot.None && i.InstanceId != mail.InstanceId &&
+            ItemCatalog.Find(i.ItemId)?.Slot == ItemSlot.Protection && root.Q<VisualElement>("hero-bag-cell-" + i.InstanceId) != null);
+        int itemCount = campaign.Inventory.Items.Count;
+        VisualElement coatCell = root.Q<VisualElement>("hero-bag-cell-" + coat.InstanceId);
+        Assert.IsNotNull(coatCell, "Снятая защита — в сетке сумки.");
+        Event doubleClick = new Event { type = EventType.MouseDown, button = 0, clickCount = 2, mousePosition = coatCell.worldBound.center };
+        using (PointerDownEvent down = PointerDownEvent.GetPooled(doubleClick))
+        {
+            down.target = coatCell;
+            coatCell.SendEvent(down);
+        }
+        yield return Frames(3);
+        Assert.AreEqual(coat.InstanceId, ItemService.Equipped(campaign, heroId, ItemSlot.Protection).InstanceId, "Двойной клик надел вещь.");
+        Assert.AreEqual(itemCount, campaign.Inventory.Items.Count, "Вещей не прибавилось и не убавилось.");
+        Assert.AreEqual(ItemSlot.None, ItemService.Find(campaign, mail.InstanceId).Slot, "Прежняя защита снята.");
+        Assert.AreEqual(CombatStatsAssembler.Compute(campaign, heroId).Final.Defense.ToString(),
+            root.Q<Label>("hero-screen-unit-card-stat-defense-value").text, "Характеристики обновились сразу.");
     }
 
     // Экран героя на вкладках: каждая вкладка показывает свою страницу,

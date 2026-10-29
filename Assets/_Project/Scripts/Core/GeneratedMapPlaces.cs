@@ -13,6 +13,18 @@ public static class GeneratedMapPlaces
     public const string IdPrefix = "gen-";
     public const string VillageKind = GeneratedMapSite.VillageKind;
 
+    // Бриф правок (22 пункта) п. 15: типы мест, у которых пока нет ничего,
+    // кроме разового «Исследовать» (ни истории, ни задачи, ни продолжения),
+    // в новой партии точками карты не становятся. Рисунок карты и места
+    // историй (руины → курган, шахта, глухой лес, сюжетные курган и пещера)
+    // не затронуты; безопасные места по LORE (хижина, пасека), перекрёсток и
+    // мельница остаются. Уже созданные в старой партии точки работают как
+    // прежде — журнал и полученные награды не трогаются.
+    public static readonly HashSet<string> KindsWithoutContent = new HashSet<string>
+    {
+        "grove", "barrow", "hillfort", "abandoned-village", "abandoned-yard", "sanctuary", "lair", "spring", "cave"
+    };
+
     public static void AddTo(GameState state)
     {
         if (state == null || !state.HasGeneratedMap)
@@ -88,6 +100,10 @@ public static class GeneratedMapPlaces
         {
             if (kinds.TryGetValue(location.Id, out string kind))
                 location.PlaceKind = kind ?? string.Empty;
+            // Отбор после заполнения: поток случайных чисел и номера прочих
+            // мест не меняются.
+            if (KindsWithoutContent.Contains(location.PlaceKind))
+                continue;
             // 12Т: деревня генератора — посещаемое поселение (вход, лагерь,
             // экран поселения). Поток случайных чисел генератора не меняется.
             location.IsSettlement = location.PlaceKind == VillageKind;

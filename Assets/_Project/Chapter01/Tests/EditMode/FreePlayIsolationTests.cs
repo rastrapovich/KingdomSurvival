@@ -62,7 +62,7 @@ public sealed class FreePlayIsolationTests
         Assert.IsTrue(ruins.IsVisibleOnMap && ruins.IsDiscovered, "Одно место известно с начала.");
 
         IReadOnlyList<JournalGoalViewData> goals = CampaignContent.BuildGoals(state);
-        Assert.IsTrue(goals.Any(g => g.Id == FreePlayContent.RegionGoalId && g.State == JournalGoalState.Active));
+        Assert.IsFalse(goals.Any(g => g.Id == FreePlayContent.RegionGoalId), "Бриф правок п. 11: «Округа Дома» в журнале пока не показывается.");
         Assert.IsFalse(goals.Any(g => g.Category == JournalGoalCategory.Optional),
             "Новая игра: дополнительных дел нет, известное место — не задание.");
         Assert.IsNotEmpty(CampaignContent.DescribeHomeObjects(state), "Дом не пустой.");
@@ -123,7 +123,7 @@ public sealed class FreePlayIsolationTests
         Assert.AreEqual(state.Configuration.WorldSeed, restored.Configuration.WorldSeed);
         FreePlayContent.Refresh(restored);
         Assert.AreEqual(2, Chronicle.Get(restored).Entries.Count(e => e.Id.StartsWith("freeplay.")), "Загрузка не дублирует записи.");
-        StringAssert.Contains("вернулся", CampaignContent.BuildGoals(restored).First(g => g.Id == FreePlayContent.RegionGoalId).CurrentStep);
+        StringAssert.Contains("вернулся", FreePlayContent.BuildRegionGoal(restored).CurrentStep);
     }
 
     [Test]

@@ -1026,12 +1026,8 @@ namespace KingdomSurvival.WorldMapVisual
                 float trailHalf = Mathf.Max(0.6f, style.TrailWidthHexes * hexPx * 0.5f);
                 List<List<Vector2>> roads = new List<List<Vector2>>();
                 List<List<Vector2>> trails = new List<List<Vector2>>();
-                foreach (GeneratedMapLine line in map.Roads)
-                {
-                    if (line?.Points == null || line.Points.Count < 2)
-                        continue;
-                    (line.Kind == GeneratedMapLine.TrailKind ? trails : roads).Add(ToPixels(line.Points));
-                }
+                foreach ((string kind, List<Vector2> points) in RoadPartsOnLand())
+                    (kind == GeneratedMapLine.TrailKind ? trails : roads).Add(points);
 
                 if (style.DrawRoads && style.DrawInk && style.Ink.RoadEdge.Enabled && style.Ink.RoadEdge.Opacity > 0f && inkPx > 0f)
                 {
@@ -1058,6 +1054,20 @@ namespace KingdomSurvival.WorldMapVisual
                     return;
                 float roadHalf = Mathf.Max(0.8f, style.RoadWidthHexes * hexPx * 0.5f);
                 float length = Mathf.Max(roadHalf * 4f, hexPx * 0.7f);
+                if (map.BridgeSpans != null && map.BridgeSpans.Count >= 2)
+                {
+                    foreach ((Vector2 a, Vector2 c) in BridgeSpanPixels())
+                    {
+                        Vector2 along = (c - a).normalized;
+                        Vector2 normal = new Vector2(-along.y, along.x);
+                        float half = roadHalf * 1.4f;
+                        FillPolygon(new[] { a + normal * half, c + normal * half, c - normal * half, a - normal * half },
+                            style.BridgeColor, style.InkColor, Mathf.Max(1f, inkPx * 0.6f), 0f);
+                        StrokeSegment(a + normal * half, c + normal * half, Mathf.Max(0.6f, inkPx * 0.35f), style.InkColor, 1f);
+                        StrokeSegment(a - normal * half, c - normal * half, Mathf.Max(0.6f, inkPx * 0.35f), style.InkColor, 1f);
+                    }
+                    return;
+                }
                 foreach (MapPointData bridge in map.Bridges)
                 {
                     Vector2 center = ToPixel(bridge);
@@ -1078,6 +1088,64 @@ namespace KingdomSurvival.WorldMapVisual
                     StrokeSegment(a + normal * half, c + normal * half, Mathf.Max(0.6f, inkPx * 0.35f), style.InkColor, 1f);
                     StrokeSegment(a - normal * half, c - normal * half, Mathf.Max(0.6f, inkPx * 0.35f), style.InkColor, 1f);
                 }
+            }
+
+            // Бриф правок п. 13: пролёты мостов в пикселях рисунка.
+            private List<(Vector2 A, Vector2 B)> BridgeSpanPixels()
+            {
+                List<(Vector2, Vector2)> spans = new List<(Vector2, Vector2)>();
+                if (map.BridgeSpans == null)
+                    return spans;
+                for (int i = 0; i + 1 < map.BridgeSpans.Count; i += 2)
+                {
+                    Vector2 a = ToPixel(map.BridgeSpans[i]);
+                    Vector2 b = ToPixel(map.BridgeSpans[i + 1]);
+                    if ((b - a).sqrMagnitude > 0.01f)
+                        spans.Add((a, b));
+                }
+                return spans;
+            }
+
+            // Линии дорог и троп без участков в русле: точка внутри пролёта
+            // моста режет линию, концы остаются на берегах.
+            private List<(string Kind, List<Vector2> Points)> RoadPartsOnLand()
+            {
+                List<(string, List<Vector2>)> parts = new List<(string, List<Vector2>)>();
+                if (map.Roads == null)
+                    return parts;
+                List<(Vector2 A, Vector2 B)> spans = BridgeSpanPixels();
+                float near = hexPx * 0.6f;
+                foreach (GeneratedMapLine line in map.Roads)
+                {
+                    if (line?.Points == null || line.Points.Count < 2)
+                        continue;
+                    List<Vector2> points = ToPixels(line.Points);
+                    List<Vector2> current = new List<Vector2>();
+                    foreach (Vector2 point in points)
+                    {
+                        bool inWater = false;
+                        foreach ((Vector2 a, Vector2 b) in spans)
+                        {
+                            float distance = DistanceToSegment(point, a, b, out float t);
+                            if (distance < near && t > 0.02f && t < 0.98f)
+                            {
+                                inWater = true;
+                                break;
+                            }
+                        }
+                        if (!inWater)
+                        {
+                            current.Add(point);
+                            continue;
+                        }
+                        if (current.Count >= 2)
+                            parts.Add((line.Kind, current));
+                        current = new List<Vector2>();
+                    }
+                    if (current.Count >= 2)
+                        parts.Add((line.Kind, current));
+                }
+                return parts;
             }
 
             private Vector2 RoadDirectionAt(Vector2 point)
@@ -1275,6 +1343,13 @@ namespace KingdomSurvival.WorldMapVisual
                 Vector2 center = ToPixel(village.XPercent, village.YPercent);
                 System.Random local = new System.Random(village.Variant);
                 float size = style.VillageSizeHexes * hexPx;
+                // Бриф правок п. 19: старт свободной игры — стоянка-лагерь у
+                // дороги, а не пустая деревня: шалаш и кострище вместо изб.
+                if (village.IsStart)
+                {
+                    stamps.Add(new Stamp { Y = center.y, Order = 1, Draw = () => DrawCamp(center, size * 0.55f) });
+                    return;
+                }
                 Sprite sprite = Pick(style.Pool(style.VillageSprites, style.UseVillageSprites), local);
                 if (sprite != null)
                 {
@@ -1493,6 +1568,19 @@ namespace KingdomSurvival.WorldMapVisual
             }
 
             // Стоянка отряда: частокол кольцом.
+            // Шалаш и кострище стоянки (временный знак до рисунка художника).
+            private void DrawCamp(Vector2 bottom, float size)
+            {
+                Vector2 top = bottom + new Vector2(-size * 0.15f, -size * 0.9f);
+                Vector2 left = bottom + new Vector2(-size * 0.65f, 0f);
+                Vector2 right = bottom + new Vector2(size * 0.35f, 0f);
+                FillPolygon(new[] { top, right, left }, style.BridgeColor, style.InkColor, Mathf.Max(1f, inkPx * 0.6f), 0f);
+                StrokeSegment(top, top + new Vector2(-size * 0.12f, -size * 0.18f), Mathf.Max(0.6f, inkPx * 0.5f), style.InkColor, 1f);
+                StrokeSegment(top, top + new Vector2(size * 0.1f, -size * 0.18f), Mathf.Max(0.6f, inkPx * 0.5f), style.InkColor, 1f);
+                Vector2 fire = bottom + new Vector2(size * 0.7f, -size * 0.05f);
+                FillEllipse(fire, size * 0.14f, size * 0.09f, style.InkColor, style.InkColor, 0f, 0f);
+            }
+
             private void DrawStartMark(Vector2 center, float radius)
             {
                 int posts = 18;

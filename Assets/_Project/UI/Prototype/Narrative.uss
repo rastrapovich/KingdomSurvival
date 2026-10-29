@@ -369,3 +369,8 @@
     -unity-font-style: bold;
     white-space: normal;
 }
+
+/* Бриф правок п. 2: разговор над поселением (или местом) — фон места виден. */
+.narrative-dialogue-overlay--over-place {
+    background-color: rgba(5, 7, 8, 0.5);
+}

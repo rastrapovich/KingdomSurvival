@@ -180,7 +180,12 @@ public static class NarrativeEffectApplier
         if (effects == null)
             return;
 
-        foreach (NarrativeEffect effect in effects)
+        // Бриф правок п. 21: выбор, завершающий поручение не в поселении
+        // выдачи, не применяется целиком (ни флага, ни награды, ни вещи).
+        List<NarrativeEffect> list = new List<NarrativeEffect>(effects);
+        if (ErrandClaims.BlocksEffects(context?.GameState, list))
+            return;
+        foreach (NarrativeEffect effect in list)
             effect?.Apply(context);
     }
 }

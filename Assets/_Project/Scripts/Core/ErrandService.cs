@@ -95,9 +95,11 @@ public static class ErrandService
                 AcceptedHour = ContinuousSimulationSystem.GetAbsoluteHours(state)
             });
         }
+        string back = ErrandClaims.DescribeReturn(state, errand);
         Chronicle.Record(state, "errand." + errand.Id + ".accepted", "Поручение: " + errand.Title,
             (string.IsNullOrWhiteSpace(errand.Summary) ? errand.Title : errand.Summary) +
-            (string.IsNullOrWhiteSpace(source) ? string.Empty : " (" + source + ")"));
+            (string.IsNullOrWhiteSpace(source) ? string.Empty : " (" + source + ")") +
+            (string.IsNullOrEmpty(back) ? string.Empty : " " + back));
     }
 
     // Опрос: поручение, принятое в разговоре, получает отметку принятия;
@@ -187,7 +189,14 @@ public static class ErrandService
                 step = "Срок вышел — поручение не выполнено.";
                 stage = "failed";
             }
-            else if (errand.CompletionLimitHours > 0)
+            else
+            {
+                // Бриф правок п. 21: к кому и куда вернуться.
+                string back = ErrandClaims.DescribeReturn(state, errand);
+                if (!string.IsNullOrEmpty(back))
+                    step += " " + back;
+            }
+            if (status == ErrandStatus.Active && errand.CompletionLimitHours > 0)
             {
                 ErrandStateData record = Find(state, errand.Id);
                 if (record != null)

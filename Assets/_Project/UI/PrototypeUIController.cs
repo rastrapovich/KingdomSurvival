@@ -471,13 +471,10 @@ public partial class PrototypeUIController : MonoBehaviour
         reportHistory.Add("День " + reportDay + "\n" + message);
         reportRequiresAcknowledgement.Add(false);
         reportReadStates.Add(true);
-        reportHistoryLabel.text = DecorateFeatureLines(string.Join("\n\n", reportHistory));
-
-        reportHistoryScroll.schedule.Execute(() =>
-        {
-            reportHistoryScroll.verticalScroller.value =
-                reportHistoryScroll.verticalScroller.highValue;
-        }).ExecuteLater(1);
+        // Бриф правок п. 1: текст показа собирается один раз и только из
+        // последних записей (RenderRoyalReportsNewestFirst) — раньше каждое
+        // донесение заново раскладывало всю историю партии.
+        ScheduleRoyalReportsRefresh();
 
         return reportHistory.Count - 1;
     }

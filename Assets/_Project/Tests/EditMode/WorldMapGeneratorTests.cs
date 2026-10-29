@@ -252,9 +252,12 @@ public class WorldMapGeneratorTests
         Assert.That(generated.FindAll(location => location.PlaceKind == GeneratedMapPlaces.VillageKind).Count,
             Is.EqualTo(map.Villages.Count - 1), "Каждая деревня, кроме стоянки, — место карты.");
 
+        // Бриф правок п. 15: типы без содержания (только «Исследовать») точками
+        // карты не становятся; остальные знаки — места.
         foreach (GeneratedMapSite site in map.Landmarks)
         {
-            Assert.That(state.Locations.Exists(location => location.PlaceKind == site.Kind), Is.True, $"У знака '{site.Kind}' нет места.");
+            bool expected = !GeneratedMapPlaces.KindsWithoutContent.Contains(site.Kind);
+            Assert.That(state.Locations.Exists(location => location.PlaceKind == site.Kind), Is.EqualTo(expected), $"Знак '{site.Kind}'.");
         }
 
         // Шахта из Базы карты встаёт у знака шахты и не дублируется местом генератора.

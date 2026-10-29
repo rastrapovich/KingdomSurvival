@@ -610,8 +610,9 @@ public sealed class SettlementsTradeTavernTests
 
         Assert.IsTrue(NoticeBoardService.TryAccept(state, Here, "notice.request", out string message), message);
         Assert.IsTrue(state.Narrative.HasFlag(ErrandAccepted));
-        TavernOfferView offer = TavernService.Offers(state, Here).Single(o => o.Offer.Id == "offer.errand");
-        Assert.IsFalse(offer.Enabled, "В корчме то же поручение уже принято.");
+        // Бриф правок п. 22: принятое поручение в корчме больше не предлагается
+        // (строка исчезает, а не сереет).
+        Assert.IsFalse(TavernService.Offers(state, Here).Any(o => o.Offer.Id == "offer.errand"), "В корчме то же поручение уже принято.");
         Assert.IsFalse(NoticeBoardService.Notices(state, Here).Single(n => n.Notice.Id == "notice.request").Actions
             .Any(a => a.Kind == NoticeActionKind.AcceptErrand));
         Assert.AreEqual(1, ErrandService.BuildGoals(state).Count(g => g.Id == "errand." + ErrandId));

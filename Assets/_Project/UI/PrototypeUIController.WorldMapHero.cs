@@ -184,7 +184,8 @@ public partial class PrototypeUIController
         TickWorldMapZoom(dt);
         TickWorldMapCameraFollow(dt, settings);
         TickWorldMapClickMarker(now, settings);
-        TickWorldMapHeroFigure(dt, settings);
+        // Шаг фигуры — в темпе карты (п. 18): ноги не отстают от пути.
+        TickWorldMapHeroFigure(dt * MapTempo, settings);
     }
 
     private bool IsWorldMapScreenGeometryReady()

@@ -31,8 +31,8 @@ public sealed class FreePlaySummaryTests
         Chronicle.Record(state, FreePlayContent.ReturnPrefix + n, "Возвращение", "Отряд вернулся в Дом.");
     }
 
-    private static JournalGoalViewData Goal(GameState state) =>
-        CampaignContent.BuildGoals(state).FirstOrDefault(g => g.Id == FreePlaySummary.GoalId);
+    // Бриф правок п. 11: в журнале итога пока нет — проверяется сам итог.
+    private static JournalGoalViewData Goal(GameState state) => FreePlaySummary.BuildGoal(state);
 
     [Test]
     public void NoTrips_NoSummary()

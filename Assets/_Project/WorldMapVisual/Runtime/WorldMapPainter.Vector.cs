@@ -489,13 +489,11 @@ namespace KingdomSurvival.WorldMapVisual
                 Color trailColor = Grade(style.TrailColor);
                 trailColor.a = 1f;
                 int seed = 1001;
-                foreach (GeneratedMapLine line in map.Roads)
+                // Бриф правок п. 13: в русле дорогу не рисуем — её несёт мост.
+                foreach ((string kind, List<Vector2> points) in RoadPartsOnLand())
                 {
-                    if (line?.Points == null || line.Points.Count < 2)
-                        continue;
-                    List<Vector2> points = ToPixels(line.Points);
                     seed++;
-                    if (line.Kind == GeneratedMapLine.TrailKind)
+                    if (kind == GeneratedMapLine.TrailKind)
                     {
                         if (!style.DrawTrails)
                             continue;
@@ -564,6 +562,26 @@ namespace KingdomSurvival.WorldMapVisual
                 List<WorldMapVectorShape> shapes = new List<WorldMapVectorShape>();
                 Color plank = Grade(style.BridgeColor);
                 int seed = 3001;
+                // Бриф правок п. 13: пролёт — от берега до берега поперёк
+                // воды; концы совпадают с концами дороги на суше.
+                if (map.BridgeSpans != null && map.BridgeSpans.Count >= 2)
+                {
+                    foreach ((Vector2 a, Vector2 c) in BridgeSpanPixels())
+                    {
+                        Vector2 along = (c - a).normalized;
+                        Vector2 normal = new Vector2(-along.y, along.x);
+                        float half = roadHalf * 1.4f;
+                        WorldMapVectorShape deck = new WorldMapVectorShape { Color = new Color(plank.r, plank.g, plank.b, 1f), OddEven = false };
+                        deck.Contours.Add(new[] { a + normal * half, c + normal * half, c - normal * half, a - normal * half });
+                        shapes.Add(deck);
+                        if (!style.DrawInk || inkPx <= 0f)
+                            continue;
+                        Brush.Stroke(shapes, new List<Vector2> { a + normal * half, c + normal * half }, false, Ink.Bridge, inkPx, InkColor(1f), seed++);
+                        Brush.Stroke(shapes, new List<Vector2> { a - normal * half, c - normal * half }, false, Ink.Bridge, inkPx, InkColor(1f), seed++);
+                    }
+                    AddVector("Мосты", shapes);
+                    return;
+                }
                 foreach (MapPointData bridge in map.Bridges)
                 {
                     Vector2 center = ToPixel(bridge);

@@ -82,6 +82,10 @@ public partial class PrototypeUIController
         settlementPeopleTitle = BindRequiredElement<Label>(settlementScreen, screen, "settlement-people-title");
         settlementParty = BindRequiredElement<Label>(settlementScreen, screen, "settlement-party");
         settlementExitButton = BindRequiredElement<Button>(settlementScreen, screen, "settlement-exit-button");
+        // Бриф правок п. 11: журнал открывается и из поселения — поверх него.
+        Button journalButton = BindRequiredElement<Button>(settlementScreen, screen, "settlement-journal-button");
+        if (journalButton != null)
+            journalButton.clicked += OpenJournal;
         settlementConfirm = BindRequiredElement<VisualElement>(settlementScreen, screen, "settlement-confirm");
         settlementConfirmText = BindRequiredElement<Label>(settlementScreen, screen, "settlement-confirm-text");
         settlementConfirmYes = BindRequiredElement<Button>(settlementScreen, screen, "settlement-confirm-yes");
@@ -142,7 +146,15 @@ public partial class PrototypeUIController
             SettlementMode mode = restoring ? settlementSuspendedMode : SettlementMode.Main;
             settlementSuspendedLocationId = null;
             OpenSettlementScreen(inside, mode, restoring);
+            // Разговор закончился обычным путём — один шаг часов (п. 14).
+            if (restoring && settlementDialogueTimePending)
+            {
+                settlementDialogueTimePending = false;
+                SpendSettlementActionTime();
+            }
         }
+        if (pendingStoryBattle != null)
+            settlementDialogueTimePending = false;
 
         if (!IsSettlementScreenOpen)
             return;
@@ -198,7 +210,7 @@ public partial class PrototypeUIController
             settlementMessageText = string.Empty;
             HideSettlementPages();
         }
-        settlementScreen.SetEnabled(true);
+        narrativeDialogueOverlay?.RemoveFromClassList(DialogueOverPlaceClass);
         settlementScreen.style.display = DisplayStyle.Flex;
         settlementScreen.BringToFront();
         settlementScreen.Focus();
@@ -218,9 +230,9 @@ public partial class PrototypeUIController
     {
         HideSettlementPages();
         CloseSettlementConfirm();
+        narrativeDialogueOverlay?.RemoveFromClassList(DialogueOverPlaceClass);
         if (settlementScreen == null)
             return;
-        settlementScreen.SetEnabled(true);
         settlementScreen.style.display = DisplayStyle.None;
     }
 
@@ -249,9 +261,16 @@ public partial class PrototypeUIController
         settlementSuspendedMode = settlementMode;
         CloseSettlementConfirm();
         settlementLocationId = null;
-        // Под разговором экран не принимает нажатий (ни сделок, ни выхода).
-        settlementScreen.SetEnabled(false);
+        // Бриф правок п. 2: экран — непрозрачный фон под разговором.
+        // SetEnabled(false) делал его полупрозрачным (состояние :disabled),
+        // и сквозь город просвечивала карта. Клики забирает слой диалога
+        // поверх; клавиши экрана при приостановке не обрабатываются. Над
+        // местом слой диалога затемняет мягче — город виден.
+        narrativeDialogueOverlay?.AddToClassList(DialogueOverPlaceClass);
+        narrativeDialogueOverlay?.BringToFront();
     }
+
+    private const string DialogueOverPlaceClass = "narrative-dialogue-overlay--over-place";
 
     private void OnSettlementExitClicked()
     {
@@ -325,6 +344,7 @@ public partial class PrototypeUIController
         settlementDescription.text = text ?? string.Empty;
 
         settlementActions.Clear();
+        HideSettlementGallery();
         if (settlementMode == SettlementMode.People)
             RenderSettlementPeopleList(profile, tavern);
         else if (settlementMode == SettlementMode.Tavern)
@@ -339,12 +359,12 @@ public partial class PrototypeUIController
         settlementPeople.Clear();
         if (settlementMode == SettlementMode.Tavern)
         {
-            foreach (SettlementPersonDefinition person in SettlementService.VisiblePeople(gameState, TavernPeople(tavern)))
+            foreach (SettlementPersonDefinition person in SettlementService.VisiblePeople(gameState, TavernPeople(tavern), settlementLocationId))
                 settlementPeople.Add(CreateSettlementPerson(person, true));
         }
         else if (settlementMode == SettlementMode.Main && profile != null)
         {
-            foreach (SettlementPersonDefinition person in SettlementService.VisiblePeople(gameState, profile.People))
+            foreach (SettlementPersonDefinition person in SettlementService.VisiblePeople(gameState, profile.People, settlementLocationId))
                 settlementPeople.Add(CreateSettlementPerson(person, false));
         }
         bool showPeople = settlementPeople.childCount > 0;
@@ -386,7 +406,7 @@ public partial class PrototypeUIController
         if (profile?.People != null)
             source.AddRange(profile.People);
         source.AddRange(TavernPeople(tavern));
-        foreach (SettlementPersonDefinition person in SettlementService.VisiblePeople(gameState, source))
+        foreach (SettlementPersonDefinition person in SettlementService.VisiblePeople(gameState, source, settlementLocationId))
         {
             bool talk = !string.IsNullOrEmpty(person.DialogueId) && SettlementDialogueExists(person.DialogueId);
             bool trades = !string.IsNullOrEmpty(person.MerchantId) && profile?.FindMerchant(person.MerchantId) != null;
@@ -396,23 +416,27 @@ public partial class PrototypeUIController
         return all;
     }
 
+    // Бриф правок п. 2: общий список — в основной области, где изображение
+    // города, плашками с портретами; в левом столбце — только «Назад».
+    private VisualElement settlementGallery;
+
     private void RenderSettlementPeopleList(SettlementProfileDefinition profile, TavernDefinition tavern)
     {
+        EnsureSettlementGallery();
+        settlementGallery.Clear();
         foreach (SettlementPersonDefinition person in SettlementAllPeople(profile, tavern))
         {
-            bool talk = !string.IsNullOrEmpty(person.DialogueId) && SettlementDialogueExists(person.DialogueId);
-            string dialogueId = person.DialogueId;
-            string merchantId = person.MerchantId;
-            string hint = person.Role + (string.IsNullOrEmpty(person.Activity) ? string.Empty : " · " + person.Activity.ToLowerInvariant());
-            AddSettlementAction(person.DisplayName, hint, true, () =>
+            VisualElement card = CreateSettlementPerson(person, false);
+            card.AddToClassList("settlement-person--gallery");
+            if (!string.IsNullOrEmpty(person.Activity))
             {
-                if (talk)
-                    StartSettlementDialogue(dialogueId);
-                else
-                    OpenSettlementTrade(merchantId);
-            }, false);
+                Label activity = new Label(person.Activity);
+                activity.AddToClassList("settlement-person-activity");
+                card.Add(activity);
+            }
+            settlementGallery.Add(card);
         }
-        AddSettlementSection(string.Empty);
+        settlementGallery.style.display = DisplayStyle.Flex;
         AddSettlementAction("Назад", null, true, () =>
         {
             settlementMode = SettlementMode.Main;
@@ -424,9 +448,13 @@ public partial class PrototypeUIController
     {
         if (profile == null)
             return;
+        RenderSettlementProfileActions(profile);
+        // Бриф правок п. 2: «Люди поселения» — в самом низу столбца
+        // действий; сам список — плашками в основной области над городом.
         int people = SettlementAllPeople(profile, TavernService.Tavern(gameState, settlementLocationId)).Count;
         if (people > 0)
         {
+            AddSettlementSection(string.Empty);
             AddSettlementAction("Люди поселения (" + people + ")", "Все, с кем здесь можно поговорить.", true, () =>
             {
                 settlementMode = SettlementMode.People;
@@ -434,6 +462,10 @@ public partial class PrototypeUIController
                 RenderSettlement();
             }, false);
         }
+    }
+
+    private void RenderSettlementProfileActions(SettlementProfileDefinition profile)
+    {
         if (profile.Actions == null)
             return;
         NarrativeEvaluationContext context = SettlementService.Context(gameState);
@@ -627,6 +659,28 @@ public partial class PrototypeUIController
         Autosave();
     }
 
+    // Бриф правок п. 14: в поселении часы стоят; целое действие — разговор
+    // до конца или подтверждённая сделка — сдвигает их один раз на минуты
+    // из Базы поселений. Сдвиг проводит полночь и прочие последствия тем же
+    // путём, что шаги в исследуемом месте, и снова оставляет паузу.
+    private bool settlementDialogueTimePending;
+
+    private void SpendSettlementActionTime()
+    {
+        if (gameState == null || isGameOver)
+            return;
+        int minutes = SettlementCatalog.Current.ActionMinutes;
+        if (minutes <= 0)
+            return;
+        ContinuousSimulationBatch batch = ContinuousSimulationSystem.AdvanceLocalHours(gameState, minutes / 60.0);
+        if (batch.HasReportableContent)
+            ProcessContinuousSimulationBatch(batch);
+        ContinuousSimulationSystem.SetPaused(gameState, true);
+        RefreshContinuousClockOnly();
+        if (IsSettlementScreenOpen)
+            RenderSettlement();
+    }
+
     // Разговор — единственной точкой входа в диалог. После обычного конца
     // сцены экран вернётся в том же режиме (TickSettlementScreen).
     private void StartSettlementDialogue(string dialogueId)
@@ -636,8 +690,10 @@ public partial class PrototypeUIController
         string locationId = settlementLocationId;
         SettlementMode mode = settlementMode;
         SuspendSettlementScreen();
+        settlementDialogueTimePending = true;
         if (!TryOpenNarrativeDialogueById(dialogueId))
         {
+            settlementDialogueTimePending = false;
             settlementSuspendedLocationId = null;
             OpenSettlementScreen(locationId, mode, true);
             ShowSettlementMessage("Сейчас не поговорить.");
@@ -649,6 +705,22 @@ public partial class PrototypeUIController
         if (narrativeDialogueDatabase == null)
             narrativeDialogueDatabase = DialogueDatabaseRuntime.LoadDefaultDatabase();
         return narrativeDialogueDatabase != null && narrativeDialogueDatabase.FindDialogue(dialogueId) != null;
+    }
+
+    private void EnsureSettlementGallery()
+    {
+        if (settlementGallery != null)
+            return;
+        settlementGallery = new VisualElement { name = "settlement-people-gallery" };
+        settlementGallery.AddToClassList("settlement-people-gallery");
+        settlementGallery.style.display = DisplayStyle.None;
+        settlementScreen.Add(settlementGallery);
+    }
+
+    private void HideSettlementGallery()
+    {
+        if (settlementGallery != null)
+            settlementGallery.style.display = DisplayStyle.None;
     }
 
     private VisualElement CreateSettlementPerson(SettlementPersonDefinition person, bool tavern)
@@ -834,7 +906,7 @@ public partial class PrototypeUIController
     private void HandleSettlementKeys()
     {
         Keyboard keyboard = Keyboard.current;
-        if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame || IsGameMenuOpen)
+        if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame || IsGameMenuOpen || IsJournalOpen)
             return;
         if (IsSettlementConfirmOpen)
         {

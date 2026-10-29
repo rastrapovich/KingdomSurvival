@@ -55,6 +55,18 @@ public static class TavernService
             TavernOfferStateData record = OfferState(state, locationId, offer.Id, false);
             if (offer.Once && record != null && record.TimesTaken > 0)
                 continue;
+            // Бриф правок пп. 16, 22: неактуальное предложение исчезает, а не
+            // висит серой строкой — поручение закреплено за другим поселением
+            // или уже взято/выполнено/провалено, сведения уже известны, а
+            // предлагающий — заказчик из другого поселения.
+            if (!string.IsNullOrEmpty(offer.ErrandId) &&
+                (!ErrandClaims.AvailableAt(state, offer.ErrandId, locationId) ||
+                 ErrandService.Status(state, SettlementCatalog.Current.FindErrand(offer.ErrandId)) != ErrandStatus.NotTaken))
+                continue;
+            if (!string.IsNullOrEmpty(offer.KnowledgeId) && state.Narrative != null && state.Narrative.HasKnowledge(offer.KnowledgeId))
+                continue;
+            if (ErrandClaims.IsGiverElsewhere(state, locationId, offer.PersonId))
+                continue;
             TavernOfferView view = new TavernOfferView { Offer = offer };
             SettlementPersonDefinition person = profile?.FindPerson(offer.PersonId);
             view.SourceName = person != null ? person.DisplayName : string.Empty;

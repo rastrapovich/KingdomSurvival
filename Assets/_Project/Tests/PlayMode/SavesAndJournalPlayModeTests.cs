@@ -79,7 +79,7 @@ public sealed class SavesAndJournalPlayModeTests
     }
 
     [UnityTest]
-    public IEnumerator Journal_DoesNotStopTime_WhileTravelling()
+    public IEnumerator Journal_StopsTime_WhileTravelling()
     {
         yield return NewGame();
         GameState campaign = CampaignSession.Current;
@@ -95,10 +95,16 @@ public sealed class SavesAndJournalPlayModeTests
 
         yield return Frames(90);
 
+        // Бриф правок п. 11: чтение журнала время не двигает и маршрут не
+        // запускает; после закрытия поход продолжается.
         Assert.IsTrue(Flag(controller, "IsJournalOpen"), "Хроника остаётся открытой.");
-        Assert.IsFalse(ContinuousSimulationSystem.IsPaused(campaign), "Открытая Хроника не останавливает время.");
+        Assert.IsTrue(ContinuousSimulationSystem.IsPaused(campaign), "Открытый журнал останавливает время.");
+        Assert.AreEqual(dayBefore, campaign.Day);
+        Assert.AreEqual(hourBefore, ContinuousSimulationSystem.GetClock(campaign).HourOfDay, 1e-6, "Пока журнал открыт, часы стоят.");
+        Invoke(controller, "CloseJournal");
+        yield return Frames(60);
         double hourAfter = ContinuousSimulationSystem.GetClock(campaign).HourOfDay;
-        Assert.IsTrue(campaign.Day > dayBefore || hourAfter > hourBefore, "Время шло, пока Хроника была открыта.");
+        Assert.IsTrue(campaign.Day > dayBefore || hourAfter > hourBefore, "После закрытия журнала поход идёт дальше.");
     }
 
     private static void Click(Button button)
@@ -195,7 +201,9 @@ public sealed class SavesAndJournalPlayModeTests
         VisualElement root = controller.GetComponent<UIDocument>().rootVisualElement;
         Invoke(controller, "OpenJournal");
         yield return null;
-        Assert.Greater(root.Q<VisualElement>("journal-main-section-list").childCount, 0, "«Дела» свободной игры не пусты.");
+        // Бриф правок п. 11: «Основной цели» и «Итога Дома» пока нет; журнал
+        // открывается отдельным экраном, история остаётся.
+        Assert.AreEqual(DisplayStyle.None, root.Q<VisualElement>("journal-main-section").resolvedStyle.display, "Блока «Основная цель» нет.");
         Invoke(controller, "CloseJournal");
 
         Assert.IsTrue((bool)Invoke(controller, "SaveCampaign", "slot3"));

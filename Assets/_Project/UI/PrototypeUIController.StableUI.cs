@@ -229,13 +229,18 @@ public partial class PrototypeUIController
         return string.Join("\n", lines);
     }
 
+    private const int ShownReportCount = 80;
+
     private void RenderRoyalReportsNewestFirst()
     {
         if (reportHistory == null || reportHistoryLabel == null)
             return;
 
-        int hash = 17;
-        for (int i = 0; i < reportHistory.Count; i++)
+        // Показ — последние записи: история хранится вся, но раскладка
+        // огромного текста давала долгий кадр на каждом донесении.
+        int first = Mathf.Max(0, reportHistory.Count - ShownReportCount);
+        int hash = 17 + first;
+        for (int i = first; i < reportHistory.Count; i++)
         {
             string entry = reportHistory[i];
             hash = hash * 31 + (entry != null ? entry.GetHashCode() : 0);
@@ -251,7 +256,7 @@ public partial class PrototypeUIController
 
         renderedReportHash = hash;
         List<string> newestFirst = new List<string>(reportHistory.Count);
-        for (int i = reportHistory.Count - 1; i >= 0; i--)
+        for (int i = reportHistory.Count - 1; i >= first; i--)
         {
             string entry = reportHistory[i] ?? string.Empty;
             if (i < reportRequiresAcknowledgement.Count &&
@@ -266,6 +271,8 @@ public partial class PrototypeUIController
             newestFirst.Add(DecorateFeatureLines(entry));
         }
 
+        if (first > 0)
+            newestFirst.Add("…ещё ранних донесений: " + first + ".");
         string expected = string.Join("\n\n", newestFirst);
         if (reportHistoryLabel.text != expected)
             reportHistoryLabel.text = expected;

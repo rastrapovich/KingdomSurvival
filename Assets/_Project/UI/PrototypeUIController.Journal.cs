@@ -133,8 +133,10 @@ public partial class PrototypeUIController
         CloseHeroScreen();
         CloseCampScreen();
 
-        // ПР-04: Хроника не останавливает время — мир живёт, пока игрок
-        // читает. Обязательное событие закрывает её само (CloseJournalForMandatoryEvent).
+        // Бриф правок п. 11: журнал — отдельный непрозрачный экран (карта
+        // скрыта и не принимает ввод), чтение время не двигает
+        // (RefreshAutoTimeState). Обязательное событие закрывает его само
+        // (CloseJournalForMandatoryEvent).
         journalOverlay.style.display = DisplayStyle.Flex;
         journalOverlay.BringToFront();
         RefreshJournal();

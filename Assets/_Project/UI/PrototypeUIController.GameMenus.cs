@@ -400,6 +400,14 @@ public partial class PrototypeUIController
             return;
         }
 
+        // Бриф правок п. 11: журнал — отдельный экран, Esc возвращает туда,
+        // откуда его открыли (карта или поселение).
+        if (IsJournalOpen && !IsNarrativeDialogueActive && activeQueuedModal == null)
+        {
+            CloseJournal();
+            return;
+        }
+
         // Экран героя закрывается по Esc, если поверх него ничего нет.
         if (IsHeroScreenOpen && !IsNarrativeDialogueActive && activeQueuedModal == null)
         {

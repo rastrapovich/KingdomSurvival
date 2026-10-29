@@ -100,12 +100,19 @@ namespace KingdomSurvival.FreePlay
 
         public static void InitializeNewCampaign(GameState state)
         {
+            // Бриф правок п. 19: партия начинается на стоянке у дороги — в
+            // лагере, а не в пустом поселении. Это не Дом и не город.
+            if (state != null && Chronicle.Find(state, StartCampChronicleId) == null)
+                Chronicle.Record(state, StartCampChronicleId, "Стоянка у дороги",
+                    "Отряд встал лагерем у развилки дорог: шалаш, кострище, вещи в мешках. Отсюда можно идти куда угодно.");
             LocationData known = state?.FindLocation(StartingKnownLocationId);
             if (known == null)
                 return;
             known.IsDiscovered = true;
             known.IsVisibleOnMap = true;
         }
+
+        public const string StartCampChronicleId = "start.camp";
 
         // ------------------------------------------------------------------
         // История: выход и возвращение каждого похода — по одной записи.
@@ -169,11 +176,17 @@ namespace KingdomSurvival.FreePlay
             if (state == null)
                 return goals;
 
-            goals.Add(BuildRegionGoal(state));
-            // ПР-12Б: контрольный итог — после первого возвращения.
-            JournalGoalViewData summary = includeSummary ? FreePlaySummary.BuildGoal(state) : null;
-            if (summary != null)
-                goals.Add(summary);
+            // Бриф правок п. 11: «Основная цель» («Округа Дома») и «Итог Дома»
+            // пока не показываются — цель свободной игры будет определена
+            // отдельно. Данные и записи Хроники итога остаются.
+            if (ShowHomeGoals)
+            {
+                goals.Add(BuildRegionGoal(state));
+                // ПР-12Б: контрольный итог — после первого возвращения.
+                JournalGoalViewData summary = includeSummary ? FreePlaySummary.BuildGoal(state) : null;
+                if (summary != null)
+                    goals.Add(summary);
+            }
             JournalGoalViewData coal = FreePlayCoalStory.BuildGoal(state);
             if (coal != null)
                 goals.Add(coal);
@@ -204,7 +217,9 @@ namespace KingdomSurvival.FreePlay
             return goals;
         }
 
-        private static JournalGoalViewData BuildRegionGoal(GameState state)
+        public static bool ShowHomeGoals = false;
+
+        public static JournalGoalViewData BuildRegionGoal(GameState state)
         {
             int returns = CountEntries(state, ReturnPrefix);
             string step;

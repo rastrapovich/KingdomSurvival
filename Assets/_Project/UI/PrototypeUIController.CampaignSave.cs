@@ -122,11 +122,14 @@ public partial class PrototypeUIController
     }
 
     // Тихое автосохранение в устойчивой точке. Ошибка не прерывает игру.
+    private static readonly Unity.Profiling.ProfilerMarker AutosaveMarker = new Unity.Profiling.ProfilerMarker("KS.Autosave");
+
     private void Autosave()
     {
         if (gameState == null || isGameOver || !CampaignSession.HasActive || IsLocalBattleRunning)
             return;
 
+        using (AutosaveMarker.Auto())
         try
         {
             GetActiveWorld(out string worldId, out int geographyVersion);

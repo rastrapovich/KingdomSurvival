@@ -133,6 +133,15 @@ public static class NoticeBoardService
                 continue;
             if (!IsPosted(state, locationId, notice, now, context, out double hoursLeft))
                 continue;
+            // Бриф правок пп. 16, 22: объявление поручения — только там, где
+            // оно закреплено, и пока поручение не выполнено и не провалено.
+            if (!string.IsNullOrEmpty(notice.ErrandId))
+            {
+                ErrandStatus errandStatus = ErrandService.Status(state, SettlementCatalog.Current.FindErrand(notice.ErrandId));
+                if (!ErrandClaims.AvailableAt(state, notice.ErrandId, locationId) ||
+                    errandStatus == ErrandStatus.Completed || errandStatus == ErrandStatus.Failed)
+                    continue;
+            }
             NoticeView view = new NoticeView
             {
                 Notice = notice,

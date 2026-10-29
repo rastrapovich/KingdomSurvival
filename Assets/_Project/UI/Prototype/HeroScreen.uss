@@ -1835,3 +1835,77 @@
 .hero-item-popup-kind { font-size: 12px; white-space: normal; }
 .hero-item-popup-text { font-size: 14px; white-space: normal; margin-top: 12px; }
 .hero-item-popup-close { align-self: flex-end; height: 32px; min-width: 120px; margin-top: 14px; }
+
+/* Бриф правок (22 пункта) пп. 6–10. */
+/* Снаряжение: без роли, уровня, тегов, состояния и повторной строки вещи. */
+.hero-screen-unit-card--gear #hero-screen-unit-card-heading,
+.hero-screen-unit-card--gear #hero-screen-unit-card-tags,
+.hero-screen-unit-card--gear #hero-screen-unit-card-level,
+.hero-screen-unit-card--gear #hero-screen-unit-card-experience-label,
+.hero-screen-unit-card--gear #hero-screen-unit-card-experience-track,
+.hero-screen-unit-card--gear #hero-screen-unit-card-message,
+#hero-screen-unit-card-condition,
+#hero-screen-bag-details-name,
+#hero-screen-bag-details-text,
+#hero-screen-inventory-story-title,
+#hero-screen-inventory-story {
+    display: none;
+}
+
+/* Разница характеристик до/после смены вещи. */
+.hero-revision-stat-delta { font-size: 13px; -unity-font-style: bold; margin-right: 6px; -unity-text-align: middle-right; }
+.hero-revision-stat-delta--up { color: rgb(140, 214, 128); }
+.hero-revision-stat-delta--down { color: rgb(226, 120, 104); }
+
+/* Главная страница: теги под уровнем, состояния иконками, качества столбцом. */
+.hero-revision-tags { flex-direction: row; flex-wrap: wrap; margin-top: 8px; }
+.hero-revision-states { flex-direction: row; flex-wrap: wrap; margin-top: 6px; }
+.hero-revision-state {
+    width: 34px; height: 34px; margin-right: 6px;
+    font-size: 18px; -unity-text-align: middle-center;
+    border-radius: 17px;
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(120, 104, 80); border-right-color: rgb(120, 104, 80);
+    border-top-color: rgb(120, 104, 80); border-bottom-color: rgb(120, 104, 80);
+    background-color: rgb(36, 32, 28);
+    color: rgb(232, 218, 183);
+}
+.hero-revision-state--injury { color: rgb(232, 120, 104); }
+.hero-revision-state--exhausted { color: rgb(214, 186, 112); }
+.hero-revision-state--wounded { color: rgb(220, 140, 130); }
+.hero-revision-qualities { flex-direction: column; flex-wrap: nowrap; }
+.hero-revision-qualities > * { width: 100%; max-width: 100%; }
+
+/* Отряд: боевые позиции внизу, свита портретами, выбор бойца. */
+.hero-revision-squad { justify-content: flex-end; }
+.hero-revision-retinue { flex-direction: row; flex-wrap: wrap; margin-top: 6px; margin-bottom: 6px; }
+.hero-revision-retinue-card { width: 104px; margin-right: 10px; align-items: center; }
+.hero-revision-retinue-portrait {
+    width: 96px; height: 96px;
+    justify-content: center; align-items: center;
+    background-color: rgb(42, 38, 32);
+    -unity-background-scale-mode: scale-and-crop;
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(150, 122, 72); border-right-color: rgb(150, 122, 72);
+    border-top-color: rgb(150, 122, 72); border-bottom-color: rgb(150, 122, 72);
+    font-size: 36px; color: rgb(140, 124, 96);
+}
+.hero-revision-retinue-name { font-size: 13px; color: rgb(232, 218, 183); margin-top: 4px; -unity-text-align: middle-center; }
+.hero-revision-picker {
+    position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px;
+    align-items: center; justify-content: center;
+    background-color: rgba(4, 5, 6, 0.6);
+}
+.hero-revision-picker-box {
+    width: 440px; padding-left: 16px; padding-right: 16px; padding-top: 14px; padding-bottom: 14px;
+    background-color: rgb(24, 22, 19);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(150, 122, 72); border-right-color: rgb(150, 122, 72);
+    border-top-color: rgb(150, 122, 72); border-bottom-color: rgb(150, 122, 72);
+}
+.hero-revision-picker-title { font-size: 17px; -unity-font-style: bold; color: rgb(221, 181, 99); margin-bottom: 8px; }
+.hero-revision-picker-option { height: 34px; margin-top: 4px; -unity-text-align: middle-left; }
+.hero-revision-picker-close { height: 30px; margin-top: 10px; }
+/* Качества — узким столбцом рядом с героем, без растягивания на всю ширину. */
+#hero-screen-qualities { max-width: 340px; }
+.hero-revision-qualities > * { min-height: 0px; height: auto; padding-top: 4px; padding-bottom: 4px; margin-bottom: 4px; }

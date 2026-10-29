@@ -278,7 +278,10 @@ public static class SettlementService
             : "Поселение. Люди заняты своими делами.";
     }
 
-    public static List<SettlementPersonDefinition> VisiblePeople(GameState state, IEnumerable<SettlementPersonDefinition> people)
+    // locationId — поселение показа: заказчик поручения, закреплённого за
+    // другим поселением, здесь не появляется (бриф правок п. 21).
+    public static List<SettlementPersonDefinition> VisiblePeople(GameState state, IEnumerable<SettlementPersonDefinition> people,
+        string locationId = null)
     {
         List<SettlementPersonDefinition> result = new List<SettlementPersonDefinition>();
         if (people == null)
@@ -286,8 +289,11 @@ public static class SettlementService
         NarrativeEvaluationContext context = Context(state);
         foreach (SettlementPersonDefinition person in people)
         {
-            if (person != null && !string.IsNullOrEmpty(person.Id) && (person.Conditions?.Evaluate(context) ?? true))
-                result.Add(person);
+            if (person == null || string.IsNullOrEmpty(person.Id) || !(person.Conditions?.Evaluate(context) ?? true))
+                continue;
+            if (!string.IsNullOrEmpty(locationId) && ErrandClaims.IsGiverElsewhere(state, locationId, person.Id))
+                continue;
+            result.Add(person);
         }
         return result;
     }
@@ -297,6 +303,7 @@ public static class SettlementService
         SettlementInstanceData instance = FindInstance(state, locationId);
         if (instance != null)
             instance.Visited = true;
+        ErrandClaims.ClaimForSettlement(state, locationId);
     }
 
     // ------------------------------------------------------------------

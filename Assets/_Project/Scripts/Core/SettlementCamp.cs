@@ -143,6 +143,7 @@ public static partial class SettlementCampService
                 CommanderInside = true,
                 WithoutCamp = true
             };
+            ErrandClaims.ClaimForSettlement(state, settlement.Id);
             return true;
         }
 
@@ -157,6 +158,8 @@ public static partial class SettlementCampService
         }
         state.SettlementCamp.WaitingIds = waiting;
         state.SettlementCamp.CommanderInside = true;
+        // Бриф правок п. 16: первый вход закрепляет поручения поселения.
+        ErrandClaims.ClaimForSettlement(state, settlement.Id);
         return true;
     }
 

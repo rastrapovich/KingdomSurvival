@@ -395,6 +395,10 @@ public sealed class GeneratedWorldMap
     public List<GeneratedMapSite> Villages = new List<GeneratedMapSite>();
     public List<GeneratedMapSite> Landmarks = new List<GeneratedMapSite>();
     public List<MapPointData> Bridges = new List<MapPointData>();
+    // Бриф правок п. 13: пролёты мостов — парами точек «берег → берег»:
+    // последняя клетка суши перед водой и первая за ней на пути дороги.
+    // Пусто у карт, созданных раньше, — рисунок тогда по-старому.
+    public List<MapPointData> BridgeSpans = new List<MapPointData>();
     public List<GeneratedSpawnSlot> SpawnSlots = new List<GeneratedSpawnSlot>();
     public float StartXPercent = WorldMapNavigation.CapitalXPercent;
     public float StartYPercent = WorldMapNavigation.CapitalYPercent;

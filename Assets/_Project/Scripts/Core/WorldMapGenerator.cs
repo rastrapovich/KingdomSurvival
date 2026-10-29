@@ -63,6 +63,8 @@ public static class WorldMapGenerator
         private readonly float[] moisture;
         private readonly bool[] lake;
         private readonly int[] riverId;
+        // Пролёты мостов по клеткам: суша до воды → суша после неё.
+        private readonly List<(int Entry, int Exit)> bridgeSpans = new List<(int, int)>();
         private readonly bool[] protectedStart;
         private readonly GeneratedWorldMap result;
         private readonly int startCell;
@@ -770,6 +772,13 @@ public static class WorldMapGenerator
                 grid.CellCenter(grid.CellAt(cell), out double x, out double y);
                 result.Bridges.Add(new MapPointData(grid.PixelToPercentX(x), grid.PixelToPercentY(y)));
             }
+            foreach ((int entry, int exit) in bridgeSpans)
+            {
+                grid.CellCenter(grid.CellAt(entry), out double ax, out double ay);
+                grid.CellCenter(grid.CellAt(exit), out double bx, out double by);
+                result.BridgeSpans.Add(new MapPointData(grid.PixelToPercentX(ax), grid.PixelToPercentY(ay)));
+                result.BridgeSpans.Add(new MapPointData(grid.PixelToPercentX(bx), grid.PixelToPercentY(by)));
+            }
         }
 
         // Плавный шум цены пути: дороги петляют, а не идут по осям сетки.
@@ -885,6 +894,22 @@ public static class WorldMapGenerator
             }
             if (run.Count > 0)
                 AddRoadLine(run, trail);
+
+            // Бриф правок п. 13: одна переправа — один пролёт от берега до
+            // берега (до того, как клетки воды станут дорогой).
+            int runStart = -1;
+            for (int i = 0; i < path.Count; i++)
+            {
+                bool water = riverId[path[i]] >= 0 && terrain[path[i]] == Water;
+                if (water && runStart < 0)
+                    runStart = i;
+                else if (!water && runStart >= 0)
+                {
+                    if (runStart > 0)
+                        bridgeSpans.Add((path[runStart - 1], path[i]));
+                    runStart = -1;
+                }
+            }
 
             foreach (int cell in path)
             {

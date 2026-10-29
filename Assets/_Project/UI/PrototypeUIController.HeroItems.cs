@@ -299,8 +299,23 @@ public partial class PrototypeUIController
                 ShowHeroItemPopup(current);
                 return;
             }
+            if (evt.button == 2)
+                return;
             heroBagSelectedId = instanceId;
             heroItemsMessage = string.Empty;
+            // Бриф правок п. 5: двойной клик надевает пригодную вещь в её
+            // слот (прежняя — в сумку, тем же TryEquip с проверкой места).
+            // Расходники и неподходящее двойной клик не трогает.
+            if (evt.clickCount >= 2)
+            {
+                ItemDefinition currentDefinition = ItemCatalog.Find(current.ItemId);
+                string personId = HeroItemsTargetPersonId;
+                if (currentDefinition != null && currentDefinition.Slot != ItemSlot.None && !string.IsNullOrEmpty(personId))
+                {
+                    RunHeroCardCommand(ItemService.TryEquip(gameState, instanceId, personId, out string message), message);
+                    return;
+                }
+            }
             RefreshHeroScreen();
         });
         return cell;
@@ -473,6 +488,7 @@ public partial class PrototypeUIController
         if (definition == null || heroItemPopup == null)
             return;
         SetHeroItemIcon(heroItemPopupIcon, definition);
+        heroItemPopupIcon.style.display = DisplayStyle.Flex;
         heroItemPopupName.text = definition.Name;
         heroItemPopupKind.text = HeroItemKindLabel(definition) +
                                  (definition.Slot != ItemSlot.None ? " · слот: " + SlotCaption(definition.Slot) : string.Empty) +
@@ -502,6 +518,7 @@ public partial class PrototypeUIController
         if (heroItemPopup == null)
             return;
         SetHeroItemIcon(heroItemPopupIcon, null);
+        heroItemPopupIcon.style.display = DisplayStyle.Flex;
         heroItemPopupName.text = "Припасы отряда";
         heroItemPopupKind.text = "общий запас похода";
         heroItemPopupText.text = "Сейчас: " + gameState.ArmySupply + ". " + DescribePartyResources(gameState, out _) +

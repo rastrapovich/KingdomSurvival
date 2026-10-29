@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -71,7 +72,15 @@ namespace KingdomSurvival.WorldMapVisual
             }
         }
 
+        private static readonly ProfilerMarker DrawMarker = new ProfilerMarker("KS.Map.SignLayerDraw");
+
         private void Draw(MeshGenerationContext context)
+        {
+            using (DrawMarker.Auto())
+                DrawSigns(context);
+        }
+
+        private void DrawSigns(MeshGenerationContext context)
         {
             if (signs == null || signs.Atlas == null || signs.Items.Count == 0)
                 return;
@@ -252,7 +261,15 @@ namespace KingdomSurvival.WorldMapVisual
             RegisterCallback<GeometryChangedEvent>(_ => MarkDirtyRepaint());
         }
 
+        private static readonly ProfilerMarker DrawMarker = new ProfilerMarker("KS.Map.TextureLayerDraw");
+
         private void Draw(MeshGenerationContext context)
+        {
+            using (DrawMarker.Auto())
+                DrawLayer(context);
+        }
+
+        private void DrawLayer(MeshGenerationContext context)
         {
             Rect rect = contentRect;
             if (layer == null || rect.width <= 0f || rect.height <= 0f)

@@ -54,6 +54,13 @@ public sealed class SettlementScreenPlayModeTests
         return (T)target.GetType().GetProperty(property, AnyInstance).GetValue(target);
     }
 
+    // Абсолютные игровые минуты партии (бриф правок п. 14).
+    private static double Minutes(GameState campaign)
+    {
+        ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(campaign);
+        return (clock.Day * 24.0 + clock.HourOfDay) * 60.0;
+    }
+
     private static IEnumerator Frames(int count)
     {
         for (int i = 0; i < count; i++)
@@ -78,6 +85,25 @@ public sealed class SettlementScreenPlayModeTests
             button.SendEvent(submit);
         }
         yield return Frames(2);
+    }
+
+    // Бриф правок п. 4: двойной клик и правая кнопка — настоящими событиями
+    // указателя с числом нажатий.
+    private static IEnumerator PointerPress(VisualElement element, int button, int clicks)
+    {
+        Event down = new Event { type = EventType.MouseDown, button = button, clickCount = clicks, mousePosition = element.worldBound.center };
+        using (PointerDownEvent evt = PointerDownEvent.GetPooled(down))
+        {
+            evt.target = element;
+            element.SendEvent(evt);
+        }
+        yield return Frames(2);
+    }
+
+    private static VisualElement TradeRow(VisualElement root, string list, string nameStart)
+    {
+        return root.Q<ScrollView>(list).Query(className: "trade-row").ToList()
+            .First(row => row.Q<Label>(className: "trade-row-name").text.StartsWith(nameStart));
     }
 
     private static IEnumerator ClickElement(VisualElement element)
@@ -137,7 +163,8 @@ public sealed class SettlementScreenPlayModeTests
         LocationData target = campaign.Locations.First(location => !location.IsWaypoint && location.IsVisibleOnMap);
         Assert.IsTrue(campaign.TryStartExpedition(target.Id, new List<string> { "garrick" }, out string message), message);
         campaign.ActiveExpedition.RouteIndex = 1;
-        yield return null;
+        // Без кадра между стартом похода и отладочным входом: иначе отряд
+        // успевает пробежать и открыть дорожную встречу (нестабильно в полном прогоне).
 
         Invoke(main, "DebugSettlementTrade");
         yield return Frames(3);
@@ -162,19 +189,38 @@ public sealed class SettlementScreenPlayModeTests
         // Торговля: две единицы припасов, повторный клик — без второй сделки.
         int gold = campaign.ArmyGold;
         int supply = campaign.ArmySupply;
+        double minutes = Minutes(campaign);
+        yield return Frames(30);
+        Assert.AreEqual(minutes, Minutes(campaign), 0.01, "Стоя на экране поселения, время не идёт.");
         yield return Click(FindButton(screen.Q("settlement-actions"), "Лавка у торга"));
         VisualElement trade = root.Q("settlement-trade-page");
         Assert.AreEqual(DisplayStyle.Flex, trade.resolvedStyle.display);
-        VisualElement suppliesRow = root.Q<ScrollView>("trade-merchant-list").Query(className: "trade-row").ToList()
-            .First(row => row.Q<Label>(className: "trade-row-name").text.StartsWith("Припасы"));
-        yield return ClickElement(suppliesRow);
-        Assert.AreEqual("1", root.Q<Label>("trade-quantity").text, "Выбор ставит количество 1.");
-        yield return Click(root.Q<Button>("trade-plus-button"));
+        // Одиночный клик только подсвечивает; двойной — единица в сделку.
+        yield return PointerPress(TradeRow(root, "trade-merchant-list", "Припасы"), 0, 1);
+        Assert.AreEqual(0, root.Q<ScrollView>("trade-buy-offer").Query(className: "trade-row").ToList().Count, "Клик ничего не кладёт в сделку.");
+        yield return PointerPress(TradeRow(root, "trade-merchant-list", "Припасы"), 0, 2);
+        yield return PointerPress(TradeRow(root, "trade-merchant-list", "Припасы"), 0, 2);
+        yield return PointerPress(TradeRow(root, "trade-merchant-list", "Припасы"), 0, 2);
+        Assert.AreEqual("Припасы в дорогу ×3", root.Q<ScrollView>("trade-buy-offer").Q<Label>(className: "trade-row-name").text);
+        // Двойной клик по строке сделки возвращает одну единицу.
+        yield return PointerPress(root.Q<ScrollView>("trade-buy-offer").Q(className: "trade-row"), 0, 2);
+        Assert.AreEqual("Припасы в дорогу ×2", root.Q<ScrollView>("trade-buy-offer").Q<Label>(className: "trade-row-name").text);
+        StringAssert.StartsWith("Доплатить ", root.Q<Label>("trade-net").text);
+        // Правая кнопка — сведения, без переноса.
+        yield return PointerPress(TradeRow(root, "trade-merchant-list", "Припасы"), 1, 1);
+        Assert.AreEqual(DisplayStyle.Flex, root.Q("trade-item-popup").resolvedStyle.display, "ПКМ открывает сведения.");
+        Assert.AreEqual("Припасы в дорогу ×2", root.Q<ScrollView>("trade-buy-offer").Q<Label>(className: "trade-row-name").text, "ПКМ ничего не переносит.");
+        yield return CaptureBoth(main, "settlement_02b_trade_popup");
+        yield return Click(root.Q<Button>("trade-item-popup-close"));
+        Assert.AreEqual(DisplayStyle.None, root.Q("trade-item-popup").resolvedStyle.display);
         yield return CaptureBoth(main, "settlement_02_trade_cart");
         Assert.AreEqual(gold, campaign.ArmyGold, "Корзина — только намерение.");
+        Assert.AreEqual(minutes, Minutes(campaign), 0.01, "Просмотр товара и корзина времени не тратят.");
         Button confirm = root.Q<Button>("trade-confirm-button");
         yield return Click(confirm);
         Assert.AreEqual(supply + 2, campaign.ArmySupply);
+        Assert.AreEqual(minutes + SettlementCatalog.Current.ActionMinutes, Minutes(campaign), 0.01, "Подтверждённая сделка — один шаг часов.");
+        minutes = Minutes(campaign);
         int paid = gold - campaign.ArmyGold;
         Assert.Greater(paid, 0);
         Assert.IsFalse(confirm.enabledInHierarchy, "После сделки корзина пуста — повторить нечего.");
@@ -183,15 +229,36 @@ public sealed class SettlementScreenPlayModeTests
         Assert.IsFalse(TradeService.TryConfirm(campaign, stale, paid, out _), "Старая ревизия не проходит.");
         Assert.AreEqual(supply + 2, campaign.ArmySupply);
 
-        // Отмена корзины ничего не тратит.
+        // Смешанный обмен: покупка вещи и продажа припасов — один итог,
+        // одна сделка, один шаг часов.
+        VisualElement goodsRow = root.Q<ScrollView>("trade-merchant-list").Query(className: "trade-row").ToList()
+            .First(row => !row.Q<Label>(className: "trade-row-name").text.StartsWith("Припасы") && !row.ClassListContains("trade-row--disabled"));
+        yield return PointerPress(goodsRow, 0, 2);
+        yield return PointerPress(TradeRow(root, "trade-party-list", "Припасы отряда"), 0, 2);
+        Assert.AreEqual(1, root.Q<ScrollView>("trade-buy-offer").Query(className: "trade-row").ToList().Count);
+        Assert.AreEqual(1, root.Q<ScrollView>("trade-sell-offer").Query(className: "trade-row").ToList().Count);
+        int goldMixed = campaign.ArmyGold;
+        int supplyMixed = campaign.ArmySupply;
+        string net = root.Q<Label>("trade-net").text;
+        yield return CaptureBoth(main, "settlement_02c_trade_mixed");
+        yield return Click(confirm);
+        int change = campaign.ArmyGold - goldMixed;
+        Assert.AreEqual(supplyMixed - 1, campaign.ArmySupply, "Продана единица припасов.");
+        Assert.AreEqual(change < 0 ? "Доплатить " + (-change) + " золота" : change > 0 ? "Получить " + change + " золота" : "Без доплаты", net,
+            "Итог на экране совпал с применённым.");
+        Assert.AreEqual(minutes + SettlementCatalog.Current.ActionMinutes, Minutes(campaign), 0.01, "Смешанная сделка — один шаг часов.");
+        minutes = Minutes(campaign);
+
+        // Отмена ничего не тратит.
         int goldAfter = campaign.ArmyGold;
-        suppliesRow = root.Q<ScrollView>("trade-merchant-list").Query(className: "trade-row").ToList()
-            .First(row => row.Q<Label>(className: "trade-row-name").text.StartsWith("Припасы"));
-        yield return ClickElement(suppliesRow);
+        int supplyAfter = campaign.ArmySupply;
+        yield return PointerPress(TradeRow(root, "trade-merchant-list", "Припасы"), 0, 2);
         yield return Click(root.Q<Button>("trade-cancel-button"));
         yield return Click(root.Q<Button>("settlement-confirm-yes"));
         Assert.AreEqual(goldAfter, campaign.ArmyGold);
-        Assert.AreEqual(supply + 2, campaign.ArmySupply);
+        Assert.AreEqual(supplyAfter, campaign.ArmySupply);
+        Assert.AreEqual(0, root.Q<ScrollView>("trade-buy-offer").Query(className: "trade-row").ToList().Count, "Отменённая сделка пуста.");
+        Assert.AreEqual(minutes, Minutes(campaign), 0.01, "Отмена сделки времени не тратит.");
         yield return Click(root.Q<Button>("trade-back-button"));
         Assert.AreEqual(DisplayStyle.None, trade.resolvedStyle.display);
 
@@ -200,6 +267,7 @@ public sealed class SettlementScreenPlayModeTests
         Assert.AreEqual("Корчма у торга", root.Q<Label>("settlement-title").text);
         yield return CaptureBoth(main, "settlement_03_tavern");
         int beforeInfo = campaign.ArmyGold;
+        minutes = Minutes(campaign);
         yield return Click(FindButton(screen.Q("settlement-actions"), "Где дед прятал"));
         yield return Click(root.Q<Button>("settlement-confirm-yes"));
         yield return Frames(3);
@@ -208,22 +276,44 @@ public sealed class SettlementScreenPlayModeTests
         Assert.IsTrue(Get<bool>(main, "IsNarrativeDialogueActive"), "Сцена рассказа открыта.");
         Assert.IsFalse(Get<bool>(main, "IsSettlementScreenOpen"), "Под разговором экран не принимает действий.");
         Assert.AreEqual(DisplayStyle.Flex, screen.resolvedStyle.display, "Разговор — поверх экрана поселения.");
-        Assert.IsFalse(screen.enabledInHierarchy, "Кнопки экрана под разговором не нажимаются.");
+        // Город виден (экран непрозрачен), но клик по его кнопке забирает
+        // слой разговора.
+        Assert.AreEqual(1f, screen.resolvedStyle.opacity, 0.001f, "Экран поселения под разговором непрозрачен.");
+        Button underDialogue = screen.Q("settlement-actions").Query<Button>().First();
+        VisualElement picked = screen.panel.Pick(underDialogue.worldBound.center);
+        Assert.IsFalse(picked == underDialogue || underDialogue.Contains(picked), "Кнопка поселения под разговором не нажимается.");
+        yield return CaptureBoth(main, "settlement_06_dialogue_over_city");
         Assert.IsTrue(ContinuousSimulationSystem.IsPaused(campaign));
         Invoke(main, "CloseNarrativeDialogue");
         yield return Frames(4);
         Assert.IsTrue(Get<bool>(main, "IsSettlementScreenOpen"), "После сцены — снова корчма.");
         Assert.AreEqual("Корчма у торга", root.Q<Label>("settlement-title").text);
         Assert.IsTrue(ContinuousSimulationSystem.IsPaused(campaign), "Между сценой и корчмой время не пошло.");
+        Assert.AreEqual(minutes + SettlementCatalog.Current.ActionMinutes, Minutes(campaign), 0.01, "Завершённый разговор — один шаг часов.");
+        yield return Frames(20);
+        Assert.AreEqual(minutes + SettlementCatalog.Current.ActionMinutes, Minutes(campaign), 0.01, "После шага часы снова стоят.");
 
-        Assert.IsTrue(screen.enabledInHierarchy);
 
         // Люди поселения: полный список, возврат на главную страницу.
         yield return Click(FindButton(screen.Q("settlement-actions"), "Вернуться в поселение"));
         yield return Click(FindButton(screen.Q("settlement-actions"), "Люди поселения"));
         Assert.AreEqual("Люди поселения", root.Q<Label>("settlement-title").text);
-        Assert.Greater(screen.Q("settlement-actions").Query<Button>().ToList().Count, 1, "В списке есть люди.");
+        // Бриф правок п. 2: люди — плашками в основной области, в левом
+        // столбце только «Назад»; разговор из списка возвращает в список.
+        VisualElement gallery = root.Q("settlement-people-gallery");
+        Assert.AreEqual(DisplayStyle.Flex, gallery.resolvedStyle.display);
+        Assert.Greater(gallery.childCount, 0, "В основной области есть люди.");
+        Assert.AreEqual(1, screen.Q("settlement-actions").Query<Button>().ToList().Count, "В столбце — только «Назад».");
+        Assert.Greater(gallery.worldBound.xMin, root.Q("settlement-panel").worldBound.xMax - 1f, "Плашки — справа от панели, над городом.");
         yield return CaptureBoth(main, "settlement_05_people");
+        VisualElement talker = gallery.Children().First(c => c.tooltip != null && c.tooltip.StartsWith("Клик — поговорить"));
+        yield return ClickElement(talker);
+        yield return Frames(3);
+        Assert.IsTrue(Get<bool>(main, "IsNarrativeDialogueActive"), "Разговор из общего списка открылся.");
+        Assert.AreEqual(DisplayStyle.Flex, screen.resolvedStyle.display, "Под разговором — город.");
+        Invoke(main, "CloseNarrativeDialogue");
+        yield return Frames(4);
+        Assert.AreEqual("Люди поселения", root.Q<Label>("settlement-title").text, "После разговора — снова список людей.");
         yield return Click(FindButton(screen.Q("settlement-actions"), "Назад"));
 
         // Доска: чтение ничего не принимает.

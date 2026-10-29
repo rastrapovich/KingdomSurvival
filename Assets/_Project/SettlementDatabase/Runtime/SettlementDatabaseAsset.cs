@@ -65,6 +65,9 @@ namespace KingdomSurvival.SettlementDatabase
         // Рабочие сцены поселений, уже засеянные в Базу диалогов (удалённую
         // автором сцену засев второй раз не вернёт).
         public List<string> seededDialogueIds = new List<string>();
+        // Бриф правок п. 14: минут за завершённый разговор или подтверждённую
+        // сделку в поселении (один шаг на всё действие, без разброса).
+        [Min(0)] public int actionMinutes = SettlementCatalogData.DefaultActionMinutes;
 
         public SettlementProfileEntry FindEntry(string profileId)
         {
@@ -85,7 +88,7 @@ namespace KingdomSurvival.SettlementDatabase
                         list.Add(entry.Data);
                 }
             }
-            return new SettlementCatalogData(list, errands);
+            return new SettlementCatalogData(list, errands) { ActionMinutes = Mathf.Max(0, actionMinutes) };
         }
 
         // Изображение экрана с учётом условного варианта.

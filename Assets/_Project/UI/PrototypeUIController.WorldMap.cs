@@ -161,8 +161,15 @@ public partial class PrototypeUIController
         if (legacyScroll != null)
             legacyScroll.style.display = DisplayStyle.None;
 
-        worldMapViewport.RemoveFromHierarchy();
-        expeditionsScreen.Add(worldMapViewport);
+        // Бриф правок п. 1: переносить карту, только если она ещё не на
+        // своём месте. Метод зовётся при каждом обновлении панели карты
+        // (донесение, смена суток); снятие с панели и возврат заставляли UI
+        // Toolkit заново строить сетки всех слоёв рисунка — кадр ≈200 мс.
+        if (worldMapViewport.parent != expeditionsScreen)
+        {
+            worldMapViewport.RemoveFromHierarchy();
+            expeditionsScreen.Add(worldMapViewport);
+        }
 
         expeditionsScreen.style.flexGrow = 1f;
         expeditionsScreen.style.minHeight = 0f;
@@ -309,7 +316,15 @@ public partial class PrototypeUIController
         RefreshStableUiAfterStateChange();
     }
 
+    private static readonly Unity.Profiling.ProfilerMarker RefreshMapMarker = new Unity.Profiling.ProfilerMarker("KS.Map.RefreshPanel");
+
     private void RefreshWorldMapPanel()
+    {
+        using (RefreshMapMarker.Auto())
+            RefreshWorldMapPanelCore();
+    }
+
+    private void RefreshWorldMapPanelCore()
     {
         if (gameState == null ||
             !WorldMapElementsExist())
@@ -334,8 +349,8 @@ public partial class PrototypeUIController
             ApplyWorldMapViewportTransform();
         }
 
+        HideWorldMapNodeTooltip();
         worldMapBackground?.Clear();
-        worldMapArtLayers?.Clear();
         worldMapWater?.Clear();
         worldMapTerrain.Clear();
         worldMapRoads?.Clear();
@@ -402,6 +417,12 @@ public partial class PrototypeUIController
     // обратное преобразование той же формулой: local/resolvedStyle*100).
     // Порядок/фильтрация — через общий WorldMapArtLayerUtility, чтобы Preview
     // и runtime никогда не разошлись.
+    // Бриф правок п. 1: слои рисунка сгенерированной карты, которые сейчас
+    // показаны. Обновление панели (донесение, смена суток) раньше удаляло и
+    // заново создавало их — UI Toolkit заново строил сетки всех слоёв
+    // (≈190 мс и ≈50 МБ мусора за кадр). Теперь — только при смене рисунка.
+    private WorldMapLayers worldMapShownLayers;
+
     private void ApplyWorldMapArtLayers()
     {
         if (worldMapArtLayers == null)
@@ -414,10 +435,17 @@ public partial class PrototypeUIController
             WorldMapGeneratorAsset generator = WorldMapVisualRuntime.LoadGenerator();
             WorldMapLayers layers = WorldMapGeneratedArt.GetLayers(
                 gameState.GeneratedMap, generator != null ? generator.Art : WorldMapArtStyle.CreateDefault());
+            if (layers != null && ReferenceEquals(layers, worldMapShownLayers) && worldMapArtLayers.childCount > 0)
+                return;
+            worldMapArtLayers.Clear();
+            worldMapShownLayers = layers;
             if (layers != null)
                 worldMapArtLayers.Add(new WorldMapLayersView { Layers = layers });
             return;
         }
+
+        worldMapArtLayers.Clear();
+        worldMapShownLayers = null;
 
         WorldMapVisualTheme theme = WorldMapVisualRuntime.LoadActiveTheme();
         if (theme == null)
@@ -464,10 +492,8 @@ public partial class PrototypeUIController
             "world-map-node-" + id;
         node.text =
             location.IsExplored ? "✓" : "●";
-        node.tooltip =
-            location.Name + "\n" +
-            location.RegionName + "\nУгроза: " +
-            location.Threat;
+        // Бриф правок п. 3: своя подсказка у значка (WorldMapNodeTooltip).
+        WireWorldMapNodeTooltip(node, location);
 
         node.AddToClassList("world-map-node");
         node.AddToClassList(
@@ -525,8 +551,12 @@ public partial class PrototypeUIController
                   ? theme.IconLibrary.FindIconForLocation(location.Id)
                   : null);
 
+        // Бриф правок п. 17: без назначенного рисунка — временный знак типа.
         if (icon == null)
+        {
+            ApplyWorldMapTemporaryMark(node, location);
             return;
+        }
 
         Image iconImage = new Image();
         iconImage.AddToClassList("world-map-node-icon");

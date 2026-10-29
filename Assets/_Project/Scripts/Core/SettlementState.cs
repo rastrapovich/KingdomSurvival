@@ -74,6 +74,9 @@ public sealed class SettlementsStateData
 {
     public List<SettlementInstanceData> Instances = new List<SettlementInstanceData>();
     public List<ErrandStateData> Errands = new List<ErrandStateData>();
+    // Бриф правок пп. 16, 21: за каким поселением и заказчиком закреплено
+    // каждое поручение (ErrandClaims).
+    public List<ErrandClaimData> ErrandClaims = new List<ErrandClaimData>();
     // Уникальные вещи, уже выданные в мир (покупкой): второй раз их не
     // предложит ни один торговец.
     public List<string> IssuedUniqueItemIds = new List<string>();

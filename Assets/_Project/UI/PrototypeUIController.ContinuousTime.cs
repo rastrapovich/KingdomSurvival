@@ -1,5 +1,6 @@
 using System;
 using KingdomSurvival.Chapter01;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -13,6 +14,17 @@ public partial class PrototypeUIController
     // Сглаживание времени кадра: неровные кадры не дают рывков бегущей фигуры.
     private const float FrameSecondsSmoothing = 0.15f;
     private float smoothedFrameSeconds;
+
+    // Бриф правок п. 1: метки профайлера пути «час/сутки → донесение → UI»
+    // (замер WorldMapPerformancePlayModeTests, фаза смены суток).
+    private static readonly ProfilerMarker AdvanceMarker = new ProfilerMarker("KS.Simulation.Advance");
+    private static readonly ProfilerMarker BatchMarker = new ProfilerMarker("KS.Batch.Process");
+    private static readonly ProfilerMarker BatchReportMarker = new ProfilerMarker("KS.Batch.AddReport");
+    private static readonly ProfilerMarker BatchModalsMarker = new ProfilerMarker("KS.Batch.QueueModals");
+    private static readonly ProfilerMarker BatchInterfaceMarker = new ProfilerMarker("KS.Batch.RefreshInterface");
+    private static readonly ProfilerMarker BatchStableMarker = new ProfilerMarker("KS.Batch.RefreshStableUi");
+    private static readonly ProfilerMarker BatchTimeUiMarker = new ProfilerMarker("KS.Batch.RefreshTimeUi");
+    private static readonly ProfilerMarker BatchNextModalMarker = new ProfilerMarker("KS.Batch.ShowNextModal");
 
     // 12И: без синхронизации с монитором (уровень качества Very Low) кадры
     // идут неровно, и карта за героем едет рывками. Синхронизация — на всю
@@ -194,16 +206,22 @@ public partial class PrototypeUIController
 
             // 12И: бегущий отряд проходит 2 клетки в секунду — долгий кадр
             // (загрузка сцены, подвисание) не должен переносить героя скачком.
-            ContinuousSimulationBatch batch =
-                ContinuousSimulationSystem.Advance(
-                    gameState,
-                    frameSeconds);
+            // Бриф правок п. 18: темп множит время симуляции кадра — путь и
+            // дела идут быстрее в реальных секундах при той же цене в часах.
+            ContinuousSimulationBatch batch;
+            using (AdvanceMarker.Auto())
+                batch = ContinuousSimulationSystem.Advance(gameState, frameSeconds * MapTempo);
 
             if (batch.HasReportableContent)
-                ProcessContinuousSimulationBatch(batch);
+            {
+                using (BatchMarker.Auto())
+                    ProcessContinuousSimulationBatch(batch);
+            }
         }
 
         RegisterContinuousDebugAutopause();
+        EnsureMapTempoBar();
+        EnsureReportsDock();
         EnsureDeferredWorldMapUi();
         RefreshContinuousClockOnly();
         TickWorldMapHero(frameSeconds);
@@ -267,7 +285,8 @@ public partial class PrototypeUIController
             reportText =
                 "[" + ContinuousSimulationSystem.FormatClock(batch.EventHour) + "]\n" +
                 NormalizeContinuousReportText(reportText);
-            reportIndex = AddReport(reportText, batch.ReportDay);
+            using (BatchReportMarker.Auto())
+                reportIndex = AddReport(reportText, batch.ReportDay);
         }
 
         if (batch.MandatoryNotice == null)
@@ -283,7 +302,8 @@ public partial class PrototypeUIController
             MarkReportUnread(reportIndex);
         }
 
-        QueueStrategicResultModals(batch.Result, reportIndex);
+        using (BatchModalsMarker.Auto())
+            QueueStrategicResultModals(batch.Result, reportIndex);
 
         // Дорожный Encounter (PrototypeUIController.Encounters.cs) пробует
         // открыться только когда этот же пакет не претендует ни на
@@ -294,12 +314,18 @@ public partial class PrototypeUIController
         if (!batch.RequestAutoPause && batch.MandatoryNotice == null)
             TryResolveRoadEncounterOpportunity(batch.Result);
 
-        RefreshInterface();
+        using (BatchInterfaceMarker.Auto())
+            RefreshInterface();
         if (stableUiInitialized)
-            RefreshStableUiAfterStateChange();
+        {
+            using (BatchStableMarker.Auto())
+                RefreshStableUiAfterStateChange();
+        }
 
-        RefreshContinuousTimeUi(true);
-        TryShowNextQueuedModal();
+        using (BatchTimeUiMarker.Auto())
+            RefreshContinuousTimeUi(true);
+        using (BatchNextModalMarker.Auto())
+            TryShowNextQueuedModal();
     }
 
     // Единственное место, где решается, идёт ли стратегическое время —
@@ -317,6 +343,13 @@ public partial class PrototypeUIController
         // ПР-12К (канон v1.53 §28.3): в исследуемом месте мировые часы стоят —
         // время тратят шаги и действия (ContinuousSimulationSystem.AdvanceLocalHours).
         if (LocalExplorationService.IsActive(gameState))
+        {
+            ContinuousSimulationSystem.SetPaused(gameState, true);
+            return;
+        }
+
+        // Бриф правок п. 11: чтение журнала время не двигает.
+        if (IsJournalOpen)
         {
             ContinuousSimulationSystem.SetPaused(gameState, true);
             return;

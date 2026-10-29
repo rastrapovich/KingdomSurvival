@@ -1295,8 +1295,10 @@ namespace KingdomSurvival.BattleSandbox
                 }
                 else
                 {
+                    // Клик по своему бойцу — «выбрать», а не модальное окно:
+                    // окно сведений перехватывало все следующие клики по
+                    // полю, и ход казался заблокированным. Сведения — ПКМ.
                     selectedTargetId = null;
-                    fighterDetailsView.Open(occupant.Definition, occupant);
                 }
                 RefreshBattleScreen();
                 return;

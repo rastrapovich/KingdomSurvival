@@ -336,6 +336,12 @@ public sealed class SettlementCatalogData
     public IReadOnlyList<SettlementProfileDefinition> Profiles => profiles;
     public IReadOnlyList<ErrandDefinition> Errands => errands;
 
+    // Бриф правок п. 14: игровые минуты за одно целое действие в поселении —
+    // завершённый разговор или подтверждённую непустую сделку. Просмотр,
+    // отмена и перенос товара времени не тратят. Рабочее значение — 15.
+    public const int DefaultActionMinutes = 15;
+    public int ActionMinutes { get; set; } = DefaultActionMinutes;
+
     public SettlementProfileDefinition FindProfile(string profileId)
     {
         return string.IsNullOrEmpty(profileId) ? null : profiles.Find(p => p.Id == profileId);

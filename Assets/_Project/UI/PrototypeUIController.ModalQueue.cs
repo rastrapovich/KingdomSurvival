@@ -211,7 +211,7 @@ public partial class PrototypeUIController
                (IsGameMenuOpen ||
                 IsNarrativeDialogueActive ||
                 IsLocationInteractionActive ||
-                IsSettlementScreenOpen ||
+                IsSettlementScreenBlocking ||
                 IsHeroScreenOpen ||
                 gameState.HasPendingExpeditionDecision ||
                 openedIncident != null ||

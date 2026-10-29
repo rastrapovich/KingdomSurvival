@@ -52,6 +52,13 @@ public sealed class HomeScreenPlayModeTests
         info.Invoke(controller, arguments.Length > 0 ? arguments : null);
     }
 
+    // Вкладка экрана героя (вложенный закрытый enum контроллера).
+    private static object HeroTab(MonoBehaviour controller, string name)
+    {
+        System.Type type = controller.GetType().GetNestedType("HeroScreenTab", BindingFlags.NonPublic);
+        return System.Enum.Parse(type, name);
+    }
+
     private static void Click(Button button)
     {
         using (NavigationSubmitEvent submit = NavigationSubmitEvent.GetPooled())
@@ -135,21 +142,37 @@ public sealed class HomeScreenPlayModeTests
         Assert.AreEqual("Меч", root.Q<Label>("hero-screen-equipment-slot-1-name").text);
         StringAssert.StartsWith("УР. ", root.Q<Label>("hero-screen-unit-card-level").text);
 
+        // Бриф исправлений п. 8: «Снаряжение» — только Командир; бойцы — на «Развитии».
         string garrick = campaign.FindFighter("garrick").Name;
-        Invoke(controller, "ShowHeroPersonCard", "garrick");
+        Invoke(controller, "ShowHeroPersonOnTab", "garrick", HeroTab(controller, "Growth"));
         yield return Frames(3);
         Assert.AreEqual(garrick.ToUpperInvariant(), root.Q<Label>("hero-screen-unit-card-title").text);
-        Assert.AreEqual("Кольчуга", root.Q<Label>("hero-screen-equipment-slot-2-name").text);
         Assert.Greater(root.Q<VisualElement>("hero-screen-unit-card-competencies").childCount, 0, "Компетенции бойца в карточке.");
 
-        Button equip = root.Q<VisualElement>("hero-screen-unit-card-available").Query<Button>().ToList()
-            .First(b => b.text == "Надеть" && b.parent.parent.Query<Label>().ToList().Any(l => l.text == "Кольчуга из клети"));
+        Invoke(controller, "ShowHeroPersonCard", "garrick");
+        Click(root.Q<Button>("hero-screen-tab-gear"));
+        yield return Frames(3);
+        string commander = campaign.GetSelectedCommander().Name;
+        Assert.AreEqual(commander.ToUpperInvariant(), root.Q<Label>("hero-screen-unit-card-title").text, "На «Снаряжении» — Командир.");
+
+        // Кольчуга из клети: ячейка кладовой → «Надеть» в сведениях под сеткой.
+        ItemInstanceData mail = ItemService.Storage(campaign).First(i => i.ItemId == ItemCatalog.StoreroomMail);
+        VisualElement cell = root.Q<VisualElement>("hero-bag-cell-" + mail.InstanceId);
+        Assert.IsNotNull(cell, "Вещь кладовой — ячейкой сетки.");
+        using (PointerDownEvent down = PointerDownEvent.GetPooled())
+        {
+            down.target = cell;
+            cell.SendEvent(down);
+        }
+        yield return Frames(3);
+        Button equip = root.Q<VisualElement>("hero-screen-bag-details-actions").Query<Button>().ToList().First(b => b.text == "Надеть");
         Click(equip);
         yield return Frames(3);
 
-        Assert.AreEqual(ItemCatalog.StoreroomMail, ItemService.Equipped(campaign, "garrick", ItemSlot.Protection).ItemId);
+        string heroId = campaign.GetSelectedCommander().Id;
+        Assert.AreEqual(ItemCatalog.StoreroomMail, ItemService.Equipped(campaign, heroId, ItemSlot.Protection).ItemId);
         Assert.AreEqual("Кольчуга из клети", root.Q<Label>("hero-screen-equipment-slot-2-name").text);
-        Assert.AreEqual(CombatStatsAssembler.Compute(campaign, "garrick").Final.Defense.ToString(),
+        Assert.AreEqual(CombatStatsAssembler.Compute(campaign, heroId).Final.Defense.ToString(),
             root.Q<Label>("hero-screen-unit-card-stat-defense-value").text, "Карточка показывает собранные числа.");
     }
 
@@ -205,27 +228,20 @@ public sealed class HomeScreenPlayModeTests
         Click(root.Q<Button>("hero-screen-tab-gear"));
         yield return Frames(3);
         Assert.IsTrue(root.Q<VisualElement>("hero-screen-unit-card-gear").ClassListContains("hero-screen-person-page--active"));
-        VisualElement store = root.Q<VisualElement>("hero-screen-unit-card-available");
-        Assert.IsTrue(store.Query<Label>().ToList().Any(l => l.text == "Кольчуга из клети"), "Кладовая показывает свои вещи.");
-
-        Click(root.Q<Button>("hero-screen-inventory-filter-weapon"));
-        yield return Frames(3);
-        Assert.IsFalse(store.Query<Label>().ToList().Any(l => l.text == "Кольчуга из клети"), "Фильтр «Оружие» прячет защиту.");
-
-        // Сумка и кладовая — один список; «В сумке» прячет то, что в кладовой.
-        Click(root.Q<Button>("hero-screen-inventory-filter-all"));
-        Click(root.Q<Button>("hero-screen-inventory-place-pack"));
-        yield return Frames(3);
-        Assert.IsFalse(store.Query<Label>().ToList().Any(l => l.text == "Кольчуга из клети"), "Фильтр «В сумке» прячет кладовую.");
-        Click(root.Q<Button>("hero-screen-inventory-place-all"));
-        yield return Frames(3);
+        Assert.IsTrue(personPlace.ClassListContains("hero-screen-unit-card--gear"), "На «Снаряжении» полоса людей скрыта.");
+        VisualElement bag = root.Q<VisualElement>("hero-screen-unit-card-available");
+        int slots = bag.Children().Count(c => c.ClassListContains("hero-bag-cell") && !c.ClassListContains("hero-bag-cell--supplies"));
+        Assert.AreEqual(ItemService.HeroPackSize, slots, "Сумка — сетка на все места.");
+        Assert.IsNotNull(bag.Q<VisualElement>("hero-bag-cell-supplies"), "Припасы видны в сумке.");
+        Assert.IsTrue(root.Q<VisualElement>("hero-screen-storage-grid").Children().Any(c => c.tooltip.StartsWith("Кольчуга из клети")),
+            "Дома видна кладовая.");
 
         // Переходы между вкладками — только вкладками: ни в таблице отряда,
         // ни на «Герое» нет кнопок, ведущих на другие вкладки.
         string[] links = { "Вещи", "Развитие", "Выбрать развитие" };
         Assert.IsFalse(root.Q<VisualElement>("hero-screen-squad-list").Query<Button>().ToList().Any(b => links.Contains(b.text)));
-        Assert.AreEqual(0, root.Q<VisualElement>("hero-screen-page-hero").Query<Button>().ToList()
-            .Count(b => !b.ClassListContains("hero-screen-supply-button")), "На «Герое» — только кнопки запасов.");
+        Assert.AreEqual(0, root.Q<VisualElement>("hero-screen-page-hero").Query<Button>().ToList().Count,
+            "На «Герое» кнопок нет: запасы перенесены на «Снаряжение».");
 
         Click(root.Q<Button>("hero-screen-tab-journey"));
         yield return Frames(3);

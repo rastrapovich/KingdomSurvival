@@ -64,6 +64,14 @@ public partial class PrototypeUIController
                 OpenSettlementScreen(location.Id);
                 return true;
             }
+            // Бриф исправлений п. 3: обычный вход — сразу всем отрядом на
+            // экран поселения. Окно выбора (лагерь снаружи) — только если
+            // кого-то здесь не пустят или лагерь уже разбит.
+            if (!SettlementCampService.HasCamp(gameState) && SettlementBlockedCompanions().Count == 0)
+            {
+                EnterSettlementWith(location, SettlementCampService.Companions(gameState));
+                return IsSettlementScreenOpen;
+            }
         }
         else if (TryEnterLocalExploration(location))
             return true;

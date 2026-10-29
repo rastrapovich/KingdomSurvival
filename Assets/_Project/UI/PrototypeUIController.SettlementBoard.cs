@@ -234,8 +234,8 @@ public partial class PrototypeUIController
                 RenderSettlementBoard();
                 return;
             case NoticeActionKind.ContactPerson:
+                // Разговор — поверх доски; после него та же доска.
                 string dialogueId = NoticeBoardService.ContactDialogueId(gameState, settlementLocationId, notice);
-                HideSettlementBoard();
                 StartSettlementDialogue(dialogueId);
                 return;
             case NoticeActionKind.OpenTrade:

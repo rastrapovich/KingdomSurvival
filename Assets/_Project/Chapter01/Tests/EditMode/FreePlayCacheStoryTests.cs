@@ -94,7 +94,8 @@ public sealed class FreePlayCacheStoryTests
         FreePlayContent.RefreshWithReports(state);
         FreePlayContent.RefreshWithReports(state);
         Assert.AreEqual(1, state.Inventory.Items.Count(i => i.ItemId == ItemCatalog.CarterTokenKnife), "Нож выдан один раз.");
-        Assert.IsTrue(state.FindLocation(FreePlayCacheStory.LocationId).IsVisibleOnMap);
+        Assert.IsFalse(state.FindLocation(FreePlayCacheStory.LocationId).IsVisibleOnMap, "Обысканное место ушло с карты.");
+        CollectionAssert.IsEmpty(WorldMapSearchAreas.Active(state), "Области поиска больше нет.");
         Assert.IsNull(FreePlayCacheStory.LocationEntry(state, FreePlayCacheStory.LocationId), "Повторно сцена не открывается.");
 
         GameState loaded = CampaignSaveService.RestoreCampaign(JsonUtility.FromJson<CampaignSaveData>(

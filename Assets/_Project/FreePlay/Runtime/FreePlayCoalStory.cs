@@ -554,8 +554,9 @@ namespace KingdomSurvival.FreePlay
             }
             else
             {
-                step = "Поговорить с Ладой на экране Дома: где взять уголь.";
-                stage = "home";
+                // Бриф исправлений п. 6: пока о деле не узнали (Лада не
+                // просила), его нет в журнале.
+                return null;
             }
 
             return new JournalGoalViewData

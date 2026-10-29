@@ -81,6 +81,13 @@ public partial class PrototypeUIController
     {
         worldMapViewport = root.Q<VisualElement>("world-map-viewport");
         worldMap = root.Q<VisualElement>("world-map");
+        // Бриф исправлений п. 16: полотно карты двигается и масштабируется
+        // каждый кадр (камера, перетаскивание). Без подсказки UI Toolkit
+        // пересчитывал на процессоре вершины всех слоёв рисунка (≈95 мс на
+        // кадр при панорамировании); с GroupTransform сдвиг — одна матрица
+        // на видеокарте.
+        if (worldMap != null)
+            worldMap.usageHints |= UsageHints.GroupTransform;
         worldMapBackground = root.Q<VisualElement>("world-map-background");
         worldMapArtLayers = root.Q<VisualElement>("world-map-art-layers");
         worldMapWater = root.Q<VisualElement>("world-map-water");

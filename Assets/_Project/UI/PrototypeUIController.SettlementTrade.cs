@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using KingdomSurvival.ItemDatabase;
+using KingdomSurvival.UnitDatabase;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -41,6 +42,12 @@ public partial class PrototypeUIController
     private Label tradeReason;
     private Button tradeConfirmButton;
 
+    private const string TradeSuppliesKey = "__party_supplies";
+    private VisualElement tradeMerchantPortrait;
+    private VisualElement tradeHeroPortraitSlot;
+    private UnitPortraitElement tradeHeroPortrait;
+    private Label tradeMerchantMoney;
+    private Label tradePartyMoney;
     private readonly TradeCart tradeCart = new TradeCart();
     private string tradeMerchantId;
     // Выбранная строка: продажа — InstanceId отряда, покупка — вид и ключ.
@@ -79,6 +86,10 @@ public partial class PrototypeUIController
         tradeNet = BindRequiredElement<Label>(settlementScreen, screen, "trade-net");
         tradeReason = BindRequiredElement<Label>(settlementScreen, screen, "trade-reason");
         tradeConfirmButton = BindRequiredElement<Button>(settlementScreen, screen, "trade-confirm-button");
+        tradeMerchantPortrait = BindRequiredElement<VisualElement>(settlementScreen, screen, "trade-merchant-portrait");
+        tradeHeroPortraitSlot = BindRequiredElement<VisualElement>(settlementScreen, screen, "trade-hero-portrait");
+        tradeMerchantMoney = BindRequiredElement<Label>(settlementScreen, screen, "trade-merchant-money");
+        tradePartyMoney = BindRequiredElement<Label>(settlementScreen, screen, "trade-party-money");
         Button cancel = BindRequiredElement<Button>(settlementScreen, screen, "trade-cancel-button");
         Button back = BindRequiredElement<Button>(settlementScreen, screen, "trade-back-button");
         if (tradePage == null || tradeMerchantList == null || tradePartyList == null || tradeConfirmButton == null)
@@ -180,8 +191,10 @@ public partial class PrototypeUIController
         }
 
         tradeTitle.text = definition.DisplayName;
-        tradeSubtitle.text = (string.IsNullOrEmpty(definition.Role) ? string.Empty : definition.Role + " · ") +
-                             "покупает за " + definition.SellPercent + "% цены, продаёт за " + definition.BuyPercent + "%";
+        tradeSubtitle.text = string.IsNullOrEmpty(definition.Role) ? string.Empty : definition.Role;
+        ApplyTradePortraits(definition);
+        tradeMerchantMoney.text = "Золото торговца: " + merchant.Money;
+        tradePartyMoney.text = "Ваше золото: " + gameState.ArmyGold;
 
         List<TradeOfferView> offers = TradeService.Offers(gameState, definition, merchant);
         List<TradeSellView> sellables = TradeService.Sellables(gameState, definition);
@@ -198,6 +211,8 @@ public partial class PrototypeUIController
             tradeMerchantList.Add(CreateTradeEmpty(offers.Count == 0 ? "У торговца пусто — подвезут позже." : "Ничего под этот отбор."));
 
         tradePartyList.Clear();
+        if (gameState.ArmySupply > 0 && PassesTradeFilter(null, true, tradePartyFilter.index, tradePartySearch.value, "Припасы"))
+            tradePartyList.Add(CreateTradeSuppliesSellRow(definition));
         foreach (TradeSellView sell in sellables)
         {
             if (!PassesTradeFilter(sell.Item, false, tradePartyFilter.index, tradePartySearch.value, sell.Item.Name))
@@ -205,25 +220,35 @@ public partial class PrototypeUIController
             tradePartyList.Add(CreateTradeSellRow(sell));
         }
         if (tradePartyList.childCount == 0)
-            tradePartyList.Add(CreateTradeEmpty(sellables.Count == 0
+            tradePartyList.Add(CreateTradeEmpty(sellables.Count == 0 && gameState.ArmySupply <= 0
                 ? "Продать нечего: надетое сначала снимите в снаряжении; вещи оставшихся в лагере отсюда не видны."
                 : "Ничего под этот отбор."));
 
         RenderTradeCard(definition, offers, sellables);
 
+        // Бриф исправлений п. 10–11: цена — в карточке; здесь — что станет с
+        // золотом (было → будет, изменение со знаком) и заполнение сумки.
         TradeQuote quote = TradeService.Quote(gameState, tradeCart);
-        int playerAfter = tradeCart.IsEmpty ? gameState.ArmyGold : quote.PlayerMoneyAfter;
-        int merchantAfter = tradeCart.IsEmpty ? merchant.Money : quote.MerchantMoneyAfter;
-        int packAfter = tradeCart.IsEmpty ? ItemService.HeroPackCount(gameState) : quote.PackAfter;
-        tradeMoney.text = "Ваше золото: " + gameState.ArmyGold + " → " + playerAfter +
-                          "   ·   у торговца: " + merchant.Money + " → " + merchantAfter;
-        tradeTotals.text = "Покупки: " + quote.BuyTotal + "   ·   продажи: " + quote.SellTotal +
-                           "   ·   сумка после сделки: " + packAfter + " / " + ItemService.HeroPackSize +
-                           (quote.SuppliesGained > 0 ? "   ·   припасы +" + quote.SuppliesGained : string.Empty);
-        tradeNet.text = tradeCart.IsEmpty ? "Корзина пуста"
-            : quote.Net > 0 ? "Доплатить: " + quote.Net + " зол."
-            : quote.Net < 0 ? "Получить: " + (-quote.Net) + " зол."
-            : "Без доплаты";
+        int pack = ItemService.HeroPackCount(gameState);
+        if (tradeCart.IsEmpty)
+        {
+            tradeNet.text = "Выберите вещь — количество 1 ставится само";
+            tradeMoney.text = "Ваше золото: " + gameState.ArmyGold;
+            tradeTotals.text = "Заполнение сумки: " + pack + " / " + ItemService.HeroPackSize;
+        }
+        else
+        {
+            int change = -quote.Net;
+            tradeNet.text = quote.Net > 0 ? "Вы платите " + quote.Net + " зол."
+                : quote.Net < 0 ? "Вы получаете " + change + " зол."
+                : "Без доплаты";
+            tradeMoney.text = "Ваше золото: " + gameState.ArmyGold + " → " + (gameState.ArmyGold + change) +
+                              " (" + (change >= 0 ? "+" : "−") + System.Math.Abs(change) + ")";
+            tradeTotals.text = "Заполнение сумки: " + pack + " / " + ItemService.HeroPackSize +
+                               (quote.PackAfter != pack ? "   ·   после сделки: " + quote.PackAfter + " / " + ItemService.HeroPackSize : string.Empty) +
+                               (quote.SuppliesGained > 0 ? "   ·   припасы +" + quote.SuppliesGained
+                                   : quote.SuppliesSold > 0 ? "   ·   припасы −" + quote.SuppliesSold : string.Empty);
+        }
         tradeReason.text = tradeCart.IsEmpty ? string.Empty : quote.Valid ? string.Empty : quote.Reason;
         tradeConfirmButton.SetEnabled(!tradeCart.IsEmpty && quote.Valid);
     }
@@ -245,9 +270,18 @@ public partial class PrototypeUIController
         return CreateTradeRow(offer.Item?.Id, offer.Name, detail, offer.UnitPrice + " зол.", inCart > 0 ? "×" + inCart : string.Empty,
             selected, inCart > 0, !offer.Enabled, () =>
             {
+                // Новый выбор — новая сделка на 1 единицу; прежнее количество
+                // не переносится (бриф исправлений п. 10).
+                bool same = !tradeSelectedIsSell && tradeSelectedKind == captured.Kind && tradeSelectedKey == captured.Key;
                 tradeSelectedIsSell = false;
                 tradeSelectedKind = captured.Kind;
                 tradeSelectedKey = captured.Key;
+                if (!same)
+                {
+                    tradeCart.Clear();
+                    if (captured.Enabled)
+                        tradeCart.SetQuantity(captured.Kind, captured.Key, 1);
+                }
                 RenderSettlementTrade();
             });
     }
@@ -262,10 +296,59 @@ public partial class PrototypeUIController
         return CreateTradeRow(sell.Item.Id, sell.Item.Name, detail, sell.Enabled ? sell.UnitPrice + " зол." : "—", inCart ? "продать" : string.Empty,
             selected, inCart, !sell.Enabled, () =>
             {
+                bool same = tradeSelectedIsSell && tradeSelectedKey == instanceId;
                 tradeSelectedIsSell = true;
                 tradeSelectedKey = instanceId;
+                if (!same)
+                {
+                    tradeCart.Clear();
+                    if (sell.Enabled)
+                        tradeCart.ToggleSell(instanceId);
+                }
                 RenderSettlementTrade();
             });
+    }
+
+    // Припасы отряда на продажу — одной строкой вверху списка отряда.
+    private VisualElement CreateTradeSuppliesSellRow(MerchantDefinition definition)
+    {
+        bool selected = tradeSelectedIsSell && tradeSelectedKey == TradeSuppliesKey;
+        VisualElement row = CreateTradeRow(null, "Припасы отряда", "есть: " + gameState.ArmySupply + " · общий запас похода",
+            TradeService.SupplySellPrice(definition) + " зол.", tradeCart.SellSupplies > 0 ? "×" + tradeCart.SellSupplies : string.Empty,
+            selected, tradeCart.SellSupplies > 0, false, () =>
+            {
+                bool same = tradeSelectedIsSell && tradeSelectedKey == TradeSuppliesKey;
+                tradeSelectedIsSell = true;
+                tradeSelectedKey = TradeSuppliesKey;
+                if (!same)
+                {
+                    tradeCart.Clear();
+                    tradeCart.SellSupplies = 1;
+                }
+                RenderSettlementTrade();
+            });
+        row.AddToClassList("trade-row--supplies");
+        return row;
+    }
+
+    // Портреты: торговец — говорящий Базы диалогов (или инициал), герой —
+    // тот же портрет, что на экране героя.
+    private void ApplyTradePortraits(MerchantDefinition definition)
+    {
+        tradeMerchantPortrait.Clear();
+        if (narrativeDialogueDatabase == null)
+            narrativeDialogueDatabase = KingdomSurvival.DialogueDatabase.DialogueDatabaseRuntime.LoadDefaultDatabase();
+        Sprite sprite = !string.IsNullOrEmpty(definition.SpeakerId) ? narrativeDialogueDatabase?.FindSpeaker(definition.SpeakerId)?.Portrait : null;
+        tradeMerchantPortrait.style.backgroundImage = sprite != null ? new StyleBackground(sprite) : new StyleBackground(StyleKeyword.None);
+        if (sprite == null)
+        {
+            Label initial = new Label(string.IsNullOrEmpty(definition.DisplayName) ? "?" : definition.DisplayName.Substring(0, 1));
+            initial.AddToClassList("trade-portrait-initial");
+            tradeMerchantPortrait.Add(initial);
+        }
+        if (tradeHeroPortrait == null)
+            tradeHeroPortrait = CreateHeroScreenPortrait(tradeHeroPortraitSlot);
+        ApplyHeroScreenPortrait(tradeHeroPortrait, ResolveHeroScreenUnit(gameState.GetSelectedCommander()));
     }
 
     private VisualElement CreateTradeRow(string itemId, string name, string detail, string price, string cart,
@@ -317,6 +400,11 @@ public partial class PrototypeUIController
     {
         TradeOfferView offer = null;
         TradeSellView sell = null;
+        if (tradeSelectedIsSell && tradeSelectedKey == TradeSuppliesKey)
+        {
+            RenderTradeSuppliesSaleCard(definition);
+            return;
+        }
         if (tradeSelectedIsSell)
             sell = sellables.Find(s => s.Instance.InstanceId == tradeSelectedKey);
         else if (tradeSelectedKey != null)
@@ -338,6 +426,8 @@ public partial class PrototypeUIController
 
         if (!any)
         {
+            // Купленная до конца вещь исчезла из списка — выбор снят.
+            tradeSelectedKey = null;
             tradeCardName.text = "Выберите вещь";
             tradeCardMeta.text = "Слева — товар торговца, справа — вещи отряда.";
             tradeCardDescription.text = string.Empty;
@@ -377,7 +467,9 @@ public partial class PrototypeUIController
             return;
         }
 
-        tradeCardPrice.text = "Цена: " + offer.UnitPrice + " зол. за " + (offer.Kind == TradeLineKind.Supplies ? "единицу" : "штуку");
+        int qty = tradeCart.QuantityOf(offer.Kind, offer.Key);
+        tradeCardPrice.text = "Цена: " + offer.UnitPrice + " зол. за " + (offer.Kind == TradeLineKind.Supplies ? "единицу" : "штуку") +
+                              (qty > 1 ? "   ·   " + qty + " × " + offer.UnitPrice + " = " + qty * offer.UnitPrice + " зол." : string.Empty);
         if (offer.Kind == TradeLineKind.Buyback)
         {
             bool inCart = tradeCart.QuantityOf(TradeLineKind.Buyback, offer.Key) > 0;
@@ -414,8 +506,35 @@ public partial class PrototypeUIController
         return "Сейчас у Командира: " + currentDefinition.Name + (mod.Length > 0 ? " (" + mod + ")" : string.Empty) + fit + ".";
     }
 
+    private void RenderTradeSuppliesSaleCard(MerchantDefinition definition)
+    {
+        int unit = TradeService.SupplySellPrice(definition);
+        tradeCardImage.image = null;
+        tradeCardName.text = "Припасы отряда";
+        tradeCardMeta.text = "общий запас похода";
+        tradeCardDescription.text = "Лишнее можно продать: торговец платит за единицу меньше, чем просит сам.";
+        tradeCardMechanics.text = "Отряд ест " + gameState.ExpeditionSupplyConsumption + " в день. Сейчас припасов: " + gameState.ArmySupply + ".";
+        tradeCardCompare.text = string.Empty;
+        tradeCardPrice.text = "Торговец даст: " + unit + " зол. за единицу" +
+                              (tradeCart.SellSupplies > 1 ? "   ·   " + tradeCart.SellSupplies + " × " + unit + " = " + tradeCart.SellSupplies * unit + " зол." : string.Empty);
+        tradeToggleButton.style.display = DisplayStyle.None;
+        tradeQuantity.text = tradeCart.SellSupplies.ToString();
+        tradeQuantity.style.display = DisplayStyle.Flex;
+        tradeMinusButton.style.display = DisplayStyle.Flex;
+        tradePlusButton.style.display = DisplayStyle.Flex;
+        tradeMinusButton.SetEnabled(tradeCart.SellSupplies > 0);
+        tradePlusButton.SetEnabled(tradeCart.SellSupplies < gameState.ArmySupply);
+        tradeCardReason.text = string.Empty;
+    }
+
     private void ChangeTradeQuantity(int delta)
     {
+        if (tradeSelectedIsSell && tradeSelectedKey == TradeSuppliesKey)
+        {
+            tradeCart.SellSupplies = Mathf.Clamp(tradeCart.SellSupplies + delta, 0, gameState.ArmySupply);
+            RenderSettlementTrade();
+            return;
+        }
         if (tradeSelectedIsSell || tradeSelectedKey == null)
             return;
         int quantity = Mathf.Clamp(tradeCart.QuantityOf(tradeSelectedKind, tradeSelectedKey) + delta, 0, TradeService.MaxQuantity);

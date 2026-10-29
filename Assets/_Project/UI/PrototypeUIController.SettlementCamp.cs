@@ -30,13 +30,7 @@ public partial class PrototypeUIController
         }
 
         bool hasCamp = SettlementCampService.HasCamp(gameState);
-        List<string> blocked = new List<string>();
-        foreach (string personId in SettlementCampService.Companions(gameState))
-        {
-            string reason = SettlementCampService.AdmissionBlockReason(gameState, personId);
-            if (!string.IsNullOrEmpty(reason))
-                blocked.Add(PersonName(personId) + " — " + reason);
-        }
+        List<string> blocked = SettlementBlockedCompanions();
 
         if (!hasCamp)
         {
@@ -67,6 +61,19 @@ public partial class PrototypeUIController
         }
         AddInteractionChoice("ОТМЕНИТЬ", "Остаться у поселения, ничего не предпринимая.", true, OnLocationInteractionCancelClicked);
         return true;
+    }
+
+    // Кого из отряда сюда не пустят: «Имя — причина».
+    private List<string> SettlementBlockedCompanions()
+    {
+        List<string> blocked = new List<string>();
+        foreach (string personId in SettlementCampService.Companions(gameState))
+        {
+            string reason = SettlementCampService.AdmissionBlockReason(gameState, personId);
+            if (!string.IsNullOrEmpty(reason))
+                blocked.Add(PersonName(personId) + " — " + reason);
+        }
+        return blocked;
     }
 
     private void OpenSettlementPicker(LocationData location)

@@ -495,6 +495,7 @@ public partial class PrototypeUIController : MonoBehaviour
             "Расход дома: " + gameState.DailyFoodConsumption + " в сутки. " + HomeOverview.DescribeFood(gameState);
 
         RefreshHeroScreenSupplyPanel();
+        RefreshPartyResources();
         RefreshExpeditionPanel();
         RefreshIncidentNotifications();
 

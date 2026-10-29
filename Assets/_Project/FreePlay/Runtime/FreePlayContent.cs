@@ -174,7 +174,9 @@ namespace KingdomSurvival.FreePlay
             JournalGoalViewData summary = includeSummary ? FreePlaySummary.BuildGoal(state) : null;
             if (summary != null)
                 goals.Add(summary);
-            goals.Add(FreePlayCoalStory.BuildGoal(state));
+            JournalGoalViewData coal = FreePlayCoalStory.BuildGoal(state);
+            if (coal != null)
+                goals.Add(coal);
             JournalGoalViewData leader = FreePlayCoalStory.BuildLeaderGoal(state);
             if (leader != null)
                 goals.Add(leader);
@@ -196,18 +198,9 @@ namespace KingdomSurvival.FreePlay
             // 12Т: принятые поручения поселений — одно «Дело» на поручение,
             // откуда бы его ни взяли (доска, корчма, разговор).
             goals.AddRange(ErrandService.BuildGoals(state));
-            foreach (LocationData location in state.Locations)
-            {
-                if (location == null || location.IsWaypoint || !location.IsVisibleOnMap || !location.IsDiscovered)
-                    continue;
-                // Хутор ведёт своя история («Уголь для Лады»); место без
-                // осмотра (Чёрный лес) — только через историю.
-                if (location.Id == FreePlayCoalStory.LocationId || location.Id == FreePlayMineStory.LocationId ||
-                    location.Id == FreePlayKurganStory.LocationId || location.Id == FreePlayCaveStory.LocationId ||
-                    location.ExplorationHours <= 0.0)
-                    continue;
-                goals.Add(BuildPlaceGoal(location));
-            }
+            // Бриф исправлений п. 6: известное на карте место — ещё не задание.
+            // Дополнительные «Дела» появляются из своих источников (разговор,
+            // доска, слух, история), а не из списка мест.
             return goals;
         }
 
@@ -245,23 +238,6 @@ namespace KingdomSurvival.FreePlay
                 RevisionId = RegionGoalId + "." + stage + "." + returns,
                 Category = JournalGoalCategory.Main,
                 State = JournalGoalState.Active
-            };
-        }
-
-        private static JournalGoalViewData BuildPlaceGoal(LocationData location)
-        {
-            bool explored = location.IsExplored;
-            return new JournalGoalViewData
-            {
-                Id = "freeplay.goal.place." + location.Id,
-                Title = location.Name,
-                Description = explored && !string.IsNullOrEmpty(location.ResearchResultText)
-                    ? location.ResearchResultText
-                    : "Известное место в округе. Опасность: " + (string.IsNullOrEmpty(location.Threat) ? "неизвестна" : location.Threat) + ".",
-                CurrentStep = explored ? "Место осмотрено." : "Дойти и осмотреть.",
-                RevisionId = "freeplay.goal.place." + location.Id + (explored ? ".explored" : ".known"),
-                Category = JournalGoalCategory.Optional,
-                State = explored ? JournalGoalState.Completed : JournalGoalState.Active
             };
         }
 

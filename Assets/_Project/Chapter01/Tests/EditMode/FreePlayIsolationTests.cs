@@ -63,7 +63,8 @@ public sealed class FreePlayIsolationTests
 
         IReadOnlyList<JournalGoalViewData> goals = CampaignContent.BuildGoals(state);
         Assert.IsTrue(goals.Any(g => g.Id == FreePlayContent.RegionGoalId && g.State == JournalGoalState.Active));
-        Assert.IsTrue(goals.Any(g => g.Title == ruins.Name), "Известное место — в «Делах».");
+        Assert.IsFalse(goals.Any(g => g.Category == JournalGoalCategory.Optional),
+            "Новая игра: дополнительных дел нет, известное место — не задание.");
         Assert.IsNotEmpty(CampaignContent.DescribeHomeObjects(state), "Дом не пустой.");
     }
 

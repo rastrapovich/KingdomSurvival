@@ -150,8 +150,14 @@ public partial class PrototypeUIController
         // Рабочее место человека — одна страница на две вкладки; display
         // выставляется явно, по нему открытость читают IsHeroCardOpen и тесты.
         heroScreenUnitCard.style.display = IsHeroPersonTab ? DisplayStyle.Flex : DisplayStyle.None;
-        if (IsHeroPersonTab)
+        // Бриф исправлений п. 8: «Снаряжение» — временно только Командир,
+        // полоса людей скрыта (отряд и вещи бойцов в игре остаются).
+        heroScreenUnitCard.EnableInClassList("hero-screen-unit-card--gear", tab == HeroScreenTab.Gear);
+        if (tab == HeroScreenTab.Gear && gameState?.GetSelectedCommander() != null)
+            SelectHeroPerson(gameState.GetSelectedCommander().Id);
+        else if (IsHeroPersonTab)
             EnsureHeroPersonSelected();
+        HideHeroItemPopup();
 
         RefreshHeroScreen();
     }
@@ -380,9 +386,9 @@ public partial class PrototypeUIController
             CycleHeroScreenTab(-1);
         else if (keyboard.eKey.wasPressedThisFrame)
             CycleHeroScreenTab(1);
-        else if (IsHeroPersonTab && keyboard.leftArrowKey.wasPressedThisFrame)
+        else if (heroScreenTab == HeroScreenTab.Growth && keyboard.leftArrowKey.wasPressedThisFrame)
             CycleHeroPerson(-1);
-        else if (IsHeroPersonTab && keyboard.rightArrowKey.wasPressedThisFrame)
+        else if (heroScreenTab == HeroScreenTab.Growth && keyboard.rightArrowKey.wasPressedThisFrame)
             CycleHeroPerson(1);
     }
 }

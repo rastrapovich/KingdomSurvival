@@ -36,13 +36,16 @@ public sealed class TradeCart
     public int Revision;
     public readonly List<TradeBuyLine> Buy = new List<TradeBuyLine>();
     public readonly List<string> SellInstanceIds = new List<string>();
+    // Бриф исправлений п. 2: припасы отряда тоже продаются (единиц).
+    public int SellSupplies;
 
-    public bool IsEmpty => Buy.Count == 0 && SellInstanceIds.Count == 0;
+    public bool IsEmpty => Buy.Count == 0 && SellInstanceIds.Count == 0 && SellSupplies == 0;
 
     public void Clear()
     {
         Buy.Clear();
         SellInstanceIds.Clear();
+        SellSupplies = 0;
     }
 
     public int QuantityOf(TradeLineKind kind, string key)
@@ -112,6 +115,7 @@ public sealed class TradeQuote
     public int PackAfter;
     public int PackLimit = ItemService.HeroPackSize;
     public int SuppliesGained;
+    public int SuppliesSold;
     public int Revision;
 }
 
@@ -156,6 +160,36 @@ public static class TradeService
         return Math.Min(sell, BuyPrice(item, merchant, usesLeft));
     }
 
+    // Цена единицы припасов, которые торговец покупает у отряда: от его
+    // цены продажи припасов (или 2, если своих нет), не дороже её.
+    public static int SupplySellPrice(MerchantDefinition merchant)
+    {
+        if (merchant == null)
+            return 0;
+        MerchantStockDefinition line = merchant.Stock?.Find(s => s != null && s.IsSupplies);
+        int unit = line != null ? Math.Max(1, line.SupplyUnitPrice) : 2;
+        int price = (int)((long)unit * Math.Max(0, merchant.SellPercent) / 100);
+        return Math.Max(1, Math.Min(unit, price));
+    }
+
+    // Нетронутая вещь (без зарядов или с полными) — неотличима от новой:
+    // выкуп такой вещи показывается одной карточкой с обычным товаром.
+    private static bool IsPlain(ItemInstanceData instance, ItemDefinition item)
+    {
+        return item != null && (item.Uses <= 0 || instance.UsesLeft >= item.Uses);
+    }
+
+    private static List<ItemInstanceData> PlainBuyback(MerchantStateData merchant, string itemId)
+    {
+        List<ItemInstanceData> result = new List<ItemInstanceData>();
+        foreach (ItemInstanceData instance in merchant.Buyback)
+        {
+            if (instance.ItemId == itemId && IsPlain(instance, ItemCatalog.Find(itemId)))
+                result.Add(instance);
+        }
+        return result;
+    }
+
     // ------------------------------------------------------------------
     // Показ
     // ------------------------------------------------------------------
@@ -181,6 +215,7 @@ public static class TradeService
         List<TradeOfferView> offers = new List<TradeOfferView>();
         if (definition == null || merchant == null)
             return offers;
+        HashSet<string> listed = new HashSet<string>(StringComparer.Ordinal);
         foreach (MerchantStockDefinition line in definition.Stock)
         {
             if (line == null)
@@ -189,48 +224,57 @@ public static class TradeService
             int count = stock != null ? stock.Count : 0;
             if (line.IsSupplies)
             {
+                // Бриф исправлений п. 10: кончилось — карточки нет.
+                if (count <= 0)
+                    continue;
                 offers.Add(new TradeOfferView
                 {
                     Kind = TradeLineKind.Supplies,
                     Available = count,
                     UnitPrice = Math.Max(1, line.SupplyUnitPrice),
-                    SupplyUnits = 1,
-                    Enabled = count > 0,
-                    Reason = count > 0 ? string.Empty : "Припасы кончились — подвезут позже."
+                    SupplyUnits = 1
                 });
                 continue;
             }
             ItemDefinition item = ItemCatalog.Find(line.ItemId);
-            if (item == null)
+            if (item == null || listed.Contains(item.Id))
                 continue; // битая ссылка видна в редакторе, игроку — нет
+            listed.Add(item.Id);
             bool issued = item.Unique && SettlementService.IsUniqueIssued(state, item.Id);
-            if (count <= 0 && line.Unique)
-                continue; // ушедшая уникальная вещь не мерцает пустой строкой
-            TradeOfferView view = new TradeOfferView
+            int available = (issued ? 0 : count) + PlainBuyback(merchant, item.Id).Count;
+            if (available <= 0 || !item.CanBuy || item.IsTradeProtected)
+                continue;
+            offers.Add(new TradeOfferView
             {
                 Kind = TradeLineKind.Stock,
                 Key = item.Id,
                 Item = item,
-                Available = issued ? 0 : count,
+                Available = available,
                 UnitPrice = BuyPrice(item, definition, item.Uses > 0 ? item.Uses : -1)
-            };
-            if (!item.CanBuy || item.IsTradeProtected)
-            {
-                view.Enabled = false;
-                view.Reason = "Это не продаётся.";
-            }
-            else if (view.Available <= 0)
-            {
-                view.Enabled = false;
-                view.Reason = issued ? "Такая вещь одна — её уже нет." : "Кончилось — торговец ждёт подвоза.";
-            }
-            offers.Add(view);
+            });
         }
+        // Проданные отрядом нетронутые вещи, которых нет в ассортименте, —
+        // одной карточкой на вид; вещи с другими зарядами — каждая своей.
         foreach (ItemInstanceData instance in merchant.Buyback)
         {
             ItemDefinition item = ItemCatalog.Find(instance.ItemId);
             if (item == null)
                 continue;
+            if (IsPlain(instance, item))
+            {
+                if (listed.Contains(item.Id))
+                    continue;
+                listed.Add(item.Id);
+                offers.Add(new TradeOfferView
+                {
+                    Kind = TradeLineKind.Stock,
+                    Key = item.Id,
+                    Item = item,
+                    Available = PlainBuyback(merchant, item.Id).Count,
+                    UnitPrice = BuyPrice(item, definition, item.Uses > 0 ? item.Uses : -1)
+                });
+                continue;
+            }
             offers.Add(new TradeOfferView
             {
                 Kind = TradeLineKind.Buyback,
@@ -339,21 +383,42 @@ public static class TradeService
                     break;
                 default:
                 {
-                    MerchantStockStateData stock = merchant.Stock.Find(s => !s.IsSupplies && s.ItemId == item.Id);
-                    stock.Count -= line.Quantity;
-                    for (int i = 0; i < line.Quantity; i++)
-                        ItemService.CreateInstance(state, item.Id, commander.Id);
-                    MerchantStockDefinition stockLine = definition.Stock.Find(s => s != null && !s.IsSupplies && s.ItemId == item.Id);
-                    if (stockLine != null && stockLine.Unique && stock.Count <= 0 && !merchant.SoldOutUnique.Contains(item.Id))
-                        merchant.SoldOutUnique.Add(item.Id);
-                    if (item.Unique && !state.Settlements.IssuedUniqueItemIds.Contains(item.Id))
-                        state.Settlements.IssuedUniqueItemIds.Add(item.Id);
+                    // Сначала — те же экземпляры, что отряд продал (InstanceId
+                    // сохраняется), затем новые из запаса торговца.
+                    List<ItemInstanceData> plain = PlainBuyback(merchant, item.Id);
+                    int fromBuyback = Math.Min(line.Quantity, plain.Count);
+                    for (int i = 0; i < fromBuyback; i++)
+                    {
+                        merchant.Buyback.Remove(plain[i]);
+                        ItemService.Attach(state, plain[i], commander.Id);
+                    }
+                    int fromStock = line.Quantity - fromBuyback;
+                    if (fromStock > 0)
+                    {
+                        MerchantStockStateData stock = merchant.Stock.Find(s => !s.IsSupplies && s.ItemId == item.Id);
+                        stock.Count -= fromStock;
+                        for (int i = 0; i < fromStock; i++)
+                            ItemService.CreateInstance(state, item.Id, commander.Id);
+                        MerchantStockDefinition stockLine = definition.Stock.Find(s => s != null && !s.IsSupplies && s.ItemId == item.Id);
+                        if (stockLine != null && stockLine.Unique && stock.Count <= 0 && !merchant.SoldOutUnique.Contains(item.Id))
+                            merchant.SoldOutUnique.Add(item.Id);
+                        if (item.Unique && !state.Settlements.IssuedUniqueItemIds.Contains(item.Id))
+                            state.Settlements.IssuedUniqueItemIds.Add(item.Id);
+                    }
                     boughtNames.Add(line.Quantity > 1 ? item.Name + " ×" + line.Quantity : item.Name);
                     break;
                 }
             }
         }
 
+        if (quote.SuppliesSold > 0)
+        {
+            state.ArmySupply -= quote.SuppliesSold;
+            MerchantStockStateData supplyStock = merchant.Stock.Find(s => s.IsSupplies);
+            if (supplyStock != null)
+                supplyStock.Count += quote.SuppliesSold;
+            soldNames.Add("припасы ×" + quote.SuppliesSold);
+        }
         state.ArmyGold = quote.PlayerMoneyAfter;
         merchant.Money = quote.MerchantMoneyAfter;
         merchant.Revision++;
@@ -497,8 +562,11 @@ public static class TradeService
                 default:
                 {
                     ItemDefinition item = ItemCatalog.Find(line.Key);
-                    MerchantStockStateData stock = item != null ? merchant.Stock.Find(s => !s.IsSupplies && s.ItemId == item.Id) : null;
-                    if (item == null || stock == null || definition.Stock.Find(s => s != null && !s.IsSupplies && s.ItemId == item.Id) == null)
+                    bool inAssortment = item != null && definition.Stock.Find(s => s != null && !s.IsSupplies && s.ItemId == item.Id) != null;
+                    MerchantStockStateData stock = inAssortment ? merchant.Stock.Find(s => !s.IsSupplies && s.ItemId == item.Id) : null;
+                    int plain = item != null ? PlainBuyback(merchant, item.Id).Count : 0;
+                    int stockCount = stock != null ? stock.Count : 0;
+                    if (item == null || (stock == null && plain == 0))
                     {
                         quote.Reason = "Этого у торговца нет.";
                         return false;
@@ -508,12 +576,13 @@ public static class TradeService
                         quote.Reason = item.Name + " не продаётся.";
                         return false;
                     }
-                    if (stock.Count < line.Quantity)
+                    bool issued = item.Unique && plain == 0 && SettlementService.IsUniqueIssued(state, item.Id);
+                    if ((issued ? plain : stockCount + plain) < line.Quantity)
                     {
                         quote.Reason = "У торговца нет столько: «" + item.Name + "».";
                         return false;
                     }
-                    if (item.Unique && (line.Quantity > 1 || SettlementService.IsUniqueIssued(state, item.Id)))
+                    if (item.Unique && line.Quantity > 1)
                     {
                         quote.Reason = "«" + item.Name + "» — такая вещь одна.";
                         return false;
@@ -524,6 +593,27 @@ public static class TradeService
                     break;
                 }
             }
+        }
+
+        if (cart.SellSupplies < 0 || cart.SellSupplies > MaxQuantity)
+        {
+            quote.Reason = "Неверное количество припасов.";
+            return false;
+        }
+        if (cart.SellSupplies > 0)
+        {
+            if (supplies > 0)
+            {
+                quote.Reason = "Припасы в одной сделке либо покупают, либо продают.";
+                return false;
+            }
+            if (cart.SellSupplies > state.ArmySupply)
+            {
+                quote.Reason = "У отряда только " + state.ArmySupply + " припасов.";
+                return false;
+            }
+            sellTotal += (long)SupplySellPrice(definition) * cart.SellSupplies;
+            quote.SuppliesSold = cart.SellSupplies;
         }
 
         if (buyTotal > int.MaxValue / 2 || sellTotal > int.MaxValue / 2)

@@ -114,9 +114,8 @@ public sealed class FreePlayCoalStoryTests
         Assert.IsNull(FreePlayCoalStory.FindHutor(state));
         Assert.AreEqual(FreePlayCoalStory.WorkRateWithoutCoal, CampaignContent.HomeWorkRate(state));
 
-        JournalGoalViewData goal = CampaignContent.BuildGoals(state).Single(g => g.Id == "freeplay.goal.coal");
-        Assert.AreEqual(JournalGoalState.Active, goal.State);
-        StringAssert.Contains("Поговорить с Ладой", goal.CurrentStep);
+        // Бриф исправлений п. 6: о деле ещё не знают — в журнале его нет.
+        Assert.IsFalse(CampaignContent.BuildGoals(state).Any(g => g.Id == "freeplay.goal.coal"));
 
         IReadOnlyList<HomeCareView> cares = CampaignContent.DescribeHomeCares(state);
         HomeCareView coal = cares.Single(c => c.Id == "home.care.freeplay_coal");

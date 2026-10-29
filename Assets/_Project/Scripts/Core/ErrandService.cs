@@ -122,6 +122,10 @@ public static class ErrandService
                 {
                     record.Finished = true;
                     string text = string.IsNullOrWhiteSpace(errand.CompletedText) ? "Поручение выполнено." : errand.CompletedText;
+                    // Бриф исправлений п. 6: фактически полученная награда этого прохождения.
+                    string reward = RewardFeed.DescribeErrandReward(state, errand.Id);
+                    if (!string.IsNullOrEmpty(reward))
+                        text += " " + reward;
                     if (Chronicle.Record(state, "errand." + errand.Id + ".done", "Выполнено: " + errand.Title, text, null,
                             "errand." + errand.Id + ".accepted"))
                         reports.Add(text);
@@ -173,6 +177,9 @@ public static class ErrandService
             if (status == ErrandStatus.Completed)
             {
                 step = string.IsNullOrWhiteSpace(errand.CompletedText) ? "Выполнено." : errand.CompletedText;
+                string reward = RewardFeed.DescribeErrandReward(state, errand.Id);
+                if (!string.IsNullOrEmpty(reward))
+                    step += " " + reward;
                 stage = "done";
             }
             else if (status == ErrandStatus.Failed)

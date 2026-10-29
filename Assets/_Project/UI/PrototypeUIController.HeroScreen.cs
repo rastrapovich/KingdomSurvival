@@ -554,6 +554,13 @@ public partial class PrototypeUIController
         heroScreenArmyGoldMinusButton.SetEnabled(canAdjust && gameState.ArmyGold > 0);
         heroScreenSupplyPlusButton.SetEnabled(canAdjust && gameState.Food > 0);
         heroScreenSupplyMinusButton.SetEnabled(canAdjust && gameState.ArmySupply > 0);
+
+        // Перекладка со склада Дома; в свободной игре Дом скрыт — только числа.
+        DisplayStyle adjust = IsFreePlayWithoutHome ? DisplayStyle.None : DisplayStyle.Flex;
+        heroScreenArmyGoldPlusButton.style.display = adjust;
+        heroScreenArmyGoldMinusButton.style.display = adjust;
+        heroScreenSupplyPlusButton.style.display = adjust;
+        heroScreenSupplyMinusButton.style.display = adjust;
     }
 
     // Шесть качеств героя 1-10 (§2 инструкции по качествам и проверкам) —

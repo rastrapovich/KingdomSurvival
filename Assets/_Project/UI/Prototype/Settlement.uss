@@ -115,19 +115,17 @@
     min-height: 18px;
 }
 
-/* Полоса людей — внизу иллюстрации, справа от панели. */
+/* Бриф исправлений п. 14: люди этого места — внизу левой колонки. */
 .settlement-people {
-    position: absolute;
-    left: 33%; right: 18px; bottom: 66px;
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    flex-shrink: 0;
 }
 
 .settlement-person {
-    width: 128px;
-    margin-left: 10px;
-    margin-top: 8px;
+    width: 104px;
+    margin-right: 8px;
+    margin-top: 6px;
     padding-left: 6px; padding-right: 6px; padding-top: 6px; padding-bottom: 6px;
     background-color: rgba(14, 13, 12, 0.78);
     border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
@@ -143,7 +141,7 @@
 }
 
 .settlement-person-portrait {
-    height: 120px;
+    height: 92px;
     background-color: rgb(42, 38, 32);
     -unity-background-scale-mode: scale-and-crop;
     justify-content: center;
@@ -481,13 +479,9 @@
 
 /* ---------------- Область поиска на карте ---------------- */
 
+/* Пятно рисует код (тушевой край неправильной формы); здесь — только место. */
 .world-map-search-area {
     position: absolute;
-    border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px;
-    border-left-color: rgba(221, 181, 99, 0.85); border-right-color: rgba(221, 181, 99, 0.85);
-    border-top-color: rgba(221, 181, 99, 0.85); border-bottom-color: rgba(221, 181, 99, 0.85);
-    border-radius: 40px;
-    background-color: rgba(221, 181, 99, 0.12);
     justify-content: center;
 }
 
@@ -525,4 +519,58 @@
 .trade-filter .unity-base-popup-field__text,
 .board-filter .unity-base-popup-field__text {
     color: rgb(226, 219, 204);
+}
+
+/* Бриф исправлений п. 5: золото, припасы и запас дней — всегда в нижней
+   строке рядом с часами. */
+.shell-resources-label {
+    flex-shrink: 1;
+    margin-right: 18px;
+    color: rgb(226, 219, 204);
+    font-size: 14px;
+    -unity-text-align: middle-right;
+    white-space: nowrap;
+}
+
+.shell-resources-label--short { color: rgb(214, 160, 120); }
+
+/* Бриф исправлений п. 11: портреты торговца и героя у своих колонок. */
+.trade-column-head { flex-direction: row; align-items: center; margin-bottom: 6px; }
+.trade-column-head-text { flex-grow: 1; flex-shrink: 1; margin-left: 10px; }
+.trade-column-money { font-size: 14px; }
+.trade-portrait {
+    width: 60px; height: 84px;
+    flex-shrink: 0;
+    justify-content: center;
+    background-color: rgb(42, 38, 32);
+    -unity-background-scale-mode: scale-and-crop;
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62);
+    border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62);
+    overflow: hidden;
+}
+.trade-portrait-initial { font-size: 28px; -unity-text-align: middle-center; color: rgb(120, 104, 80); }
+.trade-portrait .hero-screen-portrait-fill { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+.trade-row--supplies { background-color: rgba(44, 40, 28, 0.6); }
+
+/* Бриф исправлений п. 9: полученная награда — зелёным, поверх всего. */
+.reward-toast-stack {
+    position: absolute;
+    top: 70px;
+    left: 0px; right: 0px;
+    align-items: center;
+}
+
+.reward-toast {
+    margin-top: 6px;
+    padding-left: 18px; padding-right: 18px; padding-top: 8px; padding-bottom: 8px;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(170, 232, 150);
+    background-color: rgba(18, 40, 20, 0.92);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(110, 180, 96); border-right-color: rgb(110, 180, 96);
+    border-top-color: rgb(110, 180, 96); border-bottom-color: rgb(110, 180, 96);
+    border-top-left-radius: 4px; border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;
 }

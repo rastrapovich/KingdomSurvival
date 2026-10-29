@@ -37,8 +37,9 @@ public static class WorldMapSearchAreas
             {
                 if (search == null)
                     continue;
+                // Найдено (видно на карте) или уже обыскано — области нет.
                 LocationData target = state.FindLocation(search.TargetLocationId);
-                if (target != null && target.IsVisibleOnMap)
+                if (target != null && (target.IsVisibleOnMap || target.IsExplored))
                     continue;
                 WorldMapSearchStageDefinition stage = WorldMapKnowledgeService.GetActiveStage(search, state.Narrative);
                 if (stage != null)

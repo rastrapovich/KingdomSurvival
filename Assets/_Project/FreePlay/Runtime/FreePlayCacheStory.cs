@@ -59,12 +59,14 @@ namespace KingdomSurvival.FreePlay
             if (Has(state, Flags.Found))
             {
                 CommanderData commander = state.GetSelectedCommander();
-                if (commander != null)
-                    ItemService.GrantOnce(state, FoundKnifeGrant, ItemCatalog.CarterTokenKnife, commander.Id);
+                if (commander != null && ItemService.GrantOnce(state, FoundKnifeGrant, ItemCatalog.CarterTokenKnife, commander.Id) != null)
+                    RewardFeed.Add(state, ItemCatalog.Find(ItemCatalog.CarterTokenKnife).Name + " ×1", "freeplay_cache_find");
             }
             if (Has(state, Flags.Found) && cache != null)
             {
-                cache.IsVisibleOnMap = true;
+                // Бриф исправлений п. 15: обысканное место уходит с карты
+                // целиком — без значка завершения и без повторного входа.
+                cache.IsVisibleOnMap = false;
                 cache.IsDiscovered = true;
                 cache.IsExplored = true;
                 if (Chronicle.Record(state, ChronicleFound, "Тайник у расколотой ивы",

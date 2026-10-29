@@ -20,7 +20,9 @@ public partial class PrototypeUIController
     private enum SettlementMode
     {
         Main,
-        Tavern
+        Tavern,
+        // Бриф исправлений п. 14: все, с кем сейчас можно говорить здесь.
+        People
     }
 
     private VisualElement settlementScreen;
@@ -33,6 +35,7 @@ public partial class PrototypeUIController
     private ScrollView settlementActions;
     private Label settlementMessage;
     private VisualElement settlementPeople;
+    private Label settlementPeopleTitle;
     private Label settlementParty;
     private Button settlementExitButton;
     private VisualElement settlementConfirm;
@@ -52,6 +55,13 @@ public partial class PrototypeUIController
 
     private bool IsSettlementScreenOpen => settlementUiBound && !string.IsNullOrEmpty(settlementLocationId);
 
+    // Бриф исправлений п. 13: пока отряд спит в корчме, экран остаётся, но
+    // не держит время — ночь идёт общим временем, утром часы снова стоят.
+    private bool IsSettlementResting => IsSettlementScreenOpen && gameState != null && CampRest.IsResting(gameState);
+    private bool IsSettlementScreenBlocking => IsSettlementScreenOpen && !IsSettlementResting;
+    private float settlementRestRefreshTimer;
+    private bool settlementWasResting;
+
     private void BindSettlementUi()
     {
         if (settlementUiBound || interfaceRoot == null)
@@ -69,6 +79,7 @@ public partial class PrototypeUIController
         settlementActions = BindRequiredElement<ScrollView>(settlementScreen, screen, "settlement-actions");
         settlementMessage = BindRequiredElement<Label>(settlementScreen, screen, "settlement-message");
         settlementPeople = BindRequiredElement<VisualElement>(settlementScreen, screen, "settlement-people");
+        settlementPeopleTitle = BindRequiredElement<Label>(settlementScreen, screen, "settlement-people-title");
         settlementParty = BindRequiredElement<Label>(settlementScreen, screen, "settlement-party");
         settlementExitButton = BindRequiredElement<Button>(settlementScreen, screen, "settlement-exit-button");
         settlementConfirm = BindRequiredElement<VisualElement>(settlementScreen, screen, "settlement-confirm");
@@ -119,17 +130,37 @@ public partial class PrototypeUIController
         // Бой после сцены важнее: устаревшую страницу поверх него не вернуть.
         // Командир уже не там — возвращать некуда.
         if (pendingStoryBattle != null || (!string.IsNullOrEmpty(settlementSuspendedLocationId) && settlementSuspendedLocationId != inside))
+        {
             settlementSuspendedLocationId = null;
+            if (!IsSettlementScreenOpen)
+                HideSettlementScreenVisual();
+        }
 
         if (!IsSettlementScreenOpen && !string.IsNullOrEmpty(inside) && CanAutoOpenSettlement())
         {
-            SettlementMode mode = settlementSuspendedLocationId == inside ? settlementSuspendedMode : SettlementMode.Main;
+            bool restoring = settlementSuspendedLocationId == inside;
+            SettlementMode mode = restoring ? settlementSuspendedMode : SettlementMode.Main;
             settlementSuspendedLocationId = null;
-            OpenSettlementScreen(inside, mode);
+            OpenSettlementScreen(inside, mode, restoring);
         }
 
-        if (IsSettlementScreenOpen)
-            HandleSettlementKeys();
+        if (!IsSettlementScreenOpen)
+            return;
+        HandleSettlementKeys();
+        // Экран держит время, пока отряд не спит (просмотр и выбор часов не
+        // двигают); утро после ночлега останавливает часы здесь же.
+        if (IsSettlementScreenBlocking && !ContinuousSimulationSystem.IsPaused(gameState))
+            ContinuousSimulationSystem.SetPaused(gameState, true);
+        if (IsSettlementResting || settlementWasResting)
+        {
+            settlementRestRefreshTimer += Time.unscaledDeltaTime;
+            if (settlementRestRefreshTimer >= 0.5f || settlementWasResting != IsSettlementResting)
+            {
+                settlementRestRefreshTimer = 0f;
+                settlementWasResting = IsSettlementResting;
+                RenderSettlement();
+            }
+        }
     }
 
     private bool CanAutoOpenSettlement()
@@ -141,24 +172,33 @@ public partial class PrototypeUIController
         if (gameState.HasPendingExpeditionDecision || openedIncident != null || openedDecision != null ||
             activeQueuedModal != null || queuedModals.Count > 0)
             return false;
-        // Ночлег и другие дела похода идут общим временем — экран вернётся утром.
-        return gameState.HasActiveExpedition && !gameState.ActiveExpedition.HasTimedActivity &&
+        // Ночлег в поселении — экран остаётся (время идёт); прочие дела похода
+        // идут общим временем без экрана.
+        return gameState.HasActiveExpedition &&
+               (!gameState.ActiveExpedition.HasTimedActivity || CampRest.IsResting(gameState)) &&
                !LocalExplorationService.IsActive(gameState);
     }
 
-    private void OpenSettlementScreen(string locationId, SettlementMode mode = SettlementMode.Main)
+    // restoring — возвращение после разговора: та же страница (корчма,
+    // торговля, доска) и то же сообщение.
+    private void OpenSettlementScreen(string locationId, SettlementMode mode = SettlementMode.Main, bool restoring = false)
     {
         BindSettlementUi();
         if (!settlementUiBound || gameState == null)
             return;
         settlementLocationId = locationId;
         settlementMode = mode;
-        settlementLongText = false;
-        settlementMessageText = string.Empty;
         SettlementService.MarkVisited(gameState, locationId);
         CloseJournalForMandatoryEvent();
-        PauseForBlockingModal();
-        HideSettlementPages();
+        if (!CampRest.IsResting(gameState))
+            PauseForBlockingModal();
+        if (!restoring)
+        {
+            settlementLongText = false;
+            settlementMessageText = string.Empty;
+            HideSettlementPages();
+        }
+        settlementScreen.SetEnabled(true);
         settlementScreen.style.display = DisplayStyle.Flex;
         settlementScreen.BringToFront();
         settlementScreen.Focus();
@@ -168,6 +208,20 @@ public partial class PrototypeUIController
             timeToggleButton.tooltip = "Сначала выйдите из поселения";
         }
         RenderSettlement();
+        if (IsSettlementTradeOpen)
+            RenderSettlementTrade();
+        if (IsSettlementBoardOpen)
+            RenderSettlementBoard();
+    }
+
+    private void HideSettlementScreenVisual()
+    {
+        HideSettlementPages();
+        CloseSettlementConfirm();
+        if (settlementScreen == null)
+            return;
+        settlementScreen.SetEnabled(true);
+        settlementScreen.style.display = DisplayStyle.None;
     }
 
     private void CloseSettlementScreen()
@@ -188,12 +242,15 @@ public partial class PrototypeUIController
     {
         if (!IsSettlementScreenOpen)
             return;
+        // Бриф исправлений п. 12: экран остаётся фоном под разговором (та же
+        // страница), но не считается открытым — его кнопки не нажимаются, а
+        // клик не уходит на карту. Вернётся сам после конца сцены.
         settlementSuspendedLocationId = settlementLocationId;
         settlementSuspendedMode = settlementMode;
-        HideSettlementPages();
         CloseSettlementConfirm();
         settlementLocationId = null;
-        settlementScreen.style.display = DisplayStyle.None;
+        // Под разговором экран не принимает нажатий (ни сделок, ни выхода).
+        settlementScreen.SetEnabled(false);
     }
 
     private void OnSettlementExitClicked()
@@ -240,7 +297,14 @@ public partial class PrototypeUIController
         string time = "День " + clock.Day + ", " + ContinuousSimulationSystem.FormatClock(clock.HourOfDay);
         string place = location != null ? location.Name : (profile != null ? profile.Name : "Поселение");
         string text;
-        if (settlementMode == SettlementMode.Tavern)
+        if (settlementMode == SettlementMode.People)
+        {
+            settlementTitle.text = "Люди поселения";
+            settlementSubtitle.text = place + " · " + time;
+            text = "С кем здесь сейчас можно поговорить. Разговор откроется поверх этого экрана.";
+            settlementMoreButton.style.display = DisplayStyle.None;
+        }
+        else if (settlementMode == SettlementMode.Tavern)
         {
             settlementTitle.text = tavern.Name;
             settlementSubtitle.text = place + " · " + time;
@@ -261,38 +325,116 @@ public partial class PrototypeUIController
         settlementDescription.text = text ?? string.Empty;
 
         settlementActions.Clear();
-        if (settlementMode == SettlementMode.Tavern)
+        if (settlementMode == SettlementMode.People)
+            RenderSettlementPeopleList(profile, tavern);
+        else if (settlementMode == SettlementMode.Tavern)
             RenderTavernActions(tavern);
         else
             RenderSettlementActions(profile);
         if (profile == null)
             AddSettlementHint("Здесь живут, но для проезжих ничего не устроено.", false);
 
+        // Местные собеседники — внизу левой колонки: в корчме её люди, на
+        // площади — люди поселения. Тот же источник, что общий список.
         settlementPeople.Clear();
         if (settlementMode == SettlementMode.Tavern)
         {
-            List<SettlementPersonDefinition> people = new List<SettlementPersonDefinition>();
-            if (tavern.Keeper != null && !string.IsNullOrEmpty(tavern.Keeper.Id))
-                people.Add(tavern.Keeper);
-            people.AddRange(tavern.Visitors);
-            foreach (SettlementPersonDefinition person in SettlementService.VisiblePeople(gameState, people))
+            foreach (SettlementPersonDefinition person in SettlementService.VisiblePeople(gameState, TavernPeople(tavern)))
                 settlementPeople.Add(CreateSettlementPerson(person, true));
         }
-        else if (profile != null)
+        else if (settlementMode == SettlementMode.Main && profile != null)
         {
             foreach (SettlementPersonDefinition person in SettlementService.VisiblePeople(gameState, profile.People))
                 settlementPeople.Add(CreateSettlementPerson(person, false));
         }
+        bool showPeople = settlementPeople.childCount > 0;
+        settlementPeople.style.display = showPeople ? DisplayStyle.Flex : DisplayStyle.None;
+        settlementPeopleTitle.style.display = showPeople ? DisplayStyle.Flex : DisplayStyle.None;
 
         settlementParty.text = SettlementPartyLine();
         settlementExitButton.text = SettlementCampService.HasCamp(gameState) ? "ВЕРНУТЬСЯ К ЛАГЕРЮ" : "ВЫЙТИ ИЗ ПОСЕЛЕНИЯ";
         settlementMessage.text = settlementMessageText;
+        // Ночлег: экран остаётся, время идёт до утра; уйти посреди ночи нельзя.
+        bool resting = CampRest.IsResting(gameState);
+        settlementExitButton.SetEnabled(!resting);
+        if (resting)
+        {
+            double left = gameState.ActiveExpedition.ActiveActivity != null ? gameState.ActiveExpedition.ActiveActivity.RemainingHours : 0.0;
+            settlementMessage.text = "Отряд спит. До утра: " + ContinuousExpeditionCommands.FormatHours(left) + ".";
+        }
         ApplySettlementImage();
+    }
+
+    private static List<SettlementPersonDefinition> TavernPeople(TavernDefinition tavern)
+    {
+        List<SettlementPersonDefinition> people = new List<SettlementPersonDefinition>();
+        if (tavern == null)
+            return people;
+        if (tavern.Keeper != null && !string.IsNullOrEmpty(tavern.Keeper.Id))
+            people.Add(tavern.Keeper);
+        people.AddRange(tavern.Visitors);
+        return people;
+    }
+
+    // Все, кто сейчас здесь и с кем можно говорить или торговать: люди
+    // поселения и корчмы по их условиям присутствия — без людей других мест
+    // и без скрытых.
+    private List<SettlementPersonDefinition> SettlementAllPeople(SettlementProfileDefinition profile, TavernDefinition tavern)
+    {
+        List<SettlementPersonDefinition> all = new List<SettlementPersonDefinition>();
+        List<SettlementPersonDefinition> source = new List<SettlementPersonDefinition>();
+        if (profile?.People != null)
+            source.AddRange(profile.People);
+        source.AddRange(TavernPeople(tavern));
+        foreach (SettlementPersonDefinition person in SettlementService.VisiblePeople(gameState, source))
+        {
+            bool talk = !string.IsNullOrEmpty(person.DialogueId) && SettlementDialogueExists(person.DialogueId);
+            bool trades = !string.IsNullOrEmpty(person.MerchantId) && profile?.FindMerchant(person.MerchantId) != null;
+            if ((talk || trades) && !all.Exists(p => p.Id == person.Id))
+                all.Add(person);
+        }
+        return all;
+    }
+
+    private void RenderSettlementPeopleList(SettlementProfileDefinition profile, TavernDefinition tavern)
+    {
+        foreach (SettlementPersonDefinition person in SettlementAllPeople(profile, tavern))
+        {
+            bool talk = !string.IsNullOrEmpty(person.DialogueId) && SettlementDialogueExists(person.DialogueId);
+            string dialogueId = person.DialogueId;
+            string merchantId = person.MerchantId;
+            string hint = person.Role + (string.IsNullOrEmpty(person.Activity) ? string.Empty : " · " + person.Activity.ToLowerInvariant());
+            AddSettlementAction(person.DisplayName, hint, true, () =>
+            {
+                if (talk)
+                    StartSettlementDialogue(dialogueId);
+                else
+                    OpenSettlementTrade(merchantId);
+            }, false);
+        }
+        AddSettlementSection(string.Empty);
+        AddSettlementAction("Назад", null, true, () =>
+        {
+            settlementMode = SettlementMode.Main;
+            RenderSettlement();
+        }, false);
     }
 
     private void RenderSettlementActions(SettlementProfileDefinition profile)
     {
-        if (profile?.Actions == null)
+        if (profile == null)
+            return;
+        int people = SettlementAllPeople(profile, TavernService.Tavern(gameState, settlementLocationId)).Count;
+        if (people > 0)
+        {
+            AddSettlementAction("Люди поселения (" + people + ")", "Все, с кем здесь можно поговорить.", true, () =>
+            {
+                settlementMode = SettlementMode.People;
+                settlementMessageText = string.Empty;
+                RenderSettlement();
+            }, false);
+        }
+        if (profile.Actions == null)
             return;
         NarrativeEvaluationContext context = SettlementService.Context(gameState);
         foreach (SettlementActionDefinition action in profile.Actions)
@@ -457,9 +599,11 @@ public partial class PrototypeUIController
             }
             AddReport(message);
             Autosave();
-            // Ночь идёт общим временем: экран закрывается и вернётся утром
-            // сам (командир по-прежнему внутри, TickSettlementScreen).
-            CloseSettlementScreen();
+            // Ночь идёт общим временем, экран поселения остаётся (п. 13
+            // брифа исправлений); утром часы снова стоят.
+            settlementWasResting = true;
+            RenderSettlement();
+            RefreshInterface();
             RefreshContinuousTimeUi(true);
         });
     }
@@ -495,7 +639,7 @@ public partial class PrototypeUIController
         if (!TryOpenNarrativeDialogueById(dialogueId))
         {
             settlementSuspendedLocationId = null;
-            OpenSettlementScreen(locationId, mode);
+            OpenSettlementScreen(locationId, mode, true);
             ShowSettlementMessage("Сейчас не поговорить.");
         }
     }
@@ -707,7 +851,7 @@ public partial class PrototypeUIController
             CloseSettlementBoard();
             return;
         }
-        if (settlementMode == SettlementMode.Tavern)
+        if (settlementMode != SettlementMode.Main)
         {
             settlementMode = SettlementMode.Main;
             RenderSettlement();

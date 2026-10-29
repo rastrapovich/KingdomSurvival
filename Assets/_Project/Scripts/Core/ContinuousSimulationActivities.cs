@@ -170,6 +170,11 @@ public static partial class ContinuousSimulationSystem
 
         state.ArmyGold += Math.Max(0, activity.RewardArmyGold);
         state.ArmySupply += Math.Max(0, activity.RewardArmySupply);
+        // Бриф исправлений п. 9: найденное — зелёным уведомлением.
+        if (activity.RewardArmyGold > 0)
+            RewardFeed.Add(state, "Золото +" + activity.RewardArmyGold);
+        if (activity.RewardArmySupply > 0)
+            RewardFeed.Add(state, "Припасы +" + activity.RewardArmySupply);
 
         List<string> rewards = BuildActivityRewards(activity);
 
@@ -182,10 +187,11 @@ public static partial class ContinuousSimulationSystem
             "» исследована. Добыча отряда: " + rewardText + ".");
 
         // Канон v1.48 §27.4: впервые исследованное место — пережитое заново.
-        string experience = CharacterProgressionService.DescribeShared(
-            "Опыт исследования",
-            CharacterProgressionService.AwardShared(state, "explore." + location.Id,
-                CharacterProgression.ExplorationExperience, CharacterProgressionService.PartyPersonIds(state)));
+        List<ExperienceGain> explorationGains = CharacterProgressionService.AwardShared(state, "explore." + location.Id,
+            CharacterProgression.ExplorationExperience, CharacterProgressionService.PartyPersonIds(state));
+        if (explorationGains.Count > 0)
+            RewardFeed.Add(state, "Опыт +" + explorationGains[0].Amount);
+        string experience = CharacterProgressionService.DescribeShared("Опыт исследования", explorationGains);
         if (experience.Length > 0)
             batch.Result.Messages.Add(experience);
         // ПР-09 (ТЗ §6): карточка итога — что увидели и что получили.

@@ -304,6 +304,9 @@ public class GameState
     // (SettlementService).
     public SettlementsStateData Settlements = new SettlementsStateData();
 
+    // Бриф исправлений п. 6, 9: фактически выданные награды (RewardFeed).
+    public RewardLogData Rewards = new RewardLogData();
+
     // Канон v1.58 §9.9: карта «Свободной игры», сгенерированная для этой
     // партии. Пусто (или поддельный объект JsonUtility) — авторский мир.
     public GeneratedWorldMap GeneratedMap;

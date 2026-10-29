@@ -1,130 +1,116 @@
 using System.Collections.Generic;
+using KingdomSurvival.ItemDatabase;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 // ПР-08 (ProjectDocs/PR08_HERO_ITEMS_SPEC.md): вещи на экране героя.
-// Вкладка «Снаряжение» — рабочее место выбранного слева человека: три его
-// слота (HeroCard.cs) и один список вещей — сумка героя (вмещает много,
-// ItemService.HeroPackSize) и кладовая Дома (только дома). Список
-// фильтруется по месту, типу и пригодности и упорядочивается по типу, силе
-// или названию; каждая вещь говорит, подходит ли она выбранному человеку и
-// что заменит, и надевается одной кнопкой. Клик по пустому слоту — показать
-// вещи этого типа. Сюжетные вещи — метками под списком. Все изменения —
-// командами ItemService; кнопки, без перетаскивания. Сводка снаряжения
-// Командира — на вкладке «Герой».
+// Бриф исправлений 29.10.2026 (п. 2, 7, 8): вкладка «Снаряжение» — временно
+// только Командир (полоса людей скрыта, отряд и его вещи в игре остаются).
+// Кукла: портрет в центре, оружие у руки, защита у груди, особый предмет
+// отдельно; характеристики сразу под ней. Сумка — сетка квадратных ячеек на
+// все места (ItemService.HeroPackSize), отдельная плитка припасов (общий
+// ArmySupply, не вещь); дома — сетка кладовой. Клик — выбрать вещь и её
+// действия, правая кнопка — окно сведений из Базы предметов. Запасы (золото
+// и припасы) — на этом же экране. Все изменения — командами ItemService.
 public partial class PrototypeUIController
 {
     private static readonly ItemSlot[] HeroItemSlots = { ItemSlot.Weapon, ItemSlot.Protection, ItemSlot.Special };
     private static readonly string[] HeroItemSlotCaptions = { "Оружие", "Защита", "Особое" };
-
-    private enum HeroItemPlace
-    {
-        All,
-        Pack,
-        Storage
-    }
-
-    private enum HeroStoreFilter
-    {
-        All,
-        Fits,
-        Weapon,
-        Protection,
-        Special,
-        Consumable
-    }
-
-    private enum HeroStoreSort
-    {
-        Kind,
-        Power,
-        Name
-    }
+    private const string HeroSuppliesCellId = "supplies";
 
     private bool heroItemsBound;
     private string heroItemsMessage = string.Empty;
+    // Выбранная ячейка: InstanceId вещи или HeroSuppliesCellId.
+    private string heroBagSelectedId;
 
     private readonly VisualElement[] heroItemSlotRoots = new VisualElement[3];
+    private readonly VisualElement[] heroItemSlotIcons = new VisualElement[3];
     private readonly Label[] heroItemSlotNames = new Label[3];
     private readonly Label[] heroItemSlotEffects = new Label[3];
     private readonly VisualElement[] heroItemSlotActions = new VisualElement[3];
     private Label heroInventoryTitle;
     private VisualElement heroStoryList;
     private VisualElement heroStorageList;
-    private ScrollView heroStorageScroll;
+    private Label heroStorageGridTitle;
+    private VisualElement heroStorageGrid;
+    private Label heroBagDetailsName;
+    private Label heroBagDetailsText;
+    private VisualElement heroBagDetailsActions;
     private VisualElement heroHeroGearList;
     private Label heroItemsMessageLabel;
     private Label heroStatesHint;
     private VisualElement heroExperienceTrack;
-    private HeroToggleGroup<HeroItemPlace> heroItemPlace;
-    private HeroToggleGroup<HeroStoreFilter> heroStoreFilter;
-    private HeroToggleGroup<HeroStoreSort> heroStoreSort;
+    private VisualElement heroItemPopup;
+    private VisualElement heroItemPopupIcon;
+    private Label heroItemPopupName;
+    private Label heroItemPopupKind;
+    private Label heroItemPopupText;
 
     private bool BindHeroItems()
     {
         heroInventoryTitle = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-inventory-title");
         heroStoryList = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-inventory-story");
         heroStorageList = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-unit-card-available");
-        heroStorageScroll = BindRequiredElement<ScrollView>(interfaceRoot, HeroScreenName, "hero-screen-inventory-scroll");
+        heroStorageGridTitle = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-storage-title");
+        heroStorageGrid = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-storage-grid");
+        heroBagDetailsName = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-bag-details-name");
+        heroBagDetailsText = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-bag-details-text");
+        heroBagDetailsActions = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-bag-details-actions");
         heroHeroGearList = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-hero-gear-list");
         heroItemsMessageLabel = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-inventory-message");
         heroStatesHint = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-states-hint");
         heroExperienceTrack = interfaceRoot.Q<VisualElement>("hero-screen-experience-track");
+        heroItemPopup = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-item-popup");
+        heroItemPopupIcon = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-item-popup-icon");
+        heroItemPopupName = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-item-popup-name");
+        heroItemPopupKind = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-item-popup-kind");
+        heroItemPopupText = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-item-popup-text");
+        Button popupClose = BindRequiredElement<Button>(interfaceRoot, HeroScreenName, "hero-screen-item-popup-close");
 
-        bool ok = heroInventoryTitle != null && heroStoryList != null && heroStorageList != null &&
-                  heroStorageScroll != null && heroHeroGearList != null && heroItemsMessageLabel != null && heroStatesHint != null;
+        bool ok = heroInventoryTitle != null && heroStoryList != null && heroStorageList != null && heroStorageGridTitle != null &&
+                  heroStorageGrid != null && heroBagDetailsName != null && heroBagDetailsText != null && heroBagDetailsActions != null &&
+                  heroHeroGearList != null && heroItemsMessageLabel != null && heroStatesHint != null && heroItemPopup != null &&
+                  heroItemPopupIcon != null && heroItemPopupName != null && heroItemPopupKind != null && heroItemPopupText != null &&
+                  popupClose != null;
 
         for (int i = 0; i < 3; i++)
         {
             string prefix = "hero-screen-equipment-slot-" + (i + 1);
             heroItemSlotRoots[i] = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, prefix);
+            heroItemSlotIcons[i] = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, prefix + "-icon");
             heroItemSlotNames[i] = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, prefix + "-name");
             heroItemSlotEffects[i] = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, prefix + "-effect");
             heroItemSlotActions[i] = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, prefix + "-actions");
-            ok &= heroItemSlotRoots[i] != null && heroItemSlotNames[i] != null && heroItemSlotEffects[i] != null && heroItemSlotActions[i] != null;
+            ok &= heroItemSlotRoots[i] != null && heroItemSlotIcons[i] != null && heroItemSlotNames[i] != null &&
+                  heroItemSlotEffects[i] != null && heroItemSlotActions[i] != null;
         }
-
-        heroItemPlace = new HeroToggleGroup<HeroItemPlace>(HeroItemPlace.All, OnHeroStoreViewChanged);
-        ok &= heroItemPlace.Add(BindHeroToggle("hero-screen-inventory-place-all"), HeroItemPlace.All);
-        ok &= heroItemPlace.Add(BindHeroToggle("hero-screen-inventory-place-pack"), HeroItemPlace.Pack);
-        ok &= heroItemPlace.Add(BindHeroToggle("hero-screen-inventory-place-storage"), HeroItemPlace.Storage);
-
-        heroStoreFilter = new HeroToggleGroup<HeroStoreFilter>(HeroStoreFilter.All, OnHeroStoreViewChanged);
-        heroStoreSort = new HeroToggleGroup<HeroStoreSort>(HeroStoreSort.Kind, OnHeroStoreViewChanged);
-        ok &= heroStoreFilter.Add(BindHeroToggle("hero-screen-inventory-filter-all"), HeroStoreFilter.All);
-        ok &= heroStoreFilter.Add(BindHeroToggle("hero-screen-inventory-filter-fits"), HeroStoreFilter.Fits);
-        ok &= heroStoreFilter.Add(BindHeroToggle("hero-screen-inventory-filter-weapon"), HeroStoreFilter.Weapon);
-        ok &= heroStoreFilter.Add(BindHeroToggle("hero-screen-inventory-filter-protection"), HeroStoreFilter.Protection);
-        ok &= heroStoreFilter.Add(BindHeroToggle("hero-screen-inventory-filter-special"), HeroStoreFilter.Special);
-        ok &= heroStoreFilter.Add(BindHeroToggle("hero-screen-inventory-filter-consumable"), HeroStoreFilter.Consumable);
-        ok &= heroStoreSort.Add(BindHeroToggle("hero-screen-inventory-sort-kind"), HeroStoreSort.Kind);
-        ok &= heroStoreSort.Add(BindHeroToggle("hero-screen-inventory-sort-power"), HeroStoreSort.Power);
-        ok &= heroStoreSort.Add(BindHeroToggle("hero-screen-inventory-sort-name"), HeroStoreSort.Name);
-
         if (!ok)
             return false;
 
-        // Пустой слот — показать в списке вещи этого типа.
-        HeroStoreFilter[] slotFilters = { HeroStoreFilter.Weapon, HeroStoreFilter.Protection, HeroStoreFilter.Special };
+        // ПКМ по надетой вещи — сведения.
         for (int i = 0; i < 3; i++)
         {
             int index = i;
-            heroItemSlotRoots[i].RegisterCallback<ClickEvent>(evt =>
+            heroItemSlotRoots[i].RegisterCallback<PointerDownEvent>(evt =>
             {
-                if (evt.target is Button || !heroItemSlotRoots[index].ClassListContains("hero-screen-unit-card-slot--empty"))
+                if (evt.button != 1)
                     return;
-                heroStoreFilter.Set(slotFilters[index], true);
+                ItemInstanceData item = ItemService.Equipped(gameState, HeroItemsTargetPersonId, HeroItemSlots[index]);
+                if (item != null)
+                    ShowHeroItemPopup(item);
+                evt.StopPropagation();
             });
         }
 
+        popupClose.clicked += HideHeroItemPopup;
+        heroItemPopup.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            if (evt.target == heroItemPopup)
+                HideHeroItemPopup();
+        });
+        heroItemPopup.style.display = DisplayStyle.None;
         heroItemsBound = true;
         return true;
-    }
-
-    private void OnHeroStoreViewChanged()
-    {
-        heroStorageScroll.scrollOffset = Vector2.zero;
-        RefreshHeroScreen();
     }
 
     // Кто в отряде сейчас: дома — все живые Командир и бойцы Дома, в пути —
@@ -140,15 +126,16 @@ public partial class PrototypeUIController
                HomePeopleService.IsInExpedition(gameState, resident.PersonId);
     }
 
-    // На кого надевать: выбранный на рабочем месте, иначе Командир.
+    // На кого надевать: на «Снаряжении» — всегда Командир (п. 8 брифа
+    // исправлений); на «Развитии» — выбранный в полосе людей.
     private string HeroItemsTargetPersonId
     {
         get
         {
-            if (!string.IsNullOrEmpty(heroCardPersonId))
-                return heroCardPersonId;
             CommanderData commander = gameState.GetSelectedCommander();
-            return commander != null ? commander.Id : null;
+            if (heroScreenTab == HeroScreenTab.Gear || string.IsNullOrEmpty(heroCardPersonId))
+                return commander != null ? commander.Id : null;
+            return heroCardPersonId;
         }
     }
 
@@ -159,7 +146,7 @@ public partial class PrototypeUIController
 
         ItemService.EnsureInventory(gameState);
         RebuildHeroStory();
-        RebuildHeroInventory();
+        RebuildHeroBag();
         RefreshHeroGearSummary();
         RefreshHeroPath();
         heroItemsMessageLabel.text = heroItemsMessage;
@@ -171,13 +158,12 @@ public partial class PrototypeUIController
         ItemDefinition definition = item != null ? ItemCatalog.Find(item.ItemId) : null;
         heroItemSlotActions[index].Clear();
         heroItemSlotRoots[index].EnableInClassList("hero-screen-unit-card-slot--empty", definition == null);
+        SetHeroItemIcon(heroItemSlotIcons[index], definition);
 
         if (definition == null)
         {
             heroItemSlotNames[index].text = "пусто";
-            heroItemSlotEffects[index].text = HomePeopleService.HasDeparted(gameState)
-                ? "Надеть можно из сумки героя."
-                : "Клик — показать вещи этого типа.";
+            heroItemSlotEffects[index].text = "Надеть — из сумки.";
             return;
         }
 
@@ -188,7 +174,21 @@ public partial class PrototypeUIController
             RunHeroCardCommand(ItemService.TryUnequip(gameState, instanceId, out string message), message));
     }
 
-    // Сюжетные вещи — метки с описанием по наведению: их нельзя потерять,
+    // Изображение вещи из Базы предметов; без него — первая буква названия.
+    private static void SetHeroItemIcon(VisualElement icon, ItemDefinition definition)
+    {
+        icon.Clear();
+        Sprite sprite = definition != null ? ItemDatabaseRuntime.Icon(definition.Id) : null;
+        icon.style.backgroundImage = sprite != null ? new StyleBackground(sprite) : new StyleBackground(StyleKeyword.None);
+        if (definition != null && sprite == null)
+        {
+            Label letter = new Label(string.IsNullOrEmpty(definition.Name) ? "?" : definition.Name.Substring(0, 1)) { pickingMode = PickingMode.Ignore };
+            letter.AddToClassList("hero-bag-cell-letter");
+            icon.Add(letter);
+        }
+    }
+
+    // Сюжетные вещи — метками с описанием по наведению: их нельзя потерять,
     // действий с ними нет.
     private void RebuildHeroStory()
     {
@@ -208,92 +208,167 @@ public partial class PrototypeUIController
             AddHeroScreenHint(heroStoryList, "Пока нет — важные для истории вещи появятся здесь, их нельзя потерять.");
     }
 
-    // Один список вещей: сумка героя и (дома) кладовая. Фильтр по месту, типу
-    // и пригодности для выбранного человека, затем порядок; на фильтрах —
-    // сколько вещей под ними.
-    private void RebuildHeroInventory()
+    // ------------------------------------------------------------------
+    // Сумка: сетка на все места + плитка припасов; дома — кладовая.
+    // ------------------------------------------------------------------
+
+    private void RebuildHeroBag()
     {
         heroStorageList.Clear();
-        string targetId = HeroItemsTargetPersonId;
-        bool departed = HomePeopleService.HasDeparted(gameState);
+        heroStorageGrid.Clear();
         CommanderData commander = gameState.GetSelectedCommander();
-
-        List<ItemInstanceData> items = new List<ItemInstanceData>();
-        int inPack = 0;
+        List<ItemInstanceData> pack = new List<ItemInstanceData>();
         if (commander != null)
         {
             foreach (ItemInstanceData item in ItemService.OwnedBy(gameState, commander.Id))
             {
                 ItemDefinition definition = ItemCatalog.Find(item.ItemId);
                 if (item.Slot == ItemSlot.None && definition != null && !definition.IsStory)
-                {
-                    items.Add(item);
-                    inPack++;
-                }
+                    pack.Add(item);
             }
         }
-        int inStorage = 0;
-        if (!departed)
+        pack.Sort(CompareHeroBagItems);
+
+        heroInventoryTitle.text = "СУМКА — занято " + pack.Count + " / " + ItemService.HeroPackSize;
+        heroStorageList.Add(CreateHeroSuppliesCell());
+        for (int i = 0; i < ItemService.HeroPackSize; i++)
+            heroStorageList.Add(i < pack.Count ? CreateHeroBagCell(pack[i]) : CreateHeroBagEmptyCell());
+        // Вещи сверх мест (старые сохранения) не теряются — тоже в сетке.
+        for (int i = ItemService.HeroPackSize; i < pack.Count; i++)
+            heroStorageList.Add(CreateHeroBagCell(pack[i]));
+
+        bool home = !HomePeopleService.HasDeparted(gameState);
+        List<ItemInstanceData> storage = new List<ItemInstanceData>();
+        if (home && !IsFreePlayWithoutHome)
         {
             foreach (ItemInstanceData item in ItemService.Storage(gameState))
             {
-                if (ItemCatalog.Find(item.ItemId) == null)
-                    continue;
-                items.Add(item);
-                inStorage++;
+                if (ItemCatalog.Find(item.ItemId) != null)
+                    storage.Add(item);
             }
+            storage.Sort(CompareHeroBagItems);
         }
+        bool showStorage = storage.Count > 0;
+        heroStorageGridTitle.style.display = showStorage ? DisplayStyle.Flex : DisplayStyle.None;
+        heroStorageGrid.style.display = showStorage ? DisplayStyle.Flex : DisplayStyle.None;
+        heroStorageGridTitle.text = "КЛАДОВАЯ ДОМА — " + storage.Count;
+        foreach (ItemInstanceData item in storage)
+            heroStorageGrid.Add(CreateHeroBagCell(item));
 
-        heroInventoryTitle.text = "ВЕЩИ — в сумке " + inPack + " / " + ItemService.HeroPackSize +
-                                  (departed ? "  ·  кладовая — только дома" : "  ·  в кладовой " + inStorage);
-        heroItemPlace.SetCount(HeroItemPlace.All, items.Count);
-        heroItemPlace.SetCount(HeroItemPlace.Pack, inPack);
-        heroItemPlace.SetCount(HeroItemPlace.Storage, inStorage);
+        RenderHeroBagDetails();
+    }
 
-        HeroItemPlace place = heroItemPlace.Value;
-        int all = 0, fits = 0, weapon = 0, protection = 0, special = 0, consumable = 0;
-        List<ItemInstanceData> shown = new List<ItemInstanceData>();
-        foreach (ItemInstanceData item in items)
+    private static int CompareHeroBagItems(ItemInstanceData a, ItemInstanceData b)
+    {
+        ItemDefinition da = ItemCatalog.Find(a.ItemId);
+        ItemDefinition db = ItemCatalog.Find(b.ItemId);
+        int byKind = ((int)da.Kind).CompareTo((int)db.Kind);
+        if (byKind != 0)
+            return byKind;
+        int byName = string.Compare(da.Name, db.Name, System.StringComparison.CurrentCulture);
+        return byName != 0 ? byName : string.CompareOrdinal(a.InstanceId, b.InstanceId);
+    }
+
+    private VisualElement CreateHeroBagCell(ItemInstanceData item)
+    {
+        ItemDefinition definition = ItemCatalog.Find(item.ItemId);
+        VisualElement cell = new VisualElement { name = "hero-bag-cell-" + item.InstanceId };
+        cell.AddToClassList("hero-bag-cell");
+        cell.EnableInClassList("hero-bag-cell--selected", heroBagSelectedId == item.InstanceId);
+        cell.EnableInClassList("hero-bag-cell--storage", string.IsNullOrEmpty(item.OwnerPersonId));
+        VisualElement icon = new VisualElement { pickingMode = PickingMode.Ignore };
+        icon.AddToClassList("hero-bag-cell-icon");
+        SetHeroItemIcon(icon, definition);
+        cell.Add(icon);
+        if (definition.HasUse)
         {
-            bool isPack = !string.IsNullOrEmpty(item.OwnerPersonId);
-            if ((place == HeroItemPlace.Pack && !isPack) || (place == HeroItemPlace.Storage && isPack))
-                continue;
-            ItemDefinition definition = ItemCatalog.Find(item.ItemId);
-            bool fit = FitsHeroPerson(definition, targetId);
-            all++;
-            if (fit) fits++;
-            switch (definition.Kind)
+            Label uses = new Label("×" + item.UsesLeft) { pickingMode = PickingMode.Ignore };
+            uses.AddToClassList("hero-bag-cell-badge");
+            cell.Add(uses);
+        }
+        cell.tooltip = definition.Name + " — " + HeroItemKindLabel(definition) + ". ПКМ — сведения.";
+        string instanceId = item.InstanceId;
+        cell.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            evt.StopPropagation();
+            ItemInstanceData current = ItemService.Find(gameState, instanceId);
+            if (current == null)
+                return;
+            if (evt.button == 1)
             {
-                case ItemKind.Weapon: weapon++; break;
-                case ItemKind.Protection: protection++; break;
-                case ItemKind.Special: special++; break;
-                case ItemKind.Consumable: consumable++; break;
+                ShowHeroItemPopup(current);
+                return;
             }
-            if (PassesHeroStoreFilter(definition, fit, heroStoreFilter.Value))
-                shown.Add(item);
-        }
+            heroBagSelectedId = instanceId;
+            heroItemsMessage = string.Empty;
+            RefreshHeroScreen();
+        });
+        return cell;
+    }
 
-        heroStoreFilter.SetCount(HeroStoreFilter.All, all);
-        heroStoreFilter.SetCount(HeroStoreFilter.Fits, fits);
-        heroStoreFilter.SetCount(HeroStoreFilter.Weapon, weapon);
-        heroStoreFilter.SetCount(HeroStoreFilter.Protection, protection);
-        heroStoreFilter.SetCount(HeroStoreFilter.Special, special);
-        heroStoreFilter.SetCount(HeroStoreFilter.Consumable, consumable);
+    private static VisualElement CreateHeroBagEmptyCell()
+    {
+        VisualElement cell = new VisualElement();
+        cell.AddToClassList("hero-bag-cell");
+        cell.AddToClassList("hero-bag-cell--empty");
+        return cell;
+    }
 
-        HeroStoreSort sort = heroStoreSort.Value;
-        shown.Sort((a, b) => CompareHeroStoreItems(a, b, sort, targetId));
-        foreach (ItemInstanceData item in shown)
-            heroStorageList.Add(CreateHeroStoreRow(item, ItemCatalog.Find(item.ItemId), targetId));
-
-        if (shown.Count == 0)
+    // Плитка припасов: тот же ArmySupply, что в походе и торговле; места
+    // в сумке не занимает.
+    private VisualElement CreateHeroSuppliesCell()
+    {
+        VisualElement cell = new VisualElement { name = "hero-bag-cell-supplies" };
+        cell.AddToClassList("hero-bag-cell");
+        cell.AddToClassList("hero-bag-cell--supplies");
+        cell.EnableInClassList("hero-bag-cell--selected", heroBagSelectedId == HeroSuppliesCellId);
+        Label caption = new Label("Припасы") { pickingMode = PickingMode.Ignore };
+        caption.AddToClassList("hero-bag-cell-caption");
+        cell.Add(caption);
+        Label count = new Label(gameState.ArmySupply.ToString()) { pickingMode = PickingMode.Ignore };
+        count.AddToClassList("hero-bag-cell-count");
+        cell.Add(count);
+        cell.tooltip = "Припасы отряда: " + gameState.ArmySupply + ". Места в сумке не занимают.";
+        cell.RegisterCallback<PointerDownEvent>(evt =>
         {
-            if (place == HeroItemPlace.Storage && departed)
-                heroStorageList.Add(CreateHeroItemRow("Кладовая недоступна в пути", "Она дома; в пути надеть можно то, что в сумке героя."));
-            else if (items.Count == 0)
-                heroStorageList.Add(CreateHeroItemRow("Вещей нет", "Снятое дома ложится в кладовую, в пути — в сумку героя."));
-            else
-                heroStorageList.Add(CreateHeroItemRow("Ничего под этот фильтр", "Выберите «Всё» и «Все», чтобы увидеть все вещи."));
+            evt.StopPropagation();
+            if (evt.button == 1)
+            {
+                ShowHeroSuppliesPopup();
+                return;
+            }
+            heroBagSelectedId = HeroSuppliesCellId;
+            RefreshHeroScreen();
+        });
+        return cell;
+    }
+
+    // Под сеткой — выбранная вещь: что это и что с ней можно сделать.
+    private void RenderHeroBagDetails()
+    {
+        heroBagDetailsActions.Clear();
+        if (heroBagSelectedId == HeroSuppliesCellId)
+        {
+            heroBagDetailsName.text = "Припасы отряда: " + gameState.ArmySupply;
+            heroBagDetailsText.text = "Общий запас похода. Отряд ест " + gameState.ExpeditionSupplyConsumption +
+                                      " в день. Купить и продать — у торговцев в поселениях; дома — панелью запасов.";
+            return;
         }
+        ItemInstanceData item = string.IsNullOrEmpty(heroBagSelectedId) ? null : ItemService.Find(gameState, heroBagSelectedId);
+        ItemDefinition definition = item != null ? ItemCatalog.Find(item.ItemId) : null;
+        if (definition == null || item.Slot != ItemSlot.None)
+        {
+            heroBagSelectedId = null;
+            heroBagDetailsName.text = "Выберите вещь";
+            heroBagDetailsText.text = "Клик — выбрать, правая кнопка — подробные сведения.";
+            return;
+        }
+
+        string targetId = HeroItemsTargetPersonId;
+        heroBagDetailsName.text = definition.Name + (definition.HasUse ? "  ×" + item.UsesLeft : string.Empty);
+        heroBagDetailsText.text = Join(HeroItemKindLabel(definition) + ". " + EffectText(definition), DescribeFit(definition, targetId));
+        AddPersonItemActions(heroBagDetailsActions, item, definition, targetId);
+        AddItemActions(heroBagDetailsActions, item, definition, !string.IsNullOrEmpty(item.OwnerPersonId));
     }
 
     private bool FitsHeroPerson(ItemDefinition definition, string personId)
@@ -315,56 +390,13 @@ public partial class PrototypeUIController
         return false;
     }
 
-    private static bool PassesHeroStoreFilter(ItemDefinition definition, bool fits, HeroStoreFilter filter)
-    {
-        switch (filter)
-        {
-            case HeroStoreFilter.Fits: return fits;
-            case HeroStoreFilter.Weapon: return definition.Kind == ItemKind.Weapon;
-            case HeroStoreFilter.Protection: return definition.Kind == ItemKind.Protection;
-            case HeroStoreFilter.Special: return definition.Kind == ItemKind.Special;
-            case HeroStoreFilter.Consumable: return definition.Kind == ItemKind.Consumable;
-            default: return true;
-        }
-    }
-
-    private int CompareHeroStoreItems(ItemInstanceData a, ItemInstanceData b, HeroStoreSort sort, string targetId)
-    {
-        ItemDefinition da = ItemCatalog.Find(a.ItemId);
-        ItemDefinition db = ItemCatalog.Find(b.ItemId);
-        int result;
-        switch (sort)
-        {
-            case HeroStoreSort.Power:
-                result = HeroItemPower(db).CompareTo(HeroItemPower(da));
-                break;
-            case HeroStoreSort.Name:
-                result = 0;
-                break;
-            default:
-                // По типу, внутри — сначала то, что подходит выбранному.
-                result = ((int)da.Kind).CompareTo((int)db.Kind);
-                if (result == 0)
-                    result = FitsHeroPerson(db, targetId).CompareTo(FitsHeroPerson(da, targetId));
-                break;
-        }
-        return result != 0 ? result : string.Compare(da.Name, db.Name, System.StringComparison.CurrentCulture);
-    }
-
-    // Грубая «сила» вещи для порядка: сумма прибавок, жизни — вдвое легче.
-    private static int HeroItemPower(ItemDefinition definition)
-    {
-        StatModifier m = definition.Modifier;
-        return m.Attack + m.Defense + m.Damage + m.Movement + m.Initiative + m.AttackRange + m.MaxHitPoints / 2;
-    }
-
     private static string HeroItemKindLabel(ItemDefinition definition)
     {
         switch (definition.Kind)
         {
             case ItemKind.Weapon: return "оружие";
             case ItemKind.Protection: return "защита";
-            case ItemKind.Special: return "особое";
+            case ItemKind.Special: return definition.Artifact ? "особое, артефакт" : "особое";
             case ItemKind.Consumable: return "расходное";
             case ItemKind.TradeGood: return "товар";
             default: return "сюжетное";
@@ -381,54 +413,6 @@ public partial class PrototypeUIController
         ItemInstanceData current = ItemService.Equipped(gameState, personId, definition.Slot);
         ItemDefinition currentDefinition = current != null ? ItemCatalog.Find(current.ItemId) : null;
         return currentDefinition != null ? "заменит «" + currentDefinition.Name + "»" : "слот свободен";
-    }
-
-    private VisualElement CreateHeroStoreRow(ItemInstanceData item, ItemDefinition definition, string targetId)
-    {
-        bool fit = FitsHeroPerson(definition, targetId);
-        bool inPack = !string.IsNullOrEmpty(item.OwnerPersonId);
-        VisualElement row = new VisualElement();
-        row.AddToClassList("hero-item-row");
-        row.AddToClassList("hero-store-row");
-        row.EnableInClassList("hero-item-row--fits", fit);
-        row.EnableInClassList("hero-item-row--unfit", definition.Slot != ItemSlot.None && !fit);
-
-        VisualElement text = new VisualElement();
-        text.AddToClassList("hero-store-row-text");
-        VisualElement head = new VisualElement();
-        head.AddToClassList("hero-store-row-head");
-        // Имя — точное название вещи (по нему строку находят тесты).
-        // Из сумки и из кладовой — одна строка, место — меткой.
-        Label name = new Label(definition.Name);
-        name.AddToClassList("hero-item-slot-name");
-        head.Add(name);
-        if (definition.IsConsumable)
-            head.Add(CreateHeroItemTag("×" + item.UsesLeft, false));
-        head.Add(CreateHeroItemTag(HeroItemKindLabel(definition), false));
-        head.Add(CreateHeroItemTag(inPack ? "в сумке" : "в кладовой", false));
-        if (fit)
-            head.Add(CreateHeroItemTag("подходит", true));
-        text.Add(head);
-
-        Label effect = new Label(Join(EffectText(definition), DescribeFit(definition, targetId)));
-        effect.AddToClassList("hero-item-slot-effect");
-        text.Add(effect);
-        row.Add(text);
-
-        VisualElement actions = new VisualElement();
-        actions.AddToClassList("hero-item-actions");
-        AddPersonItemActions(actions, item, definition, targetId);
-        AddItemActions(actions, item, definition, inPack);
-        row.Add(actions);
-        return row;
-    }
-
-    private static Label CreateHeroItemTag(string text, bool fits)
-    {
-        Label tag = new Label(text);
-        tag.AddToClassList("hero-item-tag");
-        tag.EnableInClassList("hero-item-tag--fits", fits);
-        return tag;
     }
 
     // Действия с вещью для выбранного человека: надеть, дать отвар.
@@ -457,8 +441,6 @@ public partial class PrototypeUIController
     private void AddItemActions(VisualElement parent, ItemInstanceData item, ItemDefinition definition, bool inPack)
     {
         string instanceId = item.InstanceId;
-        // 12Т: «Использовать/Изучить» — только у вещи с эффектами; товар
-        // без применения такой кнопки не показывает.
         if (definition.HasUse && !ItemUseService.NeedsTarget(definition))
         {
             CommanderData commander = gameState.GetSelectedCommander();
@@ -467,7 +449,7 @@ public partial class PrototypeUIController
                 RunHeroItemCommand(ItemService.TryUse(gameState, instanceId, commanderId, out string message), message));
         }
 
-        bool home = !HomePeopleService.HasDeparted(gameState);
+        bool home = !HomePeopleService.HasDeparted(gameState) && !IsFreePlayWithoutHome;
         if (inPack && home)
         {
             AddHeroItemButton(parent, "В кладовую", () =>
@@ -477,6 +459,70 @@ public partial class PrototypeUIController
         {
             AddHeroItemButton(parent, "В сумку", () =>
                 RunHeroItemCommand(ItemService.TryTakeToPack(gameState, instanceId, out string message), message));
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Окно сведений о вещи (правая кнопка): всё, что задано в Базе
+    // предметов, — вид, описание, происхождение, механика, применения, цена.
+    // ------------------------------------------------------------------
+
+    private void ShowHeroItemPopup(ItemInstanceData item)
+    {
+        ItemDefinition definition = item != null ? ItemCatalog.Find(item.ItemId) : null;
+        if (definition == null || heroItemPopup == null)
+            return;
+        SetHeroItemIcon(heroItemPopupIcon, definition);
+        heroItemPopupName.text = definition.Name;
+        heroItemPopupKind.text = HeroItemKindLabel(definition) +
+                                 (definition.Slot != ItemSlot.None ? " · слот: " + SlotCaption(definition.Slot) : string.Empty) +
+                                 (definition.Unique ? " · одна на мир" : string.Empty);
+        List<string> lines = new List<string>();
+        if (!string.IsNullOrWhiteSpace(definition.Description))
+            lines.Add(definition.Description);
+        if (!string.IsNullOrWhiteSpace(definition.Origin))
+            lines.Add(definition.Origin);
+        string mechanics = ItemUseService.Describe(definition);
+        if (!string.IsNullOrEmpty(mechanics))
+            lines.Add("Действие: " + mechanics + ".");
+        if (definition.HasUse)
+            lines.Add("Осталось применений: " + item.UsesLeft + " из " + definition.Uses + ".");
+        if (definition.UnitTypes != null && definition.UnitTypes.Length > 0)
+            lines.Add("Подходит: " + string.Join(", ", definition.UnitTypes) + ".");
+        lines.Add(definition.Price > 0 ? "Цена: " + definition.Price + " зол. (торговцы платят меньше)." : "Цены нет.");
+        if (definition.IsTradeProtected)
+            lines.Add("Не продаётся и не теряется.");
+        heroItemPopupText.text = string.Join("\n\n", lines);
+        heroItemPopup.style.display = DisplayStyle.Flex;
+        heroItemPopup.BringToFront();
+    }
+
+    private void ShowHeroSuppliesPopup()
+    {
+        if (heroItemPopup == null)
+            return;
+        SetHeroItemIcon(heroItemPopupIcon, null);
+        heroItemPopupName.text = "Припасы отряда";
+        heroItemPopupKind.text = "общий запас похода";
+        heroItemPopupText.text = "Сейчас: " + gameState.ArmySupply + ". " + DescribePartyResources(gameState, out _) +
+                                 "\n\nКрупа, сало, сухари — едят все в походе. Места в сумке не занимают; покупаются и продаются у торговцев.";
+        heroItemPopup.style.display = DisplayStyle.Flex;
+        heroItemPopup.BringToFront();
+    }
+
+    private void HideHeroItemPopup()
+    {
+        if (heroItemPopup != null)
+            heroItemPopup.style.display = DisplayStyle.None;
+    }
+
+    private static string SlotCaption(ItemSlot slot)
+    {
+        switch (slot)
+        {
+            case ItemSlot.Weapon: return "оружие";
+            case ItemSlot.Protection: return "защита";
+            default: return "особый предмет";
         }
     }
 

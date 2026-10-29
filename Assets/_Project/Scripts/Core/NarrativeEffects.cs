@@ -75,6 +75,9 @@ public sealed class NarrativeEffect
         if (context.State.HasEffectApplied(EffectExecutionId))
             return;
 
+        // Бриф исправлений п. 9: сколько фактически выдано — для уведомления
+        // и Хроники (после применения, не по обещанию).
+        int actualAmount = 0;
         switch (Type)
         {
             case NarrativeEffectType.SetFlag:
@@ -126,7 +129,11 @@ public sealed class NarrativeEffect
                 break;
             case NarrativeEffectType.ChangeSupplies:
                 if (context.GameState != null)
+                {
+                    int before = context.GameState.ArmySupply;
                     context.GameState.ArmySupply = Math.Max(0, context.GameState.ArmySupply + IntParam);
+                    actualAmount = context.GameState.ArmySupply - before;
+                }
                 break;
             case NarrativeEffectType.ShortcutRouteCells:
                 if (context.GameState?.ActiveExpedition != null && IntParam > 0)
@@ -135,8 +142,10 @@ public sealed class NarrativeEffect
             case NarrativeEffectType.GrantExperience:
                 if (context.GameState != null)
                 {
-                    CharacterProgressionService.AwardShared(context.GameState, EffectExecutionId, IntParam,
+                    List<ExperienceGain> gains = CharacterProgressionService.AwardShared(context.GameState, EffectExecutionId, IntParam,
                         CharacterProgressionService.PartyPersonIds(context.GameState));
+                    foreach (ExperienceGain gain in gains)
+                        actualAmount = Math.Max(actualAmount, gain.Amount);
                 }
                 break;
             case NarrativeEffectType.GrantCompetencyPractice:
@@ -149,13 +158,18 @@ public sealed class NarrativeEffect
                 break;
             case NarrativeEffectType.ChangeArmyGold:
                 if (context.GameState != null)
+                {
+                    int before = context.GameState.ArmyGold;
                     context.GameState.ArmyGold = Math.Max(0, context.GameState.ArmyGold + IntParam);
+                    actualAmount = context.GameState.ArmyGold - before;
+                }
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(Type), Type, null);
         }
 
         context.State.MarkEffectApplied(EffectExecutionId);
+        RewardFeed.OnEffectApplied(context, this, actualAmount);
     }
 }
 

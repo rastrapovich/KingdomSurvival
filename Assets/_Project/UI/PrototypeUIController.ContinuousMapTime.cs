@@ -46,6 +46,18 @@ public partial class PrototypeUIController
 
             if (location != null && location.IsVisibleOnMap && !location.IsWaypoint)
             {
+                // Бриф исправлений п. 4: отряд уже на этом месте — клик снова
+                // открывает его (поселение — сразу экран), без отхода и без
+                // траты времени.
+                if (gameState.HasActiveExpedition &&
+                    gameState.ActiveExpedition.Phase == CommanderState.AtLocation &&
+                    gameState.ActiveExpedition.LocationId == location.Id &&
+                    !gameState.ActiveExpedition.HasTimedActivity)
+                {
+                    TryOpenLocationInteraction(location.Id);
+                    evt.StopImmediatePropagation();
+                    return;
+                }
                 ShowWorldMapClickMarker(location.MapXPercent, location.MapYPercent);
                 IssueContinuousMapOrder(
                     location.MapXPercent,

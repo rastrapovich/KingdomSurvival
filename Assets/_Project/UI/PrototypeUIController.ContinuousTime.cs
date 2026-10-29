@@ -167,6 +167,7 @@ public partial class PrototypeUIController
         // 12Т: экран поселения — пока командир внутри и поверх ничего нет.
         TickSettlementScreen();
         TickWorldMapSearchAreas();
+        TickRewardToasts();
 
         if (gameState == null)
             return;
@@ -382,9 +383,12 @@ public partial class PrototypeUIController
         // ПР-02: паводок (N04) и ночной удар на мельнице (N06) случаются
         // ночью — пока глава их ждёт, время в Доме идёт само.
         // ПР-06А: пока в Доме идёт работа или уход, время тоже идёт само.
+        // Бриф исправлений п. 13: в свободной игре (Дома на экране нет) время
+        // идёт только при движении и явно начатом деле похода — домашняя
+        // работа и уход скрытого Дома сами часы не запускают.
         bool shouldRun = ContinuousSimulationSystem.HasMovementOrActivityInProgress(gameState) ||
-                         Chapter01HomeActivities.IsWaitingForNight(gameState) ||
-                         HomeLife.HasPendingProgress(gameState);
+                         (!IsFreePlayWithoutHome &&
+                          (Chapter01HomeActivities.IsWaitingForNight(gameState) || HomeLife.HasPendingProgress(gameState)));
         ContinuousSimulationSystem.SetPaused(gameState, !shouldRun);
 
         // P08+: ExpeditionStarted должен означать физическое начало

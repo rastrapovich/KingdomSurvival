@@ -87,6 +87,12 @@ public static class ExpeditionIncidentSystem
                 0)
         };
 
+    // Правка 29.10.2026 (бриф исправлений, п. 1): дорожные донесения без
+    // диалога («Хищник у тропы» и др.) временно выключены — они прерывали
+    // путь. Дорожные встречи с диалогом (Encounter) по-прежнему возможны:
+    // проверка уступает им тот же слот. Включается обратно этим флагом.
+    public static bool ClassicRoadReportsEnabled;
+
     public static void ResolveAtScheduledCheck(
         GameState state,
         int finishedDay,
@@ -95,6 +101,12 @@ public static class ExpeditionIncidentSystem
         if (!state.HasActiveExpedition ||
             state.ActiveExpedition.HasTimedActivity)
             return;
+
+        if (!ClassicRoadReportsEnabled)
+        {
+            SurfaceRoadEncounterOpportunity(state, finishedDay, result);
+            return;
+        }
 
         int requestedIncidentCount = Random.Next(0, 3);
 

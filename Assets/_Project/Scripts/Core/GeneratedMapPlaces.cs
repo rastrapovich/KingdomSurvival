@@ -22,7 +22,7 @@ public static class GeneratedMapPlaces
     // прежде — журнал и полученные награды не трогаются.
     public static readonly HashSet<string> KindsWithoutContent = new HashSet<string>
     {
-        "grove", "barrow", "hillfort", "abandoned-village", "abandoned-yard", "sanctuary", "lair", "spring", "cave"
+        "grove", "barrow", "hillfort", "abandoned-village", "abandoned-yard", "sanctuary", "lair", "spring", "cave", "ruins"
     };
 
     public static void AddTo(GameState state)

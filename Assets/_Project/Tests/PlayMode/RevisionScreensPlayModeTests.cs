@@ -229,5 +229,25 @@ public sealed class RevisionScreensPlayModeTests
         yield return Capture(main, "rev_07_gear_page");
         Invoke(main, "CloseHeroScreen");
         yield return Frames(2);
+
+        // П. 15: событие из очереди — слоем диалога, а не отдельной табличкой;
+        // «ПОНЯТНО» закрывает его прежней логикой.
+        Invoke(main, "QueueNotice", new StrategicModalNotice
+        {
+            Title = "ПРОВЕРОЧНОЕ СОБЫТИЕ", Description = "У дороги лежит перевёрнутая телега.", Consequence = "Ничего не случилось."
+        }, -1);
+        Invoke(main, "TryShowNextQueuedModal");
+        yield return Frames(3);
+        VisualElement dialogueOverlay = root.Q("narrative-dialogue-overlay");
+        Assert.AreEqual(DisplayStyle.Flex, dialogueOverlay.resolvedStyle.display, "Событие — в слое диалога.");
+        Assert.AreEqual(DisplayStyle.None, root.Q("incident-modal-overlay").resolvedStyle.display, "Старой таблички нет.");
+        Assert.AreEqual("ПРОВЕРОЧНОЕ СОБЫТИЕ", root.Q<Label>("narrative-dialogue-speaker").text);
+        Button understood = root.Q("narrative-dialogue-choices").Query<Button>().ToList().Single();
+        Assert.AreEqual("ПОНЯТНО", understood.text);
+        yield return Capture(main, "rev_08_event_dialogue");
+        yield return Click(understood);
+        yield return Frames(2);
+        Assert.AreEqual(DisplayStyle.None, dialogueOverlay.resolvedStyle.display, "Подтверждённое событие закрыто.");
+        Assert.IsNull(Get<object>(main, "activeQueuedModal"), "Очередь событий пуста.");
     }
 }

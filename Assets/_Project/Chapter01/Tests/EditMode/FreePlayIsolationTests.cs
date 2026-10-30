@@ -57,9 +57,9 @@ public sealed class FreePlayIsolationTests
         Assert.IsTrue(CampaignContent.IsFreePlay(state));
         Assert.IsFalse(Chapter01Crisis.IsActive(state));
 
-        LocationData ruins = state.FindLocation(FreePlayContent.StartingKnownLocationId);
-        Assert.IsNotNull(ruins);
-        Assert.IsTrue(ruins.IsVisibleOnMap && ruins.IsDiscovered, "Одно место известно с начала.");
+        // Бриф правок п. 15: руин (и истории кургана) в новой игре нет.
+        Assert.IsNull(state.FindLocation(FreePlayContent.StartingKnownLocationId), "Затопленных руин нет.");
+        Assert.IsFalse(state.Locations.Exists(l => l.PlaceKind == "ruins"), "Обычных руин генератора тоже нет.");
 
         IReadOnlyList<JournalGoalViewData> goals = CampaignContent.BuildGoals(state);
         Assert.IsFalse(goals.Any(g => g.Id == FreePlayContent.RegionGoalId), "Бриф правок п. 11: «Округа Дома» в журнале пока не показывается.");
@@ -87,7 +87,11 @@ public sealed class FreePlayIsolationTests
     {
         GameState state = NewFreePlay();
         state.ArmySupply = 50;
-        Assert.IsTrue(state.TryStartExpedition(FreePlayContent.StartingKnownLocationId, new List<string> { "garrick" }, out string message), message);
+        // Руин в новой игре нет (бриф правок п. 15) — идём к первому месту карты.
+        LocationData target = state.Locations.First(location => !location.IsWaypoint);
+        target.IsVisibleOnMap = true;
+        target.IsDiscovered = true;
+        Assert.IsTrue(state.TryStartExpedition(target.Id, new List<string> { "garrick" }, out string message), message);
         FreePlayContent.Refresh(state);
         AdvanceHours(state, 2.0);
         AssertNoChapterContent(state, "в пути");

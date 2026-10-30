@@ -19,7 +19,16 @@ public sealed class FreePlayKurganStoryTests
     {
         Chapter01Content.Register();
         FreePlayContent.Register();
+        // История кургана выключена в новой игре (бриф правок п. 15), но её
+        // код живёт для старых партий — проверяется с руинами.
+        FreePlayContent.KurganStoryEnabled = true;
         dialogues = Resources.Load<DialogueDatabaseAsset>(DialogueDatabaseAsset.ResourcesPath);
+    }
+
+    [TearDown]
+    public void RestoreKurganSwitch()
+    {
+        FreePlayContent.KurganStoryEnabled = false;
     }
 
     private static GameState NewFreePlay()

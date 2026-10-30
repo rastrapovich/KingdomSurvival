@@ -48,7 +48,11 @@ public sealed class FreePlayCacheStoryTests
         GameState state = new CampaignSetup { CrisisId = CampaignStartOptions.FreePlayId, WorldSeed = 20261029 }.CreateCampaign();
         state.Narrative ??= new NarrativeStateData();
         state.ArmySupply = 30;
-        post = state.Locations.First(location => !location.IsWaypoint && location.IsVisibleOnMap);
+        // Руин в новой игре нет (бриф правок п. 15) — торговым селом делаем
+        // первое место карты и показываем его.
+        post = state.Locations.First(location => !location.IsWaypoint);
+        post.IsVisibleOnMap = true;
+        post.IsDiscovered = true;
         post.IsSettlement = true;
         if (SettlementService.FindInstance(state, post.Id) == null)
             state.Settlements.Instances.Add(new SettlementInstanceData { LocationId = post.Id, ProfileId = PostProfile });

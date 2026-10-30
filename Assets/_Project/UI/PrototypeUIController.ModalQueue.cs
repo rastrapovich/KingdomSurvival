@@ -123,6 +123,8 @@ public partial class PrototypeUIController
             decisionOptionAButton.style.display = DisplayStyle.None;
             decisionOptionBButton.style.display = DisplayStyle.None;
             incidentModalOverlay.style.display = DisplayStyle.Flex;
+            // Бриф правок п. 15: показ — слоем диалога.
+            PresentIncidentModalAsDialogue();
         }
 
         RefreshTimeControlAvailability();

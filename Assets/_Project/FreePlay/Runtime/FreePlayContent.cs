@@ -105,6 +105,15 @@ namespace KingdomSurvival.FreePlay
             if (state != null && Chronicle.Find(state, StartCampChronicleId) == null)
                 Chronicle.Record(state, StartCampChronicleId, "Стоянка у дороги",
                     "Отряд встал лагерем у развилки дорог: шалаш, кострище, вещи в мешках. Отсюда можно идти куда угодно.");
+            // Бриф правок п. 15 (решение пользователя 30.10.2026): «Затопленные
+            // руины» убраны из новой игры вместе с историей кургана — без руин
+            // курган не открывается. Код истории остаётся для старых партий,
+            // где она уже началась.
+            if (state != null && !KurganStoryEnabled)
+            {
+                state.Locations?.RemoveAll(location => location != null && location.Id == StartingKnownLocationId);
+                return;
+            }
             LocationData known = state?.FindLocation(StartingKnownLocationId);
             if (known == null)
                 return;
@@ -113,6 +122,9 @@ namespace KingdomSurvival.FreePlay
         }
 
         public const string StartCampChronicleId = "start.camp";
+
+        // Руины и курган в новой партии (выключено, см. InitializeNewCampaign).
+        public static bool KurganStoryEnabled = false;
 
         // ------------------------------------------------------------------
         // История: выход и возвращение каждого похода — по одной записи.

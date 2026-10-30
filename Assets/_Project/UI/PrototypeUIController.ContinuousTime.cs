@@ -180,6 +180,7 @@ public partial class PrototypeUIController
         TickSettlementScreen();
         TickWorldMapSearchAreas();
         TickRewardToasts();
+        TickEventDialogue();
 
         if (gameState == null)
             return;

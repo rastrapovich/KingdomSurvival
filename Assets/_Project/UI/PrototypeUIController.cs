@@ -868,6 +868,10 @@ public partial class PrototypeUIController : MonoBehaviour
         decisionOptionAButton.style.display = DisplayStyle.None;
         decisionOptionBButton.style.display = DisplayStyle.None;
         incidentModalOverlay.style.display = DisplayStyle.Flex;
+
+        // Бриф правок п. 15: показ — слоем диалога.
+
+        PresentIncidentModalAsDialogue();
         RefreshTimeControlAvailability();
     }
 
@@ -904,6 +908,10 @@ public partial class PrototypeUIController : MonoBehaviour
         decisionOptionAButton.style.display = DisplayStyle.Flex;
         decisionOptionBButton.style.display = DisplayStyle.Flex;
         incidentModalOverlay.style.display = DisplayStyle.Flex;
+
+        // Бриф правок п. 15: показ — слоем диалога.
+
+        PresentIncidentModalAsDialogue();
         RefreshTimeControlAvailability();
     }
 
@@ -960,6 +968,7 @@ public partial class PrototypeUIController : MonoBehaviour
                 out resultMessage))
         {
             incidentModalConsequence.text = resultMessage;
+            PresentIncidentModalAsDialogue();
             return;
         }
 
@@ -984,6 +993,7 @@ public partial class PrototypeUIController : MonoBehaviour
 
     private void HideIncidentModal()
     {
+        HideEventDialogue();
         openedIncident = null;
         openedDecision = null;
 

@@ -1,0 +1,429 @@
+fileFormatVersion: 2
+guid: bd872e8a003cd1f49ad2c6f20c1787c2
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 23560894970943621
+    second: KS_Map_Deciduous_Single_09_0
+  - first:
+      213: 1829381724628441960
+    second: KS_Map_Deciduous_Single_09_1
+  - first:
+      213: 2684165176487165380
+    second: KS_Map_Deciduous_Single_09_2
+  - first:
+      213: 8158019329031977287
+    second: KS_Map_Deciduous_Single_09_3
+  - first:
+      213: -1866601223394752730
+    second: KS_Map_Deciduous_Single_09_4
+  - first:
+      213: -5343999284556876458
+    second: KS_Map_Deciduous_Single_09_5
+  - first:
+      213: 3738210182435888018
+    second: KS_Map_Deciduous_Single_09_6
+  - first:
+      213: -1819525055375110898
+    second: KS_Map_Deciduous_Single_09_7
+  - first:
+      213: 5825671364307663079
+    second: KS_Map_Deciduous_Single_09_8
+  - first:
+      213: -8791049719998989361
+    second: KS_Map_Deciduous_Single_09_9
+  - first:
+      213: 225887430677358041
+    second: KS_Map_Deciduous_Single_09_10
+  - first:
+      213: -5349400110193109557
+    second: KS_Map_Deciduous_Single_09_11
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 7
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: KS_Map_Deciduous_Single_09_0
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 0
+        width: 1215
+        height: 1252
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58855575284b35000800000000000000
+      internalID: 23560894970943621
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Deciduous_Single_09_1
+      rect:
+        serializedVersion: 2
+        x: 297
+        y: 1207
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86bd11f6cf4436910800000000000000
+      internalID: 1829381724628441960
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Deciduous_Single_09_2
+      rect:
+        serializedVersion: 2
+        x: 532
+        y: 1145
+        width: 14
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4cdbdf6b102104520800000000000000
+      internalID: 2684165176487165380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Deciduous_Single_09_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 295
+        width: 13
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 749b8b15b5b173170800000000000000
+      internalID: 8158019329031977287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Deciduous_Single_09_4
+      rect:
+        serializedVersion: 2
+        x: 486
+        y: 89
+        width: 11
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6270f36b3108816e0800000000000000
+      internalID: -1866601223394752730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Deciduous_Single_09_5
+      rect:
+        serializedVersion: 2
+        x: 490
+        y: 83
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 655bb04e6fc46d5b0800000000000000
+      internalID: -5343999284556876458
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Deciduous_Single_09_6
+      rect:
+        serializedVersion: 2
+        x: 506
+        y: 67
+        width: 14
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29bd6d3ea5ac0e330800000000000000
+      internalID: 3738210182435888018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Deciduous_Single_09_7
+      rect:
+        serializedVersion: 2
+        x: 729
+        y: 67
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0d81763a9fbfb6e0800000000000000
+      internalID: -1819525055375110898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Deciduous_Single_09_8
+      rect:
+        serializedVersion: 2
+        x: 587
+        y: 31
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e839b77d31f8d050800000000000000
+      internalID: 5825671364307663079
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Deciduous_Single_09_9
+      rect:
+        serializedVersion: 2
+        x: 651
+        y: 15
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fcbb9ac4bdaeff580800000000000000
+      internalID: -8791049719998989361
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Deciduous_Single_09_10
+      rect:
+        serializedVersion: 2
+        x: 657
+        y: 14
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d5efb0eb63822300800000000000000
+      internalID: 225887430677358041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Deciduous_Single_09_11
+      rect:
+        serializedVersion: 2
+        x: 985
+        y: 0
+        width: 15
+        height: 5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc5118e21fc13c5b0800000000000000
+      internalID: -5349400110193109557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      KS_Map_Deciduous_Single_09_0: 23560894970943621
+      KS_Map_Deciduous_Single_09_1: 1829381724628441960
+      KS_Map_Deciduous_Single_09_10: 225887430677358041
+      KS_Map_Deciduous_Single_09_11: -5349400110193109557
+      KS_Map_Deciduous_Single_09_2: 2684165176487165380
+      KS_Map_Deciduous_Single_09_3: 8158019329031977287
+      KS_Map_Deciduous_Single_09_4: -1866601223394752730
+      KS_Map_Deciduous_Single_09_5: -5343999284556876458
+      KS_Map_Deciduous_Single_09_6: 3738210182435888018
+      KS_Map_Deciduous_Single_09_7: -1819525055375110898
+      KS_Map_Deciduous_Single_09_8: 5825671364307663079
+      KS_Map_Deciduous_Single_09_9: -8791049719998989361
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

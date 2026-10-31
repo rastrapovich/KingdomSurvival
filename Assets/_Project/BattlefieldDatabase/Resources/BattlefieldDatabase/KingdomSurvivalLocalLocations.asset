@@ -316,8 +316,8 @@ MonoBehaviour:
     Kind: 0
     BattlefieldId: technical_lighting_camp_field
     PlaceholderArt: 1
-    CanvasWidth: 5130
-    CanvasHeight: 2024
+    CanvasWidth: 2560
+    CanvasHeight: 1440
     HexesAcross: 67
     TerrainCells: 
     BattleFrameWidth: 1920
@@ -11195,35 +11195,35 @@ MonoBehaviour:
     Ground:
       Version: 1
       Mode: 1
-      MapId: Map_01
-      RevisionId: d2d1e0c99846457ba70f89a3358c8044
-      ExporterVersion: 2.0.0
-      ConfigurationHash: 
+      MapId: KS_Demo_Tiles
+      RevisionId: 00000000000000000000000000000001
+      ExporterVersion: 1.0.0
+      ConfigurationHash: technical
       ExportStatus: complete
       SurfaceContract: matched_ground
-      ImportedUtc: 2026-10-08 19:36:47Z
-      Manifest: {fileID: 4900000, guid: 263ae8edab74b424697348ea6a64e3c9, type: 3}
+      ImportedUtc: 2026-10-25 20:50:27Z
+      Manifest: {fileID: 4900000, guid: 6eb31cf99b953054db59f3656d514b93, type: 3}
       Warnings: []
-      Columns: 3
-      Rows: 2
-      TileWidth: 1710
-      TileHeight: 1012
+      Columns: 4
+      Rows: 4
+      TileWidth: 640
+      TileHeight: 360
       ExportPpu: 108
-      Origin: {x: -43.984375, y: -7.65625}
-      ProjectionQ: 0.015625
-      Reference: {x: -66.96771, y: -38.66383, z: 34.36678}
-      BasisRight: {x: 0.49999994, y: -0.86602545, z: 0.000000056143584}
-      BasisUp: {x: 0.3441312, y: 0.19868426, z: 0.91765916}
-      BasisBack: {x: -0.7947162, y: -0.45882952, z: 0.3973685}
+      Origin: {x: 0, y: 0}
+      ProjectionQ: 0.02
+      Reference: {x: 0, y: -10, z: 0}
+      BasisRight: {x: 1, y: 0, z: 0}
+      BasisUp: {x: 0, y: 0.5, z: 0.8660254}
+      BasisBack: {x: 0, y: -0.8660254, z: 0.5}
       UsefulPixels:
         serializedVersion: 2
-        x: 17.436493
+        x: 0
         y: 0
-        width: 5112.5635
-        height: 2024
+        width: 2560
+        height: 1440
       HeightEnabled: 1
-      HeightMin: -1.3219225704012316
-      HeightMax: 1.762712190870272
+      HeightMin: -2
+      HeightMax: 4
       HeightBitDepth: 16
       MetersPerBlenderUnit: 1
       HeightPartialAllowed: 0
@@ -11234,7 +11234,7 @@ MonoBehaviour:
       ColorScale: 1
       PaintSource: 
       PaintedUtc: 
-      Cropped: 1
+      Cropped: 0
       CropPlane:
         serializedVersion: 2
         x: -43.984375
@@ -11246,80 +11246,210 @@ MonoBehaviour:
       Tiles:
       - X: 0
         Y: 0
-        Color: {fileID: 21300000, guid: 56cf46140bce69941a7365fd79a3d890, type: 3}
-        Normal: {fileID: 2800000, guid: 3c3d8e50d36455c48b85ce3381632832, type: 3}
-        Height: {fileID: 4900000, guid: 12b03560718db7246af8c52cf39bce5a, type: 3}
-        ColorRevision: crop
-        NormalRevision: crop
-        HeightRevision: crop
-        ColorSha256: fb8e73c02d8bad604542c9a64f01f400bbda5786ab7858e171d820d506f3c80b
-        NormalSha256: 
-        HeightSha256: 
+        Color: {fileID: 21300000, guid: 6f61367b8b3f96e47a34af4f6b468d65, type: 3}
+        Normal: {fileID: 2800000, guid: c1f26856811a5614c8dd5914c8f5a394, type: 3}
+        Height: {fileID: 4900000, guid: 9946cd9c1b2e8f942a8055bb9b91a64a, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: e20bc661be75981b9e50b25d1a3c93b960f6459bccf22b86a2ca9899ad399582
+        NormalSha256: bcb415b49dc9e006097ee5df3551793cb3cd0e83cc7c79f7c14bdd3c28d3641c
+        HeightSha256: 880e19ac1d6ea1dae6382ece20a0f4b3281373a65c2270175124338570a01d94
         PaintSha256: 
         RenderColorGuid: 
       - X: 1
         Y: 0
-        Color: {fileID: 21300000, guid: b7e1165dadba2244695f7819d01f3858, type: 3}
-        Normal: {fileID: 2800000, guid: 6e769fea0f1bc8d41aafecc5fff0300f, type: 3}
-        Height: {fileID: 4900000, guid: eb06c6d4e1627d5449375d537240e77d, type: 3}
-        ColorRevision: crop
-        NormalRevision: crop
-        HeightRevision: crop
-        ColorSha256: 451a45ec1bdde8a57c45a11c57224ecc50725fb9d302643b737959c0b58c9736
-        NormalSha256: 
-        HeightSha256: 
+        Color: {fileID: 21300000, guid: 10156b485933b1547ad9b0143d5a5d90, type: 3}
+        Normal: {fileID: 2800000, guid: 88987cb30e42f2e4b805b3124821da8a, type: 3}
+        Height: {fileID: 4900000, guid: 21294a7e0b1225f45ac0f651eb2d0b7b, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: 7e67c0fd2456f4a74e99fd9fd3fbcdc58d6cda1e33b182d3eec5e3e333cf0bca
+        NormalSha256: 8788dcf7d31237aec7705e3d9396fb79ca2744615b66bf2d52d6cb81f484022c
+        HeightSha256: c680d09ba4c7b2113cba68c247a0c5844923ee2eb450b67214fe0d4dd3e79602
         PaintSha256: 
         RenderColorGuid: 
       - X: 2
         Y: 0
-        Color: {fileID: 21300000, guid: 8f255fc78e93090469fb09c114267e1d, type: 3}
-        Normal: {fileID: 2800000, guid: 231d9251dd4e06c4da5fed91fc182919, type: 3}
-        Height: {fileID: 4900000, guid: f7eb3dc0af8cffc48b7c63a088bcd933, type: 3}
-        ColorRevision: crop
-        NormalRevision: crop
-        HeightRevision: crop
-        ColorSha256: 4d7f75d9df22123adf7b46a250b0406cf236cd0c98d05e9365da461c3f54c7f7
-        NormalSha256: 
-        HeightSha256: 
+        Color: {fileID: 21300000, guid: b7f200da131f03243b80a72569ceeaab, type: 3}
+        Normal: {fileID: 2800000, guid: 3f71d5c131b137a439a1197f50ee58d0, type: 3}
+        Height: {fileID: 4900000, guid: 71af15a7f3c0eca4882c474a8fb83302, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: 056f30aa7990b12c22d0e1ebeded13639f30f5705040aa58023ad0fdab261213
+        NormalSha256: 158c3fc5b0c49a8e3e4eb9b685819127e010f2892b3d93d6b5795849ce5c7a2b
+        HeightSha256: 3a2c1e56dca6ac12219f6bee6870a42f95422e898083e5549a1bffe93755f469
+        PaintSha256: 
+        RenderColorGuid: 
+      - X: 3
+        Y: 0
+        Color: {fileID: 21300000, guid: a34eeb1889698d940909b90717bc2329, type: 3}
+        Normal: {fileID: 2800000, guid: e9794844f802b7742a53b189c35b522f, type: 3}
+        Height: {fileID: 4900000, guid: 319fb456533c26443aec2c4c4f0c4bd1, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: 3ef43fc640094619789103fce539b87524495d54303dc82179a35241ed053d07
+        NormalSha256: bcb3fbc94f1a5513e7c72d157225329cf3577bd1f980138f7643bdae7e912d8f
+        HeightSha256: 9557ac2a7b78e64d425f9cba641216590cee899ed0ffeb25b58d0412761b3656
         PaintSha256: 
         RenderColorGuid: 
       - X: 0
         Y: 1
-        Color: {fileID: 21300000, guid: 8a5964e35bae8f64b9f941cca9bb68cb, type: 3}
-        Normal: {fileID: 2800000, guid: 9030a3a2ceb20e041b401d108fda27ed, type: 3}
-        Height: {fileID: 4900000, guid: 48793149c1fd66a408d1f023fe0d3d80, type: 3}
-        ColorRevision: crop
-        NormalRevision: crop
-        HeightRevision: crop
-        ColorSha256: 6b8e14ce60d7084a2ce19bf7b3beb062420658848215891c5f9304f658edcca8
-        NormalSha256: 
-        HeightSha256: 
+        Color: {fileID: 21300000, guid: 56c0b9434ef065c4b8882c5a491baeec, type: 3}
+        Normal: {fileID: 2800000, guid: ad61ad28dbebef844ac3c0edbc20b43c, type: 3}
+        Height: {fileID: 4900000, guid: ad6a2a83573c71445aa6bafff7331766, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: 1956cdb996a19ff780adffd3dd427c5d47523b2f2c84281c616dd152eca6263e
+        NormalSha256: 643cbdb5c1aac1999f35c34ff993eea1f18e1fc7e8b1102a606b41d05f970d84
+        HeightSha256: e753f58f4b78dd72053a6e2765edc4bbdc72fec7c13c0b220278e335779fe827
         PaintSha256: 
         RenderColorGuid: 
       - X: 1
         Y: 1
-        Color: {fileID: 21300000, guid: 884a1f89b9675834da1261643cff95b4, type: 3}
-        Normal: {fileID: 2800000, guid: ac440160a27280b43a181ca3c1219bae, type: 3}
-        Height: {fileID: 4900000, guid: 1a58e7ba08637d244957ae6fac4d7d96, type: 3}
-        ColorRevision: crop
-        NormalRevision: crop
-        HeightRevision: crop
-        ColorSha256: fb78b638f86d3bc4b3426101dcb00e2197512c9484f675dc785c936d68a1d823
-        NormalSha256: 
-        HeightSha256: 
+        Color: {fileID: 21300000, guid: 5e7cb29ad35c66947bf983d04a15e9ac, type: 3}
+        Normal: {fileID: 2800000, guid: cf046299c7f9a154d83278e7d2d3f3a6, type: 3}
+        Height: {fileID: 4900000, guid: d8a0c3c3d17b7cd43a95b5432ed637a9, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: d9ff382eac20ec20ef4b2dafdf0e763723a2098ce9756c1110df0d51172582d4
+        NormalSha256: f496d1177f869eaff7785805d64b1b413037a559ec64f39398552a45db875329
+        HeightSha256: 5eac20b6699a68fbcc9166fba20807b31a1b75be46bf67081ed4228c961cc006
         PaintSha256: 
         RenderColorGuid: 
       - X: 2
         Y: 1
-        Color: {fileID: 21300000, guid: 5a884c260665bfb47b6b0b13fc1160e3, type: 3}
-        Normal: {fileID: 2800000, guid: afbc2383d8864db4d9340be0bbc0476a, type: 3}
-        Height: {fileID: 4900000, guid: 15eeee895ed1175429784e3fdbad0317, type: 3}
-        ColorRevision: crop
-        NormalRevision: crop
-        HeightRevision: crop
-        ColorSha256: 27db7d9906dd9e6ba5035ea680e2a017b9c005f348b264021895bc500c2ddd1e
-        NormalSha256: 
-        HeightSha256: 
+        Color: {fileID: 21300000, guid: 887e45ca8ccaec647b262aca103b75ae, type: 3}
+        Normal: {fileID: 2800000, guid: fcdd827688b77d14789db28846cb13cc, type: 3}
+        Height: {fileID: 4900000, guid: 9294a38fc84d05346a5738bae2fb1f33, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: 1c4c6ad01ff88081922afb7021c58ca232d6ebeda2b968f0b68e07af7dec089a
+        NormalSha256: fc5d42a38a6e33214a06a6ae5c93488dd7ec9cf441ba769dd297fa8ba198c1bb
+        HeightSha256: 0af6db0764eea079f2b76c96296a2b80d6561c4d95c849514937eb57b23d077c
+        PaintSha256: 
+        RenderColorGuid: 
+      - X: 3
+        Y: 1
+        Color: {fileID: 21300000, guid: 81163a69c1ec6d9489c54d759b9f3709, type: 3}
+        Normal: {fileID: 2800000, guid: 67bf07524f1bf6446b3b35ef52b206b1, type: 3}
+        Height: {fileID: 4900000, guid: 3a7780a59b8648e4685d13a1f81f521a, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: c9c03c034b84061b9561a620ee021077dd0c08aecf46705a9b667e06a63475d5
+        NormalSha256: 076c7675f9e0421d950e84b063fa641032bd7947f30bc8a49641e956b4b0ae0b
+        HeightSha256: 4ed2b420e19da86701051d47356f20dfbdbb29a2362e10cae38a6a41efade15c
+        PaintSha256: 
+        RenderColorGuid: 
+      - X: 0
+        Y: 2
+        Color: {fileID: 21300000, guid: 06584082914e3964ca42e6362d386227, type: 3}
+        Normal: {fileID: 2800000, guid: 6b164260a7369764fb1842ab909a3583, type: 3}
+        Height: {fileID: 4900000, guid: 94c689361486c0c44a3496c1b79444ed, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: e2c91d01aa8c7d154ac52e4abbd6d21e7887fe839ca89b6e9fea421908428d07
+        NormalSha256: dfc8e39f88fec74efe7b8435b0731a688b10626dbf8c6c8ffc024e36f9dfaa55
+        HeightSha256: 3907577524379986c8104afc6e15a0ad3854e29a5192ea48945f5e96a3e131b2
+        PaintSha256: 
+        RenderColorGuid: 
+      - X: 1
+        Y: 2
+        Color: {fileID: 21300000, guid: 3a60a92d66739964abc6c14e9fd5c417, type: 3}
+        Normal: {fileID: 2800000, guid: 06d6920b2d09efd4086f6b81f4ddc6e0, type: 3}
+        Height: {fileID: 4900000, guid: d64214d4fc9272940bcdfc5d082da0a3, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: 2c4570b280e9f9632161b8f13c8fa066dd08aa233a0e9c2ab3e198a3dc9a034f
+        NormalSha256: f9517693be76251d8e370466c7468db5a7a2a9f1ea956f197189e4991b1f6afc
+        HeightSha256: 0106262b8ee9b19a710fbb13acca7623fea9d0ad58adfb2cf24447fed52984c2
+        PaintSha256: 
+        RenderColorGuid: 
+      - X: 2
+        Y: 2
+        Color: {fileID: 21300000, guid: 140ddeccfe2b0fb46bd5574ab627c7b8, type: 3}
+        Normal: {fileID: 2800000, guid: 73bea170b65cdd94491aac2fa6f4fd57, type: 3}
+        Height: {fileID: 4900000, guid: 5d4fd95847e8f134d841f0545eb5973a, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: b18b45e7239320be6d34ecb31071dde67beb7d4d744b4dc9f1ced3ade3607baa
+        NormalSha256: 78a819ab7233bf03cfcea81e283df505ff8e888b792941bb3c015cb7ca34667b
+        HeightSha256: 2f702603c28171040a34eff71dc966ea23db7bbc6a29c496b653dee4955ad382
+        PaintSha256: 
+        RenderColorGuid: 
+      - X: 3
+        Y: 2
+        Color: {fileID: 21300000, guid: 77af8f7078bd12d45b7621eb5debce5f, type: 3}
+        Normal: {fileID: 2800000, guid: af7af57feac184c468e6a90ef1a9e58d, type: 3}
+        Height: {fileID: 4900000, guid: b243850935df09e4fb7a43e344673564, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: acbe8818024ec6d03aad11eb25fb5c724d3031968ad93fb0440eb74f76c6b854
+        NormalSha256: 29e667ff26edf8e77a9379521bc03c5b328af50ab4fdc675e216a1cf07d24398
+        HeightSha256: cc8b83b5311d6f2ec9c76303c6d9a6f0f90442e692d9bb1a19549e533fb9c773
+        PaintSha256: 
+        RenderColorGuid: 
+      - X: 0
+        Y: 3
+        Color: {fileID: 21300000, guid: 7d8d97f342d64f34ba9d386f1e1014b0, type: 3}
+        Normal: {fileID: 2800000, guid: f5ee6afc4c1d71a468d9ff2abce6b82c, type: 3}
+        Height: {fileID: 4900000, guid: 59750534cd4cba64a815a3a8be54929e, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: 5a0e4d5176f0cbbd5cca4891f5f5c7817e3c2376151566b1e7ae48984ac51213
+        NormalSha256: 0358187d4a09a757036b9f5960866c468b99c514dae1e034f70ba4598048c9ab
+        HeightSha256: 20413f0b3ac37a7bf5ec07fe87b647e7030696e9d5be6f37bd6d5495e9fda1e2
+        PaintSha256: 
+        RenderColorGuid: 
+      - X: 1
+        Y: 3
+        Color: {fileID: 21300000, guid: 9c41908bfd5ed6743b7e4c58d960ae41, type: 3}
+        Normal: {fileID: 2800000, guid: c924673432e807a4388a29c4a917260c, type: 3}
+        Height: {fileID: 4900000, guid: 2ee7b32864f998e4ba3516037d6883ef, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: a17b595e245e3c0e323a4cb783549ca596ce766d2605b9c606e8cc9a4b442a88
+        NormalSha256: 1b6d1d463139dd47ad8c9d58857dd82e2f07665f083776dd88c0d3df643bd808
+        HeightSha256: f23c13d56031fb238aea82c96a65c7136e90b57b6b9589e72a73fac978c72b51
+        PaintSha256: 
+        RenderColorGuid: 
+      - X: 2
+        Y: 3
+        Color: {fileID: 21300000, guid: 55e9da827cc649642a721151d2f72755, type: 3}
+        Normal: {fileID: 2800000, guid: a9699762ad4a1b943be088e13386aa49, type: 3}
+        Height: {fileID: 4900000, guid: 45873f5fb5b0d0c448fcde10bf56273a, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: f6dd7efaaf2bc6d9e3f067d9ef6791b808ab6797f3813b95c4a54f94085878b6
+        NormalSha256: aa3eb34189514cb9702bcec711255363b02f0029428ef2e3f35120c2c828a47e
+        HeightSha256: b5fd1c1592819904c9e30d16ebb3102934ee4db3209187d511728d8abfd5820a
+        PaintSha256: 
+        RenderColorGuid: 
+      - X: 3
+        Y: 3
+        Color: {fileID: 21300000, guid: 4119b1c826fd3e74380d77e57ce37212, type: 3}
+        Normal: {fileID: 2800000, guid: 9c0a563b40e4bad4fbaedc7821057b12, type: 3}
+        Height: {fileID: 4900000, guid: 96582f021cf136c42ac883f1b814751b, type: 3}
+        ColorRevision: 00000000000000000000000000000001
+        NormalRevision: 00000000000000000000000000000001
+        HeightRevision: 00000000000000000000000000000001
+        ColorSha256: e9d47b4a96e8ccbf492ff161b198645fb73de0010647f42e3fc14c356bdc33df
+        NormalSha256: 984885c04e325fb7e1ee995790198db7d7ccf044b8dada7ddca6dc9cf90885bc
+        HeightSha256: 70bcfcc6f83e40d343de32821cffd35e688cd444e459abc9fa21673850caeea4
         PaintSha256: 
         RenderColorGuid: 
     Camera:

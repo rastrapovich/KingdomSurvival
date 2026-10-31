@@ -1,0 +1,455 @@
+fileFormatVersion: 2
+guid: ca5203c339df35b4da118af6815c5d88
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4946155756013189185
+    second: KS_Map_Conifer_Single_09_0
+  - first:
+      213: -1853268493760088769
+    second: KS_Map_Conifer_Single_09_1
+  - first:
+      213: -4505577489935897190
+    second: KS_Map_Conifer_Single_09_2
+  - first:
+      213: 355477045766982126
+    second: KS_Map_Conifer_Single_09_3
+  - first:
+      213: 7482367061785768903
+    second: KS_Map_Conifer_Single_09_4
+  - first:
+      213: 5379472916517222838
+    second: KS_Map_Conifer_Single_09_5
+  - first:
+      213: 4560587922004231039
+    second: KS_Map_Conifer_Single_09_6
+  - first:
+      213: 2133550224382712636
+    second: KS_Map_Conifer_Single_09_7
+  - first:
+      213: 8098189262506453657
+    second: KS_Map_Conifer_Single_09_8
+  - first:
+      213: -2889207369215800426
+    second: KS_Map_Conifer_Single_09_9
+  - first:
+      213: -4721446155776694711
+    second: KS_Map_Conifer_Single_09_10
+  - first:
+      213: -6228419258641536336
+    second: KS_Map_Conifer_Single_09_11
+  - first:
+      213: 8072699304993833877
+    second: KS_Map_Conifer_Single_09_12
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 7
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: KS_Map_Conifer_Single_09_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1245
+        height: 1254
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb78417bb89bb5bb0800000000000000
+      internalID: -4946155756013189185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Conifer_Single_09_1
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 947
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f35b10cbf1ed746e0800000000000000
+      internalID: -1853268493760088769
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Conifer_Single_09_2
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 950
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a9def5cf429f871c0800000000000000
+      internalID: -4505577489935897190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Conifer_Single_09_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 947
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee90fbe5d78eee400800000000000000
+      internalID: 355477045766982126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Conifer_Single_09_4
+      rect:
+        serializedVersion: 2
+        x: 1230
+        y: 715
+        width: 7
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c3f2dc0335b6d760800000000000000
+      internalID: 7482367061785768903
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Conifer_Single_09_5
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 634
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b9f7dbad1ab7aa40800000000000000
+      internalID: 5379472916517222838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Conifer_Single_09_6
+      rect:
+        serializedVersion: 2
+        x: 1204
+        y: 626
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f73cff15d867a4f30800000000000000
+      internalID: 4560587922004231039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Conifer_Single_09_7
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 519
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3b59c200a4eb9d10800000000000000
+      internalID: 2133550224382712636
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Conifer_Single_09_8
+      rect:
+        serializedVersion: 2
+        x: 60
+        y: 512
+        width: 19
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99a649b6a3c826070800000000000000
+      internalID: 8098189262506453657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Conifer_Single_09_9
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 509
+        width: 7
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 69b8373943977e7d0800000000000000
+      internalID: -2889207369215800426
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Conifer_Single_09_10
+      rect:
+        serializedVersion: 2
+        x: 1182
+        y: 505
+        width: 7
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 946ebc29cbd0a7eb0800000000000000
+      internalID: -4721446155776694711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Conifer_Single_09_11
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 485
+        width: 21
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ba28701fa53099a0800000000000000
+      internalID: -6228419258641536336
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Conifer_Single_09_12
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 387
+        width: 7
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59343b43f3df70070800000000000000
+      internalID: 8072699304993833877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      KS_Map_Conifer_Single_09_0: -4946155756013189185
+      KS_Map_Conifer_Single_09_1: -1853268493760088769
+      KS_Map_Conifer_Single_09_10: -4721446155776694711
+      KS_Map_Conifer_Single_09_11: -6228419258641536336
+      KS_Map_Conifer_Single_09_12: 8072699304993833877
+      KS_Map_Conifer_Single_09_2: -4505577489935897190
+      KS_Map_Conifer_Single_09_3: 355477045766982126
+      KS_Map_Conifer_Single_09_4: 7482367061785768903
+      KS_Map_Conifer_Single_09_5: 5379472916517222838
+      KS_Map_Conifer_Single_09_6: 4560587922004231039
+      KS_Map_Conifer_Single_09_7: 2133550224382712636
+      KS_Map_Conifer_Single_09_8: 8098189262506453657
+      KS_Map_Conifer_Single_09_9: -2889207369215800426
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

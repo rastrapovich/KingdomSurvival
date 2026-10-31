@@ -1,0 +1,559 @@
+fileFormatVersion: 2
+guid: 9369e7d4195c5384ab7d0f80e313749e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6715242336786312262
+    second: KS_Map_Hills_Sign_01_0
+  - first:
+      213: 6662799447430610820
+    second: KS_Map_Hills_Sign_01_1
+  - first:
+      213: 7970803986792688644
+    second: KS_Map_Hills_Sign_01_2
+  - first:
+      213: -4598385504068255913
+    second: KS_Map_Hills_Sign_01_3
+  - first:
+      213: -7402653288654763768
+    second: KS_Map_Hills_Sign_01_4
+  - first:
+      213: -3248722854194073778
+    second: KS_Map_Hills_Sign_01_5
+  - first:
+      213: -5748342663851435776
+    second: KS_Map_Hills_Sign_01_6
+  - first:
+      213: -7892839392208423419
+    second: KS_Map_Hills_Sign_01_7
+  - first:
+      213: 6790763701949289971
+    second: KS_Map_Hills_Sign_01_8
+  - first:
+      213: -2613075595826450831
+    second: KS_Map_Hills_Sign_01_9
+  - first:
+      213: -7396513298754856518
+    second: KS_Map_Hills_Sign_01_10
+  - first:
+      213: 7080335318291550929
+    second: KS_Map_Hills_Sign_01_11
+  - first:
+      213: 6235681224426972598
+    second: KS_Map_Hills_Sign_01_12
+  - first:
+      213: -8952322948310274681
+    second: KS_Map_Hills_Sign_01_13
+  - first:
+      213: 4810584311298970474
+    second: KS_Map_Hills_Sign_01_14
+  - first:
+      213: -4240305840325929764
+    second: KS_Map_Hills_Sign_01_15
+  - first:
+      213: 5868626898092524026
+    second: KS_Map_Hills_Sign_01_16
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 7
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1519
+        height: 960
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64cefc09355513d50800000000000000
+      internalID: 6715242336786312262
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_1
+      rect:
+        serializedVersion: 2
+        x: 742
+        y: 925
+        width: 181
+        height: 85
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48f35c1ebc4077c50800000000000000
+      internalID: 6662799447430610820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_2
+      rect:
+        serializedVersion: 2
+        x: 946
+        y: 945
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40cab0faefbfd9e60800000000000000
+      internalID: 7970803986792688644
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_3
+      rect:
+        serializedVersion: 2
+        x: 952
+        y: 944
+        width: 17
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75fb4b15fb04f20c0800000000000000
+      internalID: -4598385504068255913
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_4
+      rect:
+        serializedVersion: 2
+        x: 1012
+        y: 945
+        width: 57
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8090b5e0e0e744990800000000000000
+      internalID: -7402653288654763768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_5
+      rect:
+        serializedVersion: 2
+        x: 1246
+        y: 871
+        width: 255
+        height: 133
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4fa11ec6c73ae2d0800000000000000
+      internalID: -3248722854194073778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_6
+      rect:
+        serializedVersion: 2
+        x: 998
+        y: 927
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00999e1adc8c930b0800000000000000
+      internalID: -5748342663851435776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_7
+      rect:
+        serializedVersion: 2
+        x: 1114
+        y: 903
+        width: 17
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 506f43e0460077290800000000000000
+      internalID: -7892839392208423419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_8
+      rect:
+        serializedVersion: 2
+        x: 1102
+        y: 887
+        width: 17
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f5dd40ab93ad3e50800000000000000
+      internalID: 6790763701949289971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_9
+      rect:
+        serializedVersion: 2
+        x: 1134
+        y: 895
+        width: 9
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17ea58b179d7cbbd0800000000000000
+      internalID: -2613075595826450831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_10
+      rect:
+        serializedVersion: 2
+        x: 1142
+        y: 895
+        width: 9
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab9934bd75e4a5990800000000000000
+      internalID: -7396513298754856518
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_11
+      rect:
+        serializedVersion: 2
+        x: 794
+        y: 852
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1d29b617577624260800000000000000
+      internalID: 7080335318291550929
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_12
+      rect:
+        serializedVersion: 2
+        x: 1200
+        y: 830
+        width: 15
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b5ea8a1907998650800000000000000
+      internalID: 6235681224426972598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_13
+      rect:
+        serializedVersion: 2
+        x: 1518
+        y: 611
+        width: 11
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78d636fb5b5f2c380800000000000000
+      internalID: -8952322948310274681
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_14
+      rect:
+        serializedVersion: 2
+        x: 1270
+        y: 97
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a63da0d81f0a2c240800000000000000
+      internalID: 4810584311298970474
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_15
+      rect:
+        serializedVersion: 2
+        x: 1390
+        y: 93
+        width: 21
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd4db58ed486725c0800000000000000
+      internalID: -4240305840325929764
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: KS_Map_Hills_Sign_01_16
+      rect:
+        serializedVersion: 2
+        x: 1062
+        y: 47
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af18b1c021d817150800000000000000
+      internalID: 5868626898092524026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      KS_Map_Hills_Sign_01_0: 6715242336786312262
+      KS_Map_Hills_Sign_01_1: 6662799447430610820
+      KS_Map_Hills_Sign_01_10: -7396513298754856518
+      KS_Map_Hills_Sign_01_11: 7080335318291550929
+      KS_Map_Hills_Sign_01_12: 6235681224426972598
+      KS_Map_Hills_Sign_01_13: -8952322948310274681
+      KS_Map_Hills_Sign_01_14: 4810584311298970474
+      KS_Map_Hills_Sign_01_15: -4240305840325929764
+      KS_Map_Hills_Sign_01_16: 5868626898092524026
+      KS_Map_Hills_Sign_01_2: 7970803986792688644
+      KS_Map_Hills_Sign_01_3: -4598385504068255913
+      KS_Map_Hills_Sign_01_4: -7402653288654763768
+      KS_Map_Hills_Sign_01_5: -3248722854194073778
+      KS_Map_Hills_Sign_01_6: -5748342663851435776
+      KS_Map_Hills_Sign_01_7: -7892839392208423419
+      KS_Map_Hills_Sign_01_8: 6790763701949289971
+      KS_Map_Hills_Sign_01_9: -2613075595826450831
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

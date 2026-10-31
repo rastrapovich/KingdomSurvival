@@ -16,10 +16,10 @@ MonoBehaviour:
   settings:
     CanvasWidth: 4160
     CanvasHeight: 2560
-    HexesAcross: 59
+    HexesAcross: 38
     ReliefScaleHexes: 26
     ReliefDetail: 4
-    ReliefRoughness: 0.5
+    ReliefRoughness: 0.509
     MountainRidges: 0.45
     HillsShare: 0.16
     MountainsShare: 0.05
@@ -422,7 +422,50 @@ MonoBehaviour:
       Source: "\u041C\u0430\u0441\u0442\u0435\u0440\u0441\u043A\u0430\u044F \u043A\u0432\u0435\u0441\u0442\u043E\u0432:
         place_knocking_cave"
   art:
-    Resolution: 1
+    Resolution: 0.579
+    DrawBase: 1
+    UseBasePattern: 1
+    UseTintVariation: 1
+    UseDetailPattern: 1
+    DrawTerrain: 1
+    UseTerrainPatterns: 1
+    DrawInk: 1
+    DrawForestOutline: 1
+    DrawWater: 1
+    DrawLakes: 1
+    DrawRivers: 1
+    DrawShoreBand: 1
+    DrawShoreInk: 1
+    UseWaterPattern: 1
+    DrawSparseTrees: 1
+    DrawReeds: 1
+    DrawCliffs: 1
+    DrawRoads: 1
+    DrawTrails: 1
+    DrawBridges: 1
+    DrawVillages: 1
+    DrawLandmarks: 1
+    DrawPost: 1
+    UseColorAdjust: 1
+    UsePaper: 1
+    UseGrain: 1
+    UseVignette: 1
+    UseCustomArt: 1
+    TrimSpritePadding: 1
+    SignsOverMap: 1
+    TexturesOverMap: 1
+    SignTextureSize: 256
+    UseConiferSprites: 1
+    UseLeafSprites: 1
+    UseTreeSprites: 1
+    UseReedSprites: 1
+    UseHillSprites: 1
+    UseMountainSprites: 1
+    UseCliffSprites: 1
+    UseBridgeSprites: 1
+    UseVillageSprites: 1
+    UseVillageIcons: 1
+    UseStartSprites: 1
     BaseColor: {r: 0.6, g: 0.58, b: 0.46, a: 1}
     BasePattern: {fileID: 0}
     BasePatternTileHexes: 8
@@ -437,9 +480,9 @@ MonoBehaviour:
     - Terrain: 0
       Enabled: 1
       Color: {r: 0.62, g: 0.62, b: 0.46, a: 1}
-      Opacity: 0.25
+      Opacity: 0.168
       Pattern: {fileID: 0}
-      PatternTileHexes: 3
+      PatternTileHexes: 1.2
       PatternStrength: 0.6
     - Terrain: 1
       Enabled: 1
@@ -458,31 +501,31 @@ MonoBehaviour:
     - Terrain: 2
       Enabled: 1
       Color: {r: 0.78, g: 0.7, b: 0.43, a: 1}
-      Opacity: 0.7
+      Opacity: 1
       Pattern: {fileID: 0}
-      PatternTileHexes: 3
-      PatternStrength: 0.6
+      PatternTileHexes: 0.9
+      PatternStrength: 0.783
     - Terrain: 3
       Enabled: 1
       Color: {r: 0.27, g: 0.34, b: 0.22, a: 1}
       Opacity: 0.85
       Pattern: {fileID: 0}
-      PatternTileHexes: 3
+      PatternTileHexes: 0.9
       PatternStrength: 0.6
     - Terrain: 6
       Enabled: 1
       Color: {r: 0.35, g: 0.4, b: 0.31, a: 1}
-      Opacity: 0.85
+      Opacity: 0.864
       Pattern: {fileID: 0}
-      PatternTileHexes: 3
+      PatternTileHexes: 1.5
       PatternStrength: 0.6
     - Terrain: 7
       Enabled: 1
       Color: {r: 0.6, g: 0.54, b: 0.39, a: 1}
-      Opacity: 0.55
+      Opacity: 0.978
       Pattern: {fileID: 0}
-      PatternTileHexes: 3
-      PatternStrength: 0.6
+      PatternTileHexes: 1.5
+      PatternStrength: 0.88
     - Terrain: 8
       Enabled: 1
       Color: {r: 0.52, g: 0.5, b: 0.47, a: 1}
@@ -506,9 +549,180 @@ MonoBehaviour:
       PatternStrength: 0.6
     EdgeRoughness: 0.55
     EdgeSoftness: 0.18
+    EdgeRaggedness: 0.6
+    RaggedScaleHexes: 0.3
+    EdgeBlend: 0
+    EdgeBlendWidthHexes: 0.35
+    EdgeBlendScaleHexes: 0.6
+    EdgeBlendDensity: 0.5
+    EdgeBlendSoftness: 0.35
+    EdgeBlendAngle: 30
     InkColor: {r: 0.07, g: 0.06, b: 0.05, a: 1}
-    InkWidth: 3
+    InkWidth: 1.48
+    Ink:
+      Version: 1
+      FillsFollowInk: 1
+      Shore:
+        Enabled: 1
+        Opacity: 0.92
+        OwnColor: 0
+        Color: {r: 0.07, g: 0.06, b: 0.05, a: 1}
+        Width: 1.15
+        Pressure: 0.6
+        Thinnest: 0.25
+        Thickest: 1.75
+        PressureWaveHexes: 0.9
+        PressureJitter: 0.3
+        Nib: 0.5
+        NibAngle: 53
+        Ends: 0
+        TaperLength: 3
+        Gaps: 0.12
+        GapScaleHexes: 2.2
+        StrokeLengthHexes: 0
+        StrokeLengthJitter: 0.4
+        StrokeOverlap: 0.25
+        StrokeOffset: 0.3
+        WobbleHexes: 0.03
+        WobbleWaveHexes: 1.2
+        Bristles: 1
+        BristleSpread: 0.8
+        Dryness: 0
+      ShoreEcho:
+        Enabled: 1
+        Opacity: 0.55
+        OwnColor: 0
+        Color: {r: 0.07, g: 0.06, b: 0.05, a: 1}
+        Width: 0.45
+        Pressure: 0.7
+        Thinnest: 0.25
+        Thickest: 1.75
+        PressureWaveHexes: 0.9
+        PressureJitter: 0.3
+        Nib: 0.3
+        NibAngle: 53
+        Ends: 0
+        TaperLength: 3
+        Gaps: 0.35
+        GapScaleHexes: 1.2
+        StrokeLengthHexes: 0
+        StrokeLengthJitter: 0.4
+        StrokeOverlap: 0.25
+        StrokeOffset: 0.3
+        WobbleHexes: 0.02
+        WobbleWaveHexes: 1.2
+        Bristles: 1
+        BristleSpread: 0.8
+        Dryness: 0
+      ShoreEchoCount: 0
+      ShoreEchoSpacingHexes: 0.12
+      ForestEdge:
+        Enabled: 1
+        Opacity: 0.55
+        OwnColor: 0
+        Color: {r: 0.07, g: 0.06, b: 0.05, a: 1}
+        Width: 0.85
+        Pressure: 0.6
+        Thinnest: 0.25
+        Thickest: 1.75
+        PressureWaveHexes: 0.9
+        PressureJitter: 0.3
+        Nib: 0.5
+        NibAngle: 53
+        Ends: 0
+        TaperLength: 3
+        Gaps: 0.17999999
+        GapScaleHexes: 2.2
+        StrokeLengthHexes: 0
+        StrokeLengthJitter: 0.4
+        StrokeOverlap: 0.25
+        StrokeOffset: 0.3
+        WobbleHexes: 0.04
+        WobbleWaveHexes: 1.2
+        Bristles: 1
+        BristleSpread: 0.8
+        Dryness: 0
+      RoadEdge:
+        Enabled: 1
+        Opacity: 0.6
+        OwnColor: 0
+        Color: {r: 0.07, g: 0.06, b: 0.05, a: 1}
+        Width: 1.2
+        Pressure: 0.45000002
+        Thinnest: 0.25
+        Thickest: 1.75
+        PressureWaveHexes: 0.9
+        PressureJitter: 0.3
+        Nib: 0.35
+        NibAngle: 53
+        Ends: 0
+        TaperLength: 3
+        Gaps: 0.1
+        GapScaleHexes: 2.2
+        StrokeLengthHexes: 0
+        StrokeLengthJitter: 0.4
+        StrokeOverlap: 0.25
+        StrokeOffset: 0.3
+        WobbleHexes: 0.02
+        WobbleWaveHexes: 1.2
+        Bristles: 1
+        BristleSpread: 0.8
+        Dryness: 0
+      Trail:
+        Enabled: 1
+        Opacity: 0.95
+        OwnColor: 0
+        Color: {r: 0.07, g: 0.06, b: 0.05, a: 1}
+        Width: 1
+        Pressure: 0.3
+        Thinnest: 0.25
+        Thickest: 1.75
+        PressureWaveHexes: 0.9
+        PressureJitter: 0.3
+        Nib: 0.25
+        NibAngle: 53
+        Ends: 0
+        TaperLength: 2
+        Gaps: 0
+        GapScaleHexes: 2.2
+        StrokeLengthHexes: 0
+        StrokeLengthJitter: 0.4
+        StrokeOverlap: 0.25
+        StrokeOffset: 0.3
+        WobbleHexes: 0.02
+        WobbleWaveHexes: 1.2
+        Bristles: 1
+        BristleSpread: 0.8
+        Dryness: 0
+      Bridge:
+        Enabled: 1
+        Opacity: 1
+        OwnColor: 0
+        Color: {r: 0.07, g: 0.06, b: 0.05, a: 1}
+        Width: 0.7
+        Pressure: 0.3
+        Thinnest: 0.25
+        Thickest: 1.75
+        PressureWaveHexes: 0.9
+        PressureJitter: 0.3
+        Nib: 0.3
+        NibAngle: 53
+        Ends: 0
+        TaperLength: 3
+        Gaps: 0
+        GapScaleHexes: 2.2
+        StrokeLengthHexes: 0
+        StrokeLengthJitter: 0.4
+        StrokeOverlap: 0.25
+        StrokeOffset: 0.3
+        WobbleHexes: 0
+        WobbleWaveHexes: 1.2
+        Bristles: 1
+        BristleSpread: 0.8
+        Dryness: 0
     ForestOutline: 0.55
+    InkVariation: 0.724
+    InkGaps: 0.023
     WaterShallowColor: {r: 0.36, g: 0.47, b: 0.47, a: 1}
     WaterDeepColor: {r: 0.2, g: 0.3, b: 0.33, a: 1}
     WaterPattern: {fileID: 0}
@@ -528,6 +742,8 @@ MonoBehaviour:
     ConiferColor: {r: 0.17, g: 0.26, b: 0.18, a: 1}
     LeafColor: {r: 0.27, g: 0.35, b: 0.2, a: 1}
     SparseTreesPerHex: 0.35
+    ReedsPerHex: 3.17
+    ReedSizeHexes: 0.4
     DrawHills: 1
     HillSprites: []
     HillsPerHex: 0.7
@@ -542,7 +758,7 @@ MonoBehaviour:
     MountainShadowColor: {r: 0.36, g: 0.34, b: 0.33, a: 1}
     RoadColor: {r: 0.72, g: 0.62, b: 0.44, a: 1}
     RoadWidthHexes: 0.14
-    RoadInk: 0.6
+    RoadInk: 0.672
     RoadDashed: 0
     TrailColor: {r: 0.45, g: 0.38, b: 0.27, a: 1}
     TrailWidthHexes: 0.07
@@ -561,6 +777,9 @@ MonoBehaviour:
     VillageIcon: {fileID: 0}
     Landmarks:
     - RuleId: ruins
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -568,6 +787,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: mine
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -575,6 +797,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: deep-forest
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -582,6 +807,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: barrow
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -589,6 +817,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: watermill
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -596,6 +827,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: cave
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -603,6 +837,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: grove
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -610,6 +847,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: hillfort
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -617,6 +857,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: abandoned-village
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -624,6 +867,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: abandoned-yard
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -631,6 +877,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: sanctuary
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -638,6 +887,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: crossroads
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -645,6 +897,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: lair
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -652,6 +907,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: spring
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -659,6 +917,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: hunters-hut
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -666,6 +927,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: apiary
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []
@@ -673,6 +937,9 @@ MonoBehaviour:
       SizeHexes: 1.4
       Tint: {r: 1, g: 1, b: 1, a: 1}
     - RuleId: knocking_cave
+      Enabled: 1
+      UseSprites: 1
+      UseIcons: 1
       Variants: []
       Sprite: {fileID: 0}
       Icons: []

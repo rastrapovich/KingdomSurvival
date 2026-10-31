@@ -31,7 +31,10 @@ public enum SettlementActionType
     // «Прогуляться»: TargetId — ID исследуемого места (База локаций).
     LocalMap,
     // Доска объявлений поселения.
-    NoticeBoard
+    NoticeBoard,
+    // Знахарь: снимает тяжёлые раны вошедших за Price с каждого (WoundRecovery).
+    // Добавлено строго в конец.
+    Healer
 }
 
 // Условный вариант описания и изображения: побеждает наибольший приоритет,
@@ -75,6 +78,8 @@ public sealed class SettlementActionDefinition
     // Не выполнено — кнопка видна, но недоступна; игрок читает причину.
     public NarrativeConditionGroup EnableConditions = new NarrativeConditionGroup();
     public string DisabledReason = string.Empty;
+    // Цена действия, если она есть: знахарь — за каждого раненого.
+    public int Price;
 }
 
 [Serializable]

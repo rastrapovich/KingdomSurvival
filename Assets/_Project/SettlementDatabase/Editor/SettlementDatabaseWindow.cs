@@ -333,6 +333,10 @@ namespace KingdomSurvival.SettlementDatabase.Editor
                     IdPickerDropdown.Field("Исследуемое место", target, "База локаций", LocalOptions, LocalExists);
                     EditorGUILayout.LabelField("Кнопка «Прогуляться» видна, только если место есть в Базе локаций.", EditorStyles.miniLabel);
                     break;
+                case SettlementActionType.Healer:
+                    EditorGUILayout.PropertyField(action.FindPropertyRelative("Price"), new GUIContent("Цена за раненого, зол."));
+                    EditorGUILayout.LabelField("Знахарь сразу снимает тяжёлые раны у всех вошедших; денег не хватает на всех — не лечит никого.", EditorStyles.wordWrappedMiniLabel);
+                    break;
                 default:
                     EditorGUILayout.LabelField("Цель — корчма/доска этого поселения.", EditorStyles.miniLabel);
                     break;

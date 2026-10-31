@@ -600,9 +600,9 @@ public partial class PrototypeUIController
     {
         List<string> parts = new List<string>();
         if (person.Injury == ResidentInjury.Recovering)
-            parts.Add("Тяжёлая рана — в поход не пойдёт, пока не долечат дома.");
+            parts.Add(WoundRecovery.Describe(person));
         else if (person.HasCombatState && person.CurrentHitPoints < person.MaxHitPoints)
-            parts.Add("Рана: " + person.CurrentHitPoints + "/" + person.MaxHitPoints + " HP — лечится уходом дома.");
+            parts.Add("Рана: " + person.CurrentHitPoints + "/" + person.MaxHitPoints + " HP — лечат отдых, перевязка и мазь.");
         if (person.Exhausted)
             parts.Add("Изнеможён — атака и инициатива ниже; пройдёт после ночи дома.");
         return parts.Count == 0 ? person.DisplayName + ": цел." : person.DisplayName + ": " + string.Join(" ", parts);

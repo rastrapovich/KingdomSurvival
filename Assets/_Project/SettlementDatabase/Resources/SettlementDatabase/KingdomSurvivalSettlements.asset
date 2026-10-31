@@ -114,6 +114,19 @@ MonoBehaviour:
           Combinator: 0
           Conditions: []
         DisabledReason: 
+      - Id: village.healer
+        Type: 6
+        Label: "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0440\u0430\u043D\u0435\u043D\u044B\u0445 \u0437\u043D\u0430\u0445\u0430\u0440\u043A\u0435"
+        Hint: "\u0417\u043D\u0430\u0445\u0430\u0440\u043A\u0430 \u0443 \u043E\u043A\u043E\u043B\u0438\u0446\u044B \u0432\u043F\u0440\u0430\u0432\u0438\u0442 \u043A\u043E\u0441\u0442\u044C \u0438 \u043F\u0435\u0440\u0435\u0432\u044F\u0436\u0435\u0442 \u0442\u044F\u0436\u0451\u043B\u0443\u044E \u0440\u0430\u043D\u0443."
+        TargetId: 
+        ShowConditions:
+          Combinator: 0
+          Conditions: []
+        EnableConditions:
+          Combinator: 0
+          Conditions: []
+        DisabledReason: 
+        Price: 10
       Merchants:
       - Id: village.shop
         DisplayName: "\u041C\u043E\u043A\u0440\u0438\u043D\u0430"

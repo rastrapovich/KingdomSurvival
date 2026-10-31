@@ -342,6 +342,16 @@ public static class CampRest
             }
         }
 
+        // Тяжёлые раны заживают по ночам (WoundRecovery): под крышей — вдвое.
+        // Кто ночевал под крышей, известно до того, как ночлег корчмы закрыт
+        // (то же условие, что у CompleteLodging: оплачен и отряд не ушёл).
+        List<string> roofIds = state.Settlements != null && !string.IsNullOrEmpty(state.Settlements.LodgingLocationId) &&
+                               state.HasActiveExpedition &&
+                               state.ActiveExpedition.LocationId == state.Settlements.LodgingLocationId
+            ? new List<string>(state.Settlements.LodgingServedIds)
+            : new List<string>();
+        WoundRecovery.ApplyNight(state, roofIds, results);
+
         // 12Т: оплаченный ночлег в корчме — лучше отдых вошедшим.
         string lodging = TavernService.CompleteLodging(state);
         if (!string.IsNullOrEmpty(lodging))

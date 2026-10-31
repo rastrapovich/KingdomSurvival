@@ -485,7 +485,14 @@ public partial class PrototypeUIController
                 enabled = false;
                 reason = lodgeReason;
             }
+            if (enabled && action.Type == SettlementActionType.Healer && !WoundRecovery.CanVisitHealer(gameState, action.Price, out string healerReason))
+            {
+                enabled = false;
+                reason = healerReason;
+            }
             string hint = enabled ? action.Hint : reason;
+            if (action.Type == SettlementActionType.Healer && action.Price > 0)
+                hint = (string.IsNullOrEmpty(hint) ? string.Empty : hint + " ") + "Цена: " + action.Price + " зол. за раненого.";
             if (action.Type == SettlementActionType.NoticeBoard && enabled)
             {
                 int unread = NoticeBoardService.UnreadCount(gameState, settlementLocationId);
@@ -513,6 +520,8 @@ public partial class PrototypeUIController
                 return LocalLocationCatalog.Find(action.TargetId) != null;
             case SettlementActionType.NoticeBoard:
                 return NoticeBoardService.Board(gameState, settlementLocationId) != null;
+            case SettlementActionType.Healer:
+                return true;
             default:
                 return false;
         }
@@ -547,7 +556,25 @@ public partial class PrototypeUIController
             case SettlementActionType.NoticeBoard:
                 OpenSettlementBoard();
                 break;
+            case SettlementActionType.Healer:
+                VisitHealer(action.Price);
+                break;
         }
+    }
+
+    // Решение пользователя 31.10.2026 (аудит A-02): знахарь снимает тяжёлые
+    // раны вошедших за плату — одно действие поселения по времени.
+    private void VisitHealer(int pricePerPerson)
+    {
+        if (!WoundRecovery.TryVisitHealer(gameState, pricePerPerson, out string message))
+        {
+            ShowSettlementMessage(message);
+            return;
+        }
+        AddReport(message);
+        SpendSettlementActionTime();
+        ShowSettlementMessage(message);
+        RefreshInterface();
     }
 
     private void RenderTavernActions(TavernDefinition tavern)

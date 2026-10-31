@@ -257,6 +257,10 @@ public static class SettlementCatalogValidator
                         if (tavern == null || !tavern.Enabled || tavern.Lodging == null || !tavern.Lodging.Enabled)
                             problems.Add(name + ": ночлег корчмы не включён.");
                         break;
+                    case SettlementActionType.Healer:
+                        if (action.Price < 0)
+                            problems.Add(name + ": отрицательная цена знахаря.");
+                        break;
                     case SettlementActionType.LocalMap:
                         if (string.IsNullOrEmpty(action.TargetId) || !context.LocalLocationExists(action.TargetId))
                             problems.Add(name + ": нет исследуемого места «" + action.TargetId + "».");

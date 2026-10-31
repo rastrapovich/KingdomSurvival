@@ -76,6 +76,9 @@ public sealed class ResidentState
     public int CurrentHitPoints;
     public int MaxHitPoints;
 
+    // Тяжёлая рана заживает по очкам ночлегов (WoundRecovery).
+    public int WoundRecoveryPoints;
+
     // ПР-08: изнеможение — дискретное состояние (−1 атака, −1 инициатива),
     // снимается отдыхом в лагере или отваром трав.
     public bool Exhausted;

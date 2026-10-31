@@ -552,7 +552,7 @@ public static class CampaignBattleBridge
             if ((forced || resident.CurrentHitPoints * FeatureCombatBatch.HeavyWoundDivisor(state, survivor.PersonId) <= resident.MaxHitPoints) &&
                 resident.Injury != ResidentInjury.Recovering)
             {
-                resident.Injury = ResidentInjury.Recovering;
+                WoundRecovery.Begin(resident);
                 heavy.Add(resident.DisplayName);
             }
 

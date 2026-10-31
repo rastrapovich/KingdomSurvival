@@ -238,9 +238,9 @@ public partial class PrototypeUIController
 
         // Состояние
         VisualElement state = HeroSquadCell(row, "hero-squad-cell-state");
-        string condition = resident.Injury == ResidentInjury.Recovering ? "Тяжёлая рана — в поход не пойдёт"
+        string condition = resident.Injury == ResidentInjury.Recovering ? WoundRecovery.DescribeShort(resident)
             : resident.Exhausted ? "Изнеможён — атака и инициатива ниже"
-            : resident.HasCombatState && resident.CurrentHitPoints < resident.MaxHitPoints ? "Ранен — лечится уходом дома"
+            : resident.HasCombatState && resident.CurrentHitPoints < resident.MaxHitPoints ? "Ранен — лечат отдых и перевязка"
             : "Цел";
         state.Add(HeroSquadLabel(condition, "hero-squad-value", entry.Hurt ? "hero-squad-value--bad" : "hero-squad-value--good"));
         if (entry.Choice)

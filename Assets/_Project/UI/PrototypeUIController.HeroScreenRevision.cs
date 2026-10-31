@@ -163,11 +163,11 @@ public partial class PrototypeUIController
         if (resident == null)
             return result;
         if (resident.Injury == ResidentInjury.Recovering)
-            result.Add(("✚", "Тяжёлая рана", "В поход не пойдёт, пока не оправится.", "injury"));
+            result.Add(("✚", "Тяжёлая рана", WoundRecovery.Describe(resident), "injury"));
         if (resident.Exhausted)
             result.Add(("◐", "Изнеможение", "Атака и инициатива ниже на 1, пока не отдохнёт.", "exhausted"));
         if (resident.HasCombatState && resident.CurrentHitPoints < resident.MaxHitPoints && resident.Injury != ResidentInjury.Recovering)
-            result.Add(("♥", "Ранен", "Жизни: " + resident.CurrentHitPoints + " из " + resident.MaxHitPoints + ". Лечит отдых и уход.", "wounded"));
+            result.Add(("♥", "Ранен", "Жизни: " + resident.CurrentHitPoints + " из " + resident.MaxHitPoints + ". Лечат отдых, перевязка и мазь.", "wounded"));
         return result;
     }
 

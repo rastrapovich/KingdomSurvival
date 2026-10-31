@@ -689,6 +689,32 @@ public sealed class SettlementsTradeTavernTests
         Assert.IsTrue(string.IsNullOrEmpty(state.Settlements.LodgingLocationId));
     }
 
+    // Аудит A-02: ночь под крышей вдвое лечит тяжёлую рану; ждущий в лагере
+    // получает только ночь в лагере; знахарь лечит лишь вошедших.
+    [Test]
+    public void HeavyWound_RoofNightCountsDouble_HealerTreatsOnlyThoseInside()
+    {
+        GameState state = InsidePost();
+        state.ArmyGold = 30;
+        ResidentState garrick = PeopleService.Find(state, "garrick");
+        ResidentState creature = PeopleService.Find(state, SettlementCampDevFixture.CreatureId);
+        WoundRecovery.Begin(garrick);
+        WoundRecovery.Begin(creature);
+
+        Assert.IsTrue(WoundRecovery.CanVisitHealer(state, 10, out string reason), reason);
+        Assert.IsTrue(WoundRecovery.TryVisitHealer(state, 10, out string message), message);
+        Assert.AreEqual(20, state.ArmyGold, "Платят только за вошедшего.");
+        Assert.AreEqual(ResidentInjury.None, garrick.Injury);
+        Assert.AreEqual(ResidentInjury.Recovering, creature.Injury, "Ждущего в лагере знахарь не видит.");
+
+        WoundRecovery.Begin(garrick);
+        Assert.IsTrue(TavernService.TryStartLodging(state, Here, out message), message);
+        state.ActiveExpedition.ActiveActivity = null;
+        CampRest.CompleteRest(state, new List<string>());
+        Assert.AreEqual(ResidentInjury.None, garrick.Injury, "Под крышей (2) и с Мартой рядом (1) — за одну ночь.");
+        Assert.AreEqual(1, creature.WoundRecoveryPoints, "В лагере — одна ночь, лекаря рядом нет.");
+    }
+
     // ------------------------------------------------------------------
     // Профили, сохранение, совместимость
     // ------------------------------------------------------------------

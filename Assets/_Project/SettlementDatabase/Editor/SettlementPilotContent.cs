@@ -177,6 +177,9 @@ namespace KingdomSurvival.SettlementDatabase.Editor
             p.Actions.Add(Action("village.inn", SettlementActionType.Tavern, "Зайти в избу у дороги", "Хозяйка, щи и разговоры."));
             p.Actions.Add(Action("village.board", SettlementActionType.NoticeBoard, "Столб у колодца", "Знаки, береста и то, что перескажет староста."));
             p.Actions.Add(Action("village.rest", SettlementActionType.Rest, "Переночевать в избе", "Ночлег под крышей для тех, кто вошёл."));
+            SettlementActionDefinition healer = Action("village.healer", SettlementActionType.Healer, "Показать раненых знахарке", "Знахарка у околицы вправит кость и перевяжет тяжёлую рану.");
+            healer.Price = 10;
+            p.Actions.Add(healer);
             return new SettlementProfileEntry { Data = p };
         }
 

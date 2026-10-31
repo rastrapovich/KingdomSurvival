@@ -273,6 +273,12 @@ public static class LocalLocationCatalog
 
     public static IReadOnlyList<LocalLocationDefinition> RegisteredDefaults => Defaults;
 
+    // Бриф правок (19 пунктов) п. 12: ходьба в исследуемом месте тратит
+    // время медленнее пути по карте — множитель к часам за клетку места.
+    // Рабочее значение (не утверждено); задаётся Базой локаций.
+    public const float DefaultWalkTimeScale = 0.25f;
+    public static float WalkTimeScale { get; set; } = DefaultWalkTimeScale;
+
     public static LocalLocationDefinition Find(string localLocationId)
     {
         if (string.IsNullOrEmpty(localLocationId))

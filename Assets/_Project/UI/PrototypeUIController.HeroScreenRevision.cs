@@ -9,25 +9,18 @@ using UnityEngine.UIElements;
 // показываются только здесь (их механика и данные не меняются).
 // «Отряд» — внизу пять боевых позиций (командир в центре), над ними свита
 // квадратными портретами только реальных участников; блока «Люди отряда»
-// нет, пустая позиция открывает выбор свободного бойца.
+// нет; бойцов нанимают разговором в корчме (пустая позиция пуста).
 // «Снаряжение» — без подписей роли, уровня, тегов, состояния и сюжетных
-// вещей; характеристики под куклой показывают разницу до/после.
+// вещей; характеристики под куклой — текущие, усиленные вещью — зелёные.
 // Разметку не переставляем — реестр макетов UI сверяет её с UXML; лишнее
 // скрывается, новое добавляется здесь.
 public partial class PrototypeUIController
 {
     private const string ServiceCommanderName = "Командир";
-    private const float StatDeltaSeconds = 6f;
 
     private bool heroRevisionApplied;
     private VisualElement heroRevisionStates;
     private VisualElement heroRevisionRetinue;
-    private VisualElement heroRevisionPicker;
-    private readonly Label[] heroStatDeltaLabels = new Label[7];
-    private string heroStatSnapshotPerson;
-    private int[] heroStatSnapshot;
-    private int[] heroStatDeltas;
-    private float heroStatDeltaUntil;
 
     private void ApplyHeroScreenRevision()
     {
@@ -39,7 +32,6 @@ public partial class PrototypeUIController
             return;
         RefreshHeroRevisionHeroPage();
         RefreshHeroRevisionRetinue();
-        RefreshHeroStatDeltas();
     }
 
     private void ApplyHeroScreenRevisionLayout()
@@ -96,31 +88,7 @@ public partial class PrototypeUIController
         retinuePanel.Insert(Mathf.Min(1, retinuePanel.childCount), heroRevisionRetinue);
         Hide(root.Q("hero-screen-retinue-description"));
 
-        // Пустая боевая позиция — выбор свободного бойца.
-        heroRevisionPicker = new VisualElement { name = "hero-screen-fighter-picker" };
-        heroRevisionPicker.AddToClassList("hero-revision-picker");
-        heroRevisionPicker.style.display = DisplayStyle.None;
-        heroRevisionPicker.RegisterCallback<PointerDownEvent>(evt =>
-        {
-            if (evt.target == heroRevisionPicker)
-            {
-                heroRevisionPicker.style.display = DisplayStyle.None;
-                evt.StopPropagation();
-            }
-        });
-        squadPage?.Add(heroRevisionPicker);
 
-        // П. 9: разница характеристик до/после — маленькой меткой у числа.
-        for (int i = 0; i < heroStatDeltaLabels.Length && i < heroScreenUnitCardStatValues.Length; i++)
-        {
-            Label value = heroScreenUnitCardStatValues[i];
-            if (value?.parent == null)
-                continue;
-            Label delta = new Label { name = value.name + "-delta", pickingMode = PickingMode.Ignore };
-            delta.AddToClassList("hero-revision-stat-delta");
-            value.parent.Insert(value.parent.IndexOf(value), delta);
-            heroStatDeltaLabels[i] = delta;
-        }
         heroRevisionApplied = true;
     }
 
@@ -236,46 +204,6 @@ public partial class PrototypeUIController
         return card;
     }
 
-    // Пустая боевая позиция: свободные бойцы списком (то же действие, что
-    // «В состав» прежнего блока «Люди отряда»).
-    private bool TryOpenHeroFighterPicker()
-    {
-        if (heroRevisionPicker == null || !ExpeditionPreparation.CanEdit(gameState))
-            return false;
-        heroRevisionPicker.Clear();
-        VisualElement box = new VisualElement();
-        box.AddToClassList("hero-revision-picker-box");
-        Label title = new Label("Кого взять в поход?");
-        title.AddToClassList("hero-revision-picker-title");
-        box.Add(title);
-        int count = 0;
-        foreach (HeroSquadEntry entry in CollectHeroSquad())
-        {
-            if (entry.IsCommander || entry.InRoster || entry.Resident == null)
-                continue;
-            string personId = entry.PersonId;
-            string state = entry.Resident.Injury == ResidentInjury.Recovering ? " · тяжёлая рана" : entry.Hurt ? " · ранен" : string.Empty;
-            Button pick = new Button(() =>
-            {
-                heroRevisionPicker.style.display = DisplayStyle.None;
-                ChangeHeroSquadRoster(personId, true);
-            })
-            { text = entry.Resident.DisplayName + " — " + entry.Resident.RoleLabel + state };
-            pick.AddToClassList("hero-revision-picker-option");
-            box.Add(pick);
-            count++;
-        }
-        if (count == 0)
-            box.Add(new Label("Свободных бойцов нет."));
-        Button close = new Button(() => heroRevisionPicker.style.display = DisplayStyle.None) { text = "Закрыть" };
-        close.AddToClassList("hero-revision-picker-close");
-        box.Add(close);
-        heroRevisionPicker.Add(box);
-        heroRevisionPicker.style.display = DisplayStyle.Flex;
-        heroRevisionPicker.BringToFront();
-        return true;
-    }
-
     private void ShowHeroInfoPopup(string name, string kind, string text)
     {
         VisualElement popup = interfaceRoot.Q("hero-screen-item-popup");
@@ -295,53 +223,5 @@ public partial class PrototypeUIController
             icon.style.display = DisplayStyle.None;
         popup.style.display = DisplayStyle.Flex;
         popup.BringToFront();
-    }
-
-    // ------------------------------------------------------------------
-    // Снаряжение: разница характеристик до/после
-    // ------------------------------------------------------------------
-
-    private void RefreshHeroStatDeltas()
-    {
-        if (heroScreenUnitCardStatValues == null || string.IsNullOrEmpty(heroCardPersonId))
-            return;
-        AssembledCombatStats stats = CombatStatsAssembler.Compute(gameState, heroCardPersonId);
-        if (!stats.HasTemplate)
-            return;
-        UnitCombatStats f = stats.Final;
-        int[] now = { f.MaxHitPoints, f.Attack, f.Defense, f.Damage, f.Movement, f.Initiative, f.AttackRange };
-        if (heroStatSnapshotPerson == heroCardPersonId && heroStatSnapshot != null)
-        {
-            bool changed = false;
-            int[] deltas = new int[now.Length];
-            for (int i = 0; i < now.Length; i++)
-            {
-                deltas[i] = now[i] - heroStatSnapshot[i];
-                changed |= deltas[i] != 0;
-            }
-            if (changed)
-            {
-                heroStatDeltas = deltas;
-                heroStatDeltaUntil = Time.unscaledTime + StatDeltaSeconds;
-            }
-        }
-        else
-        {
-            heroStatDeltas = null;
-        }
-        heroStatSnapshotPerson = heroCardPersonId;
-        heroStatSnapshot = now;
-
-        bool show = heroStatDeltas != null && Time.unscaledTime < heroStatDeltaUntil;
-        for (int i = 0; i < heroStatDeltaLabels.Length; i++)
-        {
-            Label label = heroStatDeltaLabels[i];
-            if (label == null)
-                continue;
-            int delta = show ? heroStatDeltas[i] : 0;
-            label.text = delta > 0 ? "+" + delta : delta < 0 ? "−" + (-delta) : string.Empty;
-            label.EnableInClassList("hero-revision-stat-delta--up", delta > 0);
-            label.EnableInClassList("hero-revision-stat-delta--down", delta < 0);
-        }
     }
 }

@@ -661,3 +661,5 @@
 .trade-item-popup-head-text { flex-grow: 1; flex-shrink: 1; margin-left: 12px; }
 .trade-item-popup-close { width: 34px; height: 32px; font-size: 18px; }
 .settlement-people-gallery { align-items: flex-start; }
+/* Бриф правок (19 пунктов) п. 13: припасов нет — красным. */
+.shell-resources-label--empty { color: rgb(232, 112, 96); -unity-font-style: bold; }

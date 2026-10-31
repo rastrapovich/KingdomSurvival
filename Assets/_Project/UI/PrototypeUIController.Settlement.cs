@@ -569,6 +569,9 @@ public partial class PrototypeUIController
             AddSettlementAction(view.Offer.Label + price, hint, view.Enabled, () => AskTavernOffer(captured.Offer), false);
         }
 
+        // Бриф правок (19 пунктов) п. 10: кандидаты в наёмники.
+        RenderHireCandidates();
+
         if (tavern.Lodging != null && tavern.Lodging.Enabled)
         {
             AddSettlementSection("Ночлег");
@@ -908,6 +911,11 @@ public partial class PrototypeUIController
         Keyboard keyboard = Keyboard.current;
         if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame || IsGameMenuOpen || IsJournalOpen)
             return;
+        if (hireDialogueOpen)
+        {
+            CloseHireDialogue();
+            return;
+        }
         if (IsSettlementConfirmOpen)
         {
             CloseSettlementConfirm();

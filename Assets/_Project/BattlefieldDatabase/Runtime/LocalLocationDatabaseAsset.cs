@@ -23,6 +23,10 @@ namespace KingdomSurvival.BattlefieldDatabase
         // Художественная сборка ссылается на ID места: игровые данные остаются выше.
         public List<LocationVisualDefinition> visuals = new List<LocationVisualDefinition>();
 
+        // Бриф правок (19 пунктов) п. 12: доля часов пути за клетку при ходьбе
+        // внутри места (1 — как раньше). Рабочее значение 0,25.
+        [Range(0.01f, 1f)] public float walkTimeScale = LocalLocationCatalog.DefaultWalkTimeScale;
+
         // 1 — места в точках рисунка (канон v1.54); 0 — прежние клетки поля,
         // переводятся один раз при загрузке редактора.
         public int pointFormatVersion;
@@ -61,6 +65,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                                               asset.pointFormatVersion >= CurrentPointFormatVersion
                 ? asset.locations
                 : null);
+            LocalLocationCatalog.WalkTimeScale = asset != null ? Mathf.Clamp(asset.walkTimeScale, 0.01f, 1f) : LocalLocationCatalog.DefaultWalkTimeScale;
         }
     }
 }

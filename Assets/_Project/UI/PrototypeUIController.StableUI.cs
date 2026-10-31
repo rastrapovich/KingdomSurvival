@@ -216,15 +216,27 @@ public partial class PrototypeUIController
     // Один цвет при любом исходе: отмечает особенность, а не удачу.
     private const string FeatureLineColor = "#8FA5BE";
 
+    // Бриф правок (19 пунктов) п. 13: голод и нулевые припасы — красным.
+    private const string HungerLineColor = "#E07A68";
+
+    private static bool IsHungerLine(string line) =>
+        line.StartsWith("Голод:") || line.Contains(Hunger.StarvingMessage);
+
     private static string DecorateFeatureLines(string text)
     {
-        if (string.IsNullOrEmpty(text) || !text.Contains(FeaturePresentation.Tag))
+        if (string.IsNullOrEmpty(text))
+            return text;
+        bool features = text.Contains(FeaturePresentation.Tag);
+        bool hunger = text.Contains("Голод:") || text.Contains(Hunger.StarvingMessage);
+        if (!features && !hunger)
             return text;
         string[] lines = text.Split('\n');
         for (int i = 0; i < lines.Length; i++)
         {
-            if (FeaturePresentation.IsFeatureLine(lines[i]))
+            if (features && FeaturePresentation.IsFeatureLine(lines[i]))
                 lines[i] = "<color=" + FeatureLineColor + ">" + lines[i] + "</color>";
+            else if (hunger && IsHungerLine(lines[i]))
+                lines[i] = "<color=" + HungerLineColor + ">" + lines[i] + "</color>";
         }
         return string.Join("\n", lines);
     }

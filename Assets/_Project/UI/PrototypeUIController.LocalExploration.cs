@@ -178,8 +178,11 @@ public partial class PrototypeUIController
                 return;
             }
 
-            localMover.Tick(Mathf.Min(deltaSeconds, 0.1f), out double hours);
-            AddLocalHours(hours, false);
+            // Бриф правок (19 пунктов) п. 12: темп карты ускоряет шаг (часы за
+            // путь те же); время ходьбы в месте идёт медленно и плавно —
+            // каждый кадр, а не скачком минут.
+            localMover.Tick(Mathf.Min(deltaSeconds, 0.1f) * MapTempo, out double hours);
+            AddLocalHours(hours * LocalLocationCatalog.WalkTimeScale, true);
             if (!IsLocalScreenOpen)
                 return;
             CheckLocalEncounter();

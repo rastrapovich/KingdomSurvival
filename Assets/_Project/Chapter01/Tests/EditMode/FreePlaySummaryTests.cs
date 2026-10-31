@@ -11,8 +11,16 @@ public sealed class FreePlaySummaryTests
     [SetUp]
     public void SetUp()
     {
+        // Итог Дома — для будущего режима с Домом; в текущей свободной игре выключен.
+        FreePlayContent.ShowHomeGoals = true;
         Chapter01Content.Register();
         FreePlayContent.Register();
+    }
+
+    [TearDown]
+    public void HideHomeGoals()
+    {
+        FreePlayContent.ShowHomeGoals = false;
     }
 
     private static GameState NewFreePlay()

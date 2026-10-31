@@ -36,6 +36,10 @@ namespace KingdomSurvival.FreePlay
         public static List<string> Refresh(GameState state)
         {
             List<string> reports = new List<string>();
+            // Бриф правок (19 пунктов) п. 14: «Итог Дома» в свободной игре без
+            // Дома не подводится.
+            if (!FreePlayContent.ShowHomeGoals)
+                return reports;
             int returns = Returns(state);
             if (returns == 0 || returns % CheckpointReturns != 0 || state.HasActiveExpedition)
                 return reports;

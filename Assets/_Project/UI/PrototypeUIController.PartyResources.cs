@@ -17,6 +17,8 @@ public partial class PrototypeUIController
             return;
         partyResourcesLabel.text = DescribePartyResources(gameState, out bool shortOnSupply);
         partyResourcesLabel.EnableInClassList("shell-resources-label--short", shortOnSupply);
+        // Бриф правок (19 пунктов) п. 13: ноль припасов — красным.
+        partyResourcesLabel.EnableInClassList("shell-resources-label--empty", gameState.ArmySupply <= 0);
         partyResourcesLabel.tooltip = "Золото и припасы отряда. Расход: " + gameState.ExpeditionSupplyConsumption +
                                       " в день" + (gameState.HasActiveExpedition ? "." : " (на полный состав похода).");
     }

@@ -229,10 +229,27 @@ heroCardSubtitle != null && heroCardLevel != null && heroCardExperienceLabel != 
         heroScreenUnitCardStatValues[5].text = final.Initiative.ToString();
         heroScreenUnitCardStatValues[6].text = final.AttackRange.ToString();
 
+        // Бриф правок (19 пунктов) п. 7: подсказка показателя — база и только
+        // его вклады («Меч: +1 к атаке»); показатель, который сейчас усиливает
+        // надетая вещь, подсвечен зелёным. Всё — из текущего расчёта, без
+        // накопленных разниц прошлых действий.
         int[] baseValues = { template.MaxHitPoints, template.Attack, template.Defense, template.Damage, template.Movement, template.Initiative, template.AttackRange };
-        string sourceText = sources.Count > 0 ? "\n" + string.Join("\n", sources) : string.Empty;
         for (int i = 0; i < heroCardStatExplanations.Length; i++)
-            heroCardStatExplanations[i] = HeroScreenUnitCardStatExplanations[i] + "\nОснова: " + baseValues[i] + sourceText;
+        {
+            List<string> lines = new List<string>();
+            bool boostedByItem = false;
+            if (stats.HasTemplate)
+            {
+                foreach (StatContribution contribution in stats.For((CombatStat)i))
+                {
+                    lines.Add(contribution.Source + ": " + (contribution.Amount > 0 ? "+" : "−") + System.Math.Abs(contribution.Amount));
+                    boostedByItem |= contribution.FromItem && contribution.Amount > 0;
+                }
+            }
+            heroCardStatExplanations[i] = HeroScreenUnitCardStatExplanations[i] + "\nОснова: " + baseValues[i] +
+                                          (lines.Count > 0 ? "\n" + string.Join("\n", lines) : string.Empty);
+            heroScreenUnitCardStatValues[i].EnableInClassList("hero-stat-value--boosted", boostedByItem);
+        }
     }
 
     private void FillHeroCardTags(UnitDefinitionData unit)

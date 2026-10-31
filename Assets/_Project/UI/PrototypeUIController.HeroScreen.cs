@@ -419,11 +419,18 @@ public partial class PrototypeUIController
                 return;
             }
 
-            // Пустое место — выбор свободного бойца (бриф правок п. 8).
-            if (evt.button == 0 && refs.PersonId == null && ExpeditionPreparation.CanEdit(gameState))
+            // Бриф правок (19 пунктов) п. 18: пустое место никого не нанимает и
+            // не добавляет — наёмников берут разговором в корчме. ПКМ по
+            // бойцу — характеристики и плата.
+            if (evt.button == 1 && refs.PersonId != null)
             {
-                if (!TryOpenHeroFighterPicker())
-                    SetHeroSquadFilter(HeroSquadFilter.Free);
+                ShowRosterPersonInfo(refs.PersonId);
+                evt.StopPropagation();
+                return;
+            }
+            if (evt.button == 0 && refs.PersonId == null && ExpeditionPreparation.CanEdit(gameState) && !IsFreePlayWithoutHome)
+            {
+                SetHeroSquadFilter(HeroSquadFilter.Free);
                 evt.StopPropagation();
             }
         });

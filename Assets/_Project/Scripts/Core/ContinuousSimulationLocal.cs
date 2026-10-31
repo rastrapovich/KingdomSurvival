@@ -31,7 +31,9 @@ public static partial class ContinuousSimulationSystem
             }
 
             double advancedHours = AdvanceOngoingActivities(state, runtime, stepHours, batch);
-            HomeLife.Advance(state, advancedHours, batch.Result.Messages);
+            if (CampaignContent.HasHome(state))
+                HomeLife.Advance(state, advancedHours, batch.Result.Messages);
+            Hunger.Advance(state, advancedHours, batch.Result.Messages);
 
             runtime.HourOfDay += advancedHours;
             remainingGameHours -= Math.Max(advancedHours, Epsilon);

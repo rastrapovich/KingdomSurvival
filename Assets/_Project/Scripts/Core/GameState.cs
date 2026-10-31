@@ -303,6 +303,9 @@ public class GameState
     // и остатки торговцев, предложения корчмы, доски и поручения
     // (SettlementService).
     public SettlementsStateData Settlements = new SettlementsStateData();
+    // Бриф правок (19 пунктов) п. 13: накопленные часы голода до следующей
+    // потери HP героя (Hunger).
+    public double HungerHours;
 
     // Бриф исправлений п. 6, 9: фактически выданные награды (RewardFeed).
     public RewardLogData Rewards = new RewardLogData();

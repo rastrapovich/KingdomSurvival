@@ -8,6 +8,39 @@ public sealed class AssembledCombatStats
     public UnitCombatStats Final;
     // «Кольчуга: +2 защита, −1 инициатива» — из чего сложилось.
     public readonly List<string> Sources = new List<string>();
+    // Бриф правок (19 пунктов) п. 7: те же вклады по показателям — подсказка
+    // характеристики показывает только свои источники, а надетая вещь,
+    // усиливающая показатель, подсвечивает его.
+    public readonly List<StatContribution> Contributions = new List<StatContribution>();
+
+    public IEnumerable<StatContribution> For(CombatStat stat)
+    {
+        foreach (StatContribution contribution in Contributions)
+        {
+            if (contribution.Stat == stat)
+                yield return contribution;
+        }
+    }
+}
+
+public enum CombatStat
+{
+    MaxHitPoints,
+    Attack,
+    Defense,
+    Damage,
+    Movement,
+    Initiative,
+    AttackRange
+}
+
+public struct StatContribution
+{
+    public CombatStat Stat;
+    public string Source;
+    public int Amount;
+    // Вклад надетой вещи.
+    public bool FromItem;
 }
 
 // ПР-08 (ТЗ §4 с правками §0.2–§0.4): один источник боевых чисел для экрана
@@ -43,9 +76,9 @@ public static class CombatStatsAssembler
 
         CommanderData commander = state.GetSelectedCommander();
         if (commander != null && commander.Id == personId && commander.HeroProfile != null)
-            ApplyQualities(commander.HeroProfile, ref stats, result.Sources);
+            ApplyQualities(commander.HeroProfile, ref stats, result);
 
-        ApplyProgression(state, personId, ref stats, result.Sources);
+        ApplyProgression(state, personId, ref stats, result);
 
         foreach (ItemInstanceData item in ItemService.OwnedBy(state, personId))
         {
@@ -56,6 +89,7 @@ public static class CombatStatsAssembler
                 continue;
             Apply(ref stats, definition.Modifier);
             result.Sources.Add(definition.Name + ": " + definition.Modifier.Describe());
+            AddContributions(result, definition.Name, definition.Modifier, true);
         }
 
         // 12Е-6: боевые особенности — условные правила, чисел не меняют.
@@ -67,6 +101,7 @@ public static class CombatStatsAssembler
             StatModifier exhaustion = ExhaustionModifier;
             Apply(ref stats, exhaustion);
             result.Sources.Add("Изнеможение: " + exhaustion.Describe());
+            AddContributions(result, "Изнеможение", exhaustion, false);
         }
 
         stats.MaxHitPoints = Math.Max(1, stats.MaxHitPoints);
@@ -83,13 +118,36 @@ public static class CombatStatsAssembler
     // Изнеможение (§5, правка §0.3).
     public static readonly StatModifier ExhaustionModifier = new StatModifier { Attack = -1, Initiative = -1 };
 
-    private static void ApplyQualities(HeroProfileData profile, ref UnitCombatStats stats, List<string> sources)
+    private static void AddContributions(AssembledCombatStats result, string source, StatModifier modifier, bool fromItem)
     {
+        void Add(CombatStat stat, int amount)
+        {
+            if (amount != 0)
+                result.Contributions.Add(new StatContribution { Stat = stat, Source = source, Amount = amount, FromItem = fromItem });
+        }
+        Add(CombatStat.MaxHitPoints, modifier.MaxHitPoints);
+        Add(CombatStat.Attack, modifier.Attack);
+        Add(CombatStat.Defense, modifier.Defense);
+        Add(CombatStat.Damage, modifier.Damage);
+        Add(CombatStat.Movement, modifier.Movement);
+        Add(CombatStat.Initiative, modifier.Initiative);
+        Add(CombatStat.AttackRange, modifier.AttackRange);
+    }
+
+    private static void AddContribution(AssembledCombatStats result, CombatStat stat, string source, int amount)
+    {
+        result.Contributions.Add(new StatContribution { Stat = stat, Source = source, Amount = amount });
+    }
+
+    private static void ApplyQualities(HeroProfileData profile, ref UnitCombatStats stats, AssembledCombatStats result)
+    {
+        List<string> sources = result.Sources;
         int strength = profile.GetQuality(HeroQuality.Strength);
         if (strength >= StrengthDamageThreshold)
         {
             stats.Damage += 1;
             sources.Add("Сила " + strength + ": +1 урон");
+            AddContribution(result, CombatStat.Damage, "Сила " + strength, 1);
         }
 
         int fortitude = profile.GetQuality(HeroQuality.Fortitude);
@@ -98,6 +156,7 @@ public static class CombatStatsAssembler
             int hp = (fortitude - FortitudeBaseline) * HitPointsPerFortitude;
             stats.MaxHitPoints += hp;
             sources.Add("Стойкость " + fortitude + ": +" + hp + " HP");
+            AddContribution(result, CombatStat.MaxHitPoints, "Стойкость " + fortitude, hp);
         }
 
         int dexterity = profile.GetQuality(HeroQuality.Dexterity);
@@ -105,6 +164,7 @@ public static class CombatStatsAssembler
         {
             stats.Initiative += 1;
             sources.Add("Сноровка " + dexterity + ": +1 инициатива");
+            AddContribution(result, CombatStat.Initiative, "Сноровка " + dexterity, 1);
         }
     }
 
@@ -112,8 +172,9 @@ public static class CombatStatsAssembler
     // от защитной практики, здоровье — очень ограниченно (крепость тела).
     // Уровень сам по себе боевые числа не меняет.
     private static void ApplyProgression(GameState state, string personId,
-        ref UnitCombatStats stats, List<string> sources)
+        ref UnitCombatStats stats, AssembledCombatStats result)
     {
+        List<string> sources = result.Sources;
         if (!CharacterProgressionService.IsProgressing(state, personId))
             return;
 
@@ -127,6 +188,7 @@ public static class CombatStatsAssembler
             {
                 Apply(ref stats, levelBonus);
                 sources.Add("Уровень " + record.Level + ": " + levelBonus.Describe());
+                AddContributions(result, "Уровень " + record.Level, levelBonus, false);
             }
         }
 
@@ -136,6 +198,7 @@ public static class CombatStatsAssembler
         {
             stats.Attack += attackBonus;
             sources.Add(NarrativeCompetencyLabels.GetLabel(weapon) + ": +" + attackBonus + " атака");
+            AddContribution(result, CombatStat.Attack, NarrativeCompetencyLabels.GetLabel(weapon), attackBonus);
         }
 
         int defenseBonus = CompetencyBonus(CharacterProgressionService.GetCompetencyRank(state, personId, NarrativeCompetencyIds.ShieldAndLine));
@@ -143,6 +206,7 @@ public static class CombatStatsAssembler
         {
             stats.Defense += defenseBonus;
             sources.Add(NarrativeCompetencyLabels.GetLabel(NarrativeCompetencyIds.ShieldAndLine) + ": +" + defenseBonus + " защита");
+            AddContribution(result, CombatStat.Defense, NarrativeCompetencyLabels.GetLabel(NarrativeCompetencyIds.ShieldAndLine), defenseBonus);
         }
 
         int hitPoints = CharacterProgressionService.BonusMaxHitPoints(state, personId);
@@ -150,6 +214,7 @@ public static class CombatStatsAssembler
         {
             stats.MaxHitPoints += hitPoints;
             sources.Add("Крепость тела: +" + hitPoints + " HP");
+            AddContribution(result, CombatStat.MaxHitPoints, "Крепость тела", hitPoints);
         }
     }
 

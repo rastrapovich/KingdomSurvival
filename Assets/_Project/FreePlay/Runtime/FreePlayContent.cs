@@ -102,6 +102,15 @@ namespace KingdomSurvival.FreePlay
         {
             // Бриф правок п. 19: партия начинается на стоянке у дороги — в
             // лагере, а не в пустом поселении. Это не Дом и не город.
+            // Бриф правок (19 пунктов) пп. 5, 17: 20 припасов на старте — один
+            // раз при создании партии; свита пуста (жителей стартового сюжета
+            // отряд ещё не знает).
+            if (state != null)
+            {
+                state.ArmySupply = StartingSupply;
+                ExpeditionPreparation.Get(state);
+                state.Preparation.RetinueId = string.Empty;
+            }
             if (state != null && Chronicle.Find(state, StartCampChronicleId) == null)
                 Chronicle.Record(state, StartCampChronicleId, "Стоянка у дороги",
                     "Отряд встал лагерем у развилки дорог: шалаш, кострище, вещи в мешках. Отсюда можно идти куда угодно.");
@@ -122,6 +131,9 @@ namespace KingdomSurvival.FreePlay
         }
 
         public const string StartCampChronicleId = "start.camp";
+
+        // Рабочее значение (бриф правок, 19 пунктов, п. 5).
+        public const int StartingSupply = 20;
 
         // Руины и курган в новой партии (выключено, см. InitializeNewCampaign).
         public static bool KurganStoryEnabled = false;

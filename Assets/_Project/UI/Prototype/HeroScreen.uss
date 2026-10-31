@@ -1909,3 +1909,5 @@
 /* Качества — узким столбцом рядом с героем, без растягивания на всю ширину. */
 #hero-screen-qualities { max-width: 340px; }
 .hero-revision-qualities > * { min-height: 0px; height: auto; padding-top: 4px; padding-bottom: 4px; margin-bottom: 4px; }
+/* Бриф правок (19 пунктов) п. 7: показатель, усиленный надетой вещью. */
+.hero-stat-value--boosted { color: rgb(140, 214, 128); }

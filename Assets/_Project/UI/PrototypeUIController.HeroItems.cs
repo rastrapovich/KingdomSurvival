@@ -493,24 +493,40 @@ public partial class PrototypeUIController
         heroItemPopupKind.text = HeroItemKindLabel(definition) +
                                  (definition.Slot != ItemSlot.None ? " · слот: " + SlotCaption(definition.Slot) : string.Empty) +
                                  (definition.Unique ? " · одна на мир" : string.Empty);
+        heroItemPopupText.text = string.Join("\n\n", ItemInfoLines(definition, item,
+            definition.Price > 0 ? "Цена: " + definition.Price + " зол. (торговцы платят меньше)." : "Цены нет."));
+        heroItemPopup.style.display = DisplayStyle.Flex;
+        heroItemPopup.BringToFront();
+    }
+
+    // Бриф правок (19 пунктов) п. 6: одинаковые сведения о вещи в сумке,
+    // торговле и по ПКМ — описание, «Свойства» (что даёт надетая вещь),
+    // «Действие» только у вещи с применением (по её эффектам в данных, а не
+    // по названию), затем цена. Пустых разделов нет.
+    private static List<string> ItemInfoLines(ItemDefinition definition, ItemInstanceData item, string priceLine)
+    {
         List<string> lines = new List<string>();
         if (!string.IsNullOrWhiteSpace(definition.Description))
             lines.Add(definition.Description);
         if (!string.IsNullOrWhiteSpace(definition.Origin))
             lines.Add(definition.Origin);
-        string mechanics = ItemUseService.Describe(definition);
-        if (!string.IsNullOrEmpty(mechanics))
-            lines.Add("Действие: " + mechanics + ".");
+        if (!definition.Modifier.IsZero)
+            lines.Add("Свойства: " + definition.Modifier.Describe() + (definition.Slot != ItemSlot.None ? " — пока надета." : "."));
         if (definition.HasUse)
-            lines.Add("Осталось применений: " + item.UsesLeft + " из " + definition.Uses + ".");
+        {
+            string mechanics = ItemUseService.Describe(definition);
+            if (!string.IsNullOrEmpty(mechanics))
+                lines.Add("Действие: " + mechanics + ".");
+            if (item != null)
+                lines.Add("Осталось применений: " + item.UsesLeft + " из " + definition.Uses + ".");
+        }
         if (definition.UnitTypes != null && definition.UnitTypes.Length > 0)
             lines.Add("Подходит: " + string.Join(", ", definition.UnitTypes) + ".");
-        lines.Add(definition.Price > 0 ? "Цена: " + definition.Price + " зол. (торговцы платят меньше)." : "Цены нет.");
+        if (!string.IsNullOrEmpty(priceLine))
+            lines.Add(priceLine);
         if (definition.IsTradeProtected)
             lines.Add("Не продаётся и не теряется.");
-        heroItemPopupText.text = string.Join("\n\n", lines);
-        heroItemPopup.style.display = DisplayStyle.Flex;
-        heroItemPopup.BringToFront();
+        return lines;
     }
 
     private void ShowHeroSuppliesPopup()

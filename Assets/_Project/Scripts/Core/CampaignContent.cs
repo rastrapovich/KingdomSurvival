@@ -137,6 +137,12 @@ public static class CampaignContent
         return state != null && ModeId(state) == CampaignStartOptions.FreePlayId;
     }
 
+    // Бриф правок (19 пунктов) п. 14: в текущей свободной игре Дома нет —
+    // его фоновые процессы (домашняя жизнь, суточный приход и расход, отдых
+    // дома, ремонт и уход) не идут и не пишут донесений. Данные Дома в
+    // партии остаются для будущего режима.
+    public static bool HasHome(GameState state) => state != null && !IsFreePlay(state);
+
     public static IReadOnlyList<JournalGoalViewData> BuildGoals(GameState state)
     {
         CampaignContentProvider provider = Find(state);

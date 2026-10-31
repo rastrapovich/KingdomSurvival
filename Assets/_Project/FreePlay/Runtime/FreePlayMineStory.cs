@@ -197,7 +197,7 @@ namespace KingdomSurvival.FreePlay
                 return;
             if (result.Outcome != CampaignBattleOutcome.Victory)
             {
-                reports?.Add("Звери остались в дальней штольне. Туда можно вернуться — Лада поставит крепь у входа, если придётся отходить.");
+                reports?.Add("Звери остались в дальней штольне. Туда можно вернуться.");
                 return;
             }
             state.Narrative.SetFlag(Flags.LairCleared);

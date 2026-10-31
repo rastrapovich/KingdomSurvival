@@ -382,7 +382,9 @@ public static partial class ContinuousSimulationSystem
                 batch);
 
             // ПР-06А: домашняя работа и уход идут ровно на прошедшие часы.
-            HomeLife.Advance(state, advancedHours, batch.Result.Messages);
+            if (CampaignContent.HasHome(state))
+                HomeLife.Advance(state, advancedHours, batch.Result.Messages);
+            Hunger.Advance(state, advancedHours, batch.Result.Messages);
 
             runtime.HourOfDay += advancedHours;
             remainingGameHours -= advancedHours;

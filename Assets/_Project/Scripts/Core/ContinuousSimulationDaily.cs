@@ -12,6 +12,19 @@ public static partial class ContinuousSimulationSystem
         batch.ReportDay = finishedDay;
         batch.EventHour = 0.0;
 
+        // Бриф правок (19 пунктов) п. 14: без Дома — только сутки похода.
+        if (!CampaignContent.HasHome(state))
+        {
+            ResolveExpeditionSupplyAtMidnight(state, runtime, batch.Result);
+            state.Day++;
+            // Бриф правок п. 10: плата наёмникам — раз за игровые сутки.
+            HireService.PayDaily(state, batch.Result.Messages);
+            runtime.HourOfDay = 0.0;
+            ScheduleDailyChecks(state, runtime, 0.0);
+            batch.StateChanged = true;
+            return;
+        }
+
         BuildingSystem.Synchronize(state);
         int dailyGoldIncome = BuildingSystem.GetDailyGoldIncome(state);
         int dailyFoodIncome = BuildingSystem.GetDailyFoodIncome(state);
@@ -41,6 +54,7 @@ public static partial class ContinuousSimulationSystem
         ResolveExpeditionSupplyAtMidnight(state, runtime, batch.Result);
 
         state.Day++;
+        HireService.PayDaily(state, batch.Result.Messages);
         runtime.HourOfDay = 0.0;
         ScheduleDailyChecks(state, runtime, 0.0);
         batch.StateChanged = true;
@@ -172,6 +186,15 @@ public static partial class ContinuousSimulationSystem
         int shortage = requiredSupply - availableSupply;
         state.ArmySupply = 0;
         state.ConsecutiveExpeditionSupplyShortageDays++;
+
+        // Бриф правок (19 пунктов) п. 13: без Дома голод не срывает поход и
+        // не останавливает игру — одна запись за сутки, урон идёт по часам
+        // (Hunger).
+        if (!CampaignContent.HasHome(state))
+        {
+            result.Messages.Add(Hunger.StarvingMessage);
+            return;
+        }
         result.HadNotableOccurrence = true;
 
         if (state.ConsecutiveExpeditionSupplyShortageDays == 1)

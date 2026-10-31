@@ -552,16 +552,9 @@ public partial class PrototypeUIController
             return;
         string meta = TradeKindLabel(item) + (item.Unique ? " · одна на мир" : string.Empty) +
                       (item.Uses > 0 ? " · применений: " + (instance != null ? instance.UsesLeft : item.Uses) + " из " + item.Uses : string.Empty);
-        string mechanics = ItemUseService.Describe(item);
-        string modifier = item.Modifier.Describe();
-        string effect = string.Join("\n", new[]
-        {
-            modifier.Length > 0 ? "Пока надето: " + modifier : string.Empty,
-            string.IsNullOrEmpty(mechanics) ? string.Empty : "Действие: " + mechanics
-        }).Trim();
-        ShowTradePopup(item.Id, item.Name, meta,
-            item.Description + (string.IsNullOrWhiteSpace(item.Origin) ? string.Empty : "\n\n" + item.Origin),
-            effect, DescribeTradeCompare(item), price);
+        // Бриф правок (19 пунктов) п. 6: те же сведения, что в сумке.
+        ShowTradePopup(item.Id, item.Name, meta, string.Join("\n\n", ItemInfoLines(item, instance, null)),
+            string.Empty, DescribeTradeCompare(item), price);
     }
 
     private void ShowTradePopup(string itemId, string name, string meta, string text, string mechanics, string compare, string price)

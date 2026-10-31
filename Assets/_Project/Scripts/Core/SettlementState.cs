@@ -77,6 +77,9 @@ public sealed class SettlementsStateData
     // Бриф правок пп. 16, 21: за каким поселением и заказчиком закреплено
     // каждое поручение (ErrandClaims).
     public List<ErrandClaimData> ErrandClaims = new List<ErrandClaimData>();
+    // Бриф правок (19 пунктов) п. 10: кандидаты корчем и договоры найма.
+    public List<HireTavernData> HireTaverns = new List<HireTavernData>();
+    public List<HireContractData> HireContracts = new List<HireContractData>();
     // Уникальные вещи, уже выданные в мир (покупкой): второй раз их не
     // предложит ни один торговец.
     public List<string> IssuedUniqueItemIds = new List<string>();

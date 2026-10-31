@@ -107,4 +107,34 @@ public sealed class CampaignSaveStoreTests
         CampaignSaveData legacy = NewSave(1, "world.a", 0);
         Assert.IsTrue(CampaignSaveService.IsLoadable(legacy, "world.a", 3, out _));
     }
+
+    // Аудит A-07: первая запись поверх файла старого формата один раз
+    // сохраняет его копию рядом; дальнейшие записи её не трогают.
+    [Test]
+    public void Write_OverOlderFormat_KeepsOneCopyOfTheOldFile()
+    {
+        CampaignSaveData old = NewSave(5);
+        old.SaveFormatVersion = CampaignSaveService.FreePlayHomeSaveFormatVersion;
+        store.Write(CampaignSaveStore.AutosaveSlotId, old);
+        string path = store.GetPath(CampaignSaveStore.AutosaveSlotId);
+        string copy = CampaignSaveStore.GetOlderFormatCopyPath(path, CampaignSaveService.FreePlayHomeSaveFormatVersion);
+        Assert.IsFalse(File.Exists(copy), "Пока поверх старого файла ничего не писали, копии нет.");
+        string oldText = File.ReadAllText(path);
+
+        store.Write(CampaignSaveStore.AutosaveSlotId, NewSave(6));
+        Assert.IsTrue(File.Exists(copy), "Старый формат сохранён рядом.");
+        Assert.AreEqual(oldText, File.ReadAllText(copy), "Копия — тот самый файл.");
+
+        store.Write(CampaignSaveStore.AutosaveSlotId, NewSave(7));
+        Assert.AreEqual(oldText, File.ReadAllText(copy), "Следующие записи копию не перезаписывают.");
+        Assert.AreEqual(7, store.Read(CampaignSaveStore.AutosaveSlotId).Data.State.Day);
+    }
+
+    [Test]
+    public void Write_OverCurrentFormat_MakesNoCopy()
+    {
+        store.Write(CampaignSaveStore.AutosaveSlotId, NewSave(1));
+        store.Write(CampaignSaveStore.AutosaveSlotId, NewSave(2));
+        Assert.AreEqual(0, Directory.GetFiles(directory, "*.v*.json").Length);
+    }
 }

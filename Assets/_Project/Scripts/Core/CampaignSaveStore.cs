@@ -10,6 +10,9 @@ using System.IO;
 // Запись атомарна: сначала временный файл, затем замена с резервной копией
 // .bak. Чтение: если основной файл повреждён, берётся резервная копия —
 // о чём сообщается, — но несовместимая версия никогда не «чинится» копией.
+// Аудит A-07: первая запись поверх файла старого формата сначала один раз
+// копирует его рядом (campaign.autosave.v2.json) — .bak пропал бы уже при
+// следующем сохранении, а копия старого формата остаётся.
 public sealed class CampaignSaveStore
 {
     public const string AutosaveSlotId = "autosave";
@@ -93,6 +96,8 @@ public sealed class CampaignSaveStore
         string path = GetPath(slotId);
         Directory.CreateDirectory(directory);
 
+        PreserveOlderFormat(path);
+
         string tempPath = path + ".tmp";
         File.WriteAllText(tempPath, serialize(data));
 
@@ -100,6 +105,25 @@ public sealed class CampaignSaveStore
             File.Replace(tempPath, path, path + ".bak");
         else
             File.Move(tempPath, path);
+    }
+
+    // Путь копии файла старого формата: campaign.autosave.json →
+    // campaign.autosave.v2.json.
+    public static string GetOlderFormatCopyPath(string path, int formatVersion)
+    {
+        string directoryName = Path.GetDirectoryName(path) ?? string.Empty;
+        return Path.Combine(directoryName, Path.GetFileNameWithoutExtension(path) + ".v" + formatVersion + ".json");
+    }
+
+    private void PreserveOlderFormat(string path)
+    {
+        if (!File.Exists(path) || !TryDeserialize(path, out CampaignSaveData existing) ||
+            existing.SaveFormatVersion >= CampaignSaveService.CurrentSaveFormatVersion)
+            return;
+
+        string copyPath = GetOlderFormatCopyPath(path, existing.SaveFormatVersion);
+        if (!File.Exists(copyPath))
+            File.Copy(path, copyPath);
     }
 
     public CampaignSaveReadResult Read(string slotId)

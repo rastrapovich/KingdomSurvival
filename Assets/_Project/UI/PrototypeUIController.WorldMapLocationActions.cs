@@ -82,13 +82,7 @@ public partial class PrototypeUIController
 
     private void ScheduleWorldMapLocationActionsRetry()
     {
-        UIDocument document = GetComponent<UIDocument>();
-        if (document == null)
-            return;
-
-        document.rootVisualElement.schedule
-            .Execute(TryInitializeWorldMapLocationActions)
-            .ExecuteLater(40);
+        ScheduleMapInitRetry(nameof(TryInitializeWorldMapLocationActions), TryInitializeWorldMapLocationActions, 40);
     }
 
     private void BindWorldMapLocationActionElements()

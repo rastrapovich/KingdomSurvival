@@ -74,13 +74,7 @@ public partial class PrototypeUIController
 
         if (worldMapViewport == null || worldMap == null || worldMapArmyMarker == null || gameState == null)
         {
-            UIDocument document = GetComponent<UIDocument>();
-            if (document != null)
-            {
-                document.rootVisualElement.schedule
-                    .Execute(TryInitializeWorldMapHero)
-                    .ExecuteLater(30);
-            }
+            ScheduleMapInitRetry(nameof(TryInitializeWorldMapHero), TryInitializeWorldMapHero, 30);
             return;
         }
 

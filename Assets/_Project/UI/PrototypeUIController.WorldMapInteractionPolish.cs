@@ -34,13 +34,7 @@ public partial class PrototypeUIController
 
         if (interfaceRoot == null || gameState == null || worldMap == null)
         {
-            UIDocument document = GetComponent<UIDocument>();
-            if (document != null)
-            {
-                document.rootVisualElement.schedule
-                    .Execute(TryInitializeWorldMapInteractionPolish)
-                    .ExecuteLater(30);
-            }
+            ScheduleMapInitRetry(nameof(TryInitializeWorldMapInteractionPolish), TryInitializeWorldMapInteractionPolish, 30);
             return;
         }
 
@@ -139,13 +133,17 @@ public partial class PrototypeUIController
 
     private void BindWorldMapLocationCard()
     {
-        if (worldMap == null)
+        // Аудит A-01: карточка вынесена из .world-map в .world-map-viewport
+        // (WM-03) — искать её внутри world-map нельзя: карточка не находилась,
+        // её действия не привязывались, а инициализация повторялась вечно.
+        VisualElement host = worldMapViewport ?? interfaceRoot;
+        if (host == null)
             return;
 
-        worldMapLocationCard = worldMap.Q<VisualElement>("world-map-location-inspection-card");
-        worldMapLocationCardTitle = worldMap.Q<Label>("world-map-location-inspection-title");
-        worldMapLocationCardDetails = worldMap.Q<Label>("world-map-location-inspection-details");
-        worldMapLocationCardCloseButton = worldMap.Q<Button>("world-map-location-inspection-close-button");
+        worldMapLocationCard = host.Q<VisualElement>("world-map-location-inspection-card");
+        worldMapLocationCardTitle = host.Q<Label>("world-map-location-inspection-title");
+        worldMapLocationCardDetails = host.Q<Label>("world-map-location-inspection-details");
+        worldMapLocationCardCloseButton = host.Q<Button>("world-map-location-inspection-close-button");
 
         if (worldMapLocationCardCloseButton != null)
             worldMapLocationCardCloseButton.clicked += HideWorldMapLocationCard;

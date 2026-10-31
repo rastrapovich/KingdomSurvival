@@ -1,4 +1,5 @@
 using KingdomSurvival.WorldMapVisual;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -70,14 +71,28 @@ public partial class PrototypeUIController
 
     private void ScheduleWorldMapPolishRetry()
     {
-        UIDocument document = GetComponent<UIDocument>();
+        ScheduleMapInitRetry(nameof(TryInitializeWorldMapPolish), TryInitializeWorldMapPolish, 20);
+    }
 
-        if (document == null)
+    // Аудит A-01: у каждой отложенной инициализации карты — не больше одного
+    // ждущего повтора. Её и так перезапускает периодический вызов
+    // (ContinuousTime), а самопланирующиеся цепочки размножались без предела,
+    // забивали планировщик UI Toolkit, и бой на месте «застывал».
+    private readonly HashSet<string> pendingMapInitRetries = new HashSet<string>();
+
+    private void ScheduleMapInitRetry(string key, Action retry, long delayMs)
+    {
+        UIDocument document = GetComponent<UIDocument>();
+        if (document == null || !pendingMapInitRetries.Add(key))
             return;
 
         document.rootVisualElement.schedule
-            .Execute(TryInitializeWorldMapPolish)
-            .ExecuteLater(20);
+            .Execute(() =>
+            {
+                pendingMapInitRetries.Remove(key);
+                retry();
+            })
+            .ExecuteLater(delayMs);
     }
 
     private static void HideLegacyWorldMapDecoration(VisualElement map)

@@ -28,7 +28,10 @@ public partial class PrototypeUIController
         if (worldMapSearchLayer == null)
             return;
 
-        List<ActiveSearchArea> areas = gameState != null ? WorldMapSearchAreas.Active(gameState) : new List<ActiveSearchArea>();
+        // Бриф правок (19 пунктов) п. 9: только область цели, выбранной в журнале.
+        List<ActiveSearchArea> areas = gameState != null
+            ? WorldMapSearchAreas.ForGoal(gameState, selectedJournalGoalId)
+            : new List<ActiveSearchArea>();
         string signature = string.Empty;
         foreach (ActiveSearchArea area in areas)
             signature += area.Search.SearchId + "/" + area.Stage.StageId + ";";
@@ -98,10 +101,11 @@ public partial class PrototypeUIController
                 painter.QuadraticCurveTo(corner, mid);
         }
         painter.ClosePath();
-        painter.fillColor = new Color(0.87f, 0.71f, 0.39f, 0.16f);
+        // Бриф правок (19 пунктов) п. 9: выбранная область чуть ярче.
+        painter.fillColor = new Color(0.93f, 0.78f, 0.45f, 0.26f);
         painter.Fill();
-        painter.strokeColor = new Color(0.16f, 0.12f, 0.08f, 0.85f);
-        painter.lineWidth = 2.5f;
+        painter.strokeColor = new Color(0.16f, 0.12f, 0.08f, 0.92f);
+        painter.lineWidth = 3f;
         painter.lineJoin = LineJoin.Round;
         painter.Stroke();
     }

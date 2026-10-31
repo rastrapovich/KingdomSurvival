@@ -208,6 +208,9 @@ public sealed class WorldMapMovementRules
     public const float DefaultHeroRunSpeedHexesPerSecond = 2f;
     public const float DefaultTravelHoursPerHex = 4f;
     public const float DefaultDiscoveryRadiusHexes = 1.25f;
+    // Бриф правок (19 пунктов) п. 1: радиус, в котором герой открывает
+    // туман войны (рабочее число).
+    public const float DefaultFogRevealRadiusHexes = 2.5f;
     public const float MinSpeedMultiplier = 0.05f;
 
     private static WorldMapMovementRules current = CreateDefault();
@@ -221,6 +224,7 @@ public sealed class WorldMapMovementRules
     public float HeroRunSpeedHexesPerSecond = DefaultHeroRunSpeedHexesPerSecond;
     public float TravelHoursPerHex = DefaultTravelHoursPerHex;
     public float DiscoveryRadiusHexes = DefaultDiscoveryRadiusHexes;
+    public float FogRevealRadiusHexes = DefaultFogRevealRadiusHexes;
     public List<WorldMapTerrainRule> Terrain = new List<WorldMapTerrainRule>();
 
     public static WorldMapMovementRules CreateDefault()

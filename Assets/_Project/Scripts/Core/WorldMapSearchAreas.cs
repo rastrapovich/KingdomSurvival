@@ -48,4 +48,45 @@ public static class WorldMapSearchAreas
         }
         return result;
     }
+
+    // Бриф правок (19 пунктов) п. 9: на карте — только область цели,
+    // выбранной в журнале. Нет выбора или у цели нет области — пусто.
+    // Данные и прогресс поиска от выбора не зависят.
+    public static List<ActiveSearchArea> ForGoal(GameState state, string goalId)
+    {
+        List<ActiveSearchArea> result = new List<ActiveSearchArea>();
+        if (string.IsNullOrEmpty(goalId))
+            return result;
+        foreach (ActiveSearchArea area in Active(state))
+        {
+            if (string.Equals(GoalIdFor(area.Search, area.Stage), goalId, StringComparison.Ordinal))
+                result.Add(area);
+        }
+        return result;
+    }
+
+    // Цель области: явная, иначе поручение, чья стадия открывает эту область.
+    public static string GoalIdFor(WorldMapSearchAreaDefinition search, WorldMapSearchStageDefinition stage)
+    {
+        if (search == null)
+            return null;
+        if (!string.IsNullOrEmpty(search.GoalId))
+            return search.GoalId;
+        if (stage?.RequiredKnowledgeFlags == null || SettlementCatalog.Current?.Errands == null)
+            return null;
+        foreach (ErrandDefinition errand in SettlementCatalog.Current.Errands)
+        {
+            if (errand?.Stages == null)
+                continue;
+            foreach (ErrandStageDefinition errandStage in errand.Stages)
+            {
+                if (errandStage != null && !string.IsNullOrEmpty(errandStage.Flag) &&
+                    stage.RequiredKnowledgeFlags.Contains(errandStage.Flag))
+                {
+                    return ErrandService.GoalIdPrefix + errand.Id;
+                }
+            }
+        }
+        return null;
+    }
 }

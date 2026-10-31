@@ -115,6 +115,12 @@ public class LocationData
     // Пусто — место не из генератора.
     public string PlaceKind = string.Empty;
 
+    // Бриф правок (19 пунктов) п. 1: место, известное только по виду —
+    // становится известным, когда туман над его клеткой открыт (WorldMapFog).
+    // Слух, поручение или история делают место известным сами
+    // (IsVisibleOnMap), без открытия окрестностей.
+    public bool RevealedByFog;
+
     // Литературный текст для Location Interaction (presentation-слой, не
     // Dialogue Database — локация не NPC). Пусто по умолчанию: старые/
     // технические локации без описания получают нейтральный fallback-текст
@@ -316,6 +322,10 @@ public class GameState
 
     public bool HasGeneratedMap => GeneratedMap != null && GeneratedMap.IsValid;
 
+    // Бриф правок (19 пунктов) п. 1: исследованная местность (туман войны) —
+    // отдельно от известных объектов (WorldMapFog).
+    public WorldMapFogData Fog;
+
     public int DailyGoldIncome => 3;
     public int DailyFoodIncome => 7;
 
@@ -465,6 +475,7 @@ public class GameState
     {
         WorldSeed = worldSeed ?? Guid.NewGuid().GetHashCode();
         GeneratedMap = null;
+        Fog = null;
 
         // AM-02/AM-07.5 (канон v1.35, §9.9): если авторский мир подключён
         // (через WorldMapDatabaseAsset.ActiveWorld на стороне UI), география
@@ -1145,7 +1156,7 @@ public class GameState
         {
             foreach (LocationData location in Locations)
             {
-                if (location.IsWaypoint || location.IsVisibleOnMap)
+                if (location.IsWaypoint || location.IsVisibleOnMap || location.RevealedByFog)
                     continue;
 
                 if (WorldMapNavigation.IsWithinDiscoveryRadius(

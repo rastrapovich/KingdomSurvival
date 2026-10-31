@@ -1056,7 +1056,7 @@ namespace KingdomSurvival.WorldMapVisual
                 float length = Mathf.Max(roadHalf * 4f, hexPx * 0.7f);
                 if (map.BridgeSpans != null && map.BridgeSpans.Count >= 2)
                 {
-                    foreach ((Vector2 a, Vector2 c) in BridgeSpanPixels())
+                    foreach ((Vector2 a, Vector2 c) in BridgeDeckPixels())
                     {
                         Vector2 along = (c - a).normalized;
                         Vector2 normal = new Vector2(-along.y, along.x);
@@ -1106,14 +1106,32 @@ namespace KingdomSurvival.WorldMapVisual
                 return spans;
             }
 
+            // Бриф правок (19 пунктов) п. 15: видимый настил моста — половина
+            // пролёта «берег → берег» по его середине; направление то же.
+            private const float BridgeDeckShare = 0.5f;
+
+            private List<(Vector2 A, Vector2 B)> BridgeDeckPixels()
+            {
+                List<(Vector2, Vector2)> decks = new List<(Vector2, Vector2)>();
+                foreach ((Vector2 a, Vector2 b) in BridgeSpanPixels())
+                {
+                    Vector2 middle = (a + b) * 0.5f;
+                    Vector2 half = (b - a) * (0.5f * BridgeDeckShare);
+                    decks.Add((middle - half, middle + half));
+                }
+                return decks;
+            }
+
             // Линии дорог и троп без участков в русле: точка внутри пролёта
-            // моста режет линию, концы остаются на берегах.
+            // моста режет линию; дорога доходит по линии пролёта до конца
+            // настила (п. 15 брифа — настил короче пролёта), без разрыва.
             private List<(string Kind, List<Vector2> Points)> RoadPartsOnLand()
             {
                 List<(string, List<Vector2>)> parts = new List<(string, List<Vector2>)>();
                 if (map.Roads == null)
                     return parts;
                 List<(Vector2 A, Vector2 B)> spans = BridgeSpanPixels();
+                List<(Vector2 A, Vector2 B)> decks = BridgeDeckPixels();
                 float near = hexPx * 0.6f;
                 foreach (GeneratedMapLine line in map.Roads)
                 {
@@ -1121,23 +1139,31 @@ namespace KingdomSurvival.WorldMapVisual
                         continue;
                     List<Vector2> points = ToPixels(line.Points);
                     List<Vector2> current = new List<Vector2>();
+                    int lastSpan = -1;
                     foreach (Vector2 point in points)
                     {
-                        bool inWater = false;
-                        foreach ((Vector2 a, Vector2 b) in spans)
+                        int span = -1;
+                        for (int i = 0; i < spans.Count; i++)
                         {
-                            float distance = DistanceToSegment(point, a, b, out float t);
+                            float distance = DistanceToSegment(point, spans[i].A, spans[i].B, out float t);
                             if (distance < near && t > 0.02f && t < 0.98f)
                             {
-                                inWater = true;
+                                span = i;
                                 break;
                             }
                         }
-                        if (!inWater)
+                        if (span < 0)
                         {
+                            // Вышли из пролёта — начало от дальнего конца настила.
+                            if (lastSpan >= 0 && current.Count == 0)
+                                current.Add(NearestEnd(decks[lastSpan], point));
+                            lastSpan = -1;
                             current.Add(point);
                             continue;
                         }
+                        if (lastSpan < 0 && current.Count > 0)
+                            current.Add(NearestEnd(decks[span], current[current.Count - 1]));
+                        lastSpan = span;
                         if (current.Count >= 2)
                             parts.Add((line.Kind, current));
                         current = new List<Vector2>();
@@ -1147,6 +1173,9 @@ namespace KingdomSurvival.WorldMapVisual
                 }
                 return parts;
             }
+
+            private static Vector2 NearestEnd((Vector2 A, Vector2 B) deck, Vector2 point) =>
+                (deck.A - point).sqrMagnitude <= (deck.B - point).sqrMagnitude ? deck.A : deck.B;
 
             private Vector2 RoadDirectionAt(Vector2 point)
             {

@@ -260,7 +260,9 @@ public sealed class HomeScreenPlayModeTests
         // ни на «Герое» нет кнопок, ведущих на другие вкладки.
         string[] links = { "Вещи", "Развитие", "Выбрать развитие" };
         Assert.IsFalse(root.Q<VisualElement>("hero-screen-squad-list").Query<Button>().ToList().Any(b => links.Contains(b.text)));
-        Assert.AreEqual(0, root.Q<VisualElement>("hero-screen-page-hero").Query<Button>().ToList().Count,
+        // Бриф правок (19 пунктов) п. 19: «Повысить уровень» — не переход
+        // между вкладками, а действие у портрета (видно только при выборе).
+        Assert.AreEqual(0, root.Q<VisualElement>("hero-screen-page-hero").Query<Button>().ToList().Count(b => b.name != "hero-screen-level-up"),
             "На «Герое» кнопок нет: запасы перенесены на «Снаряжение».");
 
         Click(root.Q<Button>("hero-screen-tab-journey"));

@@ -320,6 +320,8 @@ public partial class PrototypeUIController
     {
         selectedJournalGoalId = goal.Id;
         seenJournalRevisionIds.Add(goal.RevisionId);
+        // Бриф правок (19 пунктов) п. 9: смена цели сразу меняет область на карте.
+        worldMapSearchTimer = 1f;
 
         RefreshJournal();
         RefreshJournalNotificationState();

@@ -39,6 +39,9 @@ public sealed class WorldMapSearchAreaDefinition
 {
     public string SearchId = string.Empty;
     public string TargetLocationId = string.Empty;
+    // Бриф правок (19 пунктов) п. 9: цель журнала, к которой относится
+    // область. Пусто — цель находится по стадиям поручений Базы поселений.
+    public string GoalId = string.Empty;
 
     // Порядок важен: стадии перечисляются от самой широкой к самой узкой.
     // GetActiveStage побеждает последней достигнутой в порядке списка.

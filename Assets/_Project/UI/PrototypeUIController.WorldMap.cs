@@ -376,6 +376,7 @@ public partial class PrototypeUIController
         RefreshWorldMapCapital();
         RefreshWorldMapArmyMarker();
         ApplyFreePlayHomeVisibility();
+        TickWorldMapFog(true);
     }
 
     private void ApplyWorldMapBackground()

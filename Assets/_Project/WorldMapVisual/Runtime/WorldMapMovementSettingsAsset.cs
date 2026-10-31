@@ -24,6 +24,14 @@ namespace KingdomSurvival.WorldMapVisual
         [Tooltip("На каком расстоянии (в клетках) от фактического пути замечается скрытое место.")]
         [SerializeField, Range(0.25f, 6f)] private float discoveryRadiusHexes = WorldMapMovementRules.DefaultDiscoveryRadiusHexes;
 
+        [Header("Туман войны (свободная игра)")]
+        [Tooltip("Радиус (в клетках) вокруг пути героя, в котором местность открывается навсегда.")]
+        [SerializeField, Range(0.5f, 10f)] private float fogRevealRadiusHexes = WorldMapMovementRules.DefaultFogRevealRadiusHexes;
+        [Tooltip("Цвет и непрозрачность неисследованной местности.")]
+        [SerializeField] private Color fogColor = new Color(0.055f, 0.06f, 0.07f, 0.86f);
+        [Tooltip("Насколько светлее туман у самой границы исследованного (0 — резкая граница).")]
+        [SerializeField, Range(0f, 1f)] private float fogEdgeSoftness = 0.45f;
+
         [Header("Местность")]
         [SerializeField] private List<TerrainEntry> terrain = new List<TerrainEntry>();
 
@@ -56,6 +64,9 @@ namespace KingdomSurvival.WorldMapVisual
         public float HeroRunSpeedHexesPerSecond => heroRunSpeedHexesPerSecond;
         public float TravelHoursPerHex => travelHoursPerHex;
         public float DiscoveryRadiusHexes => discoveryRadiusHexes;
+        public float FogRevealRadiusHexes => fogRevealRadiusHexes;
+        public Color FogColor => fogColor;
+        public float FogEdgeSoftness => Mathf.Clamp01(fogEdgeSoftness);
         public IReadOnlyList<TerrainEntry> Terrain => terrain;
         public string HeroAnimationSetId => heroAnimationSetId ?? string.Empty;
         public float HeroHeightInHexRadii => Mathf.Max(0.1f, heroHeightInHexRadii);
@@ -75,7 +86,8 @@ namespace KingdomSurvival.WorldMapVisual
             {
                 HeroRunSpeedHexesPerSecond = heroRunSpeedHexesPerSecond,
                 TravelHoursPerHex = travelHoursPerHex,
-                DiscoveryRadiusHexes = discoveryRadiusHexes
+                DiscoveryRadiusHexes = discoveryRadiusHexes,
+                FogRevealRadiusHexes = fogRevealRadiusHexes
             };
             foreach (WorldMapTerrainRule fallback in WorldMapMovementRules.DefaultTerrainRules())
             {

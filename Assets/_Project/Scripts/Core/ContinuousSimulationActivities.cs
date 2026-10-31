@@ -321,6 +321,8 @@ public static partial class ContinuousSimulationSystem
                 expedition.CurrentMapYPercent = Lerp(from.YPercent, to.YPercent, t);
                 expedition.LastTravelPoints.Add(
                     new MapPointData(expedition.CurrentMapXPercent, expedition.CurrentMapYPercent));
+                // Бриф правок (19 пунктов) п. 1: путь открывает туман.
+                WorldMapFog.RevealAround(state, expedition.CurrentMapXPercent, expedition.CurrentMapYPercent);
 
                 if (TryResolveDiscovery(state, runtime, batch))
                     break;

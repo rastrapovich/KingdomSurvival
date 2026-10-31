@@ -132,6 +132,13 @@ public sealed class RevisionScreensPlayModeTests
         Assert.AreEqual(hours, Hours(campaign), 1e-6, "Донесения время не трогают.");
 
         // П. 3: подсказка значка карты по наведению; уходит с курсором.
+        // Бриф правок (19 пунктов) п. 1: в начале партии места за округой
+        // старта под туманом — открываем клетку ближайшего, как путь героя.
+        LocationData seen = campaign.Locations.First(l => !l.IsWaypoint && l.RevealedByFog);
+        WorldMapFog.RevealAround(campaign, seen.MapXPercent, seen.MapYPercent);
+        Invoke(main, "RefreshWorldMapPanel");
+        yield return Frames(3);
+        Assert.IsTrue(seen.IsVisibleOnMap, "Открытая клетка делает место известным.");
         Button node = root.Query<Button>(className: "world-map-node").ToList().First(n => n.resolvedStyle.display != DisplayStyle.None);
         string locationId = node.name.Substring("world-map-node-".Length);
         using (PointerEnterEvent enter = PointerEnterEvent.GetPooled())
@@ -177,7 +184,7 @@ public sealed class RevisionScreensPlayModeTests
 
         // П. 18: бег — те же часы на клетку, ×3 идёт втрое быстрее.
         campaign.ArmySupply = 40;
-        LocationData far = campaign.Locations.Where(l => !l.IsWaypoint && l.IsVisibleOnMap)
+        LocationData far = campaign.Locations.Where(l => !l.IsWaypoint && (l.IsVisibleOnMap || l.RevealedByFog))
             .OrderByDescending(l => Mathf.Abs(l.MapXPercent - WorldMapNavigation.CapitalXPercent) + Mathf.Abs(l.MapYPercent - WorldMapNavigation.CapitalYPercent))
             .First();
         Assert.IsTrue(campaign.TryStartExpedition(far.Id, new List<string>(), out string message), message);
@@ -204,9 +211,27 @@ public sealed class RevisionScreensPlayModeTests
         Assert.That(rate3 / rate1, Is.InRange(2.0, 4.0), "×3 — втрое быстрее в реальных секундах.");
         yield return Click(root.Q<Button>("map-tempo-1"));
 
+        // Бриф правок (19 пунктов) п. 19: кнопки нет, пока выбора нет; выбор
+        // появился — кнопка с числом у портрета, окно само не открывается.
+        CommanderData hero = campaign.GetSelectedCommander();
+        Invoke(main, "OpenHeroScreen");
+        yield return Frames(4);
+        Assert.AreEqual(DisplayStyle.None, root.Q("hero-screen-level-up").resolvedStyle.display, "Без выбора кнопки нет.");
+        Invoke(main, "CloseHeroScreen");
+        yield return Frames(2);
+        for (int i = 0; i < 400 && CharacterProgressionService.PendingChoices(campaign, hero.Id) < 2; i++)
+            CharacterProgressionService.AwardExperience(campaign, hero.Id, "test.levelup." + i, 50);
+        int pendingChoices = CharacterProgressionService.PendingChoices(campaign, hero.Id);
+        Assert.GreaterOrEqual(pendingChoices, 2, "Набралось два выбора развития.");
+        yield return Frames(4);
+        Assert.IsFalse(Get<bool>(main, "IsHeroScreenOpen"), "Окно выбора само не открылось.");
+
         // Пп. 6–10: страницы героя.
         Invoke(main, "OpenHeroScreen");
         yield return Frames(4);
+        Button levelUp = root.Q<Button>("hero-screen-level-up");
+        Assert.AreEqual(DisplayStyle.Flex, levelUp.resolvedStyle.display, "Есть выбор — кнопка у портрета.");
+        Assert.AreEqual("Повысить уровень (" + pendingChoices + ")", levelUp.text, "Несколько выборов — с числом.");
         Assert.AreEqual(DisplayStyle.None, root.Q("hero-screen-identity-title").resolvedStyle.display, "Служебного «КОМАНДИР» нет.");
         Assert.AreEqual(DisplayStyle.None, root.Q("hero-screen-state-phase-chip").resolvedStyle.display, "Статуса «В пути» нет.");
         Assert.AreEqual(DisplayStyle.None, root.Q("hero-screen-hero-gear").resolvedStyle.display, "Плашки «Снаряжение» нет.");
@@ -220,13 +245,31 @@ public sealed class RevisionScreensPlayModeTests
         VisualElement rosterRow = root.Q("hero-screen-roster-row");
         Assert.AreEqual(2, rosterRow.IndexOf(root.Q("hero-screen-roster-commander")), "Командир — в центре пяти позиций.");
         Assert.AreEqual(campaign.ActiveExpedition.RetinueIds.Count, root.Q("hero-screen-retinue-portraits").childCount, "Портрет — на каждого в свите, пустых нет.");
+        // Бриф правок (19 пунктов) п. 17: свита над рядом, ряд по центру,
+        // командир крупнее, в свободной игре — без Лады и Остафия.
+        VisualElement commanderCard = root.Q("hero-screen-roster-commander");
+        VisualElement fighterCard = root.Q("hero-screen-roster-fighter-1");
+        Assert.Less(root.Q("hero-screen-retinue").worldBound.yMax, rosterRow.worldBound.yMin + 1f, "Свита — над рядом позиций.");
+        Assert.AreEqual(commanderCard.worldBound.center.y, fighterCard.worldBound.center.y, 2f, "Карточки — в одной полосе высоты.");
+        Assert.That(commanderCard.worldBound.width / fighterCard.worldBound.width, Is.InRange(1.1f, 1.2f), "Командир крупнее примерно на 15%.");
+        Rect row = rosterRow.worldBound;
+        float leftGap = rosterRow.Children().Min(c => c.worldBound.xMin) - row.xMin;
+        float rightGap = row.xMax - rosterRow.Children().Max(c => c.worldBound.xMax);
+        Assert.AreEqual(leftGap, rightGap, 12f, "Ряд — по центру.");
+        Assert.AreEqual(DisplayStyle.None, root.Q("hero-screen-retinue-row").resolvedStyle.display, "Выбора Лады и Остафия нет.");
+        Assert.IsEmpty(campaign.ActiveExpedition.RetinueIds, "Свита новой свободной игры пуста.");
         yield return Capture(main, "rev_06_squad_page");
 
         yield return Click(root.Q<Button>("hero-screen-tab-gear"));
+        Assert.AreEqual(DisplayStyle.Flex, root.Q("hero-screen-unit-level-up").resolvedStyle.display, "Кнопка и у портрета на карточке человека.");
         Assert.AreEqual(DisplayStyle.None, root.Q("hero-screen-unit-card-heading").resolvedStyle.display, "Подписи «Командир» в снаряжении нет.");
         Assert.AreEqual(DisplayStyle.None, root.Q("hero-screen-unit-card-level").resolvedStyle.display, "Уровня в снаряжении нет.");
         Assert.AreEqual(DisplayStyle.None, root.Q("hero-screen-inventory-story").resolvedStyle.display, "Подписи сюжетных вещей нет.");
         yield return Capture(main, "rev_07_gear_page");
+        yield return Click(root.Q<Button>("hero-screen-unit-level-up"));
+        Assert.IsTrue(root.Q("hero-screen-unit-card-development").ClassListContains("hero-screen-person-page--active"), "Кнопка ведёт к выбору развития.");
+        Assert.AreEqual(pendingChoices, CharacterProgressionService.PendingChoices(campaign, hero.Id), "Выбор ждёт, пока его не сделают.");
+        yield return Capture(main, "rev_07b_growth_choice");
         Invoke(main, "CloseHeroScreen");
         yield return Frames(2);
 

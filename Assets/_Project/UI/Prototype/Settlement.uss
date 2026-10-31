@@ -233,7 +233,7 @@
 .trade-column {
     flex-grow: 1;
     flex-basis: 0px;
-    min-width: 280px;
+    min-width: 230px;
 }
 
 .trade-filter-row {
@@ -577,20 +577,31 @@
 
 /* Бриф правок п. 2: «Люди поселения» — плашки с портретами в основной
    области над изображением города (левая панель — 31%, не больше 600px). */
+/* Бриф правок (19 пунктов) п. 3: компактные строки у левого края
+   основной области — портрет слева, имя и описание справа, по вертикали. */
 .settlement-people-gallery {
     position: absolute;
     left: 33%; right: 32px; top: 90px; bottom: 90px;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    justify-content: center;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: flex-start;
 }
 
 .settlement-person--gallery {
-    width: 180px;
-    margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px;
-    padding-left: 8px; padding-right: 8px; padding-top: 8px; padding-bottom: 10px;
+    width: 440px;
+    max-width: 100%;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 0px; margin-right: 0px; margin-top: 0px; margin-bottom: 6px;
+    padding-left: 6px; padding-right: 10px; padding-top: 6px; padding-bottom: 6px;
     background-color: rgba(14, 13, 12, 0.86);
+}
+
+.settlement-person--gallery .settlement-person-text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin-left: 12px;
 }
 
 .settlement-person--gallery:hover {
@@ -599,11 +610,18 @@
 }
 
 .settlement-person--gallery .settlement-person-portrait {
-    height: 170px;
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+}
+
+.settlement-person--gallery .settlement-person-initial {
+    font-size: 28px;
 }
 
 .settlement-person--gallery .settlement-person-name {
-    font-size: 17px;
+    font-size: 16px;
+    margin-top: 0px;
 }
 
 .settlement-person-activity {
@@ -616,19 +634,41 @@
 /* Бриф правок п. 4: общая сделка — две стороны одновременно, под каждой
    её часть предложения; сведения — по правой кнопке. */
 .trade-hint { font-size: 12px; margin-bottom: 6px; }
-.trade-column--hero { margin-right: 14px; }
-.trade-column--merchant { margin-left: 14px; }
+/* Бриф правок (19 пунктов) п. 4: торговец слева, вещи героя справа, в
+   центре рядом две части одной сделки — «Вы покупаете» и «Вы продаёте». */
+.trade-column--merchant { margin-right: 10px; }
+.trade-column--hero { margin-left: 10px; }
+.trade-center {
+    flex-grow: 1.15;
+    flex-basis: 0px;
+    min-width: 300px;
+    flex-direction: row;
+}
 .trade-offer {
-    flex-shrink: 0;
-    height: 30%;
-    min-height: 150px;
-    margin-top: 8px;
+    flex-grow: 1;
+    flex-basis: 0px;
+    min-width: 0px;
+    margin-left: 3px; margin-right: 3px;
     padding-left: 6px; padding-right: 6px; padding-top: 6px; padding-bottom: 6px;
     background-color: rgba(40, 34, 22, 0.55);
     border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
     border-left-color: rgb(120, 98, 58); border-right-color: rgb(120, 98, 58);
     border-top-color: rgb(120, 98, 58); border-bottom-color: rgb(120, 98, 58);
     border-radius: 3px;
+}
+.trade-offer--drop { border-left-color: rgb(221, 181, 99); border-right-color: rgb(221, 181, 99);
+    border-top-color: rgb(221, 181, 99); border-bottom-color: rgb(221, 181, 99); background-color: rgba(60, 50, 28, 0.7); }
+.trade-offer--drop-hover { background-color: rgba(92, 74, 36, 0.85); }
+.trade-drag-ghost {
+    position: absolute;
+    padding-left: 10px; padding-right: 10px; padding-top: 6px; padding-bottom: 6px;
+    background-color: rgba(30, 26, 20, 0.92);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(221, 181, 99); border-right-color: rgb(221, 181, 99);
+    border-top-color: rgb(221, 181, 99); border-bottom-color: rgb(221, 181, 99);
+    border-radius: 3px;
+    color: rgb(233, 220, 190);
+    font-size: 14px;
 }
 .trade-offer-title { font-size: 13px; -unity-font-style: bold; color: rgb(221, 181, 99); margin-bottom: 4px; }
 .trade-offer-list { flex-grow: 1; }
@@ -660,6 +700,5 @@
 .trade-item-popup-icon { width: 64px; height: 64px; background-color: rgb(42, 38, 32); }
 .trade-item-popup-head-text { flex-grow: 1; flex-shrink: 1; margin-left: 12px; }
 .trade-item-popup-close { width: 34px; height: 32px; font-size: 18px; }
-.settlement-people-gallery { align-items: flex-start; }
 /* Бриф правок (19 пунктов) п. 13: припасов нет — красным. */
 .shell-resources-label--empty { color: rgb(232, 112, 96); -unity-font-style: bold; }

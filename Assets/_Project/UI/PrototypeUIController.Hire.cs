@@ -1,4 +1,4 @@
-using UnityEngine.UIElements;
+using System.Collections.Generic;
 
 // Бриф правок (19 пунктов) пп. 10, 18: найм — только разговором в корчме.
 // В корчме под «Ищут работу» — кандидаты (бывает, что никого); нажатие
@@ -9,11 +9,10 @@ using UnityEngine.UIElements;
 public partial class PrototypeUIController
 {
     private bool hireDialogueOpen;
-    private bool hireDialogueSoftened;
 
     private void RenderHireCandidates()
     {
-        System.Collections.Generic.List<HireCandidateData> candidates = HireService.Candidates(gameState, settlementLocationId);
+        List<HireCandidateData> candidates = HireService.Candidates(gameState, settlementLocationId);
         if (candidates.Count == 0)
             return;
         AddSettlementSection("Ищут работу");
@@ -29,51 +28,22 @@ public partial class PrototypeUIController
     {
         if (candidate == null || narrativeDialogueOverlay == null || IsNarrativeDialogueActive)
             return;
-        hireDialogueOpen = true;
         bool canHire = HireService.CanHire(gameState, settlementLocationId, candidate.Id, out string reason);
         int free = gameState.HasActiveExpedition ? GameState.ExpeditionFighterSlots - gameState.ActiveExpedition.FighterIds.Count : 0;
-
-        if (narrativePortrait != null)
-            narrativePortrait.style.display = DisplayStyle.None;
-        if (narrativeSpeakerLabel != null)
-            narrativeSpeakerLabel.text = candidate.Name;
-        if (narrativeRoleLabel != null)
-            narrativeRoleLabel.text = "ИЩЕТ РАБОТУ · " + candidate.RoleLabel.ToUpperInvariant();
-        if (narrativeHistoryContainer != null)
-        {
-            narrativeHistoryContainer.Clear();
-            AddEventDialogueLine("— Возьмёте с собой — пойду. Я " + candidate.RoleLabel + ": " + candidate.Benefit + ".", false);
-            AddEventDialogueLine("Плата — " + candidate.DailyWage + " зол. за игровые сутки, пока идёт с отрядом. Свободных мест в отряде: " +
-                                 System.Math.Max(0, free) + "." + (canHire ? string.Empty : " " + reason), true);
-        }
-        if (narrativeChoicesContainer != null)
-        {
-            narrativeChoicesContainer.Clear();
-            Button hire = InstantiateFlatTemplate<Button>(LoadNarrativeChoiceButtonTemplate(), "narrative-dialogue-choice");
-            if (hire != null)
+        string candidateId = candidate.Id;
+        ShowSettlementTalk(candidate.Name, "ИЩЕТ РАБОТУ · " + candidate.RoleLabel.ToUpperInvariant(),
+            new List<(string, bool)>
             {
-                hire.name = "hire-dialogue-accept";
-                hire.text = "Нанять — " + candidate.DailyWage + " зол. в сутки";
-                hire.SetEnabled(canHire);
-                hire.clicked += () => ConfirmHire(candidate.Id);
-                narrativeChoicesContainer.Add(hire);
-            }
-            Button later = InstantiateFlatTemplate<Button>(LoadNarrativeChoiceButtonTemplate(), "narrative-dialogue-choice");
-            if (later != null)
+                ("— Возьмёте с собой — пойду. Я " + candidate.RoleLabel + ": " + candidate.Benefit + ".", false),
+                ("Плата — " + candidate.DailyWage + " зол. за игровые сутки, пока идёт с отрядом. Свободных мест в отряде: " +
+                 System.Math.Max(0, free) + "." + (canHire ? string.Empty : " " + reason), true)
+            },
+            new List<(string, string, bool, System.Action)>
             {
-                later.name = "hire-dialogue-decline";
-                later.text = "Не сейчас";
-                later.clicked += CloseHireDialogue;
-                narrativeChoicesContainer.Add(later);
-            }
-        }
-        if (!narrativeDialogueOverlay.ClassListContains(DialogueOverPlaceClass))
-        {
-            narrativeDialogueOverlay.AddToClassList(DialogueOverPlaceClass);
-            hireDialogueSoftened = true;
-        }
-        narrativeDialogueOverlay.style.display = DisplayStyle.Flex;
-        narrativeDialogueOverlay.BringToFront();
+                ("hire-dialogue-accept", "Нанять — " + candidate.DailyWage + " зол. в сутки", canHire, () => ConfirmHire(candidateId)),
+                ("hire-dialogue-decline", "Не сейчас", true, CloseHireDialogue)
+            });
+        hireDialogueOpen = true;
     }
 
     private void ConfirmHire(string candidateId)
@@ -95,18 +65,7 @@ public partial class PrototypeUIController
     {
         if (!hireDialogueOpen)
             return;
-        hireDialogueOpen = false;
-        if (narrativeDialogueOverlay != null)
-            narrativeDialogueOverlay.style.display = DisplayStyle.None;
-        if (hireDialogueSoftened)
-        {
-            narrativeDialogueOverlay?.RemoveFromClassList(DialogueOverPlaceClass);
-            hireDialogueSoftened = false;
-        }
-        narrativeChoicesContainer?.Clear();
-        narrativeHistoryContainer?.Clear();
-        if (narrativePortrait != null)
-            narrativePortrait.style.display = DisplayStyle.Flex;
+        CloseSettlementTalk();
     }
 
     // ПКМ по бойцу отряда: характеристики (тот же расчёт, что в бою) и плата.

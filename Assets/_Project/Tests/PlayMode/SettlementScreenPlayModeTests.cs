@@ -91,12 +91,44 @@ public sealed class SettlementScreenPlayModeTests
     // указателя с числом нажатий.
     private static IEnumerator PointerPress(VisualElement element, int button, int clicks)
     {
+        IPanel panel = element.panel;
         Event down = new Event { type = EventType.MouseDown, button = button, clickCount = clicks, mousePosition = element.worldBound.center };
         using (PointerDownEvent evt = PointerDownEvent.GetPooled(down))
         {
             evt.target = element;
             element.SendEvent(evt);
         }
+        // Бриф правок (19 пунктов) п. 4: настоящий клик — нажатие и отпускание
+        // (строки торговли ждут отпускания, чтобы отличить клик от перетаскивания).
+        Event up = new Event { type = EventType.MouseUp, button = button, clickCount = clicks, mousePosition = element.worldBound.center };
+        using (PointerUpEvent evt = PointerUpEvent.GetPooled(up))
+        {
+            evt.target = element;
+            panel.visualTree.SendEvent(evt);
+        }
+        yield return Frames(2);
+    }
+
+    // Перетаскивание указателем: нажатие на строке, движение, отпускание над целью.
+    private static IEnumerator PointerDrag(VisualElement from, Vector2 to)
+    {
+        Vector2 start = from.worldBound.center;
+        IPanel panel = from.panel;
+        using (PointerDownEvent evt = PointerDownEvent.GetPooled(new Event { type = EventType.MouseDown, button = 0, clickCount = 1, mousePosition = start }))
+        {
+            evt.target = from;
+            from.SendEvent(evt);
+        }
+        yield return null;
+        foreach (float t in new[] { 0.1f, 0.5f, 1f })
+        {
+            Vector2 point = Vector2.Lerp(start, to, t);
+            using (PointerMoveEvent evt = PointerMoveEvent.GetPooled(new Event { type = EventType.MouseDrag, button = 0, mousePosition = point }))
+                panel.visualTree.SendEvent(evt);
+            yield return null;
+        }
+        using (PointerUpEvent evt = PointerUpEvent.GetPooled(new Event { type = EventType.MouseUp, button = 0, clickCount = 1, mousePosition = to }))
+            panel.visualTree.SendEvent(evt);
         yield return Frames(2);
     }
 
@@ -160,7 +192,7 @@ public sealed class SettlementScreenPlayModeTests
 
         GameState campaign = CampaignSession.Current;
         campaign.ArmySupply = 10;
-        LocationData target = campaign.Locations.First(location => !location.IsWaypoint && location.IsVisibleOnMap);
+        LocationData target = campaign.Locations.First(location => !location.IsWaypoint && (location.IsVisibleOnMap || location.RevealedByFog));
         Assert.IsTrue(campaign.TryStartExpedition(target.Id, new List<string> { "garrick" }, out string message), message);
         campaign.ActiveExpedition.RouteIndex = 1;
         // Без кадра между стартом похода и отладочным входом: иначе отряд
@@ -259,6 +291,33 @@ public sealed class SettlementScreenPlayModeTests
         Assert.AreEqual(supplyAfter, campaign.ArmySupply);
         Assert.AreEqual(0, root.Q<ScrollView>("trade-buy-offer").Query(className: "trade-row").ToList().Count, "Отменённая сделка пуста.");
         Assert.AreEqual(minutes, Minutes(campaign), 0.01, "Отмена сделки времени не тратит.");
+        // Бриф правок (19 пунктов) п. 4: торговец слева, вещи героя справа,
+        // в центре рядом «Вы покупаете» и «Вы продаёте»; перетаскивание.
+        VisualElement buyZone = root.Q("trade-buy-zone");
+        VisualElement sellZone = root.Q("trade-sell-zone");
+        Assert.Less(root.Q("trade-merchant-list").worldBound.xMax, buyZone.worldBound.xMin + 1f, "Товар торговца — слева.");
+        Assert.Less(buyZone.worldBound.xMax, sellZone.worldBound.xMin + 1f, "«Вы покупаете» и «Вы продаёте» — рядом.");
+        Assert.Less(sellZone.worldBound.xMax, root.Q("trade-party-list").worldBound.xMin + 1f, "Вещи героя — справа.");
+        yield return PointerDrag(TradeRow(root, "trade-merchant-list", "Припасы"), buyZone.worldBound.center);
+        Assert.AreEqual(1, root.Q<ScrollView>("trade-buy-offer").Query(className: "trade-row").ToList().Count, "Перетащенный товар — в покупках.");
+        yield return PointerDrag(TradeRow(root, "trade-party-list", "Припасы отряда"), sellZone.worldBound.center);
+        Assert.AreEqual(1, root.Q<ScrollView>("trade-sell-offer").Query(className: "trade-row").ToList().Count, "Своя вещь — в продажах.");
+        yield return PointerDrag(TradeRow(root, "trade-merchant-list", "Припасы"), sellZone.worldBound.center);
+        Assert.AreEqual("Припасы в дорогу", root.Q<ScrollView>("trade-buy-offer").Q<Label>(className: "trade-row-name").text,
+            "Товар торговца в «Вы продаёте» не кладётся.");
+        yield return CaptureBoth(main, "settlement_02d_trade_drag");
+        // Правая кнопка — сведения и в частях сделки.
+        yield return PointerPress(root.Q<ScrollView>("trade-sell-offer").Q(className: "trade-row"), 1, 1);
+        Assert.AreEqual(DisplayStyle.Flex, root.Q("trade-item-popup").resolvedStyle.display, "ПКМ в «Вы продаёте» — сведения.");
+        yield return Click(root.Q<Button>("trade-item-popup-close"));
+        // Вытащить строку из сделки — вернуть.
+        yield return PointerDrag(root.Q<ScrollView>("trade-buy-offer").Q(className: "trade-row"), root.Q("trade-merchant-list").worldBound.center);
+        yield return PointerDrag(root.Q<ScrollView>("trade-sell-offer").Q(className: "trade-row"), root.Q("trade-party-list").worldBound.center);
+        Assert.AreEqual(0, root.Q<ScrollView>("trade-buy-offer").Query(className: "trade-row").ToList().Count, "Вытащенная строка вернулась.");
+        Assert.AreEqual(0, root.Q<ScrollView>("trade-sell-offer").Query(className: "trade-row").ToList().Count);
+        Assert.AreEqual(goldAfter, campaign.ArmyGold, "Перетаскивание — только намерение.");
+        Assert.AreEqual(minutes, Minutes(campaign), 0.01, "Перетаскивание времени не тратит.");
+
         yield return Click(root.Q<Button>("trade-back-button"));
         Assert.AreEqual(DisplayStyle.None, trade.resolvedStyle.display);
 
@@ -306,7 +365,39 @@ public sealed class SettlementScreenPlayModeTests
         Assert.AreEqual(1, screen.Q("settlement-actions").Query<Button>().ToList().Count, "В столбце — только «Назад».");
         Assert.Greater(gallery.worldBound.xMin, root.Q("settlement-panel").worldBound.xMax - 1f, "Плашки — справа от панели, над городом.");
         yield return CaptureBoth(main, "settlement_05_people");
-        VisualElement talker = gallery.Children().First(c => c.tooltip != null && c.tooltip.StartsWith("Клик — поговорить"));
+        // Бриф правок (19 пунктов) п. 3: компактные строки по вертикали у
+        // левого края — портрет слева, имя справа, описание под именем.
+        List<VisualElement> rows = gallery.Children().ToList();
+        VisualElement firstRow = rows[0];
+        Assert.AreEqual(gallery.worldBound.xMin, firstRow.worldBound.xMin, 2f, "Строки — у левого края.");
+        Assert.LessOrEqual(firstRow.Q(className: "settlement-person-portrait").worldBound.xMax,
+            firstRow.Q<Label>(className: "settlement-person-name").worldBound.xMin, "Портрет слева от имени.");
+        Assert.Greater(firstRow.Q<Label>(className: "settlement-person-role").worldBound.yMin,
+            firstRow.Q<Label>(className: "settlement-person-name").worldBound.yMin, "Описание под именем.");
+        if (rows.Count > 1)
+            Assert.Greater(rows[1].worldBound.yMin, firstRow.worldBound.yMin, "Строки идут по вертикали.");
+
+        // Бриф правок (19 пунктов) п. 2: торговец — разговор, «Покажи свой
+        // товар» — торговля, «Назад» — снова разговор.
+        VisualElement trader = rows.First(c => c.tooltip == "Клик — поговорить с торговцем.");
+        double talkMinutes = Minutes(campaign);
+        yield return ClickElement(trader);
+        Assert.IsTrue(Get<bool>(main, "IsSettlementTalkOpen"), "Клик по торговцу — разговор.");
+        Assert.AreEqual(DisplayStyle.None, trade.resolvedStyle.display, "Торговля сама не открылась.");
+        yield return CaptureBoth(main, "settlement_05b_merchant_talk");
+        yield return Click(root.Q<Button>("merchant-talk-trade"));
+        Assert.AreEqual(DisplayStyle.Flex, trade.resolvedStyle.display, "«Покажи свой товар» — торговля.");
+        Assert.IsFalse(Get<bool>(main, "IsSettlementTalkOpen"));
+        yield return Click(root.Q<Button>("trade-back-button"));
+        Assert.AreEqual(DisplayStyle.None, trade.resolvedStyle.display);
+        Assert.IsTrue(Get<bool>(main, "IsSettlementTalkOpen"), "После торговли — снова разговор с торговцем.");
+        yield return Click(root.Q<Button>("merchant-talk-leave"));
+        Assert.IsFalse(Get<bool>(main, "IsSettlementTalkOpen"));
+        Assert.AreEqual("Люди поселения", root.Q<Label>("settlement-title").text, "Без петель — назад к списку.");
+        Assert.AreEqual(talkMinutes, Minutes(campaign), 0.01, "Разговор и просмотр товара времени не тратят.");
+
+        // Список перерисован после торговли — строки берутся заново.
+        VisualElement talker = gallery.Children().First(c => c.tooltip == "Клик — поговорить.");
         yield return ClickElement(talker);
         yield return Frames(3);
         Assert.IsTrue(Get<bool>(main, "IsNarrativeDialogueActive"), "Разговор из общего списка открылся.");

@@ -119,7 +119,7 @@ public sealed class WorldMapPerformancePlayModeTests
         Phase run = new Phase { Name = "Бег героя" };
         phases.Add(run);
         LocationData target = campaign.Locations
-            .Where(l => !l.IsWaypoint && l.IsVisibleOnMap)
+            .Where(l => !l.IsWaypoint && (l.IsVisibleOnMap || l.RevealedByFog))
             .OrderByDescending(l => Mathf.Abs(l.MapXPercent - WorldMapNavigation.CapitalXPercent) + Mathf.Abs(l.MapYPercent - WorldMapNavigation.CapitalYPercent))
             .FirstOrDefault();
         if (target != null)
@@ -185,7 +185,7 @@ public sealed class WorldMapPerformancePlayModeTests
         GameState campaign = CampaignSession.Current;
         campaign.ArmySupply = 60;
         LocationData target = campaign.Locations
-            .Where(l => !l.IsWaypoint && l.IsVisibleOnMap)
+            .Where(l => !l.IsWaypoint && (l.IsVisibleOnMap || l.RevealedByFog))
             .OrderByDescending(l => Mathf.Abs(l.MapXPercent - WorldMapNavigation.CapitalXPercent) + Mathf.Abs(l.MapYPercent - WorldMapNavigation.CapitalYPercent))
             .First();
         Assert.IsTrue(campaign.TryStartExpedition(target.Id, new List<string>(), out string message), message);
@@ -231,7 +231,7 @@ public sealed class WorldMapPerformancePlayModeTests
                 if (campaign.HasActiveExpedition)
                     campaign.ActiveExpedition = null;
                 LocationData next = campaign.Locations
-                    .Where(l => !l.IsWaypoint && l.IsVisibleOnMap && l.Id != target.Id)
+                    .Where(l => !l.IsWaypoint && (l.IsVisibleOnMap || l.RevealedByFog) && l.Id != target.Id)
                     .OrderByDescending(l => Mathf.Abs(l.MapXPercent - WorldMapNavigation.CapitalXPercent) + Mathf.Abs(l.MapYPercent - WorldMapNavigation.CapitalYPercent))
                     .First();
                 target = next;

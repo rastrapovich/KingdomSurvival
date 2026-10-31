@@ -153,10 +153,10 @@
                                         <ui:VisualElement name="world-map-terrain" class="world-map-layer world-map-terrain" />
                                         <ui:VisualElement name="world-map-roads" class="world-map-layer world-map-roads" />
                                         <ui:VisualElement name="world-map-decoration" class="world-map-layer world-map-decoration" />
+                                        <ui:VisualElement name="world-map-fog" class="world-map-layer world-map-fog" picking-mode="Ignore" />
                                         <ui:VisualElement name="world-map-routes" class="world-map-layer world-map-routes" />
                                         <ui:VisualElement name="world-map-search-areas" class="world-map-layer world-map-search-areas" picking-mode="Ignore" />
                                         <ui:VisualElement name="world-map-markers" class="world-map-layer world-map-markers" />
-                                        <ui:VisualElement name="world-map-fog" class="world-map-layer world-map-fog" />
                                         <ui:Button
                                             name="world-map-capital-button"
                                             text="ДОМ"
@@ -877,27 +877,8 @@
                     <ui:Label name="trade-title" text="" class="settlement-page-title ks-gold-text" />
                     <ui:Label name="trade-subtitle" text="" class="settlement-page-subtitle ks-muted-text" />
                 </ui:VisualElement>
-                <ui:Label name="trade-hint" text="Двойной клик — в сделку · двойной клик по строке сделки — вернуть · правая кнопка — сведения" class="trade-hint ks-muted-text" />
+                <ui:Label name="trade-hint" text="Перетащите товар в «Вы покупаете», свою вещь — в «Вы продаёте» (или двойной клик) · вытащите строку из сделки или нажмите ×, чтобы вернуть · правая кнопка — сведения" class="trade-hint ks-muted-text" />
                 <ui:VisualElement class="trade-columns">
-                    <ui:VisualElement class="trade-column trade-column--hero">
-                        <ui:VisualElement class="trade-column-head">
-                            <ui:VisualElement name="trade-hero-portrait" class="trade-portrait" />
-                            <ui:VisualElement class="trade-column-head-text">
-                                <ui:Label text="ВАШИ ВЕЩИ" class="ks-panel-title" />
-                                <ui:Label name="trade-party-money" text="" class="trade-column-money ks-text" />
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="trade-filter-row">
-                            <ui:TextField name="trade-party-search" class="trade-search" />
-                            <ui:DropdownField name="trade-party-filter" class="trade-filter" />
-                        </ui:VisualElement>
-                        <ui:ScrollView name="trade-party-list" class="trade-list" />
-                        <ui:VisualElement class="trade-offer">
-                            <ui:Label text="ВЫ ПРОДАЁТЕ" class="trade-offer-title" />
-                            <ui:ScrollView name="trade-sell-offer" class="trade-offer-list" />
-                            <ui:Label name="trade-sell-total" text="" class="trade-offer-total ks-text" />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
                     <ui:VisualElement class="trade-column trade-column--merchant">
                         <ui:VisualElement class="trade-column-head">
                             <ui:VisualElement name="trade-merchant-portrait" class="trade-portrait" />
@@ -911,11 +892,32 @@
                             <ui:DropdownField name="trade-merchant-filter" class="trade-filter" />
                         </ui:VisualElement>
                         <ui:ScrollView name="trade-merchant-list" class="trade-list" />
-                        <ui:VisualElement class="trade-offer">
+                    </ui:VisualElement>
+                    <ui:VisualElement class="trade-center">
+                        <ui:VisualElement name="trade-buy-zone" class="trade-offer trade-offer--buy">
                             <ui:Label text="ВЫ ПОКУПАЕТЕ" class="trade-offer-title" />
                             <ui:ScrollView name="trade-buy-offer" class="trade-offer-list" />
                             <ui:Label name="trade-buy-total" text="" class="trade-offer-total ks-text" />
                         </ui:VisualElement>
+                        <ui:VisualElement name="trade-sell-zone" class="trade-offer trade-offer--sell">
+                            <ui:Label text="ВЫ ПРОДАЁТЕ" class="trade-offer-title" />
+                            <ui:ScrollView name="trade-sell-offer" class="trade-offer-list" />
+                            <ui:Label name="trade-sell-total" text="" class="trade-offer-total ks-text" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="trade-column trade-column--hero">
+                        <ui:VisualElement class="trade-column-head">
+                            <ui:VisualElement name="trade-hero-portrait" class="trade-portrait" />
+                            <ui:VisualElement class="trade-column-head-text">
+                                <ui:Label text="ВАШИ ВЕЩИ" class="ks-panel-title" />
+                                <ui:Label name="trade-party-money" text="" class="trade-column-money ks-text" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="trade-filter-row">
+                            <ui:TextField name="trade-party-search" class="trade-search" />
+                            <ui:DropdownField name="trade-party-filter" class="trade-filter" />
+                        </ui:VisualElement>
+                        <ui:ScrollView name="trade-party-list" class="trade-list" />
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="trade-footer">

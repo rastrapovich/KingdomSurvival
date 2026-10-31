@@ -179,6 +179,7 @@ public partial class PrototypeUIController
         // 12Т: экран поселения — пока командир внутри и поверх ничего нет.
         TickSettlementScreen();
         TickWorldMapSearchAreas();
+        TickWorldMapFog();
         TickRewardToasts();
         TickEventDialogue();
 

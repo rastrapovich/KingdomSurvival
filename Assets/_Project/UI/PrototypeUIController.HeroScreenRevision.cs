@@ -21,6 +21,9 @@ public partial class PrototypeUIController
     private bool heroRevisionApplied;
     private VisualElement heroRevisionStates;
     private VisualElement heroRevisionRetinue;
+    private Label heroRevisionRetinueEmpty;
+    private Button heroLevelUpButton;
+    private Button heroUnitLevelUpButton;
 
     private void ApplyHeroScreenRevision()
     {
@@ -32,6 +35,7 @@ public partial class PrototypeUIController
             return;
         RefreshHeroRevisionHeroPage();
         RefreshHeroRevisionRetinue();
+        RefreshHeroLevelUpButtons();
     }
 
     private void ApplyHeroScreenRevisionLayout()
@@ -78,6 +82,11 @@ public partial class PrototypeUIController
         VisualElement squadPage = rosterBar.parent;
         squadPage?.Add(rosterBar);
         squadPage?.AddToClassList("hero-revision-squad");
+        // Бриф правок (19 пунктов) п. 17: свита — над рядом боевых позиций;
+        // ряд по центру, карточки в одной полосе высоты, командир крупнее.
+        if (retinuePanel.parent == rosterBar)
+            rosterBar.Insert(0, retinuePanel);
+        rosterBar.AddToClassList("hero-revision-roster-bar");
         Hide(root.Q("hero-screen-states"));
         foreach (HeroRosterCardRefs refs in heroScreenRosterCards)
             Hide(refs?.Condition);
@@ -87,6 +96,31 @@ public partial class PrototypeUIController
         heroRevisionRetinue.AddToClassList("hero-revision-retinue");
         retinuePanel.Insert(Mathf.Min(1, retinuePanel.childCount), heroRevisionRetinue);
         Hide(root.Q("hero-screen-retinue-description"));
+        heroRevisionRetinueEmpty = new Label("Свиты нет.") { name = "hero-screen-retinue-empty" };
+        heroRevisionRetinueEmpty.AddToClassList("hero-screen-retinue-caption");
+        heroRevisionRetinueEmpty.AddToClassList("ks-muted-text");
+        retinuePanel.Insert(Mathf.Min(2, retinuePanel.childCount), heroRevisionRetinueEmpty);
+
+        // Бриф правок (19 пунктов) п. 19: «Повысить уровень» у портрета —
+        // командира на главной странице и выбранного человека на его
+        // карточке. Окно само не открывается; выбор ждёт, пока его не сделают.
+        heroLevelUpButton = CreateHeroLevelUpButton("hero-screen-level-up", () =>
+        {
+            CommanderData commander = gameState?.GetSelectedCommander();
+            if (commander != null)
+                ShowHeroPersonOnTab(commander.Id, HeroScreenTab.Growth);
+        });
+        VisualElement identity = root.Q("hero-screen-identity");
+        VisualElement heroPortrait = root.Q("hero-screen-portrait");
+        if (identity != null && heroPortrait != null && heroPortrait.parent == identity)
+            identity.Insert(identity.IndexOf(heroPortrait) + 1, heroLevelUpButton);
+        heroUnitLevelUpButton = CreateHeroLevelUpButton("hero-screen-unit-level-up", () =>
+        {
+            if (!string.IsNullOrEmpty(heroCardPersonId))
+                ShowHeroPersonOnTab(heroCardPersonId, HeroScreenTab.Growth);
+        });
+        heroUnitLevelUpButton.AddToClassList("hero-level-up-button--unit");
+        root.Q("hero-screen-unit-card-portrait")?.Add(heroUnitLevelUpButton);
 
 
         heroRevisionApplied = true;
@@ -160,14 +194,46 @@ public partial class PrototypeUIController
         heroRevisionRetinue.style.display = heroRevisionRetinue.childCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
 
         // Выбор специалиста — только пока состав можно менять; в походе
-        // свита уже ушла и видна портретами.
-        bool editable = ExpeditionPreparation.CanEdit(gameState);
+        // свита уже ушла и видна портретами. Бриф правок (19 пунктов) п. 17:
+        // в свободной игре Дома нет — Остафия и Лады нет, заглушек выбора тоже.
+        bool editable = ExpeditionPreparation.CanEdit(gameState) && !IsFreePlayWithoutHome;
         foreach (string name in new[] { "hero-screen-retinue-row", "hero-screen-retinue-forecast" })
         {
             VisualElement element = interfaceRoot.Q(name);
             if (element != null)
                 element.style.display = editable ? DisplayStyle.Flex : DisplayStyle.None;
         }
+        if (heroRevisionRetinueEmpty != null)
+            heroRevisionRetinueEmpty.style.display = heroRevisionRetinue.childCount == 0 && !editable
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
+    }
+
+    private static Button CreateHeroLevelUpButton(string name, System.Action onClick)
+    {
+        Button button = new Button(onClick) { name = name, text = "Повысить уровень" };
+        button.AddToClassList("ks-button");
+        button.AddToClassList("hero-level-up-button");
+        button.style.display = DisplayStyle.None;
+        return button;
+    }
+
+    // Кнопка видна, только пока у человека ждёт выбор развития; несколько —
+    // с числом. Привязка — к своему человеку (командир / выбранный).
+    private void RefreshHeroLevelUpButtons()
+    {
+        CommanderData commander = gameState.GetSelectedCommander();
+        ApplyHeroLevelUpButton(heroLevelUpButton, commander?.Id);
+        ApplyHeroLevelUpButton(heroUnitLevelUpButton, heroCardPersonId);
+    }
+
+    private void ApplyHeroLevelUpButton(Button button, string personId)
+    {
+        if (button == null)
+            return;
+        int pending = string.IsNullOrEmpty(personId) ? 0 : CharacterProgressionService.PendingChoices(gameState, personId);
+        button.text = pending > 1 ? "Повысить уровень (" + pending + ")" : "Повысить уровень";
+        button.style.display = pending > 0 ? DisplayStyle.Flex : DisplayStyle.None;
     }
 
     private VisualElement CreateRetinuePortrait(ResidentState resident)

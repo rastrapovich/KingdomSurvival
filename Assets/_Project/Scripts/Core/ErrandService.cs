@@ -149,6 +149,8 @@ public static class ErrandService
         return reports;
     }
 
+    public const string GoalIdPrefix = "errand.";
+
     // «Дела» журнала по принятым поручениям.
     public static List<JournalGoalViewData> BuildGoals(GameState state)
     {
@@ -208,7 +210,7 @@ public static class ErrandService
 
             goals.Add(new JournalGoalViewData
             {
-                Id = "errand." + errand.Id,
+                Id = GoalIdPrefix + errand.Id,
                 Title = errand.Title,
                 Description = errand.Summary + (string.IsNullOrWhiteSpace(errand.RewardText) ? string.Empty : " Награда: " + errand.RewardText + "."),
                 CurrentStep = step,

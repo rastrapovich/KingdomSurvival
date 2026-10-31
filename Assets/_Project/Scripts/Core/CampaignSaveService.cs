@@ -166,6 +166,10 @@ public static class CampaignSaveService
         if (!state.HasGeneratedMap)
             state.GeneratedMap = null;
 
+        // Бриф правок (19 пунктов) п. 1: у сохранений до тумана открыта
+        // округа текущей точки героя; известные места остаются известными.
+        WorldMapFog.EnsureInitialized(state);
+
         // ПР-06А: население — производное, пересчитывается из людей.
         HomePeopleService.RecountPopulation(state);
 

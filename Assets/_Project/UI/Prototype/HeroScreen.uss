@@ -1878,6 +1878,27 @@
 
 /* Отряд: боевые позиции внизу, свита портретами, выбор бойца. */
 .hero-revision-squad { justify-content: flex-end; }
+/* Бриф правок (19 пунктов) п. 17: свита над рядом; ряд по центру, карточки
+   в одной полосе высоты, командир крупнее примерно на 15%. */
+.hero-revision-roster-bar { flex-direction: column; align-items: stretch; }
+.hero-revision-roster-bar .hero-screen-retinue-panel { width: auto; margin-bottom: 10px; }
+.hero-revision-roster-bar .hero-screen-roster-panel { margin-right: 0px; }
+.hero-revision-roster-bar .hero-screen-roster-row { justify-content: center; align-items: center; }
+.hero-revision-roster-bar .hero-screen-roster-card { margin-left: 5px; margin-right: 5px; }
+.hero-revision-roster-bar .hero-screen-roster-card-commander { width: 202px; }
+.hero-revision-roster-bar .hero-screen-roster-card-commander .hero-screen-roster-card-portrait { height: 126px; }
+.hero-revision-roster-bar .hero-screen-roster-card-commander .hero-screen-roster-card-name { font-size: 15px; }
+/* Бриф правок (19 пунктов) п. 19: «Повысить уровень» у портрета. */
+.hero-level-up-button {
+    height: 30px; margin-top: 6px; margin-bottom: 4px;
+    font-size: 13px; -unity-font-style: bold;
+    color: rgb(30, 24, 14);
+    background-color: rgb(221, 181, 99);
+    border-left-color: rgb(250, 220, 150); border-right-color: rgb(250, 220, 150);
+    border-top-color: rgb(250, 220, 150); border-bottom-color: rgb(250, 220, 150);
+}
+.hero-level-up-button:hover { background-color: rgb(240, 202, 120); }
+.hero-level-up-button--unit { position: absolute; left: 6px; right: 6px; top: 4px; margin-top: 0px; }
 .hero-revision-retinue { flex-direction: row; flex-wrap: wrap; margin-top: 6px; margin-bottom: 6px; }
 .hero-revision-retinue-card { width: 104px; margin-right: 10px; align-items: center; }
 .hero-revision-retinue-portrait {

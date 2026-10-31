@@ -25,6 +25,15 @@ public partial class PrototypeUIController
     private readonly Dictionary<string, QuickExpeditionCardView> quickExpeditionCards =
         new Dictionary<string, QuickExpeditionCardView>();
     private VisualTreeAsset expeditionLocationCardTemplate;
+    // Бриф правок (19 пунктов) п. 16: карточки строятся для конкретной
+    // партии и её набора мест. Раньше они собирались один раз (новая игра)
+    // и после загрузки оставались от прежней партии: срабатывала только
+    // карточка с совпавшим ID (у генератора — «Перекрёсток»), а места,
+    // появившиеся по ходу игры, карточек не имели. Лишние карточки уходили
+    // за край окна — теперь список прокручивается.
+    private GameState quickExpeditionBoundState;
+    private string quickExpeditionBoundSignature;
+    private ScrollView quickExpeditionList;
 
     private void InitializeExpeditionViewsUi()
     {
@@ -68,13 +77,27 @@ public partial class PrototypeUIController
         foreach (QuickExpeditionCardView existing in quickExpeditionCards.Values)
             existing.Root?.RemoveFromHierarchy();
         quickExpeditionCards.Clear();
+        quickExpeditionBoundState = gameState;
+        quickExpeditionBoundSignature = QuickExpeditionSignature();
+
+        if (quickExpeditionList == null)
+        {
+            quickExpeditionList = new ScrollView(ScrollViewMode.Vertical) { name = "quick-expedition-list" };
+            quickExpeditionList.AddToClassList("quick-expedition-list");
+            quickExpeditionList.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+            quickExpeditionList.style.flexGrow = 1f;
+            quickExpeditionList.style.flexShrink = 1f;
+            quickExpeditionPopup.Add(quickExpeditionList);
+        }
 
         VisualTreeAsset template = LoadExpeditionLocationCardTemplate();
-        if (template == null)
+        if (template == null || gameState == null)
             return;
 
         foreach (LocationData location in gameState.Locations)
         {
+            if (location == null || location.IsWaypoint)
+                continue;
             TemplateContainer instance = template.Instantiate();
 
             VisualElement card = instance.Q<VisualElement>("quick-expedition-card");
@@ -90,7 +113,7 @@ public partial class PrototypeUIController
             if (action != null)
                 action.clicked += () => OnQuickLocationActionClicked(capturedId);
 
-            quickExpeditionPopup.Add(instance);
+            quickExpeditionList.Add(instance);
             quickExpeditionCards[location.Id] = new QuickExpeditionCardView
             {
                 Location = location,
@@ -207,10 +230,29 @@ public partial class PrototypeUIController
         RefreshQuickExpeditionStatus();
     }
 
+    // Набор мест партии (ID по порядку): изменился — карточки собираются заново.
+    private string QuickExpeditionSignature()
+    {
+        if (gameState?.Locations == null)
+            return string.Empty;
+        System.Text.StringBuilder builder = new System.Text.StringBuilder();
+        foreach (LocationData location in gameState.Locations)
+        {
+            if (location != null && !location.IsWaypoint)
+                builder.Append(location.Id).Append('|');
+        }
+        return builder.ToString();
+    }
+
     private void RefreshQuickExpeditionStatus()
     {
         if (quickExpeditionOrderLabel == null)
             return;
+        if (!ReferenceEquals(quickExpeditionBoundState, gameState) ||
+            quickExpeditionBoundSignature != QuickExpeditionSignature())
+        {
+            BindQuickExpeditionPopup();
+        }
 
         if (!gameState.HasActiveExpedition)
             quickExpeditionOrderLabel.text = "ПРИКАЗ НА СЕГОДНЯ: нет";
@@ -238,6 +280,7 @@ public partial class PrototypeUIController
             QuickExpeditionCardView view;
             if (!quickExpeditionCards.TryGetValue(location.Id, out view))
                 continue;
+            view.Location = location;
 
             if (view.Card != null)
                 view.Card.style.display = location.IsVisibleOnMap

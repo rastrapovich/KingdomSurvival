@@ -4,11 +4,13 @@ using KingdomSurvival.UnitDatabase;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-// 12Т (SETTLEMENTS_TRADE_TAVERN_SPEC.md §10) и бриф правок (22 пункта) п. 4:
-// торговля — одна общая сделка. Слева вещи героя (и припасы), справа товар
-// торговца; под каждой стороной — её часть предложения. Двойной клик кладёт
-// единицу в предложение, двойной клик по строке предложения возвращает одну,
-// правая кнопка — сведения (ничего не переносит). Предложение — только
+// 12Т (SETTLEMENTS_TRADE_TAVERN_SPEC.md §10) и брифы правок (22 пункта) п. 4,
+// (19 пунктов) п. 4: торговля — одна общая сделка. Слева товар торговца,
+// справа вещи героя (и припасы), в центре рядом «Вы покупаете» и «Вы
+// продаёте». Перетаскивание или двойной клик кладёт единицу в предложение;
+// строку предложения возвращают ×/−, двойным кликом или вытащив её из
+// своей части; правая кнопка — сведения во всех четырёх областях (ничего не
+// переносит). Предложение — только
 // намерение: вещи и золото меняет одна команда TradeService.TryConfirm (всё
 // или ничего, с повторной проверкой остатков, денег и места в сумке).
 public partial class PrototypeUIController
@@ -124,6 +126,7 @@ public partial class PrototypeUIController
             }
         });
         tradePage.style.display = DisplayStyle.None;
+        BindSettlementTradeDrag();
     }
 
     private void OpenSettlementTrade(string merchantId)
@@ -153,6 +156,7 @@ public partial class PrototypeUIController
 
     private void HideSettlementTrade()
     {
+        CancelTradeDrag();
         HideTradePopup();
         if (tradePage != null)
             tradePage.style.display = DisplayStyle.None;
@@ -183,11 +187,15 @@ public partial class PrototypeUIController
             {
                 HideSettlementTrade();
                 RenderSettlement();
+                ReturnToMerchantTalkAfterTrade();
             });
             return;
         }
         HideSettlementTrade();
         RenderSettlement();
+        // Бриф правок (19 пунктов) п. 2: из разговора — назад в разговор,
+        // из кнопки лавки — на страницу поселения.
+        ReturnToMerchantTalkAfterTrade();
     }
 
     // ------------------------------------------------------------------
@@ -280,10 +288,11 @@ public partial class PrototypeUIController
             TradeOfferView captured = offer;
             tradeBuyOffer.Add(CreateTradeOfferLine(offer.Item?.Id, offer.Name, line.Quantity, sum, stepper,
                 () => ChangeTradeBuy(captured, -1), () => ChangeTradeBuy(captured, 1),
-                () => ShowTradePopupForOffer(captured)));
+                () => ShowTradePopupForOffer(captured), TradeDragSource.BuyOffer,
+                () => ChangeTradeBuy(captured, -tradeCart.QuantityOf(captured.Kind, captured.Key))));
         }
         if (tradeBuyOffer.childCount == 0)
-            tradeBuyOffer.Add(CreateTradeOfferEmpty("Двойной клик по товару справа — купить."));
+            tradeBuyOffer.Add(CreateTradeOfferEmpty("Перетащите сюда товар торговца слева или дважды щёлкните по нему."));
         tradeBuyTotal.text = "Покупки: " + total + " зол.";
         return total;
     }
@@ -298,7 +307,8 @@ public partial class PrototypeUIController
             int sum = unit * tradeCart.SellSupplies;
             total += sum;
             tradeSellOffer.Add(CreateTradeOfferLine(null, "Припасы отряда", tradeCart.SellSupplies, sum, true,
-                () => ChangeTradeSupplySale(-1), () => ChangeTradeSupplySale(1), () => ShowTradeSuppliesPopup(definition)));
+                () => ChangeTradeSupplySale(-1), () => ChangeTradeSupplySale(1), () => ShowTradeSuppliesPopup(definition),
+                TradeDragSource.SellOffer, () => ChangeTradeSupplySale(-tradeCart.SellSupplies)));
         }
         foreach (string instanceId in tradeCart.SellInstanceIds)
         {
@@ -308,10 +318,11 @@ public partial class PrototypeUIController
             total += sell.UnitPrice;
             TradeSellView captured = sell;
             tradeSellOffer.Add(CreateTradeOfferLine(sell.Item.Id, sell.Item.Name, 1, sell.UnitPrice, false,
-                () => RemoveTradeSell(captured), null, () => ShowTradePopupForSell(captured)));
+                () => RemoveTradeSell(captured), null, () => ShowTradePopupForSell(captured),
+                TradeDragSource.SellOffer, () => RemoveTradeSell(captured)));
         }
         if (tradeSellOffer.childCount == 0)
-            tradeSellOffer.Add(CreateTradeOfferEmpty("Двойной клик по своей вещи слева — продать."));
+            tradeSellOffer.Add(CreateTradeOfferEmpty("Перетащите сюда свою вещь справа или дважды щёлкните по ней."));
         tradeSellTotal.text = "Продажи: " + total + " зол.";
         return total;
     }
@@ -364,7 +375,8 @@ public partial class PrototypeUIController
         TradeOfferView captured = offer;
         VisualElement row = CreateTradeRow(offer.Item?.Id, offer.Name, detail, offer.UnitPrice + " зол.",
             inCart > 0 ? "в сделке ×" + inCart : string.Empty, tradeHighlightKey == key, inCart > 0, !offer.Enabled);
-        WireTradeRow(row, key, () => ChangeTradeBuy(captured, 1), () => ShowTradePopupForOffer(captured));
+        WireTradeRow(row, key, () => ChangeTradeBuy(captured, 1), () => ShowTradePopupForOffer(captured),
+            TradeDragSource.Merchant, offer.Name);
         return row;
     }
 
@@ -377,7 +389,8 @@ public partial class PrototypeUIController
         TradeSellView captured = sell;
         VisualElement row = CreateTradeRow(sell.Item.Id, sell.Item.Name, detail, sell.Enabled ? sell.UnitPrice + " зол." : "—",
             inCart ? "в сделке" : string.Empty, tradeHighlightKey == key, inCart, !sell.Enabled);
-        WireTradeRow(row, key, () => AddTradeSell(captured), () => ShowTradePopupForSell(captured));
+        WireTradeRow(row, key, () => AddTradeSell(captured), () => ShowTradePopupForSell(captured),
+            TradeDragSource.Hero, sell.Item.Name);
         return row;
     }
 
@@ -389,13 +402,15 @@ public partial class PrototypeUIController
             TradeService.SupplySellPrice(definition) + " зол.", tradeCart.SellSupplies > 0 ? "в сделке ×" + tradeCart.SellSupplies : string.Empty,
             tradeHighlightKey == "sell:supplies", tradeCart.SellSupplies > 0, false);
         row.AddToClassList("trade-row--supplies");
-        WireTradeRow(row, "sell:supplies", () => ChangeTradeSupplySale(1), () => ShowTradeSuppliesPopup(definition));
+        WireTradeRow(row, "sell:supplies", () => ChangeTradeSupplySale(1), () => ShowTradeSuppliesPopup(definition),
+            TradeDragSource.Hero, "Припасы отряда");
         return row;
     }
 
-    // Клик — подсветить строку; двойной клик — действие; правая кнопка —
-    // сведения (ничего не переносит).
-    private void WireTradeRow(VisualElement row, string key, System.Action onDouble, System.Action onDetails)
+    // Клик — подсветить строку; перетаскивание в свою часть сделки или
+    // двойной клик — действие; правая кнопка — сведения (ничего не переносит).
+    private void WireTradeRow(VisualElement row, string key, System.Action onDouble, System.Action onDetails,
+        TradeDragSource source, string dragLabel)
     {
         row.RegisterCallback<PointerDownEvent>(evt =>
         {
@@ -408,16 +423,19 @@ public partial class PrototypeUIController
             if (evt.button != 0)
                 return;
             evt.StopPropagation();
-            tradeHighlightKey = key;
             if (evt.clickCount >= 2)
+            {
+                CancelTradeDrag();
+                tradeHighlightKey = key;
                 onDouble?.Invoke();
-            else
-                RenderSettlementTrade();
+                return;
+            }
+            BeginTradeDragCandidate(evt, source, key, dragLabel, onDouble);
         });
     }
 
     private VisualElement CreateTradeOfferLine(string itemId, string name, int quantity, int sum, bool stepper,
-        System.Action onLess, System.Action onMore, System.Action onDetails)
+        System.Action onLess, System.Action onMore, System.Action onDetails, TradeDragSource source, System.Action onRemoveAll)
     {
         VisualElement row = CreateTradeRow(itemId, quantity > 1 ? name + " ×" + quantity : name, string.Empty, sum + " зол.",
             string.Empty, false, true, false);
@@ -447,10 +465,18 @@ public partial class PrototypeUIController
                 evt.StopPropagation();
                 onDetails?.Invoke();
             }
-            else if (evt.button == 0 && evt.clickCount >= 2)
+            else if (evt.button == 0 && !(evt.target is Button))
             {
                 evt.StopPropagation();
-                onLess();
+                if (evt.clickCount >= 2)
+                {
+                    CancelTradeDrag();
+                    onLess();
+                }
+                else
+                {
+                    BeginTradeDragCandidate(evt, source, null, name, onRemoveAll);
+                }
             }
         });
         return row;

@@ -240,6 +240,8 @@ public partial class PrototypeUIController
     {
         if (!settlementUiBound)
             return;
+        CloseSettlementTalk();
+        tradeReturnPersonId = null;
         HideSettlementPages();
         CloseSettlementConfirm();
         settlementLocationId = null;
@@ -432,7 +434,7 @@ public partial class PrototypeUIController
             {
                 Label activity = new Label(person.Activity);
                 activity.AddToClassList("settlement-person-activity");
-                card.Add(activity);
+                (card.Q<VisualElement>("settlement-person-text") ?? card).Add(activity);
             }
             settlementGallery.Add(card);
         }
@@ -526,6 +528,9 @@ public partial class PrototypeUIController
                 StartSettlementDialogue(action.TargetId);
                 break;
             case SettlementActionType.Trade:
+                // Бриф правок (19 пунктов) п. 2: кнопка лавки — сразу торговля,
+                // «Назад» — на страницу поселения.
+                tradeReturnPersonId = null;
                 OpenSettlementTrade(action.TargetId);
                 break;
             case SettlementActionType.Tavern:
@@ -744,35 +749,46 @@ public partial class PrototypeUIController
             portrait.Add(initial);
         }
         card.Add(portrait);
+        // Бриф правок (19 пунктов) п. 3: имя и описание — одним блоком (в
+        // общем списке он стоит справа от портрета).
+        VisualElement text = new VisualElement { name = "settlement-person-text" };
+        text.AddToClassList("settlement-person-text");
+        card.Add(text);
         Label name = new Label(person.DisplayName);
         name.AddToClassList("settlement-person-name");
-        card.Add(name);
+        text.Add(name);
         string role = person.Role;
         if (tavern && !string.IsNullOrEmpty(person.Activity))
             role = string.IsNullOrEmpty(role) ? person.Activity : role + " · " + person.Activity.ToLowerInvariant();
         Label roleLabel = new Label(role);
         roleLabel.AddToClassList("settlement-person-role");
-        card.Add(roleLabel);
+        text.Add(roleLabel);
 
         bool talk = !string.IsNullOrEmpty(person.DialogueId) && SettlementDialogueExists(person.DialogueId);
         bool trades = !string.IsNullOrEmpty(person.MerchantId) &&
                       SettlementService.Profile(gameState, settlementLocationId)?.FindMerchant(person.MerchantId) != null;
-        card.tooltip = talk && trades ? "Клик — поговорить; торговля — кнопкой на панели." : talk ? "Клик — поговорить." : trades ? "Клик — торговать." : person.DisplayName;
+        // Бриф правок (19 пунктов) п. 2: торговец — сначала разговор (кто он,
+        // «Покажи свой товар»), а прямая торговля — у кнопки лавки.
+        card.tooltip = trades ? "Клик — поговорить с торговцем." : talk ? "Клик — поговорить." : person.DisplayName;
         string dialogueId = person.DialogueId;
         string merchantId = person.MerchantId;
         card.RegisterCallback<ClickEvent>(evt =>
         {
             evt.StopPropagation();
-            if (talk)
+            if (trades)
+                OpenMerchantTalk(person);
+            else if (talk)
                 StartSettlementDialogue(dialogueId);
-            else if (trades)
-                OpenSettlementTrade(merchantId);
         });
-        // Торгующий посетитель корчмы — ещё и кнопкой на панели.
+        // Торгующий посетитель корчмы — ещё и кнопкой на панели (прямая торговля).
         if (tavern && trades)
         {
             string label = "Торговать: " + person.DisplayName;
-            AddSettlementAction(label, person.Role, true, () => OpenSettlementTrade(merchantId), false);
+            AddSettlementAction(label, person.Role, true, () =>
+            {
+                tradeReturnPersonId = null;
+                OpenSettlementTrade(merchantId);
+            }, false);
         }
         return card;
     }
@@ -911,9 +927,9 @@ public partial class PrototypeUIController
         Keyboard keyboard = Keyboard.current;
         if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame || IsGameMenuOpen || IsJournalOpen)
             return;
-        if (hireDialogueOpen)
+        if (IsSettlementTalkOpen)
         {
-            CloseHireDialogue();
+            CloseSettlementTalk();
             return;
         }
         if (IsSettlementConfirmOpen)

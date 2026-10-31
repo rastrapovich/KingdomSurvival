@@ -112,7 +112,7 @@ public sealed class SettlementCampPlayModeTests
 
         GameState campaign = CampaignSession.Current;
         campaign.ArmySupply = 30;
-        LocationData target = campaign.Locations.First(location => !location.IsWaypoint && location.IsVisibleOnMap);
+        LocationData target = campaign.Locations.First(location => !location.IsWaypoint && (location.IsVisibleOnMap || location.RevealedByFog));
         Assert.IsTrue(campaign.TryStartExpedition(target.Id, new List<string> { "garrick" }, out string message, HomePeopleService.OstafiyId), message);
         campaign.ActiveExpedition.RouteIndex = 1;
         // Без кадра между стартом похода и отладочным входом: иначе отряд

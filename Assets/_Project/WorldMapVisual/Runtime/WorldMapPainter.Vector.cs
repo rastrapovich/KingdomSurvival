@@ -566,7 +566,8 @@ namespace KingdomSurvival.WorldMapVisual
                 // воды; концы совпадают с концами дороги на суше.
                 if (map.BridgeSpans != null && map.BridgeSpans.Count >= 2)
                 {
-                    foreach ((Vector2 a, Vector2 c) in BridgeSpanPixels())
+                    // Бриф правок (19 пунктов) п. 15: настил — половина пролёта.
+                    foreach ((Vector2 a, Vector2 c) in BridgeDeckPixels())
                     {
                         Vector2 along = (c - a).normalized;
                         Vector2 normal = new Vector2(-along.y, along.x);

@@ -95,7 +95,7 @@ public static class CharacterProgressionService
         ProgressionRules rules = ProgressionRules.Current;
         if (IsHero(state, personId))
             return rules.GetProfile(ProgressionRules.HeroProfileId);
-        ResidentState resident = HomePeopleService.Find(state, personId);
+        ResidentState resident = PeopleService.Find(state, personId);
         string unitTypeId = resident != null && !string.IsNullOrEmpty(resident.UnitTypeId)
             ? resident.UnitTypeId
             : FindFighter(state, personId)?.UnitTypeId;
@@ -123,7 +123,7 @@ public static class CharacterProgressionService
         PersonProgressionData record = Get(state, personId);
         if (record == null || WasApplied(state, sourceId, personId))
             return null;
-        ResidentState resident = HomePeopleService.Find(state, personId);
+        ResidentState resident = PeopleService.Find(state, personId);
         if (resident != null && !resident.IsAlive)
             return null;
         ProgressionProfile profile = ProfileFor(state, personId);
@@ -180,7 +180,7 @@ public static class CharacterProgressionService
         {
             foreach (string fighterId in state.ActiveExpedition.FighterIds)
             {
-                ResidentState resident = HomePeopleService.Find(state, fighterId);
+                ResidentState resident = PeopleService.Find(state, fighterId);
                 if ((resident == null || resident.IsAlive) && IsProgressing(state, fighterId) &&
                     !PartyPresence.IsWaitingInCamp(state, fighterId))
                     ids.Add(fighterId);
@@ -756,7 +756,7 @@ public static class CharacterProgressionService
 
     public static string DisplayName(GameState state, string personId)
     {
-        ResidentState resident = HomePeopleService.Find(state, personId);
+        ResidentState resident = PeopleService.Find(state, personId);
         if (resident != null && !string.IsNullOrEmpty(resident.DisplayName))
             return resident.DisplayName;
         FighterData data = FindPersonData(state, personId);

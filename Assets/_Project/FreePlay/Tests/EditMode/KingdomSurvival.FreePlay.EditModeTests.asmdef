@@ -1,0 +1,27 @@
+{
+  "name": "KingdomSurvival.FreePlay.EditModeTests",
+  "rootNamespace": "",
+  "references": [
+    "KingdomSurvival.Core",
+    "KingdomSurvival.DialogueDatabase",
+    "KingdomSurvival.FreePlay",
+    "KingdomSurvival.Encounters",
+    "KingdomSurvival.BattlefieldDatabase",
+    "KingdomSurvival.BattleSandbox.Runtime",
+    "KingdomSurvival.UnitDatabase"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

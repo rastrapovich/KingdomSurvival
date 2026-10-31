@@ -10,7 +10,7 @@ public sealed class ChroniclePr11Tests
 {
     private static GameState NewState()
     {
-        return new CampaignSetup { WorldSeed = 20260925 }.CreateCampaign();
+        return TestPeople.AdmitAll(new CampaignSetup { WorldSeed = 20260925 }.CreateCampaign());
     }
 
     [Test]
@@ -57,9 +57,9 @@ public sealed class ChroniclePr11Tests
     public void Death_OutsideBattle_IsRecordedOnce()
     {
         GameState state = NewState();
-        ResidentState person = HomePeopleService.Find(state, "garrick");
-        HomePeopleService.MarkDead(state, "garrick", "hunger");
-        HomePeopleService.MarkDead(state, "garrick", "hunger");
+        ResidentState person = PeopleService.Find(state, "garrick");
+        PeopleService.MarkDead(state, "garrick", "hunger");
+        PeopleService.MarkDead(state, "garrick", "hunger");
 
         ChronicleEntryData entry = Chronicle.Find(state, "death.garrick");
         Assert.IsNotNull(entry);
@@ -80,7 +80,7 @@ public sealed class ChroniclePr11Tests
             Assert.IsTrue(state.TryStartExpedition(target.Id, new List<string> { "garrick", "edric" }, out string message), message);
             state.ActiveExpedition.RouteIndex = 1;
             string hero = state.GetSelectedCommander().Id;
-            string edricName = HomePeopleService.Find(state, "edric").DisplayName;
+            string edricName = PeopleService.Find(state, "edric").DisplayName;
 
             CampaignBattleResult result = new CampaignBattleResult
             {

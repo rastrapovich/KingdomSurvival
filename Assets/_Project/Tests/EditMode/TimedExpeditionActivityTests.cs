@@ -167,27 +167,6 @@ public class TimedExpeditionActivityTests
     }
 
     [Test]
-    public void ArmySupplyBatchAdjustment_TransfersAvailableAmountOnly()
-    {
-        GameState state = new GameState();
-        state.CreateNewGame(604);
-        state.Food = 7;
-        state.ArmySupply = 2;
-
-        Assert.That(state.AdjustArmySupply(5), Is.EqualTo(5));
-        Assert.That(state.Food, Is.EqualTo(2));
-        Assert.That(state.ArmySupply, Is.EqualTo(7));
-
-        Assert.That(state.AdjustArmySupply(10), Is.EqualTo(2));
-        Assert.That(state.Food, Is.Zero);
-        Assert.That(state.ArmySupply, Is.EqualTo(9));
-
-        Assert.That(state.AdjustArmySupply(-20), Is.EqualTo(-9));
-        Assert.That(state.Food, Is.EqualTo(9));
-        Assert.That(state.ArmySupply, Is.Zero);
-    }
-
-    [Test]
     public void RouteChange_CancelsRoadActivityWithoutReward()
     {
         GameState state = CreateTravellingState();
@@ -260,6 +239,7 @@ public class TimedExpeditionActivityTests
     {
         GameState state = new GameState();
         state.CreateNewGame(603);
+        TestPeople.AdmitAll(state);
         // WM-12: "1 клетка = 1 сутки" — даже короткий переход теперь
         // пересекает минимум одну полночь; ArmySupply=0 (дефолт
         // CreateNewGame) сразу же обрывает поход автоматическим
@@ -339,6 +319,7 @@ public class TimedExpeditionActivityTests
     {
         GameState state = new GameState();
         state.CreateNewGame(602);
+        TestPeople.AdmitAll(state);
 
         string message;
         Assert.That(
@@ -358,6 +339,7 @@ public class TimedExpeditionActivityTests
     {
         GameState state = new GameState();
         state.CreateNewGame(601);
+        TestPeople.AdmitAll(state);
         LocationData ruins = state.FindLocation("ruins");
 
         string message;

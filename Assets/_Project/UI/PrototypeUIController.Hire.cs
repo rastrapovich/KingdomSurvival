@@ -71,7 +71,7 @@ public partial class PrototypeUIController
     // ПКМ по бойцу отряда: характеристики (тот же расчёт, что в бою) и плата.
     private void ShowRosterPersonInfo(string personId)
     {
-        ResidentState resident = HomePeopleService.Find(gameState, personId);
+        ResidentState resident = PeopleService.Find(gameState, personId);
         if (resident == null)
             return;
         AssembledCombatStats stats = CombatStatsAssembler.Compute(gameState, personId);

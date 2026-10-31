@@ -6,14 +6,14 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
     // Одноразовая синхронизация: задачи этапа ПР-07 заменяются задачами трёх
     // поставок — 07А-1 (логика Дома), 07А-2 (экран и перетаскивание),
     // 07Б (рыбная ловля и сведения из похода) — по
-    // ProjectDocs/PR07_HOME_SPEC.md (утверждена 25.09.2026 с правками §0).
+    // ProjectDocs/Archive/PR07_HOME_SPEC.md (утверждена 25.09.2026 с правками §0).
     // Прежние общие задачи ПР-07 не начинались, прогресс не теряется.
     [InitializeOnLoad]
     public static class DevelopmentPlanPr07SplitSync
     {
         private const string Marker = "[PR07_SPLIT_V1_SYNCED]";
         private const string PhaseId = "PR07_HOME";
-        private const string SpecDoc = "ProjectDocs/PR07_HOME_SPEC.md";
+        private const string SpecDoc = "ProjectDocs/Archive/PR07_HOME_SPEC.md";
 
         static DevelopmentPlanPr07SplitSync()
         {

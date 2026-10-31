@@ -70,7 +70,7 @@ public partial class PrototypeUIController
         foreach (string line in lines)
         {
             if (line.StartsWith("Сила отряда:") ||
-                line.StartsWith("Гарнизон Дома:"))
+                line.StartsWith("Гарнизон Дома:")) // строки старых донесений
             {
                 continue;
             }
@@ -87,11 +87,11 @@ public partial class PrototypeUIController
         element.text = element.text
             .Replace("Ожидает приказа короля", "Ожидает решения")
             .Replace("ожидает приказа короля", "ожидает решения")
-            .Replace("столицу", "Дом")
-            .Replace("столицы", "Дома")
-            .Replace("столице", "Доме")
-            .Replace("Столицу", "Дом")
-            .Replace("Столицы", "Дома")
-            .Replace("Столице", "Доме");
+            .Replace("столицу", "стоянку")
+            .Replace("столицы", "стоянки")
+            .Replace("столице", "стоянке")
+            .Replace("Столицу", "Стоянку")
+            .Replace("Столицы", "Стоянки")
+            .Replace("Столице", "Стоянке");
     }
 }

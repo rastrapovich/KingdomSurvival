@@ -62,11 +62,12 @@ public sealed class WorldMapPerformancePlayModeTests
             yield return null;
         MonoBehaviour main = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
             .First(b => b.GetType().Name == "PrototypeUIController");
-        main.GetType().GetMethod("StartNewFreePlayFromMenu", AnyInstance).Invoke(main, null);
+        main.GetType().GetMethod("StartNewGameFromMenu", AnyInstance).Invoke(main, null);
         for (int i = 0; i < 60; i++)
             yield return null;
 
         GameState campaign = CampaignSession.Current;
+        TestPeople.AdmitAll(campaign);
         Assert.IsNotNull(campaign);
 
         List<string> names = new List<string>();
@@ -179,10 +180,11 @@ public sealed class WorldMapPerformancePlayModeTests
             yield return null;
         MonoBehaviour main = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
             .First(b => b.GetType().Name == "PrototypeUIController");
-        main.GetType().GetMethod("StartNewFreePlayFromMenu", AnyInstance).Invoke(main, null);
+        main.GetType().GetMethod("StartNewGameFromMenu", AnyInstance).Invoke(main, null);
         for (int i = 0; i < 60; i++)
             yield return null;
         GameState campaign = CampaignSession.Current;
+        TestPeople.AdmitAll(campaign);
         campaign.ArmySupply = 60;
         LocationData target = campaign.Locations
             .Where(l => !l.IsWaypoint && (l.IsVisibleOnMap || l.RevealedByFog))

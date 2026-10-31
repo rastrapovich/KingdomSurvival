@@ -17,6 +17,7 @@ public sealed class ContinuousMovementTimeTests
     {
         GameState state = new GameState();
         state.CreateNewGame(701);
+        TestPeople.AdmitAll(state);
         return state;
     }
 
@@ -24,6 +25,7 @@ public sealed class ContinuousMovementTimeTests
     {
         GameState state = new GameState();
         state.CreateNewGame(702);
+        TestPeople.AdmitAll(state);
 
         string message;
         Assert.That(
@@ -43,6 +45,7 @@ public sealed class ContinuousMovementTimeTests
     {
         GameState state = new GameState();
         state.CreateNewGame(703);
+        TestPeople.AdmitAll(state);
         LocationData ruins = state.FindLocation("ruins");
 
         string message;
@@ -177,6 +180,7 @@ public sealed class ContinuousMovementTimeTests
     {
         GameState state = new GameState();
         state.CreateNewGame(704);
+        TestPeople.AdmitAll(state);
         LocationData ruins = state.FindLocation("ruins");
 
         string message;

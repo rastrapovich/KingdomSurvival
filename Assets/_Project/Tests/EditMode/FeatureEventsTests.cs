@@ -40,6 +40,7 @@ public sealed class FeatureEventsTests
     private static GameState OnTheRoad(params string[] fighters)
     {
         GameState state = new CampaignSetup { WorldSeed = 20260927 }.CreateCampaign();
+        TestPeople.AdmitAll(state);
         state.ArmySupply = 50;
         LocationData target = state.Locations.First(location => !location.IsWaypoint);
         Assert.IsTrue(state.TryStartExpedition(target.Id, fighters.ToList(), out string message), message);

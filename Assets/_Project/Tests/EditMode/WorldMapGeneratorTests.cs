@@ -156,7 +156,7 @@ public class WorldMapGeneratorTests
     public void FreePlayCampaign_KeepsItsGeneratedMapThroughSaveAndLoad()
     {
         GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 77);
-        CampaignSetup setup = new CampaignSetup { CrisisId = CampaignStartOptions.FreePlayId };
+        CampaignSetup setup = new CampaignSetup();
         GameState state = setup.CreateCampaign(null, null, map);
 
         Assert.That(state.WorldSeed, Is.EqualTo(77));
@@ -245,7 +245,7 @@ public class WorldMapGeneratorTests
     public void FreePlayCampaign_TurnsVillagesAndLandmarksIntoPlaces()
     {
         GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 31);
-        GameState state = new CampaignSetup { CrisisId = CampaignStartOptions.FreePlayId }.CreateCampaign(null, null, map);
+        GameState state = new CampaignSetup().CreateCampaign(null, null, map);
 
         List<LocationData> generated = state.Locations.FindAll(location => location.Id.StartsWith(GeneratedMapPlaces.IdPrefix));
         Assert.That(generated.ConvertAll(location => location.Id), Is.Unique);
@@ -256,6 +256,10 @@ public class WorldMapGeneratorTests
         // карты не становятся; остальные знаки — места.
         foreach (GeneratedMapSite site in map.Landmarks)
         {
+            // Авторские «Затопленные руины» снимает содержание свободной игры
+            // (FreePlayContent); тест ядра его не регистрирует.
+            if (site.Kind == "ruins")
+                continue;
             bool expected = !GeneratedMapPlaces.KindsWithoutContent.Contains(site.Kind);
             Assert.That(state.Locations.Exists(location => location.PlaceKind == site.Kind), Is.EqualTo(expected), $"Знак '{site.Kind}'.");
         }

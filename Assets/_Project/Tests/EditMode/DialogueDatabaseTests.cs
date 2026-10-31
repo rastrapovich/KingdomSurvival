@@ -9,7 +9,7 @@ using UnityEngine;
 // тесты, привязанные к его конкретному ID/содержимому. Условия/группы/
 // Negate сами по себе покрыты NarrativeCheckSystemTests.cs и
 // DialogueDatabaseCheckSystemTests.cs (программно собранный демо-граф),
-// runtime-сессия — Chapter01FourResidentsTests.cs на реальном N01.
+// runtime-сессия — тесты сцен свободной игры (FreePlay/Tests).
 public sealed class DialogueDatabaseTests
 {
     [Test]

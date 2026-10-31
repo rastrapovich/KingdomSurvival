@@ -107,13 +107,14 @@ public sealed class SettlementCampPlayModeTests
             yield return null;
         yield return Frames(20);
         MonoBehaviour main = FindBehaviour("PrototypeUIController");
-        Invoke(main, "StartNewFreePlayFromMenu");
+        Invoke(main, "StartNewGameFromMenu");
         yield return Frames(10);
 
         GameState campaign = CampaignSession.Current;
+        TestPeople.AdmitAll(campaign);
         campaign.ArmySupply = 30;
         LocationData target = campaign.Locations.First(location => !location.IsWaypoint && (location.IsVisibleOnMap || location.RevealedByFog));
-        Assert.IsTrue(campaign.TryStartExpedition(target.Id, new List<string> { "garrick" }, out string message, HomePeopleService.OstafiyId), message);
+        Assert.IsTrue(campaign.TryStartExpedition(target.Id, new List<string> { "garrick" }, out string message, "ostafiy"), message);
         campaign.ActiveExpedition.RouteIndex = 1;
         // Без кадра между стартом похода и отладочным входом: иначе отряд
         // успевает пробежать и открыть дорожную встречу (нестабильно в полном прогоне).
@@ -135,7 +136,7 @@ public sealed class SettlementCampPlayModeTests
         yield return Click(Choice(root, "ВОЙТИ"));
 
         Assert.IsTrue(SettlementCampService.IsCommanderInside(campaign));
-        CollectionAssert.AreEquivalent(new[] { HomePeopleService.OstafiyId, SettlementCampDevFixture.CreatureId },
+        CollectionAssert.AreEquivalent(new[] { "ostafiy", SettlementCampDevFixture.CreatureId },
             campaign.SettlementCamp.WaitingIds);
         Assert.IsFalse(PartyPresence.IsPresent(campaign, SettlementCampDevFixture.CreatureId));
         Assert.IsTrue(PartyPresence.IsPresent(campaign, "garrick"));

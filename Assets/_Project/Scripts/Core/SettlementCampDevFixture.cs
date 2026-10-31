@@ -68,7 +68,7 @@ public static class SettlementCampDevFixture
         if (state.FindFighter(id) == null)
             state.Fighters.Add(new FighterData(id, name, origin == CampaignParticipantOrigin.CreatureAlly ? "Существо-союзник" : "Наёмник", 1, 0, unitTypeId));
 
-        ResidentState resident = HomePeopleService.Find(state, id);
+        ResidentState resident = PeopleService.Find(state, id);
         if (resident == null)
         {
             resident = new ResidentState
@@ -83,7 +83,7 @@ public static class SettlementCampDevFixture
                 SettlementAdmissionBlock = admissionBlock
             };
             state.People.Residents.Add(resident);
-            HomePeopleService.EnsureCombatState(resident);
+            PeopleService.EnsureCombatState(resident);
         }
         expedition.FighterIds.Add(id);
         added.Add(name);

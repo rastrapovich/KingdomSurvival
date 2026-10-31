@@ -319,8 +319,8 @@ public sealed class NarrativeEvaluationContext
     // PresentCompanionIds, чтобы не менять существующие вызовы.
     public int PartySize { get; }
 
-    // Ссылка на стратегическое состояние (Food/ArmySupply и т.д.) для
-    // Gameplay Effects (ChangeFood/ChangeSupplies) — Encounter-система,
+    // Ссылка на стратегическое состояние (ArmySupply и т.д.) для
+    // Gameplay Effects (ChangeSupplies и др.) — Encounter-система,
     // §106/§63 инструкции. Может быть null (старые вызовы диалога, не
     // передающие GameState) — тогда эффекты, требующие GameState, молча
     // не применяются, а не падают с NullReferenceException. Параметр

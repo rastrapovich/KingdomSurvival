@@ -22,12 +22,8 @@ namespace KingdomSurvival.FreePlay.Editor
 
         private static readonly (string Id, string Name, string Role)[] Speakers =
         {
-            ("coalburner", "Углежог", "Хутор у кромки Чёрного леса"),
             ("agnessa", "Агнесса", "Разведчица"),
-            ("miller_son", "Сын мельника", "С дальней мельницы"),
-            ("torvin", "Торвин", "Копейщик"),
-            ("refugee", "Беженец", "У костра за ольшаником"),
-            ("refugee_woman", "Беженка", "У костра за ольшаником")
+            ("torvin", "Торвин", "Копейщик")
         };
 
         // Запуск — кнопкой «+ Сцены свободной игры» в окне Базы диалогов

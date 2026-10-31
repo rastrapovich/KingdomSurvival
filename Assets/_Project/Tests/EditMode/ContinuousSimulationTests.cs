@@ -8,6 +8,7 @@ public class ContinuousSimulationTests
     {
         GameState state = new GameState();
         state.CreateNewGame(1234);
+        TestPeople.AdmitAll(state);
         ContinuousSimulationSystem.Reset(state);
 
         ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(state);
@@ -27,6 +28,7 @@ public class ContinuousSimulationTests
     {
         GameState state = new GameState();
         state.CreateNewGame(4321);
+        TestPeople.AdmitAll(state);
         ContinuousSimulationSystem.Reset(state);
         ContinuousSimulationSystem.SetPaused(state, false);
 
@@ -155,17 +157,17 @@ public class ContinuousSimulationTests
     }
 
     [Test]
-    public void Midnight_ResolvesDailyEconomyOnce()
+    public void Midnight_AdvancesDayOnce_WithoutHomeEconomy()
     {
+        // Канон v1.59: исходного Дома нет — полночь меняет день, но не
+        // приносит казны, пищи и домашних донесений.
         GameState state = new GameState();
         state.CreateNewGame(99);
         ContinuousSimulationSystem.Reset(state);
         ContinuousSimulationSystem.SetPaused(state, false);
 
-        int startGold = state.Gold;
-        int startFood = state.Food;
-        int expectedFood =
-            startFood + state.DailyFoodIncome - state.DailyFoodConsumption;
+        int startSupply = state.ArmySupply;
+        int startGold = state.ArmyGold;
 
         // WM-13: было захардкожено 80f (16 игровых часов при старом
         // GameHoursPerRealSecond) — считаем из константы, чтобы ускорение
@@ -176,14 +178,15 @@ public class ContinuousSimulationTests
         ContinuousSimulationSystem.Advance(state, advanceSeconds, false);
 
         Assert.That(state.Day, Is.EqualTo(2));
-        Assert.That(state.Gold, Is.EqualTo(startGold + state.DailyGoldIncome));
-        Assert.That(state.Food, Is.EqualTo(expectedFood));
+        Assert.That(state.ArmySupply, Is.EqualTo(startSupply), "Без похода припасы не расходуются.");
+        Assert.That(state.ArmyGold, Is.EqualTo(startGold), "Казны Дома нет — дохода в полночь нет.");
     }
 
     private static GameState CreateTravellingState()
     {
         GameState state = new GameState();
         state.CreateNewGame(2026);
+        TestPeople.AdmitAll(state);
 
         string message;
         bool started = state.TryStartExpeditionToMapPoint(

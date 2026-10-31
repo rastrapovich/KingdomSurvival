@@ -117,14 +117,14 @@ heroCardSubtitle != null && heroCardLevel != null && heroCardExperienceLabel != 
             return;
 
         string personId = heroCardPersonId;
-        ResidentState resident = HomePeopleService.Find(gameState, personId);
+        ResidentState resident = PeopleService.Find(gameState, personId);
         if (resident == null || !resident.IsAlive || !IsHeroItemsCandidate(resident))
         {
             // Человек выбыл из отряда (погиб, остался дома) — к Командиру.
             heroCardPersonId = null;
             EnsureHeroPersonSelected();
             personId = heroCardPersonId;
-            resident = HomePeopleService.Find(gameState, personId);
+            resident = PeopleService.Find(gameState, personId);
             if (resident == null)
                 return;
         }

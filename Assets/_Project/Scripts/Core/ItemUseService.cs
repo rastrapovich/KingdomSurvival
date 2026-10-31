@@ -96,7 +96,7 @@ public static class ItemUseService
         CommanderData commander = state.GetSelectedCommander();
         string targetId = string.IsNullOrEmpty(targetPersonId) ? commander?.Id : targetPersonId;
         preview.TargetPersonId = targetId ?? string.Empty;
-        ResidentState target = string.IsNullOrEmpty(targetId) ? null : HomePeopleService.Find(state, targetId);
+        ResidentState target = string.IsNullOrEmpty(targetId) ? null : PeopleService.Find(state, targetId);
         bool targetHere = target != null && target.IsAlive && ItemService.IsWithHeroPublic(state, targetId);
 
         foreach (ItemUseEffect effect in definition.UseEffects)
@@ -176,13 +176,13 @@ public static class ItemUseService
         }
 
         ItemDefinition definition = ItemCatalog.Find(item.ItemId);
-        ResidentState target = HomePeopleService.Find(state, preview.TargetPersonId);
+        ResidentState target = PeopleService.Find(state, preview.TargetPersonId);
         foreach (ItemUseEffect effect in preview.Applicable)
         {
             switch (effect.Type)
             {
                 case ItemUseEffectType.RestoreHitPoints:
-                    HomePeopleService.SetHitPoints(target, Math.Min(target.MaxHitPoints, target.CurrentHitPoints + effect.Amount));
+                    PeopleService.SetHitPoints(target, Math.Min(target.MaxHitPoints, target.CurrentHitPoints + effect.Amount));
                     break;
                 case ItemUseEffectType.RemoveExhaustion:
                     target.Exhausted = false;

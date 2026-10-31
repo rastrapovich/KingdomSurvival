@@ -1,55 +1,10 @@
 using System;
 using System.Collections.Generic;
 
-// ПР-12А (канон v1.45 §6.0): общие модели экрана Дома и «Дел» и реестр
-// содержания режима кампании. Ядро не знает ни главу «Дома на чужой воде»,
-// ни свободную игру: каждый модуль регистрирует свой источник по ID режима
-// из CampaignConfiguration.CrisisId, UI читает только этот вход.
-
-// Объект Дома на экране: что видим → почему это известно → что можно
-// сделать (PR07_HOME_SPEC §5). StateKey — стабильный ключ состояния для
-// слоя образа Дома (класс USS и имя рисунка художника).
-public sealed class HomeObjectView
-{
-    public string Id;
-    public string Title;
-    public string StateKey;
-    // Короткая подпись слоя образа Дома: «мутная», «стоит», «цела».
-    public string Short;
-    public string State;
-    public string Source;
-    public string ActionLabel;
-    public string ActionDialogueId;
-}
-
-public enum HomeCareAction
-{
-    None,
-    StartYardDeck,
-    OpenDialogue,
-    // ПР-12Б: повторяемое действие режима (ActionId → CampaignContent.RunHomeAction),
-    // например недельный обмен. Сцена здесь не подходит: её эффекты
-    // применяются один раз навсегда.
-    ModeAction
-}
-
-// Забота: одна проблема — одна карточка (PR07_HOME_SPEC §7.1).
-public sealed class HomeCareView
-{
-    public string Id;
-    public string Title;
-    public string Cause;
-    public string Status;
-    public string Detail;
-    public int Priority;
-    public bool Urgent;
-    public string ActionLabel;
-    public HomeCareAction Action;
-    public string DialogueId;
-    // Для HomeCareAction.ModeAction.
-    public string ActionId;
-    public bool ActionEnabled;
-}
+// ПР-12А: общие модели «Дел» и вход к содержанию свободной игры. Ядро не
+// знает конкретных историй: модуль свободной игры регистрирует свой
+// источник (FreePlayContent.Register), UI и ядро читают только этот вход.
+// Канон v1.59: режим один — свободная игра; выбора режима по ID нет.
 
 public enum JournalGoalCategory
 {
@@ -79,24 +34,17 @@ public sealed class JournalGoalViewData
 public sealed class CampaignContentProvider
 {
     public Func<GameState, IReadOnlyList<JournalGoalViewData>> Goals;
-    public Func<GameState, IReadOnlyList<HomeObjectView>> HomeObjects;
-    public Func<GameState, IReadOnlyList<HomeCareView>> HomeCares;
-    // Однократная настройка только что созданной кампании этого режима.
+    // Однократная настройка только что созданной партии.
     public Action<GameState> OnNewCampaign;
 
-    // ПР-12Б: авторские истории режима. Узкие точки входа, не система
-    // квестов: сцена при входе в место, конец разговора, бой после сцены,
-    // итог такого боя, скорость работ Дома и опрос каждого кадра с
-    // донесениями.
+    // ПР-12Б: авторские истории. Узкие точки входа, не система квестов:
+    // сцена при входе в место, конец разговора, бой после сцены, итог
+    // такого боя и опрос каждого кадра с донесениями.
     public Func<GameState, string, LocationEntryView> LocationEntry;
     public Action<GameState, string> DialogueCompleted;
     public Func<GameState, string, CampaignBattleRequest> BattleAfterDialogue;
     public Action<GameState, CampaignBattleResult, List<string>> BattleApplied;
-    public Func<GameState, double> HomeWorkRate;
     public Func<GameState, List<string>> Refresh;
-    // Повторяемое действие заботы Дома (HomeCareAction.ModeAction):
-    // выполняет и возвращает донесение (пусто — ничего не сделано).
-    public Func<GameState, string, string> HomeAction;
 }
 
 // Сцена при входе в достигнутое место: какой диалог и как подписана кнопка.
@@ -109,201 +57,52 @@ public sealed class LocationEntryView
 
 public static class CampaignContent
 {
-    private static readonly Dictionary<string, CampaignContentProvider> Providers =
-        new Dictionary<string, CampaignContentProvider>();
+    private static CampaignContentProvider provider;
 
-    public static void Register(string modeId, CampaignContentProvider provider)
+    public static void Register(CampaignContentProvider contentProvider)
     {
-        if (!string.IsNullOrEmpty(modeId) && provider != null)
-            Providers[modeId] = provider;
+        if (contentProvider != null)
+            provider = contentProvider;
     }
 
-    public static bool IsRegistered(string modeId)
-    {
-        return !string.IsNullOrEmpty(modeId) && Providers.ContainsKey(modeId);
-    }
-
-    // Режим партии. Старые сохранения без конфигурации — сюжетная кампания.
-    public static string ModeId(GameState state)
-    {
-        CampaignConfiguration configuration = state?.Configuration;
-        return configuration != null && !string.IsNullOrEmpty(configuration.CrisisId)
-            ? configuration.CrisisId
-            : CampaignStartOptions.HomeOnForeignWaterCrisisId;
-    }
-
-    public static bool IsFreePlay(GameState state)
-    {
-        return state != null && ModeId(state) == CampaignStartOptions.FreePlayId;
-    }
-
-    // Бриф правок (19 пунктов) п. 14: в текущей свободной игре Дома нет —
-    // его фоновые процессы (домашняя жизнь, суточный приход и расход, отдых
-    // дома, ремонт и уход) не идут и не пишут донесений. Данные Дома в
-    // партии остаются для будущего режима.
-    public static bool HasHome(GameState state) => state != null && !IsFreePlay(state);
+    public static bool IsRegistered => provider != null;
 
     public static IReadOnlyList<JournalGoalViewData> BuildGoals(GameState state)
     {
-        CampaignContentProvider provider = Find(state);
-        return provider?.Goals != null ? provider.Goals(state) : new List<JournalGoalViewData>();
-    }
-
-    public static IReadOnlyList<HomeObjectView> DescribeHomeObjects(GameState state)
-    {
-        CampaignContentProvider provider = Find(state);
-        return provider?.HomeObjects != null ? provider.HomeObjects(state) : new List<HomeObjectView>();
-    }
-
-    public static IReadOnlyList<HomeCareView> DescribeHomeCares(GameState state)
-    {
-        CampaignContentProvider provider = Find(state);
-        return provider?.HomeCares != null ? provider.HomeCares(state) : HomeCares.DescribeCommon(state);
+        return state != null && provider?.Goals != null ? provider.Goals(state) : new List<JournalGoalViewData>();
     }
 
     public static void InitializeNewCampaign(GameState state)
     {
-        Find(state)?.OnNewCampaign?.Invoke(state);
+        if (state != null)
+            provider?.OnNewCampaign?.Invoke(state);
     }
 
     public static LocationEntryView LocationEntry(GameState state, string locationId)
     {
-        CampaignContentProvider provider = Find(state);
-        return provider?.LocationEntry != null ? provider.LocationEntry(state, locationId) : null;
+        return state != null && provider?.LocationEntry != null ? provider.LocationEntry(state, locationId) : null;
     }
 
     public static void OnDialogueCompleted(GameState state, string dialogueId)
     {
-        Find(state)?.DialogueCompleted?.Invoke(state, dialogueId);
+        if (state != null)
+            provider?.DialogueCompleted?.Invoke(state, dialogueId);
     }
 
     public static CampaignBattleRequest BattleAfterDialogue(GameState state, string dialogueId)
     {
-        CampaignContentProvider provider = Find(state);
-        return provider?.BattleAfterDialogue != null ? provider.BattleAfterDialogue(state, dialogueId) : null;
+        return state != null && provider?.BattleAfterDialogue != null ? provider.BattleAfterDialogue(state, dialogueId) : null;
     }
 
     public static void OnBattleApplied(GameState state, CampaignBattleResult result, List<string> reports)
     {
-        Find(state)?.BattleApplied?.Invoke(state, result, reports);
+        if (state != null)
+            provider?.BattleApplied?.Invoke(state, result, reports);
     }
 
-    public static string RunHomeAction(GameState state, string actionId)
-    {
-        CampaignContentProvider provider = Find(state);
-        return provider?.HomeAction != null ? provider.HomeAction(state, actionId) ?? string.Empty : string.Empty;
-    }
-
-    // Множитель скорости работ Дома (1 — обычная).
-    public static double HomeWorkRate(GameState state)
-    {
-        CampaignContentProvider provider = Find(state);
-        return provider?.HomeWorkRate != null ? Math.Max(0.0, provider.HomeWorkRate(state)) : 1.0;
-    }
-
-    // Опрос содержания режима; возвращает донесения для игрока.
+    // Опрос содержания; возвращает донесения для игрока.
     public static List<string> Refresh(GameState state)
     {
-        CampaignContentProvider provider = Find(state);
-        return provider?.Refresh != null ? provider.Refresh(state) ?? new List<string>() : new List<string>();
-    }
-
-    private static CampaignContentProvider Find(GameState state)
-    {
-        if (state == null)
-            return null;
-        return Providers.TryGetValue(ModeId(state), out CampaignContentProvider provider) ? provider : null;
-    }
-}
-
-// Общие заботы любого Дома: нехватка еды и уход за ранеными. Модуль режима
-// добавляет к ним свои (работы, функции конкретных людей).
-public static class HomeCares
-{
-    // Порядок забот (PR07_HOME_SPEC §7.1): сюжетное решение → нехватка/
-    // остановленная необходимая функция → доступные работы → идущие работы.
-    public const int PriorityStory = 0;
-    public const int PriorityNeed = 1;
-    public const int PriorityOptional = 2;
-    public const int PriorityRunning = 3;
-
-    public static List<HomeCareView> DescribeCommon(GameState gameState)
-    {
-        List<HomeCareView> cares = new List<HomeCareView>();
-        if (gameState == null)
-            return cares;
-
-        HomeFoodForecast food = HomeOverview.ForecastFood(gameState);
-        if (food.HasCurrentShortage || food.Outlook == HomeFoodOutlook.ShortageAtNextMidnight)
-        {
-            cares.Add(new HomeCareView
-            {
-                Id = "home.care.food",
-                Title = "Нехватка еды",
-                Cause = "Дома едят " + food.DailyConsumption + " в сутки, поступает " + food.DailyIncome + ".",
-                Status = HomeOverview.DescribeFood(food),
-                Priority = PriorityNeed,
-                Urgent = true
-            });
-        }
-
-        AddPatients(gameState, cares);
-        return cares;
-    }
-
-    private static void AddPatients(GameState gameState, List<HomeCareView> cares)
-    {
-        List<ResidentState> patients = new List<ResidentState>();
-        foreach (ResidentState resident in HomePeopleService.All(gameState))
-        {
-            if (resident.NeedsCare && HomePeopleService.IsHomePresent(gameState, resident))
-                patients.Add(resident);
-        }
-
-        if (patients.Count == 0)
-            return;
-
-        HomeFunctionReport care = HomeFunctionResolver.Resolve(gameState, HomeFunctionResolver.CareId);
-        List<string> lines = new List<string>();
-        foreach (ResidentState patient in patients)
-        {
-            string line = patient.DisplayName;
-            if (patient.HasCombatState)
-                line += " — " + patient.CurrentHitPoints + "/" + patient.MaxHitPoints + " HP";
-            if (care.Rate > 0.0)
-            {
-                double hours = (1.0 - patient.RecoveryProgress) * HomeLife.FullCareCycleHours / care.Rate;
-                line += ", около " + Math.Max(1, (int)Math.Ceiling(hours)) + " ч.";
-            }
-            else
-            {
-                line += ", уход остановлен";
-            }
-            lines.Add(line);
-        }
-
-        cares.Add(new HomeCareView
-        {
-            Id = "home.care.patients",
-            Title = "Уход за ранеными",
-            Cause = patients.Count == 1 ? "Один человек ранен." : "Раненых: " + patients.Count + ".",
-            Status = StatusLine(care),
-            Detail = string.Join("\n", lines),
-            Priority = care.Status == HomeFunctionStatus.Stopped ? PriorityNeed : PriorityRunning,
-            Urgent = care.Status == HomeFunctionStatus.Stopped
-        });
-    }
-
-    public static string StatusLine(HomeFunctionReport report)
-    {
-        switch (report.Status)
-        {
-            case HomeFunctionStatus.Working:
-                return "Работает — " + report.ExecutorName + ".";
-            case HomeFunctionStatus.Limited:
-                return "Медленнее: " + report.Reason + ".";
-            default:
-                return "Остановлено: " + report.Reason + ".";
-        }
+        return state != null && provider?.Refresh != null ? provider.Refresh(state) ?? new List<string>() : new List<string>();
     }
 }

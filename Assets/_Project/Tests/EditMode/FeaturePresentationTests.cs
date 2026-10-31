@@ -38,6 +38,7 @@ public sealed class FeaturePresentationTests
     private static GameState OnTheRoad(params string[] fighters)
     {
         GameState state = new CampaignSetup { WorldSeed = 20260928 }.CreateCampaign();
+        TestPeople.AdmitAll(state);
         state.ArmySupply = 50;
         LocationData target = state.Locations.First(location => !location.IsWaypoint);
         Assert.IsTrue(state.TryStartExpedition(target.Id, fighters.ToList(), out string message), message);
@@ -88,7 +89,7 @@ public sealed class FeaturePresentationTests
     {
         GameState state = OnTheRoad("garrick", "edric");
         Give(state, "garrick", FeatureIds.FieldMedic);
-        ResidentState edric = HomePeopleService.Find(state, "edric");
+        ResidentState edric = PeopleService.Find(state, "edric");
         edric.HasCombatState = true;
         edric.MaxHitPoints = 20;
         edric.CurrentHitPoints = 4;

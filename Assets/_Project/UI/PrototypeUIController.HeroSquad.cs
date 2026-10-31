@@ -92,7 +92,7 @@ public partial class PrototypeUIController
         for (int i = 0; i < people.Count; i++)
         {
             string personId = people[i];
-            ResidentState resident = HomePeopleService.Find(gameState, personId);
+            ResidentState resident = PeopleService.Find(gameState, personId);
             bool isCommander = commander != null && commander.Id == personId;
             entries.Add(new HeroSquadEntry
             {

@@ -714,8 +714,6 @@ public partial class PrototypeUIController
         }
         AddReport(message);
         tradeHighlightKey = null;
-        homePeopleSignature = null;
-        homePrepSignature = null;
         // Подтверждённая непустая сделка — один шаг часов (п. 14).
         SpendSettlementActionTime();
         Autosave();

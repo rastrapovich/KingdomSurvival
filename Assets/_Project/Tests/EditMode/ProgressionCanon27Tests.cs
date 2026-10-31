@@ -39,6 +39,7 @@ public sealed class ProgressionCanon27Tests
     private static GameState OnTheRoad(params string[] fighters)
     {
         GameState state = new CampaignSetup { WorldSeed = 20260926 }.CreateCampaign();
+        TestPeople.AdmitAll(state);
         state.ArmySupply = 50;
         LocationData target = state.Locations.First(location => !location.IsWaypoint);
         Assert.IsTrue(state.TryStartExpedition(target.Id, fighters.ToList(), out string message), message);
@@ -98,6 +99,7 @@ public sealed class ProgressionCanon27Tests
     public void Retinue_DoesNotProgress()
     {
         GameState state = new CampaignSetup { WorldSeed = 1 }.CreateCampaign();
+        TestPeople.AdmitAll(state);
         Assert.IsNull(CharacterProgressionService.AwardExperience(state, "lada", "test.source", 500));
     }
 
@@ -318,6 +320,7 @@ public sealed class ProgressionCanon27Tests
     public void NewcomerWithPastLife_NoBacklogOfChoices()
     {
         GameState state = new CampaignSetup { WorldSeed = 2 }.CreateCampaign();
+        TestPeople.AdmitAll(state);
         state.Fighters.Add(new FighterData("veteran", "Ветеран", "Дружинник", 7, 3, "guard"));
         PersonProgressionData record = CharacterProgressionService.Get(state, "veteran");
         Assert.AreEqual(7, record.Level);
@@ -378,6 +381,7 @@ public sealed class ProgressionCanon27Tests
     public void OldSaveWithoutProgression_GetsDefaults()
     {
         GameState state = new CampaignSetup { WorldSeed = 3 }.CreateCampaign();
+        TestPeople.AdmitAll(state);
         state.Progression = null;
         GameState restored = CampaignSaveService.RestoreCampaign(CampaignSaveService.ExportCampaign(state));
         Assert.IsNotNull(restored.Progression);

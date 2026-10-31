@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using KingdomSurvival.Chapter01;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
@@ -46,10 +45,6 @@ public partial class PrototypeUIController
         Autosave();
 
         CampaignBattleRequest request = prepared ?? CampaignBattleBridge.CreateRequest(gameState, battleId);
-        // ПР-10: бой главы отмечается начатым уже после предбоевого сохранения —
-        // загрузка этого сохранения снова откроет вступление и бой.
-        if (request.BattleId == Chapter01CampBattle.BattleId && gameState.Narrative != null)
-            gameState.Narrative.SetFlag(Chapter01Ids.Flags.CampBeastsTriggered);
         // ПР-12К (канон v1.53 §28.3): дорожный бой — арена по местности, где
         // стоит отряд; подходящего рисунка нет — общее поле полигона.
         if (!request.IsLocal && string.IsNullOrEmpty(request.BattlefieldId))
@@ -82,13 +77,13 @@ public partial class PrototypeUIController
         return field.Id;
     }
 
-    // Опрос каждого кадра: вступление к сюжетному бою и запуск боя после него.
+    // Опрос каждого кадра: запуск боя после сцены истории.
     private void RefreshStoryBattle()
     {
         if (gameState == null || isGameOver)
             return;
 
-        // Бой после сцены — и главы, и свободной игры (ПР-12Б).
+        // Бой после сцены истории свободной игры (ПР-12Б).
         if (pendingStoryBattle != null)
         {
             if (IsNarrativeDialogueActive || HasBlockingModalWork())
@@ -97,26 +92,13 @@ public partial class PrototypeUIController
             pendingStoryBattle = null;
             if (!TryStartPreparedCampaignBattle(request.BattleId, request, out string message))
                 AddReport(message);
-            return;
         }
-
-        if (!Chapter01Crisis.IsActive(gameState))
-            return;
-
-        string dialogueId = Chapter01CampBattle.GetPendingDialogueId(gameState);
-        if (!string.IsNullOrEmpty(dialogueId))
-            TryOpenNarrativeDialogueById(dialogueId);
     }
 
     private void OnStoryDialogueCompleted(string dialogueId)
     {
         if (gameState == null)
             return;
-        if (dialogueId == Chapter01Ids.Dialogues.CampBeasts)
-        {
-            pendingStoryBattle = Chapter01CampBattle.CreateRequest(gameState);
-            return;
-        }
 
         // ПР-12Б: сцены свободной игры — реакция режима и, если нужно, бой.
         CampaignContent.OnDialogueCompleted(gameState, dialogueId);
@@ -156,14 +138,6 @@ public partial class PrototypeUIController
             // ПР-10: поражение — загрузка предбоевого сохранения одним нажатием.
             ShowPreBattleLoadButton(true);
             return false;
-        }
-
-        // ПР-10: исход сюжетного боя главы.
-        if (status == CampaignBattleApplyStatus.SquadSurvived &&
-            result.BattleId == Chapter01CampBattle.BattleId && gameState.Narrative != null)
-        {
-            gameState.Narrative.SetFlag(Chapter01Ids.Flags.CampBeastsResolved);
-            AddReport(Chapter01CampBattle.DescribeOutcome(result.Outcome));
         }
 
         // ПР-12Б: исход боя истории свободной игры.

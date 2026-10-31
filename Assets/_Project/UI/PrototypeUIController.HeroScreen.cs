@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using KingdomSurvival.Chapter01;
 using KingdomSurvival.UnitDatabase;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -106,11 +105,7 @@ public partial class PrototypeUIController
     private Label heroScreenStatePhaseChip;
 
     private Label heroScreenArmyGoldLabel;
-    private Button heroScreenArmyGoldMinusButton;
-    private Button heroScreenArmyGoldPlusButton;
     private Label heroScreenSupplyValueLabel;
-    private Button heroScreenSupplyMinusButton;
-    private Button heroScreenSupplyPlusButton;
     private Label heroScreenSupplyConsumptionLabel;
     private Label heroScreenSupplyDaysLabel;
 
@@ -123,7 +118,6 @@ public partial class PrototypeUIController
     private VisualElement heroScreenSquadList;
 
     private Label heroScreenRosterSelectedLabel;
-    private Button heroScreenRosterConfirmButton;
     private HeroRosterCardRefs[] heroScreenRosterCards;
 
     private VisualElement heroScreenUnitCard;
@@ -220,17 +214,12 @@ public partial class PrototypeUIController
         heroScreenStatePhaseChip = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-state-phase-chip");
 
         heroScreenArmyGoldLabel = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-army-gold-label");
-        heroScreenArmyGoldMinusButton = BindRequiredElement<Button>(interfaceRoot, HeroScreenName, "hero-screen-army-gold-minus-button");
-        heroScreenArmyGoldPlusButton = BindRequiredElement<Button>(interfaceRoot, HeroScreenName, "hero-screen-army-gold-plus-button");
         heroScreenSupplyValueLabel = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-supply-value-label");
-        heroScreenSupplyMinusButton = BindRequiredElement<Button>(interfaceRoot, HeroScreenName, "hero-screen-supply-minus-button");
-        heroScreenSupplyPlusButton = BindRequiredElement<Button>(interfaceRoot, HeroScreenName, "hero-screen-supply-plus-button");
         heroScreenSupplyConsumptionLabel = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-supply-consumption-label");
         heroScreenSupplyDaysLabel = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-supply-days-label");
 
         return heroScreenStatePhaseChip != null &&
-               heroScreenArmyGoldLabel != null && heroScreenArmyGoldMinusButton != null && heroScreenArmyGoldPlusButton != null &&
-               heroScreenSupplyValueLabel != null && heroScreenSupplyMinusButton != null && heroScreenSupplyPlusButton != null &&
+               heroScreenArmyGoldLabel != null && heroScreenSupplyValueLabel != null &&
                heroScreenSupplyConsumptionLabel != null && heroScreenSupplyDaysLabel != null;
     }
 
@@ -262,9 +251,8 @@ public partial class PrototypeUIController
     private bool BindHeroScreenRoster()
     {
         heroScreenRosterSelectedLabel = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-roster-selected-label");
-        heroScreenRosterConfirmButton = BindRequiredElement<Button>(interfaceRoot, HeroScreenName, "hero-screen-roster-confirm-button");
 
-        bool ok = heroScreenRosterSelectedLabel != null && heroScreenRosterConfirmButton != null;
+        bool ok = heroScreenRosterSelectedLabel != null;
 
         heroScreenRosterCards = new HeroRosterCardRefs[HeroScreenRosterCardNames.Length];
         for (int i = 0; i < HeroScreenRosterCardNames.Length; i++)
@@ -360,11 +348,6 @@ public partial class PrototypeUIController
     private void WireHeroScreenCallbacks()
     {
         heroScreenCloseButton.clicked += CloseHeroScreen;
-        heroScreenArmyGoldMinusButton.clicked += OnStableArmyGoldMinusClicked;
-        heroScreenArmyGoldPlusButton.clicked += OnStableArmyGoldPlusClicked;
-        heroScreenSupplyMinusButton.clicked += OnStableSupplyMinusClicked;
-        heroScreenSupplyPlusButton.clicked += OnStableSupplyPlusClicked;
-        heroScreenRosterConfirmButton.clicked += OnHeroScreenRosterConfirmClicked;
 
         heroScreenStatePhaseChip.RegisterCallback<PointerEnterEvent>(_ =>
             ShowHeroScreenTagTooltip(heroScreenStatePhaseChip, heroScreenStatePhaseChip.text, "Где сейчас отряд."));
@@ -427,11 +410,6 @@ public partial class PrototypeUIController
                 ShowRosterPersonInfo(refs.PersonId);
                 evt.StopPropagation();
                 return;
-            }
-            if (evt.button == 0 && refs.PersonId == null && ExpeditionPreparation.CanEdit(gameState) && !IsFreePlayWithoutHome)
-            {
-                SetHeroSquadFilter(HeroSquadFilter.Free);
-                evt.StopPropagation();
             }
         });
 
@@ -551,8 +529,6 @@ public partial class PrototypeUIController
         int fullDays = dailyConsumption > 0
             ? gameState.ArmySupply / dailyConsumption
             : 0;
-        bool canAdjust = gameState.CanAdjustArmySupply && !isGameOver;
-
         heroScreenArmyGoldLabel.text = gameState.ArmyGold.ToString();
         heroScreenSupplyValueLabel.text = gameState.ArmySupply.ToString();
         heroScreenSupplyConsumptionLabel.text =
@@ -560,17 +536,6 @@ public partial class PrototypeUIController
         heroScreenSupplyDaysLabel.text =
             "Хватит на " + fullDays + " " + GetDayWord(fullDays);
 
-        heroScreenArmyGoldPlusButton.SetEnabled(canAdjust && gameState.Gold > 0);
-        heroScreenArmyGoldMinusButton.SetEnabled(canAdjust && gameState.ArmyGold > 0);
-        heroScreenSupplyPlusButton.SetEnabled(canAdjust && gameState.Food > 0);
-        heroScreenSupplyMinusButton.SetEnabled(canAdjust && gameState.ArmySupply > 0);
-
-        // Перекладка со склада Дома; в свободной игре Дом скрыт — только числа.
-        DisplayStyle adjust = IsFreePlayWithoutHome ? DisplayStyle.None : DisplayStyle.Flex;
-        heroScreenArmyGoldPlusButton.style.display = adjust;
-        heroScreenArmyGoldMinusButton.style.display = adjust;
-        heroScreenSupplyPlusButton.style.display = adjust;
-        heroScreenSupplyMinusButton.style.display = adjust;
     }
 
     // Шесть качеств героя 1-10 (§2 инструкции по качествам и проверкам) —
@@ -653,11 +618,6 @@ public partial class PrototypeUIController
             }
         }
 
-        // ПР-08 (§8.2 ТЗ): сделанный в главе выбор пути — приобретённая черта.
-        string growth = gameState != null ? Chapter01OutcomeApplier.DescribeRoadGrowth(gameState.Narrative) : null;
-        if (!string.IsNullOrEmpty(growth))
-            AddHeroScreenChip(heroScreenTraitsRow, "Путь", HeroScreenTraitChipColor, growth);
-
         if (heroScreenTraitsRow.childCount == 0)
             AddHeroScreenHint(heroScreenTraitsRow, "У героя пока нет особенностей.");
     }
@@ -665,7 +625,7 @@ public partial class PrototypeUIController
     private void RefreshHeroScreenStates(CommanderData commander)
     {
         heroScreenStatePhaseChip.text = commander != null && commander.State == CommanderState.InCastle
-            ? "Дома"
+            ? "На стоянке"
             : "В пути";
     }
 
@@ -743,7 +703,7 @@ public partial class PrototypeUIController
         string personId = null)
     {
         refs.CurrentUnit = unit;
-        ResidentState resident = HomePeopleService.Find(gameState, personId);
+        ResidentState resident = PeopleService.Find(gameState, personId);
         refs.PersonId = resident != null && resident.IsAlive ? personId : null;
         bool filled = unit != null || refs.PersonId != null;
 
@@ -787,51 +747,13 @@ public partial class PrototypeUIController
     }
 
     // Кого добавить — таблица людей ниже (HeroSquad.cs: «В состав»), здесь
-    // только счёт мест и кнопка сюжетного сбора.
+    // только счёт мест.
     private void RefreshHeroScreenRosterAvailable(List<FighterData> slotFighters, bool expeditionActive)
     {
         heroScreenRosterSelectedLabel.text = "Бойцов: " + slotFighters.Count + " / " + HeroScreenFighterSlots +
             (ExpeditionPreparation.CanEdit(gameState)
                 ? "  ·  добавить — «В состав» в таблице ниже"
                 : "  ·  состав закреплён: отряд в походе");
-
-        // Кнопка нужна только пока сюжет Главы 01 реально ждёт сбора отряда
-        // (N09 решение принято, но экспедиция ещё не создана) — обычный
-        // поход по-прежнему отправляется кликом по цели на карте.
-        bool chapter01AwaitingDeparture =
-            !expeditionActive &&
-            gameState.Narrative != null &&
-            gameState.Narrative.HasFlag(Chapter01Ids.Flags.FarRouteUnlocked) &&
-            !gameState.Narrative.HasFlag(Chapter01Ids.Flags.ExpeditionStarted);
-
-        heroScreenRosterConfirmButton.style.display =
-            chapter01AwaitingDeparture ? DisplayStyle.Flex : DisplayStyle.None;
-        heroScreenRosterConfirmButton.SetEnabled(chapter01AwaitingDeparture && !isGameOver);
-    }
-
-    // Карта = единственный запуск похода (раздел 2/3/4 инструкции про карту
-    // и время): подтверждение состава здесь только фиксирует выбор игрока
-    // и не создаёт ActiveExpedition само по себе — герой остаётся у Дома,
-    // стратегическое время остаётся на месте (RefreshAutoTimeState читает
-    // HasActiveExpedition/Phase, которых тут ещё нет). selectedFighterIds
-    // намеренно не очищается: тот же набор читает клик по карте
-    // (GetSelectedFighterIdsInArmyOrder в IssueContinuousMapOrder), который
-    // и создаёт настоящую экспедицию. ExpeditionStarted ставится не отсюда,
-    // а в PrototypeUIController.ContinuousTime.cs по факту реального
-    // движения — раньше этот флаг ошибочно стоял здесь, сразу по клику.
-    private void OnHeroScreenRosterConfirmClicked()
-    {
-        if (isGameOver || gameState == null)
-            return;
-
-        List<string> selected = GetSelectedFighterIdsInArmyOrder();
-        AddReport(
-            "Состав похода подтверждён: " +
-            (selected.Count > 0 ? "командир и " + GetFighterNames(selected) : "командир один") +
-            ". Выберите цель на карте — отряд начнёт движение сразу после выбора.");
-
-        CloseHeroScreen();
-        RefreshStableUiAfterStateChange();
     }
 
     // ------------------------------------------------------------------

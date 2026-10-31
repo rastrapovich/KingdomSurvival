@@ -173,7 +173,7 @@ public sealed class OldMineBattlePlayModeTests
     [UnityTest]
     public IEnumerator OldMine_Battle_WithFighters_PlayerMovesAttacksAndEndsTurn_ByPointer()
     {
-        return Run(new List<string> { "garrick", "torvin" }, HomePeopleService.OstafiyId);
+        return Run(new List<string> { "garrick", "torvin" }, "ostafiy");
     }
 
     // Герой в одиночку — как в живой партии, где бой застревал.
@@ -211,6 +211,7 @@ public sealed class OldMineBattlePlayModeTests
             Invoke(main, "HideMainMenu");
             yield return Frames(10);
             campaign = CampaignSession.Current;
+            TestPeople.AdmitAll(campaign);
             LocationData mine = campaign.FindLocation("mine");
             Assert.IsNotNull(mine, "Шахта есть на карте партии.");
             // Из поселения, где стоял отряд, — к шахте.
@@ -230,10 +231,10 @@ public sealed class OldMineBattlePlayModeTests
         }
         else
         {
-            Invoke(main, "StartNewFreePlayFromMenu");
+            Invoke(main, "StartNewGameFromMenu");
             yield return Frames(10);
             campaign = CampaignSession.Current;
-            campaign.Food = 40;
+            TestPeople.AdmitAll(campaign);
             campaign.ArmySupply = 30;
             campaign.Narrative.SetFlag("freeplay.mine.known");
             CampaignContent.Refresh(campaign);

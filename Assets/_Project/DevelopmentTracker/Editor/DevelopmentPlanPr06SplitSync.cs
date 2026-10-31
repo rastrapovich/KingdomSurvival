@@ -5,14 +5,14 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 {
     // Одноразовая синхронизация: задачи этапа ПР-06 заменяются задачами двух
     // поставок — ПР-06А (люди как одна личность) и ПР-06Б (пополнение) — по
-    // ProjectDocs/PR06_PEOPLE_SPEC.md (утверждена 24.09.2026 с правками §0).
+    // ProjectDocs/Archive/PR06_PEOPLE_SPEC.md (утверждена 24.09.2026 с правками §0).
     // Прежние две общие задачи ПР-06 не начинались, прогресс не теряется.
     [InitializeOnLoad]
     public static class DevelopmentPlanPr06SplitSync
     {
         private const string Marker = "[PR06_SPLIT_V1_SYNCED]";
         private const string PhaseId = "PR06_PEOPLE";
-        private const string SpecDoc = "ProjectDocs/PR06_PEOPLE_SPEC.md";
+        private const string SpecDoc = "ProjectDocs/Archive/PR06_PEOPLE_SPEC.md";
 
         static DevelopmentPlanPr06SplitSync()
         {

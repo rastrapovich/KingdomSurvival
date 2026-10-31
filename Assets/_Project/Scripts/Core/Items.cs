@@ -239,15 +239,17 @@ public static class ItemCatalog
     public const string FisherCoat = "item.fisher_coat";
     public const string HealerBag = "item.healer_bag";
 
-    // Вещи первой главы (§8.1 ТЗ, утверждено).
-    public const string StoreroomMail = "item.storeroom_mail";
-    public const string OldHuntingBow = "item.old_hunting_bow";
+    // Дорожные вещи (ПР-08), продаются в поселениях.
     public const string RopeWithHooks = "item.rope_with_hooks";
     public const string DriedFish = "item.dried_fish";
-    public const string UlyanaHerbs = "item.ulyana_herbs";
 
-    // Сюжетная вещь главы: ID совпадает с меткой NarrativeState.Items.
-    public const string SevenToothGauge = "chapter01.item.seven_tooth_gauge";
+    // Канон v1.59: вещи удалённой кампании «Дом на чужой воде». ID не
+    // переиспользуются; экземпляры в старых сохранениях снимаются при
+    // загрузке (CampaignSaveService).
+    public static readonly string[] RemovedItemIds =
+    {
+        "item.storeroom_mail", "item.old_hunting_bow", "item.ulyana_herbs", "chapter01.item.seven_tooth_gauge"
+    };
 
     // 12Т: рабочие товары поселений [РАБОЧЕЕ].
     public const string Wax = "item.goods.wax";
@@ -318,27 +320,15 @@ public static class ItemCatalog
                 Description = "Бинты, иглы, травы. Без неё Марта лечит хуже.",
                 Tags = new[] { "healer" }
             },
-            Protection(StoreroomMail, "Кольчуга из клети", "Лежала в клети без хозяина — чья, уже никто не помнит.",
-                new StatModifier { Defense = 2, Initiative = -1 }, 30),
-            Weapon(OldHuntingBow, "Старый охотничий лук", "Бьёт дальше нынешних — делали для зверя, не для драки.",
-                new StatModifier { AttackRange = 1 }, 18, Archers),
             new ItemDefinition
             {
                 Id = RopeWithHooks, Name = "Верёвка с крючьями", Kind = ItemKind.Special, Price = 6,
-                Description = "Лада сплела из остатков настила. На подъёме и у воды выручает.",
+                Description = "На подъёме и у воды выручает.",
                 Tags = new[] { "rope" }
             },
             // Прежнее поведение: +2 припаса за применение, 3 применения.
-            Consumable(DriedFish, "Сушёная рыба в дорогу", "Варвара насушила из улова. В походе — два дня еды на одного.", 3, 3,
+            Consumable(DriedFish, "Сушёная рыба в дорогу", "Сушёная рыба. В походе — два дня еды на одного.", 3, 3,
                 new ItemUseEffect { Type = ItemUseEffectType.AddSupplies, Amount = 2 }, "Съесть"),
-            // Прежнее поведение: снимает изнеможение, 2 применения.
-            Consumable(UlyanaHerbs, "Сумка трав Ульяны", "Отвар снимает изнеможение с одного человека.", 2, 5,
-                new ItemUseEffect { Type = ItemUseEffectType.RemoveExhaustion }, "Дать отвар"),
-            new ItemDefinition
-            {
-                Id = SevenToothGauge, Name = "Мерка семи зубьев", Kind = ItemKind.Story, CanSell = false, CanBuy = false,
-                Description = "Старая мерка воды. Её нельзя потерять: она ещё понадобится."
-            },
 
             // --- 12Т: рабочие товары [РАБОЧЕЕ] ---
             new ItemDefinition

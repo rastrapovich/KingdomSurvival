@@ -86,12 +86,10 @@ public partial class PrototypeUIController
     }
 
     // ПР-12В: встреча в лагере — одна возможность на ночлег (CampEncounters),
-    // та же цепочка: выбор → открытие диалога → запись начала. В кампании
-    // главы у лагеря свои сцены, поэтому здесь — вне главы.
+    // та же цепочка: выбор → открытие диалога → запись начала.
     private void TryResolveCampEncounterOpportunity()
     {
-        if (gameState == null || isGameOver || KingdomSurvival.Chapter01.Chapter01Crisis.IsActive(gameState) ||
-            HasBlockingModalWork())
+        if (gameState == null || isGameOver || HasBlockingModalWork())
             return;
 
         EncounterOpportunity opportunity = CampEncounters.Opportunity(gameState);

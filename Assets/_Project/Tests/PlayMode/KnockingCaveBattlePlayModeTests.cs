@@ -181,7 +181,6 @@ public sealed class KnockingCaveBattlePlayModeTests
         Assert.IsNotNull(cave, "Пещера есть в свободной игре.");
         cave.IsDiscovered = true;
         cave.IsVisibleOnMap = true;
-        campaign.Food = 40;
         campaign.ArmySupply = 30;
         if (!campaign.HasActiveExpedition)
             Assert.IsTrue(campaign.TryStartExpedition(CaveId, fighters, out string message), message);
@@ -229,9 +228,10 @@ public sealed class KnockingCaveBattlePlayModeTests
         yield return Frames(20);
         MonoBehaviour main = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
             .First(b => b.GetType().Name == "PrototypeUIController");
-        Invoke(main, "StartNewFreePlayFromMenu");
+        Invoke(main, "StartNewGameFromMenu");
         yield return Frames(20);
         GameState campaign = CampaignSession.Current;
+        TestPeople.AdmitAll(campaign);
         yield return EnterCave(main, campaign, new List<string> { "garrick" });
         yield return StartDenBattle(main);
         object controller = Field(main, "localBattle");
@@ -242,7 +242,7 @@ public sealed class KnockingCaveBattlePlayModeTests
         Invoke(controller, "RetreatFromCampaignBattle");
         yield return Frames(5);
         Assert.IsNull(Field(main, "localBattle"), "Отступили.");
-        ResidentState hero = HomePeopleService.Find(campaign, campaign.GetSelectedCommander().Id);
+        ResidentState hero = PeopleService.Find(campaign, campaign.GetSelectedCommander().Id);
         Assert.AreEqual(heroHpInBattle, hero.CurrentHitPoints, "Раны героя после отхода сохранены.");
         LocalLocationDefinition cave = LocalExplorationService.ActiveDefinition(campaign);
         foreach (LocalActorStateData wolf in LocalExplorationService.AliveEnemies(campaign, cave))
@@ -252,6 +252,7 @@ public sealed class KnockingCaveBattlePlayModeTests
         Assert.IsTrue((bool)Invoke(main, "LoadCampaign", CampaignSaveStore.ManualSlotIds[0]));
         yield return Frames(10);
         campaign = CampaignSession.Current;
+        TestPeople.AdmitAll(campaign);
         Assert.IsTrue(LocalExplorationService.IsActive(campaign), "После загрузки — снова в пещере.");
         yield return StartDenBattle(main);
         controller = Field(main, "localBattle");
@@ -269,9 +270,10 @@ public sealed class KnockingCaveBattlePlayModeTests
         yield return Frames(20);
         MonoBehaviour main = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
             .First(b => b.GetType().Name == "PrototypeUIController");
-        Invoke(main, "StartNewFreePlayFromMenu");
+        Invoke(main, "StartNewGameFromMenu");
         yield return Frames(20);
         GameState campaign = CampaignSession.Current;
+        TestPeople.AdmitAll(campaign);
         IPanel panel = main.GetComponent<UIDocument>().rootVisualElement.panel;
 
         yield return EnterCave(main, campaign, fighters);

@@ -388,7 +388,7 @@ public static class FeatureImplementationsFirstBatch
         double worstShare = 1.0;
         foreach (string personId in CampRest.PartyIds(state))
         {
-            ResidentState resident = HomePeopleService.Find(state, personId);
+            ResidentState resident = PeopleService.Find(state, personId);
             if (resident == null || !resident.IsAlive || !resident.HasCombatState || resident.MaxHitPoints <= 0 ||
                 resident.CurrentHitPoints >= resident.MaxHitPoints)
                 continue;

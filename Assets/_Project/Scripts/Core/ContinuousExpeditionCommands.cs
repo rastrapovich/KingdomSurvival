@@ -29,7 +29,7 @@ public static class ContinuousExpeditionCommands
 
         if (expedition.Phase == CommanderState.ReturningToCastle)
         {
-            resultMessage = "Отряд уже возвращается в Дом.";
+            resultMessage = "Отряд уже возвращается на стоянку.";
             return false;
         }
 
@@ -57,7 +57,7 @@ public static class ContinuousExpeditionCommands
         if (route.Count < 2)
         {
             string delivered = state.CompleteExpeditionReturn();
-            resultMessage = "Отряд уже у Дома. " + delivered;
+            resultMessage = "Отряд уже на стоянке. " + delivered;
             ContinuousSimulationSystem.NotifyRouteChanged(state);
             return true;
         }

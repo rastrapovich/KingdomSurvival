@@ -132,7 +132,6 @@ public partial class PrototypeUIController
         // столицу/армию здесь же, как только реальный размер известен.
         if (gameState != null && WorldMapElementsExist())
         {
-            RefreshWorldMapCapital();
             RefreshWorldMapArmyMarker();
         }
 
@@ -321,14 +320,6 @@ public partial class PrototypeUIController
         ClampWorldMapPan();
         ApplyWorldMapViewportTransform();
         RefreshWorldMapZoomIndicator();
-    }
-
-    private void OnWorldMapFocusHomeButtonClicked()
-    {
-        SuspendWorldMapCameraFollow();
-        CenterWorldMapOn(GetWorldMapHomeXPercent(), GetWorldMapHomeYPercent());
-        ClampWorldMapPan();
-        ApplyWorldMapViewportTransform();
     }
 
     private void OnWorldMapFocusHeroButtonClicked()

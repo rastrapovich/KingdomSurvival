@@ -49,7 +49,7 @@ public static class ContinuousPreparationCommands
                 return false;
             }
 
-            ResidentState resident = HomePeopleService.Find(state, fighterId);
+            ResidentState resident = PeopleService.Find(state, fighterId);
             if (resident != null && resident.Injury == ResidentInjury.Recovering)
             {
                 resultMessage = resident.DisplayName + " ранен(а) и восстанавливается — в поход не пойдёт.";
@@ -121,7 +121,7 @@ public static class ContinuousPreparationCommands
             return false;
         }
 
-        if (!HomePeopleService.CanJoinAsRetinue(state, personId, out string reason))
+        if (!PeopleService.CanJoinAsRetinue(state, personId, out string reason))
         {
             resultMessage = "Нельзя взять в свиту: " + reason + ".";
             return false;
@@ -130,7 +130,7 @@ public static class ContinuousPreparationCommands
         expedition.RetinueIds.Clear();
         expedition.RetinueIds.Add(personId);
         ExpeditionPreparation.RememberExpeditionRoster(state);
-        resultMessage = "Специалист в походе: " + HomePeopleService.Find(state, personId).DisplayName + ".";
+        resultMessage = "Специалист в походе: " + PeopleService.Find(state, personId).DisplayName + ".";
         return true;
     }
 }

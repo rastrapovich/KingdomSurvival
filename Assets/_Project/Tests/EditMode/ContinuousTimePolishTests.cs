@@ -8,6 +8,7 @@ public class ContinuousTimePolishTests
     {
         GameState state = new GameState();
         state.CreateNewGame(501);
+        TestPeople.AdmitAll(state);
         ContinuousSimulationSystem.Reset(state);
 
         ContinuousClockSnapshot before =
@@ -30,6 +31,7 @@ public class ContinuousTimePolishTests
     {
         GameState state = new GameState();
         state.CreateNewGame(502 + multiplier);
+        TestPeople.AdmitAll(state);
         ContinuousSimulationSystem.Reset(state);
 
         Assert.That(
@@ -190,6 +192,7 @@ public class ContinuousTimePolishTests
     {
         GameState state = new GameState();
         state.CreateNewGame(777);
+        TestPeople.AdmitAll(state);
 
         string message;
         bool started = state.TryStartExpeditionToMapPoint(
@@ -208,6 +211,7 @@ public class ContinuousTimePolishTests
     {
         GameState state = new GameState();
         state.CreateNewGame(888);
+        TestPeople.AdmitAll(state);
 
         LocationData location = state.FindLocation("ruins");
         Assert.That(location, Is.Not.Null);

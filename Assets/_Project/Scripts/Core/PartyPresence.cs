@@ -99,7 +99,7 @@ public static class PartyPresence
             state.ActiveExpedition.RetinueIds.Contains(personId))
             return ReasonRetinue;
         // ПР-10: тяжелораненый идёт с отрядом, но в бой не вступает.
-        ResidentState resident = HomePeopleService.Find(state, personId);
+        ResidentState resident = PeopleService.Find(state, personId);
         if (resident != null && resident.Injury == ResidentInjury.Recovering)
             return ReasonWounded;
         return string.Empty;
@@ -115,7 +115,7 @@ public static class PartyPresence
     {
         if (state == null || string.IsNullOrEmpty(personId))
             return false;
-        ResidentState resident = HomePeopleService.Find(state, personId);
+        ResidentState resident = PeopleService.Find(state, personId);
         return resident == null || resident.IsAlive;
     }
 }

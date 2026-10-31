@@ -14,8 +14,6 @@
     <Style src="Journal.uss" />
     <Style src="HeroScreen.uss" />
     <Style src="Narrative.uss" />
-    <Style src="HomeActivities.uss" />
-    <Style src="HomeScreen.uss" />
     <Style src="GameMenus.uss" />
     <Style src="Expedition.uss" />
     <Style src="LocalExploration.uss" />
@@ -37,83 +35,6 @@
 
             <ui:VisualElement class="shell-workspace">
                 <ui:VisualElement name="main-screen-scroll" class="main-screen-scroll shell-workspace-content">
-                    <!-- ПР-07А-2: экран Дома (PR07_HOME_SPEC §4). Сводка, образ Дома и объекты, заботы и дела главы,
-                         люди; закреплённая панель подготовки похода внизу. Код: PrototypeUIController.HomeScreen.cs
-                         и PrototypeUIController.HomePrep.cs; модель: Chapter01HomeView, HomeOverview, ExpeditionPreparation. -->
-                    <ui:VisualElement name="capital-screen" class="game-screen shell-content-screen home-screen">
-                        <ui:ScrollView name="home-screen-scroll" class="shell-screen-scroll home-screen-scroll">
-                            <ui:VisualElement class="panel shell-content-panel home-screen-panel">
-                                <ui:VisualElement class="home-header">
-                                    <ui:Label text="ДОМ" class="panel-title home-title" />
-                                    <ui:VisualElement name="capital-resource-panel" class="capital-resource-panel home-summary">
-                                        <ui:VisualElement class="resource-strip capital-resource-strip home-summary-strip">
-                                            <ui:Button name="home-summary-gold" class="resource-box capital-resource-box home-summary-box">
-                                                <ui:Label name="gold-label" text="Деньги: 0" class="resource-value" /><ui:Label name="gold-income-label" text="+3" class="resource-income" />
-                                            </ui:Button>
-                                            <ui:Button name="home-summary-food" class="resource-box food-box capital-resource-box home-summary-box">
-                                                <ui:Label name="food-label" text="Запасы: 0" class="resource-value" /><ui:Label name="food-income-label" text="+24" class="resource-income" />
-                                                <ui:Label name="food-consumption-label" text="" class="home-summary-hint" />
-                                            </ui:Button>
-                                            <ui:Button name="home-summary-people" class="resource-box capital-resource-box home-summary-box">
-                                                <ui:Label name="population-label" text="Люди" class="resource-value" />
-                                            </ui:Button>
-                                            <ui:Button name="home-summary-defense" class="resource-box capital-resource-box home-summary-box">
-                                                <ui:Label name="home-defense-label" text="Защита" class="resource-value" />
-                                            </ui:Button>
-                                        </ui:VisualElement>
-                                        <ui:Label name="home-summary-detail" class="home-summary-detail" />
-                                    </ui:VisualElement>
-                                </ui:VisualElement>
-                                <ui:Label name="home-away-notice" text="Отряд в походе. Подробные сведения о Доме будут доступны после возвращения." class="home-away-notice" />
-                                <ui:VisualElement name="home-main-row" class="home-main-row">
-                                    <ui:VisualElement class="home-scene-column">
-                                        <ui:VisualElement name="home-scene" class="home-scene">
-                                            <ui:Button name="home-scene-yard" class="home-scene-layer home-scene-yard"><ui:Label name="home-scene-yard-caption" class="home-scene-caption" /></ui:Button>
-                                            <ui:Button name="home-scene-livestock" class="home-scene-layer home-scene-livestock"><ui:Label name="home-scene-livestock-caption" class="home-scene-caption" /></ui:Button>
-                                            <ui:Button name="home-scene-mill" class="home-scene-layer home-scene-mill"><ui:Label name="home-scene-mill-caption" class="home-scene-caption" /></ui:Button>
-                                            <ui:Button name="home-scene-walkway" class="home-scene-layer home-scene-walkway"><ui:Label name="home-scene-walkway-caption" class="home-scene-caption" /></ui:Button>
-                                            <ui:Button name="home-scene-dam" class="home-scene-layer home-scene-dam"><ui:Label name="home-scene-dam-caption" class="home-scene-caption" /></ui:Button>
-                                            <ui:Button name="home-scene-water" class="home-scene-layer home-scene-water"><ui:Label name="home-scene-water-caption" class="home-scene-caption" /></ui:Button>
-                                        </ui:VisualElement>
-                                        <ui:VisualElement name="home-objects-list" class="home-objects-list" />
-                                    </ui:VisualElement>
-                                    <ui:VisualElement class="home-side-column">
-                                        <ui:VisualElement name="home-cares-panel" class="home-activities-panel home-cares-panel">
-                                            <ui:Label text="ЗАБОТЫ" class="section-title" />
-                                            <ui:Label name="home-people-maintenance" class="home-people-function" />
-                                            <ui:Label name="home-people-care" class="home-people-function" />
-                                            <ui:Label name="home-people-fishing" class="home-people-function" />
-                                            <ui:VisualElement name="home-cares-list" class="home-cares-list" />
-                                        </ui:VisualElement>
-                                        <ui:VisualElement name="home-activities-panel" class="home-activities-panel">
-                                            <ui:Label text="ДЕЛА ГЛАВЫ" class="section-title" />
-                                            <ui:Label name="home-activities-empty" text="Сейчас никто не ждёт тебя." class="home-activities-empty" />
-                                            <ui:VisualElement name="home-activities-list" class="home-activities-list" />
-                                        </ui:VisualElement>
-                                    </ui:VisualElement>
-                                </ui:VisualElement>
-                                <ui:VisualElement name="home-people-panel" class="home-activities-panel home-people-panel">
-                                    <ui:Label text="ЛЮДИ ДОМА" class="section-title" />
-                                    <ui:Label name="home-people-summary" class="home-people-summary" />
-                                    <ui:VisualElement name="home-people-list" class="home-people-list" />
-                                    <ui:Label name="home-people-detail" class="home-people-detail" />
-                                </ui:VisualElement>
-                            </ui:VisualElement>
-                        </ui:ScrollView>
-                        <ui:VisualElement name="home-prep-panel" class="home-prep-panel">
-                            <ui:VisualElement class="home-prep-header">
-                                <ui:Label name="home-prep-title" text="ПОДГОТОВКА ПОХОДА" class="section-title home-prep-title" />
-                                <ui:Label name="home-prep-message" class="home-prep-message" />
-                                <ui:Button name="home-prep-route-button" text="Выбрать путь" class="game-menu-button home-prep-route-button" />
-                            </ui:VisualElement>
-                            <ui:VisualElement class="home-prep-body">
-                                <ui:VisualElement name="home-prep-slots" class="home-prep-slots" />
-                                <ui:VisualElement name="home-prep-candidates" class="home-prep-candidates" />
-                            </ui:VisualElement>
-                            <ui:Label name="home-prep-forecast" class="home-prep-forecast" />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-
                     <ui:VisualElement name="expeditions-screen" class="game-screen shell-content-screen">
                         <ui:ScrollView class="shell-screen-scroll military-expedition-column">
                             <ui:VisualElement class="panel expedition-panel shell-content-panel shell-expedition-panel">
@@ -157,11 +78,6 @@
                                         <ui:VisualElement name="world-map-routes" class="world-map-layer world-map-routes" />
                                         <ui:VisualElement name="world-map-search-areas" class="world-map-layer world-map-search-areas" picking-mode="Ignore" />
                                         <ui:VisualElement name="world-map-markers" class="world-map-layer world-map-markers" />
-                                        <ui:Button
-                                            name="world-map-capital-button"
-                                            text="ДОМ"
-                                            tooltip="Во время похода нажмите, чтобы приказать армии возвращаться"
-                                            class="world-map-capital" />
                                         <ui:VisualElement name="world-map-army-marker" class="world-map-army-marker">
                                             <ui:Label text="ОТРЯД" class="world-map-army-badge" />
                                             <ui:Label name="world-map-army-marker-label" text="" class="world-map-army-label" />
@@ -189,13 +105,12 @@
                                     </ui:VisualElement>
                                     <ui:Button name="world-map-locations-button" text="ЛОКАЦИИ" tooltip="Открытые локации" class="world-map-locations-button" />
                                     <!-- AM-06 (раздел 7 инструкции по миграции): навигация/зум карты —
-                                         "К герою"/"К Дому"/"Вся карта", +/- зум, компактный индикатор
+                                         "К герою"/"Вся карта", +/- зум, компактный индикатор
                                          масштаба, переключатель сетки (по умолчанию выключена). HUD-панель
                                          внутри world-map-viewport — не панорамируется/зумируется вместе с
                                          картой, как и world-map-locations-button. -->
                                     <ui:VisualElement name="world-map-nav-controls" class="world-map-nav-controls">
                                         <ui:Button name="world-map-focus-hero-button" text="К герою" tooltip="Центрировать на герое" class="world-map-nav-button" />
-                                        <ui:Button name="world-map-focus-home-button" text="К Дому" tooltip="Центрировать на Доме" class="world-map-nav-button" />
                                         <ui:Button name="world-map-fit-button" text="Вся карта" tooltip="Показать всю карту целиком" class="world-map-nav-button" />
                                         <ui:VisualElement name="world-map-zoom-row" class="world-map-zoom-row">
                                             <ui:Button name="world-map-zoom-out-button" text="−" tooltip="Уменьшить" class="world-map-zoom-step-button" />
@@ -222,7 +137,6 @@
 
         <ui:VisualElement class="shell-bottom-bar">
             <ui:VisualElement class="navigation-bar shell-navigation-bar">
-                <ui:Button name="nav-capital-button" text="Дом" tooltip="Дом" class="nav-button shell-nav-button nav-capital" />
                 <ui:Button name="nav-expeditions-button" text="Карта" tooltip="Глобальная карта" class="nav-button shell-nav-button nav-expedition" />
                 <ui:Button name="nav-hero-button" text="Герой" tooltip="Экран героя: состав похода, характеристики, снаряжение" class="nav-button shell-nav-button nav-hero" />
                 <ui:Button name="nav-journal-button" text="Журнал" tooltip="Цели и хроника" class="nav-button shell-nav-button nav-journal" />
@@ -287,10 +201,6 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="camp-art" class="camp-art" />
-                <ui:VisualElement name="camp-scenes-panel" class="camp-panel camp-scenes-panel">
-                    <ui:Label text="СЦЕНЫ" class="camp-panel-title" />
-                    <ui:VisualElement name="camp-scene-list" class="camp-scene-list" />
-                </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="camp-footer" class="camp-footer">
                 <ui:VisualElement name="camp-status-panel" class="camp-panel camp-status-panel">
@@ -314,7 +224,7 @@
              позиция/размеры — из Kingdom Survival -> UI Конструктор
              (KingdomSurvivalUILayouts.asset, экран "journal"). C# только
              ищет эти узлы по имени и наполняет данными из
-             Chapter01JournalProvider. -->
+             CampaignContent.BuildGoals. -->
         <ui:VisualElement name="journal-overlay" class="journal-overlay ks-panel-backdrop">
             <ui:VisualElement name="journal-header" class="journal-header">
                 <ui:Label name="journal-title" text="ЖУРНАЛ" class="journal-title ks-gold-text" />
@@ -580,20 +490,11 @@
                             </ui:VisualElement>
                             <ui:VisualElement class="hero-screen-roster-confirm-row">
                                 <ui:Label name="hero-screen-roster-selected-label" class="hero-screen-roster-selected-label ks-muted-text" />
-                                <ui:Button name="hero-screen-roster-confirm-button" text="ПОДТВЕРДИТЬ СОСТАВ" class="ks-button hero-screen-roster-confirm-button" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement name="hero-screen-retinue" class="ks-panel hero-screen-retinue-panel">
-                            <!-- ПР-06А: свита — 0–1 небоевой специалист (Остафий или Лада).
-                                 Код — PrototypeUIController.HomePeople.cs. -->
+                            <!-- ПР-06А: свита — 0–1 небоевой специалист; портреты — HeroScreenRevision.cs. -->
                             <ui:Label name="hero-screen-retinue-title" text="СВИТА — один специалист, не боец" class="ks-panel-title" />
-                            <ui:VisualElement name="hero-screen-retinue-row" class="hero-screen-wrap-row">
-                                <ui:Button name="hero-screen-retinue-none" text="Без специалиста" class="ks-button hero-screen-retinue-option" />
-                                <ui:Button name="hero-screen-retinue-ostafiy" text="Остафий" class="ks-button hero-screen-retinue-option" />
-                                <ui:Button name="hero-screen-retinue-lada" text="Лада" class="ks-button hero-screen-retinue-option" />
-                            </ui:VisualElement>
-                            <ui:Label name="hero-screen-retinue-description" class="hero-screen-retinue-caption ks-muted-text" />
-                            <ui:Label name="hero-screen-retinue-forecast" class="hero-screen-retinue-caption ks-text" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement name="hero-screen-states" class="ks-panel hero-screen-grow-panel hero-screen-squad-panel">
@@ -723,8 +624,6 @@
                             <ui:Label name="hero-screen-inventory-title" text="СУМКА" class="ks-panel-title" />
                             <ui:ScrollView name="hero-screen-inventory-scroll" class="hero-screen-list-scroll hero-bag-scroll" horizontal-scroller-visibility="Hidden">
                                 <ui:VisualElement name="hero-screen-unit-card-available" class="hero-bag-grid" />
-                                <ui:Label name="hero-screen-storage-title" text="КЛАДОВАЯ ДОМА" class="ks-panel-title hero-item-subtitle" />
-                                <ui:VisualElement name="hero-screen-storage-grid" class="hero-bag-grid" />
                             </ui:ScrollView>
                             <ui:VisualElement name="hero-screen-bag-details" class="hero-bag-details">
                                 <ui:Label name="hero-screen-bag-details-name" class="hero-item-slot-name ks-gold-text" />
@@ -739,15 +638,11 @@
                             <ui:Label name="hero-screen-supply-title" text="ЗАПАСЫ ОТРЯДА" class="ks-panel-title" />
                             <ui:Label text="ЗОЛОТО" class="hero-screen-supply-subtitle ks-muted-text" />
                             <ui:VisualElement class="hero-screen-supply-row">
-                                <ui:Button name="hero-screen-army-gold-minus-button" text="−" class="ks-button hero-screen-supply-button" />
                                 <ui:Label name="hero-screen-army-gold-label" text="0" class="hero-screen-supply-value ks-text" />
-                                <ui:Button name="hero-screen-army-gold-plus-button" text="+" class="ks-button hero-screen-supply-button" />
                             </ui:VisualElement>
                             <ui:Label text="ПРИПАСЫ" class="hero-screen-supply-subtitle ks-muted-text" />
                             <ui:VisualElement class="hero-screen-supply-row">
-                                <ui:Button name="hero-screen-supply-minus-button" text="−" class="ks-button hero-screen-supply-button" />
                                 <ui:Label name="hero-screen-supply-value-label" text="0" class="hero-screen-supply-value ks-text" />
-                                <ui:Button name="hero-screen-supply-plus-button" text="+" class="ks-button hero-screen-supply-button" />
                             </ui:VisualElement>
                             <ui:Label name="hero-screen-supply-consumption-label" text="Расход: —" class="hero-screen-hint ks-muted-text" />
                             <ui:Label name="hero-screen-supply-days-label" text="Хватит на: —" class="hero-screen-hint ks-muted-text" />
@@ -1034,7 +929,7 @@
         <ui:VisualElement name="main-menu-overlay" class="game-menu-overlay main-menu-overlay">
             <ui:VisualElement class="game-menu-panel">
                 <ui:Label text="Kingdom Survival" class="main-menu-title" />
-                <ui:Label text="Дом на чужой воде" class="main-menu-subtitle" />
+                <ui:Label text="Свободная игра" class="main-menu-subtitle" />
                 <ui:Button name="main-menu-continue-button" text="Продолжить" class="game-menu-button" />
                 <ui:Label name="main-menu-continue-hint" class="game-menu-hint" />
                 <ui:Button name="main-menu-new-game-button" text="Новая игра" class="game-menu-button" />
@@ -1067,26 +962,21 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- ПР-05: итог перед стартом новой кампании. Тексты берутся из
-             CampaignStartOptions. ПР-12А: выбор режима — свободная игра или
-             кампания «Дом на чужой воде». -->
+        <!-- ПР-05: итог перед стартом новой партии. Командир — из
+             CampaignStartOptions. Канон v1.59: режим один — свободная игра. -->
         <ui:VisualElement name="new-game-overlay" class="game-menu-overlay new-game-overlay">
             <ui:VisualElement class="game-menu-panel new-game-panel">
                 <ui:Label text="НОВАЯ ИГРА" class="game-menu-title" />
-                <ui:Label text="КАМПАНИЯ" class="new-game-section" />
-                <ui:VisualElement name="new-game-mode-row" class="new-game-mode-row">
-                    <ui:Button name="new-game-mode-free" text="Свободная игра" class="game-menu-button new-game-mode-button" />
-                    <ui:Button name="new-game-mode-story" text="Дом на чужой воде" class="game-menu-button new-game-mode-button" />
-                </ui:VisualElement>
-                <ui:Label name="new-game-crisis-title" class="new-game-option-title" />
-                <ui:Label name="new-game-crisis-summary" class="new-game-option-summary" />
+                <ui:Label text="РЕЖИМ" class="new-game-section" />
+                <ui:Label name="new-game-mode-title" text="Свободная игра" class="new-game-option-title" />
+                <ui:Label name="new-game-mode-summary" text="Большой беды по расписанию нет. Вокруг — округа, люди и места, о которых пока известно мало. Куда идти и кого брать с собой — решаете вы." class="new-game-option-summary" />
                 <ui:Label text="КОМАНДИР" class="new-game-section" />
                 <ui:Label name="new-game-commander-title" class="new-game-option-title" />
                 <ui:Label name="new-game-commander-summary" class="new-game-option-summary" />
                 <ui:Label text="НАЧАЛЬНЫЕ УСЛОВИЯ" class="new-game-section" />
-                <ui:Label name="new-game-start-title" class="new-game-option-title" />
-                <ui:Label name="new-game-start-summary" class="new-game-option-summary" />
-                <ui:Label text="Решения и потери сохраняются внутри кампании." class="game-menu-hint new-game-reminder" />
+                <ui:Label name="new-game-start-title" text="Стоянка у дороги" class="new-game-option-title" />
+                <ui:Label name="new-game-start-summary" text="Отряд встал лагерем у развилки дорог. Отсюда можно идти куда угодно." class="new-game-option-summary" />
+                <ui:Label text="Решения и потери сохраняются внутри партии." class="game-menu-hint new-game-reminder" />
                 <ui:Button name="new-game-start-button" text="Начать" class="game-menu-button" />
                 <ui:Button name="new-game-back-button" text="Назад" class="game-menu-button" />
                 <ui:Label name="new-game-message" class="game-menu-message" />

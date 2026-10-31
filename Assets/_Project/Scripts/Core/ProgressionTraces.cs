@@ -195,7 +195,7 @@ public static class ProgressionTraces
         }
         foreach (CampaignBattleSurvivor survivor in result.Survivors ?? new List<CampaignBattleSurvivor>())
         {
-            ResidentState resident = HomePeopleService.Find(state, survivor.PersonId);
+            ResidentState resident = PeopleService.Find(state, survivor.PersonId);
             if (resident != null && resident.MaxHitPoints > 0 && survivor.HitPoints * 4 <= resident.MaxHitPoints)
                 return true;
         }
@@ -228,7 +228,7 @@ public static class ProgressionTraces
 
         foreach (CampaignBattleSurvivor survivor in result.Survivors ?? new List<CampaignBattleSurvivor>())
         {
-            ResidentState resident = HomePeopleService.Find(state, survivor.PersonId);
+            ResidentState resident = PeopleService.Find(state, survivor.PersonId);
             if (resident == null || !resident.IsAlive)
                 continue;
             if (resident.MaxHitPoints > 0 && survivor.HitPoints * 4 <= resident.MaxHitPoints)
@@ -252,7 +252,7 @@ public static class ProgressionTraces
 
     private static bool IsAlive(GameState state, string personId)
     {
-        ResidentState resident = HomePeopleService.Find(state, personId);
+        ResidentState resident = PeopleService.Find(state, personId);
         return resident != null ? resident.IsAlive : CharacterProgressionService.IsProgressing(state, personId);
     }
 

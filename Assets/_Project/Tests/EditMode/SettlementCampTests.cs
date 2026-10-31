@@ -20,31 +20,29 @@ public sealed class SettlementCampTests
     {
         GameState state = new GameState();
         state.CreateNewGame(20261005);
+        TestPeople.AdmitAll(state);
         state.ArmySupply = 100;
         LocationData target = state.Locations.First(location => !location.IsWaypoint);
         List<string> selected = state.Fighters.Take(fighters).Select(f => f.Id).ToList();
         Assert.IsTrue(state.TryStartExpedition(target.Id, selected, out string message), message);
         if (withRetinue)
-            state.ActiveExpedition.RetinueIds.Add(HomePeopleService.OstafiyId);
-        // Отряд вышел из Дома — домашние функции участников выключены.
+            state.ActiveExpedition.RetinueIds.Add("ostafiy");
+        // Отряд снялся со стоянки.
         state.ActiveExpedition.RouteIndex = 1;
         Assert.IsTrue(SettlementCampDevFixture.Apply(state, out string report), report);
         return state;
     }
 
     [Test]
-    public void Fixture_AddsExternalsWithinTheFighterLimit_NotToHomePopulation()
+    public void Fixture_AddsExternalsWithinTheFighterLimit()
     {
         GameState state = NewStateAtSettlement(2);
         Assert.AreEqual(4, state.ActiveExpedition.FighterIds.Count, "Наёмник и существо заняли места бойцов.");
         Assert.LessOrEqual(state.ActiveExpedition.FighterIds.Count, GameState.ExpeditionFighterSlots);
-        ResidentState creature = HomePeopleService.Find(state, SettlementCampDevFixture.CreatureId);
+        ResidentState creature = PeopleService.Find(state, SettlementCampDevFixture.CreatureId);
         Assert.AreEqual(ResidentMembership.External, creature.Membership);
         Assert.AreEqual(CampaignParticipantOrigin.CreatureAlly, creature.Origin);
-        Assert.IsFalse(creature.IsHomeMember, "Внешний участник не член населения Дома.");
-        int population = state.Population;
-        HomePeopleService.RecountPopulation(state);
-        Assert.AreEqual(population, state.Population);
+        Assert.IsFalse(creature.IsMember, "Внешний участник — не свой человек партии.");
 
         GameState full = NewStateAtSettlement(4);
         Assert.AreEqual(GameState.ExpeditionFighterSlots, full.ActiveExpedition.FighterIds.Count, "Сверх лимита никто не добавлен.");
@@ -65,14 +63,13 @@ public sealed class SettlementCampTests
         List<string> present = PartyPresence.PresentIds(state);
         CollectionAssert.AreEquivalent(new[] { hero, garrick, SettlementCampDevFixture.MercenaryId }, present);
         Assert.IsTrue(PartyPresence.IsWaitingInCamp(state, leftBehind));
-        Assert.IsTrue(PartyPresence.IsWaitingInCamp(state, HomePeopleService.OstafiyId), "Свита тоже может ждать.");
+        Assert.IsTrue(PartyPresence.IsWaitingInCamp(state, "ostafiy"), "Свита тоже может ждать.");
         Assert.IsTrue(PartyPresence.IsWaitingInCamp(state, SettlementCampDevFixture.CreatureId));
         Assert.IsFalse(present.Intersect(state.SettlementCamp.WaitingIds).Any(), "Один ID не может быть и внутри, и в лагере.");
 
         CollectionAssert.AreEqual(fightersBefore, state.ActiveExpedition.FighterIds, "Ожидающие не удалены из похода.");
         Assert.AreEqual(supplyUse, state.ExpeditionSupplyConsumption, "Едят из припасов похода, как раньше.");
-        Assert.IsTrue(HomePeopleService.IsInExpedition(state, HomePeopleService.OstafiyId),
-            "Остафий ждёт у города — дома его функции нет.");
+        Assert.IsTrue(PeopleService.IsInExpedition(state, "ostafiy"), "Остафий ждёт у города, но остаётся в походе.");
 
         CampaignBattleRequest request = CampaignBattleBridge.CreateRequest(state, "test.town.battle");
         CollectionAssert.AreEquivalent(new[] { hero, garrick, SettlementCampDevFixture.MercenaryId },
@@ -80,7 +77,7 @@ public sealed class SettlementCampTests
         CollectionAssert.DoesNotContain(CharacterProgressionService.PartyPersonIds(state), leftBehind,
             "Опыт и особенности внутри — без ожидающих.");
         Assert.AreEqual(3, PartyPresence.PresentPartySize(state), "Размер группы здесь: командир и двое бойцов.");
-        CollectionAssert.DoesNotContain(PartyPresence.PresentCompanionIds(state), HomePeopleService.OstafiyId,
+        CollectionAssert.DoesNotContain(PartyPresence.PresentCompanionIds(state), "ostafiy",
             "Остафий не отвечает изнутри.");
     }
 
@@ -101,7 +98,7 @@ public sealed class SettlementCampTests
         Assert.AreEqual(SettlementCampDevFixture.CreatureUnitTypeId, creature.UnitTypeId);
 
         // Авторское исключение снимает запрет.
-        HomePeopleService.Find(state, SettlementCampDevFixture.CreatureId).SettlementAdmissionExceptionFlag = "test.allowed";
+        PeopleService.Find(state, SettlementCampDevFixture.CreatureId).SettlementAdmissionExceptionFlag = "test.allowed";
         state.Narrative.SetFlag("test.allowed");
         Assert.IsEmpty(SettlementCampService.AdmissionBlockReason(state, SettlementCampDevFixture.CreatureId));
     }
@@ -138,7 +135,7 @@ public sealed class SettlementCampTests
         string fallen = state.ActiveExpedition.FighterIds[1];
         Assert.IsTrue(SettlementCampService.Enter(state, new string[0], out _));
         state.SettlementCamp.WaitingIds.Add("nobody.like.this");
-        HomePeopleService.MarkDead(state, fallen, "test");
+        PeopleService.MarkDead(state, fallen, "test");
         int residents = state.Residents().Count();
 
         List<string> reports = SettlementCampService.Normalize(state);
@@ -170,7 +167,7 @@ public sealed class SettlementCampTests
         Assert.AreEqual(SettlementCampDevFixture.SettlementId, restored.SettlementCamp.SettlementLocationId);
         Assert.IsTrue(restored.FindLocation(SettlementCampDevFixture.SettlementId).IsSettlement);
         Assert.AreEqual(CampaignParticipantOrigin.CreatureAlly,
-            HomePeopleService.Find(restored, SettlementCampDevFixture.CreatureId).Origin);
+            PeopleService.Find(restored, SettlementCampDevFixture.CreatureId).Origin);
     }
 }
 

@@ -27,29 +27,27 @@ public sealed class ShellLayoutRegressionTests
     }
 
     [Test]
-    public void ResourcesLiveInsideCapitalAndNotBottomBar()
+    public void NoHomeScreen_AndNoResourceBar()
     {
+        // Канон v1.59: экрана Дома и его ресурсов нет.
         string uxml = ReadMainUxml();
-        int capitalStart = uxml.IndexOf("name=\"capital-screen\"");
-        int resourcePanel = uxml.IndexOf("name=\"capital-resource-panel\"");
-        int mapStart = uxml.IndexOf("name=\"expeditions-screen\"");
-
-        Assert.That(capitalStart, Is.GreaterThanOrEqualTo(0));
-        Assert.That(resourcePanel, Is.GreaterThan(capitalStart));
-        Assert.That(resourcePanel, Is.LessThan(mapStart));
+        StringAssert.DoesNotContain("name=\"capital-screen\"", uxml);
+        StringAssert.DoesNotContain("capital-resource-panel", uxml);
+        StringAssert.DoesNotContain("world-map-capital-button", uxml);
+        StringAssert.Contains("name=\"expeditions-screen\"", uxml);
         StringAssert.DoesNotContain("shell-resource-bar", uxml);
         StringAssert.DoesNotContain("shell-resource-strip", uxml);
     }
 
     [Test]
-    public void BottomBarKeepsFiveNavigationButtonsAndTimeIndicator()
+    public void BottomBarKeepsFourNavigationButtonsAndTimeIndicator()
     {
         string uxml = ReadMainUxml();
         int bottomStart = uxml.IndexOf("class=\"shell-bottom-bar\"");
         int bottomEnd = uxml.IndexOf("class=\"top-bar shell-debug-host\"");
         string bottom = uxml.Substring(bottomStart, bottomEnd - bottomStart);
 
-        StringAssert.Contains("nav-capital-button", bottom);
+        StringAssert.DoesNotContain("nav-capital-button", bottom);
         StringAssert.Contains("nav-expeditions-button", bottom);
         StringAssert.Contains("nav-hero-button", bottom);
         StringAssert.Contains("nav-journal-button", bottom);

@@ -57,7 +57,7 @@ public static class CombatStatsAssembler
     public static AssembledCombatStats Compute(GameState state, string personId)
     {
         AssembledCombatStats result = new AssembledCombatStats();
-        ResidentState resident = HomePeopleService.Find(state, personId);
+        ResidentState resident = PeopleService.Find(state, personId);
         string unitTypeId = resident != null ? resident.UnitTypeId : null;
         CommanderData hero = state.GetSelectedCommander();
         if (hero != null && hero.Id == personId)

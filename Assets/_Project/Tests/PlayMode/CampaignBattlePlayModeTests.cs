@@ -72,6 +72,7 @@ public sealed class CampaignBattlePlayModeTests
         yield return null;
 
         GameState campaign = CampaignSession.Current;
+        TestPeople.AdmitAll(campaign);
         campaign.ArmySupply = 100;
         LocationData target = campaign.Locations.First(location => !location.IsWaypoint);
         List<string> selected = campaign.Fighters.Take(fighters).Select(f => f.Id).ToList();
@@ -157,11 +158,10 @@ public sealed class CampaignBattlePlayModeTests
         Assert.AreEqual(fightersBefore - 1, campaign.Fighters.Count);
         Assert.IsFalse(campaign.Fighters.Any(f => f.Id == fallenId), "Павший погибает насовсем.");
         // ПР-06А: павший остаётся в реестре людей — погибшим, не удалённым.
-        ResidentState fallen = HomePeopleService.Find(campaign, fallenId);
+        ResidentState fallen = PeopleService.Find(campaign, fallenId);
         Assert.IsNotNull(fallen);
         Assert.AreEqual(ResidentLifeStatus.Dead, fallen.LifeStatus);
-        Assert.AreEqual(23, campaign.Population);
-        ResidentState hero = HomePeopleService.Find(campaign, campaign.GetSelectedCommander().Id);
+        ResidentState hero = PeopleService.Find(campaign, campaign.GetSelectedCommander().Id);
         Assert.IsTrue(hero.HasCombatState && hero.CurrentHitPoints > 0, "HP героя вернулись из боя в его запись.");
         Assert.IsNull(CampaignSession.TakeCompletedBattle(), "Итог уже применён.");
         Assert.IsTrue(CampaignBattleBridge.IsApplied(campaign, "test.battle"));
@@ -186,49 +186,6 @@ public sealed class CampaignBattlePlayModeTests
         clock.ExpeditionIncidentChecked = true;
         clock.ExpeditionDecisionChecked = true;
         ContinuousSimulationSystem.RestoreSnapshot(campaign, clock);
-    }
-
-    // ПР-10: сюжетный бой главы из обычного прохождения — ночлег, вступление,
-    // бой с тремя зверями, отход и последствия в той же кампании.
-    [UnityTest]
-    public IEnumerator StoryBattle_BeastsAtCamp_RetreatAppliesAftermath()
-    {
-        yield return StartCampaignInExpedition(1);
-        GameState campaign = CampaignSession.Current;
-        campaign.ActiveExpedition.RouteIndex = 1;
-        campaign.Narrative.SetFlag("chapter01.flag.expedition_started");
-        Assert.IsTrue(CampRest.TryStartRest(campaign, out string message), message);
-        campaign.ActiveExpedition.ActiveActivity.RemainingHours = 6.0;
-        SkipTodaysRandomChecks(campaign);
-        int supply = campaign.ArmySupply;
-        int day = campaign.Day;
-
-        MonoBehaviour main = FindBehaviour("PrototypeUIController");
-        for (int i = 0; i < 60 && !GetBool(main, "IsNarrativeDialogueActive"); i++)
-            yield return null;
-        Assert.IsTrue(GetBool(main, "IsNarrativeDialogueActive"), "Вступление «Звери у стоянки» открылось само.");
-
-        Invoke(main, "OnStoryDialogueCompleted", "chapter01_dialogue_camp_beasts");
-        Invoke(main, "CloseNarrativeDialogue");
-        yield return WaitForScene(BattleScene);
-
-        MonoBehaviour sandbox = FindBehaviour("BattleSandboxController");
-        for (int i = 0; i < 60 && GetField(sandbox, "battle") == null; i++)
-            yield return null;
-        object battle = GetField(sandbox, "battle");
-        int enemies = ((IEnumerable)battle.GetType().GetProperty("Units").GetValue(battle)).Cast<object>()
-            .Count(unit => unit.GetType().GetProperty("Team").GetValue(unit).ToString() == "Enemy");
-        Assert.AreEqual(3, enemies, "Два зверя и вожак.");
-
-        Invoke(sandbox, "RetreatFromCampaignBattle");
-        yield return WaitForScene(MainScene);
-
-        Assert.AreSame(campaign, CampaignSession.Current);
-        Assert.IsTrue(campaign.Narrative.HasFlag("chapter01.flag.camp_beasts_resolved"));
-        Assert.AreEqual(day, campaign.Day, "Полночь с суточным расходом не наступила.");
-        Assert.AreEqual(supply - CampaignBattleBridge.RetreatSupplyLoss, campaign.ArmySupply);
-        Assert.IsFalse(CampRest.IsResting(campaign), "Ночлег прерван отходом.");
-        Assert.IsTrue(HomePeopleService.Find(campaign, campaign.GetSelectedCommander().Id).Exhausted);
     }
 
     [UnityTest]

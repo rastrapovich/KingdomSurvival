@@ -59,7 +59,7 @@ public sealed class FeaturePresentationPlayModeTests
             yield return null;
         for (int i = 0; i < 20; i++)
             yield return null;
-        Invoke(FindController(), "StartNewFreePlayFromMenu");
+        Invoke(FindController(), "StartNewGameFromMenu");
         for (int i = 0; i < 10; i++)
             yield return null;
     }
@@ -87,7 +87,7 @@ public sealed class FeaturePresentationPlayModeTests
         FeatureActivation activation = Lead(campaign);
 
         MonoBehaviour main = FindController();
-        Assert.IsTrue((bool)Invoke(main, "TryOpenNarrativeDialogueById", "chapter01_dialogue_camp_beasts"), "Диалог открылся.");
+        Assert.IsTrue((bool)Invoke(main, "TryOpenNarrativeDialogueById", "road_warm_sheep_01"), "Диалог открылся.");
         object view = Invoke(GetField(main, "narrativeDialogueSession"), "BuildView");
         Invoke(main, "DisplayNarrativeView", view, null, new List<FeatureActivation> { activation });
         yield return null;

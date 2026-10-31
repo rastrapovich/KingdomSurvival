@@ -497,7 +497,7 @@ public partial class PrototypeUIController
         {
             if (candidates.Contains(member.Id))
                 continue;
-            ResidentState resident = HomePeopleService.Find(gameState, member.Id);
+            ResidentState resident = PeopleService.Find(gameState, member.Id);
             string who = resident != null ? resident.DisplayName : member.Id;
             request.Notes.Add(who + " держится у выхода: " +
                               PartyPresence.BattleExclusionReason(gameState, member.Id).ToLowerInvariant() + ".");
@@ -923,7 +923,7 @@ public partial class PrototypeUIController
         List<string> retinue = gameState.ActiveExpedition?.RetinueIds ?? new List<string>();
         foreach (LocalHexMover.Member member in localMover.Members)
         {
-            ResidentState resident = HomePeopleService.Find(gameState, member.Id);
+            ResidentState resident = PeopleService.Find(gameState, member.Id);
             string unitType = hero != null && member.Id == hero.Id
                 ? (string.IsNullOrWhiteSpace(hero.UnitTypeId) ? CampaignBattleBridge.HeroFallbackUnitTypeId : hero.UnitTypeId)
                 : FindFighterUnitType(member.Id) ?? resident?.UnitTypeId;
@@ -1034,7 +1034,7 @@ public partial class PrototypeUIController
         List<string> rows = new List<string>();
         foreach (string personId in PartyPresence.ExpeditionIds(gameState))
         {
-            ResidentState resident = HomePeopleService.Find(gameState, personId);
+            ResidentState resident = PeopleService.Find(gameState, personId);
             if (resident != null && !resident.IsAlive)
                 continue;
             string name = resident != null ? resident.DisplayName : personId;

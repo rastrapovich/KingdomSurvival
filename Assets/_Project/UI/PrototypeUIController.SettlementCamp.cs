@@ -165,7 +165,7 @@ public partial class PrototypeUIController
 
     private string PersonName(string personId)
     {
-        ResidentState resident = HomePeopleService.Find(gameState, personId);
+        ResidentState resident = PeopleService.Find(gameState, personId);
         return resident != null && !string.IsNullOrEmpty(resident.DisplayName) ? resident.DisplayName : personId;
     }
 

@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using KingdomSurvival.Chapter01;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
 /// Журнал целей (P08J, UI-M02) — read-only fullscreen-слой поверх
-/// Chapter01JournalProvider.Build. Первый экран, мигрированный на
+/// CampaignContent.BuildGoals. Первый экран, мигрированный на
 /// ProjectDocs/UI_ARCHITECTURE.md после Camp: постоянная структура —
 /// Prototype_Main.uxml (journal-overlay), общий стиль — Prototype_
 /// SharedPanels.uss (.ks-*) + Journal.uss, повторяемая строка цели —
@@ -162,7 +161,7 @@ public partial class PrototypeUIController
     // Наполнение данными
     // ------------------------------------------------------------------
 
-    // Единственная точка входа в Chapter01JournalProvider.Build — вызывается
+    // Единственная точка входа в CampaignContent.BuildGoals — вызывается
     // при каждом открытии и при каждом относящемся к делу изменении
     // состояния, пока журнал открыт (RefreshStableUiAfterStateChange /
     // RefreshInterface). Никакого собственного Update-цикла.
@@ -182,7 +181,7 @@ public partial class PrototypeUIController
         journalDetailStepCaption.style.display = DisplayStyle.Flex;
         journalDetailMapButton.style.display = DisplayStyle.None;
 
-        // ПР-11/12А: «Дела» — через общий вход содержания режима кампании.
+        // ПР-11/12А: «Дела» — через общий вход содержания свободной игры.
         IReadOnlyList<JournalGoalViewData> goals = CampaignContent.BuildGoals(gameState);
 
         journalMainList.Clear();

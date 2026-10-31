@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 // ПР-08: все изменения вещей — атомарными командами с причиной отказа.
 // Один предмет — один экземпляр: передача меняет владельца, а не копирует.
-// Дома доступны кладовая и все живые жители; в пути — только вещи тех,
-// кто в отряде, кладовая недоступна («Нужно вернуться в Дом»).
+// Канон v1.59: кладовой исходного Дома нет — у каждой вещи есть владелец;
+// находка без владельца попадает в сумку героя.
 public static class ItemService
 {
     // Решение пользователя 24.10.2026 (PR08_HERO_ITEMS_SPEC §0.8): сумка
@@ -12,19 +12,8 @@ public static class ItemService
     public const int HeroPackSize = 30;
     public const string StartingKitGrant = "pr08.grant.starting_kit";
 
-    // Стартовое снаряжение (§7 ТЗ с правкой §0.4).
-    private static readonly Dictionary<string, string[]> StartingKit = new Dictionary<string, string[]>
-    {
-        { "garrick", new[] { ItemCatalog.SwordAndShield, ItemCatalog.MailShirt } },
-        { "edric", new[] { ItemCatalog.Bow, ItemCatalog.Jacket } },
-        { "marta", new[] { ItemCatalog.Knife, ItemCatalog.Jacket, ItemCatalog.HealerBag } },
-        { "torvin", new[] { ItemCatalog.Spear, ItemCatalog.PaddedCoat } },
-        { "agnessa", new[] { ItemCatalog.Bow, ItemCatalog.Jacket } },
-        { HomePeopleService.TikhonId, new[] { ItemCatalog.Axe, ItemCatalog.FisherCoat } }
-    };
-
+    // Стартовое снаряжение героя (§7 ТЗ с правкой §0.4).
     private static readonly string[] HeroKit = { ItemCatalog.Sword, ItemCatalog.PaddedCoat };
-    private static readonly string[] StoreroomKit = { ItemCatalog.StoreroomMail, ItemCatalog.OldHuntingBow };
 
     public static InventoryData Get(GameState state)
     {
@@ -37,9 +26,9 @@ public static class ItemService
         return state.Inventory;
     }
 
-    // Новая партия и загрузка: стартовый набор один раз, сюжетные метки
-    // NarrativeState.Items — в сюжетные вещи героя, снаряжение принятых
-    // позже людей (Тихон). Идемпотентно — можно вызывать часто.
+    // Новая партия и загрузка: стартовый набор героя один раз, сюжетные
+    // метки NarrativeState.Items — в вещи героя. Идемпотентно — можно
+    // вызывать часто.
     public static void EnsureInventory(GameState state)
     {
         if (state?.People == null)
@@ -55,19 +44,6 @@ public static class ItemService
                 foreach (string itemId in HeroKit)
                     Equip(state, Create(state, itemId, commander.Id));
             }
-            foreach (string itemId in StoreroomKit)
-                Create(state, itemId, string.Empty);
-        }
-
-        foreach (KeyValuePair<string, string[]> kit in StartingKit)
-        {
-            ResidentState resident = HomePeopleService.Find(state, kit.Key);
-            string grant = "pr08.grant.kit." + kit.Key;
-            if (resident == null || inventory.AppliedGrants.Contains(grant))
-                continue;
-            inventory.AppliedGrants.Add(grant);
-            foreach (string itemId in kit.Value)
-                Equip(state, Create(state, itemId, kit.Key));
         }
 
         SyncStoryItems(state);
@@ -157,6 +133,9 @@ public static class ItemService
             throw new ArgumentException("Неизвестная вещь: " + itemId, nameof(itemId));
 
         InventoryData inventory = Get(state);
+        // Находка без владельца — герою (кладовой нет).
+        if (string.IsNullOrEmpty(ownerPersonId))
+            ownerPersonId = state.GetSelectedCommander()?.Id;
         ItemInstanceData instance = new ItemInstanceData
         {
             InstanceId = "item." + inventory.NextNumber.ToString("0000"),
@@ -175,6 +154,25 @@ public static class ItemService
         ItemDefinition definition = ItemCatalog.Find(instance.ItemId);
         if (definition != null && definition.Slot != ItemSlot.None)
             instance.Slot = definition.Slot;
+    }
+
+    // Снаряжение принятого человека (CharacterTemplate.KitItemIds) — один
+    // раз на человека; вещи с местом надеваются, остальные лежат при нём.
+    public static void GrantKit(GameState state, string personId, IEnumerable<string> itemIds)
+    {
+        if (state == null || string.IsNullOrEmpty(personId) || itemIds == null)
+            return;
+        InventoryData inventory = Get(state);
+        string grant = "kit." + personId;
+        if (inventory.AppliedGrants.Contains(grant))
+            return;
+        inventory.AppliedGrants.Add(grant);
+        foreach (string itemId in itemIds)
+        {
+            if (ItemCatalog.Find(itemId) != null)
+                Equip(state, Create(state, itemId, personId));
+        }
+        RefreshMaxHitPoints(state, personId);
     }
 
     // ------------------------------------------------------------------
@@ -210,11 +208,6 @@ public static class ItemService
                 result.Add(item);
         }
         return result;
-    }
-
-    public static List<ItemInstanceData> Storage(GameState state)
-    {
-        return OwnedBy(state, string.Empty);
     }
 
     public static ItemInstanceData Equipped(GameState state, string personId, ItemSlot slot)
@@ -264,13 +257,14 @@ public static class ItemService
         return count;
     }
 
-    // Кто сейчас рядом с героем: в пути — отряд, дома — все живые жители.
+    // Кто сейчас рядом с героем: в пути — присутствующий отряд, на стоянке —
+    // все живые люди партии.
     private static bool IsWithHero(GameState state, string personId)
     {
-        ResidentState resident = HomePeopleService.Find(state, personId);
+        ResidentState resident = PeopleService.Find(state, personId);
         if (resident == null || !resident.IsAlive)
             return false;
-        if (HomePeopleService.HasDeparted(state))
+        if (PeopleService.HasDeparted(state))
         {
             // 12Т: оставленный в лагере у поселения не рядом с командиром —
             // его вещи не участвуют в сцене, торговле и снаряжении внутри.
@@ -278,9 +272,9 @@ public static class ItemService
                 return false;
             CommanderData commander = state.GetSelectedCommander();
             return (commander != null && commander.Id == personId) ||
-                   HomePeopleService.IsInExpedition(state, personId);
+                   PeopleService.IsInExpedition(state, personId);
         }
-        return resident.IsHomeMember;
+        return resident.IsMember;
     }
 
     public static bool IsWithHeroPublic(GameState state, string personId) => IsWithHero(state, personId);
@@ -289,14 +283,12 @@ public static class ItemService
     {
         if (item == null)
             return false;
-        if (string.IsNullOrEmpty(item.OwnerPersonId))
-            return !HomePeopleService.HasDeparted(state);
-        return IsWithHero(state, item.OwnerPersonId);
+        return !string.IsNullOrEmpty(item.OwnerPersonId) && IsWithHero(state, item.OwnerPersonId);
     }
 
-    // Вещи «рядом» для условий ItemPresent и модификаторов проверок: в пути
-    // — у участников отряда, дома — у жителей и в кладовой. Прежние
-    // сюжетные метки NarrativeState.Items учитываются всегда.
+    // Вещи «рядом» для условий ItemPresent и модификаторов проверок — у тех,
+    // кто рядом с героем. Прежние сюжетные метки NarrativeState.Items
+    // учитываются всегда.
     public static List<string> GetPresentItemIds(GameState state)
     {
         List<string> ids = new List<string>();
@@ -321,7 +313,7 @@ public static class ItemService
     public static bool CanUseSlotItem(GameState state, string personId, ItemDefinition definition, out string reason)
     {
         reason = string.Empty;
-        ResidentState resident = HomePeopleService.Find(state, personId);
+        ResidentState resident = PeopleService.Find(state, personId);
         if (resident == null || !resident.IsAlive)
         {
             reason = "Этого человека нет среди живых.";
@@ -348,7 +340,7 @@ public static class ItemService
     // ------------------------------------------------------------------
 
     // Надеть вещь на человека. Прежняя вещь из того же слота уходит туда,
-    // откуда пришла новая (кладовая или сумка героя), либо в кладовую/сумку.
+    // откуда пришла новая, либо в сумку героя.
     public static bool TryEquip(GameState state, string instanceId, string personId, out string message)
     {
         ItemInstanceData item = Find(state, instanceId);
@@ -365,7 +357,7 @@ public static class ItemService
         }
         if (!IsReachable(state, item) || !IsWithHero(state, personId))
         {
-            message = "Вещь и человек должны быть рядом. Кладовая — только дома.";
+            message = "Вещь и человек должны быть рядом.";
             return false;
         }
         if (!CanUseSlotItem(state, personId, definition, out message))
@@ -392,12 +384,12 @@ public static class ItemService
         if (!string.IsNullOrEmpty(sourceOwner) && sourceOwner != personId)
             RefreshMaxHitPoints(state, sourceOwner);
 
-        ResidentState resident = HomePeopleService.Find(state, personId);
+        ResidentState resident = PeopleService.Find(state, personId);
         message = (resident != null ? resident.DisplayName : personId) + ": " + definition.Name + ".";
         return true;
     }
 
-    // Снять: дома — в кладовую, в пути — в сумку героя.
+    // Снять — в сумку героя.
     public static bool TryUnequip(GameState state, string instanceId, out string message)
     {
         ItemInstanceData item = Find(state, instanceId);
@@ -417,46 +409,11 @@ public static class ItemService
         if (!TryPlaceUnequipped(state, item, null, null, out message))
             return false;
         RefreshMaxHitPoints(state, owner);
-        message = definition.Name + (string.IsNullOrEmpty(item.OwnerPersonId) ? " — в кладовой." : " — в сумке героя.");
+        message = definition.Name + " — в сумке героя.";
         return true;
     }
 
-    // Отнести в кладовую (дома). Сюжетные вещи остаются при герое.
-    public static bool TryStore(GameState state, string instanceId, out string message)
-    {
-        ItemInstanceData item = Find(state, instanceId);
-        ItemDefinition definition = item != null ? ItemCatalog.Find(item.ItemId) : null;
-        if (definition == null)
-        {
-            message = "Такой вещи нет.";
-            return false;
-        }
-        if (definition.IsStory)
-        {
-            message = definition.Name + " остаётся при герое.";
-            return false;
-        }
-        if (HomePeopleService.HasDeparted(state))
-        {
-            message = "Нужно вернуться в Дом.";
-            return false;
-        }
-        if (!IsReachable(state, item))
-        {
-            message = "Эта вещь сейчас не рядом.";
-            return false;
-        }
-
-        string owner = item.OwnerPersonId;
-        item.OwnerPersonId = string.Empty;
-        item.Slot = ItemSlot.None;
-        if (!string.IsNullOrEmpty(owner))
-            RefreshMaxHitPoints(state, owner);
-        message = definition.Name + " — в кладовой.";
-        return true;
-    }
-
-    // Взять в сумку героя (из кладовой дома или у человека рядом).
+    // Взять в сумку героя у человека рядом.
     public static bool TryTakeToPack(GameState state, string instanceId, out string message)
     {
         ItemInstanceData item = Find(state, instanceId);
@@ -469,7 +426,7 @@ public static class ItemService
         }
         if (!IsReachable(state, item))
         {
-            message = string.IsNullOrEmpty(item.OwnerPersonId) ? "Нужно вернуться в Дом." : "Эта вещь сейчас не рядом.";
+            message = "Эта вещь сейчас не рядом.";
             return false;
         }
         if (item.OwnerPersonId == commander.Id && item.Slot == ItemSlot.None)
@@ -499,8 +456,7 @@ public static class ItemService
         return ItemUseService.TryUse(state, instanceId, targetPersonId, out message);
     }
 
-    // Человек погиб: сюжетные вещи — к герою, остальное — в кладовую Дома
-    // (в пути недоступна, как и вся кладовая).
+    // Человек погиб: его вещи переходят к герою.
     public static void OnPersonDied(GameState state, string personId)
     {
         if (state?.Inventory?.Items == null)
@@ -510,9 +466,7 @@ public static class ItemService
         {
             if (item.OwnerPersonId != personId)
                 continue;
-            ItemDefinition definition = ItemCatalog.Find(item.ItemId);
-            bool story = definition != null && definition.IsStory;
-            item.OwnerPersonId = story && commander != null && commander.Id != personId ? commander.Id : string.Empty;
+            item.OwnerPersonId = commander != null && commander.Id != personId ? commander.Id : string.Empty;
             item.Slot = ItemSlot.None;
         }
     }
@@ -522,12 +476,7 @@ public static class ItemService
     {
         message = string.Empty;
         CommanderData commander = state.GetSelectedCommander();
-        bool departed = HomePeopleService.HasDeparted(state);
-
-        // В пути вещь не может уйти в кладовую — только в сумку героя.
-        string owner = preferredOwner ?? (departed ? commander?.Id : string.Empty);
-        if (string.IsNullOrEmpty(owner) && departed)
-            owner = commander?.Id;
+        string owner = string.IsNullOrEmpty(preferredOwner) ? commander?.Id : preferredOwner;
 
         if (!string.IsNullOrEmpty(owner) && commander != null && owner == commander.Id)
         {
@@ -552,13 +501,13 @@ public static class ItemService
 
     public static void RefreshAllMaxHitPoints(GameState state)
     {
-        foreach (ResidentState resident in HomePeopleService.All(state))
+        foreach (ResidentState resident in PeopleService.All(state))
             RefreshMaxHitPoints(state, resident.PersonId);
     }
 
     public static void RefreshMaxHitPoints(GameState state, string personId)
     {
-        ResidentState resident = HomePeopleService.Find(state, personId);
+        ResidentState resident = PeopleService.Find(state, personId);
         if (resident == null || !resident.HasCombatState || !resident.IsAlive)
             return;
 
@@ -569,7 +518,5 @@ public static class ItemService
         bool wasFull = resident.CurrentHitPoints >= resident.MaxHitPoints;
         resident.MaxHitPoints = newMax;
         resident.CurrentHitPoints = wasFull ? newMax : Math.Min(resident.CurrentHitPoints, newMax);
-        if (resident.RecoveryBaseHitPoints > newMax)
-            resident.RecoveryBaseHitPoints = newMax;
     }
 }

@@ -46,6 +46,7 @@ public sealed class FeatureCombatBatchTests
     private static GameState OnTheRoad(params string[] fighters)
     {
         GameState state = new CampaignSetup { WorldSeed = 20260928 }.CreateCampaign();
+        TestPeople.AdmitAll(state);
         state.ArmySupply = 50;
         LocationData target = state.Locations.First(location => !location.IsWaypoint);
         Assert.IsTrue(state.TryStartExpedition(target.Id, fighters.ToList(), out string message), message);
@@ -110,15 +111,15 @@ public sealed class FeatureCombatBatchTests
     {
         GameState state = OnTheRoad("garrick", "edric");
         Give(state, "garrick", CombatFeatureIds.Stubborn);
-        int garrickMax = HomePeopleService.Find(state, "garrick").MaxHitPoints;
-        int edricMax = HomePeopleService.Find(state, "edric").MaxHitPoints;
+        int garrickMax = PeopleService.Find(state, "garrick").MaxHitPoints;
+        int edricMax = PeopleService.Find(state, "edric").MaxHitPoints;
         Assert.Greater(garrickMax / 4, garrickMax / 8, "Между порогами есть зазор.");
 
         CampaignBattleBridge.ApplyResult(state, Result("test.stubborn", CampaignBattleOutcome.Victory,
             new Dictionary<string, int> { { Hero(state), 20 }, { "garrick", garrickMax / 4 }, { "edric", edricMax / 4 } }), new List<string>());
 
-        Assert.AreEqual(ResidentInjury.None, HomePeopleService.Find(state, "garrick").Injury, "Упрямец: четверть — ещё не тяжёлая рана.");
-        Assert.AreEqual(ResidentInjury.Recovering, HomePeopleService.Find(state, "edric").Injury);
+        Assert.AreEqual(ResidentInjury.None, PeopleService.Find(state, "garrick").Injury, "Упрямец: четверть — ещё не тяжёлая рана.");
+        Assert.AreEqual(ResidentInjury.Recovering, PeopleService.Find(state, "edric").Injury);
     }
 
     [Test]
@@ -133,7 +134,7 @@ public sealed class FeatureCombatBatchTests
 
         CampaignBattleBridge.ApplyResult(state, result, new List<string>(), notes);
 
-        Assert.AreEqual(ResidentInjury.Recovering, HomePeopleService.Find(state, "garrick").Injury, "После боя — обязательная тяжёлая рана.");
+        Assert.AreEqual(ResidentInjury.Recovering, PeopleService.Find(state, "garrick").Injury, "После боя — обязательная тяжёлая рана.");
         Assert.IsTrue(notes.Any(n => n.Contains("«Ещё на ногах»")));
         Assert.IsTrue(CharacterProgressionService.EnsureState(state).RecentFeatureActivations
             .Any(a => a.PersonId == "garrick" && a.FeatureId == CombatFeatureIds.StillStanding));
@@ -164,7 +165,7 @@ public sealed class FeatureCombatBatchTests
         CampaignBattleBridge.ApplyResult(state, Result("test.retreat1", CampaignBattleOutcome.Retreat,
             new Dictionary<string, int> { { Hero(state), 20 }, { "edric", 20 } }, "garrick"), new List<string>(), notes);
 
-        ResidentState garrick = HomePeopleService.Find(state, "garrick");
+        ResidentState garrick = PeopleService.Find(state, "garrick");
         Assert.IsTrue(garrick.IsAlive, "Вынесен из боя живым.");
         Assert.AreEqual(1, garrick.CurrentHitPoints);
         Assert.AreEqual(ResidentInjury.Recovering, garrick.Injury);
@@ -172,7 +173,7 @@ public sealed class FeatureCombatBatchTests
 
         CampaignBattleBridge.ApplyResult(state, Result("test.retreat2", CampaignBattleOutcome.Retreat,
             new Dictionary<string, int> { { Hero(state), 20 }, { "garrick", 1 } }, "edric"), new List<string>());
-        Assert.IsFalse(HomePeopleService.Find(state, "edric").IsAlive, "Раз за поход.");
+        Assert.IsFalse(PeopleService.Find(state, "edric").IsAlive, "Раз за поход.");
     }
 
     [Test]
@@ -184,7 +185,7 @@ public sealed class FeatureCombatBatchTests
         CampaignBattleBridge.ApplyResult(state, Result("test.victory", CampaignBattleOutcome.Victory,
             new Dictionary<string, int> { { Hero(state), 20 } }, "garrick"), new List<string>());
 
-        Assert.IsFalse(HomePeopleService.Find(state, "garrick").IsAlive, "Победа — павший не выносится.");
+        Assert.IsFalse(PeopleService.Find(state, "garrick").IsAlive, "Победа — павший не выносится.");
     }
 
     [Test]

@@ -138,7 +138,7 @@ public static class HireService
         string personId = candidate.Id;
         if (state.FindFighter(personId) == null)
             state.Fighters.Add(new FighterData(personId, candidate.Name, "Наёмник", 1, 0, candidate.UnitTypeId));
-        if (HomePeopleService.Find(state, personId) == null)
+        if (PeopleService.Find(state, personId) == null)
         {
             ResidentState resident = new ResidentState
             {
@@ -152,7 +152,7 @@ public static class HireService
                 UnitTypeId = candidate.UnitTypeId
             };
             state.People.Residents.Add(resident);
-            HomePeopleService.EnsureCombatState(resident);
+            PeopleService.EnsureCombatState(resident);
         }
         state.ActiveExpedition.FighterIds.Add(personId);
         candidate.Hired = true;
@@ -178,7 +178,7 @@ public static class HireService
         {
             if (contract == null || contract.LastPaidDay >= state.Day)
                 continue;
-            ResidentState resident = HomePeopleService.Find(state, contract.PersonId);
+            ResidentState resident = PeopleService.Find(state, contract.PersonId);
             if (resident == null || !resident.IsAlive)
                 continue;
             contract.LastPaidDay = state.Day;

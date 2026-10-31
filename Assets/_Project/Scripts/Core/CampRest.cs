@@ -66,6 +66,7 @@ public static class CampRest
     public const int InspectRadiusCells = 3;
     public const string MartaId = "marta";
     public const string AgnessaId = "agnessa";
+    public const string OstafiyId = "ostafiy";
 
     public static CampNightData GetNight(GameState state)
     {
@@ -136,7 +137,7 @@ public static class CampRest
 
     private static bool InParty(GameState state, string personId)
     {
-        ResidentState resident = HomePeopleService.Find(state, personId);
+        ResidentState resident = PeopleService.Find(state, personId);
         return resident != null && resident.IsAlive && PartyIds(state).Contains(personId);
     }
 
@@ -194,7 +195,7 @@ public static class CampRest
         bool anyWounded = false;
         foreach (string id in PartyIds(state))
         {
-            ResidentState resident = HomePeopleService.Find(state, id);
+            ResidentState resident = PeopleService.Find(state, id);
             if (resident != null && resident.IsAlive && resident.HasCombatState && resident.CurrentHitPoints < resident.MaxHitPoints)
                 anyWounded = true;
         }
@@ -333,7 +334,7 @@ public static class CampRest
 
         foreach (string id in PartyIds(state))
         {
-            ResidentState resident = HomePeopleService.Find(state, id);
+            ResidentState resident = PeopleService.Find(state, id);
             if (resident != null && resident.IsAlive && resident.Exhausted)
             {
                 resident.Exhausted = false;
@@ -380,13 +381,13 @@ public static class CampRest
                 List<string> healed = new List<string>();
                 foreach (string id in PartyIds(state))
                 {
-                    ResidentState resident = HomePeopleService.Find(state, id);
+                    ResidentState resident = PeopleService.Find(state, id);
                     if (resident == null || !resident.IsAlive || !resident.HasCombatState ||
                         resident.CurrentHitPoints >= resident.MaxHitPoints)
                         continue;
                     int missing = resident.MaxHitPoints - resident.CurrentHitPoints;
                     int gain = Math.Max(1, bag ? missing / 2 : missing / 4);
-                    HomePeopleService.SetHitPoints(resident, resident.CurrentHitPoints + gain);
+                    PeopleService.SetHitPoints(resident, resident.CurrentHitPoints + gain);
                     healed.Add(resident.DisplayName + " +" + gain + " HP");
                 }
                 return healed.Count > 0 ? "Марта перевязала: " + string.Join(", ", healed) : null;

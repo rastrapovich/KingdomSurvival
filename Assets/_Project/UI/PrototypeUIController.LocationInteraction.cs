@@ -1,4 +1,3 @@
-using KingdomSurvival.Chapter01;
 using UnityEngine.UIElements;
 
 // Location Interaction — системное окно "мы вошли в локацию", которое
@@ -151,14 +150,9 @@ public partial class PrototypeUIController
         if (RenderSettlementChoices(location))
             return;
 
-        string entryDialogueId =
-            Chapter01StoryDirector.GetLocationEntryDialogueId(gameState, location.Id);
         // ПР-12Б: сцена места свободной игры (своя подпись кнопки).
-        LocationEntryView modeEntry = string.IsNullOrEmpty(entryDialogueId)
-            ? CampaignContent.LocationEntry(gameState, location.Id)
-            : null;
-        if (modeEntry != null)
-            entryDialogueId = modeEntry.DialogueId;
+        LocationEntryView modeEntry = CampaignContent.LocationEntry(gameState, location.Id);
+        string entryDialogueId = modeEntry?.DialogueId;
 
         Button primaryButton = InstantiateFlatTemplate<Button>(LoadNarrativeChoiceButtonTemplate(), "narrative-dialogue-choice");
         if (primaryButton != null)
@@ -225,9 +219,7 @@ public partial class PrototypeUIController
             return;
 
         string locationId = locationInteractionLocationId;
-        string availableDialogueId =
-            Chapter01StoryDirector.GetLocationEntryDialogueId(gameState, locationId) ??
-            CampaignContent.LocationEntry(gameState, locationId)?.DialogueId;
+        string availableDialogueId = CampaignContent.LocationEntry(gameState, locationId)?.DialogueId;
         if (!string.Equals(
                 availableDialogueId,
                 dialogueId,

@@ -187,10 +187,11 @@ public sealed class SettlementScreenPlayModeTests
             yield return null;
         yield return Frames(20);
         MonoBehaviour main = FindBehaviour("PrototypeUIController");
-        Invoke(main, "StartNewFreePlayFromMenu");
+        Invoke(main, "StartNewGameFromMenu");
         yield return Frames(10);
 
         GameState campaign = CampaignSession.Current;
+        TestPeople.AdmitAll(campaign);
         campaign.ArmySupply = 10;
         LocationData target = campaign.Locations.First(location => !location.IsWaypoint && (location.IsVisibleOnMap || location.RevealedByFog));
         Assert.IsTrue(campaign.TryStartExpedition(target.Id, new List<string> { "garrick" }, out string message), message);

@@ -58,6 +58,7 @@ public sealed class LocalExplorationCoreTests
     {
         GameState state = new GameState();
         state.CreateNewGame(20261004);
+        TestPeople.AdmitAll(state);
         state.ArmySupply = 100;
         LocationData target = state.Locations.First(location => !location.IsWaypoint);
         List<string> selected = state.Fighters.Take(fighters).Select(f => f.Id).ToList();
@@ -107,8 +108,8 @@ public sealed class LocalExplorationCoreTests
     {
         GameState state = NewStateAtCave(2);
         string wounded = state.ActiveExpedition.FighterIds[1];
-        HomePeopleService.Find(state, wounded).Injury = ResidentInjury.Recovering;
-        state.ActiveExpedition.RetinueIds.Add(HomePeopleService.OstafiyId);
+        PeopleService.Find(state, wounded).Injury = ResidentInjury.Recovering;
+        state.ActiveExpedition.RetinueIds.Add("ostafiy");
         LocalLocationDefinition cave = LocalLocationCatalog.Find(TestLocationId);
         Assert.IsTrue(LocalExplorationService.Enter(state, cave, "in", out _));
 
@@ -120,7 +121,7 @@ public sealed class LocalExplorationCoreTests
         Assert.AreEqual("test.battle.cave.1", request.BattleId);
         List<string> ids = request.Participants.Select(p => p.PersonId).ToList();
         CollectionAssert.DoesNotContain(ids, wounded, "Тяжелораненый не сражается.");
-        CollectionAssert.DoesNotContain(ids, HomePeopleService.OstafiyId, "Свита в бой не вступает.");
+        CollectionAssert.DoesNotContain(ids, "ostafiy", "Свита в бой не вступает.");
         Assert.AreEqual(2, ids.Count, "Герой и один боеспособный боец.");
         Assert.IsTrue(request.Participants.All(p => p.HasCell));
         CollectionAssert.AreEquivalent(new[] { "cave.beast.1", "cave.beast.2" }, request.Enemies.Select(e => e.InstanceId));
@@ -272,7 +273,7 @@ public sealed class LocalExplorationCoreTests
 
         Assert.IsFalse(LocalExplorationService.IsActive(restored), "Без локальных данных — прежний слой.");
         Assert.IsNull(restored.SettlementCamp);
-        CollectionAssert.AreEquivalent(PartyPresence.ExpeditionIds(restored).Where(id => HomePeopleService.Find(restored, id) == null || HomePeopleService.Find(restored, id).IsAlive),
+        CollectionAssert.AreEquivalent(PartyPresence.ExpeditionIds(restored).Where(id => PeopleService.Find(restored, id) == null || PeopleService.Find(restored, id).IsAlive),
             PartyPresence.PresentIds(restored), "Без разделения все участники похода вместе.");
     }
 

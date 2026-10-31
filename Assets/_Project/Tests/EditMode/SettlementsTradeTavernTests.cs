@@ -138,6 +138,7 @@ public sealed class SettlementsTradeTavernTests
     private static GameState NewCampaign()
     {
         GameState state = new CampaignSetup { WorldSeed = 20261029 }.CreateCampaign();
+        TestPeople.AdmitAll(state);
         state.ArmySupply = 50;
         return state;
     }
@@ -186,8 +187,7 @@ public sealed class SettlementsTradeTavernTests
         {
             ItemCatalog.Sword, ItemCatalog.SwordAndShield, ItemCatalog.Bow, ItemCatalog.Spear, ItemCatalog.Knife, ItemCatalog.Axe,
             ItemCatalog.PaddedCoat, ItemCatalog.MailShirt, ItemCatalog.Jacket, ItemCatalog.FisherCoat, ItemCatalog.HealerBag,
-            ItemCatalog.StoreroomMail, ItemCatalog.OldHuntingBow, ItemCatalog.RopeWithHooks, ItemCatalog.DriedFish,
-            ItemCatalog.UlyanaHerbs, ItemCatalog.SevenToothGauge
+            ItemCatalog.RopeWithHooks, ItemCatalog.DriedFish
         };
         foreach (string id in old)
             Assert.IsNotNull(ItemCatalog.Find(id), id);
@@ -195,10 +195,9 @@ public sealed class SettlementsTradeTavernTests
         Assert.AreEqual(3, fish.Uses);
         Assert.AreEqual(ItemUseEffectType.AddSupplies, fish.UseEffects.Single().Type);
         Assert.AreEqual(2, fish.UseEffects.Single().Amount);
-        ItemDefinition herbs = ItemCatalog.Find(ItemCatalog.UlyanaHerbs);
-        Assert.AreEqual(2, herbs.Uses);
-        Assert.AreEqual(ItemUseEffectType.RemoveExhaustion, herbs.UseEffects.Single().Type);
-        Assert.IsTrue(ItemCatalog.Find(ItemCatalog.SevenToothGauge).IsTradeProtected);
+        // Канон v1.59: вещи удалённой кампании сняты с каталога, ID не заняты.
+        foreach (string removed in ItemCatalog.RemovedItemIds)
+            Assert.IsNull(ItemCatalog.Find(removed), removed);
         foreach (ItemDefinition item in ItemCatalog.All)
             CollectionAssert.IsEmpty(ItemCatalogValidator.Validate(item, ItemCatalog.All), item.Id);
     }
@@ -215,13 +214,13 @@ public sealed class SettlementsTradeTavernTests
         ItemCatalog.Current = new ItemCatalogData(items);
         GameState state = InsidePost();
         ItemInstanceData tonic = Give(state, "test.tonic");
-        ResidentState garrick = HomePeopleService.Find(state, "garrick");
+        ResidentState garrick = PeopleService.Find(state, "garrick");
 
         Assert.IsFalse(ItemService.TryUse(state, tonic.InstanceId, "garrick", out string message), "Гаррик цел — заряд не тратится.");
         StringAssert.Contains("цел", message);
         Assert.AreEqual(2, tonic.UsesLeft);
 
-        HomePeopleService.SetHitPoints(garrick, garrick.MaxHitPoints - 2);
+        PeopleService.SetHitPoints(garrick, garrick.MaxHitPoints - 2);
         Assert.IsTrue(ItemService.TryUse(state, tonic.InstanceId, "garrick", out message), message);
         Assert.AreEqual(garrick.MaxHitPoints, garrick.CurrentHitPoints, "Не выше максимума.");
         Assert.AreEqual(1, tonic.UsesLeft);
@@ -281,9 +280,9 @@ public sealed class SettlementsTradeTavernTests
     public void EquipAndUnequip_DoNotHealInfinitely()
     {
         GameState state = InsidePost();
-        ResidentState garrick = HomePeopleService.Find(state, "garrick");
+        ResidentState garrick = PeopleService.Find(state, "garrick");
         ItemInstanceData vest = Give(state, ItemCatalog.ScaleVest);
-        HomePeopleService.SetHitPoints(garrick, garrick.MaxHitPoints - 4);
+        PeopleService.SetHitPoints(garrick, garrick.MaxHitPoints - 4);
         int hurt = garrick.CurrentHitPoints;
         for (int i = 0; i < 3; i++)
         {
@@ -421,13 +420,11 @@ public sealed class SettlementsTradeTavernTests
     }
 
     [Test]
-    public void Trade_StoryEquippedAndProtected_CannotBeSoldEvenByCommand()
+    public void Trade_EquippedItem_CannotBeSoldEvenByCommand()
     {
         GameState state = InsidePost();
-        Give(state, ItemCatalog.SevenToothGauge);
-        ItemInstanceData gauge = ItemService.FindFirst(state, ItemCatalog.SevenToothGauge);
         ItemInstanceData equipped = ItemService.Equipped(state, Hero(state), ItemSlot.Weapon);
-        foreach (ItemInstanceData item in new[] { gauge, equipped })
+        foreach (ItemInstanceData item in new[] { equipped })
         {
             TradeCart cart = Cart(state);
             cart.ToggleSell(item.InstanceId);
@@ -672,10 +669,10 @@ public sealed class SettlementsTradeTavernTests
     {
         GameState state = InsidePost();
         state.ArmyGold = 10;
-        ResidentState garrick = HomePeopleService.Find(state, "garrick");
-        ResidentState creature = HomePeopleService.Find(state, SettlementCampDevFixture.CreatureId);
-        HomePeopleService.SetHitPoints(garrick, garrick.MaxHitPoints - 5);
-        HomePeopleService.SetHitPoints(creature, creature.MaxHitPoints - 5);
+        ResidentState garrick = PeopleService.Find(state, "garrick");
+        ResidentState creature = PeopleService.Find(state, SettlementCampDevFixture.CreatureId);
+        PeopleService.SetHitPoints(garrick, garrick.MaxHitPoints - 5);
+        PeopleService.SetHitPoints(creature, creature.MaxHitPoints - 5);
         int creatureHp = creature.CurrentHitPoints;
 
         Assert.IsTrue(TavernService.TryStartLodging(state, Here, out string message), message);

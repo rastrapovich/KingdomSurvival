@@ -19,7 +19,7 @@ public static class Hunger
     public const string StarvingMessage = "Припасы кончились — отряд идёт впроголодь, герой слабеет.";
 
     public static bool Applies(GameState state) =>
-        state != null && !CampaignContent.HasHome(state) && state.HasActiveExpedition;
+        state != null && state.HasActiveExpedition;
 
     public static bool IsStarving(GameState state) => Applies(state) && state.ArmySupply <= 0;
 
@@ -34,10 +34,10 @@ public static class Hunger
             return;
         }
         CommanderData commander = state.GetSelectedCommander();
-        ResidentState hero = commander != null ? HomePeopleService.Find(state, commander.Id) : null;
+        ResidentState hero = commander != null ? PeopleService.Find(state, commander.Id) : null;
         if (hero == null)
             return;
-        HomePeopleService.EnsureCombatState(hero);
+        PeopleService.EnsureCombatState(hero);
 
         state.HungerHours += gameHours;
         double period = Math.Max(0.1, HoursPerHitPoint);

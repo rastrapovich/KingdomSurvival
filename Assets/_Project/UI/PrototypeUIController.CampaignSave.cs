@@ -189,7 +189,6 @@ public partial class PrototypeUIController
         unreadIncidents.Clear();
         reportRequiresAcknowledgement.Clear();
         reportReadStates.Clear();
-        homePeopleSignature = null;
         selectedJournalGoalId = null;
         ClearQueuedModals();
         ResetWorldMapSelection();

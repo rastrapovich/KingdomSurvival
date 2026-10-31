@@ -479,7 +479,7 @@ public static partial class ContinuousSimulationSystem
             // только строка в донесениях.
             batch.Result.Messages.Add(
                 commanderName + " и " + fighterCount +
-                " бойцов вернулись в Дом. " + delivered);
+                " бойцов вернулись на стоянку. " + delivered);
             batch.Result.HadNotableOccurrence = true;
             ResetRouteTracking(runtime, null);
             return;

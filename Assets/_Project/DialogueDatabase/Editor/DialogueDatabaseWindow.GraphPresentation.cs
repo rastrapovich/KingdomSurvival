@@ -209,8 +209,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     return "+ ПРЕДМЕТ " + effect.StringParam;
                 case NarrativeEffectType.RemoveItem:
                     return "− ПРЕДМЕТ " + effect.StringParam;
-                case NarrativeEffectType.ChangeFood:
-                    return "ЕДА ДОМА " + (effect.IntParam >= 0 ? "+" : string.Empty) + effect.IntParam.ToString(CultureInfo.InvariantCulture);
+                case NarrativeEffectType.RemovedChangeFood:
+                    return "УДАЛЕНО: ЕДА ДОМА";
                 case NarrativeEffectType.ChangeSupplies:
                     return "ПРИПАСЫ " + (effect.IntParam >= 0 ? "+" : string.Empty) + effect.IntParam.ToString(CultureInfo.InvariantCulture);
                 case NarrativeEffectType.ChangeArmyGold:

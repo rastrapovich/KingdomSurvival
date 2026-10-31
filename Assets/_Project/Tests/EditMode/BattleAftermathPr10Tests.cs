@@ -34,6 +34,7 @@ public sealed class BattleAftermathPr10Tests
     private static GameState OnTheRoad(params string[] fighters)
     {
         GameState state = new CampaignSetup { WorldSeed = 20260925 }.CreateCampaign();
+        TestPeople.AdmitAll(state);
         state.ArmySupply = 50;
         LocationData target = state.Locations.First(location => !location.IsWaypoint);
         Assert.IsTrue(state.TryStartExpedition(target.Id, fighters.ToList(), out string message), message);
@@ -62,8 +63,8 @@ public sealed class BattleAftermathPr10Tests
     public void HeavyWound_AtQuarterOrBelow_OnlyWoundAbove()
     {
         GameState state = OnTheRoad("garrick", "edric");
-        int garrickMax = HomePeopleService.Find(state, "garrick").MaxHitPoints;
-        int edricMax = HomePeopleService.Find(state, "edric").MaxHitPoints;
+        int garrickMax = PeopleService.Find(state, "garrick").MaxHitPoints;
+        int edricMax = PeopleService.Find(state, "edric").MaxHitPoints;
         List<string> notes = new List<string>();
 
         CampaignBattleBridge.ApplyResult(state, Result(state, CampaignBattleOutcome.Victory, 3,
@@ -74,10 +75,10 @@ public sealed class BattleAftermathPr10Tests
                 { "edric", edricMax / 4 + 1 }
             }), new List<string>(), notes);
 
-        Assert.AreEqual(ResidentInjury.Recovering, HomePeopleService.Find(state, "garrick").Injury);
-        Assert.AreEqual(ResidentInjury.None, HomePeopleService.Find(state, "edric").Injury, "Выше четверти — просто рана.");
+        Assert.AreEqual(ResidentInjury.Recovering, PeopleService.Find(state, "garrick").Injury);
+        Assert.AreEqual(ResidentInjury.None, PeopleService.Find(state, "edric").Injury, "Выше четверти — просто рана.");
         Assert.IsTrue(notes.Any(n => n.StartsWith("Тяжело ранены: Гаррик")));
-        Assert.IsFalse(HomePeopleService.Find(state, "garrick").Exhausted, "Короткий бой без потерь не выматывает.");
+        Assert.IsFalse(PeopleService.Find(state, "garrick").Exhausted, "Короткий бой без потерь не выматывает.");
     }
 
     [Test]
@@ -86,13 +87,13 @@ public sealed class BattleAftermathPr10Tests
         GameState withLoss = OnTheRoad("garrick", "edric");
         CampaignBattleBridge.ApplyResult(withLoss, Result(withLoss, CampaignBattleOutcome.Victory, 2,
             new Dictionary<string, int> { { Hero(withLoss), 20 }, { "garrick", 20 } }, "edric"), new List<string>());
-        Assert.IsTrue(HomePeopleService.Find(withLoss, "garrick").Exhausted);
-        Assert.IsTrue(HomePeopleService.Find(withLoss, Hero(withLoss)).Exhausted);
+        Assert.IsTrue(PeopleService.Find(withLoss, "garrick").Exhausted);
+        Assert.IsTrue(PeopleService.Find(withLoss, Hero(withLoss)).Exhausted);
 
         GameState longFight = OnTheRoad("garrick");
         CampaignBattleBridge.ApplyResult(longFight, Result(longFight, CampaignBattleOutcome.Victory, 7,
             new Dictionary<string, int> { { Hero(longFight), 20 }, { "garrick", 20 } }), new List<string>());
-        Assert.IsTrue(HomePeopleService.Find(longFight, "garrick").Exhausted, "Дольше 6 раундов — изнеможение.");
+        Assert.IsTrue(PeopleService.Find(longFight, "garrick").Exhausted, "Дольше 6 раундов — изнеможение.");
     }
 
     [Test]
@@ -107,8 +108,8 @@ public sealed class BattleAftermathPr10Tests
         Assert.AreEqual(CampaignBattleApplyStatus.SquadSurvived, CampaignBattleBridge.ApplyResult(state, retreat, new List<string>()));
         Assert.AreEqual(supply - CampaignBattleBridge.RetreatSupplyLoss, state.ArmySupply);
         Assert.IsFalse(CampRest.IsResting(state), "Ночлег прерван.");
-        Assert.IsTrue(HomePeopleService.Find(state, "garrick").Exhausted);
-        Assert.IsTrue(HomePeopleService.Find(state, Hero(state)).Exhausted);
+        Assert.IsTrue(PeopleService.Find(state, "garrick").Exhausted);
+        Assert.IsTrue(PeopleService.Find(state, Hero(state)).Exhausted);
 
         Assert.AreEqual(CampaignBattleApplyStatus.AlreadyApplied, CampaignBattleBridge.ApplyResult(state, retreat, new List<string>()));
         Assert.AreEqual(supply - CampaignBattleBridge.RetreatSupplyLoss, state.ArmySupply, "Один раз.");
@@ -139,7 +140,7 @@ public sealed class BattleAftermathPr10Tests
     public void Request_SkipsHeavilyWounded_HasSeed()
     {
         GameState state = OnTheRoad("garrick", "edric");
-        HomePeopleService.Find(state, "edric").Injury = ResidentInjury.Recovering;
+        PeopleService.Find(state, "edric").Injury = ResidentInjury.Recovering;
         CampaignBattleRequest request = CampaignBattleBridge.CreateRequest(state, "test.request");
 
         CollectionAssert.AreEquivalent(new[] { Hero(state), "garrick" }, request.Participants.Select(p => p.PersonId));

@@ -30,5 +30,4 @@ public sealed class CampaignSaveData
     public bool HasSettlementCamp;
 
     public ContinuousSimulationSnapshotData ClockSnapshot;
-    public BuildingSystemSnapshotData BuildingSnapshot;
 }

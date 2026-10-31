@@ -73,7 +73,7 @@ public static partial class SettlementCampService
     // задаёт сам участник (авторская причина) и может снять флаг истории.
     public static string AdmissionBlockReason(GameState state, string personId)
     {
-        ResidentState resident = HomePeopleService.Find(state, personId);
+        ResidentState resident = PeopleService.Find(state, personId);
         if (resident == null || string.IsNullOrEmpty(resident.SettlementAdmissionBlock))
             return string.Empty;
         if (!string.IsNullOrEmpty(resident.SettlementAdmissionExceptionFlag) && state.Narrative != null &&
@@ -91,7 +91,7 @@ public static partial class SettlementCampService
         {
             if (hero != null && personId == hero.Id)
                 continue;
-            ResidentState resident = HomePeopleService.Find(state, personId);
+            ResidentState resident = PeopleService.Find(state, personId);
             if (resident == null || resident.IsAlive)
                 ids.Add(personId);
         }
@@ -123,7 +123,7 @@ public static partial class SettlementCampService
             string block = AdmissionBlockReason(state, personId);
             if (entering.Contains(personId) && !string.IsNullOrEmpty(block))
             {
-                ResidentState resident = HomePeopleService.Find(state, personId);
+                ResidentState resident = PeopleService.Find(state, personId);
                 reason = (resident != null ? resident.DisplayName : personId) + " не допускается: " + block;
                 return false;
             }
@@ -184,7 +184,7 @@ public static partial class SettlementCampService
             return names;
         foreach (string personId in state.SettlementCamp.WaitingIds)
         {
-            ResidentState resident = HomePeopleService.Find(state, personId);
+            ResidentState resident = PeopleService.Find(state, personId);
             if (resident != null && resident.IsAlive)
                 names.Add(resident.DisplayName);
         }
@@ -209,7 +209,7 @@ public static partial class SettlementCampService
         List<string> party = PartyPresence.ExpeditionIds(state);
         int removed = state.SettlementCamp.WaitingIds.RemoveAll(personId =>
         {
-            ResidentState resident = HomePeopleService.Find(state, personId);
+            ResidentState resident = PeopleService.Find(state, personId);
             return !party.Contains(personId) || (resident != null && !resident.IsAlive);
         });
         if (removed > 0)

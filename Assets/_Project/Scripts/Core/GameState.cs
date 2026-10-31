@@ -241,11 +241,6 @@ public class GameState
 
     public int WorldSeed;
     public int Day;
-    public int Gold;
-    public int Food;
-    public int Population;
-    public int Mood;
-    public int ConsecutiveFoodShortageDays;
     public int ConsecutiveExpeditionSupplyShortageDays;
 
     public int ArmySupply;
@@ -266,26 +261,17 @@ public class GameState
     // См. EncounterRuntimeState.cs, §18, §64 инструкции по Encounter-системе.
     public EncounterRuntimeStateData Encounters;
 
-    // ПР-05: что выбрано при старте (кризис, командир, начальное состояние,
+    // ПР-05: что выбрано при старте (режим, командир, начальное состояние,
     // версия контента, seed). Фиксируется CampaignSetup и сохраняется вместе
-    // с кампанией. У партий старше ПР-05 и у тестов, создающих GameState
-    // напрямую, пусто — они считаются кампанией единственного кризиса.
+    // с кампанией.
     public CampaignConfiguration Configuration;
 
-    // ПР-06А: люди Дома (HomePeopleService). Population ниже — производное
-    // число живых членов Дома, пересчитывается из реестра.
-    public HomePeopleState People;
-
-    // ПР-06А: базовый суточный приток Запасов Дома из пресета старта.
-    // 0 — старое прототипное значение BuildingSystem.BaseDailyFoodIncome.
-    public int BaseDailyFoodIncome;
+    // ПР-06А: люди партии (PeopleService) — герой, бойцы, свита, наёмники.
+    public PeopleState People;
 
     // ПР-07А-1: подготовленный состав похода (ExpeditionPreparation) —
-    // один выбор для Дома, экрана героя и карты; переживает save/load.
+    // один выбор для экрана героя и карты; переживает save/load.
     public ExpeditionPreparationData Preparation = new ExpeditionPreparationData();
-
-    // ПР-07Б: что известно о Доме из похода и отложенные домашние новости.
-    public HomeKnowledgeData HomeKnowledge = new HomeKnowledgeData();
 
     // ПР-08: вещи с владельцем (ItemService).
     public InventoryData Inventory = new InventoryData();
@@ -326,14 +312,6 @@ public class GameState
     // отдельно от известных объектов (WorldMapFog).
     public WorldMapFogData Fog;
 
-    public int DailyGoldIncome => 3;
-    public int DailyFoodIncome => 7;
-
-    // Дома едят те, кто физически дома; ушедшие в поход едят из его
-    // припасов (спецификация §11) — без двойного расхода.
-    public int DailyFoodConsumption =>
-        People != null ? HomePeopleService.CountHomePresent(this) : Population;
-
     // Канонический поход: командир + от 0 до ExpeditionFighterSlots бойцов.
     // Без активной экспедиции возвращается расход на максимальный состав —
     // это оценка "худшего случая" для отображения запаса снабжения.
@@ -367,83 +345,12 @@ public class GameState
         HasActiveExpedition &&
         ActiveExpedition.PendingDecision != null;
 
-    // Ниже сохранены совместимые прототипные агрегаты старого UI. Временный
-    // технический слой (канон v1.38 §13.1): защита Дома выводится не из
-    // суммарного числа силы, а из причинных факторов — кто остался дома, в
-    // каком состоянии эти люди, какие есть укрепления, было ли предупреждение
-    // и какие прошлые решения изменили ситуацию. Точная формула и UI
-    // уточняются после первого региона. Значение по каждому бойцу берётся из
-    // UnitStatsProvider (реальные данные UnitDatabase), если у бойца задан
-    // UnitTypeId и провайдер назначен; иначе — из legacy FighterData.DefensePower.
-    public int TotalArmyDefensePower
-    {
-        get
-        {
-            int total = 0;
-            foreach (FighterData fighter in Fighters)
-                total += GetFighterDefensePower(fighter);
-            return total;
-        }
-    }
-
-    public int GarrisonFighterCount
-    {
-        get
-        {
-            if (!HasActiveExpedition)
-                return Fighters.Count;
-
-            int count = 0;
-            foreach (FighterData fighter in Fighters)
-            {
-                if (!IsFighterInActiveExpedition(fighter.Id))
-                    count++;
-            }
-            return count;
-        }
-    }
-
-    public int GarrisonDefensePower
-    {
-        get
-        {
-            int total = 0;
-            foreach (FighterData fighter in Fighters)
-            {
-                if (!IsFighterInActiveExpedition(fighter.Id))
-                    total += GetFighterDefensePower(fighter);
-            }
-            return total;
-        }
-    }
-
-    public int ExpeditionDefensePower
-    {
-        get
-        {
-            if (!HasActiveExpedition)
-                return 0;
-            return CalculateDefensePower(ActiveExpedition.FighterIds);
-        }
-    }
-
     public bool CanCancelPreparedExpedition =>
         HasActiveExpedition &&
         ActiveExpedition.Phase == CommanderState.TravellingToLocation &&
         !HasPendingExpeditionDecision &&
         !ActiveExpedition.HasTimedActivity &&
         !ContinuousSimulationSystem.HasExpeditionStartedMoving(this);
-
-    public bool CanAdjustArmySupply
-    {
-        get
-        {
-            CommanderData commander = GetSelectedCommander();
-            return commander != null &&
-                   commander.State == CommanderState.InCastle &&
-                   !HasActiveExpedition;
-        }
-    }
 
     public bool CanResearchActiveLocation
     {
@@ -476,6 +383,16 @@ public class GameState
         WorldSeed = worldSeed ?? Guid.NewGuid().GetHashCode();
         GeneratedMap = null;
         Fog = null;
+        // Канон v1.59: режим один — свободная игра. CampaignSetup дополняет
+        // конфигурацию (ID партии, командир); партия, созданная напрямую
+        // (тесты, инструменты), тоже остаётся свободной игрой.
+        Configuration = new CampaignConfiguration
+        {
+            CrisisId = CampaignStartOptions.FreePlayId,
+            CommanderProfileId = CampaignStartOptions.PlaceholderCommanderId,
+            StartingConditionId = CampaignStartOptions.RoadCampStartId,
+            WorldSeed = WorldSeed
+        };
 
         // AM-02/AM-07.5 (канон v1.35, §9.9): если авторский мир подключён
         // (через WorldMapDatabaseAsset.ActiveWorld на стороне UI), география
@@ -488,11 +405,6 @@ public class GameState
         else
             WorldMapNavigation.ConfigureDefaultTerrain();
         Day = 1;
-        Gold = 120;
-        Food = 72;
-        Population = 24;
-        Mood = 64;
-        ConsecutiveFoodShortageDays = 0;
         ConsecutiveExpeditionSupplyShortageDays = 0;
         ArmySupply = 0;
         ArmyGold = 0;
@@ -508,17 +420,10 @@ public class GameState
         Commanders = new List<CommanderData> { commander };
         SelectedCommanderId = commander.Id;
 
-        Fighters = new List<FighterData>
-        {
-            // DefensePower остаётся как fallback для legacy-UI. UnitTypeId
-            // указывает на роль в UnitDatabase ("guard"/"archer"/...), откуда
-            // GameState.UnitStatsProvider берёт настоящие боевые характеристики.
-            new FighterData("garrick", "Гаррик", "Гвардеец", 1, 3, "guard"),
-            new FighterData("edric", "Эдрик", "Лучник", 1, 2, "archer"),
-            new FighterData("marta", "Марта", "Лекарь", 1, 1, "healer"),
-            new FighterData("torvin", "Торвин", "Копейщик", 1, 3, "spearman"),
-            new FighterData("agnessa", "Агнесса", "Разведчик", 1, 2, "scout")
-        };
+        // Канон v1.59: бойцов на старте нет — герой начинает один, отряд
+        // собирается наймом (HireService). Прежние бойцы исходного Дома —
+        // неактивные заготовки (CharacterTemplates).
+        Fighters = new List<FighterData>();
 
         IReadOnlyList<WorldMapLocationTemplateData> sourceTemplates =
             locationTemplates != null && locationTemplates.Count > 0
@@ -536,11 +441,10 @@ public class GameState
         Narrative = new NarrativeStateData();
         Encounters = new EncounterRuntimeStateData();
 
-        // ПР-06А: 24 конкретных человека вместо безличного счётчика.
-        People = HomePeopleService.CreateDefaults(this);
-        HomePeopleService.RecountPopulation(this);
+        // ПР-06А: люди партии — на старте только Командир.
+        People = PeopleService.CreateDefaults(this);
 
-        // ПР-08: стартовое снаряжение и кладовая Дома.
+        // ПР-08: стартовое снаряжение героя.
         Inventory = new InventoryData();
         ItemService.EnsureInventory(this);
 
@@ -598,40 +502,6 @@ public class GameState
                ActiveExpedition.FighterIds.Contains(fighterId);
     }
 
-    public int CalculateDefensePower(IEnumerable<string> fighterIds)
-    {
-        if (fighterIds == null)
-            return 0;
-
-        int total = 0;
-        HashSet<string> countedIds = new HashSet<string>();
-        foreach (string fighterId in fighterIds)
-        {
-            if (!countedIds.Add(fighterId))
-                continue;
-
-            FighterData fighter = FindFighter(fighterId);
-            if (fighter != null)
-                total += GetFighterDefensePower(fighter);
-        }
-        return total;
-    }
-
-    private static int GetFighterDefensePower(FighterData fighter)
-    {
-        if (fighter == null)
-            return 0;
-
-        if (UnitStatsProvider != null &&
-            !string.IsNullOrWhiteSpace(fighter.UnitTypeId) &&
-            UnitStatsProvider.TryGetCombatStats(fighter.UnitTypeId, out UnitCombatStats stats))
-        {
-            return Math.Max(0, stats.Defense);
-        }
-
-        return Math.Max(0, fighter.DefensePower);
-    }
-
     public List<string> GetCommanderNames()
     {
         List<string> names = new List<string>();
@@ -654,35 +524,6 @@ public class GameState
 
         SelectedCommanderId = commander.Id;
         return true;
-    }
-
-    public bool TryAddArmySupply()
-    {
-        return AdjustArmySupply(1) > 0;
-    }
-
-    public bool TryRemoveArmySupply()
-    {
-        return AdjustArmySupply(-1) < 0;
-    }
-
-    public int AdjustArmySupply(int requestedDelta)
-    {
-        if (!CanAdjustArmySupply || requestedDelta == 0)
-            return 0;
-
-        if (requestedDelta > 0)
-        {
-            int transferred = Math.Min(Food, requestedDelta);
-            Food -= transferred;
-            ArmySupply += transferred;
-            return transferred;
-        }
-
-        int returned = Math.Min(ArmySupply, -requestedDelta);
-        ArmySupply -= returned;
-        Food += returned;
-        return -returned;
     }
 
     public bool TryStartExpedition(
@@ -1066,57 +907,6 @@ public class GameState
         return true;
     }
 
-    public bool ForceReturnFromSupplyFailure(out string resultMessage)
-    {
-        resultMessage = "Не удалось начать вынужденное возвращение.";
-
-        if (!HasActiveExpedition)
-            return false;
-
-        ExpeditionData expedition = ActiveExpedition;
-        CommanderData commander = FindCommander(expedition.CommanderId);
-        if (commander == null)
-            return false;
-
-        expedition.PendingDecision = null;
-        expedition.ActiveActivity = null;
-        expedition.HasInterruptedRoute = false;
-
-        if (expedition.Phase == CommanderState.ReturningToCastle)
-        {
-            commander.State = CommanderState.ReturningToCastle;
-            resultMessage =
-                "Отряд уже возвращается в поселение и продолжает обратный путь.";
-            return true;
-        }
-
-        List<MapPointData> returnRoute = WorldMapNavigation.FindPath(
-            expedition.CurrentMapXPercent,
-            expedition.CurrentMapYPercent,
-            WorldMapNavigation.CapitalXPercent,
-            WorldMapNavigation.CapitalYPercent);
-        int returnCells = Math.Max(
-            1,
-            WorldMapNavigation.CalculateRouteCells(returnRoute));
-
-        expedition.Phase = CommanderState.ReturningToCastle;
-        expedition.RemainingRouteCells = returnCells;
-        expedition.RouteLengthCells = returnCells;
-        expedition.Route = returnRoute;
-        expedition.RouteIndex = 0;
-        expedition.RouteDelayHoursRemaining = 0.0;
-        expedition.TargetMapXPercent = WorldMapNavigation.CapitalXPercent;
-        expedition.TargetMapYPercent = WorldMapNavigation.CapitalYPercent;
-        expedition.LastTravelPoints.Clear();
-        commander.State = CommanderState.ReturningToCastle;
-
-        resultMessage =
-            "Поход сорван: из-за второй подряд нехватки припасов отряд вынужденно возвращается. " +
-            "Расчётное время пути: " +
-            ContinuousSimulationSystem.FormatTravelTime(returnRoute) + ".";
-        return true;
-    }
-
     public string CompleteExpeditionReturn()
     {
         if (ActiveExpedition == null)
@@ -1374,7 +1164,7 @@ public class GameState
             }
 
             // ПР-06А: длительно раненый не начинает новый поход.
-            ResidentState resident = HomePeopleService.Find(this, fighterId);
+            ResidentState resident = PeopleService.Find(this, fighterId);
             if (resident != null && resident.Injury == ResidentInjury.Recovering)
             {
                 resultMessage = resident.DisplayName + " ранен(а) и восстанавливается — в поход не пойдёт.";

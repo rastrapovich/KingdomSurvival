@@ -330,74 +330,10 @@ MonoBehaviour:
     Icon: {fileID: 0}
     AuthorNotes: 
   - Data:
-      Id: item.storeroom_mail
-      Name: "\u041A\u043E\u043B\u044C\u0447\u0443\u0433\u0430 \u0438\u0437 \u043A\u043B\u0435\u0442\u0438"
-      Description: "\u041B\u0435\u0436\u0430\u043B\u0430 \u0432 \u043A\u043B\u0435\u0442\u0438
-        \u0431\u0435\u0437 \u0445\u043E\u0437\u044F\u0438\u043D\u0430 \u2014 \u0447\u044C\u044F,
-        \u0443\u0436\u0435 \u043D\u0438\u043A\u0442\u043E \u043D\u0435 \u043F\u043E\u043C\u043D\u0438\u0442."
-      Kind: 1
-      UnitTypes: []
-      Modifier:
-        MaxHitPoints: 0
-        Attack: 0
-        Defense: 2
-        Damage: 0
-        Movement: 0
-        Initiative: -1
-        AttackRange: 0
-      Uses: 0
-      Price: 30
-      CanSell: 1
-      CanBuy: 1
-      Unique: 0
-      Protected: 0
-      Artifact: 0
-      Origin: 
-      UseVerb: 
-      UseEffects: []
-      Tags: []
-    Icon: {fileID: 0}
-    AuthorNotes: 
-  - Data:
-      Id: item.old_hunting_bow
-      Name: "\u0421\u0442\u0430\u0440\u044B\u0439 \u043E\u0445\u043E\u0442\u043D\u0438\u0447\u0438\u0439
-        \u043B\u0443\u043A"
-      Description: "\u0411\u044C\u0451\u0442 \u0434\u0430\u043B\u044C\u0448\u0435
-        \u043D\u044B\u043D\u0435\u0448\u043D\u0438\u0445 \u2014 \u0434\u0435\u043B\u0430\u043B\u0438
-        \u0434\u043B\u044F \u0437\u0432\u0435\u0440\u044F, \u043D\u0435 \u0434\u043B\u044F
-        \u0434\u0440\u0430\u043A\u0438."
-      Kind: 0
-      UnitTypes:
-      - archer
-      - scout
-      Modifier:
-        MaxHitPoints: 0
-        Attack: 0
-        Defense: 0
-        Damage: 0
-        Movement: 0
-        Initiative: 0
-        AttackRange: 1
-      Uses: 0
-      Price: 18
-      CanSell: 1
-      CanBuy: 1
-      Unique: 0
-      Protected: 0
-      Artifact: 0
-      Origin: 
-      UseVerb: 
-      UseEffects: []
-      Tags: []
-    Icon: {fileID: 0}
-    AuthorNotes: 
-  - Data:
       Id: item.rope_with_hooks
       Name: "\u0412\u0435\u0440\u0451\u0432\u043A\u0430 \u0441 \u043A\u0440\u044E\u0447\u044C\u044F\u043C\u0438"
-      Description: "\u041B\u0430\u0434\u0430 \u0441\u043F\u043B\u0435\u043B\u0430
-        \u0438\u0437 \u043E\u0441\u0442\u0430\u0442\u043A\u043E\u0432 \u043D\u0430\u0441\u0442\u0438\u043B\u0430.
-        \u041D\u0430 \u043F\u043E\u0434\u044A\u0451\u043C\u0435 \u0438 \u0443 \u0432\u043E\u0434\u044B
-        \u0432\u044B\u0440\u0443\u0447\u0430\u0435\u0442."
+      Description: "\u041D\u0430 \u043F\u043E\u0434\u044A\u0451\u043C\u0435 \u0438
+        \u0443 \u0432\u043E\u0434\u044B \u0432\u044B\u0440\u0443\u0447\u0430\u0435\u0442."
       Kind: 2
       UnitTypes: []
       Modifier:
@@ -426,10 +362,9 @@ MonoBehaviour:
       Id: item.dried_fish
       Name: "\u0421\u0443\u0448\u0451\u043D\u0430\u044F \u0440\u044B\u0431\u0430
         \u0432 \u0434\u043E\u0440\u043E\u0433\u0443"
-      Description: "\u0412\u0430\u0440\u0432\u0430\u0440\u0430 \u043D\u0430\u0441\u0443\u0448\u0438\u043B\u0430
-        \u0438\u0437 \u0443\u043B\u043E\u0432\u0430. \u0412 \u043F\u043E\u0445\u043E\u0434\u0435
-        \u2014 \u0434\u0432\u0430 \u0434\u043D\u044F \u0435\u0434\u044B \u043D\u0430
-        \u043E\u0434\u043D\u043E\u0433\u043E."
+      Description: "\u0421\u0443\u0448\u0451\u043D\u0430\u044F \u0440\u044B\u0431\u0430.
+        \u0412 \u043F\u043E\u0445\u043E\u0434\u0435 \u2014 \u0434\u0432\u0430 \u0434\u043D\u044F
+        \u0435\u0434\u044B \u043D\u0430 \u043E\u0434\u043D\u043E\u0433\u043E."
       Kind: 4
       UnitTypes: []
       Modifier:
@@ -455,70 +390,6 @@ MonoBehaviour:
         KnowledgeId: 
         StageFlagId: 
         KnowledgeText: 
-      Tags: []
-    Icon: {fileID: 0}
-    AuthorNotes: 
-  - Data:
-      Id: item.ulyana_herbs
-      Name: "\u0421\u0443\u043C\u043A\u0430 \u0442\u0440\u0430\u0432 \u0423\u043B\u044C\u044F\u043D\u044B"
-      Description: "\u041E\u0442\u0432\u0430\u0440 \u0441\u043D\u0438\u043C\u0430\u0435\u0442
-        \u0438\u0437\u043D\u0435\u043C\u043E\u0436\u0435\u043D\u0438\u0435 \u0441
-        \u043E\u0434\u043D\u043E\u0433\u043E \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0430."
-      Kind: 4
-      UnitTypes: []
-      Modifier:
-        MaxHitPoints: 0
-        Attack: 0
-        Defense: 0
-        Damage: 0
-        Movement: 0
-        Initiative: 0
-        AttackRange: 0
-      Uses: 2
-      Price: 5
-      CanSell: 1
-      CanBuy: 1
-      Unique: 0
-      Protected: 0
-      Artifact: 0
-      Origin: 
-      UseVerb: "\u0414\u0430\u0442\u044C \u043E\u0442\u0432\u0430\u0440"
-      UseEffects:
-      - Type: 1
-        Amount: 0
-        KnowledgeId: 
-        StageFlagId: 
-        KnowledgeText: 
-      Tags: []
-    Icon: {fileID: 0}
-    AuthorNotes: 
-  - Data:
-      Id: chapter01.item.seven_tooth_gauge
-      Name: "\u041C\u0435\u0440\u043A\u0430 \u0441\u0435\u043C\u0438 \u0437\u0443\u0431\u044C\u0435\u0432"
-      Description: "\u0421\u0442\u0430\u0440\u0430\u044F \u043C\u0435\u0440\u043A\u0430
-        \u0432\u043E\u0434\u044B. \u0415\u0451 \u043D\u0435\u043B\u044C\u0437\u044F
-        \u043F\u043E\u0442\u0435\u0440\u044F\u0442\u044C: \u043E\u043D\u0430 \u0435\u0449\u0451
-        \u043F\u043E\u043D\u0430\u0434\u043E\u0431\u0438\u0442\u0441\u044F."
-      Kind: 3
-      UnitTypes: []
-      Modifier:
-        MaxHitPoints: 0
-        Attack: 0
-        Defense: 0
-        Damage: 0
-        Movement: 0
-        Initiative: 0
-        AttackRange: 0
-      Uses: 0
-      Price: 0
-      CanSell: 0
-      CanBuy: 0
-      Unique: 0
-      Protected: 0
-      Artifact: 0
-      Origin: 
-      UseVerb: 
-      UseEffects: []
       Tags: []
     Icon: {fileID: 0}
     AuthorNotes: 

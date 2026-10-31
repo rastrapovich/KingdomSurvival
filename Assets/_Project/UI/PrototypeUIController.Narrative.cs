@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using KingdomSurvival.Chapter01;
 using KingdomSurvival.DialogueDatabase;
 using KingdomSurvival.UILayout;
 using UnityEngine;
@@ -106,11 +105,10 @@ public partial class PrototypeUIController
 
     private bool IsNarrativeDialogueActive => narrativeDialogueSession != null && narrativeDialogueSession.IsActive;
 
-    // ПР-12А: содержание режимов кампании регистрируется до создания
-    // любой партии — UI читает только CampaignContent.
+    // ПР-12А: содержание свободной игры регистрируется до создания любой
+    // партии — UI читает только CampaignContent.
     static PrototypeUIController()
     {
-        KingdomSurvival.Chapter01.Chapter01Content.Register();
         KingdomSurvival.FreePlay.FreePlayContent.Register();
     }
 
@@ -308,10 +306,13 @@ public partial class PrototypeUIController
         if (gameState.Narrative == null)
             gameState.Narrative = new NarrativeStateData();
 
-        // ПР-06А: те же спутники, что в Chapter01ContextBuilder — бойцы и свита.
-        List<string> presentCompanionIds = Chapter01ContextBuilder.GetPresentCompanionIds(gameState);
+        // ПР-06А, ПР-12К: спутники рядом — присутствующие бойцы и свита (без
+        // героя); оставленный в лагере у поселения не отвечает.
+        List<string> presentCompanionIds = gameState.HasActiveExpedition
+            ? PartyPresence.PresentCompanionIds(gameState)
+            : new List<string>();
 
-        List<string> presentItemIds = Chapter01ContextBuilder.GetPresentItemIds(gameState);
+        List<string> presentItemIds = KingdomSurvival.Encounters.EncounterEvaluationContextBuilder.GetPresentItemIds(gameState);
 
         bool started = narrativeDialogueSession.Start(
             narrativeDialogueDatabase,
@@ -323,7 +324,7 @@ public partial class PrototypeUIController
             presentCompanionIds,
             presentItemIds,
             gameState.WorldSeed,
-            Chapter01ContextBuilder.GetPartySize(gameState),
+            KingdomSurvival.Encounters.EncounterEvaluationContextBuilder.GetPartySize(gameState),
             gameState);
 
         if (!started)
@@ -560,24 +561,13 @@ public partial class PrototypeUIController
                 AddReport(string.Join("\n", FeaturePresentation.Lines(gameState, features)));
 
             string completedDialogueId = narrativeDialogueSession.DialogueId;
-            Chapter01StoryDirector.HandleDialogueCompleted(gameState, completedDialogueId);
             OnStoryDialogueCompleted(completedDialogueId);
             AwardEncounterExperience(completedDialogueId);
             CloseNarrativeDialogue();
 
-            // P08-T03: N10 заканчивается действием «Выбрать состав похода» без
-            // эффектов — реальный набор 0-4 бойцов происходит в picker'е Экрана
-            // героя (панель «СОСТАВ ПОХОДА»), не в самом диалоге.
             // ПР-04: сцена завершена и её последствия применены — устойчивая
             // точка для автосохранения (не посреди реплик и выбора).
             Autosave();
-
-            if (string.Equals(completedDialogueId, Chapter01Ids.Dialogues.D10, StringComparison.Ordinal))
-            {
-                gameState.Narrative?.SetFlag(Chapter01Ids.Flags.PartyGatheringSeen);
-                OpenHeroScreenOnTab(HeroScreenTab.Squad);
-            }
-
             return;
         }
 
@@ -596,10 +586,8 @@ public partial class PrototypeUIController
             narrativeChoicesContainer.Clear();
         if (narrativeHistoryContainer != null)
             narrativeHistoryContainer.Clear();
-        // Chapter01StoryDirector.HandleDialogueCompleted (вызван выше, до
-        // закрытия) мог изменить ресурсы (например, Food -12 при потере
-        // скота в P05) — без перерисовки верхняя панель показывала бы
-        // старое число до следующего не связанного действия.
+        // Завершённая сцена могла изменить ресурсы (припасы, золото) — без
+        // перерисовки верхняя панель показывала бы старое число.
         RefreshInterface();
         RefreshTimeControlAvailability();
         ResumeAfterBlockingModalIfReady();

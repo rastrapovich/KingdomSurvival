@@ -20,7 +20,9 @@ public enum NarrativeEffectType
     RemoveTrait,
     GrantItem,
     RemoveItem,
-    ChangeFood,
+    // Канон v1.59: «Изменить еду Дома» удалено вместе с Домом. Значение
+    // сохранено, чтобы следующие типы не сдвинулись; не переиспользовать.
+    RemovedChangeFood,
     ChangeSupplies,
 
     // Продвигает ExpeditionData.RouteIndex на N клеток вперёд (та же
@@ -123,9 +125,7 @@ public sealed class NarrativeEffect
             case NarrativeEffectType.RemoveItem:
                 context.State.RemoveItem(StringParam);
                 break;
-            case NarrativeEffectType.ChangeFood:
-                if (context.GameState != null)
-                    context.GameState.Food = Math.Max(0, context.GameState.Food + IntParam);
+            case NarrativeEffectType.RemovedChangeFood:
                 break;
             case NarrativeEffectType.ChangeSupplies:
                 if (context.GameState != null)

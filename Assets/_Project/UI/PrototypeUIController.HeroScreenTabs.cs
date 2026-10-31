@@ -228,7 +228,7 @@ public partial class PrototypeUIController
         CommanderData commander = gameState.GetSelectedCommander();
         List<string> roster = new List<string>(ExpeditionPreparation.GetFighterIds(gameState));
         List<string> others = new List<string>();
-        foreach (ResidentState resident in HomePeopleService.All(gameState))
+        foreach (ResidentState resident in PeopleService.All(gameState))
         {
             if (!resident.IsAlive || !IsHeroItemsCandidate(resident))
                 continue;
@@ -240,7 +240,7 @@ public partial class PrototypeUIController
 
         foreach (string id in roster)
         {
-            ResidentState resident = HomePeopleService.Find(gameState, id);
+            ResidentState resident = PeopleService.Find(gameState, id);
             if (resident != null && resident.IsAlive && IsHeroItemsCandidate(resident))
                 result.Add(id);
         }
@@ -256,7 +256,7 @@ public partial class PrototypeUIController
         if (commander != null && commander.Id == personId)
             return ResolveHeroScreenUnit(commander);
 
-        ResidentState resident = HomePeopleService.Find(gameState, personId);
+        ResidentState resident = PeopleService.Find(gameState, personId);
         if (heroScreenUnits != null && resident != null && !string.IsNullOrEmpty(resident.UnitTypeId))
         {
             UnitDefinitionData byType = heroScreenUnits.FindById(resident.UnitTypeId);
@@ -287,7 +287,7 @@ public partial class PrototypeUIController
 
         foreach (string personId in GetHeroScreenPeople())
         {
-            ResidentState resident = HomePeopleService.Find(gameState, personId);
+            ResidentState resident = PeopleService.Find(gameState, personId);
             PersonProgressionData record = CharacterProgressionService.Get(gameState, personId);
             bool choice = CharacterProgressionService.PendingChoices(gameState, personId) > 0;
 
@@ -336,7 +336,7 @@ public partial class PrototypeUIController
         int choices = 0;
         foreach (string personId in GetHeroScreenPeople())
         {
-            ResidentState resident = HomePeopleService.Find(gameState, personId);
+            ResidentState resident = PeopleService.Find(gameState, personId);
             if (IsHeroPersonHurt(resident))
                 hurt++;
             choices += CharacterProgressionService.PendingChoices(gameState, personId);

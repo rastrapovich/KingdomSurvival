@@ -1,5 +1,4 @@
 using System;
-using KingdomSurvival.Chapter01;
 using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -83,7 +82,6 @@ public partial class PrototypeUIController
             gameState == null ||
             timeToggleButton == null ||
             worldMap == null ||
-            worldMapCapitalButton == null ||
             returnExpeditionButton == null ||
             researchExpeditionButton == null)
         {
@@ -134,9 +132,6 @@ public partial class PrototypeUIController
         researchExpeditionButton.clicked -= OnContinuousResearchClicked;
         researchExpeditionButton.clicked += OnContinuousResearchClicked;
 
-        worldMapCapitalButton.clicked -= OnWorldMapCapitalClicked;
-        worldMapCapitalButton.clicked -= OnContinuousCapitalClicked;
-        worldMapCapitalButton.clicked += OnContinuousCapitalClicked;
     }
 
     private void RegisterContinuousMapInput()
@@ -360,84 +355,10 @@ public partial class PrototypeUIController
         if (HasBlockingModalWork())
             return;
 
-        // P09-T01/T02/T03: продолжение "старого пути" после временного
-        // крюка и фиксация прибытия в область поиска — тоже читаются
-        // каждый кадр наравне с паузой, не отдельным колбэком по месту
-        // клика (раздел "Единый принцип" инструкции про карту/время).
-        // ПР-05: дорожные и местные сцены главы — только в кампании её кризиса.
-        bool chapterActive = Chapter01Crisis.IsActive(gameState);
-        if (chapterActive)
-        {
-            Chapter01StoryDirector.RefreshRoadState(gameState);
-            // ПР-09: обратный путь через старый брод (ТЗ §7).
-            string fordReport = Chapter01StoryDirector.TryApplyFordReturnCrossing(gameState);
-            if (!string.IsNullOrEmpty(fordReport))
-                AddReport(fordReport);
-        }
-
-        // Обязательная/необязательная дорожная встреча первого похода —
-        // единственный производственный случай, когда сюжетный диалог
-        // открывается САМ, без клика игрока (раздел "Обязательная дорожная
-        // встреча": "не случайный RNG, гарантированное обучение"). Успешное
-        // открытие уже само ставит PauseForBlockingModal внутри
-        // TryOpenNarrativeDialogueById — выходим сразу, не давая коду ниже
-        // пересчитать паузу этим же кадром.
-        string pendingRoadEventDialogueId = chapterActive
-            ? Chapter01StoryDirector.GetPendingRoadEventDialogueId(gameState)
-            : null;
-        if (!string.IsNullOrEmpty(pendingRoadEventDialogueId) &&
-            TryOpenNarrativeDialogueById(pendingRoadEventDialogueId))
-        {
-            return;
-        }
-
-        // P10-LocInt: завершённое сюжетное Location Research (N12) — тот же
-        // приоритет и тот же принцип, что дорожная встреча выше: физический
-        // факт (место осмотрено), не клик игрока, поэтому опрашивается
-        // каждый кадр отдельно от общего диспетчера автоматических диалогов.
-        string pendingLocationNarrativeDialogueId = chapterActive
-            ? Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState)
-            : null;
-        if (!string.IsNullOrEmpty(pendingLocationNarrativeDialogueId) &&
-            TryOpenNarrativeDialogueById(pendingLocationNarrativeDialogueId))
-        {
-            return;
-        }
-
-        // ПР-06Б: выход на берег у старого брода — по дороге от брода к
-        // нижним людям, тот же принцип физического факта.
-        string pendingFordAccessDialogueId = chapterActive
-            ? Chapter01StoryDirector.GetPendingFordAccessDialogueId(gameState)
-            : null;
-        if (!string.IsNullOrEmpty(pendingFordAccessDialogueId) &&
-            TryOpenNarrativeDialogueById(pendingFordAccessDialogueId))
-        {
-            return;
-        }
-
-        // ПР-02: паводок (N04) и ночной удар на мельнице (N06) случаются
-        // ночью — пока глава их ждёт, время в Доме идёт само.
-        // ПР-06А: пока в Доме идёт работа или уход, время тоже идёт само.
-        // Бриф исправлений п. 13: в свободной игре (Дома на экране нет) время
-        // идёт только при движении и явно начатом деле похода — домашняя
-        // работа и уход скрытого Дома сами часы не запускают.
-        bool shouldRun = ContinuousSimulationSystem.HasMovementOrActivityInProgress(gameState) ||
-                         (!IsFreePlayWithoutHome &&
-                          (Chapter01HomeActivities.IsWaitingForNight(gameState) || HomeLife.HasPendingProgress(gameState)));
+        // Бриф исправлений п. 13: время идёт только при движении и явно
+        // начатом деле похода.
+        bool shouldRun = ContinuousSimulationSystem.HasMovementOrActivityInProgress(gameState);
         ContinuousSimulationSystem.SetPaused(gameState, !shouldRun);
-
-        // P08+: ExpeditionStarted должен означать физическое начало
-        // движения, а не подтверждение состава в Hero Screen/N10 (раздел
-        // 3/18 инструкции про карту и время) — ставится здесь, по факту
-        // того, что отряд действительно тронулся, а не откуда-то из UI
-        // выбора бойцов.
-        if (shouldRun &&
-            gameState.Narrative != null &&
-            gameState.Narrative.HasFlag(Chapter01Ids.Flags.FarRouteUnlocked) &&
-            !gameState.Narrative.HasFlag(Chapter01Ids.Flags.ExpeditionStarted))
-        {
-            Chapter01StoryDirector.HandleStoryExpeditionStarted(gameState);
-        }
     }
 
     private void OnContinuousResearchClicked()
@@ -501,15 +422,4 @@ public partial class PrototypeUIController
         RefreshContinuousTimeUi(true);
     }
 
-    private void OnContinuousCapitalClicked()
-    {
-        if (!gameState.HasActiveExpedition ||
-            gameState.HasPendingExpeditionDecision ||
-            gameState.ActiveExpedition.IsLocationResearchInProgress)
-        {
-            return;
-        }
-
-        OnContinuousExpeditionActionClicked();
-    }
 }

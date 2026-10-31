@@ -2,7 +2,8 @@ using NUnit.Framework;
 using UnityEngine;
 
 // ПР-05: конфигурация кампании фиксируется при старте и переживает
-// сохранение; неверный выбор не создаёт полусозданную кампанию.
+// сохранение; неверный выбор не создаёт полусозданную кампанию. Канон v1.59:
+// режим один — свободная игра, без выбора кризиса и начального состояния.
 public sealed class CampaignSetupTests
 {
     [Test]
@@ -16,9 +17,9 @@ public sealed class CampaignSetupTests
 
         Assert.IsNotNull(configuration);
         Assert.IsNotEmpty(configuration.CampaignId);
-        Assert.AreEqual(CampaignStartOptions.HomeOnForeignWaterCrisisId, configuration.CrisisId);
+        Assert.AreEqual(CampaignStartOptions.FreePlayId, configuration.CrisisId);
         Assert.AreEqual(CampaignStartOptions.PlaceholderCommanderId, configuration.CommanderProfileId);
-        Assert.AreEqual(CampaignStartOptions.BaseHomeStartId, configuration.StartingConditionId);
+        Assert.AreEqual(CampaignStartOptions.RoadCampStartId, configuration.StartingConditionId);
         Assert.AreEqual(CampaignConfiguration.CurrentContentVersion, configuration.ContentVersion);
         Assert.AreEqual(20260924, configuration.WorldSeed);
     }
@@ -34,9 +35,9 @@ public sealed class CampaignSetupTests
     [Test]
     public void UnknownChoice_IsRejected_BeforeAnythingIsCreated()
     {
-        CampaignSetup setup = new CampaignSetup { CrisisId = "crisis.unknown" };
+        CampaignSetup setup = new CampaignSetup { CommanderProfileId = "commander.unknown" };
         Assert.IsFalse(setup.Validate(out string reason));
-        StringAssert.Contains("кризис", reason);
+        StringAssert.Contains("командир", reason);
         Assert.Throws<System.InvalidOperationException>(() => setup.CreateCampaign());
     }
 
@@ -59,11 +60,7 @@ public sealed class CampaignSetupTests
     [Test]
     public void OptionTexts_ArePresent_ForEveryChoice()
     {
-        foreach (CampaignOptionDefinition option in CampaignStartOptions.Crises)
-            Assert.IsNotEmpty(option.Summary, option.Id);
         foreach (CampaignOptionDefinition option in CampaignStartOptions.Commanders)
-            Assert.IsNotEmpty(option.Summary, option.Id);
-        foreach (CampaignOptionDefinition option in CampaignStartOptions.StartingConditions)
             Assert.IsNotEmpty(option.Summary, option.Id);
     }
 }

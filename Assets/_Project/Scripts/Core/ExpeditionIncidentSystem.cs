@@ -512,7 +512,7 @@ public static class ExpeditionIncidentSystem
         if (expedition.Phase == CommanderState.ReturningToCastle)
         {
             string deliveredResources = state.CompleteExpeditionReturn();
-            return "Отряд вернулся в Дом. " + deliveredResources;
+            return "Отряд вернулся на стоянку. " + deliveredResources;
         }
 
         return string.Empty;

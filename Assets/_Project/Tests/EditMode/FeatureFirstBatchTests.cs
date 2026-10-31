@@ -41,6 +41,7 @@ public sealed class FeatureFirstBatchTests
     private static GameState OnTheRoad(params string[] fighters)
     {
         GameState state = new CampaignSetup { WorldSeed = 20260927 }.CreateCampaign();
+        TestPeople.AdmitAll(state);
         state.ArmySupply = 50;
         LocationData target = state.Locations.First(location => !location.IsWaypoint);
         Assert.IsTrue(state.TryStartExpedition(target.Id, fighters.ToList(), out string message), message);
@@ -286,11 +287,11 @@ public sealed class FeatureFirstBatchTests
     {
         GameState state = OnTheRoad("garrick", "edric");
         Give(state, "garrick", FeatureIds.FieldMedic);
-        ResidentState edric = HomePeopleService.Find(state, "edric");
+        ResidentState edric = PeopleService.Find(state, "edric");
         edric.HasCombatState = true;
         edric.MaxHitPoints = 20;
         edric.CurrentHitPoints = 4;
-        ResidentState garrick = HomePeopleService.Find(state, "garrick");
+        ResidentState garrick = PeopleService.Find(state, "garrick");
         garrick.HasCombatState = true;
         garrick.MaxHitPoints = 20;
         garrick.CurrentHitPoints = 18;

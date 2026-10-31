@@ -22,7 +22,7 @@ public sealed class WorldMapFogData
 public static class WorldMapFog
 {
     public static bool Applies(GameState state) =>
-        state != null && state.HasGeneratedMap && CampaignContent.IsFreePlay(state);
+        state != null && state.HasGeneratedMap;
 
     // Версия открытого — растёт при каждом новом открытии; интерфейс по ней
     // решает, перерисовывать ли текстуру тумана (не каждый кадр).

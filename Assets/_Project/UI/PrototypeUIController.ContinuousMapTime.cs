@@ -215,7 +215,7 @@ public partial class PrototypeUIController
             if (changed)
             {
                 ContinuousSimulationSystem.NotifyRouteChanged(gameState);
-                AddReport("Отряд вышел из Дома.");
+                AddReport("Отряд снялся со стоянки.");
             }
             else if (!silent)
             {

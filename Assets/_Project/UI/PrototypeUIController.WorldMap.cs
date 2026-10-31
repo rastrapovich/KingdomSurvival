@@ -44,7 +44,6 @@ public partial class PrototypeUIController
     private VisualElement worldMapRoutes;
     private VisualElement worldMapMarkers;
     private VisualElement worldMapFog;
-    private Button worldMapCapitalButton;
     private VisualElement worldMapArmyMarker;
     private Label worldMapArmyMarkerLabel;
     private VisualElement worldMapArmyActivity;
@@ -62,7 +61,6 @@ public partial class PrototypeUIController
     // AM-06: навигация/зум карты — "К герою"/"К Дому"/"Вся карта", +/-,
     // компактный индикатор масштаба, переключатель вспомогательной сетки.
     private Button worldMapFocusHeroButton;
-    private Button worldMapFocusHomeButton;
     private Button worldMapFitButton;
     private Button worldMapZoomInButton;
     private Button worldMapZoomOutButton;
@@ -97,7 +95,6 @@ public partial class PrototypeUIController
         worldMapRoutes = root.Q<VisualElement>("world-map-routes");
         worldMapMarkers = root.Q<VisualElement>("world-map-markers");
         worldMapFog = root.Q<VisualElement>("world-map-fog");
-        worldMapCapitalButton = root.Q<Button>("world-map-capital-button");
         worldMapArmyMarker = root.Q<VisualElement>("world-map-army-marker");
         worldMapArmyMarkerLabel =
             root.Q<Label>("world-map-army-marker-label");
@@ -107,7 +104,6 @@ public partial class PrototypeUIController
         mapSelectionDetails = root.Q<Label>("map-selection-details");
         mapSendButton = root.Q<Button>("map-send-button");
         worldMapFocusHeroButton = root.Q<Button>("world-map-focus-hero-button");
-        worldMapFocusHomeButton = root.Q<Button>("world-map-focus-home-button");
         worldMapFitButton = root.Q<Button>("world-map-fit-button");
         worldMapZoomInButton = root.Q<Button>("world-map-zoom-in-button");
         worldMapZoomOutButton = root.Q<Button>("world-map-zoom-out-button");
@@ -201,22 +197,17 @@ public partial class PrototypeUIController
         worldMapTerrain != null &&
         worldMapRoutes != null &&
         worldMapMarkers != null &&
-        worldMapCapitalButton != null &&
         worldMapArmyMarker != null &&
         worldMapArmyMarkerLabel != null;
 
     private void RegisterWorldMapCallbacks()
     {
-        worldMapCapitalButton.clicked +=
-            OnWorldMapCapitalClicked;
         RegisterWorldMapViewportCallbacks();
         RegisterWorldMapNavControlCallbacks();
     }
 
     private void UnregisterWorldMapCallbacks()
     {
-        worldMapCapitalButton.clicked -=
-            OnWorldMapCapitalClicked;
         UnregisterWorldMapViewportCallbacks();
         UnregisterWorldMapNavControlCallbacks();
     }
@@ -225,8 +216,6 @@ public partial class PrototypeUIController
     {
         if (worldMapFocusHeroButton != null)
             worldMapFocusHeroButton.clicked += OnWorldMapFocusHeroButtonClicked;
-        if (worldMapFocusHomeButton != null)
-            worldMapFocusHomeButton.clicked += OnWorldMapFocusHomeButtonClicked;
         if (worldMapFitButton != null)
             worldMapFitButton.clicked += OnWorldMapFitButtonClicked;
         if (worldMapZoomInButton != null)
@@ -246,8 +235,6 @@ public partial class PrototypeUIController
     {
         if (worldMapFocusHeroButton != null)
             worldMapFocusHeroButton.clicked -= OnWorldMapFocusHeroButtonClicked;
-        if (worldMapFocusHomeButton != null)
-            worldMapFocusHomeButton.clicked -= OnWorldMapFocusHomeButtonClicked;
         if (worldMapFitButton != null)
             worldMapFitButton.clicked -= OnWorldMapFitButtonClicked;
         if (worldMapZoomInButton != null)
@@ -288,32 +275,6 @@ public partial class PrototypeUIController
     // Старый подтверждающий обработчик больше не используется.
     private void OnWorldMapSendClicked()
     {
-    }
-
-    private void OnWorldMapCapitalClicked()
-    {
-        if (!gameState.HasActiveExpedition ||
-            gameState.HasPendingExpeditionDecision ||
-            gameState.ActiveExpedition.IsLocationResearchInProgress)
-        {
-            return;
-        }
-
-        string resultMessage;
-
-        if (gameState.CanCancelPreparedExpedition)
-        {
-            gameState.TryCancelPreparedExpedition(
-                out resultMessage);
-        }
-        else
-        {
-            gameState.TryOrderReturn(
-                out resultMessage);
-        }
-
-        AddReport(resultMessage);
-        RefreshStableUiAfterStateChange();
     }
 
     private static readonly Unity.Profiling.ProfilerMarker RefreshMapMarker = new Unity.Profiling.ProfilerMarker("KS.Map.RefreshPanel");
@@ -373,9 +334,8 @@ public partial class PrototypeUIController
             CreateWorldMapNode(location);
         }
 
-        RefreshWorldMapCapital();
         RefreshWorldMapArmyMarker();
-        ApplyFreePlayHomeVisibility();
+        EnsureMapScreenOpen();
         TickWorldMapFog(true);
     }
 
@@ -601,62 +561,6 @@ public partial class PrototypeUIController
     private void RefreshWorldMapHint()
     {
         // Текстовые инструкции с экрана карты удалены.
-    }
-
-    private void RefreshWorldMapCapital()
-    {
-        bool active =
-            gameState.HasActiveExpedition;
-
-        worldMapCapitalButton.RemoveFromClassList(
-            "world-map-capital-return");
-
-        if (active)
-        {
-            worldMapCapitalButton.AddToClassList(
-                "world-map-capital-return");
-        }
-
-        // Размер и позиция считаются из реального разрешения сетки,
-        // WorldMapVisualTheme.HomeMarkerSizeCells (доли клетки) и
-        // канонической точки столицы.
-        float homeMarkerSizeCells = GetActiveMarkerTheme()?.HomeMarkerSizeCells
-            ?? WorldMapVisualTheme.DefaultHomeMarkerSizeCells;
-        Vector2 markerSizePercent = GetMarkerSizePercent(homeMarkerSizeCells);
-        float markerWidthPercent = markerSizePercent.x;
-        float markerHeightPercent = markerSizePercent.y;
-
-        worldMapCapitalButton.style.width =
-            new Length(markerWidthPercent, LengthUnit.Percent);
-        worldMapCapitalButton.style.height =
-            new Length(markerHeightPercent, LengthUnit.Percent);
-        // USS min-width/min-height:0 не побеждал встроенный min-size темы
-        // Button (порядок применения стилшитов, не специфичность) — задаём
-        // inline-стилем в коде, он гарантированно выше любого USS-правила.
-        worldMapCapitalButton.style.minWidth = new Length(0, LengthUnit.Pixel);
-        worldMapCapitalButton.style.minHeight = new Length(0, LengthUnit.Pixel);
-        worldMapCapitalButton.style.left = new Length(
-            WorldMapNavigation.CapitalXPercent - markerWidthPercent * 0.5f,
-            LengthUnit.Percent);
-        worldMapCapitalButton.style.top = new Length(
-            WorldMapNavigation.CapitalYPercent - markerHeightPercent * 0.5f,
-            LengthUnit.Percent);
-
-        worldMapCapitalButton.text = string.Empty;
-        worldMapCapitalButton.tooltip =
-            active
-                ? "Дом — нажмите, чтобы приказать отряду возвращаться"
-                : "Дом";
-
-        bool canUseCapital =
-            active &&
-            !gameState.HasPendingExpeditionDecision &&
-            !gameState.ActiveExpedition.IsLocationResearchInProgress &&
-            gameState.ActiveExpedition.Phase !=
-                CommanderState.ReturningToCastle;
-
-        worldMapCapitalButton.SetEnabled(
-            canUseCapital);
     }
 
     private void RefreshWorldMapArmyMarker()

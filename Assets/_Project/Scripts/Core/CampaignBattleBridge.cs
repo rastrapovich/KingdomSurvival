@@ -334,7 +334,7 @@ public static class CampaignBattleBridge
                 };
             }
 
-            ResidentState resident = HomePeopleService.Find(state, personId);
+            ResidentState resident = PeopleService.Find(state, personId);
             participant.Origin = resident != null ? resident.Origin : CampaignParticipantOrigin.HomePerson;
             FillHitPoints(state, participant);
             request.Participants.Add(participant);
@@ -362,11 +362,11 @@ public static class CampaignBattleBridge
         // 12Е-6: боевые правила особенностей человека.
         participant.PerkIds = FeatureCombatBatch.PerksFor(state, participant.PersonId);
 
-        ResidentState resident = HomePeopleService.Find(state, participant.PersonId);
+        ResidentState resident = PeopleService.Find(state, participant.PersonId);
         if (resident == null)
             return;
 
-        HomePeopleService.EnsureCombatState(resident);
+        PeopleService.EnsureCombatState(resident);
         if (!resident.HasCombatState)
             return;
         ItemService.RefreshMaxHitPoints(state, resident.PersonId);
@@ -431,7 +431,7 @@ public static class CampaignBattleBridge
         HashSet<string> woundedBeforeBattle = new HashSet<string>();
         foreach (CampaignBattleSurvivor survivor in result.Survivors ?? new List<CampaignBattleSurvivor>())
         {
-            ResidentState resident = HomePeopleService.Find(state, survivor.PersonId);
+            ResidentState resident = PeopleService.Find(state, survivor.PersonId);
             if (resident != null && resident.Injury == ResidentInjury.Recovering)
                 woundedBeforeBattle.Add(survivor.PersonId);
         }
@@ -456,10 +456,10 @@ public static class CampaignBattleBridge
                 continue;
 
             fallenNames?.Add(fighter.Name);
-            if (HomePeopleService.Find(state, personId) != null)
+            if (PeopleService.Find(state, personId) != null)
             {
                 // ПР-06А: погибший остаётся в реестре и семье, уходит из состава.
-                HomePeopleService.MarkDead(state, personId, "battle." + result.BattleId);
+                PeopleService.MarkDead(state, personId, "battle." + result.BattleId);
             }
             else
             {
@@ -473,12 +473,12 @@ public static class CampaignBattleBridge
         // UnitDatabase не меняется. Потерянное здоровье лечит уход дома.
         foreach (CampaignBattleSurvivor survivor in result.Survivors ?? new List<CampaignBattleSurvivor>())
         {
-            ResidentState resident = HomePeopleService.Find(state, survivor.PersonId);
+            ResidentState resident = PeopleService.Find(state, survivor.PersonId);
             if (resident == null || !resident.IsAlive)
                 continue;
 
-            HomePeopleService.EnsureCombatState(resident);
-            HomePeopleService.SetHitPoints(resident, survivor.HitPoints);
+            PeopleService.EnsureCombatState(resident);
+            PeopleService.SetHitPoints(resident, survivor.HitPoints);
         }
 
         if (!heroFell)
@@ -491,7 +491,7 @@ public static class CampaignBattleBridge
             List<string> fallenHere = new List<string>();
             foreach (string personId in result.FallenPersonIds ?? new List<string>())
             {
-                ResidentState fallen = HomePeopleService.Find(state, personId);
+                ResidentState fallen = PeopleService.Find(state, personId);
                 if (fallen != null)
                     fallenHere.Add(fallen.DisplayName);
             }
@@ -544,7 +544,7 @@ public static class CampaignBattleBridge
         List<string> tired = new List<string>();
         foreach (CampaignBattleSurvivor survivor in result.Survivors ?? new List<CampaignBattleSurvivor>())
         {
-            ResidentState resident = HomePeopleService.Find(state, survivor.PersonId);
+            ResidentState resident = PeopleService.Find(state, survivor.PersonId);
             if (resident == null || !resident.IsAlive || !resident.HasCombatState)
                 continue;
 

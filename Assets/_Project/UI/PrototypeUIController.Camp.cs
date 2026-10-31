@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using KingdomSurvival.Chapter01;
 using UnityEngine.UIElements;
 
 /// <summary>
@@ -29,7 +28,6 @@ public partial class PrototypeUIController
     private Label campLocationLabel;
     private Label campCommanderName;
     private Label campCommanderStatus;
-    private VisualElement campSceneList;
     private Label campStatusText;
     // ПР-09: действия ночи и ночлег.
     private Label campActionsHint;
@@ -64,7 +62,6 @@ public partial class PrototypeUIController
         campContinueButton = campScreen.Q<Button>("camp-continue-button");
         campCommanderName = campScreen.Q<Label>("camp-commander-name");
         campCommanderStatus = campScreen.Q<Label>("camp-commander-status");
-        campSceneList = campScreen.Q<VisualElement>("camp-scene-list");
         campStatusText = campScreen.Q<Label>("camp-status-text");
         campActionsHint = campScreen.Q<Label>("camp-actions-placeholder");
         campActionList = campScreen.Q<VisualElement>("camp-action-list");
@@ -89,10 +86,6 @@ public partial class PrototypeUIController
         if (campNavButton != null)
         {
             campNavButton.clicked += ToggleCampScreen;
-            // Скрыта до CampUnlocked (раздел "Кнопка": "До встречи — кнопки
-            // вообще нет") — RefreshCampNavButtonState включает видимость
-            // после первого реального обновления состояния.
-            campNavButton.style.display = DisplayStyle.None;
         }
     }
 
@@ -114,17 +107,7 @@ public partial class PrototypeUIController
     {
         return gameState != null &&
                !isGameOver &&
-               IsCampUnlocked() &&
                gameState.HasActiveExpedition;
-    }
-
-    // ПР-12А: в свободной игре лагерь доступен сразу; в главе — после встречи,
-    // которая его открывает (CampUnlocked).
-    private bool IsCampUnlocked()
-    {
-        return gameState != null &&
-               (CampaignContent.IsFreePlay(gameState) ||
-                gameState.Narrative != null && gameState.Narrative.HasFlag(Chapter01Ids.Flags.CampUnlocked));
     }
 
     private void OpenCampScreen()
@@ -148,16 +131,6 @@ public partial class PrototypeUIController
         campScreen.BringToFront();
         RefreshCampScreen();
         RefreshCampNavButtonState();
-
-        // Раздел "Что происходит при первом открытии": авторская camp-сцена
-        // запускается автоматически поверх лагерного экрана через
-        // TryOpenNarrativeDialogueById — не второй рендерер диалогов.
-        // HasBlockingModalWorkExceptCamp (не HasBlockingModalWork) в самом
-        // TryOpenNarrativeDialogueById позволяет ей открыться, пока
-        // isCampScreenOpen уже true.
-        CampSceneViewData? scene = Chapter01CampSceneProvider.GetAvailableScene(gameState);
-        if (scene.HasValue)
-            TryOpenNarrativeDialogueById(scene.Value.DialogueId);
     }
 
     private void CloseCampScreen()
@@ -199,7 +172,6 @@ public partial class PrototypeUIController
 
         RefreshCampLocationAndStatus();
         RefreshCampRoster();
-        RefreshCampSceneList();
         RefreshCampActions();
     }
 
@@ -298,7 +270,7 @@ public partial class PrototypeUIController
         }
 
         if (campLocationLabel != null)
-            campLocationLabel.text = placeText + " · " + Chapter01StoryDirector.DescribeCampPlace(gameState);
+            campLocationLabel.text = placeText + " · " + CampRest.DescribePlace(gameState);
 
         if (campStatusText != null)
         {
@@ -351,43 +323,13 @@ public partial class PrototypeUIController
     // ПР-09: у костра видно, кто ранен и кто вымотан.
     private string CampPersonStatus(string personId)
     {
-        ResidentState resident = HomePeopleService.Find(gameState, personId);
+        ResidentState resident = PeopleService.Find(gameState, personId);
         if (resident == null || !resident.HasCombatState)
             return "—";
         string text = "HP " + resident.CurrentHitPoints + "/" + resident.MaxHitPoints;
         if (resident.Exhausted)
             text += " · изнеможён";
         return text;
-    }
-
-    // Раздел 12/20 инструкции: единственный источник — Chapter01CampSceneProvider
-    // (read-only), никакого второго рендерера диалогов — запуск идёт через
-    // TryOpenNarrativeDialogueById в OpenCampScreen. Список — динамический
-    // контент, поэтому строится в C#, но стилизуется классами из
-    // Prototype_Camp.uss (camp-scene-row/camp-scene-row-title/
-    // camp-placeholder-text), а не инлайн-стилями.
-    private void RefreshCampSceneList()
-    {
-        if (campSceneList == null)
-            return;
-
-        campSceneList.Clear();
-
-        CampSceneViewData? scene = Chapter01CampSceneProvider.GetAvailableScene(gameState);
-        if (!scene.HasValue)
-        {
-            Label empty = new Label("Пока нечего рассказать.");
-            empty.AddToClassList("camp-placeholder-text");
-            campSceneList.Add(empty);
-            return;
-        }
-
-        VisualElement row = new VisualElement();
-        row.AddToClassList("camp-scene-row");
-        Label title = new Label("● " + scene.Value.Title);
-        title.AddToClassList("camp-scene-row-title");
-        row.Add(title);
-        campSceneList.Add(row);
     }
 
     // Раздел 2/18 инструкции: скрыта/disabled/enabled/активна должны
@@ -399,11 +341,6 @@ public partial class PrototypeUIController
     private void RefreshCampNavButtonState()
     {
         if (campNavButton == null || gameState == null)
-            return;
-
-        bool unlocked = IsCampUnlocked();
-        campNavButton.style.display = unlocked ? DisplayStyle.Flex : DisplayStyle.None;
-        if (!unlocked)
             return;
 
         bool blockedByOther = HasBlockingModalWorkExceptCamp();

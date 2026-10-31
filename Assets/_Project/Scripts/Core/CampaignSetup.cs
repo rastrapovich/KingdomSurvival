@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
 
-// ПР-05: конфигурация кампании. Выбор кризиса, командира и начального
-// состояния делается до старта (CampaignSetup), проверяется и фиксируется
-// в GameState.Configuration — она сохраняется вместе с кампанией, и загрузка
-// восстанавливает ту же композицию, а не собирает мир заново.
-//
-// Сейчас в каждом списке одна запись; каталоги и мастер выбора — ПР-12.
-// Тексты описаний — рабочие, не канон: личность героя не утверждена, и
-// текст её не придумывает; завязка описана без разгадки.
+// ПР-05: конфигурация кампании. Командир выбирается до старта
+// (CampaignSetup), проверяется и фиксируется в GameState.Configuration — она
+// сохраняется вместе с кампанией, и загрузка восстанавливает ту же
+// композицию, а не собирает мир заново. Канон v1.59: режим один — свободная
+// игра; выбора кризиса и начального состояния нет.
+// Тексты описаний — рабочие, не канон: личность героя не утверждена.
 [Serializable]
 public sealed class CampaignConfiguration
 {
@@ -38,43 +36,21 @@ public sealed class CampaignOptionDefinition
 
 public static class CampaignStartOptions
 {
-    public const string HomeOnForeignWaterCrisisId = "crisis.home_on_foreign_water";
-    // ПР-12А (канон v1.45 §6.0): «Свободная игра» — базовый режим без кризиса.
-    // Хранится в том же поле CrisisId, но в интерфейсе кризисом не называется.
+    // Канон v1.59 §6.0: «Свободная игра» — единственный режим. ID хранится в
+    // CampaignConfiguration.CrisisId (имя поля сохранено ради старых
+    // сохранений) и не переиспользуется для другого содержания.
     public const string FreePlayId = "freeplay.home_region";
     public const string PlaceholderCommanderId = "commander.placeholder";
-    public const string BaseHomeStartId = "start.base_home";
-
-    // Без разгадки: только исходная беда и тон (план ПР-05, §4).
-    // ПР-12А: первая запись — свободная игра, основа игры (канон v1.45).
-    public static readonly IReadOnlyList<CampaignOptionDefinition> Crises = new[]
-    {
-        new CampaignOptionDefinition(
-            FreePlayId,
-            "Свободная игра",
-            "Дом живёт обычной жизнью, большой беды по расписанию нет. Вокруг — округа, люди и места, о которых пока известно мало. " +
-            "Куда идти, кого брать с собой и кого оставить дома — решаете вы."),
-        new CampaignOptionDefinition(
-            HomeOnForeignWaterCrisisId,
-            "Дом на чужой воде",
-            "Весенний паводок бьёт по плотине, на которой держатся мельница и весь уклад Дома. " +
-            "Её придётся чинить — и решить, как именно.")
-    };
+    // Начальное состояние новой партии — стоянка у дороги. Прежний ID
+    // «start.base_home» (исходный Дом) не переиспользуется.
+    public const string RoadCampStartId = "start.road_camp";
 
     public static readonly IReadOnlyList<CampaignOptionDefinition> Commanders = new[]
     {
         new CampaignOptionDefinition(
             PlaceholderCommanderId,
             "Командир",
-            "Тот, на ком теперь решения Дома. Может уйти в поход один или взять с собой до четырёх бойцов.")
-    };
-
-    public static readonly IReadOnlyList<CampaignOptionDefinition> StartingConditions = new[]
-    {
-        new CampaignOptionDefinition(
-            BaseHomeStartId,
-            "Обычная жизнь",
-            "Мельница работает, люди заняты своим делом, запасов хватает. Всё, что случится дальше, начнётся с этой нормы.")
+            "Ведёт отряд. Может уйти в поход один или взять с собой до четырёх бойцов.")
     };
 
     public static CampaignOptionDefinition Find(IReadOnlyList<CampaignOptionDefinition> options, string id)
@@ -92,29 +68,15 @@ public static class CampaignStartOptions
 // полусозданной кампании.
 public sealed class CampaignSetup
 {
-    public const int BaseHomeDailyFoodIncome = 24;
-
-    public string CrisisId = CampaignStartOptions.HomeOnForeignWaterCrisisId;
     public string CommanderProfileId = CampaignStartOptions.PlaceholderCommanderId;
-    public string StartingConditionId = CampaignStartOptions.BaseHomeStartId;
     public int? WorldSeed;
 
     public bool Validate(out string reason)
     {
         reason = string.Empty;
-        if (CampaignStartOptions.Find(CampaignStartOptions.Crises, CrisisId) == null)
-        {
-            reason = "неизвестный кризис '" + CrisisId + "'";
-            return false;
-        }
         if (CampaignStartOptions.Find(CampaignStartOptions.Commanders, CommanderProfileId) == null)
         {
             reason = "неизвестный командир '" + CommanderProfileId + "'";
-            return false;
-        }
-        if (CampaignStartOptions.Find(CampaignStartOptions.StartingConditions, StartingConditionId) == null)
-        {
-            reason = "неизвестное начальное состояние '" + StartingConditionId + "'";
             return false;
         }
         return true;
@@ -139,24 +101,19 @@ public sealed class CampaignSetup
         }
 
         GameState state = new GameState();
-        state.CreateNewGame(WorldSeed, WorldMapLocationTemplateData.ForMode(locationTemplates, CrisisId), worldDefinition);
+        state.CreateNewGame(WorldSeed, WorldMapLocationTemplateData.ForMode(locationTemplates, CampaignStartOptions.FreePlayId), worldDefinition);
         if (generated)
         {
             state.GeneratedMap = generatedMap;
             GeneratedMapPlaces.AddTo(state);
         }
 
-        // ПР-06А: «Обычная жизнь» — Дом кормит себя. Приток 24 при 24
-        // жителях — фиксированная настройка пресета, не подгонка под
-        // текущее население: новые люди действительно увеличивают расход.
-        if (StartingConditionId == CampaignStartOptions.BaseHomeStartId)
-            state.BaseDailyFoodIncome = BaseHomeDailyFoodIncome;
         state.Configuration = new CampaignConfiguration
         {
             CampaignId = Guid.NewGuid().ToString("N"),
-            CrisisId = CrisisId,
+            CrisisId = CampaignStartOptions.FreePlayId,
             CommanderProfileId = CommanderProfileId,
-            StartingConditionId = StartingConditionId,
+            StartingConditionId = CampaignStartOptions.RoadCampStartId,
             ContentVersion = CampaignConfiguration.CurrentContentVersion,
             WorldSeed = state.WorldSeed
         };
@@ -167,7 +124,7 @@ public sealed class CampaignSetup
         // известными.
         WorldMapFog.HidePlacesUnderFog(state);
 
-        // ПР-12А: однократная настройка режима (его модуль зарегистрирован в CampaignContent).
+        // ПР-12А: однократная настройка свободной игры (модуль зарегистрирован в CampaignContent).
         CampaignContent.InitializeNewCampaign(state);
 
         // Бриф правок (19 пунктов) п. 1: новая партия — туман с открытой

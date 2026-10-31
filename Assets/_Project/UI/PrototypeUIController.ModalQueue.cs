@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using KingdomSurvival.Chapter01;
 using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
@@ -74,19 +73,6 @@ public partial class PrototypeUIController
                     return;
                 }
             }
-        }
-
-        // P10-LocInt: если сюжетное Location Research для этой локации уже
-        // завершилось и Chapter01StoryDirector готов открыть N12, техническое
-        // "ИССЛЕДОВАНИЕ ЗАВЕРШЕНО" не показываем — сюжетная сцена сама
-        // является результатом исследования (раздел "Приоритет N12 над
-        // техническим окном" инструкции). Для обычных локаций без сюжетного
-        // продолжения GetPendingLocationNarrativeDialogueId вернёт null, и
-        // уведомление показывается как раньше.
-        if (notice.Title == "ИССЛЕДОВАНИЕ ЗАВЕРШЕНО" &&
-            !string.IsNullOrEmpty(Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState)))
-        {
-            return;
         }
 
         queuedModals.Enqueue(new QueuedModal

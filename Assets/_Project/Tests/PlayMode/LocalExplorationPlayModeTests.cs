@@ -170,15 +170,15 @@ public sealed class LocalExplorationPlayModeTests
             yield return null;
         yield return Frames(20);
         MonoBehaviour main = FindBehaviour("PrototypeUIController");
-        Invoke(main, "StartNewFreePlayFromMenu");
+        Invoke(main, "StartNewGameFromMenu");
         yield return Frames(10);
 
         GameState campaign = CampaignSession.Current;
-        campaign.Food = 40;
+        TestPeople.AdmitAll(campaign);
         campaign.ArmySupply = 30;
         campaign.Narrative.SetFlag("freeplay.mine.known");
         CampaignContent.Refresh(campaign);
-        Assert.IsTrue(campaign.TryStartExpedition("mine", new List<string> { "garrick", "torvin" }, out string message, HomePeopleService.OstafiyId), message);
+        Assert.IsTrue(campaign.TryStartExpedition("mine", new List<string> { "garrick", "torvin" }, out string message, "ostafiy"), message);
         campaign.ActiveExpedition.Phase = CommanderState.AtLocation;
         yield return null;
 
@@ -297,6 +297,7 @@ public sealed class LocalExplorationPlayModeTests
         yield return Frames(5);
         Assert.AreNotSame(campaign, CampaignSession.Current, "Загружена партия из файла.");
         campaign = CampaignSession.Current;
+        TestPeople.AdmitAll(campaign);
         Assert.IsTrue(LocalExplorationService.IsActive(campaign), "После загрузки — снова в шахте.");
         Assert.IsNotNull(Mover(main), "Экран места поднят заново.");
         Assert.Less(Vector2.Distance(leaderBefore, Leader(main)), 1f, "Командир там же.");

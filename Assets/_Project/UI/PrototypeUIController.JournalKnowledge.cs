@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using KingdomSurvival.Chapter01;
 using KingdomSurvival.DialogueDatabase;
 using UnityEngine.UIElements;
 
 // ПР-11 (ProjectDocs/PR11_CHRONICLE_SPEC.md): вкладки журнала «Сведения»
-// и «История». Сведения — открытые знания главы: текст берётся из той
+// и «История». Сведения — открытые знания (KnowledgeCatalog): текст из той
 // реплики, которая дала знание (база диалогов), с источником и степенью
 // уверенности. История — сохраняемые записи Chronicle. «НОВОЕ» снимается
 // кликом и сохраняется (Chronicle.SeenIds).
@@ -77,7 +76,7 @@ public partial class PrototypeUIController
     private void RefreshKnowledgeTab()
     {
         journalEntriesTitle.text = "СВЕДЕНИЯ";
-        List<KnowledgeEntry> known = Chapter01KnowledgeCatalog.Known(gameState.Narrative);
+        List<KnowledgeEntry> known = KnowledgeCatalog.Known(gameState.Narrative);
         KnowledgeEntry selected = null;
         foreach (KnowledgeEntry entry in known)
         {
@@ -86,7 +85,7 @@ public partial class PrototypeUIController
             if (isSelected)
                 selected = entry;
             KnowledgeEntry captured = entry;
-            AddJournalEntryRow(entry.Title, Chapter01KnowledgeCatalog.CertaintyLabel(gameState.Narrative, entry),
+            AddJournalEntryRow(entry.Title, KnowledgeCatalog.CertaintyLabel(gameState.Narrative, entry),
                 !Chronicle.IsSeen(gameState, seenId), isSelected, () =>
                 {
                     selectedJournalKnowledgeId = captured.Id;
@@ -106,7 +105,7 @@ public partial class PrototypeUIController
         }
 
         DialogueKnowledgeSource source = FindKnowledgeSource(selected.Id);
-        ShowJournalDetail("СВЕДЕНИЕ · " + Chapter01KnowledgeCatalog.CertaintyLabel(gameState.Narrative, selected).ToUpperInvariant(),
+        ShowJournalDetail("СВЕДЕНИЕ · " + KnowledgeCatalog.CertaintyLabel(gameState.Narrative, selected).ToUpperInvariant(),
             selected.Title, source.Text, "ОТКУДА", source.Source, selected.LocationId);
     }
 
@@ -218,7 +217,7 @@ public partial class PrototypeUIController
             knowledgeSources = DialogueKnowledgeSources.Build(narrativeDialogueDatabase ?? DialogueDatabaseRuntime.LoadDefaultDatabase());
         return knowledgeSources.TryGetValue(knowledgeId, out DialogueKnowledgeSource source)
             ? source
-            : new DialogueKnowledgeSource { KnowledgeId = knowledgeId, Text = "Узнано по ходу главы.", Source = "из пережитого в походе" };
+            : new DialogueKnowledgeSource { KnowledgeId = knowledgeId, Text = "Узнано в пути.", Source = "из пережитого в походе" };
     }
 
     // «Журнал •» — есть непрочитанные сведения или записи истории.
@@ -226,7 +225,7 @@ public partial class PrototypeUIController
     {
         if (gameState == null)
             return false;
-        foreach (KnowledgeEntry entry in Chapter01KnowledgeCatalog.Known(gameState.Narrative))
+        foreach (KnowledgeEntry entry in KnowledgeCatalog.Known(gameState.Narrative))
         {
             if (!Chronicle.IsSeen(gameState, "knowledge:" + entry.Id))
                 return true;

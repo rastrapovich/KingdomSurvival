@@ -66,7 +66,6 @@ public partial class PrototypeUIController
         researchExpeditionButton.clicked -= OnResearchExpeditionClicked;
         researchExpeditionButton.clicked += OnStableResearchExpeditionClicked;
 
-        navCapitalButton.clicked += OnStableNavigationChanged;
         navExpeditionsButton.clicked += OnStableNavigationChanged;
 
         incidentUnderstoodButton.clicked += OnStablePostActionRefresh;
@@ -129,44 +128,8 @@ public partial class PrototypeUIController
         RefreshStableUiAfterStateChange();
     }
 
-    private void OnStableArmyGoldPlusClicked()
-    {
-        if (!isGameOver && gameState.CanAdjustArmySupply && gameState.Gold > 0)
-        {
-            gameState.Gold--;
-            gameState.ArmyGold++;
-        }
-        RefreshStableResourceUi();
-    }
-
-    private void OnStableArmyGoldMinusClicked()
-    {
-        if (!isGameOver && gameState.CanAdjustArmySupply && gameState.ArmyGold > 0)
-        {
-            gameState.ArmyGold--;
-            gameState.Gold++;
-        }
-        RefreshStableResourceUi();
-    }
-
-    private void OnStableSupplyPlusClicked()
-    {
-        if (!isGameOver)
-            gameState.TryAddArmySupply();
-        RefreshStableResourceUi();
-    }
-
-    private void OnStableSupplyMinusClicked()
-    {
-        if (!isGameOver)
-            gameState.TryRemoveArmySupply();
-        RefreshStableResourceUi();
-    }
-
     private void RefreshStableResourceUi()
     {
-        goldLabel.text = "Золото: " + gameState.Gold;
-        foodLabel.text = "Пища: " + gameState.Food;
         RefreshHeroScreenSupplyPanel();
     }
 

@@ -40,6 +40,7 @@ public sealed class ProgressionTracesTests
     private static GameState OnTheRoad(params string[] fighters)
     {
         GameState state = new CampaignSetup { WorldSeed = 20260928 }.CreateCampaign();
+        TestPeople.AdmitAll(state);
         state.ArmySupply = 50;
         LocationData target = state.Locations.First(location => !location.IsWaypoint);
         Assert.IsTrue(state.TryStartExpedition(target.Id, fighters.ToList(), out string message), message);
@@ -52,8 +53,8 @@ public sealed class ProgressionTracesTests
     // Боевое состояние заводит запрос боя (CampaignBattleBridge.CreateRequest).
     private static int Max(GameState state, string personId)
     {
-        ResidentState resident = HomePeopleService.Find(state, personId);
-        HomePeopleService.EnsureCombatState(resident);
+        ResidentState resident = PeopleService.Find(state, personId);
+        PeopleService.EnsureCombatState(resident);
         return resident.MaxHitPoints;
     }
 
@@ -139,7 +140,7 @@ public sealed class ProgressionTracesTests
     public void HeavyWound_FromEarlier_DoesNotCountAgain()
     {
         GameState state = OnTheRoad("garrick");
-        HomePeopleService.Find(state, "garrick").Injury = ResidentInjury.Recovering;
+        PeopleService.Find(state, "garrick").Injury = ResidentInjury.Recovering;
         CampaignBattleResult result = Battle("test.old_wound");
         Healthy(state, result, Hero(state), "garrick");
 

@@ -138,7 +138,9 @@ public sealed class SavesAndJournalPlayModeTests
         yield return NewGame();
         GameState campaign = CampaignSession.Current;
         StartExpedition(campaign, 1);
-        campaign.Narrative.AddKnowledge("chapter01.knowledge.second_loaf_is_ration");
+        // Канон v1.59: сведений удалённой главы нет — каталог общий, запись регистрирует содержание.
+        KnowledgeCatalog.Register(new KnowledgeEntry { Id = "test.knowledge.rumor", Title = "Проверочный слух", Certainty = KnowledgeCertainty.Rumor });
+        campaign.Narrative.AddKnowledge("test.knowledge.rumor");
         Chronicle.Record(campaign, "test.history", "Проверка истории", "Запись для проверки.");
         yield return Frames(5);
 
@@ -150,14 +152,14 @@ public sealed class SavesAndJournalPlayModeTests
         yield return null;
         Assert.AreEqual(DisplayStyle.Flex, root.Q<VisualElement>("journal-entries-section").resolvedStyle.display);
         Assert.AreEqual(DisplayStyle.None, root.Q<VisualElement>("journal-main-section").resolvedStyle.display);
-        CollectionAssert.Contains(RowTitles(root), "Второй хлеб — это паёк");
+        CollectionAssert.Contains(RowTitles(root), "Проверочный слух");
 
         VisualElement knowledgeRow = root.Q<VisualElement>("journal-entries-list").Q<VisualElement>("journal-goal-row");
         PointerDown(knowledgeRow);
         yield return null;
         StringAssert.Contains("СЛУХ", root.Q<Label>("journal-detail-panel-title").text);
         Assert.IsFalse(string.IsNullOrWhiteSpace(root.Q<Label>("journal-detail-description").text), "Текст сведения из реплики.");
-        Assert.IsTrue(Chronicle.IsSeen(campaign, "knowledge:chapter01.knowledge.second_loaf_is_ration"));
+        Assert.IsTrue(Chronicle.IsSeen(campaign, "knowledge:test.knowledge.rumor"));
 
         Click(root.Q<Button>("journal-tab-chronicle"));
         yield return null;
@@ -186,7 +188,7 @@ public sealed class SavesAndJournalPlayModeTests
             yield return null;
         yield return Frames(20);
         MonoBehaviour controller = Controller();
-        Invoke(controller, "StartNewFreePlayFromMenu");
+        Invoke(controller, "StartNewGameFromMenu");
         GameState campaign = CampaignSession.Current;
         Assert.AreEqual(CampaignStartOptions.FreePlayId, campaign.Configuration.CrisisId);
 
@@ -211,26 +213,6 @@ public sealed class SavesAndJournalPlayModeTests
         yield return null;
         Assert.AreEqual(CampaignStartOptions.FreePlayId, CampaignSession.Current.Configuration.CrisisId, "Загрузка восстанавливает режим.");
         Assert.IsFalse(CampaignSession.Current.Narrative.Flags.Any(f => f.StartsWith("chapter01.")));
-    }
-
-    [UnityTest]
-    public IEnumerator MandatoryScene_ClosesJournal_AndShowsAlone()
-    {
-        yield return NewGame();
-        MonoBehaviour controller = Controller();
-
-        // N01 откроется сам через секунду — Хроника открыта раньше.
-        Invoke(controller, "OpenJournal");
-        Assert.IsTrue(Flag(controller, "IsJournalOpen"));
-
-        // Пауза перед сценой — по реальному времени, а кадры в batchmode
-        // идут очень быстро: ждём секунды, не кадры.
-        float deadline = Time.unscaledTime + 5f;
-        while (Time.unscaledTime < deadline && !Flag(controller, "IsNarrativeDialogueActive"))
-            yield return null;
-
-        Assert.IsTrue(Flag(controller, "IsNarrativeDialogueActive"), "Обязательная сцена открылась поверх Хроники.");
-        Assert.IsFalse(Flag(controller, "IsJournalOpen"), "Хроника закрылась — два окна сразу не показываются.");
     }
 
     [UnityTest]

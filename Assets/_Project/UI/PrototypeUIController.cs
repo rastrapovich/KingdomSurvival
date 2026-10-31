@@ -7,9 +7,9 @@ using UnityEngine.UIElements;
 [RequireComponent(typeof(UIDocument))]
 public partial class PrototypeUIController : MonoBehaviour
 {
+    // Канон v1.59: экрана Дома нет — главный экран один, карта.
     private enum MainScreen
     {
-        Capital,
         Expeditions
     }
 
@@ -23,18 +23,10 @@ public partial class PrototypeUIController : MonoBehaviour
     private bool isGameOver;
     private VisualElement interfaceRoot;
 
-    private Button navCapitalButton;
     private Button navExpeditionsButton;
-    private VisualElement capitalScreen;
     private VisualElement expeditionsScreen;
 
     private Label dayLabel;
-    private Label goldLabel;
-    private Label goldIncomeLabel;
-    private Label foodLabel;
-    private Label foodIncomeLabel;
-    private Label populationLabel;
-    private Label foodConsumptionLabel;
     private Button timeToggleButton;
 
     // ПР-07А-1: выбор бойцов — не отдельное поле UI, а общий подготовленный
@@ -152,9 +144,8 @@ public partial class PrototypeUIController : MonoBehaviour
 
         reportHistoryLabel.enableRichText = true;
 
-        // Мост кампании с базой существ/бойцов: боевые агрегаты GameState
-        // (TotalArmyDefensePower и т.п.) начинают читать настоящие
-        // характеристики из UnitDatabase вместо legacy-полей прототипа.
+        // Мост кампании с базой существ/бойцов: HP и боевые данные людей
+        // читаются из UnitDatabase.
         if (GameState.UnitStatsProvider == null)
             GameState.UnitStatsProvider = new KingdomSurvival.UnitDatabase.UnitDatabaseStatsProvider();
 
@@ -174,19 +165,10 @@ public partial class PrototypeUIController : MonoBehaviour
     private void FindInterfaceElements(VisualElement root)
     {
         interfaceRoot = root;
-        navCapitalButton = root.Q<Button>("nav-capital-button");
         navExpeditionsButton = root.Q<Button>("nav-expeditions-button");
-
-        capitalScreen = root.Q<VisualElement>("capital-screen");
         expeditionsScreen = root.Q<VisualElement>("expeditions-screen");
 
         dayLabel = root.Q<Label>("day-label");
-        goldLabel = root.Q<Label>("gold-label");
-        goldIncomeLabel = root.Q<Label>("gold-income-label");
-        foodLabel = root.Q<Label>("food-label");
-        foodIncomeLabel = root.Q<Label>("food-income-label");
-        populationLabel = root.Q<Label>("population-label");
-        foodConsumptionLabel = root.Q<Label>("food-consumption-label");
         timeToggleButton = root.Q<Button>("time-toggle-button");
 
         expeditionStatusLabel = root.Q<Label>("expedition-status-label");
@@ -217,17 +199,9 @@ public partial class PrototypeUIController : MonoBehaviour
     private bool AllRequiredElementsExist()
     {
         return
-            navCapitalButton != null &&
             navExpeditionsButton != null &&
-            capitalScreen != null &&
             expeditionsScreen != null &&
             dayLabel != null &&
-            goldLabel != null &&
-            goldIncomeLabel != null &&
-            foodLabel != null &&
-            foodIncomeLabel != null &&
-            populationLabel != null &&
-            foodConsumptionLabel != null &&
             timeToggleButton != null &&
             expeditionStatusLabel != null &&
             WorldMapElementsExist() &&
@@ -281,7 +255,7 @@ public partial class PrototypeUIController : MonoBehaviour
         // Канон v1.58 §9.9: свободная игра получает свою карту из генератора.
         GeneratedWorldMap generatedMap = null;
         WorldMapGeneratorAsset generator = WorldMapVisualRuntime.LoadGenerator();
-        if (setup.CrisisId == CampaignStartOptions.FreePlayId && generator != null && generator.UseForFreePlay)
+        if (generator != null && generator.UseForFreePlay)
         {
             setup.WorldSeed ??= Guid.NewGuid().GetHashCode();
             generatedMap = generator.Generate(setup.WorldSeed.Value);
@@ -308,7 +282,6 @@ public partial class PrototypeUIController : MonoBehaviour
         reportHistory.Clear();
         reportRequiresAcknowledgement.Clear();
         reportReadStates.Clear();
-        homePeopleSignature = null;
         // P08J: «НОВОЕ» — session-only UI-пометка, не сюжетный прогресс
         // (раздел 29 инструкции) — на новой игре сбрасывается вместе с
         // остальным сеансовым состоянием интерфейса.
@@ -329,37 +302,29 @@ public partial class PrototypeUIController : MonoBehaviour
         RefreshInterface();
     }
 
-    private void ToggleScreen(MainScreen screen)
+    // Канон v1.58–v1.59: под картой нет другого главного экрана — карта
+    // всегда открыта (раньше это обеспечивал обход «свободная игра без Дома»).
+    private void EnsureMapScreenOpen()
     {
-        if (openedScreen.HasValue && openedScreen.Value == screen)
-        {
-            CloseMainScreen();
-            return;
-        }
-
-        OpenScreen(screen);
+        if (!openedScreen.HasValue)
+            OpenScreen(MainScreen.Expeditions);
     }
 
     private void OpenScreen(MainScreen screen)
     {
         openedScreen = screen;
 
-        capitalScreen.style.display =
-            screen == MainScreen.Capital ? DisplayStyle.Flex : DisplayStyle.None;
         expeditionsScreen.style.display =
             screen == MainScreen.Expeditions ? DisplayStyle.Flex : DisplayStyle.None;
 
-        SetNavigationButtonActive(navCapitalButton, screen == MainScreen.Capital);
         SetNavigationButtonActive(navExpeditionsButton, screen == MainScreen.Expeditions);
     }
 
     private void CloseMainScreen()
     {
         openedScreen = null;
-        capitalScreen.style.display = DisplayStyle.None;
         expeditionsScreen.style.display = DisplayStyle.None;
 
-        SetNavigationButtonActive(navCapitalButton, false);
         SetNavigationButtonActive(navExpeditionsButton, false);
     }
 
@@ -382,21 +347,14 @@ public partial class PrototypeUIController : MonoBehaviour
         return true;
     }
 
-    private void OnCapitalNavigationClicked()
-    {
-        if (CanProcessNavigationClick())
-            ToggleScreen(MainScreen.Capital);
-    }
-
     private void OnExpeditionsNavigationClicked()
     {
         if (CanProcessNavigationClick())
-            ToggleScreen(MainScreen.Expeditions);
+            OpenScreen(MainScreen.Expeditions);
     }
 
     private void RegisterCallbacks()
     {
-        navCapitalButton.clicked += OnCapitalNavigationClicked;
         navExpeditionsButton.clicked += OnExpeditionsNavigationClicked;
 
         RegisterWorldMapCallbacks();
@@ -412,7 +370,6 @@ public partial class PrototypeUIController : MonoBehaviour
         if (!callbacksRegistered)
             return;
 
-        navCapitalButton.clicked -= OnCapitalNavigationClicked;
         navExpeditionsButton.clicked -= OnExpeditionsNavigationClicked;
 
         UnregisterWorldMapCallbacks();
@@ -482,14 +439,6 @@ public partial class PrototypeUIController : MonoBehaviour
     private void RefreshInterface()
     {
         dayLabel.text = "День: " + gameState.Day;
-        goldLabel.text = "Деньги: " + gameState.Gold;
-        goldIncomeLabel.text = "+" + BuildingSystem.GetNetDailyGoldIncome(gameState);
-        foodLabel.text = "Запасы: " + gameState.Food;
-        foodIncomeLabel.text = "+" + BuildingSystem.GetDailyFoodIncome(gameState);
-        populationLabel.text = "Люди: дома " + HomePeopleService.CountHomePresent(gameState) +
-                               " · в походе " + HomePeopleService.CountExpeditionPresent(gameState);
-        foodConsumptionLabel.text =
-            "Расход дома: " + gameState.DailyFoodConsumption + " в сутки. " + HomeOverview.DescribeFood(gameState);
 
         RefreshHeroScreenSupplyPanel();
         RefreshPartyResources();
@@ -511,7 +460,7 @@ public partial class PrototypeUIController : MonoBehaviour
         if (IsCampScreenOpen)
             RefreshCampScreen();
 
-        ApplyFreePlayHomeVisibility();
+        EnsureMapScreenOpen();
     }
 
     private List<string> GetSelectedFighterIdsInArmyOrder()
@@ -637,8 +586,8 @@ public partial class PrototypeUIController : MonoBehaviour
         }
         else if (expedition.Phase == CommanderState.ReturningToCastle)
         {
-            currentTask = "Вернуться в Дом";
-            timingInformation = "До Дома: " +
+            currentTask = "Вернуться на стоянку";
+            timingInformation = "До стоянки: " +
                 ContinuousExpeditionCommands.FormatHours(
                     ContinuousSimulationSystem.GetTravelHoursRemaining(gameState));
         }
@@ -646,7 +595,7 @@ public partial class PrototypeUIController : MonoBehaviour
         {
             currentTask = "Локация исследована";
             timingInformation =
-                "Расстояние до Дома: " +
+                "Расстояние до стоянки: " +
                 ContinuousExpeditionCommands.FormatHours(
                     location.TravelHoursFromCapital);
         }
@@ -662,7 +611,7 @@ public partial class PrototypeUIController : MonoBehaviour
         {
             currentTask = "Исследование этой локации пока не реализовано";
             timingInformation =
-                "Расстояние до Дома: " +
+                "Расстояние до стоянки: " +
                 ContinuousExpeditionCommands.FormatHours(
                     location.TravelHoursFromCapital);
         }
@@ -675,11 +624,6 @@ public partial class PrototypeUIController : MonoBehaviour
         activeExpeditionDetails.text =
             "Командир: " + commander.Name + "\n" +
             "Бойцы: " + GetFighterNames(expedition.FighterIds) + "\n" +
-            "Сила отряда: " + gameState.ExpeditionDefensePower + "\n" +
-            "Гарнизон Дома: " + gameState.GarrisonFighterCount +
-            " " + GetFighterWord(gameState.GarrisonFighterCount) +
-            " · оборона " + gameState.GarrisonDefensePower +
-            "/" + gameState.TotalArmyDefensePower + "\n" +
             "Цель: " + targetName + "\n" +
             "Состояние: " + stateText + "\n" +
             "Текущая задача: " + currentTask + "\n" +

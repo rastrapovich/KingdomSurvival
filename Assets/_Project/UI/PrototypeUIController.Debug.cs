@@ -8,8 +8,6 @@ public partial class PrototypeUIController
     private Button debugToggleButton;
     private VisualElement debugPanel;
 
-    private Label debugGoldValueLabel;
-    private Label debugFoodValueLabel;
     private Label debugArmyGoldValueLabel;
     private Label debugArmySupplyValueLabel;
     private Label debugExpeditionStateLabel;
@@ -54,21 +52,16 @@ public partial class PrototypeUIController
 
     private void LateUpdate()
     {
-        // P11/P12: единый LateUpdate всей partial-класса. Return flow должен
-        // видеть результат ContinuousSimulationSystem.Update этого же кадра,
-        // а отдельный LateUpdate в другом partial-файле создаёт CS0111.
+        // P11/P12: единый LateUpdate всей partial-класса (отдельный
+        // LateUpdate в другом partial-файле создаёт CS0111).
         HandleGameMenuHotkeys();
         HandleHeroScreenHotkeys();
-        RefreshChapter01ReturnFlow();
-        RefreshChapter01HomeFlow();
-        RefreshHomePeopleUi();
         RefreshStoryBattle();
         TryResolveCampEncounterOpportunity();
         if (gameState != null)
         {
-            KingdomSurvival.Chapter01.Chapter01Chronicle.Refresh(gameState);
-            // ПР-12Б: содержание режима (история походов, истории свободной
-            // игры) — с донесениями для игрока.
+            // ПР-12Б: содержание свободной игры (история походов, истории)
+            // — с донесениями для игрока.
             foreach (string report in CampaignContent.Refresh(gameState))
                 AddReport(report);
         }
@@ -127,24 +120,6 @@ public partial class PrototypeUIController
         ScrollView scroll = new ScrollView(ScrollViewMode.Vertical);
         scroll.AddToClassList("debug-scroll");
         debugPanel.Add(scroll);
-
-        AddDebugSectionTitle(scroll, "ДОМ");
-
-        // ПР-07А-1: отладочные кнопки ресурсов живут только здесь; население
-        // выводится из людей, настроения больше нет.
-        debugGoldValueLabel = CreateDebugValueLabel();
-        scroll.Add(CreateDebugResourceRow(
-            "Золото",
-            CreateDebugStepButton("−10", () => AdjustDebugGold(-10)),
-            debugGoldValueLabel,
-            CreateDebugStepButton("+10", () => AdjustDebugGold(10))));
-
-        debugFoodValueLabel = CreateDebugValueLabel();
-        scroll.Add(CreateDebugResourceRow(
-            "Пища",
-            CreateDebugStepButton("−10", () => AdjustDebugFood(-10)),
-            debugFoodValueLabel,
-            CreateDebugStepButton("+10", () => AdjustDebugFood(10))));
 
         AddDebugSectionTitle(scroll, "ОТРЯД");
 
@@ -215,14 +190,6 @@ public partial class PrototypeUIController
         scroll.Add(CreateDebugActionButton(
             "БОЙ ЗДЕСЬ (ЧЕРНОВИК ПР-03)",
             DebugStartCampaignBattle));
-
-        AddDebugSectionTitle(scroll, "ГЛАВА 1");
-
-        // Инструмент разработки: открыть следующую сцену домашней части
-        // без ожидания ночи и без выбора карточки (см. DebugContinueChapter01).
-        scroll.Add(CreateDebugActionButton(
-            "ПРОДОЛЖИТЬ ГЛАВУ 1",
-            DebugContinueChapter01));
 
         AddDebugSectionTitle(scroll, "ПАРТИЯ");
 
@@ -331,8 +298,6 @@ public partial class PrototypeUIController
             return;
 
         debugToggleButton.SetEnabled(!isGameOver);
-        debugGoldValueLabel.text = gameState.Gold.ToString();
-        debugFoodValueLabel.text = gameState.Food.ToString();
         debugArmyGoldValueLabel.text = gameState.ArmyGold.ToString();
         debugArmySupplyValueLabel.text = gameState.ArmySupply.ToString();
 
@@ -435,18 +400,6 @@ public partial class PrototypeUIController
                 (location.IsDiscovered ? " [открыта]" : " [скрыта]");
         }
         return result;
-    }
-
-    private void AdjustDebugGold(int delta)
-    {
-        gameState.Gold = Math.Max(0, gameState.Gold + delta);
-        RefreshInterface();
-    }
-
-    private void AdjustDebugFood(int delta)
-    {
-        gameState.Food = Math.Max(0, gameState.Food + delta);
-        RefreshInterface();
     }
 
     private void AdjustDebugArmyGold(int delta)
@@ -597,57 +550,6 @@ public partial class PrototypeUIController
     // открылась бы сама, иначе — первое дело в Доме; ночное событие —
     // сразу, не дожидаясь ночи. С N11 глава продвигается сама — через
     // маршрут, место и возвращение, — поэтому кнопка там только объясняет.
-    private void DebugContinueChapter01()
-    {
-        if (isGameOver || IsNarrativeDialogueActive)
-        {
-            AddReport("[DEBUG] Сейчас нельзя открыть узел главы: идёт другой диалог или игра окончена.");
-            return;
-        }
-
-        if (gameState.Narrative == null)
-            gameState.Narrative = new NarrativeStateData();
-
-        NarrativeStateData state = gameState.Narrative;
-        if (KingdomSurvival.Chapter01.Chapter01StoryDirector.IsChapterComplete(state))
-        {
-            AddReport("[DEBUG] Глава 1 уже завершена.");
-            return;
-        }
-
-        if (state.HasFlag(KingdomSurvival.Chapter01.Chapter01Ids.Flags.ExpeditionStarted))
-        {
-            AddReport("[DEBUG] Дальше глава открывается сама: по ходу маршрута, в месте или при возвращении.");
-            return;
-        }
-
-        bool heroAtHome = !gameState.HasActiveExpedition;
-        string dialogueId = KingdomSurvival.Chapter01.Chapter01StoryDirector.GetAutoOpenHomeDialogueId(gameState);
-        if (string.IsNullOrEmpty(dialogueId))
-            dialogueId = KingdomSurvival.Chapter01.Chapter01HomeActivities.GetPendingNightScene(state, heroAtHome);
-        if (string.IsNullOrEmpty(dialogueId))
-        {
-            IReadOnlyList<KingdomSurvival.Chapter01.Chapter01HomeActivity> activities =
-                KingdomSurvival.Chapter01.Chapter01HomeActivities.GetAvailable(gameState);
-            if (activities.Count > 0)
-                dialogueId = activities[0].DialogueId;
-        }
-
-        if (string.IsNullOrEmpty(dialogueId))
-        {
-            AddReport(state.HasFlag(KingdomSurvival.Chapter01.Chapter01Ids.Flags.PartyGatheringSeen)
-                ? "[DEBUG] Отряд собран — выходите в поход с экрана героя."
-                : "[DEBUG] Следующий узел главы сейчас недоступен.");
-            return;
-        }
-
-        if (debugPanel != null)
-            debugPanel.style.display = DisplayStyle.None;
-
-        if (!TryOpenNarrativeDialogueById(dialogueId))
-            AddReport("[DEBUG] Сцену '" + dialogueId + "' сейчас нельзя открыть.");
-    }
-
     private void ApplyDebugResolutionResult(
         StrategicSimulationResult result,
         string fallbackMessage)

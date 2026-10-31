@@ -147,6 +147,7 @@ public class WorldMapNavigationTests
     {
         GameState state = new GameState();
         state.CreateNewGame(seed);
+        TestPeople.AdmitAll(state);
         WorldMapNavigation.ConfigureDefaultTerrain();
 
         string message;

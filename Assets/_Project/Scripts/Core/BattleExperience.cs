@@ -165,7 +165,7 @@ public static class BattleExperience
         List<PracticeGain> practice = new List<PracticeGain>();
         foreach (CampaignBattleContribution contribution in contributions)
         {
-            ResidentState resident = HomePeopleService.Find(state, contribution.PersonId);
+            ResidentState resident = PeopleService.Find(state, contribution.PersonId);
             if (resident != null && !resident.IsAlive)
                 continue;
             if (contribution.DamageDealt > 0 && contribution.UsedRangedAttack)

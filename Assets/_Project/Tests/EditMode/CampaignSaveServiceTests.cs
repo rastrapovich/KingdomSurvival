@@ -11,6 +11,7 @@ public class CampaignSaveServiceTests
     {
         GameState state = new GameState();
         state.CreateNewGame(1);
+        TestPeople.AdmitAll(state);
         state.ActiveExpedition = null;
 
         CampaignSaveData data = CampaignSaveService.ExportCampaign(state);
@@ -33,6 +34,7 @@ public class CampaignSaveServiceTests
     {
         GameState state = new GameState();
         state.CreateNewGame(1);
+        TestPeople.AdmitAll(state);
         state.ActiveExpedition = new ExpeditionData
         {
             IsActive = true,
@@ -59,6 +61,7 @@ public class CampaignSaveServiceTests
     {
         GameState state = new GameState();
         state.CreateNewGame(1);
+        TestPeople.AdmitAll(state);
         state.ActiveExpedition = new ExpeditionData { IsActive = true };
         state.ActiveExpedition.ActiveActivity = new ExpeditionActivityData
         {
@@ -82,6 +85,7 @@ public class CampaignSaveServiceTests
     {
         GameState original = new GameState();
         original.CreateNewGame(4242);
+        TestPeople.AdmitAll(original);
         ContinuousSimulationSystem.SetPaused(original, false);
         ContinuousSimulationSystem.SetSpeedMultiplier(
             original, ContinuousSimulationSystem.MaximumSpeedMultiplier);
@@ -92,6 +96,7 @@ public class CampaignSaveServiceTests
 
         GameState restored = new GameState();
         restored.CreateNewGame(4242);
+        TestPeople.AdmitAll(restored);
         ContinuousSimulationSystem.RestoreSnapshot(restored, snapshot);
         ContinuousSimulationSystem.SetPaused(restored, false);
         ContinuousSimulationSystem.SetSpeedMultiplier(
@@ -128,6 +133,7 @@ public class CampaignSaveServiceTests
         // перемещаются (все дома).
         GameState state = new GameState();
         state.CreateNewGame(1);
+        TestPeople.AdmitAll(state);
         Assert.That(ExpeditionPreparation.TryAddFighter(state, "torvin", out string message), Is.True, message);
         Assert.That(ExpeditionPreparation.TryAddFighter(state, "garrick", out message), Is.True, message);
         Assert.That(ExpeditionPreparation.TrySetRetinue(state, "lada", out message), Is.True, message);
@@ -139,6 +145,5 @@ public class CampaignSaveServiceTests
         Assert.That(ExpeditionPreparation.GetFighterIds(restored), Is.EqualTo(new[] { "torvin", "garrick" }));
         Assert.That(ExpeditionPreparation.GetRetinueId(restored), Is.EqualTo("lada"));
         Assert.That(restored.HasActiveExpedition, Is.False);
-        Assert.That(restored.DailyFoodConsumption, Is.EqualTo(state.DailyFoodConsumption), "Подготовка не уводит людей из Дома.");
     }
 }

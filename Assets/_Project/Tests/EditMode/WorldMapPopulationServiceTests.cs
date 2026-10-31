@@ -6,10 +6,10 @@ using NUnit.Framework;
 // сервис с явными режимами Fixed/Anchored/Temporary.
 public class WorldMapPopulationServiceTests
 {
-    // Место истории одного режима (например, свободной игры из Мастерской
-    // квестов) не попадает в авторский мир другого режима.
+    // Место с режимом другой (будущей) кампании не попадает в свободную
+    // игру; места свободной игры и места без режима — попадают.
     [Test]
-    public void CreateCampaign_LeavesModeOnlyLocationsOutOfOtherModes()
+    public void CreateCampaign_LeavesOtherModeLocationsOut()
     {
         List<WorldMapLocationTemplateData> templates = WorldMapLocationDefaults.Create().ToList();
         templates.Add(new WorldMapLocationTemplateData
@@ -20,13 +20,21 @@ public class WorldMapPopulationServiceTests
             InitiallyVisibleOnMap = true,
             ModeId = CampaignStartOptions.FreePlayId
         });
+        templates.Add(new WorldMapLocationTemplateData
+        {
+            Id = "test.other_mode",
+            Name = "Другой режим",
+            Threat = "неизвестна",
+            InitiallyVisibleOnMap = true,
+            ModeId = "mode.test.other"
+        });
 
-        GameState crisis = new CampaignSetup { WorldSeed = 7 }.CreateCampaign(templates);
+        GameState state = new CampaignSetup { WorldSeed = 7 }.CreateCampaign(templates);
 
-        Assert.IsNull(crisis.FindLocation("test.freeplay_only"));
-        Assert.IsNotNull(crisis.FindLocation("ruins"), "Места без режима есть везде.");
-        Assert.IsTrue(WorldMapLocationTemplateData.ForMode(templates, CampaignStartOptions.FreePlayId).Any(t => t.Id == "test.freeplay_only"));
-        Assert.AreEqual(templates.Count - 1, WorldMapLocationTemplateData.ForMode(templates, crisis.Configuration.CrisisId).Count);
+        Assert.IsNotNull(state.FindLocation("test.freeplay_only"));
+        Assert.IsNull(state.FindLocation("test.other_mode"));
+        Assert.IsNotNull(state.FindLocation("mine"), "Места без режима есть везде.");
+        Assert.AreEqual(templates.Count - 1, WorldMapLocationTemplateData.ForMode(templates, state.Configuration.CrisisId).Count);
     }
 
     [Test]

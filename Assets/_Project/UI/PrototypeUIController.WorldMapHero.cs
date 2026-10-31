@@ -215,15 +215,9 @@ public partial class PrototypeUIController
 
     private void TickWorldMapHeroFigure(float dt, WorldMapMovementSettingsAsset settings)
     {
-        // Канон v1.58: в свободной игре Дома нет — между походами герой
-        // стоит на стоянке (точка старта карты), а не исчезает в Доме.
-        bool idleAtStart = !gameState.HasActiveExpedition && IsFreePlayWithoutHome;
-        if (!gameState.HasActiveExpedition && !idleAtStart)
-        {
-            worldMapHeroImage.style.display = DisplayStyle.None;
-            worldMapHeroFallback.style.display = DisplayStyle.None;
-            return;
-        }
+        // Канон v1.58: между походами герой стоит на стоянке (точка старта
+        // карты) и виден на ней.
+        bool idleAtStart = !gameState.HasActiveExpedition;
 
         ExpeditionData expedition = gameState.ActiveExpedition;
         Vector2 ground = idleAtStart

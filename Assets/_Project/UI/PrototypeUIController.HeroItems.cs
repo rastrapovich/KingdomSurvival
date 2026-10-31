@@ -31,8 +31,6 @@ public partial class PrototypeUIController
     private Label heroInventoryTitle;
     private VisualElement heroStoryList;
     private VisualElement heroStorageList;
-    private Label heroStorageGridTitle;
-    private VisualElement heroStorageGrid;
     private Label heroBagDetailsName;
     private Label heroBagDetailsText;
     private VisualElement heroBagDetailsActions;
@@ -51,8 +49,6 @@ public partial class PrototypeUIController
         heroInventoryTitle = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-inventory-title");
         heroStoryList = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-inventory-story");
         heroStorageList = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-unit-card-available");
-        heroStorageGridTitle = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-storage-title");
-        heroStorageGrid = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-storage-grid");
         heroBagDetailsName = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-bag-details-name");
         heroBagDetailsText = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-bag-details-text");
         heroBagDetailsActions = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-bag-details-actions");
@@ -67,8 +63,8 @@ public partial class PrototypeUIController
         heroItemPopupText = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-item-popup-text");
         Button popupClose = BindRequiredElement<Button>(interfaceRoot, HeroScreenName, "hero-screen-item-popup-close");
 
-        bool ok = heroInventoryTitle != null && heroStoryList != null && heroStorageList != null && heroStorageGridTitle != null &&
-                  heroStorageGrid != null && heroBagDetailsName != null && heroBagDetailsText != null && heroBagDetailsActions != null &&
+        bool ok = heroInventoryTitle != null && heroStoryList != null && heroStorageList != null &&
+                  heroBagDetailsName != null && heroBagDetailsText != null && heroBagDetailsActions != null &&
                   heroHeroGearList != null && heroItemsMessageLabel != null && heroStatesHint != null && heroItemPopup != null &&
                   heroItemPopupIcon != null && heroItemPopupName != null && heroItemPopupKind != null && heroItemPopupText != null &&
                   popupClose != null;
@@ -119,11 +115,11 @@ public partial class PrototypeUIController
     {
         if (resident.TravelRole != ResidentTravelRole.Commander && resident.TravelRole != ResidentTravelRole.Combatant)
             return false;
-        if (!HomePeopleService.HasDeparted(gameState))
-            return resident.IsHomeMember;
+        if (!PeopleService.HasDeparted(gameState))
+            return resident.IsMember;
         CommanderData commander = gameState.GetSelectedCommander();
         return (commander != null && commander.Id == resident.PersonId) ||
-               HomePeopleService.IsInExpedition(gameState, resident.PersonId);
+               PeopleService.IsInExpedition(gameState, resident.PersonId);
     }
 
     // На кого надевать: на «Снаряжении» — всегда Командир (п. 8 брифа
@@ -209,13 +205,12 @@ public partial class PrototypeUIController
     }
 
     // ------------------------------------------------------------------
-    // Сумка: сетка на все места + плитка припасов; дома — кладовая.
+    // Сумка: сетка на все места + плитка припасов.
     // ------------------------------------------------------------------
 
     private void RebuildHeroBag()
     {
         heroStorageList.Clear();
-        heroStorageGrid.Clear();
         CommanderData commander = gameState.GetSelectedCommander();
         List<ItemInstanceData> pack = new List<ItemInstanceData>();
         if (commander != null)
@@ -236,24 +231,6 @@ public partial class PrototypeUIController
         // Вещи сверх мест (старые сохранения) не теряются — тоже в сетке.
         for (int i = ItemService.HeroPackSize; i < pack.Count; i++)
             heroStorageList.Add(CreateHeroBagCell(pack[i]));
-
-        bool home = !HomePeopleService.HasDeparted(gameState);
-        List<ItemInstanceData> storage = new List<ItemInstanceData>();
-        if (home && !IsFreePlayWithoutHome)
-        {
-            foreach (ItemInstanceData item in ItemService.Storage(gameState))
-            {
-                if (ItemCatalog.Find(item.ItemId) != null)
-                    storage.Add(item);
-            }
-            storage.Sort(CompareHeroBagItems);
-        }
-        bool showStorage = storage.Count > 0;
-        heroStorageGridTitle.style.display = showStorage ? DisplayStyle.Flex : DisplayStyle.None;
-        heroStorageGrid.style.display = showStorage ? DisplayStyle.Flex : DisplayStyle.None;
-        heroStorageGridTitle.text = "КЛАДОВАЯ ДОМА — " + storage.Count;
-        foreach (ItemInstanceData item in storage)
-            heroStorageGrid.Add(CreateHeroBagCell(item));
 
         RenderHeroBagDetails();
     }
@@ -464,13 +441,7 @@ public partial class PrototypeUIController
                 RunHeroItemCommand(ItemService.TryUse(gameState, instanceId, commanderId, out string message), message));
         }
 
-        bool home = !HomePeopleService.HasDeparted(gameState) && !IsFreePlayWithoutHome;
-        if (inPack && home)
-        {
-            AddHeroItemButton(parent, "В кладовую", () =>
-                RunHeroItemCommand(ItemService.TryStore(gameState, instanceId, out string message), message));
-        }
-        else if (!inPack)
+        if (!inPack)
         {
             AddHeroItemButton(parent, "В сумку", () =>
                 RunHeroItemCommand(ItemService.TryTakeToPack(gameState, instanceId, out string message), message));
@@ -620,8 +591,6 @@ public partial class PrototypeUIController
         heroItemsMessage = message ?? string.Empty;
         if (ok && !string.IsNullOrEmpty(message))
             AddReport(message);
-        homePeopleSignature = null;
-        homePrepSignature = null;
         RefreshInterface();
         RefreshHeroScreen();
     }

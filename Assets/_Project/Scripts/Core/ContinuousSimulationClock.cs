@@ -71,7 +71,7 @@ public static partial class ContinuousSimulationSystem
 
     private const double Epsilon = 0.00001;
 
-    // ПР-07Б (PR07_HOME_SPEC §0.3): длинный шаг проходит кусками не
+    // ПР-07Б (Archive/PR07_HOME_SPEC §0.3): длинный шаг проходит кусками не
     // длиннее четверти часа — выход, возвращение или выздоровление внутри
     // шага не засчитывают домашней работы (ловли, ремонта, ухода) больше
     // одного подшага.
@@ -381,9 +381,6 @@ public static partial class ContinuousSimulationSystem
                 stepHours,
                 batch);
 
-            // ПР-06А: домашняя работа и уход идут ровно на прошедшие часы.
-            if (CampaignContent.HasHome(state))
-                HomeLife.Advance(state, advancedHours, batch.Result.Messages);
             Hunger.Advance(state, advancedHours, batch.Result.Messages);
 
             runtime.HourOfDay += advancedHours;

@@ -47,14 +47,14 @@ public partial class PrototypeUIController
 
         VisualElement map =
             interfaceRoot.Q<VisualElement>("world-map");
-        Button capitalButton =
-            interfaceRoot.Q<Button>("world-map-capital-button");
         Button cancelButton =
             interfaceRoot.Q<Button>("return-expedition-button");
 
+        // Канон v1.59: маркера Дома на карте нет — ждать его нельзя, иначе
+        // повторы инициализации копятся в планировщике UI Toolkit и он
+        // откладывает отложенные задачи (бой на месте «застывал»).
         if (map == null ||
             worldMapViewport == null ||
-            capitalButton == null ||
             cancelButton == null)
         {
             ScheduleWorldMapPolishRetry();
@@ -63,7 +63,7 @@ public partial class PrototypeUIController
 
         HideLegacyWorldMapDecoration(map);
         EnsureWorldMapGrid();
-        RegisterCancelledRosterPreservation(cancelButton, capitalButton);
+        RegisterCancelledRosterPreservation(cancelButton);
 
         worldMapPolishInitialized = true;
     }
@@ -236,19 +236,13 @@ public partial class PrototypeUIController
         RefreshWorldMapGridOverlay();
     }
 
-    private void RegisterCancelledRosterPreservation(
-        Button cancelButton,
-        Button capitalButton)
+    private void RegisterCancelledRosterPreservation(Button cancelButton)
     {
         cancelButton.RegisterCallback<PointerDownEvent>(
             CaptureRosterBeforePotentialCancellation,
             TrickleDown.TrickleDown);
-        capitalButton.RegisterCallback<PointerDownEvent>(
-            CaptureRosterBeforePotentialCancellation,
-            TrickleDown.TrickleDown);
 
         cancelButton.clicked += ScheduleCancelledRosterRestore;
-        capitalButton.clicked += ScheduleCancelledRosterRestore;
     }
 
     private void CaptureRosterBeforePotentialCancellation(

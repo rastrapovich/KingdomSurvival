@@ -34,6 +34,7 @@ public sealed class ItemsPr08Tests
     private static GameState NewGame()
     {
         GameState state = new CampaignSetup { WorldSeed = 20260925 }.CreateCampaign();
+        TestPeople.AdmitAll(state);
         state.ArmySupply = 100;
         return state;
     }
@@ -58,7 +59,7 @@ public sealed class ItemsPr08Tests
     // --- Стартовый набор ---
 
     [Test]
-    public void StartingKit_EquippedOnce_StorageHasTwoFinds()
+    public void StartingKit_EquippedOnce_NoStoreroom()
     {
         GameState state = NewGame();
         Assert.AreEqual(ItemCatalog.Sword, ItemIdOf(Equipped(state, HeroId(state), ItemSlot.Weapon)));
@@ -66,8 +67,8 @@ public sealed class ItemsPr08Tests
         Assert.AreEqual(ItemCatalog.SwordAndShield, ItemIdOf(Equipped(state, "garrick", ItemSlot.Weapon)));
         Assert.AreEqual(ItemCatalog.MailShirt, ItemIdOf(Equipped(state, "garrick", ItemSlot.Protection)));
         Assert.AreEqual(ItemCatalog.HealerBag, ItemIdOf(Equipped(state, "marta", ItemSlot.Special)));
-        CollectionAssert.AreEquivalent(new[] { ItemCatalog.StoreroomMail, ItemCatalog.OldHuntingBow },
-            ItemService.Storage(state).Select(i => i.ItemId));
+        // Канон v1.59: кладовой Дома нет — у каждой вещи есть владелец.
+        Assert.IsFalse(state.Inventory.Items.Any(i => string.IsNullOrEmpty(i.OwnerPersonId)));
 
         int count = state.Inventory.Items.Count;
         ItemService.EnsureInventory(state);
@@ -88,7 +89,7 @@ public sealed class ItemsPr08Tests
         AssembledCombatStats edric = CombatStatsAssembler.Compute(state, "edric");
         Assert.AreEqual(3, edric.Final.Attack);
         Assert.AreEqual(22, edric.Final.MaxHitPoints);
-        Assert.AreEqual(22, HomePeopleService.Find(state, "edric").MaxHitPoints, "Максимум HP человека = собранный.");
+        Assert.AreEqual(22, PeopleService.Find(state, "edric").MaxHitPoints, "Максимум HP человека = собранный.");
         Assert.IsTrue(edric.Sources.Any(s => s.StartsWith("Лук")));
     }
 
@@ -125,15 +126,16 @@ public sealed class ItemsPr08Tests
     // --- Команды ---
 
     [Test]
-    public void Equip_SwapsPreviousToStorage_OneCopyEach()
+    public void Equip_SwapsPreviousToHeroPack_OneCopyEach()
     {
         GameState state = NewGame();
-        ItemInstanceData mail = ItemService.Storage(state).Single(i => i.ItemId == ItemCatalog.StoreroomMail);
+        ItemInstanceData mail = ItemService.GrantOnce(state, "test.mail", ItemCatalog.MailShirt, HeroId(state));
         int total = state.Inventory.Items.Count;
 
         Assert.IsTrue(ItemService.TryEquip(state, mail.InstanceId, "torvin", out string message), message);
-        Assert.AreEqual(ItemCatalog.StoreroomMail, ItemIdOf(Equipped(state, "torvin", ItemSlot.Protection)));
-        Assert.IsTrue(ItemService.Storage(state).Any(i => i.ItemId == ItemCatalog.PaddedCoat), "Стёганка ушла в кладовую.");
+        Assert.AreEqual(ItemCatalog.MailShirt, ItemIdOf(Equipped(state, "torvin", ItemSlot.Protection)));
+        Assert.IsTrue(ItemService.OwnedBy(state, HeroId(state)).Any(i => i.ItemId == ItemCatalog.PaddedCoat && i.Slot == ItemSlot.None),
+            "Стёганка ушла туда, откуда пришла кольчуга, — в сумку героя.");
         Assert.AreEqual(total, state.Inventory.Items.Count, "Передача не копирует вещь.");
         Assert.AreEqual(4, CombatStatsAssembler.Compute(state, "torvin").Final.Defense);
     }
@@ -142,29 +144,27 @@ public sealed class ItemsPr08Tests
     public void Equip_WrongRoleOrNonFighter_Rejected()
     {
         GameState state = NewGame();
-        ItemInstanceData bow = ItemService.Storage(state).Single(i => i.ItemId == ItemCatalog.OldHuntingBow);
+        ItemInstanceData bow = ItemService.GrantOnce(state, "test.bow", ItemCatalog.Bow, HeroId(state));
 
         Assert.IsFalse(ItemService.TryEquip(state, bow.InstanceId, "torvin", out string message));
         StringAssert.Contains("для стрелков", message);
-        Assert.IsFalse(ItemService.TryEquip(state, bow.InstanceId, HomePeopleService.UlyanaId, out message));
+        Assert.IsFalse(ItemService.TryEquip(state, bow.InstanceId, "ostafiy", out message));
         StringAssert.Contains("не воюет", message);
         Assert.IsTrue(ItemService.TryEquip(state, bow.InstanceId, "edric", out message), message);
-        Assert.AreEqual(2, CombatStatsAssembler.Compute(state, "edric").Final.AttackRange);
     }
 
     [Test]
-    public void Departed_StorageUnreachable_PartyItemsPresent()
+    public void Departed_OnlyPartyItemsPresent()
     {
         GameState state = NewGame();
         Depart(state, new[] { "garrick" });
-        ItemInstanceData mail = ItemService.Storage(state).Single(i => i.ItemId == ItemCatalog.StoreroomMail);
+        ItemInstanceData spear = ItemService.OwnedBy(state, "torvin").Single(i => i.ItemId == ItemCatalog.Spear);
 
-        Assert.IsFalse(ItemService.TryTakeToPack(state, mail.InstanceId, out string message));
-        Assert.AreEqual("Нужно вернуться в Дом.", message);
+        Assert.IsFalse(ItemService.TryTakeToPack(state, spear.InstanceId, out string message));
+        Assert.AreEqual("Эта вещь сейчас не рядом.", message);
         List<string> present = ItemService.GetPresentItemIds(state);
-        CollectionAssert.DoesNotContain(present, ItemCatalog.StoreroomMail);
         CollectionAssert.Contains(present, ItemCatalog.SwordAndShield, "Вещи отряда рядом.");
-        CollectionAssert.DoesNotContain(present, ItemCatalog.Spear, "Копьё Торвина осталось дома.");
+        CollectionAssert.DoesNotContain(present, ItemCatalog.Spear, "Копьё Торвина не в походе.");
     }
 
     [Test]
@@ -192,27 +192,26 @@ public sealed class ItemsPr08Tests
     }
 
     [Test]
-    public void StoryItem_SyncedToHero_CannotBeStored()
+    public void RemovedCampaignItem_InNarrative_IsNotCreated()
     {
+        // Канон v1.59: вещи удалённой кампании сняты с каталога — их метка в
+        // старом состоянии сюжета не превращается в вещь.
         GameState state = NewGame();
-        state.Narrative.GrantItem(ItemCatalog.SevenToothGauge);
-        ItemService.SyncStoryItems(state);
+        int count = state.Inventory.Items.Count;
+        state.Narrative.GrantItem("chapter01.item.seven_tooth_gauge");
         ItemService.SyncStoryItems(state);
 
-        List<ItemInstanceData> gauges = state.Inventory.Items.Where(i => i.ItemId == ItemCatalog.SevenToothGauge).ToList();
-        Assert.AreEqual(1, gauges.Count);
-        Assert.AreEqual(HeroId(state), gauges[0].OwnerPersonId);
-        Assert.IsFalse(ItemService.TryStore(state, gauges[0].InstanceId, out string message));
-        StringAssert.Contains("остаётся при герое", message);
+        Assert.IsNull(ItemCatalog.Find("chapter01.item.seven_tooth_gauge"));
+        Assert.AreEqual(count, state.Inventory.Items.Count);
     }
 
     [Test]
-    public void DeadFighter_ItemsGoToStorage()
+    public void DeadFighter_ItemsGoToHero()
     {
         GameState state = NewGame();
-        HomePeopleService.MarkDead(state, "garrick", "test");
-        Assert.IsTrue(ItemService.Storage(state).Any(i => i.ItemId == ItemCatalog.SwordAndShield));
-        Assert.IsTrue(ItemService.Storage(state).Any(i => i.ItemId == ItemCatalog.MailShirt));
+        PeopleService.MarkDead(state, "garrick", "test");
+        Assert.IsTrue(ItemService.OwnedBy(state, HeroId(state)).Any(i => i.ItemId == ItemCatalog.SwordAndShield));
+        Assert.IsTrue(ItemService.OwnedBy(state, HeroId(state)).Any(i => i.ItemId == ItemCatalog.MailShirt));
         Assert.AreEqual(0, ItemService.OwnedBy(state, "garrick").Count);
     }
 
@@ -221,7 +220,7 @@ public sealed class ItemsPr08Tests
     {
         GameState state = NewGame();
         ItemInstanceData fish = ItemService.GrantOnce(state, "test.fish", ItemCatalog.DriedFish, HeroId(state));
-        ItemInstanceData herbs = ItemService.GrantOnce(state, "test.herbs", ItemCatalog.UlyanaHerbs, HeroId(state));
+        ItemInstanceData herbs = ItemService.GrantOnce(state, "test.herbs", ItemCatalog.BitterInfusion, HeroId(state));
 
         Assert.IsFalse(ItemService.TryUse(state, fish.InstanceId, null, out string message), "Дома рыбу в дорогу не едят.");
         Depart(state, new[] { "garrick" });
@@ -233,48 +232,24 @@ public sealed class ItemsPr08Tests
 
         Assert.IsFalse(ItemService.TryUse(state, herbs.InstanceId, "garrick", out message));
         StringAssert.Contains("не изнеможён", message);
-        HomePeopleService.Find(state, "garrick").Exhausted = true;
+        PeopleService.Find(state, "garrick").Exhausted = true;
         Assert.IsTrue(ItemService.TryUse(state, herbs.InstanceId, "garrick", out message), message);
-        Assert.IsFalse(HomePeopleService.Find(state, "garrick").Exhausted);
-        Assert.AreEqual(1, herbs.UsesLeft);
+        Assert.IsFalse(PeopleService.Find(state, "garrick").Exhausted);
+        Assert.IsNull(ItemService.Find(state, herbs.InstanceId), "Отвар на один раз.");
     }
 
     // --- Изнеможение ---
 
     [Test]
-    public void Exhaustion_LowersStats_ClearsAfterNightAtHome()
+    public void Exhaustion_LowersStats()
     {
         GameState state = NewGame();
-        ResidentState garrick = HomePeopleService.Find(state, "garrick");
+        ResidentState garrick = PeopleService.Find(state, "garrick");
         UnitCombatStats before = CombatStatsAssembler.Compute(state, "garrick").Final;
         garrick.Exhausted = true;
         UnitCombatStats tired = CombatStatsAssembler.Compute(state, "garrick").Final;
         Assert.AreEqual(before.Attack - 1, tired.Attack);
         Assert.AreEqual(before.Initiative - 1, tired.Initiative);
-
-        ContinuousSimulationSystem.SetPaused(state, false);
-        ContinuousSimulationSystem.SetSpeedMultiplier(state, ContinuousSimulationSystem.MaximumSpeedMultiplier);
-        int day = state.Day;
-        for (int i = 0; i < 40 && state.Day == day; i++)
-            ContinuousSimulationSystem.Advance(state, 1f, false);
-        Assert.IsFalse(garrick.Exhausted, "Ночь дома снимает изнеможение.");
-    }
-
-    [Test]
-    public void SecondHungryNightOnTheRoad_ExhaustsParty()
-    {
-        GameState state = NewGame();
-        Depart(state, new[] { "garrick" });
-        state.ArmySupply = 0;
-
-        ContinuousSimulationSystem.SetPaused(state, false);
-        ContinuousSimulationSystem.SetSpeedMultiplier(state, ContinuousSimulationSystem.MaximumSpeedMultiplier);
-        for (int i = 0; i < 80 && state.ConsecutiveExpeditionSupplyShortageDays < 2; i++)
-            ContinuousSimulationSystem.Advance(state, 1f, false);
-
-        Assert.IsTrue(HomePeopleService.Find(state, "garrick").Exhausted);
-        Assert.IsTrue(HomePeopleService.Find(state, HeroId(state)).Exhausted);
-        Assert.IsFalse(HomePeopleService.Find(state, "edric").Exhausted, "Оставшиеся дома не изнеможены.");
     }
 
     // --- Сохранение и возвращение ---
@@ -283,17 +258,17 @@ public sealed class ItemsPr08Tests
     public void SaveLoad_KeepsInventoryAndExhaustion_NoDuplicateKit()
     {
         GameState state = NewGame();
-        ItemInstanceData mail = ItemService.Storage(state).Single(i => i.ItemId == ItemCatalog.StoreroomMail);
+        ItemInstanceData mail = ItemService.GrantOnce(state, "test.mail", ItemCatalog.MailShirt, HeroId(state));
         Assert.IsTrue(ItemService.TryEquip(state, mail.InstanceId, "torvin", out string message), message);
-        HomePeopleService.Find(state, "edric").Exhausted = true;
+        PeopleService.Find(state, "edric").Exhausted = true;
         int total = state.Inventory.Items.Count;
 
         string json = JsonUtility.ToJson(CampaignSaveService.ExportCampaign(state));
         GameState restored = CampaignSaveService.RestoreCampaign(JsonUtility.FromJson<CampaignSaveData>(json));
 
         Assert.AreEqual(total, restored.Inventory.Items.Count);
-        Assert.AreEqual(ItemCatalog.StoreroomMail, ItemIdOf(Equipped(restored, "torvin", ItemSlot.Protection)));
-        Assert.IsTrue(HomePeopleService.Find(restored, "edric").Exhausted);
+        Assert.AreEqual(ItemCatalog.MailShirt, ItemIdOf(Equipped(restored, "torvin", ItemSlot.Protection)));
+        Assert.IsTrue(PeopleService.Find(restored, "edric").Exhausted);
     }
 
     [Test]
@@ -304,7 +279,7 @@ public sealed class ItemsPr08Tests
         string json = JsonUtility.ToJson(CampaignSaveService.ExportCampaign(state));
         GameState restored = CampaignSaveService.RestoreCampaign(JsonUtility.FromJson<CampaignSaveData>(json));
 
-        Assert.AreEqual(ItemCatalog.SwordAndShield, ItemIdOf(Equipped(restored, "garrick", ItemSlot.Weapon)));
+        Assert.AreEqual(ItemCatalog.Sword, ItemIdOf(Equipped(restored, HeroId(restored), ItemSlot.Weapon)));
         int count = restored.Inventory.Items.Count;
         ItemService.EnsureInventory(restored);
         Assert.AreEqual(count, restored.Inventory.Items.Count);
@@ -317,15 +292,11 @@ public sealed class ItemsPr08Tests
         Depart(state, new[] { "garrick" });
         state.ArmySupply = 17;
         state.ArmyGold = 5;
-        int food = state.Food;
-        int gold = state.Gold;
 
         state.CompleteExpeditionReturn();
 
         Assert.AreEqual(17, state.ArmySupply, "Припасы остаются у отряда.");
         Assert.AreEqual(5, state.ArmyGold);
-        Assert.AreEqual(food, state.Food, "В Дом ничего не передаётся.");
-        Assert.AreEqual(gold, state.Gold);
         Assert.IsFalse(state.HasActiveExpedition);
     }
 }

@@ -23,6 +23,7 @@ public sealed class CampaignBattleBridgeTests
     {
         GameState state = new GameState();
         state.CreateNewGame(20260924);
+        TestPeople.AdmitAll(state);
         state.ArmySupply = 100;
 
         LocationData target = state.Locations.First(location => !location.IsWaypoint);

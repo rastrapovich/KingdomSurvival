@@ -64,17 +64,6 @@
     overflow: hidden;
 }
 
-.camp-scenes-panel { width: 26%; min-width: 0px; margin-right: 0px; }
-.camp-scene-row {
-    padding-left: 6px; padding-right: 6px; padding-top: 6px; padding-bottom: 6px;
-    margin-bottom: 4px;
-    background-color: rgb(27, 31, 37);
-    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
-    border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62); border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62);
-    border-radius: 3px;
-}
-.camp-scene-row-title { color: rgb(226, 219, 204); font-size: 12px; }
-
 .camp-placeholder-text { color: rgb(156, 154, 148); font-size: 11px; white-space: normal; }
 
 .camp-footer {

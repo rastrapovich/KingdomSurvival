@@ -201,7 +201,7 @@ public static class ExpeditionPreparation
         if (string.IsNullOrEmpty(personId))
             return Commit(state, fighters, null, out message);
 
-        ResidentState candidate = HomePeopleService.Find(state, personId);
+        ResidentState candidate = PeopleService.Find(state, personId);
         if (candidate != null && candidate.TravelRole == ResidentTravelRole.Combatant)
         {
             message = "Это место для специалиста.";
@@ -214,9 +214,9 @@ public static class ExpeditionPreparation
             return false;
         }
 
-        if (!HomePeopleService.CanJoinAsRetinue(state, personId, out string reason))
+        if (!PeopleService.CanJoinAsRetinue(state, personId, out string reason))
         {
-            ResidentState resident = HomePeopleService.Find(state, personId);
+            ResidentState resident = PeopleService.Find(state, personId);
             message = resident != null && resident.TravelRole == ResidentTravelRole.Combatant
                 ? "Это место для специалиста."
                 : Capitalize(reason) + ".";
@@ -302,7 +302,7 @@ public static class ExpeditionPreparation
                 message = "Один человек не может быть и бойцом, и специалистом.";
                 return false;
             }
-            if (!HomePeopleService.CanJoinAsRetinue(state, retinueId, out string reason))
+            if (!PeopleService.CanJoinAsRetinue(state, retinueId, out string reason))
             {
                 message = "Нельзя взять в свиту: " + reason + ".";
                 return false;
@@ -329,7 +329,7 @@ public static class ExpeditionPreparation
             return false;
         }
 
-        ResidentState resident = HomePeopleService.Find(state, personId);
+        ResidentState resident = PeopleService.Find(state, personId);
         if (state.FindFighter(personId) == null)
         {
             if (resident == null)
@@ -347,9 +347,9 @@ public static class ExpeditionPreparation
 
         if (resident != null)
         {
-            if (!resident.IsHomeMember)
+            if (!resident.IsMember)
             {
-                message = resident.DisplayName + " больше не живёт в Доме.";
+                message = resident.DisplayName + " больше не с отрядом.";
                 return false;
             }
             if (resident.Injury == ResidentInjury.Recovering)
@@ -405,14 +405,14 @@ public static class ExpeditionPreparation
         {
             if (state.FindFighter(id) == null)
                 return true;
-            ResidentState resident = HomePeopleService.Find(state, id);
-            return resident != null && !resident.IsHomeMember;
+            ResidentState resident = PeopleService.Find(state, id);
+            return resident != null && !resident.IsMember;
         });
 
         if (!string.IsNullOrEmpty(data.RetinueId))
         {
-            ResidentState resident = HomePeopleService.Find(state, data.RetinueId);
-            if (resident == null || !resident.IsHomeMember)
+            ResidentState resident = PeopleService.Find(state, data.RetinueId);
+            if (resident == null || !resident.IsMember)
                 data.RetinueId = string.Empty;
         }
     }

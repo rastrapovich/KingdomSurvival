@@ -279,12 +279,12 @@ public static class TavernService
         {
             foreach (string id in data.LodgingServedIds)
             {
-                ResidentState resident = HomePeopleService.Find(state, id);
+                ResidentState resident = PeopleService.Find(state, id);
                 if (resident == null || !resident.IsAlive || !resident.HasCombatState ||
                     resident.CurrentHitPoints >= resident.MaxHitPoints)
                     continue;
                 int gain = Math.Min(data.LodgingHealHitPoints, resident.MaxHitPoints - resident.CurrentHitPoints);
-                HomePeopleService.SetHitPoints(resident, resident.CurrentHitPoints + gain);
+                PeopleService.SetHitPoints(resident, resident.CurrentHitPoints + gain);
                 healed.Add(resident.DisplayName + " +" + gain + " HP");
             }
         }

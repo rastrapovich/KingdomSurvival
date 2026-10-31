@@ -95,7 +95,6 @@ public partial class PrototypeUIController
         heroRevisionRetinue = new VisualElement { name = "hero-screen-retinue-portraits" };
         heroRevisionRetinue.AddToClassList("hero-revision-retinue");
         retinuePanel.Insert(Mathf.Min(1, retinuePanel.childCount), heroRevisionRetinue);
-        Hide(root.Q("hero-screen-retinue-description"));
         heroRevisionRetinueEmpty = new Label("Свиты нет.") { name = "hero-screen-retinue-empty" };
         heroRevisionRetinueEmpty.AddToClassList("hero-screen-retinue-caption");
         heroRevisionRetinueEmpty.AddToClassList("ks-muted-text");
@@ -143,7 +142,7 @@ public partial class PrototypeUIController
         heroScreenNameLabel.style.display = named ? DisplayStyle.Flex : DisplayStyle.None;
 
         heroRevisionStates.Clear();
-        ResidentState resident = commander != null ? HomePeopleService.Find(gameState, commander.Id) : null;
+        ResidentState resident = commander != null ? PeopleService.Find(gameState, commander.Id) : null;
         foreach ((string glyph, string title, string text, string tone) in CommanderStates(resident))
         {
             Label icon = new Label(glyph) { name = "hero-state-" + tone };
@@ -182,29 +181,21 @@ public partial class PrototypeUIController
         List<string> retinue = new List<string>();
         if (gameState.HasActiveExpedition)
             retinue.AddRange(gameState.ActiveExpedition.RetinueIds);
-        else if (!string.IsNullOrEmpty(SelectedRetinueId))
-            retinue.Add(SelectedRetinueId);
+        else if (!string.IsNullOrEmpty(ExpeditionPreparation.GetRetinueId(gameState)))
+            retinue.Add(ExpeditionPreparation.GetRetinueId(gameState));
         foreach (string personId in retinue)
         {
-            ResidentState resident = HomePeopleService.Find(gameState, personId);
+            ResidentState resident = PeopleService.Find(gameState, personId);
             if (resident == null)
                 continue;
             heroRevisionRetinue.Add(CreateRetinuePortrait(resident));
         }
         heroRevisionRetinue.style.display = heroRevisionRetinue.childCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
 
-        // Выбор специалиста — только пока состав можно менять; в походе
-        // свита уже ушла и видна портретами. Бриф правок (19 пунктов) п. 17:
-        // в свободной игре Дома нет — Остафия и Лады нет, заглушек выбора тоже.
-        bool editable = ExpeditionPreparation.CanEdit(gameState) && !IsFreePlayWithoutHome;
-        foreach (string name in new[] { "hero-screen-retinue-row", "hero-screen-retinue-forecast" })
-        {
-            VisualElement element = interfaceRoot.Q(name);
-            if (element != null)
-                element.style.display = editable ? DisplayStyle.Flex : DisplayStyle.None;
-        }
+        // Бриф правок (19 пунктов) п. 17: свита видна портретами; выбора
+        // специалиста-заглушки нет (канон v1.59: Остафий и Лада — заготовки).
         if (heroRevisionRetinueEmpty != null)
-            heroRevisionRetinueEmpty.style.display = heroRevisionRetinue.childCount == 0 && !editable
+            heroRevisionRetinueEmpty.style.display = heroRevisionRetinue.childCount == 0
                 ? DisplayStyle.Flex
                 : DisplayStyle.None;
     }
@@ -262,7 +253,7 @@ public partial class PrototypeUIController
             if (evt.button != 1)
                 return;
             evt.StopPropagation();
-            ResidentState current = HomePeopleService.Find(gameState, personId);
+            ResidentState current = PeopleService.Find(gameState, personId);
             if (current != null)
                 ShowHeroInfoPopup(current.DisplayName, current.RoleLabel, current.ShortDescription +
                                   "\n\nВ бой не идёт, ест из припасов похода.");

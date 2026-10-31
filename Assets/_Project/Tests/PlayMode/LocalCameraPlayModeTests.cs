@@ -110,15 +110,15 @@ public sealed class LocalCameraPlayModeTests
         yield return Frames(20);
         MonoBehaviour main = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
             .First(behaviour => behaviour.GetType().Name == "PrototypeUIController");
-        Invoke(main, "StartNewFreePlayFromMenu");
+        Invoke(main, "StartNewGameFromMenu");
         yield return Frames(10);
 
         GameState campaign = CampaignSession.Current;
-        campaign.Food = 40;
+        TestPeople.AdmitAll(campaign);
         campaign.ArmySupply = 30;
         campaign.Narrative.SetFlag("freeplay.mine.known");
         CampaignContent.Refresh(campaign);
-        Assert.IsTrue(campaign.TryStartExpedition("mine", new List<string> { "garrick", "torvin" }, out string message, HomePeopleService.OstafiyId), message);
+        Assert.IsTrue(campaign.TryStartExpedition("mine", new List<string> { "garrick", "torvin" }, out string message, "ostafiy"), message);
         campaign.ActiveExpedition.Phase = CommanderState.AtLocation;
         yield return null;
         Assert.IsTrue((bool)Invoke(main, "TryOpenLocationInteraction", "mine"));

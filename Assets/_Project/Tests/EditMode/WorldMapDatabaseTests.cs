@@ -19,11 +19,11 @@ public sealed class WorldMapDatabaseTests
 
         Assert.IsNotNull(database);
 
-        // Места одного режима (свободной игры из Мастерской квестов) в мир
-        // кризиса не попадают: в нём — те же три стартовых места.
+        // Стартовые места базы без режима — первыми, затем места свободной
+        // игры (Мастерская квестов).
         IReadOnlyList<WorldMapLocationTemplateData> templates = WorldMapLocationTemplateData.ForMode(
-            database.BuildRuntimeLocationTemplates(), CampaignStartOptions.HomeOnForeignWaterCrisisId);
-        Assert.That(templates.Count, Is.EqualTo(3));
+            database.BuildRuntimeLocationTemplates(), CampaignStartOptions.FreePlayId);
+        Assert.That(templates.Count, Is.GreaterThanOrEqualTo(3));
         Assert.That(templates[0].Id, Is.EqualTo("ruins"));
         Assert.That(templates[1].Id, Is.EqualTo("mine"));
         Assert.That(templates[2].Id, Is.EqualTo("forest"));

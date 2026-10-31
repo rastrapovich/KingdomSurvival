@@ -1,7 +1,7 @@
 using NUnit.Framework;
 
 // Минимальный Gameplay Effects слой (§63/§106 инструкции по Encounter-
-// системе): NarrativeEffectType.ChangeFood/ChangeSupplies/GrantItem/RemoveItem,
+// системе): NarrativeEffectType.ChangeSupplies/GrantItem/RemoveItem,
 // добавленные поверх существующего NarrativeEffect (Scripts/Core/NarrativeEffects.cs).
 // Лежит в Encounters.Tests, а не в общей Core.Tests, т.к. появились ради
 // Encounter-контента, но тестируют общий Core-класс напрямую.
@@ -13,36 +13,19 @@ public sealed class NarrativeGameplayEffectsTests
     }
 
     [Test]
-    public void ChangeFood_Applies_Delta_To_GameState()
+    public void RemovedChangeFood_DoesNothing_AndDoesNotThrow()
     {
-        GameState state = new GameState { Food = 10 };
-        NarrativeEvaluationContext context = MakeContext(state);
+        // Канон v1.59: «еда Дома» удалена вместе с Домом — старый эффект в
+        // данных ничего не меняет и не падает.
+        GameState state = new GameState { ArmySupply = 5 };
+        new NarrativeEffect { EffectExecutionId = "e0", Type = NarrativeEffectType.RemovedChangeFood, IntParam = -3 }
+            .Apply(MakeContext(state));
+        Assert.That(state.ArmySupply, Is.EqualTo(5));
 
-        new NarrativeEffect { EffectExecutionId = "e1", Type = NarrativeEffectType.ChangeFood, IntParam = -3 }
-            .Apply(context);
-
-        Assert.That(state.Food, Is.EqualTo(7));
-    }
-
-    [Test]
-    public void ChangeFood_Clamps_At_Zero()
-    {
-        GameState state = new GameState { Food = 2 };
-        NarrativeEvaluationContext context = MakeContext(state);
-
-        new NarrativeEffect { EffectExecutionId = "e1", Type = NarrativeEffectType.ChangeFood, IntParam = -10 }
-            .Apply(context);
-
-        Assert.That(state.Food, Is.EqualTo(0));
-    }
-
-    [Test]
-    public void ChangeFood_Without_GameState_In_Context_Does_Not_Throw()
-    {
         NarrativeEvaluationContext context = MakeContext(gameState: null);
 
         Assert.DoesNotThrow(() =>
-            new NarrativeEffect { EffectExecutionId = "e1", Type = NarrativeEffectType.ChangeFood, IntParam = -3 }
+            new NarrativeEffect { EffectExecutionId = "e1", Type = NarrativeEffectType.RemovedChangeFood, IntParam = -3 }
                 .Apply(context));
     }
 
@@ -116,16 +99,4 @@ public sealed class NarrativeGameplayEffectsTests
                 .Apply(context));
     }
 
-    [Test]
-    public void ChangeFood_Applied_Twice_With_Same_ExecutionId_Applies_Once()
-    {
-        GameState state = new GameState { Food = 10 };
-        NarrativeEvaluationContext context = MakeContext(state);
-        NarrativeEffect effect = new NarrativeEffect { EffectExecutionId = "e1", Type = NarrativeEffectType.ChangeFood, IntParam = -3 };
-
-        effect.Apply(context);
-        effect.Apply(context);
-
-        Assert.That(state.Food, Is.EqualTo(7), "Повторный рендер текста не должен применить эффект дважды.");
-    }
 }

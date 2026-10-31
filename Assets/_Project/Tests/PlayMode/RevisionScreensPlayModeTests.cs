@@ -108,7 +108,7 @@ public sealed class RevisionScreensPlayModeTests
         yield return Frames(20);
         MonoBehaviour main = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
             .First(b => b.GetType().Name == "PrototypeUIController");
-        Invoke(main, "StartNewFreePlayFromMenu");
+        Invoke(main, "StartNewGameFromMenu");
         yield return Frames(30);
         GameState campaign = CampaignSession.Current;
         VisualElement root = main.GetComponent<UIDocument>().rootVisualElement;
@@ -256,7 +256,7 @@ public sealed class RevisionScreensPlayModeTests
         float leftGap = rosterRow.Children().Min(c => c.worldBound.xMin) - row.xMin;
         float rightGap = row.xMax - rosterRow.Children().Max(c => c.worldBound.xMax);
         Assert.AreEqual(leftGap, rightGap, 12f, "Ряд — по центру.");
-        Assert.AreEqual(DisplayStyle.None, root.Q("hero-screen-retinue-row").resolvedStyle.display, "Выбора Лады и Остафия нет.");
+        Assert.IsNull(root.Q("hero-screen-retinue-row"), "Выбора Лады и Остафия нет.");
         Assert.IsEmpty(campaign.ActiveExpedition.RetinueIds, "Свита новой свободной игры пуста.");
         yield return Capture(main, "rev_06_squad_page");
 

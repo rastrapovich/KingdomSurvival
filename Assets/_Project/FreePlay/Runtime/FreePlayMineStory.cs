@@ -7,22 +7,20 @@ namespace KingdomSurvival.FreePlay
     // §4; лор — LORE.md §17.1: шахта старше Дома, кем вырыта — открыто;
     // звери Чёрного леса). [РАБОЧЕЕ].
     //
-    // Ход: после первого возвращения Остафий вспоминает о шахте → на месте
-    // отвалы с железом (Наблюдательность), клеймо старых работ (Остафий в
-    // отряде или Расследование), дальняя штольня занята зверями (бой
-    // «Логово в штольне», можно не спускаться, после отхода — вернуться) →
-    // железо; с углём Лады из него отковывают топор. Прочитанное клеймо
-    // открывает у Остафия разговор о прежних работах.
+    // Ход: на месте отвалы с железом (Наблюдательность), клеймо старых работ
+    // (Расследование), дальняя штольня занята зверями (бой «Логово в
+    // штольне», можно не спускаться, после отхода — вернуться) → железо.
+    // Канон v1.59: зацепка через Остафия, разговор о клейме и топор из угля
+    // Лады удалены вместе с исходным Домом. Шахта открывается на карте и
+    // исследуется локальной картой (FreePlayMineLocal); сцены входа ниже
+    // работают для партий, где шахта уже была известна (флаг Known).
     public static class FreePlayMineStory
     {
         public const string LocationId = "mine";
 
-        public const string OstafiyDialogueId = "freeplay_mine_ostafiy";
         public const string EntryDialogueId = "freeplay_mine_entry";
         public const string DeepDialogueId = "freeplay_mine_deep";
-        public const string MarkTalkDialogueId = "freeplay_mine_mark_talk";
         public const string LairBattlePrefix = "freeplay.battle.mine_lair.";
-        public const string AxeGrantId = "freeplay.mine.axe";
 
         public static class Flags
         {
@@ -32,15 +30,11 @@ namespace KingdomSurvival.FreePlay
             public const string Mark = "freeplay.mine.mark";
             public const string Deep = "freeplay.mine.deep";
             public const string LairCleared = "freeplay.mine.lair_cleared";
-            public const string Axe = "freeplay.mine.axe";
-            public const string MarkTalked = "freeplay.mine.mark_talked";
         }
 
         private const string ChronicleIron = "freeplay.mine.chronicle.iron";
         private const string ChronicleMark = "freeplay.mine.chronicle.mark";
         private const string ChronicleLair = "freeplay.mine.chronicle.lair";
-        private const string ChronicleAxe = "freeplay.mine.chronicle.axe";
-        private const string ChronicleMarkTalk = "freeplay.mine.chronicle.mark_talk";
 
         private static bool Has(GameState state, string flag) => state?.Narrative != null && state.Narrative.HasFlag(flag);
 
@@ -71,73 +65,11 @@ namespace KingdomSurvival.FreePlay
             if (Has(state, Flags.Mark) && Chronicle.Find(state, ChronicleMark) == null)
             {
                 Chronicle.Record(state, ChronicleMark, "Клеймо старых работ",
-                    "На старом железе шахты — одно клеймо: два угла, вписанные один в другой. Не Дома и не дальней мельницы: " +
-                    "кто-то метил своё железо, чтобы его узнавали.", LocationId);
+                    "На старом железе шахты — одно клеймо: два угла, вписанные один в другой. " +
+                    "Кто-то метил своё железо, чтобы его узнавали.", LocationId);
             }
 
-            if (HasIron(state) && FreePlayCoalStory.HasCoal(state) && !Has(state, Flags.Axe))
-            {
-                state.Narrative.SetFlag(Flags.Axe);
-                ItemService.GrantOnce(state, AxeGrantId, ItemCatalog.Axe, string.Empty);
-                string text = "Лада и Торвин отковали из старого железа топор — он в кладовой.";
-                Chronicle.Record(state, ChronicleAxe, "Топор из старого железа", text, null, ChronicleIron);
-                reports.Add(text);
-            }
             return reports;
-        }
-
-        // ------------------------------------------------------------------
-        // Дом: Остафий вспоминает о шахте; Остафий о клейме
-        // ------------------------------------------------------------------
-
-        public static void AddHomeCares(GameState state, List<HomeCareView> cares)
-        {
-            bool atHome = !HomePeopleService.HasDeparted(state);
-            ResidentState ostafiy = HomePeopleService.Find(state, HomePeopleService.OstafiyId);
-            if (ostafiy == null || !ostafiy.IsAlive)
-                return;
-
-            if (!Has(state, Flags.Known) && FreePlayContent.CountEntries(state, FreePlayContent.ReturnPrefix) > 0)
-            {
-                cares.Add(new HomeCareView
-                {
-                    Id = "home.care.freeplay_mine_hint",
-                    Title = "Остафий вспоминает",
-                    Cause = "Остафий слышал, о чём рассказывал вернувшийся отряд, и что-то припомнил.",
-                    Status = atHome ? "Ждёт разговора." : "Расскажет, когда Командир вернётся.",
-                    Priority = HomeCares.PriorityOptional,
-                    ActionLabel = "Поговорить с Остафием",
-                    Action = HomeCareAction.OpenDialogue,
-                    DialogueId = OstafiyDialogueId,
-                    ActionEnabled = atHome
-                });
-            }
-
-            if (Has(state, Flags.Mark) && !Has(state, Flags.MarkTalked))
-            {
-                cares.Add(new HomeCareView
-                {
-                    Id = "home.care.freeplay_mine_mark",
-                    Title = "Остафий о клейме",
-                    Cause = "Остафий хочет посмотреть на клеймо со старого железа.",
-                    Status = atHome ? "Ждёт разговора." : "Посмотрит, когда Командир вернётся.",
-                    Priority = HomeCares.PriorityOptional,
-                    ActionLabel = "Показать клеймо Остафию",
-                    Action = HomeCareAction.OpenDialogue,
-                    DialogueId = MarkTalkDialogueId,
-                    ActionEnabled = atHome
-                });
-            }
-        }
-
-        public static void DialogueCompleted(GameState state, string dialogueId)
-        {
-            if (dialogueId == MarkTalkDialogueId && Has(state, Flags.MarkTalked) && Chronicle.Find(state, ChronicleMarkTalk) == null)
-            {
-                Chronicle.Record(state, ChronicleMarkTalk, "Остафий о клейме",
-                    "Остафий думает, что видел такой знак на камне — может быть, в кладке затопленных руин. Сам говорит: старость любит сходства.",
-                    null, ChronicleMark);
-            }
         }
 
         // ------------------------------------------------------------------
@@ -219,15 +151,15 @@ namespace KingdomSurvival.FreePlay
             if (!Has(state, Flags.Entered))
                 step = "Дойти до старой шахты и осмотреть отвалы.";
             else if (done)
-                step = "Железо у Дома, дальняя штольня чиста." + (Has(state, Flags.Mark) ? " Клеймо старых работ прочитано." : string.Empty);
+                step = "Железо найдено, дальняя штольня чиста." + (Has(state, Flags.Mark) ? " Клеймо старых работ прочитано." : string.Empty);
             else
-                step = (HasIron(state) ? "Железо у Дома. " : "Железа пока нет. ") +
+                step = (HasIron(state) ? "Железо найдено. " : "Железа пока нет. ") +
                        (Has(state, Flags.LairCleared) ? "Дальняя штольня чиста." : "В дальней штольне — звери.");
             return new JournalGoalViewData
             {
                 Id = "freeplay.goal.mine",
                 Title = "Сухая шахта",
-                Description = "Шахту вырыли до того, как пришли основатели Дома. Кто — в Доме не знает никто. " +
+                Description = "Шахту вырыли давно. Кто — не знает никто. " +
                               "Штольни сухие, и железо в отвалах лежит, будто его ждут.",
                 CurrentStep = step,
                 RevisionId = "freeplay.goal.mine." + (Has(state, Flags.Entered) ? "entered" : "known") + (HasIron(state) ? ".iron" : "") +

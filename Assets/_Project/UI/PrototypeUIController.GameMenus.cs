@@ -143,7 +143,6 @@ public partial class PrototypeUIController
         unreadIncidents.Clear();
         reportRequiresAcknowledgement.Clear();
         reportReadStates.Clear();
-        homePeopleSignature = null;
         selectedJournalGoalId = null;
         ClearQueuedModals();
         ResetWorldMapSelection();
@@ -251,15 +250,6 @@ public partial class PrototypeUIController
         HideMainMenu();
     }
 
-    // ПР-12А: то же для свободной игры.
-    private void StartNewFreePlayFromMenu()
-    {
-        SetNewGameConfirmOpen(false);
-        StartNewGame(new CampaignSetup { CrisisId = CampaignStartOptions.FreePlayId });
-        CloseMenuOverlay(newGameOverlay);
-        HideMainMenu();
-    }
-
     // ------------------------------------------------------------------
     // ПР-05: итог перед стартом. Кампания создаётся один раз — по «Начать».
     // «Назад» ничего не создаёт, не сохраняет и не тратит время.
@@ -280,17 +270,6 @@ public partial class PrototypeUIController
         if (newGameStartButton != null)
             newGameStartButton.clicked += OnNewGameStartClicked;
         BindMenuButton("new-game-back-button", CloseNewGameSummary);
-        BindMenuButton("new-game-mode-free", () => SelectNewGameMode(CampaignStartOptions.FreePlayId));
-        BindMenuButton("new-game-mode-story", () => SelectNewGameMode(CampaignStartOptions.HomeOnForeignWaterCrisisId));
-    }
-
-    // ПР-12А: выбор режима меняет только ещё не созданную кампанию.
-    private void SelectNewGameMode(string modeId)
-    {
-        if (pendingSetup == null)
-            return;
-        pendingSetup.CrisisId = modeId;
-        FillNewGameSummary();
     }
 
     private void OpenNewGameSummary()
@@ -298,21 +277,15 @@ public partial class PrototypeUIController
         if (newGameOverlay == null)
             return;
 
-        // ПР-12А: по умолчанию — свободная игра, основа игры (канон v1.45).
-        pendingSetup = new CampaignSetup { CrisisId = CampaignStartOptions.FreePlayId };
+        // Канон v1.59: режим один — свободная игра.
+        pendingSetup = new CampaignSetup();
         FillNewGameSummary();
         OpenMenuOverlay(newGameOverlay);
     }
 
     private void FillNewGameSummary()
     {
-        interfaceRoot.Q<Button>("new-game-mode-free")?.EnableInClassList("new-game-mode-selected",
-            pendingSetup.CrisisId == CampaignStartOptions.FreePlayId);
-        interfaceRoot.Q<Button>("new-game-mode-story")?.EnableInClassList("new-game-mode-selected",
-            pendingSetup.CrisisId == CampaignStartOptions.HomeOnForeignWaterCrisisId);
-        FillOption("new-game-crisis", CampaignStartOptions.Find(CampaignStartOptions.Crises, pendingSetup.CrisisId));
         FillOption("new-game-commander", CampaignStartOptions.Find(CampaignStartOptions.Commanders, pendingSetup.CommanderProfileId));
-        FillOption("new-game-start", CampaignStartOptions.Find(CampaignStartOptions.StartingConditions, pendingSetup.StartingConditionId));
 
         bool valid = pendingSetup.Validate(out string reason);
         newGameMessage.text = valid ? string.Empty : "Нельзя начать: " + reason + ".";

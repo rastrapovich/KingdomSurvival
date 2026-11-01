@@ -16,7 +16,7 @@ MonoBehaviour:
   settings:
     CanvasWidth: 4160
     CanvasHeight: 2560
-    HexesAcross: 38
+    HexesAcross: 100
     ReliefScaleHexes: 26
     ReliefDetail: 4
     ReliefRoughness: 0.509

@@ -44,6 +44,9 @@ public sealed class FreePlayRevision19Tests
         GameState state = NewFreePlay();
         Assert.AreEqual(FreePlayContent.StartingSupply, state.ArmySupply);
         Assert.AreEqual(20, state.ArmySupply);
+        // Стартовое золото героя (просьба пользователя 01.11.2026).
+        Assert.AreEqual(FreePlayContent.StartingGold, state.ArmyGold);
+        Assert.AreEqual(50, state.ArmyGold);
         Assert.IsEmpty(ExpeditionPreparation.GetRetinueId(state) ?? string.Empty, "Свита на старте пуста.");
 
         GameState loaded = CampaignSaveService.RestoreCampaign(JsonUtility.FromJson<CampaignSaveData>(

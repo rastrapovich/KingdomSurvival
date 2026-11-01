@@ -53,6 +53,28 @@ public static class CampaignStartOptions
             "Ведёт отряд. Может уйти в поход один или взять с собой до четырёх бойцов.")
     };
 
+    // Размер карты свободной игры — клеток по ширине (просьба пользователя
+    // 01.11.2026). Генератор берёт остальные настройки из своего ассета.
+    public const int SmallMapHexesAcross = 50;
+    public const int MediumMapHexesAcross = 100;
+    public const int DefaultMapHexesAcross = MediumMapHexesAcross;
+
+    public static readonly IReadOnlyList<MapSizeOption> MapSizes = new[]
+    {
+        new MapSizeOption(SmallMapHexesAcross, "Маленькая", "50 клеток по ширине: места ближе, дороги короче."),
+        new MapSizeOption(MediumMapHexesAcross, "Средняя", "100 клеток по ширине: округа больше, путь между местами дольше.")
+    };
+
+    public static MapSizeOption FindMapSize(int hexesAcross)
+    {
+        foreach (MapSizeOption option in MapSizes)
+        {
+            if (option.HexesAcross == hexesAcross)
+                return option;
+        }
+        return null;
+    }
+
     public static CampaignOptionDefinition Find(IReadOnlyList<CampaignOptionDefinition> options, string id)
     {
         foreach (CampaignOptionDefinition option in options)
@@ -64,12 +86,28 @@ public static class CampaignStartOptions
     }
 }
 
+public sealed class MapSizeOption
+{
+    public int HexesAcross { get; }
+    public string Title { get; }
+    public string Summary { get; }
+
+    public MapSizeOption(int hexesAcross, string title, string summary)
+    {
+        HexesAcross = hexesAcross;
+        Title = title;
+        Summary = summary;
+    }
+}
+
 // Выбор до старта. Validate — до создания GameState; ошибка не оставляет
 // полусозданной кампании.
 public sealed class CampaignSetup
 {
     public string CommanderProfileId = CampaignStartOptions.PlaceholderCommanderId;
     public int? WorldSeed;
+    // Клеток по ширине генерируемой карты (CampaignStartOptions.MapSizes).
+    public int MapHexesAcross = CampaignStartOptions.DefaultMapHexesAcross;
 
     public bool Validate(out string reason)
     {
@@ -77,6 +115,11 @@ public sealed class CampaignSetup
         if (CampaignStartOptions.Find(CampaignStartOptions.Commanders, CommanderProfileId) == null)
         {
             reason = "неизвестный командир '" + CommanderProfileId + "'";
+            return false;
+        }
+        if (CampaignStartOptions.FindMapSize(MapHexesAcross) == null)
+        {
+            reason = "неизвестный размер карты " + MapHexesAcross;
             return false;
         }
         return true;

@@ -56,6 +56,15 @@ namespace KingdomSurvival.WorldMapVisual
         public GeneratedWorldMap Generate(int seed, WorldMapGenerationStage upTo = WorldMapGenerationStage.Complete) =>
             WorldMapGenerator.Generate(Settings, seed, upTo);
 
+        // Карта партии выбранного размера: остальные настройки — из ассета.
+        public GeneratedWorldMap Generate(int seed, int hexesAcross)
+        {
+            WorldMapGenerationSettings settings = Settings.Clone();
+            if (hexesAcross > 0)
+                settings.HexesAcross = hexesAcross;
+            return WorldMapGenerator.Generate(settings, seed);
+        }
+
         public WorldMapGeneratorPreset FindPreset(string id) =>
             string.IsNullOrEmpty(id) ? null : Presets.Find(preset => preset != null && preset.Id == id);
 

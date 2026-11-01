@@ -270,6 +270,69 @@ public partial class PrototypeUIController
         if (newGameStartButton != null)
             newGameStartButton.clicked += OnNewGameStartClicked;
         BindMenuButton("new-game-back-button", CloseNewGameSummary);
+        BuildNewGameMapSizeChoice();
+    }
+
+    private readonly System.Collections.Generic.List<(MapSizeOption Option, Button Button)> newGameMapSizeButtons =
+        new System.Collections.Generic.List<(MapSizeOption, Button)>();
+    private Label newGameMapSizeSummary;
+
+    // Размер карты свободной игры — перед «Начальными условиями».
+    private void BuildNewGameMapSizeChoice()
+    {
+        Label startTitle = newGameOverlay?.Q<Label>("new-game-start-title");
+        VisualElement panel = startTitle?.parent;
+        if (panel == null || newGameMapSizeButtons.Count > 0)
+            return;
+        int index = Mathf.Max(0, panel.IndexOf(startTitle) - 1);
+
+        Label section = new Label("КАРТА");
+        section.AddToClassList("new-game-section");
+        VisualElement row = new VisualElement { name = "new-game-map-size-row" };
+        row.style.flexDirection = FlexDirection.Row;
+        foreach (MapSizeOption option in CampaignStartOptions.MapSizes)
+        {
+            MapSizeOption captured = option;
+            Button button = new Button(() => SelectNewGameMapSize(captured.HexesAcross)) { text = option.Title + " · " + option.HexesAcross };
+            button.AddToClassList("game-menu-button");
+            button.AddToClassList("game-menu-button-small");
+            row.Add(button);
+            newGameMapSizeButtons.Add((option, button));
+        }
+        newGameMapSizeSummary = new Label();
+        newGameMapSizeSummary.AddToClassList("new-game-option-summary");
+        panel.Insert(index, newGameMapSizeSummary);
+        panel.Insert(index, row);
+        panel.Insert(index, section);
+    }
+
+    private void SelectNewGameMapSize(int hexesAcross)
+    {
+        if (pendingSetup == null)
+            return;
+        pendingSetup.MapHexesAcross = hexesAcross;
+        FillNewGameSummary();
+    }
+
+    private void FillNewGameMapSize()
+    {
+        int selected = pendingSetup != null ? pendingSetup.MapHexesAcross : CampaignStartOptions.DefaultMapHexesAcross;
+        foreach ((MapSizeOption option, Button button) in newGameMapSizeButtons)
+        {
+            bool on = option.HexesAcross == selected;
+            Color border = on ? new Color(0.83f, 0.69f, 0.42f) : new Color(0f, 0f, 0f, 0f);
+            button.style.borderTopColor = border;
+            button.style.borderBottomColor = border;
+            button.style.borderLeftColor = border;
+            button.style.borderRightColor = border;
+            float width = on ? 2f : 0f;
+            button.style.borderTopWidth = width;
+            button.style.borderBottomWidth = width;
+            button.style.borderLeftWidth = width;
+            button.style.borderRightWidth = width;
+        }
+        if (newGameMapSizeSummary != null)
+            newGameMapSizeSummary.text = CampaignStartOptions.FindMapSize(selected)?.Summary ?? string.Empty;
     }
 
     private void OpenNewGameSummary()
@@ -286,6 +349,7 @@ public partial class PrototypeUIController
     private void FillNewGameSummary()
     {
         FillOption("new-game-commander", CampaignStartOptions.Find(CampaignStartOptions.Commanders, pendingSetup.CommanderProfileId));
+        FillNewGameMapSize();
 
         bool valid = pendingSetup.Validate(out string reason);
         newGameMessage.text = valid ? string.Empty : "Нельзя начать: " + reason + ".";

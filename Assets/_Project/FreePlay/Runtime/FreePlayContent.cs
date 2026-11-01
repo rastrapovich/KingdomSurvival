@@ -75,6 +75,7 @@ namespace KingdomSurvival.FreePlay
             // пп. 5, 17: 20 припасов на старте — один раз при создании
             // партии; свита пуста.
             state.ArmySupply = StartingSupply;
+            state.ArmyGold = StartingGold;
             ExpeditionPreparation.Get(state);
             state.Preparation.RetinueId = string.Empty;
             if (Chronicle.Find(state, StartCampChronicleId) == null)
@@ -87,6 +88,8 @@ namespace KingdomSurvival.FreePlay
 
         // Рабочее значение (бриф правок, 19 пунктов, п. 5).
         public const int StartingSupply = 20;
+        // Стартовое золото героя — рабочее значение (просьба пользователя 01.11.2026).
+        public const int StartingGold = 50;
 
         // ------------------------------------------------------------------
         // История: выход и возвращение каждого похода — по одной записи.

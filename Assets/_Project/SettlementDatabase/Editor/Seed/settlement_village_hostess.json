@@ -3,7 +3,7 @@
   "title": "12Т — Хозяйка постоялого двора",
   "category": 4,
   "status": 1,
-  "developerComment": "12Т [РАБОЧЕЕ]. Хозяйка «Избы у дороги» (деревня). Предупреждение о звере у дороги — то же знание, что на доске (settlement.knowledge.wolf_road), пока жив вожак углежогов; после freeplay.coal.leader_killed — новость.",
+  "developerComment": "12Т [РАБОЧЕЕ]. Хозяйка «Избы у дороги» (деревня). Предупреждение о звере у дороги — то же знание, что на доске (settlement.knowledge.wolf_road), пока весть о гибели седого волка не дошла до деревни; после last_wolf.news_local («Последний волк») — новость.",
   "startNodeId": "settlement.hostess.start",
   "tags": ["поселения", "12Т"],
   "schemaVersion": 1,
@@ -22,7 +22,7 @@
           "blockId": "settlement.hostess.start.wolf",
           "kind": 0,
           "text": "— Только к лесу по темноте не ходите. Возчики говорят, старый волк у дороги овец режет — и не боится ни огня, ни крика.",
-          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 0, "StringParam": "freeplay.coal.leader_killed", "Negate": true } ] },
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 0, "StringParam": "last_wolf.news_local", "Negate": true } ] },
           "onRevealEffects": [
             { "EffectExecutionId": "settlement.hostess.wolf", "Type": 2, "StringParam": "settlement.knowledge.wolf_road" }
           ]
@@ -30,8 +30,8 @@
         {
           "blockId": "settlement.hostess.start.wolf_gone",
           "kind": 0,
-          "text": "— Говорят, старого волка у дороги кто-то уложил. Возчики снова ездят засветло и даже поют. Плохо поют, но ездят.",
-          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 0, "StringParam": "freeplay.coal.leader_killed" } ] }
+          "text": "— Говорят, седого волка у дороги Савва уложил — углежоги сами видели. Возчики снова ездят засветло и даже поют. Плохо поют, но ездят.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 0, "StringParam": "last_wolf.news_local" } ] }
         }
       ],
       "choices": [

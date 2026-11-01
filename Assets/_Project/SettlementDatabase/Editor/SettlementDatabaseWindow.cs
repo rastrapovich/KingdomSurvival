@@ -784,7 +784,14 @@ namespace KingdomSurvival.SettlementDatabase.Editor
             };
         }
 
-        private bool DialogueExists(string id) => dialogues != null && dialogues.FindDialogue(id) != null;
+        // «диалог#узел» — разговор с объявленной точки входа.
+        private bool DialogueExists(string id)
+        {
+            DialogueDefinitionData dialogue = dialogues?.FindDialogue(DialogueEntryRef.DialogueId(id));
+            string node = DialogueEntryRef.NodeId(id);
+            return dialogue != null && (node.Length == 0 || dialogue.IsEntryNode(node));
+        }
+
         private bool SpeakerExists(string id) => dialogues != null && dialogues.FindSpeaker(id) != null;
         private bool ErrandExists(string id) => database.errands != null && database.errands.Exists(e => e != null && e.Id == id);
 

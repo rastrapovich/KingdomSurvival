@@ -48,7 +48,8 @@ namespace KingdomSurvival.DialogueDatabase
             IReadOnlyCollection<string> presentItemIds = null,
             int worldSeedValue = 0,
             int? partySize = null,
-            GameState gameState = null)
+            GameState gameState = null,
+            string startNodeId = null)
         {
             view = null;
             error = string.Empty;
@@ -72,12 +73,18 @@ namespace KingdomSurvival.DialogueDatabase
                 return false;
             }
 
+            if (!string.IsNullOrWhiteSpace(startNodeId) && (!dialogueData.IsEntryNode(startNodeId) || FindNode(dialogueData, startNodeId) == null))
+            {
+                error = "Узел '" + startNodeId + "' не объявлен точкой входа диалога '" + dialogueId + "'.";
+                return false;
+            }
+
             database = dialogueDatabase;
             dialogue = dialogueData;
             context = new NarrativeEvaluationContext(hero, state, presentCompanionIds, presentItemIds, worldSeedValue, partySize, gameState);
             context.SceneId = FeatureScenes.Begin(gameState, dialogueId);
             worldSeed = worldSeedValue;
-            CurrentNodeId = dialogueData.StartNodeId;
+            CurrentNodeId = string.IsNullOrWhiteSpace(startNodeId) ? dialogueData.StartNodeId : startNodeId;
             ResetPresentationState();
             IsActive = true;
 

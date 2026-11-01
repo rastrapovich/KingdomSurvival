@@ -281,6 +281,9 @@ public partial class PrototypeUIController
     // в редакторе (§13/§20).
     public bool TryOpenNarrativeDialogueById(string dialogueId)
     {
+        // «диалог#узел» — разговор с точки входа (DialogueEntryRef).
+        string startNodeId = DialogueEntryRef.NodeId(dialogueId);
+        dialogueId = DialogueEntryRef.DialogueId(dialogueId);
         if (!narrativeUiBound)
             return false;
 
@@ -325,7 +328,8 @@ public partial class PrototypeUIController
             presentItemIds,
             gameState.WorldSeed,
             KingdomSurvival.Encounters.EncounterEvaluationContextBuilder.GetPartySize(gameState),
-            gameState);
+            gameState,
+            startNodeId);
 
         if (!started)
         {

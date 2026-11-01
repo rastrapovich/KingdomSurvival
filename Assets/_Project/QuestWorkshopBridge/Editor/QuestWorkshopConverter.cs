@@ -19,6 +19,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         public DialogueProductionStatus status = DialogueProductionStatus.Working;
         public string developerComment = string.Empty;
         public string startNodeId = string.Empty;
+        public List<string> entryNodeIds = new List<string>();
         public List<string> tags = new List<string>();
         public List<NodeMirror> nodes = new List<NodeMirror>();
         public int schemaVersion = DialogueDefinitionData.CurrentSchemaVersion;
@@ -313,6 +314,8 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 title = scene.Title,
                 startNodeId = StripNode(scene.StartNodeId)
             };
+            foreach (string entry in scene.EntryNodeIds)
+                mirror.entryNodeIds.Add(StripNode(entry));
 
             if (TryEnum(scene.UnityCategory, out DialogueCategory category))
                 mirror.category = category;
@@ -437,6 +440,9 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
 
             if (!nodeIds.Contains(mirror.startNodeId))
                 issues?.Add(Issue(WorkshopIssueSeverity.Error, "Не выбрана первая реплика сцены."));
+            foreach (string entry in mirror.entryNodeIds)
+                if (!nodeIds.Contains(entry))
+                    issues?.Add(Issue(WorkshopIssueSeverity.Error, "Точка входа «" + entry + "» не найдена среди реплик."));
             return mirror;
         }
 
@@ -603,6 +609,9 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 lines.Add("Теги: " + string.Join(", ", current.tags) + " → " + string.Join(", ", next.tags) + ".");
             if (current.startNodeId != next.startNodeId)
                 lines.Add("Первая реплика: " + current.startNodeId + " → " + next.startNodeId + ".");
+            if (string.Join(",", current.entryNodeIds) != string.Join(",", next.entryNodeIds))
+                lines.Add("Точки входа: " + (current.entryNodeIds.Count > 0 ? string.Join(", ", current.entryNodeIds) : "нет") + " → " +
+                          (next.entryNodeIds.Count > 0 ? string.Join(", ", next.entryNodeIds) : "нет") + ".");
 
             Dictionary<string, string> oldNodes = new Dictionary<string, string>(StringComparer.Ordinal);
             foreach (NodeMirror node in current.nodes)

@@ -15,7 +15,9 @@ namespace KingdomSurvival.SettlementDatabase.Editor
         public const string CarterErrandId = "settlement.errand.carter_knife";
         public const string TownErrandId = "settlement.errand.town_message";
 
-        private const string LeaderKilled = "freeplay.coal.leader_killed";
+        // A-04: весть о гибели седого волка («Последний волк») дошла до поселений —
+        // рассказом героя или сообщением углежогов (FreePlayLastWolfStory).
+        private const string LeaderKilled = "last_wolf.news_local";
 
         // Говорящие пилота (ID, имя, роль) — добавляются в Базу диалогов.
         public static readonly (string Id, string Name, string Role)[] Speakers =
@@ -137,6 +139,48 @@ namespace KingdomSurvival.SettlementDatabase.Editor
                     Description = "Лавка у тёплой стены, щи и хлеб. Утром Мокрина будит всех одним словом."
                 }
             };
+            // «Последний волк»: слух до встречи, рассказ очевидца и позднее эхо.
+            p.Tavern.Offers.Add(new TavernOfferDefinition
+            {
+                Id = "offer.last_wolf.rumor", Label = "Расспросить о седом волке", PersonId = "village_hostess",
+                Description = "Мокрина пересказывает, что говорят возчики про волка у лесной дороги.",
+                Conditions = new NarrativeConditionGroup
+                {
+                    Conditions = new List<NarrativeCondition>
+                    {
+                        new NarrativeCondition { Type = NarrativeConditionType.FlagSet, StringParam = "last_wolf.seen", Negate = true },
+                        new NarrativeCondition { Type = NarrativeConditionType.FlagSet, StringParam = "last_wolf.rumor_heard", Negate = true }
+                    }
+                },
+                DialogueId = "freeplay_last_wolf#lw_inn_before"
+            });
+            p.Tavern.Offers.Add(new TavernOfferDefinition
+            {
+                Id = "offer.last_wolf.report", Label = "Рассказать о мёртвом волке", PersonId = "village_hostess",
+                Description = "Вы видели седого волка мёртвым — хозяйке избы стоит это знать.",
+                Conditions = new NarrativeConditionGroup
+                {
+                    Conditions = new List<NarrativeCondition>
+                    {
+                        new NarrativeCondition { Type = NarrativeConditionType.FlagSet, StringParam = "last_wolf.dead_seen", Negate = false },
+                        new NarrativeCondition { Type = NarrativeConditionType.FlagSet, StringParam = "last_wolf.rumor_shared", Negate = true }
+                    }
+                },
+                DialogueId = "freeplay_last_wolf#lw_inn_report"
+            });
+            p.Tavern.Offers.Add(new TavernOfferDefinition
+            {
+                Id = "offer.last_wolf.after", Label = "Спросить, что теперь говорят про волка", PersonId = "village_hostess",
+                Description = "Весть о седом волке дошла до избы — Мокрина слышала, что говорят возчики.",
+                Conditions = new NarrativeConditionGroup
+                {
+                    Conditions = new List<NarrativeCondition>
+                    {
+                        new NarrativeCondition { Type = NarrativeConditionType.FlagSet, StringParam = "last_wolf.news_local", Negate = false }
+                    }
+                },
+                DialogueId = "freeplay_last_wolf#lw_inn_after"
+            });
 
             p.Board = new NoticeBoardDefinition
             {
@@ -168,7 +212,7 @@ namespace KingdomSurvival.SettlementDatabase.Editor
             {
                 Id = "notice.village.wolf_gone", Type = NoticeType.LocalNews, Medium = NoticeMedium.Spoken,
                 Title = "Волка больше нет",
-                Text = "Вышата, не дожидаясь вопроса: «Волка у дороги уложили. Кто — толком не знают, но возчики теперь ночуют у нас, а не в лесу. И торг бойчее пошёл».",
+                Text = "Вышата, не дожидаясь вопроса: «Седого волка у дороги уложил старый Савва — углежоги сами тушу видели. Возчики теперь ночуют у нас, а не в лесу. И торг бойчее пошёл».",
                 AuthorName = "староста Вышата",
                 ShowConditions = Flag(LeaderKilled)
             });

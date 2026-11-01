@@ -102,6 +102,15 @@ public partial class PrototypeUIController
 
         // ПР-12Б: сцены свободной игры — реакция режима и, если нужно, бой.
         CampaignContent.OnDialogueCompleted(gameState, dialogueId);
+        // Время, прошедшее за сцену (путь, переноска), — обычным ходом часов.
+        double storyHours = CampaignContent.TakeHoursAfterDialogue(gameState, dialogueId);
+        if (storyHours > 0.0)
+        {
+            ContinuousSimulationBatch batch = ContinuousSimulationSystem.AdvanceLocalHours(gameState, storyHours);
+            if (batch.HasReportableContent)
+                ProcessContinuousSimulationBatch(batch);
+            RefreshContinuousClockOnly();
+        }
         // ПР-12К: в исследуемом месте бой после сцены начинается на месте —
         // отдельная арена здесь не грузится.
         if (IsLocalScreenOpen)

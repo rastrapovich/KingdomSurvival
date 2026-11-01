@@ -45,6 +45,38 @@ public sealed class CampaignContentProvider
     public Func<GameState, string, CampaignBattleRequest> BattleAfterDialogue;
     public Action<GameState, CampaignBattleResult, List<string>> BattleApplied;
     public Func<GameState, List<string>> Refresh;
+    // Сколько игровых часов прошло за только что законченную сцену (путь,
+    // переноска): UI прокручивает это время обычным ходом часов. Однократно —
+    // история сама помнит, что уже отдала.
+    public Func<GameState, string, double> HoursAfterDialogue;
+}
+
+// Ссылка на диалог с точкой входа: «диалог#узел». Узел должен быть
+// стартовым или объявленной точкой входа диалога (DialogueDefinitionData).
+public static class DialogueEntryRef
+{
+    public const char Separator = '#';
+
+    public static string Make(string dialogueId, string nodeId)
+    {
+        return string.IsNullOrEmpty(nodeId) ? dialogueId ?? string.Empty : dialogueId + Separator + nodeId;
+    }
+
+    public static string DialogueId(string reference)
+    {
+        if (string.IsNullOrEmpty(reference))
+            return string.Empty;
+        int at = reference.IndexOf(Separator);
+        return at < 0 ? reference : reference.Substring(0, at);
+    }
+
+    public static string NodeId(string reference)
+    {
+        if (string.IsNullOrEmpty(reference))
+            return string.Empty;
+        int at = reference.IndexOf(Separator);
+        return at < 0 ? string.Empty : reference.Substring(at + 1);
+    }
 }
 
 // Сцена при входе в достигнутое место: какой диалог и как подписана кнопка.
@@ -92,6 +124,11 @@ public static class CampaignContent
     public static CampaignBattleRequest BattleAfterDialogue(GameState state, string dialogueId)
     {
         return state != null && provider?.BattleAfterDialogue != null ? provider.BattleAfterDialogue(state, dialogueId) : null;
+    }
+
+    public static double TakeHoursAfterDialogue(GameState state, string dialogueId)
+    {
+        return state != null && provider?.HoursAfterDialogue != null ? Math.Max(0.0, provider.HoursAfterDialogue(state, dialogueId)) : 0.0;
     }
 
     public static void OnBattleApplied(GameState state, CampaignBattleResult result, List<string> reports)

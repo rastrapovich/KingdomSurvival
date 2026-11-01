@@ -26,7 +26,8 @@ namespace KingdomSurvival.FreePlay
                 LocationEntry = LocationEntry,
                 BattleAfterDialogue = BattleAfterDialogue,
                 BattleApplied = BattleApplied,
-                Refresh = RefreshWithReports
+                Refresh = RefreshWithReports,
+                HoursAfterDialogue = FreePlayLastWolfStory.HoursAfterDialogue
             });
             // ПР-12К: исследуемые места (пилот — Старая шахта).
             LocalLocationCatalog.RegisterDefault(FreePlayMineLocal.Create());
@@ -36,7 +37,8 @@ namespace KingdomSurvival.FreePlay
 
         public static LocationEntryView LocationEntry(GameState state, string locationId)
         {
-            return FreePlayMineStory.LocationEntry(state, locationId) ?? FreePlayCacheStory.LocationEntry(state, locationId);
+            return FreePlayLastWolfStory.LocationEntry(state, locationId) ?? FreePlayMineStory.LocationEntry(state, locationId) ??
+                   FreePlayCacheStory.LocationEntry(state, locationId);
         }
 
         public static CampaignBattleRequest BattleAfterDialogue(GameState state, string dialogueId)
@@ -57,6 +59,7 @@ namespace KingdomSurvival.FreePlay
                 return new List<string>();
             List<string> reports = FreePlayMineStory.Refresh(state);
             reports.AddRange(FreePlayCaveStory.Refresh(state));
+            reports.AddRange(FreePlayLastWolfStory.Refresh(state));
             // 12Т: поручения поселений и тайник у старого русла.
             reports.AddRange(FreePlayCacheStory.Refresh(state));
             reports.AddRange(ErrandService.Refresh(state));
@@ -150,6 +153,9 @@ namespace KingdomSurvival.FreePlay
             JournalGoalViewData cave = FreePlayCaveStory.BuildGoal(state);
             if (cave != null)
                 goals.Add(cave);
+            JournalGoalViewData wolf = FreePlayLastWolfStory.BuildGoal(state);
+            if (wolf != null)
+                goals.Add(wolf);
             // 12Т: принятые поручения поселений — одно «Дело» на поручение,
             // откуда бы его ни взяли (доска, корчма, разговор).
             goals.AddRange(ErrandService.BuildGoals(state));

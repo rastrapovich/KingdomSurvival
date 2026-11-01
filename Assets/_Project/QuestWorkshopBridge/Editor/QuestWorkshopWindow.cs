@@ -141,6 +141,51 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             Debug.Log("Мастерская квестов: перенос (пакетный).\n" + result.Summary());
         }
 
+        // Для -executeMethod с аргументом «-ksWorkshopQuest <ID квеста>»: перенести
+        // только диалоги одного квеста (и созданных ими новых говорящих). Остальная
+        // мастерская, имена существующих говорящих и места не трогаются.
+        public static void ApplyQuestBatch()
+        {
+            string questId = CommandLineValue("-ksWorkshopQuest");
+            if (questId.Length == 0 || !File.Exists(QuestWorkshopPaths.Workspace))
+            {
+                Debug.LogError("Мастерская квестов: нужен -ksWorkshopQuest <ID квеста> и файл " + QuestWorkshopPaths.Workspace);
+                return;
+            }
+            WorkshopProject loaded = WorkshopProject.Load(QuestWorkshopPaths.Workspace);
+            QuestWorkshopSyncState state = QuestWorkshopSyncState.Load(QuestWorkshopPaths.SyncState);
+            DialogueDatabaseAsset dialogues = QuestWorkshopPaths.LoadDialogues();
+            EncounterDatabaseAsset encounters = QuestWorkshopPaths.LoadEncounters();
+            EncounterFlagRegistryAsset flags = QuestWorkshopPaths.LoadFlags();
+            List<WorkshopSceneReport> list = QuestWorkshopImporter.Analyze(loaded, dialogues, encounters, state)
+                .Where(r => r.Scene.Quest != null && r.Scene.Quest.Id == questId).ToList();
+            foreach (WorkshopSceneReport report in list)
+                Debug.Log("Мастерская квестов: " + report.Scene.UnityId + " [" + report.State + ", " + report.Direction + "]");
+            List<WorkshopScene> scenes = list.Where(r => r.AutoTransferable).Select(r => r.Scene).ToList();
+            WorkshopImportResult result = QuestWorkshopImporter.Apply(loaded, scenes, dialogues, encounters, flags, state);
+            state.Save(QuestWorkshopPaths.SyncState);
+            if (result.Changed)
+            {
+                EditorUtility.SetDirty(dialogues);
+                if (encounters != null)
+                    EditorUtility.SetDirty(encounters);
+                if (flags != null)
+                    EditorUtility.SetDirty(flags);
+                AssetDatabase.SaveAssets();
+            }
+            QuestWorkshopPaths.WriteSnapshot();
+            Debug.Log("Мастерская квестов: перенос квеста " + questId + " (пакетный).\n" + result.Summary());
+        }
+
+        private static string CommandLineValue(string name)
+        {
+            string[] args = System.Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length - 1; i++)
+                if (args[i] == name)
+                    return args[i + 1].Trim();
+            return string.Empty;
+        }
+
         // Для -executeMethod: сверить мастерскую с базами и вывести итог в журнал.
         public static void VerifyBatch()
         {

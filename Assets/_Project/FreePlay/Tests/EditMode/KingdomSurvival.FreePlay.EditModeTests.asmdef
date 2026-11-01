@@ -8,7 +8,8 @@
     "KingdomSurvival.Encounters",
     "KingdomSurvival.BattlefieldDatabase",
     "KingdomSurvival.BattleSandbox.Runtime",
-    "KingdomSurvival.UnitDatabase"
+    "KingdomSurvival.UnitDatabase",
+    "KingdomSurvival.SettlementDatabase"
   ],
   "includePlatforms": [
     "Editor"

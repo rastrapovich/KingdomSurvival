@@ -187,6 +187,25 @@ MonoBehaviour:
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
+  - id: last_wolf_savva
+    displayName: "\u0421\u0430\u0432\u0432\u0430"
+    role: "\u0421\u0442\u0430\u0440\u044B\u0439 \u043E\u0445\u043E\u0442\u043D\u0438\u043A
+      \xB7 \xAB\u041F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439 \u0432\u043E\u043B\u043A\xBB
+      [\u0420\u0410\u0411\u041E\u0427\u0415\u0415]"
+    portrait: {fileID: 0}
+    overridePortraitFraming: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
+  - id: coalburner
+    displayName: "\u0423\u0433\u043B\u0435\u0436\u043E\u0433"
+    role: "\u0425\u0443\u0442\u043E\u0440 \u0443 \u043A\u0440\u043E\u043C\u043A\u0438
+      \u0427\u0451\u0440\u043D\u043E\u0433\u043E \u043B\u0435\u0441\u0430"
+    portrait: {fileID: 0}
+    overridePortraitFraming: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
   dialogues:
   - id: road_warm_sheep_01
     title: "\u0422\u0451\u043F\u043B\u0430\u044F \u043E\u0432\u0446\u0430"
@@ -203,6 +222,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - warm_sheep
@@ -1607,6 +1627,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -1854,6 +1875,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -2100,6 +2122,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -2295,6 +2318,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -2490,6 +2514,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -2737,6 +2762,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -2983,6 +3009,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -3229,6 +3256,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -3473,6 +3501,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -3666,6 +3695,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -3912,6 +3942,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -4160,6 +4191,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -4408,6 +4440,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -4607,6 +4640,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -4855,6 +4889,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -5051,6 +5086,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - ambiguous
@@ -5295,6 +5331,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -5490,6 +5527,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - ambiguous
@@ -5679,6 +5717,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - mundane
@@ -5920,6 +5959,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: start
+    entryNodeIds: []
     tags:
     - road
     - ambiguous
@@ -6123,6 +6163,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: freeplay.mine.deep.start
+    entryNodeIds: []
     tags:
     - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
     - "\u0418-2"
@@ -6226,6 +6267,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: freeplay.mine.entry.start
+    entryNodeIds: []
     tags:
     - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
     - "\u0418-2"
@@ -6868,6 +6910,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: freeplay.mine.local.dumps.start
+    entryNodeIds: []
     tags:
     - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
     - "\u0418-2"
@@ -7074,6 +7117,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: freeplay.mine.local.lair.start
+    entryNodeIds: []
     tags:
     - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
     - "\u0418-2"
@@ -7158,6 +7202,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: freeplay.mine.local.mark.start
+    entryNodeIds: []
     tags:
     - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
     - "\u0418-2"
@@ -7468,6 +7513,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: freeplay.mine.local.signs.start
+    entryNodeIds: []
     tags:
     - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
     - "\u0418-2"
@@ -7559,6 +7605,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: cave.wall.start
+    entryNodeIds: []
     tags:
     - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
     - "\u043F\u0435\u0449\u0435\u0440\u0430"
@@ -7777,6 +7824,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: cave.crack.start
+    entryNodeIds: []
     tags:
     - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
     - "\u043F\u0435\u0449\u0435\u0440\u0430"
@@ -8484,6 +8532,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: cave.den.start
+    entryNodeIds: []
     tags:
     - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
     - "\u043F\u0435\u0449\u0435\u0440\u0430"
@@ -8554,6 +8603,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: cave.cutter.start
+    entryNodeIds: []
     tags:
     - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
     - "\u043F\u0435\u0449\u0435\u0440\u0430"
@@ -9014,6 +9064,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: cave.old_wall.start
+    entryNodeIds: []
     tags:
     - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
     - "\u043F\u0435\u0449\u0435\u0440\u0430"
@@ -9200,6 +9251,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: freeplay.cache.find.start
+    entryNodeIds: []
     tags:
     - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
     - "12\u0422"
@@ -9324,6 +9376,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: freeplay.carter.start
+    entryNodeIds: []
     tags:
     - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
     - "12\u0422"
@@ -9756,6 +9809,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: freeplay.carter.tells.start
+    entryNodeIds: []
     tags:
     - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
     - "12\u0422"
@@ -9859,6 +9913,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: settlement.townhostess.start
+    entryNodeIds: []
     tags:
     - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
     - "12\u0422"
@@ -9958,6 +10013,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: settlement.milana.start
+    entryNodeIds: []
     tags:
     - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
     - "12\u0422"
@@ -10385,6 +10441,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: settlement.tradekeeper.start
+    entryNodeIds: []
     tags:
     - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
     - "12\u0422"
@@ -10503,6 +10560,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: settlement.peddler.start
+    entryNodeIds: []
     tags:
     - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
     - "12\u0422"
@@ -10598,6 +10656,7 @@ MonoBehaviour:
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: settlement.elder.start
+    entryNodeIds: []
     tags:
     - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
     - "12\u0422"
@@ -10866,20 +10925,13 @@ MonoBehaviour:
       \u0434\u0432\u043E\u0440\u0430"
     category: 4
     status: 1
-    developerComment: "12\u0422 [\u0420\u0410\u0411\u041E\u0427\u0415\u0415]. \u0425\u043E\u0437\u044F\u0439\u043A\u0430
-      \xAB\u0418\u0437\u0431\u044B \u0443 \u0434\u043E\u0440\u043E\u0433\u0438\xBB
-      (\u0434\u0435\u0440\u0435\u0432\u043D\u044F). \u041F\u0440\u0435\u0434\u0443\u043F\u0440\u0435\u0436\u0434\u0435\u043D\u0438\u0435
-      \u043E \u0437\u0432\u0435\u0440\u0435 \u0443 \u0434\u043E\u0440\u043E\u0433\u0438
-      \u2014 \u0442\u043E \u0436\u0435 \u0437\u043D\u0430\u043D\u0438\u0435, \u0447\u0442\u043E
-      \u043D\u0430 \u0434\u043E\u0441\u043A\u0435 (settlement.knowledge.wolf_road),
-      \u043F\u043E\u043A\u0430 \u0436\u0438\u0432 \u0432\u043E\u0436\u0430\u043A
-      \u0443\u0433\u043B\u0435\u0436\u043E\u0433\u043E\u0432; \u043F\u043E\u0441\u043B\u0435
-      freeplay.coal.leader_killed \u2014 \u043D\u043E\u0432\u043E\u0441\u0442\u044C."
+    developerComment: "12\u0422 [\u0420\u0410\u0411\u041E\u0427\u0415\u0415]. \u0425\u043E\u0437\u044F\u0439\u043A\u0430 \u00AB\u0418\u0437\u0431\u044B \u0443 \u0434\u043E\u0440\u043E\u0433\u0438\u00BB (\u0434\u0435\u0440\u0435\u0432\u043D\u044F). \u041F\u0440\u0435\u0434\u0443\u043F\u0440\u0435\u0436\u0434\u0435\u043D\u0438\u0435 \u043E \u0437\u0432\u0435\u0440\u0435 \u0443 \u0434\u043E\u0440\u043E\u0433\u0438 \u2014 \u0442\u043E \u0436\u0435 \u0437\u043D\u0430\u043D\u0438\u0435, \u0447\u0442\u043E \u043D\u0430 \u0434\u043E\u0441\u043A\u0435 (settlement.knowledge.wolf_road), \u043F\u043E\u043A\u0430 \u0432\u0435\u0441\u0442\u044C \u043E \u0433\u0438\u0431\u0435\u043B\u0438 \u0441\u0435\u0434\u043E\u0433\u043E \u0432\u043E\u043B\u043A\u0430 \u043D\u0435 \u0434\u043E\u0448\u043B\u0430 \u0434\u043E \u0434\u0435\u0440\u0435\u0432\u043D\u0438; \u043F\u043E\u0441\u043B\u0435 last_wolf.news_local (\u00AB\u041F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439 \u0432\u043E\u043B\u043A\u00BB) \u2014 \u043D\u043E\u0432\u043E\u0441\u0442\u044C."
     sceneIllustration: {fileID: 0}
     sceneIllustrationFillFrame: 0
     sceneIllustrationScale: 1
     sceneIllustrationOffsetNormalized: {x: 0, y: 0}
     startNodeId: settlement.hostess.start
+    entryNodeIds: []
     tags:
     - "\u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
     - "12\u0422"
@@ -10923,7 +10975,7 @@ MonoBehaviour:
           Combinator: 0
           Conditions:
           - Type: 0
-            StringParam: freeplay.coal.leader_killed
+            StringParam: last_wolf.news_local
             QualityParam: 0
             IntParam: 0
             Negate: 1
@@ -10943,17 +10995,12 @@ MonoBehaviour:
       - blockId: settlement.hostess.start.wolf_gone
         kind: 0
         speakerIdOverride: 
-        text: "\u2014 \u0413\u043E\u0432\u043E\u0440\u044F\u0442, \u0441\u0442\u0430\u0440\u043E\u0433\u043E
-          \u0432\u043E\u043B\u043A\u0430 \u0443 \u0434\u043E\u0440\u043E\u0433\u0438
-          \u043A\u0442\u043E-\u0442\u043E \u0443\u043B\u043E\u0436\u0438\u043B. \u0412\u043E\u0437\u0447\u0438\u043A\u0438
-          \u0441\u043D\u043E\u0432\u0430 \u0435\u0437\u0434\u044F\u0442 \u0437\u0430\u0441\u0432\u0435\u0442\u043B\u043E
-          \u0438 \u0434\u0430\u0436\u0435 \u043F\u043E\u044E\u0442. \u041F\u043B\u043E\u0445\u043E
-          \u043F\u043E\u044E\u0442, \u043D\u043E \u0435\u0437\u0434\u044F\u0442."
+        text: "\u2014 \u0413\u043E\u0432\u043E\u0440\u044F\u0442, \u0441\u0435\u0434\u043E\u0433\u043E \u0432\u043E\u043B\u043A\u0430 \u0443 \u0434\u043E\u0440\u043E\u0433\u0438 \u0421\u0430\u0432\u0432\u0430 \u0443\u043B\u043E\u0436\u0438\u043B \u2014 \u0443\u0433\u043B\u0435\u0436\u043E\u0433\u0438 \u0441\u0430\u043C\u0438 \u0432\u0438\u0434\u0435\u043B\u0438. \u0412\u043E\u0437\u0447\u0438\u043A\u0438 \u0441\u043D\u043E\u0432\u0430 \u0435\u0437\u0434\u044F\u0442 \u0437\u0430\u0441\u0432\u0435\u0442\u043B\u043E \u0438 \u0434\u0430\u0436\u0435 \u043F\u043E\u044E\u0442. \u041F\u043B\u043E\u0445\u043E \u043F\u043E\u044E\u0442, \u043D\u043E \u0435\u0437\u0434\u044F\u0442."
         conditions:
           Combinator: 0
           Conditions:
           - Type: 0
-            StringParam: freeplay.coal.leader_killed
+            StringParam: last_wolf.news_local
             QualityParam: 0
             IntParam: 0
             Negate: 0
@@ -10971,6 +11018,4943 @@ MonoBehaviour:
         nextNodeId: 
         endsDialogue: 1
         choiceId: settlement.hostess.bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: freeplay_last_wolf
+    title: "\u041F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439 \u0432\u043E\u043B\u043A"
+    category: 2
+    status: 1
+    developerComment: "\u0421\u0435\u0434\u043E\u0439 \u0432\u043E\u043B\u043A \u0443\u0436\u0435
+      \u043C\u0451\u0440\u0442\u0432. \u0420\u044F\u0434\u043E\u043C \u0441\u0438\u0434\u0438\u0442
+      \u0441\u0442\u0430\u0440\u044B\u0439 \u043E\u0445\u043E\u0442\u043D\u0438\u043A
+      \u0421\u0430\u0432\u0432\u0430, \u043F\u043E\u0432\u0440\u0435\u0434\u0438\u0432\u0448\u0438\u0439
+      \u043D\u043E\u0433\u0443. \u0418\u0433\u0440\u043E\u043A \u043F\u043E\u043C\u043E\u0433\u0430\u0435\u0442
+      \u0432\u044B\u0431\u0440\u0430\u0442\u044C\u0441\u044F \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0443
+      \u0438 \u0440\u0435\u0448\u0430\u0435\u0442, \u0431\u0440\u0430\u0442\u044C
+      \u043B\u0438 \u043D\u0430 \u0441\u0435\u0431\u044F \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0443
+      \u0434\u043E\u0431\u044B\u0447\u0438, \u0437\u0430 \u043A\u043E\u0442\u043E\u0440\u0443\u044E
+      \u0435\u043C\u0443 \u043E\u0431\u0435\u0449\u0430\u043D\u0430 \u043F\u043B\u0430\u0442\u0430."
+    sceneIllustration: {fileID: 0}
+    sceneIllustrationFillFrame: 0
+    sceneIllustrationScale: 1
+    sceneIllustrationOffsetNormalized: {x: 0, y: 0}
+    startNodeId: lw_arrival
+    entryNodeIds:
+    - lw_person_first
+    - lw_arrival_no_proof
+    - lw_return_corpse
+    - lw_return_empty
+    - lw_hut_again
+    - lw_inn_before
+    - lw_inn_report
+    - lw_inn_after
+    tags: []
+    nodes:
+    - id: lw_arrival
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_001
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041F\u043E\u0434 \u0432\u044B\u0432\u043E\u0440\u043E\u0442\u043D\u0435\u043C
+          \u043B\u0435\u0436\u0438\u0442 \u0441\u0435\u0434\u043E\u0439 \u0432\u043E\u043B\u043A.
+          \u041A\u043E\u043F\u044C\u0451 \u043F\u0440\u043E\u0448\u043B\u043E \u043F\u043E\u0434
+          \u043B\u043E\u043F\u0430\u0442\u043A\u0443; \u0434\u0440\u0435\u0432\u043A\u043E
+          \u0437\u0430\u0436\u0430\u0442\u043E \u043C\u0435\u0436\u0434\u0443 \u043A\u043E\u0440\u043D\u044F\u043C\u0438.
+          \u0412 \u0441\u0442\u043E\u0440\u043E\u043D\u0435 \u0441\u0438\u0434\u0438\u0442
+          \u0441\u0442\u0430\u0440\u0438\u043A \u0441 \u0442\u0443\u0433\u043E \u043E\u0431\u043C\u043E\u0442\u0430\u043D\u043D\u043E\u0439
+          \u043D\u043E\u0433\u043E\u0439."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_002
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0416\u0438\u0432\u043E\u0439 \u044F. \u041A\u043E\u043F\u044C\u0451
+          \u043F\u043E\u0434\u0430\u0439."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_003
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041E\u043D \u0437\u0430\u043C\u0435\u0447\u0430\u0435\u0442, \u043A\u0443\u0434\u0430
+          \u0432\u044B \u0441\u043C\u043E\u0442\u0440\u0438\u0442\u0435, \u0438 \u043A\u0430\u0447\u0430\u0435\u0442
+          \u0433\u043E\u043B\u043E\u0432\u043E\u0439."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_004
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0422\u043E\u0442 \u0443\u0436\u0435 \u043D\u0435\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_004_0
+          Type: 0
+          StringParam: last_wolf.seen
+          IntParam: 1
+        - EffectExecutionId: lw_fx_004_1
+          Type: 0
+          StringParam: last_wolf.dead_seen
+          IntParam: 1
+      choices:
+      - text: "\u041F\u043E\u0434\u0430\u0442\u044C \u043A\u043E\u043F\u044C\u0451
+          \u0438 \u043F\u043E\u043C\u043E\u0447\u044C \u0435\u043C\u0443 \u0441\u0435\u0441\u0442\u044C
+          \u0443\u0434\u043E\u0431\u043D\u0435\u0435."
+        nextNodeId: lw_first_help
+        endsDialogue: 0
+        choiceId: lw_a_005
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C
+          \u0432\u043E\u043B\u043A\u0430 \u0438 \u0440\u0430\u043D\u0435\u043D\u0443\u044E
+          \u043D\u043E\u0433\u0443."
+        nextNodeId: lw_look
+        endsDialogue: 0
+        choiceId: lw_a_006
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u041A\u0430\u043A \u0442\u0435\u0431\u044F \u0437\u043E\u0432\u0443\u0442?
+          \u0427\u0442\u043E \u0441\u043B\u0443\u0447\u0438\u043B\u043E\u0441\u044C?\xBB"
+        nextNodeId: lw_name
+        endsDialogue: 0
+        choiceId: lw_a_007
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u041C\u043D\u0435 \u043D\u0443\u0436\u043D\u043E \u0438\u0434\u0442\u0438\xBB."
+        nextNodeId: lw_leave_warning
+        endsDialogue: 0
+        choiceId: lw_a_008
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_first_help
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_009
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0412\u044B \u043E\u0441\u0432\u043E\u0431\u043E\u0436\u0434\u0430\u0435\u0442\u0435
+          \u0434\u0440\u0435\u0432\u043A\u043E. \u0421\u0442\u0430\u0440\u0438\u043A
+          \u0445\u0432\u0430\u0442\u0430\u0435\u0442\u0441\u044F \u0437\u0430 \u043D\u0435\u0433\u043E,
+          \u043F\u0440\u043E\u0431\u0443\u0435\u0442 \u043F\u043E\u0434\u043D\u044F\u0442\u044C\u0441\u044F
+          \u0438 \u0442\u0443\u0442 \u0436\u0435 \u0441\u0430\u0434\u0438\u0442\u0441\u044F
+          \u043E\u0431\u0440\u0430\u0442\u043D\u043E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_010
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0414\u043E \u0445\u0443\u0442\u043E\u0440\u0430 \u0434\u043E\u0439\u0434\u0451\u0448\u044C?"
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_011
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041E\u043D \u043A\u0438\u0432\u0430\u0435\u0442 \u043D\u0430 \u0441\u0432\u043E\u044E
+          \u043D\u043E\u0433\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_012
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u042F \u0432\u043E\u0442 \u0442\u043E\u0436\u0435 \u0434\u0443\u043C\u0430\u043B,
+          \u0447\u0442\u043E \u0434\u043E\u0439\u0434\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\xAB\u041F\u043E\u043A\u0430\u0436\u0438, \u0447\u0442\u043E \u0441
+          \u043D\u043E\u0433\u043E\u0439\xBB."
+        nextNodeId: lw_look
+        endsDialogue: 0
+        choiceId: lw_a_013
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u041A\u0443\u0434\u0430 \u0442\u0435\u0431\u044F \u043E\u0442\u043D\u0435\u0441\u0442\u0438?\xBB"
+        nextNodeId: lw_terms
+        endsDialogue: 0
+        choiceId: lw_a_014
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_look
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_015
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0412\u043E\u043B\u0447\u044C\u044F \u0433\u0440\u0443\u0434\u044C
+          \u043D\u0435 \u0434\u0432\u0438\u0436\u0435\u0442\u0441\u044F. \u041D\u0430
+          \u043F\u0435\u0440\u0435\u0434\u043D\u0435\u0439 \u043B\u0430\u043F\u0435
+          \u043D\u0435\u0442 \u0434\u0432\u0443\u0445 \u043F\u0430\u043B\u044C\u0446\u0435\u0432;
+          \u0441\u0435\u0434\u0430\u044F \u0448\u0435\u0440\u0441\u0442\u044C \u043D\u0430
+          \u0437\u0430\u0433\u0440\u0438\u0432\u043A\u0435 \u0441\u0432\u0430\u043B\u044F\u043B\u0430\u0441\u044C
+          \u043E\u0442 \u0437\u0430\u0441\u043E\u0445\u0448\u0435\u0439 \u043A\u0440\u043E\u0432\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_016
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423 \u0441\u0442\u0430\u0440\u0438\u043A\u0430 \u0440\u0430\u0441\u043F\u0443\u0445\u043B\u0430
+          \u0449\u0438\u043A\u043E\u043B\u043E\u0442\u043A\u0430. \u041D\u0430 \u043F\u043E\u0432\u044F\u0437\u043A\u0435
+          \u043D\u0435\u0442 \u0441\u043B\u0435\u0434\u043E\u0432 \u0443\u043A\u0443\u0441\u0430.
+          \u041E\u043D \u043F\u0440\u0438\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442
+          \u043D\u043E\u0433\u0443 \u043E\u0431\u0435\u0438\u043C\u0438 \u0440\u0443\u043A\u0430\u043C\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_017
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0412\u043E\u043B\u043A \u043F\u0440\u044B\u0433\u043D\u0443\u043B.
+          \u042F \u043E\u0442\u0441\u0442\u0443\u043F\u0438\u043B, \u043F\u043E\u043F\u0430\u043B
+          \u043D\u043E\u0433\u043E\u0439 \u043C\u0435\u0436\u0434\u0443 \u043A\u043E\u0440\u043D\u0435\u0439.
+          \u0414\u0430\u043B\u044C\u0448\u0435 \u043C\u044B \u043E\u0431\u0430 \u0437\u0434\u0435\u0441\u044C
+          \u043E\u0441\u0442\u0430\u043B\u0438\u0441\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_018
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0422\u043E\u043B\u044C\u043A\u043E \u0435\u043C\u0443 \u0445\u0443\u0436\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\xAB\u0414\u043E \u0445\u0443\u0442\u043E\u0440\u0430 \u0434\u0430\u043B\u0435\u043A\u043E?\xBB"
+        nextNodeId: lw_terms
+        endsDialogue: 0
+        choiceId: lw_a_019
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u0422\u044B \u0421\u0430\u0432\u0432\u0430? \u041E \u0442\u0435\u0431\u0435
+          \u0433\u043E\u0432\u043E\u0440\u0438\u043B\u0438 \u0443 \u0434\u043E\u0440\u043E\u0433\u0438\xBB."
+        nextNodeId: lw_name
+        endsDialogue: 0
+        choiceId: lw_a_020
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.rumor_heard
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u041F\u043E\u0447\u0435\u043C\u0443 \u043F\u043E\u0448\u0451\u043B
+          \u043E\u0434\u0438\u043D?\xBB"
+        nextNodeId: lw_alone
+        endsDialogue: 0
+        choiceId: lw_a_021
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u041F\u043E\u043C\u043E\u0447\u044C \u0431\u0435\u0437 \u0434\u0430\u043B\u044C\u043D\u0435\u0439\u0448\u0438\u0445
+          \u0432\u043E\u043F\u0440\u043E\u0441\u043E\u0432."
+        nextNodeId: lw_terms
+        endsDialogue: 0
+        choiceId: lw_a_022
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_name
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_023
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0421\u0430\u0432\u0432\u0430. \u0423\u0433\u043B\u0435\u0436\u043E\u0433\u0438
+          \u043D\u0430\u043D\u044F\u043B\u0438. \u041F\u043B\u0430\u0442\u0443 \u043E\u0431\u0435\u0449\u0430\u043B\u0438
+          \u0437\u0430 \u044D\u0442\u043E\u0433\u043E, \u0441\u0435\u0434\u043E\u0433\u043E.
+          \u041B\u0430\u043F\u0430 \u0443 \u043D\u0435\u0433\u043E \u043F\u0440\u0438\u043C\u0435\u0442\u043D\u0430\u044F
+          \u2014 \u0438\u0437 \u0441\u0442\u0430\u0440\u043E\u0433\u043E \u043A\u0430\u043F\u043A\u0430\u043D\u0430
+          \u0443\u0448\u0451\u043B."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_024
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041E\u043D \u0443\u0431\u0438\u0440\u0430\u0435\u0442 \u0441 \u043B\u0430\u0434\u043E\u043D\u0438
+          \u043F\u0440\u0438\u043B\u0438\u043F\u0448\u0443\u044E \u0449\u0435\u043F\u043A\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_025
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041A\u0430\u043F\u043A\u0430\u043D \u043D\u0435 \u043C\u043E\u0439.
+          \u0421\u0440\u0430\u0437\u0443 \u0433\u043E\u0432\u043E\u0440\u044E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\xAB\u041F\u043E\u0447\u0435\u043C\u0443 \u043F\u043E\u0448\u0451\u043B
+          \u043E\u0434\u0438\u043D?\xBB"
+        nextNodeId: lw_alone
+        endsDialogue: 0
+        choiceId: lw_a_026
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u041A\u0442\u043E \u0437\u0430\u043F\u043B\u0430\u0442\u0438\u0442
+          \u0438 \u043A\u0430\u043A \u0443\u0437\u043D\u0430\u0435\u0442 \u0441\u0432\u043E\u0435\u0433\u043E
+          \u0432\u043E\u043B\u043A\u0430?\xBB"
+        nextNodeId: lw_bounty
+        endsDialogue: 0
+        choiceId: lw_a_027
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u0420\u0430\u0441\u0441\u043A\u0430\u0437\u044B\u0432\u0430\u0442\u044C
+          \u0431\u0443\u0434\u0435\u0448\u044C \u043F\u043E \u0434\u043E\u0440\u043E\u0433\u0435.
+          \u041A\u0430\u043A \u0442\u0435\u0431\u0435 \u043F\u043E\u043C\u043E\u0447\u044C?\xBB"
+        nextNodeId: lw_terms
+        endsDialogue: 0
+        choiceId: lw_a_028
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_alone
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_029
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0414\u0432\u043E\u0438\u0445 \u0437\u0432\u0430\u043B\u0438.
+          \u0412\u0442\u043E\u0440\u043E\u0439 \u043A \u0440\u043E\u0434\u043D\u0435
+          \u0443\u0435\u0445\u0430\u043B. \u042F \u043C\u0435\u0441\u0442\u043E \u0437\u043D\u0430\u043B,
+          \u0432\u0435\u0442\u0435\u0440 \u0431\u044B\u043B \u0445\u043E\u0440\u043E\u0448\u0438\u0439.
+          \u0420\u0435\u0448\u0438\u043B \u043D\u0435 \u0436\u0434\u0430\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_030
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041E\u043D \u043F\u043E\u0434\u0442\u044F\u0433\u0438\u0432\u0430\u0435\u0442
+          \u043F\u043E\u0432\u044F\u0437\u043A\u0443, \u043C\u043E\u0440\u0449\u0438\u0442\u0441\u044F
+          \u0438 \u043F\u0435\u0440\u0435\u0441\u0442\u0430\u0451\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_031
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u042D\u0442\u043E \u044F \u0442\u0435\u0431\u0435 \u0441\u0435\u0439\u0447\u0430\u0441
+          \u0441\u043A\u043B\u0430\u0434\u043D\u043E \u0440\u0430\u0441\u0441\u043A\u0430\u0437\u044B\u0432\u0430\u044E.
+          \u0423\u0442\u0440\u043E\u043C \u0431\u044B\u043B\u043E \u043A\u043E\u0440\u043E\u0447\u0435:
+          \u0441\u0445\u043E\u0436\u0443 \u0438 \u0432\u0435\u0440\u043D\u0443\u0441\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\xAB\u0411\u044B\u0432\u0430\u0435\u0442. \u0414\u0430\u0432\u0430\u0439
+          \u0432\u044B\u0431\u0438\u0440\u0430\u0442\u044C\u0441\u044F\xBB."
+        nextNodeId: lw_terms
+        endsDialogue: 0
+        choiceId: lw_a_032
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u0422\u0435\u043F\u0435\u0440\u044C \u0447\u0443\u0436\u0438\u043C
+          \u043F\u0440\u0438\u0434\u0451\u0442\u0441\u044F \u0438\u0441\u043F\u0440\u0430\u0432\u043B\u044F\u0442\u044C\xBB."
+        nextNodeId: lw_sharp
+        endsDialogue: 0
+        choiceId: lw_a_033
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u0410 \u0432\u043E\u043B\u043A \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043B\u044C\u043D\u043E
+          \u043D\u0435 \u0431\u043E\u044F\u043B\u0441\u044F \u043E\u0433\u043D\u044F?\xBB"
+        nextNodeId: lw_fire
+        endsDialogue: 0
+        choiceId: lw_a_034
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_sharp
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_035
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041F\u0440\u0438\u0434\u0451\u0442\u0441\u044F. \u041F\u043E\u0442\u043E\u043C\u0443
+          \u0438 \u043F\u0440\u043E\u0448\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_036
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0421\u0430\u0432\u0432\u0430 \u043A\u043B\u0430\u0434\u0451\u0442
+          \u043A\u043E\u043F\u044C\u0451 \u043F\u043E\u043F\u0435\u0440\u0451\u043A
+          \u043A\u043E\u043B\u0435\u043D \u0438 \u0436\u0434\u0451\u0442 \u0432\u0430\u0448\u0435\u0433\u043E
+          \u0440\u0435\u0448\u0435\u043D\u0438\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041E\u0431\u0441\u0443\u0434\u0438\u0442\u044C \u043F\u043E\u043C\u043E\u0449\u044C."
+        nextNodeId: lw_terms
+        endsDialogue: 0
+        choiceId: lw_a_037
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u042F \u043C\u043E\u0433\u0443 \u0445\u043E\u0442\u044F \u0431\u044B
+          \u0441\u043E\u043E\u0431\u0449\u0438\u0442\u044C \u0443\u0433\u043B\u0435\u0436\u043E\u0433\u0430\u043C\xBB."
+        nextNodeId: lw_send_offer
+        endsDialogue: 0
+        choiceId: lw_a_038
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_fire
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_039
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041A \u044F\u043C\u0430\u043C \u043F\u043E\u0434\u0445\u043E\u0434\u0438\u043B,
+          \u0445\u043E\u0442\u044F \u0442\u0430\u043C \u043E\u0433\u043D\u0438. \u041D\u043E
+          \u043E\u043D \u043D\u0435 \u0432 \u043E\u0433\u043E\u043D\u044C \u0448\u0451\u043B.
+          \u0416\u0434\u0430\u043B, \u043F\u043E\u043A\u0430 \u0447\u0435\u043B\u043E\u0432\u0435\u043A
+          \u043E\u0442\u043E\u0439\u0434\u0451\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_040
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0421\u043E\u0431\u0430\u043A\u0443 \u0443 \u043D\u0438\u0445
+          \u0443\u043D\u0451\u0441. \u041E\u0432\u0446\u0443 \u0443 \u0432\u043E\u0437\u0447\u0438\u043A\u0430.
+          \u0418 \u0434\u043E\u0440\u043E\u0433\u0443 \u0443\u0436\u0435 \u0437\u0430\u043F\u043E\u043C\u043D\u0438\u043B.
+          \u041F\u043E\u0442\u043E\u043C\u0443 \u043C\u0435\u043D\u044F \u0438 \u043F\u043E\u0437\u0432\u0430\u043B\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\xAB\u0422\u0435\u043F\u0435\u0440\u044C \u0434\u043E\u0440\u043E\u0433\u0430
+          \u0441\u0442\u0430\u043D\u0435\u0442 \u0441\u043F\u043E\u043A\u043E\u0439\u043D\u0435\u0435\xBB."
+        nextNodeId: lw_bounty
+        endsDialogue: 0
+        choiceId: lw_a_041
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u041D\u0430\u0434\u043E \u0432\u044B\u0431\u0438\u0440\u0430\u0442\u044C\u0441\u044F\xBB."
+        nextNodeId: lw_terms
+        endsDialogue: 0
+        choiceId: lw_a_042
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_bounty
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_043
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0423\u0433\u043B\u0435\u0436\u043E\u0433 \u0432\u0438\u0434\u0435\u043B
+          \u0435\u0433\u043E \u0431\u043B\u0438\u0437\u043A\u043E. \u0423\u0437\u043D\u0430\u0435\u0442
+          \u043F\u043E \u043B\u0430\u043F\u0435 \u0438 \u0441\u0435\u0434\u043E\u043C\u0443
+          \u0437\u0430\u0433\u0440\u0438\u0432\u043A\u0443. \u0417\u0430 \u0440\u0430\u0441\u0441\u043A\u0430\u0437
+          \u043F\u043B\u0430\u0442\u0438\u0442\u044C \u043D\u0435 \u0441\u0442\u0430\u043D\u0435\u0442:
+          \u0435\u043C\u0443 \u0443\u0436\u0435 \u0440\u0430\u0441\u0441\u043A\u0430\u0437\u044B\u0432\u0430\u043B\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_044
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0414\u043E\u0432\u0435\u0437\u0451\u043C \u0432\u043E\u043B\u043A\u0430
+          \u2014 \u043F\u043E\u043B\u043E\u0432\u0438\u043D\u0430 \u043F\u043B\u0430\u0442\u044B
+          \u0442\u0432\u043E\u044F. \u0417\u0430 \u043C\u0435\u043D\u044F \u0438
+          \u0437\u0430 \u0440\u0430\u0431\u043E\u0442\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\xAB\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0440\u0435\u0448\u0438\u043C,
+          \u043A\u0430\u043A \u0442\u0435\u0431\u044F \u0432\u044B\u043D\u0435\u0441\u0442\u0438\xBB."
+        nextNodeId: lw_terms
+        endsDialogue: 0
+        choiceId: lw_a_045
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u042F \u043D\u0435 \u0431\u0435\u0440\u0443 \u043F\u043B\u0430\u0442\u0443
+          \u0437\u0430 \u0442\u0430\u043A\u0443\u044E \u043F\u043E\u043C\u043E\u0449\u044C\xBB."
+        nextNodeId: lw_refuse_fee
+        endsDialogue: 0
+        choiceId: lw_a_046
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_refuse_fee
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_047
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041A\u0430\u043A \u0441\u043A\u0430\u0436\u0435\u0448\u044C.
+          \u0410 \u0443\u0433\u043B\u0435\u0436\u043E\u0433\u0443 \u0437\u0430 \u043C\u0435\u043D\u044F
+          \u0441\u043A\u0438\u0434\u043A\u0443 \u043D\u0435 \u0434\u0435\u043B\u0430\u0439."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_047_0
+          Type: 0
+          StringParam: last_wolf.fee_refused
+          IntParam: 1
+      choices:
+      - text: "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u0441\u043F\u043E\u0441\u043E\u0431
+          \u043F\u043E\u043C\u043E\u0449\u0438."
+        nextNodeId: lw_terms
+        endsDialogue: 0
+        choiceId: lw_a_048
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_terms
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_049
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0425\u0443\u0442\u043E\u0440 \u0437\u0430 \u043E\u043B\u044C\u0448\u0430\u043D\u0438\u043A\u043E\u043C.
+          \u0422\u0440\u043E\u043F\u0430 \u0441\u0443\u0445\u0430\u044F, \u0442\u043E\u043B\u044C\u043A\u043E
+          \u0432 \u043A\u043E\u043D\u0446\u0435 \u043F\u043E\u0434\u044A\u0451\u043C.
+          \u0414\u043E \u043C\u0435\u0441\u0442\u0430 \u043F\u043E\u043B\u0447\u0430\u0441\u0430
+          \u043D\u0430\u043B\u0435\u0433\u043A\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_050
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0423 \u043C\u0435\u043D\u044F \u043F\u043B\u0430\u0449 \u0438
+          \u0432\u0435\u0440\u0451\u0432\u043A\u0430. \u0414\u0432\u0435 \u0436\u0435\u0440\u0434\u0438
+          \u0441\u0440\u0435\u0436\u0435\u0448\u044C \u2014 \u043C\u043E\u0436\u043D\u043E
+          \u0442\u0430\u0449\u0438\u0442\u044C. \u0421 \u0432\u043E\u043B\u043A\u043E\u043C
+          \u0434\u043E\u043B\u044C\u0448\u0435 \u0432\u044B\u0439\u0434\u0435\u0442.
+          \u041E\u0441\u0442\u0430\u0432\u0438\u043C \u0435\u0433\u043E \u2014 \u0434\u043E\u0431\u0435\u0440\u0451\u043C\u0441\u044F
+          \u0441\u043A\u043E\u0440\u0435\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_051
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0415\u0441\u043B\u0438 \u0438 \u043C\u0435\u043D\u044F, \u0438
+          \u0432\u043E\u043B\u043A\u0430 \u0434\u043E\u0432\u0435\u0437\u0451\u0448\u044C
+          \u2014 \u043F\u043E\u043B\u043E\u0432\u0438\u043D\u0430 \u043F\u043B\u0430\u0442\u044B
+          \u0442\u0432\u043E\u044F."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.fee_refused
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_052
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0421\u0430\u0432\u0432\u0430 \u0434\u043E\u0441\u0442\u0430\u0451\u0442
+          \u043A\u043E\u0440\u043E\u0442\u043A\u0438\u0439 \u043D\u043E\u0436 \u0438
+          \u043F\u0440\u043E\u0442\u044F\u0433\u0438\u0432\u0430\u0435\u0442 \u0440\u0443\u043A\u043E\u044F\u0442\u044C\u044E
+          \u043A \u0432\u0430\u043C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_053
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0421\u0430\u043C \u0445\u043E\u0442\u044C \u0432 \u044D\u0442\u043E\u043C
+          \u043F\u043E\u0443\u0447\u0430\u0441\u0442\u0432\u0443\u044E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0434\u043E\u0441\u0442\u0430\u0432\u0438\u0442\u044C
+          \u0421\u0430\u0432\u0432\u0443 \u043D\u0430 \u0445\u0443\u0442\u043E\u0440.
+          \u0414\u043E\u0431\u044B\u0447\u0443 \u043E\u0441\u0442\u0430\u0432\u0438\u0442\u044C.
+          [1 \u0447\u0430\u0441]"
+        nextNodeId: lw_person_first
+        endsDialogue: 0
+        choiceId: lw_a_054
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u0421\u0434\u0435\u043B\u0430\u0442\u044C \u0432\u043E\u043B\u043E\u043A\u0443\u0448\u0443
+          \u0434\u043B\u044F \u0421\u0430\u0432\u0432\u044B \u0438 \u0434\u043E\u0431\u044B\u0447\u0438.
+          [2 \u0447\u0430\u0441\u0430 \u0441 \u043F\u043E\u043C\u043E\u0449\u043D\u0438\u043A\u043E\u043C;
+          3 \u0447\u0430\u0441\u0430 \u0432 \u043E\u0434\u0438\u043D\u043E\u0447\u043A\u0443]"
+        nextNodeId: lw_both_prepare
+        endsDialogue: 0
+        choiceId: lw_a_055
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u0414\u043E\u0439\u0442\u0438 \u043D\u0430\u043B\u0435\u0433\u043A\u0435
+          \u0434\u043E \u0445\u0443\u0442\u043E\u0440\u0430 \u0438 \u043F\u0440\u0438\u0432\u0435\u0441\u0442\u0438
+          \u043F\u043E\u043C\u043E\u0449\u044C. [30 \u043C\u0438\u043D\u0443\u0442
+          \u0434\u043E \u0445\u0443\u0442\u043E\u0440\u0430]"
+        nextNodeId: lw_send_offer
+        endsDialogue: 0
+        choiceId: lw_a_056
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u0414\u043E\u043B\u044E \u043E\u0441\u0442\u0430\u0432\u044C
+          \u0441\u0435\u0431\u0435. \u042F \u043F\u043E\u043C\u043E\u0433\u0443 \u0431\u0435\u0437
+          \u043F\u043B\u0430\u0442\u044B\xBB."
+        nextNodeId: lw_refuse_fee
+        endsDialogue: 0
+        choiceId: lw_a_057
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.fee_refused
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u041C\u043D\u0435 \u043D\u0443\u0436\u043D\u043E \u0438\u0434\u0442\u0438\xBB."
+        nextNodeId: lw_leave_warning
+        endsDialogue: 0
+        choiceId: lw_a_058
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_send_offer
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_059
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0423 \u0434\u0430\u043B\u044C\u043D\u0435\u0439 \u044F\u043C\u044B
+          \u0441\u043F\u0440\u043E\u0441\u0438 \u0445\u043E\u0437\u044F\u0438\u043D\u0430.
+          \u0421\u043A\u0430\u0436\u0438: \u0421\u0430\u0432\u0432\u0430 \u043F\u043E\u0434
+          \u0432\u044B\u0432\u043E\u0440\u043E\u0442\u043D\u0435\u043C, \u043B\u0435\u0432\u0435\u0435
+          \u0442\u0440\u043E\u043F\u044B. \u0414\u0432\u0430 \u043F\u0430\u043B\u044C\u0446\u0430
+          \u0443 \u0432\u043E\u043B\u043A\u0430, \u043D\u043E\u0433\u0430 \u0443
+          \u0421\u0430\u0432\u0432\u044B. \u041D\u0435 \u043F\u0435\u0440\u0435\u043F\u0443\u0442\u0430\u0439."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_060
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041E\u043D \u043A\u0438\u0432\u0430\u0435\u0442 \u043D\u0430 \u0440\u0430\u0437\u0432\u0438\u043B\u043A\u0443,
+          \u0432\u0438\u0434\u043D\u0443\u044E \u0441\u043A\u0432\u043E\u0437\u044C
+          \u043E\u043B\u044C\u0445\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_061
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0422\u0430\u043C \u0441\u043B\u043E\u043C\u0430\u043D\u0430
+          \u0432\u0435\u0440\u0445\u0443\u0448\u043A\u0430. \u041E\u0442 \u043D\u0435\u0451
+          \u0443\u0441\u043B\u044B\u0448\u0430\u0442, \u0435\u0441\u043B\u0438 \u043A\u0440\u0438\u043A\u043D\u0443\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0418\u0434\u0442\u0438 \u043D\u0430 \u0445\u0443\u0442\u043E\u0440
+          \u0437\u0430 \u043B\u044E\u0434\u044C\u043C\u0438. [30 \u043C\u0438\u043D\u0443\u0442]"
+        nextNodeId: lw_message_hut
+        endsDialogue: 0
+        choiceId: lw_a_062
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u041B\u0443\u0447\u0448\u0435 \u0432\u0441\u0451-\u0442\u0430\u043A\u0438
+          \u0432\u044B\u043D\u0435\u0441\u0443 \u0441\u0430\u043C\xBB."
+        nextNodeId: lw_terms
+        endsDialogue: 0
+        choiceId: lw_a_063
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_leave_warning
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_064
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0415\u0441\u043B\u0438 \u043C\u0438\u043C\u043E \u0445\u0443\u0442\u043E\u0440\u0430
+          \u043F\u043E\u0439\u0434\u0451\u0448\u044C, \u0441\u043A\u0430\u0436\u0438
+          \u043F\u0440\u043E \u043C\u0435\u043D\u044F. \u041E\u043D\u0438 \u043A
+          \u0432\u0435\u0447\u0435\u0440\u0443 \u0432\u0441\u0451 \u0440\u0430\u0432\u043D\u043E
+          \u0438\u0441\u043A\u0430\u0442\u044C \u0432\u044B\u0439\u0434\u0443\u0442,
+          \u043D\u043E \u0438\u043C \u043B\u0438\u0448\u043D\u0438\u0439 \u0447\u0430\u0441
+          \u043F\u043E \u043B\u0435\u0441\u0443 \u043D\u0435 \u043D\u0443\u0436\u0435\u043D."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_065
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0421\u0430\u0432\u0432\u0430 \u043F\u043E\u0434\u043E\u0434\u0432\u0438\u0433\u0430\u0435\u0442
+          \u043A \u0441\u0435\u0431\u0435 \u0432\u0435\u0440\u0451\u0432\u043A\u0443
+          \u0438 \u043D\u0430\u0447\u0438\u043D\u0430\u0435\u0442 \u0441\u043D\u043E\u0432\u0430
+          \u0441\u0432\u043E\u0440\u0430\u0447\u0438\u0432\u0430\u0442\u044C \u0435\u0451."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_066
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423\u0439\u0442\u0438 \u043C\u043E\u0436\u043D\u043E. \u041E\u0431\u0435\u0449\u0430\u043D\u0438\u044F
+          \u0432\u044B \u0435\u0449\u0451 \u043D\u0435 \u0434\u0430\u043B\u0438;
+          \u043F\u043E\u043C\u043E\u0449\u0438 \u0421\u0430\u0432\u0432\u0430 \u043E\u0442
+          \u0432\u0430\u0441 \u043F\u043E\u043A\u0430 \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0438\u043B."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041E\u0441\u0442\u0430\u0442\u044C\u0441\u044F \u0438 \u043F\u043E\u043C\u043E\u0447\u044C."
+        nextNodeId: lw_terms
+        endsDialogue: 0
+        choiceId: lw_a_067
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u0421\u043A\u0430\u0436\u0443 \u0438\u043C, \u0433\u0434\u0435
+          \u0442\u044B\xBB. \u0418\u0434\u0442\u0438 \u043D\u0430 \u0445\u0443\u0442\u043E\u0440.
+          [30 \u043C\u0438\u043D\u0443\u0442]"
+        nextNodeId: lw_message_hut
+        endsDialogue: 0
+        choiceId: lw_a_068
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u0423\u0439\u0442\u0438, \u043D\u0438\u0447\u0435\u0433\u043E \u043D\u0435
+          \u043E\u0431\u0435\u0449\u0430\u044F."
+        nextNodeId: lw_withdraw
+        endsDialogue: 0
+        choiceId: lw_a_069
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_withdraw
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_070
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0421\u0430\u0432\u0432\u0430 \u043A\u043E\u0440\u043E\u0442\u043A\u043E
+          \u043A\u0438\u0432\u0430\u0435\u0442. \u041A\u043E\u0433\u0434\u0430 \u0432\u044B
+          \u0432\u044B\u0445\u043E\u0434\u0438\u0442\u0435 \u043D\u0430 \u0442\u0440\u043E\u043F\u0443,
+          \u043E\u043D \u0443\u0436\u0435 \u0440\u0430\u0437\u0431\u0438\u0440\u0430\u0435\u0442
+          \u0443\u0437\u0435\u043B \u043D\u0430 \u0432\u0435\u0440\u0451\u0432\u043A\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_071
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0412\u043E\u043B\u043A \u043C\u0451\u0440\u0442\u0432. \u0421\u0430\u0432\u0432\u0430
+          \u043E\u0441\u0442\u0430\u043B\u0441\u044F \u0436\u0434\u0430\u0442\u044C
+          \u0443\u0433\u043B\u0435\u0436\u043E\u0433\u043E\u0432."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_071_0
+          Type: 0
+          StringParam: last_wolf.withdrawn
+          IntParam: 1
+        - EffectExecutionId: lw_fx_071_1
+          Type: 0
+          StringParam: last_wolf.closed
+          IntParam: 1
+      choices:
+      - text: "\u0412\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F \u043A \u0441\u0432\u043E\u0435\u043C\u0443
+          \u043F\u0443\u0442\u0438."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_072
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_person_first
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_073
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0412\u044B \u0441\u0432\u044F\u0437\u044B\u0432\u0430\u0435\u0442\u0435
+          \u0434\u0432\u0435 \u0436\u0435\u0440\u0434\u0438 \u0432\u0435\u0440\u0451\u0432\u043A\u043E\u0439
+          \u0421\u0430\u0432\u0432\u044B \u0438 \u0437\u0430\u043A\u0440\u0435\u043F\u043B\u044F\u0435\u0442\u0435
+          \u043C\u0435\u0436\u0434\u0443 \u043D\u0438\u043C\u0438 \u0435\u0433\u043E
+          \u043F\u043B\u0430\u0449. \u0412\u043E\u043B\u043A \u043E\u0441\u0442\u0430\u0451\u0442\u0441\u044F
+          \u043F\u043E\u0434 \u0432\u044B\u0432\u043E\u0440\u043E\u0442\u043D\u0435\u043C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_074
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041A\u043E\u043F\u044C\u0451 \u043F\u043E\u043B\u043E\u0436\u0438
+          \u0440\u044F\u0434\u043E\u043C. \u0421 \u043D\u0438\u043C \u0445\u043E\u0442\u044C
+          \u0440\u0443\u043A\u0438 \u0437\u0430\u043D\u044F\u0442\u044B \u0431\u0443\u0434\u0443\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_075
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041D\u0430 \u043F\u043E\u0434\u044A\u0451\u043C\u0435 \u0421\u0430\u0432\u0432\u0430
+          \u0437\u0430\u043C\u043E\u043B\u043A\u0430\u0435\u0442 \u0438 \u043A\u0440\u0435\u043F\u0447\u0435
+          \u0441\u0436\u0438\u043C\u0430\u0435\u0442 \u0434\u0440\u0435\u0432\u043A\u043E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_076
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423 \u044F\u043C \u0432\u0438\u0434\u0435\u043D \u0434\u044B\u043C.
+          \u0418\u0437-\u0437\u0430 \u043F\u043E\u043B\u0435\u043D\u043D\u0438\u0446\u044B
+          \u0432\u044B\u0445\u043E\u0434\u0438\u0442 \u0443\u0433\u043B\u0435\u0436\u043E\u0433."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_076_0
+          Type: 0
+          StringParam: last_wolf.hunter_safe
+          IntParam: 1
+        - EffectExecutionId: lw_fx_076_1
+          Type: 0
+          StringParam: last_wolf.proof_left
+          IntParam: 1
+      choices:
+      - text: "\u041F\u043E\u0437\u0432\u0430\u0442\u044C \u0443\u0433\u043B\u0435\u0436\u043E\u0433\u0430."
+        nextNodeId: lw_arrival_no_proof
+        endsDialogue: 0
+        choiceId: lw_a_077
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_both_prepare
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_078
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0412\u044B \u0432\u044B\u0440\u0443\u0431\u0430\u0435\u0442\u0435
+          \u0434\u0432\u0435 \u0436\u0435\u0440\u0434\u0438. \u0421\u0430\u0432\u0432\u0430
+          \u043F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0435\u0442, \u043A\u0430\u043A
+          \u0443\u043B\u043E\u0436\u0438\u0442\u044C \u043F\u043B\u0430\u0449 \u0438
+          \u0433\u0434\u0435 \u0441\u0442\u044F\u043D\u0443\u0442\u044C \u043F\u043E\u043F\u0435\u0440\u0435\u0447\u0438\u043D\u044B;
+          \u043B\u0435\u0436\u0430\u0442\u044C \u0435\u043C\u0443 \u043F\u0440\u0438\u0434\u0451\u0442\u0441\u044F
+          \u0440\u044F\u0434\u043E\u043C \u0441 \u0432\u043E\u043B\u043A\u043E\u043C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_079
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0428\u0435\u0440\u0441\u0442\u044C\u044E \u043A\u043E \u043C\u043D\u0435
+          \u043A\u043B\u0430\u0434\u0438. \u041A\u043E\u043F\u044C\u0451 \u0432\u0441\u0451
+          \u0440\u0430\u0432\u043D\u043E \u0443\u0436\u0435 \u0432\u044B\u043D\u0443\u043B."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_080
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0412\u044B \u0442\u044F\u043D\u0435\u0442\u0435 \u0432\u043E\u043B\u043E\u043A\u0443\u0448\u0443
+          \u043F\u043E \u0442\u0440\u043E\u043F\u0435. \u041D\u0430 \u043F\u043E\u0434\u044A\u0451\u043C\u0435
+          \u043F\u0440\u0438\u0445\u043E\u0434\u0438\u0442\u0441\u044F \u043E\u0441\u0442\u0430\u043D\u0430\u0432\u043B\u0438\u0432\u0430\u0442\u044C\u0441\u044F
+          \u0438 \u043F\u043E\u0434\u0441\u043E\u0432\u044B\u0432\u0430\u0442\u044C
+          \u0436\u0435\u0440\u0434\u044C \u043F\u043E\u0434 \u043F\u043E\u043B\u043E\u0437\u044C\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_081
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041B\u0435\u0432\u0435\u0435 \u0431\u0435\u0440\u0438. \u0422\u0430\u043C
+          \u043A\u043E\u0440\u0435\u043D\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_082
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0421\u0430\u0432\u0432\u0430 \u0437\u0430\u043C\u0435\u0447\u0430\u0435\u0442
+          \u0432\u0430\u0448 \u0432\u0437\u0433\u043B\u044F\u0434 \u0438 \u0434\u043E\u0431\u0430\u0432\u043B\u044F\u0435\u0442
+          \u0442\u0438\u0448\u0435:"
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_083
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0412\u0441\u0451. \u041C\u043E\u043B\u0447\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0414\u043E\u0442\u0430\u0449\u0438\u0442\u044C \u0432\u043E\u043B\u043E\u043A\u0443\u0448\u0443
+          \u0434\u043E \u0445\u0443\u0442\u043E\u0440\u0430."
+        nextNodeId: lw_both_arrived
+        endsDialogue: 0
+        choiceId: lw_a_084
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_both_arrived
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_085
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423 \u043F\u043E\u043B\u0435\u043D\u043D\u0438\u0446\u044B \u0443\u0433\u043B\u0435\u0436\u043E\u0433
+          \u0441\u0442\u0430\u0432\u0438\u0442 \u0432\u0435\u0434\u0440\u043E \u0438
+          \u0438\u0434\u0451\u0442 \u043D\u0430\u0432\u0441\u0442\u0440\u0435\u0447\u0443.
+          \u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u043E\u043D \u043F\u043E\u0434\u0445\u0432\u0430\u0442\u044B\u0432\u0430\u0435\u0442
+          \u0432\u043E\u043B\u043E\u043A\u0443\u0448\u0443, \u043F\u043E\u0442\u043E\u043C
+          \u0437\u0430\u043C\u0435\u0447\u0430\u0435\u0442 \u0432\u043E\u043B\u043A\u0430."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_086
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u041D\u0443, \u0421\u0430\u0432\u0432\u0430. \u041F\u0440\u0438\u0432\u0451\u0437."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_087
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041F\u0440\u0438\u0432\u0435\u0437\u043B\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_087_0
+          Type: 0
+          StringParam: last_wolf.hunter_safe
+          IntParam: 1
+        - EffectExecutionId: lw_fx_087_1
+          Type: 0
+          StringParam: last_wolf.proof_delivered
+          IntParam: 1
+      choices:
+      - text: "\u041F\u0435\u0440\u0435\u0434\u0430\u0442\u044C \u0421\u0430\u0432\u0432\u0443
+          \u0445\u043E\u0437\u044F\u0435\u0432\u0430\u043C \u0438 \u043F\u043E\u043A\u0430\u0437\u0430\u0442\u044C
+          \u0434\u043E\u0431\u044B\u0447\u0443."
+        nextNodeId: lw_proof_check
+        endsDialogue: 0
+        choiceId: lw_a_088
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_message_hut
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_089
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423 \u0434\u0430\u043B\u044C\u043D\u0435\u0439 \u044F\u043C\u044B
+          \u0443\u0433\u043B\u0435\u0436\u043E\u0433 \u0440\u0430\u0437\u0440\u0430\u0432\u043D\u0438\u0432\u0430\u0435\u0442
+          \u0437\u0435\u043C\u043B\u044E \u0434\u043B\u0438\u043D\u043D\u043E\u0439
+          \u043B\u043E\u043F\u0430\u0442\u043E\u0439. \u0423\u0441\u043B\u044B\u0448\u0430\u0432
+          \u043F\u0440\u043E \u0421\u0430\u0432\u0432\u0443, \u043E\u043D \u0432\u0442\u044B\u043A\u0430\u0435\u0442
+          \u043B\u043E\u043F\u0430\u0442\u0443 \u0432 \u043D\u0430\u0441\u044B\u043F\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_090
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u041F\u043E\u0434 \u0432\u044B\u0432\u043E\u0440\u043E\u0442\u043D\u0435\u043C?
+          \u0413\u0434\u0435 \u043E\u043B\u044C\u0445\u0430 \u0440\u0430\u0437\u0434\u0432\u0430\u0438\u0432\u0430\u0435\u0442\u0441\u044F?"
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_091
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0412\u044B \u043E\u0431\u044A\u044F\u0441\u043D\u044F\u0435\u0442\u0435,
+          \u0433\u0434\u0435 \u043B\u0435\u0436\u0438\u0442 \u043E\u0445\u043E\u0442\u043D\u0438\u043A
+          \u0438 \u0447\u0442\u043E \u0441\u043B\u0443\u0447\u0438\u043B\u043E\u0441\u044C
+          \u0441 \u043D\u043E\u0433\u043E\u0439."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_092
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u0412\u0435\u0440\u0451\u0432\u043A\u0443 \u0432\u043E\u0437\u044C\u043C\u0451\u043C.
+          \u0418 \u0436\u0435\u0440\u0434\u0438. \u0414\u043E \u0432\u0435\u0447\u0435\u0440\u0430
+          \u0447\u0435\u0433\u043E \u0436\u0434\u0430\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_092_0
+          Type: 0
+          StringParam: last_wolf.help_sent
+          IntParam: 1
+        - EffectExecutionId: lw_fx_092_1
+          Type: 0
+          StringParam: last_wolf.death_reported
+          IntParam: 1
+      choices:
+      - text: "\xAB\u042F \u043F\u043E\u043A\u0430\u0437\u0430\u043B \u0434\u043E\u0440\u043E\u0433\u0443.
+          \u0414\u0430\u043B\u044C\u0448\u0435 \u0441\u043F\u0440\u0430\u0432\u0438\u0442\u0435\u0441\u044C?\xBB"
+        nextNodeId: lw_message_end
+        endsDialogue: 0
+        choiceId: lw_a_093
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u041E\u0441\u0442\u0430\u0442\u044C\u0441\u044F \u0434\u043E \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0435\u043D\u0438\u044F
+          \u043B\u044E\u0434\u0435\u0439. [\u0415\u0449\u0451 2 \u0447\u0430\u0441\u0430]"
+        nextNodeId: lw_wait_helpers
+        endsDialogue: 0
+        choiceId: lw_a_094
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_message_end
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_095
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u0421\u043F\u0440\u0430\u0432\u0438\u043C\u0441\u044F. \u0422\u044B
+          \u0435\u0433\u043E \u043D\u0430\u0448\u0451\u043B \u2014 \u0443\u0436\u0435
+          \u0434\u0435\u043B\u043E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_096
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423\u0433\u043B\u0435\u0436\u043E\u0433 \u0437\u0430\u0432\u043E\u0440\u0430\u0447\u0438\u0432\u0430\u0435\u0442
+          \u0432 \u0442\u0440\u044F\u043F\u0438\u0446\u0443 \u0445\u043B\u0435\u0431
+          \u0438 \u043A\u0443\u0441\u043E\u043A \u0441\u043E\u043B\u0451\u043D\u043E\u0439
+          \u0440\u044B\u0431\u044B."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_097
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u0412\u043E\u0437\u044C\u043C\u0438 \u0432 \u0434\u043E\u0440\u043E\u0433\u0443.
+          \u0410 \u0442\u043E \u043F\u0440\u0438\u0434\u0451\u0442\u0441\u044F \u0438
+          \u0442\u0435\u0431\u044F \u0438\u0441\u043A\u0430\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_098
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041B\u044E\u0434\u0438 \u0443\u0445\u043E\u0434\u044F\u0442 \u043A
+          \u043E\u043B\u044C\u0448\u0430\u043D\u0438\u043A\u0443 \u0441 \u0436\u0435\u0440\u0434\u044F\u043C\u0438
+          \u0438 \u0432\u0435\u0440\u0451\u0432\u043A\u043E\u0439."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_098_0
+          Type: 0
+          StringParam: last_wolf.message_ending
+          IntParam: 1
+        - EffectExecutionId: lw_fx_098_1
+          Type: 0
+          StringParam: last_wolf.closed
+          IntParam: 1
+      choices:
+      - text: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u043F\u0443\u0442\u044C."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_099
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_wait_helpers
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_100
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0412\u044B \u043F\u043E\u043C\u043E\u0433\u0430\u0435\u0442\u0435
+          \u0443 \u043F\u043E\u043B\u0435\u043D\u043D\u0438\u0446\u044B, \u043F\u043E\u043A\u0430
+          \u0443\u0433\u043B\u0435\u0436\u043E\u0433\u0438 \u0445\u043E\u0434\u044F\u0442
+          \u0437\u0430 \u0421\u0430\u0432\u0432\u043E\u0439. \u0427\u0435\u0440\u0435\u0437
+          \u0434\u0432\u0430 \u0447\u0430\u0441\u0430 \u0441\u043E \u0441\u0442\u043E\u0440\u043E\u043D\u044B
+          \u043B\u0435\u0441\u0430 \u0441\u043B\u044B\u0448\u0438\u0442\u0441\u044F
+          \u0435\u0433\u043E \u0433\u043E\u043B\u043E\u0441."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_101
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0417\u0430 \u043A\u043E\u0440\u0435\u043D\u044C \u043D\u0435
+          \u0434\u0451\u0440\u0433\u0430\u0439. \u0422\u0430\u043C \u0438 \u044F
+          \u043B\u0435\u0436\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_102
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041D\u0430 \u0445\u0443\u0442\u043E\u0440 \u0432\u0442\u0430\u0441\u043A\u0438\u0432\u0430\u044E\u0442
+          \u043E\u0445\u043E\u0442\u043D\u0438\u043A\u0430 \u0438 \u0432\u043E\u043B\u043A\u0430.
+          \u0421\u0430\u0432\u0432\u0430 \u0437\u0430\u043C\u0435\u0447\u0430\u0435\u0442
+          \u0432\u0430\u0441 \u0438 \u043F\u043E\u0434\u043D\u0438\u043C\u0430\u0435\u0442
+          \u0440\u0443\u043A\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_103
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041F\u0435\u0440\u0435\u0434\u0430\u043B, \u0437\u043D\u0430\u0447\u0438\u0442.
+          \u0421\u043F\u0430\u0441\u0438\u0431\u043E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_103_0
+          Type: 0
+          StringParam: last_wolf.hunter_safe
+          IntParam: 1
+        - EffectExecutionId: lw_fx_103_1
+          Type: 0
+          StringParam: last_wolf.proof_delivered
+          IntParam: 1
+        - EffectExecutionId: lw_fx_103_2
+          Type: 0
+          StringParam: last_wolf.waited_helpers
+          IntParam: 1
+      choices:
+      - text: "\xAB\u041A\u0430\u043A \u043D\u043E\u0433\u0430?\xBB"
+        nextNodeId: lw_message_reunion
+        endsDialogue: 0
+        choiceId: lw_a_104
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_message_reunion
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_105
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041F\u043B\u043E\u0445\u043E. \u041D\u043E \u0442\u0435\u043F\u0435\u0440\u044C
+          \u043C\u043E\u0436\u043D\u043E \u043B\u0435\u0436\u0430\u0442\u044C \u0438
+          \u0440\u0443\u0433\u0430\u0442\u044C\u0441\u044F. \u0422\u0430\u043C \u043F\u0440\u0438\u0445\u043E\u0434\u0438\u043B\u043E\u0441\u044C
+          \u0435\u0449\u0451 \u0434\u0443\u043C\u0430\u0442\u044C, \u043A\u0443\u0434\u0430
+          \u043F\u043E\u043B\u0437\u0442\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_106
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u0412\u044B\u0445\u043E\u0434\u0438\u043B\u0430 \u0431\u044B
+          \u0442\u0432\u043E\u044F \u0440\u0443\u0433\u0430\u043D\u044C \u0432\u043F\u0435\u0440\u0451\u0434
+          \u0442\u0435\u0431\u044F, \u0441\u0430\u043C\u0438 \u0431\u044B \u043D\u0430\u0448\u043B\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_107
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423\u0433\u043B\u0435\u0436\u043E\u0433 \u043E\u0442\u0434\u0430\u0451\u0442
+          \u0432\u0430\u043C \u0441\u0432\u0451\u0440\u0442\u043E\u043A \u0441 \u0445\u043B\u0435\u0431\u043E\u043C
+          \u0438 \u0440\u044B\u0431\u043E\u0439."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_107_0
+          Type: 0
+          StringParam: last_wolf.message_ending
+          IntParam: 1
+        - EffectExecutionId: lw_fx_107_1
+          Type: 0
+          StringParam: last_wolf.closed
+          IntParam: 1
+        - EffectExecutionId: lw_fx_107_2
+          Type: 0
+          StringParam: last_wolf.death_reported
+          IntParam: 1
+      choices:
+      - text: "\u041F\u043E\u043F\u0440\u043E\u0449\u0430\u0442\u044C\u0441\u044F."
+        nextNodeId: lw_goodbye_message
+        endsDialogue: 0
+        choiceId: lw_a_108
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_goodbye_message
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_109
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041D\u043E\u0436 \u0432\u0435\u0440\u043D\u0438, \u0435\u0441\u043B\u0438
+          \u0431\u0440\u0430\u043B. \u041E\u043D \u0443 \u043C\u0435\u043D\u044F
+          \u0435\u0449\u0451 \u043F\u043E\u0440\u0430\u0431\u043E\u0442\u0430\u0435\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_110
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0412\u044B \u043A\u043B\u0430\u0434\u0451\u0442\u0435 \u043D\u043E\u0436
+          \u0440\u044F\u0434\u043E\u043C \u0441 \u043D\u0438\u043C. \u0421\u0430\u0432\u0432\u0430
+          \u043F\u0440\u0438\u0442\u044F\u0433\u0438\u0432\u0430\u0435\u0442 \u0435\u0433\u043E
+          \u043A \u0441\u0435\u0431\u0435 \u0438 \u0442\u043E\u043B\u044C\u043A\u043E
+          \u043F\u043E\u0442\u043E\u043C \u0433\u043E\u0432\u043E\u0440\u0438\u0442:"
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_111
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0418 \u0442\u044B \u0437\u0430\u0445\u043E\u0434\u0438, \u0435\u0441\u043B\u0438
+          \u0431\u0443\u0434\u0435\u0448\u044C \u0440\u044F\u0434\u043E\u043C. \u0411\u0435\u0437
+          \u0432\u043E\u043B\u043A\u0430 \u043C\u043E\u0436\u043D\u043E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0423\u0439\u0442\u0438 \u0441 \u0445\u0443\u0442\u043E\u0440\u0430."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_112
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_arrival_no_proof
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_113
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423\u0433\u043B\u0435\u0436\u043E\u0433 \u043F\u043E\u043C\u043E\u0433\u0430\u0435\u0442
+          \u0437\u0430\u043D\u0435\u0441\u0442\u0438 \u0421\u0430\u0432\u0432\u0443
+          \u043F\u043E\u0434 \u043D\u0430\u0432\u0435\u0441. \u041E\u0445\u043E\u0442\u043D\u0438\u043A
+          \u043E\u0442\u043F\u0443\u0441\u043A\u0430\u0435\u0442 \u043A\u043E\u043F\u044C\u0451,
+          \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u043E\u0433\u0434\u0430 \u0435\u0433\u043E
+          \u0443\u0441\u0442\u0440\u0430\u0438\u0432\u0430\u044E\u0442 \u043D\u0430
+          \u0441\u043A\u0430\u043C\u044C\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_114
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u0412\u043E\u043B\u043A \u0433\u0434\u0435?"
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_115
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041F\u043E\u0434 \u0432\u044B\u0432\u043E\u0440\u043E\u0442\u043D\u0435\u043C.
+          \u042F \u0440\u0430\u043D\u044C\u0448\u0435 \u043F\u043E\u043D\u0430\u0434\u043E\u0431\u0438\u043B\u0441\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_116
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423\u0433\u043B\u0435\u0436\u043E\u0433 \u0441\u043C\u043E\u0442\u0440\u0438\u0442
+          \u043D\u0430 \u0435\u0433\u043E \u043D\u043E\u0433\u0443 \u0438 \u043A\u0438\u0432\u0430\u0435\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_117
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u0421\u0435\u0439\u0447\u0430\u0441 \u0432\u043E\u0434\u044B
+          \u043F\u0440\u0438\u043D\u0435\u0441\u0443. \u041F\u043E\u0442\u043E\u043C
+          \u043F\u0440\u043E \u0432\u043E\u043B\u043A\u0430."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_117_0
+          Type: 0
+          StringParam: last_wolf.death_reported
+          IntParam: 1
+      choices:
+      - text: "\xAB\u041C\u044B \u0432\u0435\u0440\u043D\u0451\u043C\u0441\u044F
+          \u0437\u0430 \u0434\u043E\u0431\u044B\u0447\u0435\u0439\xBB."
+        nextNodeId: lw_return_offer
+        endsDialogue: 0
+        choiceId: lw_a_118
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u0421\u0430\u0432\u0432\u0430 \u0437\u0434\u0435\u0441\u044C.
+          \u0417\u0430 \u0434\u043E\u0431\u044B\u0447\u0435\u0439 \u0441\u0445\u043E\u0434\u0438\u0442\u0435
+          \u0441\u0430\u043C\u0438\xBB."
+        nextNodeId: lw_no_return
+        endsDialogue: 0
+        choiceId: lw_a_119
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u0417\u0430 \u043F\u043E\u043C\u043E\u0449\u044C \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0443
+          \u0432\u044B \u0442\u043E\u0436\u0435 \u043F\u043B\u0430\u0442\u0438\u0442\u0435?\xBB"
+        nextNodeId: lw_rescue_pay
+        endsDialogue: 0
+        choiceId: lw_a_120
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_rescue_pay
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_121
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u0412\u043E\u043B\u043A\u0430 \u043C\u044B \u0441 \u043D\u0438\u043C
+          \u0443\u0433\u043E\u0432\u0430\u0440\u0438\u0432\u0430\u043B\u0438\u0441\u044C.
+          \u0417\u0430 \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0430 \u043D\u0435
+          \u0442\u043E\u0440\u0433\u043E\u0432\u0430\u043B\u0438\u0441\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_122
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423\u0433\u043B\u0435\u0436\u043E\u0433 \u0434\u043E\u0441\u0442\u0430\u0451\u0442
+          \u0445\u043B\u0435\u0431 \u0438 \u0441\u043E\u043B\u0451\u043D\u0443\u044E
+          \u0440\u044B\u0431\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_123
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u041D\u043E \u0441 \u043F\u0443\u0441\u0442\u044B\u043C\u0438
+          \u0440\u0443\u043A\u0430\u043C\u0438 \u043D\u0435 \u043E\u0442\u043F\u0443\u0449\u0443.
+          \u042D\u0442\u043E \u0441\u0440\u0430\u0437\u0443. \u0421\u0435\u0440\u0435\u0431\u0440\u043E
+          \u2014 \u0435\u0441\u043B\u0438 \u0432\u043E\u043B\u043A\u0430 \u043F\u0440\u0438\u0432\u0435\u0437\u0451\u0442\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041F\u0440\u0438\u043D\u044F\u0442\u044C \u0435\u0434\u0443 \u0438
+          \u0432\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F \u0437\u0430 \u0434\u043E\u0431\u044B\u0447\u0435\u0439."
+        nextNodeId: lw_return_offer
+        endsDialogue: 0
+        choiceId: lw_a_124
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u041F\u0440\u0438\u043D\u044F\u0442\u044C \u0435\u0434\u0443. \u0417\u0430
+          \u0434\u043E\u0431\u044B\u0447\u0435\u0439 \u043F\u043E\u0439\u0434\u0443\u0442
+          \u043C\u0435\u0441\u0442\u043D\u044B\u0435."
+        nextNodeId: lw_no_return
+        endsDialogue: 0
+        choiceId: lw_a_125
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_return_offer
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_126
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u0422\u0440\u043E\u043F\u0430 \u0442\u0435\u043F\u0435\u0440\u044C
+          \u0437\u043D\u0430\u043A\u043E\u043C\u0430\u044F. \u0412\u0435\u0440\u043D\u0451\u0448\u044C\u0441\u044F
+          \u2014 \u043A\u0440\u0438\u043A\u043D\u0438 \u0443 \u043F\u043E\u043B\u0435\u043D\u043D\u0438\u0446\u044B,
+          \u043F\u043E\u043C\u043E\u0433\u0443 \u0437\u0430\u0442\u0430\u0449\u0438\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_127
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041F\u043E\u043B\u043E\u0432\u0438\u043D\u0430 \u043C\u043E\u044F
+          \u2014 \u043F\u043E\u043B\u043E\u0432\u0438\u043D\u0430 \u0442\u0432\u043E\u044F.
+          \u041A\u0430\u043A \u0433\u043E\u0432\u043E\u0440\u0438\u043B."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.fee_refused
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_128
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0418 \u0441\u043F\u0430\u0441\u0438\u0431\u043E. \u0415\u0449\u0451
+          \u0440\u0430\u0437."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.fee_refused
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_129
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423\u0433\u043B\u0435\u0436\u043E\u0433 \u043F\u0440\u043E\u0442\u044F\u0433\u0438\u0432\u0430\u0435\u0442
+          \u0432\u0430\u043C \u0441\u0432\u0451\u0440\u0442\u043E\u043A \u0441 \u0435\u0434\u043E\u0439."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_129_0
+          Type: 0
+          StringParam: last_wolf.return_available
+          IntParam: 1
+      - blockId: lw_b_130
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u0414\u043E \u0443\u0442\u0440\u0430 \u043E\u0441\u0442\u0430\u0432\u0438\u043C
+          \u0435\u0451 \u0442\u0435\u0431\u0435. \u041F\u043E\u0442\u043E\u043C \u0441\u0430\u043C\u0438
+          \u0441\u0445\u043E\u0434\u0438\u043C. \u0422\u0435\u0431\u0435 \u043E\u0431\u0440\u0430\u0442\u043D\u043E
+          \u0432\u0435\u0441\u044C \u043A\u0440\u0443\u0433 \u2014 \u0447\u0430\u0441\u0430
+          \u0434\u0432\u0430. \u0417\u0430\u0432\u0442\u0440\u0430 \u044F\u043C\u0430
+          \u043D\u0443\u0436\u043D\u0430, \u0436\u0434\u0430\u0442\u044C \u0434\u043E\u043B\u044C\u0448\u0435
+          \u043D\u0435\u043A\u043E\u0433\u0434\u0430."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0412\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F \u0437\u0430
+          \u0432\u043E\u043B\u043A\u043E\u043C \u0441\u0435\u0439\u0447\u0430\u0441.
+          [2 \u0447\u0430\u0441\u0430, \u0432\u043A\u043B\u044E\u0447\u0430\u044F
+          \u043F\u0443\u0442\u044C \u043E\u0431\u0440\u0430\u0442\u043D\u043E]"
+        nextNodeId: lw_return_corpse
+        endsDialogue: 0
+        choiceId: lw_a_131
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u0417\u0430\u043D\u044F\u0442\u044C\u0441\u044F \u0434\u0440\u0443\u0433\u0438\u043C;
+          \u0434\u043E\u0431\u044B\u0447\u0443 \u043F\u043E\u043A\u0430 \u043E\u0441\u0442\u0430\u0432\u0438\u0442\u044C."
+        nextNodeId: lw_return_later
+        endsDialogue: 0
+        choiceId: lw_a_132
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u041D\u0435 \u0436\u0434\u0438\u0442\u0435. \u041B\u0443\u0447\u0448\u0435
+          \u0441\u0445\u043E\u0434\u0438\u0442\u0435 \u0441\u0430\u043C\u0438\xBB."
+        nextNodeId: lw_no_return
+        endsDialogue: 0
+        choiceId: lw_a_133
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_return_later
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_134
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0421\u0430\u0432\u0432\u0430 \u0443\u043A\u043B\u0430\u0434\u044B\u0432\u0430\u0435\u0442
+          \u043D\u043E\u0433\u0443 \u043F\u043E\u0432\u044B\u0448\u0435. \u0423\u0433\u043B\u0435\u0436\u043E\u0433
+          \u043F\u0440\u0438\u0441\u0442\u0440\u0430\u0438\u0432\u0430\u0435\u0442
+          \u0443 \u0441\u043A\u0430\u043C\u044C\u0438 \u0432\u0435\u0434\u0440\u043E,
+          \u0447\u0442\u043E\u0431\u044B \u043E\u0445\u043E\u0442\u043D\u0438\u043A
+          \u043C\u043E\u0433 \u0434\u043E\u0442\u044F\u043D\u0443\u0442\u044C\u0441\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_135
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041F\u043E\u043C\u043E\u0449\u044C \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0443
+          \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u0430. \u0417\u0430 \u0434\u043E\u0431\u044B\u0447\u0435\u0439
+          \u0435\u0449\u0451 \u043C\u043E\u0436\u043D\u043E \u0432\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F
+          \u0434\u043E \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0435\u0433\u043E
+          \u0443\u0442\u0440\u0430."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_135_0
+          Type: 0
+          StringParam: last_wolf.rescue_complete
+          IntParam: 1
+      choices:
+      - text: "\u0423\u0439\u0442\u0438 \u0441 \u0445\u0443\u0442\u043E\u0440\u0430."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_136
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_no_return
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_137
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u0422\u043E\u0433\u0434\u0430 \u0441\u0430\u043C\u0438 \u0437\u0430\u0431\u0435\u0440\u0451\u043C.
+          \u0422\u044B \u0435\u0433\u043E \u0434\u043E\u0442\u0430\u0449\u0438\u043B
+          \u2014 \u0441\u043F\u0430\u0441\u0438\u0431\u043E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_138
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0414\u0430. \u041D\u0435 \u0437\u0430\u0441\u0442\u0430\u0432\u043B\u044F\u0439
+          \u0442\u043E\u043B\u044C\u043A\u043E \u043C\u0435\u043D\u044F \u0434\u043E\u0440\u043E\u0433\u0443
+          \u043F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_139
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423\u0433\u043B\u0435\u0436\u043E\u0433 \u0441\u0442\u0430\u0432\u0438\u0442
+          \u043F\u0435\u0440\u0435\u0434 \u0421\u0430\u0432\u0432\u043E\u0439 \u0432\u043E\u0434\u0443
+          \u0438 \u043E\u0442\u0434\u0430\u0451\u0442 \u0432\u0430\u043C \u0435\u0434\u0443
+          \u043D\u0430 \u0434\u043E\u0440\u043E\u0433\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_139_0
+          Type: 0
+          StringParam: last_wolf.rescue_complete
+          IntParam: 1
+        - EffectExecutionId: lw_fx_139_1
+          Type: 0
+          StringParam: last_wolf.closed
+          IntParam: 1
+        - EffectExecutionId: lw_fx_139_2
+          Type: 0
+          StringParam: last_wolf.locals_collect
+          IntParam: 1
+      choices:
+      - text: "\xAB\u0412 \u0434\u0440\u0443\u0433\u043E\u0439 \u0440\u0430\u0437
+          \u0432\u043E\u0437\u044C\u043C\u0438 \u043A\u043E\u0433\u043E-\u043D\u0438\u0431\u0443\u0434\u044C
+          \u0441 \u0441\u043E\u0431\u043E\u0439\xBB."
+        nextNodeId: lw_goodbye_person
+        endsDialogue: 0
+        choiceId: lw_a_140
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u041F\u043E\u0436\u0435\u043B\u0430\u0442\u044C \u0421\u0430\u0432\u0432\u0435
+          \u043F\u043E\u043F\u0440\u0430\u0432\u0438\u0442\u044C\u0441\u044F \u0438
+          \u0443\u0439\u0442\u0438."
+        nextNodeId: lw_quiet_goodbye
+        endsDialogue: 0
+        choiceId: lw_a_141
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_goodbye_person
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_142
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0412\u043E\u0437\u044C\u043C\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_143
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0421\u0430\u0432\u0432\u0430 \u0441\u043C\u043E\u0442\u0440\u0438\u0442
+          \u0432 \u0441\u0442\u043E\u0440\u043E\u043D\u0443 \u043E\u043B\u044C\u0448\u0430\u043D\u0438\u043A\u0430."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_144
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0422\u043E\u043B\u044C\u043A\u043E \u0447\u0442\u043E\u0431
+          \u0442\u0440\u043E\u043F\u044B \u0437\u043D\u0430\u043B. \u041D\u0435 \u0445\u043E\u0447\u0443
+          \u0435\u0449\u0451 \u0438 \u0435\u0433\u043E \u0432\u044B\u0442\u0430\u0441\u043A\u0438\u0432\u0430\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0423\u0439\u0442\u0438 \u0441 \u0445\u0443\u0442\u043E\u0440\u0430."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_145
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_quiet_goodbye
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_146
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0421\u0430\u0432\u0432\u0430 \u043F\u043E\u0434\u043D\u0438\u043C\u0430\u0435\u0442
+          \u043A\u0440\u0443\u0436\u043A\u0443, \u0431\u0443\u0434\u0442\u043E \u0441\u043E\u0431\u0438\u0440\u0430\u0435\u0442\u0441\u044F
+          \u0447\u0442\u043E-\u0442\u043E \u0434\u043E\u0431\u0430\u0432\u0438\u0442\u044C.
+          \u041F\u043E\u0442\u043E\u043C \u043F\u0440\u043E\u0441\u0442\u043E \u043F\u044C\u0451\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_147
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0417\u0430 \u043D\u0430\u0432\u0435\u0441\u043E\u043C \u0443\u0433\u043B\u0435\u0436\u043E\u0433
+          \u0441\u0442\u0443\u0447\u0438\u0442 \u043B\u043E\u043F\u0430\u0442\u043E\u0439
+          \u043F\u043E \u043A\u0440\u0430\u044E \u044F\u043C\u044B. \u0420\u0430\u0431\u043E\u0442\u0430
+          \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0430\u0435\u0442\u0441\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0412\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F \u043D\u0430
+          \u0434\u043E\u0440\u043E\u0433\u0443."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_148
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_proof_check
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_149
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423\u0433\u043B\u0435\u0436\u043E\u0433 \u043F\u0440\u0438\u0441\u0435\u0434\u0430\u0435\u0442
+          \u0443 \u0432\u043E\u043B\u043A\u0430, \u043F\u0440\u0438\u043F\u043E\u0434\u043D\u0438\u043C\u0430\u0435\u0442
+          \u043F\u0435\u0440\u0435\u0434\u043D\u044E\u044E \u043B\u0430\u043F\u0443
+          \u0438 \u043F\u0440\u043E\u0432\u043E\u0434\u0438\u0442 \u043B\u0430\u0434\u043E\u043D\u044C\u044E
+          \u043F\u043E \u0437\u0430\u0433\u0440\u0438\u0432\u043A\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_150
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u041E\u043D. \u0421\u043E\u0431\u0430\u043A\u0430 \u043D\u0430
+          \u043D\u0435\u0433\u043E \u043E\u0442\u0441\u044E\u0434\u0430 \u043B\u0430\u044F\u043B\u0430.
+          \u042F \u0442\u043E\u0433\u0434\u0430 \u0437\u0430 \u043E\u0433\u0440\u0430\u0434\u0443
+          \u043D\u0435 \u0432\u044B\u0448\u0435\u043B."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_151
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u0441\u0434\u0435\u043B\u0430\u043B."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_152
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u0410 \u0442\u044B \u0432\u044B\u0448\u0435\u043B."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_153
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041C\u043D\u0435 \u0437\u0430 \u044D\u0442\u043E \u043F\u043B\u0430\u0442\u044F\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\xAB\u0420\u0430\u0431\u043E\u0442\u0430 \u0437\u0430\u043A\u043E\u043D\u0447\u0435\u043D\u0430.
+          \u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0439\u0442\u0435\u0441\u044C
+          \u0441 \u0421\u0430\u0432\u0432\u043E\u0439\xBB."
+        nextNodeId: lw_settle
+        endsDialogue: 0
+        choiceId: lw_a_154
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u0417\u0430 \u0432\u044B\u043D\u043E\u0441 \u043C\u044B \u0434\u043E\u0433\u043E\u0432\u043E\u0440\u0438\u043B\u0438\u0441\u044C
+          \u043E \u043F\u043E\u043B\u043E\u0432\u0438\u043D\u0435\xBB."
+        nextNodeId: lw_settle
+        endsDialogue: 0
+        choiceId: lw_a_155
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.fee_refused
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u0422\u0435\u043F\u0435\u0440\u044C \u043F\u043E \u043D\u043E\u0447\u0430\u043C
+          \u043C\u043E\u0436\u043D\u043E \u0445\u043E\u0434\u0438\u0442\u044C \u0441\u043F\u043E\u043A\u043E\u0439\u043D\u043E?\xBB"
+        nextNodeId: lw_road_safe
+        endsDialogue: 0
+        choiceId: lw_a_156
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_road_safe
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_157
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u042D\u0442\u043E\u0442 \u0443\u0436\u0435 \u043D\u0438\u043A\u043E\u0433\u043E
+          \u043D\u0435 \u0442\u0440\u043E\u043D\u0435\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_158
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0421\u0430\u0432\u0432\u0430 \u043F\u043E\u0432\u043E\u0440\u0430\u0447\u0438\u0432\u0430\u0435\u0442
+          \u0433\u043E\u043B\u043E\u0432\u0443 \u043A \u0445\u043E\u0437\u044F\u0438\u043D\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_159
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0410 \u043F\u043E \u0442\u0435\u043C\u043D\u043E\u0442\u0435
+          \u0432\u0441\u0451 \u0440\u0430\u0432\u043D\u043E \u0441\u043C\u043E\u0442\u0440\u0438,
+          \u043A\u0443\u0434\u0430 \u043D\u043E\u0433\u0443 \u0441\u0442\u0430\u0432\u0438\u0448\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0417\u0430\u043A\u043E\u043D\u0447\u0438\u0442\u044C \u0440\u0430\u0441\u0447\u0451\u0442."
+        nextNodeId: lw_settle
+        endsDialogue: 0
+        choiceId: lw_a_160
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_settle
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_161
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423\u0433\u043B\u0435\u0436\u043E\u0433 \u043F\u0440\u0438\u043D\u043E\u0441\u0438\u0442
+          \u043C\u0430\u043B\u0435\u043D\u044C\u043A\u0438\u0439 \u0441\u0432\u0451\u0440\u0442\u043E\u043A
+          \u0440\u0443\u0431\u043B\u0435\u043D\u043E\u0433\u043E \u0441\u0435\u0440\u0435\u0431\u0440\u0430.
+          \u0421\u0430\u0432\u0432\u0430 \u043D\u0435 \u0442\u044F\u043D\u0435\u0442\u0441\u044F
+          \u043A \u043D\u0435\u043C\u0443, \u0430 \u043F\u0440\u043E\u0441\u0438\u0442
+          \u043F\u043E\u043B\u043E\u0436\u0438\u0442\u044C \u0440\u044F\u0434\u043E\u043C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_162
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0420\u0430\u0437\u0434\u0435\u043B\u0438 \u043F\u043E\u0440\u043E\u0432\u043D\u0443.
+          \u041E\u043D \u0441\u043E \u0441\u0432\u043E\u0435\u0439 \u043D\u043E\u0433\u043E\u0439
+          \u043F\u0440\u0438\u0448\u0451\u043B, \u0430 \u043E\u0431\u0440\u0430\u0442\u043D\u043E
+          \u043E\u0431\u0435 \u0442\u0430\u0449\u0438\u043B\u0438."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.fee_refused
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+          - Type: 0
+            StringParam: last_wolf.waited_helpers
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_163
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0412\u044B \u0434\u0435\u043B\u0438\u0442\u0435 \u0441\u0435\u0440\u0435\u0431\u0440\u043E.
+          \u0421\u0430\u0432\u0432\u0430 \u043F\u0440\u0438\u0434\u0432\u0438\u0433\u0430\u0435\u0442
+          \u0441\u0432\u043E\u044E \u0434\u043E\u043B\u044E \u043A \u043D\u043E\u0436\u0443."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.fee_refused
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+          - Type: 0
+            StringParam: last_wolf.waited_helpers
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_163_0
+          Type: 0
+          StringParam: last_wolf.fee_paid
+          IntParam: 1
+      - blockId: lw_b_164
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0412\u044B \u043E\u0441\u0442\u0430\u0432\u043B\u044F\u0435\u0442\u0435
+          \u0432\u0435\u0441\u044C \u0441\u0432\u0451\u0440\u0442\u043E\u043A \u0421\u0430\u0432\u0432\u0435:
+          \u043E\u0442 \u0434\u043E\u043B\u0438 \u0432\u044B \u0443\u0436\u0435 \u043E\u0442\u043A\u0430\u0437\u0430\u043B\u0438\u0441\u044C."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.fee_refused
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_165
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0421\u043B\u044B\u0448\u0430\u043B. \u041D\u0435 \u0437\u0430\u0431\u044B\u043B."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.fee_refused
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_166
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423\u0433\u043B\u0435\u0436\u043E\u0433 \u0443\u0431\u0438\u0440\u0430\u0435\u0442
+          \u0441\u0435\u0440\u0435\u0431\u0440\u043E \u0421\u0430\u0432\u0432\u0435
+          \u043F\u043E\u0434 \u0441\u043B\u043E\u0436\u0435\u043D\u043D\u044B\u0439
+          \u043F\u043B\u0430\u0449."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.fee_refused
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_166_0
+          Type: 0
+          StringParam: last_wolf.fee_waived
+          IntParam: 1
+      - blockId: lw_b_167
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u0425\u043B\u0435\u0431\u0430 \u0432\u0441\u0451 \u0440\u0430\u0432\u043D\u043E
+          \u0432\u043E\u0437\u044C\u043C\u0438. \u041D\u0435 \u0432\u0441\u0451 \u0436\u0435
+          \u0432\u0430\u043C \u044D\u0442\u043E\u0442 \u0433\u0440\u0443\u0437 \u0442\u0430\u0449\u0438\u0442\u044C
+          \u0437\u0430 \u0441\u043F\u0430\u0441\u0438\u0431\u043E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_168
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041E\u043D \u043F\u0440\u0438\u043D\u043E\u0441\u0438\u0442 \u0445\u043B\u0435\u0431
+          \u0438 \u0440\u044B\u0431\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_168_0
+          Type: 0
+          StringParam: last_wolf.closed
+          IntParam: 1
+        - EffectExecutionId: lw_fx_168_1
+          Type: 0
+          StringParam: last_wolf.rescue_complete
+          IntParam: 1
+        - EffectExecutionId: lw_fx_168_2
+          Type: 0
+          StringParam: last_wolf.death_reported
+          IntParam: 1
+      choices:
+      - text: "\xAB\u0422\u044B \u0445\u043E\u0442\u0435\u043B \u0443\u0431\u0438\u0442\u044C
+          \u0438\u043C\u0435\u043D\u043D\u043E \u044D\u0442\u043E\u0433\u043E \u0432\u043E\u043B\u043A\u0430?\xBB"
+        nextNodeId: lw_last_hunt
+        endsDialogue: 0
+        choiceId: lw_a_169
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u0412 \u0434\u0440\u0443\u0433\u043E\u0439 \u0440\u0430\u0437
+          \u0432\u043E\u0437\u044C\u043C\u0438 \u043F\u043E\u043C\u043E\u0449\u043D\u0438\u043A\u0430\xBB."
+        nextNodeId: lw_goodbye_person
+        endsDialogue: 0
+        choiceId: lw_a_170
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u041F\u043E\u043F\u0440\u043E\u0449\u0430\u0442\u044C\u0441\u044F
+          \u0431\u0435\u0437 \u0440\u0430\u0441\u0441\u043F\u0440\u043E\u0441\u043E\u0432."
+        nextNodeId: lw_quiet_goodbye
+        endsDialogue: 0
+        choiceId: lw_a_171
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_last_hunt
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_172
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0425\u043E\u0442\u0435\u043B \u043F\u043E\u043B\u0443\u0447\u0438\u0442\u044C
+          \u043F\u043B\u0430\u0442\u0443. \u0418 \u0447\u0442\u043E\u0431\u044B \u0443
+          \u044F\u043C \u0441\u043D\u043E\u0432\u0430 \u0441\u043E\u0431\u0430\u043A\u0443
+          \u0434\u0435\u0440\u0436\u0430\u043B\u0438, \u0430 \u043D\u0435 \u043A\u0430\u0436\u0434\u044B\u0439
+          \u0440\u0430\u0437 \u043D\u043E\u0432\u0443\u044E \u0431\u0440\u0430\u043B\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_173
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041E\u043D \u0441\u043C\u043E\u0442\u0440\u0438\u0442 \u043D\u0430
+          \u0432\u043E\u043B\u043A\u0430, \u043F\u043E\u0442\u043E\u043C \u043E\u0442\u0432\u043E\u0434\u0438\u0442
+          \u0433\u043B\u0430\u0437\u0430."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_174
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0410 \u0442\u0435\u043F\u0435\u0440\u044C \u0445\u043E\u0447\u0443,
+          \u0447\u0442\u043E\u0431 \u0434\u043E \u0432\u0435\u0441\u043D\u044B \u043D\u0438\u043A\u0442\u043E
+          \u043D\u0435 \u0437\u0432\u0430\u043B. \u041F\u043E\u0441\u0438\u0436\u0443.
+          \u0412\u0435\u0440\u0451\u0432\u043A\u0438 \u043F\u0435\u0440\u0435\u0431\u0435\u0440\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_175
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u041D\u0430\u0439\u0434\u0451\u0442\u0441\u044F \u0442\u0435\u0431\u0435
+          \u0440\u0430\u0431\u043E\u0442\u0430 \u0438 \u0441\u0438\u0434\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_176
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0422\u043E\u043B\u044C\u043A\u043E \u0441\u043D\u0430\u0447\u0430\u043B\u0430
+          \u0434\u0430\u0439 \u043F\u043E\u0441\u0438\u0434\u0435\u0442\u044C \u043F\u0440\u043E\u0441\u0442\u043E
+          \u0442\u0430\u043A."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041E\u0441\u0442\u0430\u0432\u0438\u0442\u044C \u0421\u0430\u0432\u0432\u0443
+          \u043E\u0442\u0434\u044B\u0445\u0430\u0442\u044C."
+        nextNodeId: lw_quiet_goodbye
+        endsDialogue: 0
+        choiceId: lw_a_177
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_return_corpse
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_178
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041F\u043E\u0434 \u0432\u044B\u0432\u043E\u0440\u043E\u0442\u043D\u0435\u043C
+          \u043E\u0441\u0442\u0430\u043B\u0430\u0441\u044C \u043F\u0440\u0438\u043C\u044F\u0442\u0430\u044F
+          \u043F\u043E\u0434\u0441\u0442\u0438\u043B\u043A\u0430. \u0412\u043E\u043B\u043A
+          \u043B\u0435\u0436\u0438\u0442 \u0442\u0430\u043C, \u0433\u0434\u0435 \u0432\u044B
+          \u0435\u0433\u043E \u043E\u0441\u0442\u0430\u0432\u0438\u043B\u0438. \u0421\u0430\u0432\u0432\u0438\u043D\u043E\u0439
+          \u0432\u0435\u0440\u0451\u0432\u043A\u0438 \u0437\u0434\u0435\u0441\u044C
+          \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0435\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_179
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423\u0433\u043B\u0435\u0436\u043E\u0433 \u0434\u0430\u043B \u0432\u0435\u0440\u0451\u0432\u043A\u0443
+          \u0438 \u0434\u0432\u0435 \u0436\u0435\u0440\u0434\u0438 \u043F\u0435\u0440\u0435\u0434
+          \u0432\u0430\u0448\u0438\u043C \u0443\u0445\u043E\u0434\u043E\u043C. \u0412\u044B
+          \u0441\u0432\u044F\u0437\u044B\u0432\u0430\u0435\u0442\u0435 \u0442\u0443\u0448\u0443
+          \u0438 \u0432\u044B\u0432\u043E\u043B\u0430\u043A\u0438\u0432\u0430\u0435\u0442\u0435
+          \u0435\u0451 \u043D\u0430 \u0442\u0440\u043E\u043F\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_180
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041D\u0430 \u0445\u0443\u0442\u043E\u0440\u0435 \u0421\u0430\u0432\u0432\u0430
+          \u0441\u043B\u044B\u0448\u0438\u0442 \u0441\u043A\u0440\u0438\u043F \u0432\u043E\u043B\u043E\u043A\u0443\u0448\u0438
+          \u0438 \u043F\u0440\u0438\u043F\u043E\u0434\u043D\u0438\u043C\u0430\u0435\u0442\u0441\u044F
+          \u043D\u0430 \u043B\u043E\u043A\u0442\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_181
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041D\u0443 \u0432\u043E\u0442. \u0422\u0435\u043F\u0435\u0440\u044C
+          \u0432\u0441\u0435\u0445 \u0434\u043E\u043D\u0435\u0441\u043B\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_181_0
+          Type: 0
+          StringParam: last_wolf.proof_delivered
+          IntParam: 1
+        - EffectExecutionId: lw_fx_181_1
+          Type: 0
+          StringParam: last_wolf.proof_retrieved
+          IntParam: 1
+      choices:
+      - text: "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0434\u043E\u0431\u044B\u0447\u0443
+          \u0443\u0433\u043B\u0435\u0436\u043E\u0433\u0443."
+        nextNodeId: lw_proof_check
+        endsDialogue: 0
+        choiceId: lw_a_182
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_return_empty
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_183
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041F\u043E\u0434 \u0432\u044B\u0432\u043E\u0440\u043E\u0442\u043D\u0435\u043C
+          \u043F\u0443\u0441\u0442\u043E. \u041D\u0430 \u0442\u0440\u043E\u043F\u0435
+          \u0434\u0432\u0435 \u0431\u043E\u0440\u043E\u0437\u0434\u044B \u043E\u0442
+          \u0436\u0435\u0440\u0434\u0435\u0439."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_return_empty_seen
+          Type: 0
+          StringParam: last_wolf.return_empty_seen
+          IntParam: 1
+      - blockId: lw_b_184
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0412\u044B \u0443\u0441\u043F\u0435\u043B\u0438 \u0432\u044B\u0432\u0435\u0441\u0442\u0438
+          \u0421\u0430\u0432\u0432\u0443. \u0417\u0430 \u0432\u043E\u043B\u043A\u043E\u043C,
+          \u043A\u0430\u043A \u0438 \u0434\u043E\u0433\u043E\u0432\u0430\u0440\u0438\u0432\u0430\u043B\u0438\u0441\u044C,
+          \u0441\u0445\u043E\u0434\u0438\u043B\u0438 \u0443\u0433\u043B\u0435\u0436\u043E\u0433\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_184_0
+          Type: 0
+          StringParam: last_wolf.locals_collect
+          IntParam: 1
+        - EffectExecutionId: lw_fx_184_1
+          Type: 0
+          StringParam: last_wolf.closed
+          IntParam: 1
+      choices:
+      - text: "\u0412\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F \u043A \u0441\u0432\u043E\u0438\u043C
+          \u0434\u0435\u043B\u0430\u043C."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_185
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_hut_again
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_186
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0421\u0430\u0432\u0432\u0430 \u0441\u0438\u0434\u0438\u0442 \u043F\u043E\u0434
+          \u043D\u0430\u0432\u0435\u0441\u043E\u043C. \u041C\u0435\u0436\u0434\u0443
+          \u043A\u043E\u043B\u0435\u043D \u0443 \u043D\u0435\u0433\u043E \u0441\u0432\u044F\u0437\u043A\u0430
+          \u0432\u0435\u0440\u0451\u0432\u043E\u043A; \u043D\u043E\u0433\u0430 \u043B\u0435\u0436\u0438\u0442
+          \u043D\u0430 \u043E\u0431\u0440\u0443\u0431\u043A\u0435, \u043D\u0430\u043A\u0440\u044B\u0442\u043E\u043C
+          \u043C\u0435\u0448\u043A\u043E\u0432\u0438\u043D\u043E\u0439."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_hut_again_seen
+          Type: 0
+          StringParam: last_wolf.hut_again_seen
+          IntParam: 1
+      - blockId: lw_b_187
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0417\u0430\u0445\u043E\u0434\u0438. \u0422\u0435\u043F\u0435\u0440\u044C
+          \u044F \u043E\u0442\u0441\u044E\u0434\u0430 \u0434\u043E \u0434\u043E\u0440\u043E\u0433\u0438
+          \u0442\u043E\u043B\u044C\u043A\u043E \u0440\u0443\u0433\u0430\u0442\u044C\u0441\u044F
+          \u043C\u043E\u0433\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_188
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041E\u043D \u043E\u0442\u043A\u043B\u0430\u0434\u044B\u0432\u0430\u0435\u0442
+          \u0432\u0435\u0440\u0451\u0432\u043A\u0443 \u0438 \u043F\u043E\u0434\u043E\u0434\u0432\u0438\u0433\u0430\u0435\u0442
+          \u0432\u0430\u043C \u0441\u043A\u0430\u043C\u044C\u044E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\xAB\u041D\u043E\u0433\u0443 \u0431\u0435\u0440\u0435\u0436\u0451\u0448\u044C?\xBB"
+        nextNodeId: lw_leg_after
+        endsDialogue: 0
+        choiceId: lw_a_189
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u0421 \u0432\u043E\u043B\u043A\u043E\u043C \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u043B\u0438\u0441\u044C?\xBB"
+        nextNodeId: lw_locals_paid
+        endsDialogue: 0
+        choiceId: lw_a_190
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.locals_collect
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\xAB\u041C\u044B \u0442\u043E\u043B\u044C\u043A\u043E \u043F\u0435\u0440\u0435\u0434\u0430\u043B\u0438,
+          \u0433\u0434\u0435 \u0442\u044B \u043B\u0435\u0436\u0430\u043B\xBB."
+        nextNodeId: lw_thanks_message
+        endsDialogue: 0
+        choiceId: lw_a_191
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.message_ending
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u041A\u0438\u0432\u043D\u0443\u0442\u044C \u0438 \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C
+          \u043F\u0443\u0442\u044C."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_192
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_leg_after
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_193
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0411\u0435\u0440\u0435\u0433\u0443. \u0425\u043E\u0437\u044F\u0438\u043D
+          \u0432\u0435\u043B\u0435\u043B \u0432\u0435\u0440\u0451\u0432\u043A\u0438
+          \u0447\u0438\u043D\u0438\u0442\u044C. \u0423 \u043D\u0435\u0433\u043E \u043B\u044E\u0431\u0430\u044F
+          \u0431\u043E\u043B\u0435\u0437\u043D\u044C \u043B\u0435\u0447\u0438\u0442\u0441\u044F
+          \u0440\u0430\u0431\u043E\u0442\u043E\u0439, \u043A\u043E\u0442\u043E\u0440\u0443\u044E
+          \u043C\u043E\u0436\u043D\u043E \u0434\u0435\u043B\u0430\u0442\u044C \u0441\u0438\u0434\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_194
+        kind: 0
+        speakerIdOverride: coalburner
+        text: "\u2014 \u0421\u0430\u043C \u043F\u043E\u043F\u0440\u043E\u0441\u0438\u043B\u0441\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_195
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0410 \u0442\u044B \u0441\u043E\u0433\u043B\u0430\u0441\u0438\u043B\u0441\u044F.
+          \u0422\u0435\u043F\u0435\u0440\u044C \u0432\u0438\u043D\u043E\u0432\u0430\u0442\u044B\u0445
+          \u0434\u0432\u043E\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041F\u043E\u043F\u0440\u043E\u0449\u0430\u0442\u044C\u0441\u044F."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_196
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_locals_paid
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_197
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u043B\u0438\u0441\u044C.
+          \u041F\u0440\u0438\u043D\u0435\u0441\u043B\u0438 \u0443\u0442\u0440\u043E\u043C.
+          \u042F \u043F\u043E\u0434 \u043D\u0430\u0432\u0435\u0441\u043E\u043C \u0431\u044B\u043B
+          \u2014 \u0434\u0430\u0436\u0435 \u0432\u0441\u0442\u0430\u0432\u0430\u0442\u044C
+          \u043D\u0435 \u043F\u043E\u043D\u0430\u0434\u043E\u0431\u0438\u043B\u043E\u0441\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_198
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u0417\u0430 \u0442\u0435\u0431\u044F \u0443\u0436\u0435 \u0434\u0440\u0443\u0433\u0438\u0435
+          \u0441\u0445\u043E\u0434\u0438\u043B\u0438. \u041D\u0438\u0447\u0435\u0433\u043E
+          \u0442\u044B \u043C\u043D\u0435 \u043D\u0435 \u0434\u043E\u043B\u0436\u0435\u043D."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\xAB\u041F\u043E\u043F\u0440\u0430\u0432\u043B\u044F\u0439\u0441\u044F\xBB."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_199
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_thanks_message
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_200
+        kind: 0
+        speakerIdOverride: last_wolf_savva
+        text: "\u2014 \u041F\u0435\u0440\u0435\u0434\u0430\u043B\u0438. \u0410 \u043E\u043D\u0438
+          \u043F\u0440\u0438\u0448\u043B\u0438 \u0442\u0443\u0434\u0430, \u0433\u0434\u0435
+          \u044F \u0431\u044B\u043B. \u041D\u0435 \u0432 \u0434\u0440\u0443\u0433\u043E\u0439
+          \u043A\u043E\u043D\u0435\u0446 \u043B\u0435\u0441\u0430. \u0425\u043E\u0440\u043E\u0448\u0435\u0435
+          \u0432\u044B\u0448\u043B\u043E \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_201
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0421\u0430\u0432\u0432\u0430 \u043F\u043E\u0434\u043D\u0438\u043C\u0430\u0435\u0442
+          \u0432\u0435\u0440\u0451\u0432\u043A\u0443, \u043F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0435\u0442
+          \u0430\u043A\u043A\u0443\u0440\u0430\u0442\u043D\u043E \u0437\u0430\u0434\u0435\u043B\u0430\u043D\u043D\u044B\u0439
+          \u043A\u043E\u043D\u0435\u0446 \u0438 \u0441\u043D\u043E\u0432\u0430 \u0431\u0435\u0440\u0451\u0442\u0441\u044F
+          \u0437\u0430 \u0440\u0430\u0431\u043E\u0442\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0423\u0439\u0442\u0438 \u0441 \u0445\u0443\u0442\u043E\u0440\u0430."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_202
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_inn_before
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_203
+        kind: 0
+        speakerIdOverride: village_hostess
+        text: "\u2014 \u041A \u043B\u0435\u0441\u0443 \u043F\u043E \u0442\u0435\u043C\u043D\u043E\u0442\u0435
+          \u043D\u0435 \u0445\u043E\u0434\u0438\u0442\u0435. \u0412\u043E\u0437\u0447\u0438\u043A\u0438
+          \u0433\u043E\u0432\u043E\u0440\u044F\u0442, \u0441\u0435\u0434\u043E\u0439
+          \u0432\u043E\u043B\u043A \u0443 \u0434\u043E\u0440\u043E\u0433\u0438 \u043E\u0432\u0435\u0446
+          \u0440\u0435\u0436\u0435\u0442. \u0421\u0430\u0432\u0432\u0430 \u0437\u0430
+          \u043D\u0438\u043C \u043F\u043E\u0448\u0451\u043B, \u0435\u0449\u0451 \u043D\u0435
+          \u0432\u0435\u0440\u043D\u0443\u043B\u0441\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_203_0
+          Type: 0
+          StringParam: last_wolf.rumor_heard
+          IntParam: 1
+      choices:
+      - text: "\xAB\u0413\u0434\u0435 \u0435\u0433\u043E \u0438\u0441\u043A\u0430\u0442\u044C?\xBB"
+        nextNodeId: lw_inn_direction
+        endsDialogue: 0
+        choiceId: lw_a_204
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      - text: "\u041F\u043E\u0431\u043B\u0430\u0433\u043E\u0434\u0430\u0440\u0438\u0442\u044C
+          \u0437\u0430 \u043F\u0440\u0435\u0434\u0443\u043F\u0440\u0435\u0436\u0434\u0435\u043D\u0438\u0435."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_205
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_inn_direction
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_206
+        kind: 0
+        speakerIdOverride: village_hostess
+        text: "\u2014 \u0423\u0433\u043B\u0435\u0436\u043E\u0433\u0438 \u0435\u0433\u043E
+          \u043D\u0430\u043D\u044F\u043B\u0438, \u043E\u043D\u0438 \u0443 \u043A\u0440\u043E\u043C\u043A\u0438
+          \u0427\u0451\u0440\u043D\u043E\u0433\u043E \u043B\u0435\u0441\u0430. \u041A
+          \u043D\u0438\u043C \u0442\u0440\u043E\u043F\u0430 \u0447\u0435\u0440\u0435\u0437
+          \u043E\u043B\u044C\u0448\u0430\u043D\u0438\u043A. \u0421 \u0434\u043E\u0440\u043E\u0433\u0438
+          \u0434\u044B\u043C \u0432\u0438\u0434\u043D\u043E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_direction_known
+          Type: 0
+          StringParam: last_wolf.direction_known
+          IntParam: 1
+      choices:
+      - text: "\u0417\u0430\u043F\u043E\u043C\u043D\u0438\u0442\u044C \u0434\u043E\u0440\u043E\u0433\u0443."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_207
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_inn_report
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_208
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0412\u044B \u0440\u0430\u0441\u0441\u043A\u0430\u0437\u044B\u0432\u0430\u0435\u0442\u0435
+          \u0445\u043E\u0437\u044F\u0439\u043A\u0435, \u0447\u0442\u043E \u0432\u0438\u0434\u0435\u043B\u0438
+          \u0441\u0435\u0434\u043E\u0433\u043E \u0432\u043E\u043B\u043A\u0430 \u043C\u0451\u0440\u0442\u0432\u044B\u043C.
+          \u041D\u0430\u0437\u044B\u0432\u0430\u0435\u0442\u0435 \u043F\u0440\u0438\u043C\u0435\u0442\u0443
+          \u2014 \u0434\u0432\u0430 \u043D\u0435\u0434\u043E\u0441\u0442\u0430\u044E\u0449\u0438\u0445
+          \u043F\u0430\u043B\u044C\u0446\u0430 \u043D\u0430 \u043F\u0435\u0440\u0435\u0434\u043D\u0435\u0439
+          \u043B\u0430\u043F\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_209
+        kind: 0
+        speakerIdOverride: village_hostess
+        text: "\u2014 \u0417\u043D\u0430\u0447\u0438\u0442, \u0434\u043E\u0448\u0451\u043B
+          \u0421\u0430\u0432\u0432\u0430. \u0421\u0445\u043E\u0434\u0438\u043B \u0431\u044B
+          \u0442\u0435\u043F\u0435\u0440\u044C \u043A\u0442\u043E \u0437\u0430 \u043D\u0438\u043C."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.hunter_safe
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+          - Type: 0
+            StringParam: last_wolf.help_sent
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+          - Type: 0
+            StringParam: last_wolf.withdrawn
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_210
+        kind: 0
+        speakerIdOverride: village_hostess
+        text: "\u2014 \u041D\u0443, \u0445\u043E\u0442\u044C \u043D\u0430\u0448\u043B\u0438
+          \u0435\u0433\u043E. \u041D\u043E\u0433\u0430 \u0446\u0435\u043B\u0435\u0435
+          \u043E\u0442 \u0440\u0430\u0441\u0441\u043A\u0430\u0437\u043E\u0432 \u043D\u0435
+          \u0441\u0442\u0430\u043D\u0435\u0442, \u043D\u043E \u0443\u0436\u0435 \u043D\u0435
+          \u0432 \u043B\u0435\u0441\u0443 \u043B\u0435\u0436\u0438\u0442."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.hunter_safe
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_211
+        kind: 0
+        speakerIdOverride: village_hostess
+        text: "\u2014 \u0423\u0433\u043B\u0435\u0436\u043E\u0433\u0438 \u0437\u0430
+          \u043D\u0438\u043C \u043F\u043E\u0448\u043B\u0438? \u0422\u043E\u0433\u0434\u0430
+          \u0434\u043E\u0436\u0434\u0451\u043C\u0441\u044F \u0438\u0445. \u0410 \u043F\u0440\u043E
+          \u0432\u043E\u043B\u043A\u0430 \u043B\u044E\u0434\u044F\u043C \u0441\u043A\u0430\u0436\u0443:
+          \u0441\u0430\u043C \u0432\u0438\u0434\u0435\u043B."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.help_sent
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+          - Type: 0
+            StringParam: last_wolf.hunter_safe
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_212
+        kind: 0
+        speakerIdOverride: village_hostess
+        text: "\u2014 \u0422\u043E\u0433\u0434\u0430 \u0441\u043F\u0440\u043E\u0448\u0443
+          \u0443\u0433\u043B\u0435\u0436\u043E\u0433\u043E\u0432, \u0432\u0435\u0440\u043D\u0443\u043B\u0441\u044F
+          \u043B\u0438. \u041E\u043D\u0438 \u0435\u0433\u043E \u0437\u0432\u0430\u043B\u0438."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: last_wolf.withdrawn
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+          - Type: 0
+            StringParam: last_wolf.hunter_safe
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+          - Type: 0
+            StringParam: last_wolf.help_sent
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_213
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0425\u043E\u0437\u044F\u0439\u043A\u0430 \u0437\u0430\u043F\u043E\u043C\u0438\u043D\u0430\u0435\u0442
+          \u043F\u0440\u0438\u043C\u0435\u0442\u0443 \u0438 \u043E\u0442\u043E\u0434\u0432\u0438\u0433\u0430\u0435\u0442
+          \u043F\u0443\u0441\u0442\u0443\u044E \u043C\u0438\u0441\u043A\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: lw_fx_213_0
+          Type: 0
+          StringParam: last_wolf.rumor_shared
+          IntParam: 1
+      choices:
+      - text: "\u0417\u0430\u043A\u043E\u043D\u0447\u0438\u0442\u044C \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_214
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+        unavailableHint: 
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: lw_inn_after
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: lw_b_215
+        kind: 0
+        speakerIdOverride: village_hostess
+        text: "\u2014 \u0412\u043E\u0437\u0447\u0438\u043A \u0432\u0447\u0435\u0440\u0430
+          \u043E\u043F\u044F\u0442\u044C \u043F\u0440\u043E \u0441\u0435\u0434\u043E\u0433\u043E
+          \u043D\u0430\u0447\u0430\u043B. \u042F \u0433\u043E\u0432\u043E\u0440\u044E:
+          \u0442\u043E\u0433\u043E \u0443\u0436\u0435 \u0443\u0431\u0438\u043B\u0438.
+          \u041E\u043D \u043F\u043E\u0441\u0438\u0434\u0435\u043B, \u043F\u043E\u0434\u0443\u043C\u0430\u043B
+          \u2014 \u0441\u0442\u0430\u043B \u043F\u0440\u043E \u0431\u043E\u043B\u043E\u0442\u043E
+          \u0440\u0430\u0441\u0441\u043A\u0430\u0437\u044B\u0432\u0430\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_216
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041E\u043D\u0430 \u0441\u0442\u0430\u0432\u0438\u0442 \u043F\u0435\u0440\u0435\u0434
+          \u0432\u0430\u043C\u0438 \u043C\u0438\u0441\u043A\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: lw_b_217
+        kind: 0
+        speakerIdOverride: village_hostess
+        text: "\u2014 \u0429\u0438 \u0442\u0435 \u0436\u0435. \u0422\u0443\u0442
+          \u043D\u043E\u0432\u043E\u0441\u0442\u0435\u0439 \u043D\u0435\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041F\u043E\u0431\u043B\u0430\u0433\u043E\u0434\u0430\u0440\u0438\u0442\u044C
+          \u0438 \u0437\u0430\u043D\u044F\u0442\u044C\u0441\u044F \u0441\u0432\u043E\u0438\u043C\u0438
+          \u0434\u0435\u043B\u0430\u043C\u0438."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: lw_a_218
         kind: 3
         conditions:
           Combinator: 0

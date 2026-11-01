@@ -248,6 +248,10 @@ namespace KingdomSurvival.DialogueDatabase
         [SerializeField, Min(0.05f)] private float sceneIllustrationScale = 1f;
         [SerializeField] private Vector2 sceneIllustrationOffsetNormalized = Vector2.zero;
         [SerializeField] private string startNodeId = string.Empty;
+        // Дополнительные точки входа: сюжетный код открывает диалог с них
+        // (ссылка «диалог#узел»). Узлы, достижимые только отсюда, — не
+        // «недостижимые»: так один квест держит вход, возвращение и эхо.
+        [SerializeField] private List<string> entryNodeIds = new List<string>();
         [SerializeField] private List<string> tags = new List<string>();
         [SerializeField] private List<DialogueNodeData> nodes = new List<DialogueNodeData>();
         [SerializeField] private int schemaVersion;
@@ -262,6 +266,23 @@ namespace KingdomSurvival.DialogueDatabase
         public float SceneIllustrationScale => sceneIllustrationScale > 0f ? Mathf.Max(0.05f, sceneIllustrationScale) : 1f;
         public Vector2 SceneIllustrationOffsetNormalized => sceneIllustrationOffsetNormalized;
         public string StartNodeId => startNodeId;
+        public IReadOnlyList<string> EntryNodeIds => entryNodeIds ?? (IReadOnlyList<string>)Array.Empty<string>();
+
+        // Можно ли начать разговор с этого узла: стартовый или точка входа.
+        public bool IsEntryNode(string nodeId)
+        {
+            if (string.IsNullOrWhiteSpace(nodeId))
+                return false;
+            if (string.Equals(nodeId, startNodeId, StringComparison.Ordinal))
+                return true;
+            foreach (string entry in EntryNodeIds)
+            {
+                if (string.Equals(entry, nodeId, StringComparison.Ordinal))
+                    return true;
+            }
+            return false;
+        }
+
         public IReadOnlyList<string> Tags => tags ?? (IReadOnlyList<string>)Array.Empty<string>();
         public IReadOnlyList<DialogueNodeData> Nodes => nodes ?? (IReadOnlyList<DialogueNodeData>)Array.Empty<DialogueNodeData>();
         public int SchemaVersion => schemaVersion;
@@ -689,10 +710,21 @@ namespace KingdomSurvival.DialogueDatabase
             if (!string.IsNullOrWhiteSpace(dialogue.StartNodeId) && !nodesById.ContainsKey(dialogue.StartNodeId))
                 issues.Add(prefix + ": стартовый узел '" + dialogue.StartNodeId + "' не существует.");
 
+            foreach (string entryNodeId in dialogue.EntryNodeIds)
+            {
+                if (!nodesById.ContainsKey(entryNodeId ?? string.Empty))
+                    issues.Add(prefix + ": точка входа '" + entryNodeId + "' не существует.");
+            }
+
             if (!includeReachability || !nodesById.ContainsKey(dialogue.StartNodeId))
                 return;
 
             HashSet<string> reachable = CollectReachableNodes(dialogue.StartNodeId, nodesById);
+            foreach (string entryNodeId in dialogue.EntryNodeIds)
+            {
+                if (!string.IsNullOrEmpty(entryNodeId) && nodesById.ContainsKey(entryNodeId))
+                    reachable.UnionWith(CollectReachableNodes(entryNodeId, nodesById));
+            }
             foreach (string nodeId in nodesById.Keys)
             {
                 if (!reachable.Contains(nodeId))

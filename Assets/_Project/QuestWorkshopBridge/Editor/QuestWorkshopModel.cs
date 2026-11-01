@@ -226,6 +226,14 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                     merged.Nodes.Add(copy);
                 }
             }
+            // Начало каждой сцены квеста — точка входа сборного диалога: сюжетный
+            // код открывает возвращение, эхо или слух в корчме ссылкой «диалог#узел».
+            foreach (WorkshopScene scene in written)
+            {
+                if (scene != start && scene.StartNodeId.Length > 0 && scene.StartNodeId != merged.StartNodeId &&
+                    !merged.EntryNodeIds.Contains(scene.StartNodeId))
+                    merged.EntryNodeIds.Add(scene.StartNodeId);
+            }
             return merged;
         }
 
@@ -271,6 +279,8 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         public List<string> UnityTags = new List<string>();
         public WorkshopConditionGroup Conditions = new WorkshopConditionGroup();
         public readonly List<WorkshopNode> Nodes = new List<WorkshopNode>();
+        // Дополнительные точки входа сборного диалога квеста (MergedScene).
+        public readonly List<string> EntryNodeIds = new List<string>();
         public WorkshopEncounter Encounter;
 
         // ID диалога Unity — те же правила, что и в мастерской (ksSceneUnityId).

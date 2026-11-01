@@ -739,7 +739,7 @@ public partial class PrototypeUIController
     {
         if (narrativeDialogueDatabase == null)
             narrativeDialogueDatabase = DialogueDatabaseRuntime.LoadDefaultDatabase();
-        return narrativeDialogueDatabase != null && narrativeDialogueDatabase.FindDialogue(dialogueId) != null;
+        return narrativeDialogueDatabase != null && narrativeDialogueDatabase.FindDialogue(DialogueEntryRef.DialogueId(dialogueId)) != null;
     }
 
     private void EnsureSettlementGallery()

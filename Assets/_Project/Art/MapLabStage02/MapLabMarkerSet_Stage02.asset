@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05d85f2f42b84b6448781b2fa872cf21, type: 3}
+  m_Name: MapLabMarkerSet_Stage02
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabMarkerSet
+  ArtSet: {fileID: 11400000, guid: 1e0c221c19d1f374faab702db07d55a3, type: 2}
+  ViewIds:
+  - Figure_Front
+  - Figure_Front_Right
+  - Figure_Back_Right
+  - Figure_Back
+  - Figure_Back_Left
+  - Figure_Front_Left
+  Front40Id: Figure_Front_Pitch40
+  Front60Id: Figure_Front_Pitch60
+  FullSetPitch: 50
+  CalibrationTolerance: 4

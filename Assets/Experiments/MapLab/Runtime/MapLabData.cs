@@ -123,6 +123,21 @@ namespace KingdomSurvival.MapLab
         public Vector2 Size;   // ширина × глубина для построек
     }
 
+    public struct MapLabYardRect
+    {
+        public Vector2 Center;
+        public Vector2 AxisU;
+        public Vector2 Half;
+
+        public bool Contains(Vector2 p, float margin)
+        {
+            Vector2 d = p - Center;
+            float u = Vector2.Dot(d, AxisU);
+            float v = Vector2.Dot(d, new Vector2(-AxisU.y, AxisU.x));
+            return Mathf.Abs(u) < Half.x + margin && Mathf.Abs(v) < Half.y + margin;
+        }
+    }
+
     public struct MapLabFence
     {
         public Vector2 A;
@@ -154,6 +169,9 @@ namespace KingdomSurvival.MapLab
     public sealed class MapLabData
     {
         public const int AlgorithmVersion = 1;
+        // Ревизия генератора без смены потоков случайности (этап 02: ритм уступов,
+        // дворы с воротами, межи и дороги). Пишется в JSON экспорта.
+        public const int Revision = 2;
 
         public int Seed;
         public MapLabPresetKind Preset;
@@ -201,6 +219,10 @@ namespace KingdomSurvival.MapLab
         public readonly List<MapLabPlacement> Objects = new List<MapLabPlacement>();
         public readonly List<MapLabFence> Fences = new List<MapLabFence>();
         public readonly List<Vector4> Yards = new List<Vector4>(); // центр x,z; полуразмер; угол
+        // Короткие тропинки от ворот двора к дороге (этап 02); рисуются как тропа.
+        public readonly List<MapLabPolyline> YardPaths = new List<MapLabPolyline>();
+        // Прямоугольники дворов (дом + двор): центр, ось вдоль конька, полуразмеры. Деревья сюда не садятся.
+        public readonly List<MapLabYardRect> YardRects = new List<MapLabYardRect>();
 
         public MapLabStats Stats;
 

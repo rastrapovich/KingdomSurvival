@@ -27,6 +27,12 @@ namespace KingdomSurvival.MapLab
         public Shader CardShader;
         public Shader SolidShader;
         public Shader LinesShader;
+        public Shader ArtCardShader;
+        public Shader ContactShader;
+
+        [Header("Художественный набор этапа 02 (локальные PNG; без них — процедурный вид)")]
+        public MapLabArtSet ArtSet;
+        public MapLabMarkerSet MarkerSet;
 
         [SerializeField, HideInInspector] private GameObject root;
 
@@ -38,8 +44,54 @@ namespace KingdomSurvival.MapLab
         private Texture2D paletteTexture, detailTexture, waterTexture, atlasTexture;
         private readonly Dictionary<string, GameObject> groups = new Dictionary<string, GameObject>();
         private static Texture2D cachedDetail, cachedWater, cachedAtlas;
+        private readonly Dictionary<MapLabArtEntry, Material> artMaterials = new Dictionary<MapLabArtEntry, Material>();
+        private MapLabArtBuilder.Plan artPlan;
+        private bool buildingSprites;
 
         public MapLabData Data => data;
+        public MapLabArtBuilder.Plan ArtPlan => artPlan;
+        public int ArtMaterialCount => artMaterials.Count;
+
+        // Центр демонстрационного участка: поселение пресета (или центр карты).
+        public Vector2 DemoFocus
+        {
+            get
+            {
+                if (data == null)
+                    return Vector2.one * 128f;
+                if (data.Composition != null && data.Composition.SettlementCenter != Vector2.zero)
+                    return data.Composition.SettlementCenter;
+                return Vector2.one * data.Size * 0.5f;
+            }
+        }
+
+        // Нарисованные карточки при наклоне не около 50° — ракурс приближённый.
+        public bool ArtSpritesApproximate
+        {
+            get
+            {
+                if (artPlan == null || artPlan.Count == 0 || CameraRig == null)
+                    return false;
+                return Mathf.Abs(CameraRig.Pitch - 50f) > 4f;
+            }
+        }
+
+        public MapLabMarker Marker => GetComponent<MapLabMarker>();
+
+        // Набор арта: назначенный в сцене или (в редакторе) лежащий по стандартному пути.
+        public MapLabArtSet ResolvedArtSet
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (ArtSet == null)
+                    ArtSet = UnityEditor.AssetDatabase.LoadAssetAtPath<MapLabArtSet>("Assets/_Project/Art/MapLabStage02/MapLabArtSet_Stage02.asset");
+                if (MarkerSet == null)
+                    MarkerSet = UnityEditor.AssetDatabase.LoadAssetAtPath<MapLabMarkerSet>("Assets/_Project/Art/MapLabStage02/MapLabMarkerSet_Stage02.asset");
+#endif
+                return ArtSet;
+            }
+        }
         public GameObject Root => root;
         public string LastError { get; private set; }
         public MapLabStats LastStats { get; private set; }
@@ -121,6 +173,8 @@ namespace KingdomSurvival.MapLab
                 return false;
             Stopwatch watch = Stopwatch.StartNew();
             MapLabData fresh = MapLabGenerator.Generate(Settings, progress);
+            if (GetComponent<MapLabMarker>() == null)
+                gameObject.AddComponent<MapLabMarker>();
             Clear();
             data = fresh;
             BuildEverything(progress);
@@ -154,9 +208,7 @@ namespace KingdomSurvival.MapLab
             MapLabGenerator.Report(progress, "Растительность и постройки", 0.2f);
             MapLabGenerator.RebuildObjects(data, Settings);
             MapLabGenerator.Report(progress, "Объекты", 0.6f);
-            DestroyGroup("Vegetation");
-            DestroyGroup("Structures");
-            DestroyGroup("Boulders");
+            DestroyObjectGroups();
             BuildObjects();
             UploadShade();
             Repaint();
@@ -175,6 +227,11 @@ namespace KingdomSurvival.MapLab
                 if (owned[i] != null)
                     DestroySafe(owned[i]);
             owned.Clear();
+            artMaterials.Clear();
+            artPlan = null;
+            MapLabMarker marker = Marker;
+            if (marker != null)
+                marker.Clear();
             terrainMaterial = waterMaterial = cardMaterial = solidMaterial = linesMaterial = null;
             paintTexture = shadeTexture = maskATexture = maskBTexture = heightTexture = null;
             paletteTexture = detailTexture = waterTexture = atlasTexture = null;
@@ -194,6 +251,8 @@ namespace KingdomSurvival.MapLab
             if (CardShader == null) CardShader = Shader.Find("Kingdom Survival/MapLab/Card");
             if (SolidShader == null) SolidShader = Shader.Find("Kingdom Survival/MapLab/Solid");
             if (LinesShader == null) LinesShader = Shader.Find("Kingdom Survival/MapLab/Lines");
+            if (ArtCardShader == null) ArtCardShader = Shader.Find("Kingdom Survival/MapLab/Art Card");
+            if (ContactShader == null) ContactShader = Shader.Find("Kingdom Survival/MapLab/Contact");
             if (TerrainShader == null || WaterShader == null || CardShader == null || SolidShader == null)
             {
                 LastError = "Не найдены шейдеры MapLab (Assets/Experiments/MapLab/Shaders).";
@@ -220,9 +279,12 @@ namespace KingdomSurvival.MapLab
             BuildObjects();
             BuildWireframe();
             ApplyMaterialSettings();
-            ApplyVisibility();
             if (CameraRig != null)
                 CameraRig.Bind(this, true);
+            ApplyVisibility();
+            MapLabMarker marker = Marker;
+            if (marker != null)
+                marker.OnMapBuilt(this);
             MapLabStats stats = data.Stats;
             stats.PaintMs += 0f;
             CountStats(ref stats);
@@ -411,14 +473,227 @@ namespace KingdomSurvival.MapLab
             AddRenderer(group, "Cliff Walls", MapLabMeshes.BuildCliffs(data, Settings), solidMaterial);
         }
 
+        private static readonly string[] ObjectGroups = { "Vegetation", "Structures", "Houses", "Boulders", "ArtVegetation", "ArtHouses", "ArtBoulders", "ArtCliffDecor" };
+
+        private void DestroyObjectGroups()
+        {
+            foreach (string name in ObjectGroups)
+                DestroyGroup(name);
+        }
+
+        // Процедурные объекты — только для типов, не заменённых рисунками;
+        // дома строятся в обоих видах (геометрия и карточка), чтобы смена
+        // наклона переключала их без перестройки.
         private void BuildObjects()
         {
+            artPlan = new MapLabArtBuilder.Plan();
+            MapLabArtBuilder.Plan housePlan = new MapLabArtBuilder.Plan();
+            MapLabArtSet set = ResolvedArtSet;
+            if (set != null)
+            {
+                MapLabArtBuilder.PlanVegetation(data, Settings, set, artPlan);
+                MapLabArtBuilder.PlanBoulders(data, Settings, set, artPlan);
+                MapLabArtBuilder.PlanCliffDecor(data, Settings, set, Settings.Camera.AzimuthDegrees, artPlan);
+                if (Settings.Art.Buildings != MapLabBuildingDisplay.Geometry)
+                    MapLabArtBuilder.PlanBuildings(data, Settings, set, housePlan);
+            }
             GameObject vegetation = Group("Vegetation");
-            List<Mesh> cards = MapLabMeshes.BuildVegetationCards(data, 64f);
+            List<Mesh> cards = MapLabMeshes.BuildVegetationCards(data, 64f, artPlan.Replaced);
             for (int i = 0; i < cards.Count; i++)
                 AddRenderer(vegetation, cards[i].name, cards[i], cardMaterial);
-            AddRenderer(Group("Structures"), "Structures", MapLabMeshes.BuildStructures(data, Settings), solidMaterial);
-            AddRenderer(Group("Boulders"), "Boulders", MapLabMeshes.BuildBoulders(data), solidMaterial);
+            HashSet<MapLabObjectKind> noHouses = new HashSet<MapLabObjectKind> { MapLabObjectKind.House, MapLabObjectKind.Barn };
+            AddRenderer(Group("Structures"), "Structures", MapLabMeshes.BuildStructures(data, Settings, noHouses), solidMaterial);
+            AddRenderer(Group("Houses"), "Houses", MapLabMeshes.BuildHouses(data), solidMaterial);
+            AddRenderer(Group("Boulders"), "Boulders", MapLabMeshes.BuildBoulders(data, artPlan.Replaced), solidMaterial);
+            BuildArtGroup("ArtVegetation", artPlan, e => e.Category == MapLabArtCategory.Vegetation);
+            BuildArtGroup("ArtBoulders", artPlan, e => e.Category == MapLabArtCategory.Rock);
+            BuildArtGroup("ArtCliffDecor", artPlan, e => e.Category == MapLabArtCategory.Cliff);
+            BuildArtGroup("ArtHouses", housePlan, e => e.Category == MapLabArtCategory.Building);
+            foreach (KeyValuePair<MapLabArtEntry, List<MapLabArtInstance>> pair in housePlan.Cards)
+                foreach (MapLabArtInstance inst in pair.Value)
+                    artPlan.Add(pair.Key, inst);
+            foreach (MapLabObjectKind kind in housePlan.Replaced)
+                artPlan.Replaced.Add(kind);
+        }
+
+        private void BuildArtGroup(string name, MapLabArtBuilder.Plan plan, System.Predicate<MapLabArtEntry> filter)
+        {
+            List<MapLabArtEntry> entries = new List<MapLabArtEntry>(plan.Cards.Keys);
+            entries.Sort((a, b) => string.CompareOrdinal(a.Id, b.Id));
+            GameObject group = null;
+            foreach (MapLabArtEntry entry in entries)
+            {
+                if (!filter(entry))
+                    continue;
+                group = group != null ? group : Group(name);
+                Material material = ArtMaterial(entry);
+                List<Mesh> meshes = MapLabArtBuilder.BuildMeshes(data, entry, plan.Cards[entry], 64f);
+                for (int i = 0; i < meshes.Count; i++)
+                    AddRenderer(group, meshes[i].name, meshes[i], material);
+            }
+        }
+
+        private Material ArtMaterial(MapLabArtEntry entry)
+        {
+            if (artMaterials.TryGetValue(entry, out Material material) && material != null)
+                return material;
+            material = Own(new Material(ArtCardShader) { name = "MapLab Art " + entry.Id });
+            artMaterials[entry] = material;
+            ConfigureArtMaterial(material, entry);
+            return material;
+        }
+
+        // Материал карточки одного рисунка: текстура, порог, оттенок палитры по типу.
+        public void ConfigureArtMaterial(Material m, MapLabArtEntry entry)
+        {
+            if (m == null || entry == null || Settings == null)
+                return;
+            MapLabPalette palette = Palette;
+            MapLabArtSettings art = Settings.Art;
+            m.SetTexture("_MainTex", entry.Texture);
+            m.SetFloat("_Cutoff", entry.Cutoff);
+            m.SetFloat("_CardLean", art.CardLean);
+            Color tone;
+            switch (entry.Category)
+            {
+                case MapLabArtCategory.Vegetation:
+                    tone = entry.Kind == MapLabObjectKind.Conifer ? palette.TreeSmoky : palette.TreeMoss;
+                    break;
+                case MapLabArtCategory.Rock:
+                case MapLabArtCategory.Cliff:
+                    tone = palette.RockLight;
+                    break;
+                default:
+                    tone = Color.white;
+                    break;
+            }
+            m.SetColor("_TintColor", tone);
+            m.SetFloat("_TintStrength", entry.Category == MapLabArtCategory.Figure || entry.Category == MapLabArtCategory.FigureCalibration || entry.Category == MapLabArtCategory.Building ? 0f : 1f);
+            m.SetColor("_ShadowTint", palette.ShadowTint);
+            m.SetFloat("_GroundShade", Settings.Diagnostics.ShowReliefLight ? art.GroundShade : 0f);
+            m.SetFloat("_MapSize", data != null ? data.Size : Settings.General.MapSize);
+            m.SetTexture("_ShadeTex", shadeTexture != null ? shadeTexture : Texture2D.whiteTexture);
+            m.SetFloat("_Saturation", Settings.PainterlyStyle.Saturation);
+            m.SetFloat("_AlphaView", (float)art.AlphaView);
+        }
+
+        // Пересобрать только нарисованные объекты (после импорта или смены режима).
+        public bool RebuildArt()
+        {
+            if (data == null || !Validate())
+                return false;
+            DestroyObjectGroups();
+            foreach (Material m in artMaterials.Values)
+            {
+                owned.Remove(m);
+                DestroySafe(m);
+            }
+            artMaterials.Clear();
+            BuildObjects();
+            ApplyMaterialSettings();
+            ApplyVisibility();
+            MapLabStats stats = data.Stats;
+            CountStats(ref stats);
+            data.Stats = stats;
+            MapLabMarker marker = Marker;
+            if (marker != null)
+                marker.OnMapBuilt(this);
+            return true;
+        }
+
+        // Тестовая полоса перед картой (ближе к камере): на светлой панели —
+        // исходный PNG без оттенка и тени рядом с экземпляром «как в сцене»; на
+        // тёмной — исходная альфа и результат AlphaClip. Возвращает центр полосы.
+        public Vector3 BuildArtStrip(IList<MapLabArtEntry> entries)
+        {
+            DestroyGroup("ArtTestStrip");
+            if (data == null || entries == null || entries.Count == 0)
+                return Vector3.zero;
+            GameObject group = Group("ArtTestStrip");
+            float spacing = 0f;
+            foreach (MapLabArtEntry e in entries)
+                spacing = Mathf.Max(spacing, e.CardHeight * e.Aspect * e.SolidRect.width * 1.2f + 2f);
+            float width = spacing * 2f * entries.Count + 6f;
+            float x0 = data.Size * 0.5f - width * 0.5f;
+            float y = data.MinHeight - 2f;
+            float zLight = -18f, zDark = -48f;
+            Material light = Own(new Material(LinesShader) { name = "MapLab Strip Light" });
+            light.SetColor("_Color", Palette.Paper);
+            Material dark = Own(new Material(LinesShader) { name = "MapLab Strip Dark" });
+            dark.SetColor("_Color", Palette.ForestFloor);
+            Mesh Panel(float z0, float z1)
+            {
+                Mesh m = new Mesh { name = "MapLab Strip Panel", hideFlags = HideFlags.DontSave };
+                m.vertices = new[] { new Vector3(x0 - 4f, y, z0), new Vector3(x0 + width, y, z0), new Vector3(x0 + width, y, z1), new Vector3(x0 - 4f, y, z1) };
+                m.triangles = new[] { 0, 3, 2, 0, 2, 1 };
+                m.RecalculateBounds();
+                return m;
+            }
+            AddRenderer(group, "Light Panel", Panel(zLight - 16f, zLight + 14f), light);
+            AddRenderer(group, "Dark Panel", Panel(zDark - 16f, zLight - 16f), dark);
+            for (int i = 0; i < entries.Count; i++)
+            {
+                MapLabArtEntry e = entries[i];
+                float xa = x0 + spacing * (2 * i + 0.5f), xb = xa + spacing;
+                AddStripCard(group, e, new Vector3(xa, y, zLight), 0f, MapLabAlphaView.Off, "Source");
+                AddStripCard(group, e, new Vector3(xb, y, zLight), 1f, MapLabAlphaView.Off, "Scene");
+                AddStripCard(group, e, new Vector3(xa, y, zDark), 0f, MapLabAlphaView.SourceAlpha, "Alpha");
+                AddStripCard(group, e, new Vector3(xb, y, zDark), 0f, MapLabAlphaView.ClipResult, "Clip");
+            }
+            return new Vector3(data.Size * 0.5f, y, (zLight + zDark) * 0.5f);
+        }
+
+        private void AddStripCard(GameObject group, MapLabArtEntry entry, Vector3 basePoint, float sceneLook, MapLabAlphaView alphaView, string label)
+        {
+            Material m = Own(new Material(ArtCardShader) { name = $"MapLab Strip {entry.Id} {label}" });
+            ConfigureArtMaterial(m, entry);
+            m.SetFloat("_AlphaView", (float)alphaView);
+            if (sceneLook < 0.5f)
+            {
+                m.SetFloat("_TintStrength", 0f);
+                m.SetFloat("_GroundShade", 0f);
+            }
+            MapLabArtInstance inst = new MapLabArtInstance
+            {
+                Base = basePoint,
+                Height = entry.CardHeight,
+                Width = entry.CardHeight * entry.Aspect,
+                Pivot = entry.Pivot,
+                Brightness = 1f,
+                Tint = sceneLook > 0.5f ? Settings.Art.PaletteTint : 0f,
+                GroundShade = 0f,
+            };
+            List<Vector3> positions = new List<Vector3>();
+            List<Vector2> uv0 = new List<Vector2>(), uv1 = new List<Vector2>();
+            List<Color> colors = new List<Color>();
+            List<int> indices = new List<int>();
+            MapLabArtBuilder.AppendCard(inst, new Color(0.8f, inst.Tint, 0f, 1f), positions, uv0, uv1, colors, indices);
+            Mesh mesh = new Mesh { name = $"MapLab Strip {entry.Id} {label}", hideFlags = HideFlags.DontSave };
+            mesh.SetVertices(positions);
+            mesh.SetUVs(0, uv0);
+            mesh.SetUVs(1, uv1);
+            mesh.SetColors(colors);
+            mesh.SetTriangles(indices, 0, false);
+            mesh.bounds = new Bounds(basePoint, Vector3.one * (inst.Height * 4f + 8f));
+            AddRenderer(group, entry.Id + " " + label, mesh, m);
+        }
+
+        public void ClearArtStrip()
+        {
+            DestroyGroup("ArtTestStrip");
+        }
+
+        // Камера сменила наклон или приближение: дома-карточки ↔ геометрия, кадр фишки.
+        public void OnCameraChanged()
+        {
+            if (data == null)
+                return;
+            bool sprites = Settings.Art.BuildingSpritesAt(CameraRig != null ? CameraRig.Pitch : 50f);
+            if (sprites != buildingSprites)
+                ApplyVisibility();
+            MapLabMarker marker = Marker;
+            if (marker != null)
+                marker.Refresh();
         }
 
         private void BuildWireframe()
@@ -522,8 +797,42 @@ namespace KingdomSurvival.MapLab
 
             if (linesMaterial != null)
                 linesMaterial.SetColor("_Color", new Color(0.12f, 0.12f, 0.14f, 1f));
+
+            ApplyGroundTextures(t, s);
+            foreach (KeyValuePair<MapLabArtEntry, Material> pair in artMaterials)
+                ConfigureArtMaterial(pair.Value, pair.Key);
             if (CameraRig != null)
                 CameraRig.Bind(this, false);
+        }
+
+        // Фактуры этапа 02: трава, земля, камень — если подключены и включены.
+        private void ApplyGroundTextures(Material terrain, Material solid)
+        {
+            MapLabArtSet set = ResolvedArtSet;
+            MapLabArtSettings art = Settings.Art;
+            MapLabArtEntry grass = set != null ? set.Find("Ground_Grass_Color") : null;
+            MapLabArtEntry earth = set != null ? set.Find("Ground_Earth_Color") : null;
+            MapLabArtEntry rock = set != null ? set.Find("Rock_Color") : null;
+            bool on = art.GroundTextures && Settings.Diagnostics.ShowPaint && grass != null && grass.HasTexture && earth != null && earth.HasTexture && rock != null && rock.HasTexture;
+            terrain.SetFloat("_GroundStrength", on ? art.GroundStrength : 0f);
+            terrain.SetVector("_GroundScales", new Vector4(art.GrassScale, art.EarthScale, art.RockScale, 0f));
+            if (on)
+            {
+                terrain.SetTexture("_GrassTex", grass.Texture);
+                terrain.SetTexture("_EarthTex", earth.Texture);
+                terrain.SetTexture("_RockTex", rock.Texture);
+                terrain.SetColor("_GrassMean", grass.MeanColor.linear);
+                terrain.SetColor("_EarthMean", earth.MeanColor.linear);
+                terrain.SetColor("_RockMean", rock.MeanColor.linear);
+            }
+            bool rockOn = rock != null && rock.HasTexture && Settings.Diagnostics.ShowPaint;
+            solid.SetFloat("_RockStrength", rockOn ? art.RockColorStrength : 0f);
+            if (rockOn)
+            {
+                solid.SetTexture("_RockTex", rock.Texture);
+                solid.SetColor("_RockMean", rock.MeanColor.linear);
+                solid.SetFloat("_RockScale", art.RockScale * 0.5f);
+            }
         }
 
         public void ApplyVisibility()
@@ -532,12 +841,22 @@ namespace KingdomSurvival.MapLab
                 return;
             MapLabDiagnosticsSettings d = Settings.Diagnostics;
             bool final = d.Mode == MapLabDiagnosticMode.Final || d.Mode == MapLabDiagnosticMode.Wireframe;
+            bool forest = d.ShowForest && (final || d.Mode == MapLabDiagnosticMode.ForestDensity);
+            buildingSprites = Settings.Art.BuildingSpritesAt(CameraRig != null ? CameraRig.Pitch : Settings.Camera.PitchFor(1f)) && groups.ContainsKey("ArtHouses");
             SetActive("Water", d.ShowWater);
-            SetActive("Vegetation", d.ShowForest && (final || d.Mode == MapLabDiagnosticMode.ForestDensity));
+            SetActive("Vegetation", forest);
+            SetActive("ArtVegetation", forest);
             SetActive("Structures", d.ShowBuildings && final);
+            SetActive("Houses", d.ShowBuildings && final && !buildingSprites);
+            SetActive("ArtHouses", d.ShowBuildings && final && buildingSprites);
             SetActive("Boulders", d.ShowCliffs && final);
+            SetActive("ArtBoulders", d.ShowCliffs && final);
+            SetActive("ArtCliffDecor", d.ShowCliffs && final);
             SetActive("Cliffs", d.ShowCliffs && d.Mode != MapLabDiagnosticMode.Height && d.Mode != MapLabDiagnosticMode.Slope);
             SetActive("Wireframe", d.Mode == MapLabDiagnosticMode.Wireframe);
+            MapLabMarker marker = Marker;
+            if (marker != null && marker.View == this)
+                marker.Refresh();
         }
 
         private void SetActive(string name, bool active)
@@ -660,7 +979,17 @@ namespace KingdomSurvival.MapLab
             {
                 if (data.Contains(p.x, p.z) && p.y <= data.SampleHeight(p.x, p.z))
                 {
-                    point = new Vector3(p.x, data.SampleHeight(p.x, p.z), p.z);
+                    // Уточнение пересечения между последним шагом над землёй и первым под ней.
+                    Vector3 above = p - ray.direction * step, below = p;
+                    for (int k = 0; k < 12; k++)
+                    {
+                        Vector3 mid = (above + below) * 0.5f;
+                        if (data.Contains(mid.x, mid.z) && mid.y <= data.SampleHeight(mid.x, mid.z))
+                            below = mid;
+                        else
+                            above = mid;
+                    }
+                    point = new Vector3(below.x, data.SampleHeight(below.x, below.z), below.z);
                     return true;
                 }
                 if (p.y < data.MinHeight - 1f)

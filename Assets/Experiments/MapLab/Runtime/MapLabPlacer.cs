@@ -16,6 +16,8 @@ namespace KingdomSurvival.MapLab
             data.Objects.Clear();
             data.Fences.Clear();
             data.Yards.Clear();
+            data.YardPaths.Clear();
+            data.YardRects.Clear();
             data.Piers.Clear();
             PlaceSettlement(data, settings);
             buildings.Clear();
@@ -110,6 +112,11 @@ namespace KingdomSurvival.MapLab
                 if (Vector2.Distance(new Vector2(houses[i].Position.x, houses[i].Position.z), center) < minDistance)
                     return;
             }
+            int variant = rng.Range(0, 4);
+            // Этап 02: изба ставится в ту ориентацию, в которой нарисована её
+            // картинка (рисунок нельзя крутить). Одинаково для геометрии и PNG.
+            if (s.AlignToDrawnView)
+                yaw = DrawnYaw(s, variant % 4 < 2 ? 0 : 1, yaw);
             MapLabPlacement house = new MapLabPlacement
             {
                 Kind = MapLabObjectKind.House,
@@ -117,24 +124,33 @@ namespace KingdomSurvival.MapLab
                 Yaw = yaw,
                 Scale = 1f,
                 Size = size,
-                Variant = rng.Range(0, 4),
+                Variant = variant,
                 Brightness = rng.Range(0.9f, 1.08f),
                 Tone = rng.Value(),
             };
             houses.Add(house);
             data.Objects.Add(house);
             Vector2 back = -roadNormal * side;
+            float yawRad = yaw * Mathf.Deg2Rad;
+            Vector2 axisU = new Vector2(Mathf.Cos(yawRad), Mathf.Sin(yawRad));
+            Vector2 axisV = MapLabGeometry.LeftNormal(axisU);
+            Vector2 backV = Vector2.Dot(axisV, back) >= 0f ? axisV : -axisV;
+            float hw = size.x * 0.5f, hd = size.y * 0.5f;
+            float yardDepth = rng.Range(4.5f, 7f) * s.BuildingScale;
             if (rng.Chance(0.4f))
             {
                 Vector2 barnSize = new Vector2(rng.Range(2.4f, 3.4f), rng.Range(2.2f, 2.8f)) * s.BuildingScale;
-                Vector2 barnCenter = center + back * (Mathf.Max(size.x, size.y) * 0.5f + barnSize.y * 0.5f + 1.6f) + MapLabGeometry.LeftNormal(back) * rng.Signed() * 2f;
+                float barnYaw = s.AlignToDrawnView ? DrawnYaw(s, 2, yaw) : yaw + rng.Signed() * 8f;
+                // Амбар — в глубине двора, у одного из углов.
+                Vector2 barnCenter = center + backV * (hd + barnSize.y * 0.5f + 1.4f) + axisU * rng.Signed() * Mathf.Max(0f, hw - barnSize.x * 0.3f);
+                yardDepth = Mathf.Max(yardDepth, barnSize.y + 2.6f);
                 if (BuildableSpot(data, barnCenter, 1.8f, 16f) && MinRoadDistance(data, barnCenter) > 2.5f)
                 {
                     MapLabPlacement barn = new MapLabPlacement
                     {
                         Kind = MapLabObjectKind.Barn,
                         Position = new Vector3(barnCenter.x, data.SampleHeight(barnCenter.x, barnCenter.y), barnCenter.y),
-                        Yaw = yaw + rng.Signed() * 8f,
+                        Yaw = barnYaw,
                         Scale = 1f,
                         Size = barnSize,
                         Variant = rng.Range(0, 3),
@@ -144,25 +160,56 @@ namespace KingdomSurvival.MapLab
                     data.Objects.Add(barn);
                 }
             }
-            // Двор за домом: огород под покраску и ограда без стороны к дороге.
-            float yardHalf = Mathf.Max(size.x, size.y) * 0.55f + 2.2f;
-            Vector2 yardCenter = center + back * (yardHalf * 0.55f);
-            float angle = Mathf.Atan2(back.y, back.x);
-            data.Yards.Add(new Vector4(yardCenter.x, yardCenter.y, yardHalf, angle));
-            if (s.Fences && rng.Chance(0.65f))
+            // Двор: огород в глубине (покраска) и ограда вокруг дома и двора с
+            // воротами со стороны дороги; от ворот — короткая тропинка к дороге.
+            float yardHalf = Mathf.Min(yardDepth * 0.5f, hw + 1.4f);
+            Vector2 gardenCenter = center + backV * (hd + yardDepth * 0.55f);
+            data.Yards.Add(new Vector4(gardenCenter.x, gardenCenter.y, yardHalf, Mathf.Atan2(backV.y, backV.x)));
+            float rectV0 = -(hd + 1.3f), rectV1 = hd + yardDepth + 0.4f;
+            data.YardRects.Add(new MapLabYardRect { Center = center + backV * ((rectV0 + rectV1) * 0.5f), AxisU = axisU, Half = new Vector2(hw + 1.6f, (rectV1 - rectV0) * 0.5f) });
+            if (s.Fences && rng.Chance(0.7f))
             {
-                Vector2 ax = back;
-                Vector2 ay = MapLabGeometry.LeftNormal(back);
-                Vector2 c0 = yardCenter + (-ax + -ay) * yardHalf;
-                Vector2 c1 = yardCenter + (ax + -ay) * yardHalf;
-                Vector2 c2 = yardCenter + (ax + ay) * yardHalf;
-                Vector2 c3 = yardCenter + (-ax + ay) * yardHalf;
-                AddFence(data, c0, c1);
-                AddFence(data, c1, c2);
-                AddFence(data, c2, c3);
-                if (rng.Chance(0.4f))
-                    AddFence(data, c3, Vector2.Lerp(c3, c0, 0.35f));
+                float u0 = -(hw + 1.6f), u1 = hw + 1.6f;
+                float v0 = -(hd + 1.3f), v1 = hd + yardDepth + 0.4f;
+                Vector2 P(float u, float v) => center + axisU * u + backV * v;
+                // Ворота на передней стороне, ближе к той половине, где дверь.
+                float gate = rng.Signed() * hw * 0.4f;
+                const float gateHalf = 0.95f;
+                AddFence(data, P(u0, v0), P(gate - gateHalf, v0));
+                AddFence(data, P(gate + gateHalf, v0), P(u1, v0));
+                AddFence(data, P(u1, v0), P(u1, v1));
+                AddFence(data, P(u1, v1), P(u0, v1));
+                AddFence(data, P(u0, v1), P(u0, v0));
+                Vector2 gatePoint = P(gate, v0);
+                float best = float.MaxValue;
+                Vector2 onRoad = gatePoint;
+                for (int r = 0; r < data.Roads.Count; r++)
+                {
+                    float d = MapLabGeometry.Nearest(data.Roads[r].Points, gatePoint, out int segment, out float t, out _, out _);
+                    if (d < best && segment + 1 < data.Roads[r].Points.Count)
+                    {
+                        best = d;
+                        onRoad = Vector2.Lerp(data.Roads[r].Points[segment], data.Roads[r].Points[segment + 1], t);
+                    }
+                }
+                if (best < 16f && best > 1.2f)
+                {
+                    MapLabPolyline path = new MapLabPolyline { Width = 1.1f, Kind = MapLabRoadKind.Path };
+                    path.Points.Add(P(gate, v0 + 0.6f));
+                    path.Points.Add(Vector2.Lerp(gatePoint, onRoad, 0.5f) + MapLabGeometry.LeftNormal((onRoad - gatePoint).normalized) * rng.Signed() * 0.5f);
+                    path.Points.Add(onRoad);
+                    data.YardPaths.Add(path);
+                }
             }
+        }
+
+        // Ориентация конька, в которой нарисована картинка: 0 — изба с соломой,
+        // 1 — изба с дранкой, 2 — амбар. Ось конька без направления: из двух
+        // вариантов берётся ближайший к предложенному.
+        private static float DrawnYaw(MapLabSettlementSettings s, int type, float suggested)
+        {
+            float drawn = type == 0 ? s.DrawnRidgeYaw.x : type == 1 ? s.DrawnRidgeYaw.y : s.DrawnRidgeYaw.z;
+            return Mathf.Abs(Mathf.DeltaAngle(suggested, drawn)) <= 90f ? drawn : drawn + 180f;
         }
 
         private static void AddFence(MapLabData data, Vector2 a, Vector2 b)
@@ -344,6 +391,10 @@ namespace KingdomSurvival.MapLab
                 return false;
             for (int b = 0; b < data.Bridges.Count; b++)
                 if (MapLabGeometry.DistanceToSegment(p, data.Bridges[b].EndA, data.Bridges[b].EndB, out _) < 4f)
+                    return false;
+            // Дворы и огороды свободны от леса и одиночных деревьев.
+            for (int y = 0; y < data.YardRects.Count; y++)
+                if (data.YardRects[y].Contains(p, 1.2f))
                     return false;
             for (int i = 0; i < data.Piers.Count; i++)
                 if (MapLabGeometry.DistanceToSegment(p, data.Piers[i].Shore, data.Piers[i].Tip, out _) < 3f)

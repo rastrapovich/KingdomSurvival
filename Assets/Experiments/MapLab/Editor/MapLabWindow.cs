@@ -12,18 +12,18 @@ namespace KingdomSurvival.MapLab.Editor
     {
         private static readonly string[] Groups =
         {
-            "General", "Relief", "Water", "RoadsAndFields", "Cliffs", "Vegetation", "Settlement", "PainterlyStyle", "Camera", "Diagnostics", "Advanced",
+            "General", "Relief", "Water", "RoadsAndFields", "Cliffs", "Vegetation", "Settlement", "PainterlyStyle", "Camera", "Art", "Diagnostics", "Advanced",
         };
 
         private static readonly string[] GroupTitles =
         {
             "Общее (General)", "Рельеф (Relief)", "Вода (Water)", "Дороги и поля (Roads And Fields)", "Уступы (Cliffs)",
-            "Растительность (Vegetation)", "Поселение (Settlement)", "Живописный стиль (Painterly Style)", "Камера (Camera)",
+            "Растительность (Vegetation)", "Поселение (Settlement)", "Живописный стиль (Painterly Style)", "Камера (Camera)", "Арт этапа 02 (Art) · применяется пересборкой объектов",
             "Диагностика (Diagnostics)", "Дополнительно (Advanced)",
         };
 
         // Группы, изменение которых не требует перестройки.
-        private static readonly bool[] CheapGroups = { false, false, false, false, false, false, false, true, true, true, false };
+        private static readonly bool[] CheapGroups = { false, false, false, false, false, false, false, true, true, true, true, false };
 
         private static readonly Vector2Int[] ExportSizes = { new Vector2Int(2048, 1365), new Vector2Int(3072, 2048), new Vector2Int(1536, 1024), new Vector2Int(1920, 1080) };
         private static readonly string[] ExportSizeNames = { "2048 × 1365", "3072 × 2048", "1536 × 1024", "1920 × 1080" };
@@ -31,7 +31,7 @@ namespace KingdomSurvival.MapLab.Editor
         private MapLabView view;
         private SerializedObject serialized;
         private Vector2 scroll;
-        private readonly bool[] open = { true, true, false, false, true, true, false, true, true, true, false };
+        private readonly bool[] open = { false, false, false, false, false, false, false, false, true, true, false, false };
         private int exportSize;
         private int supersample = 2;
         private string status = "";
@@ -94,12 +94,14 @@ namespace KingdomSurvival.MapLab.Editor
 
             DrawCommands();
             DrawStatus();
+            DrawStage02();
 
             if (serialized == null || serialized.targetObject != view.Settings)
                 serialized = new SerializedObject(view.Settings);
             serialized.Update();
             scroll = EditorGUILayout.BeginScrollView(scroll);
             bool cheapChanged = false;
+            bool artChanged = false;
             for (int g = 0; g < Groups.Length; g++)
             {
                 SerializedProperty group = serialized.FindProperty(Groups[g]);
@@ -120,13 +122,16 @@ namespace KingdomSurvival.MapLab.Editor
                     }
                     EditorGUI.indentLevel--;
                     if (EditorGUI.EndChangeCheck() && CheapGroups[g])
+                    {
                         cheapChanged = true;
+                        artChanged |= Groups[g] == "Art";
+                    }
                 }
                 EditorGUILayout.EndFoldoutHeaderGroup();
             }
             EditorGUILayout.EndScrollView();
             if (serialized.ApplyModifiedProperties() && cheapChanged)
-                ApplyCheap();
+                ApplyCheap(artChanged);
         }
 
         private void DrawPresetSwitch()
@@ -190,6 +195,181 @@ namespace KingdomSurvival.MapLab.Editor
             sceneClick = EditorGUILayout.ToggleLeft(new GUIContent("Диагностический клик в Scene View (Shift + ЛКМ)", "Координата, высота, уклон и тип поверхности."), sceneClick);
         }
 
+        // ---------- Этап 02: арт, камера, фишка ----------
+
+        private bool stage02Open = true;
+        private bool previewing;
+
+        private void DrawStage02()
+        {
+            stage02Open = EditorGUILayout.BeginFoldoutHeaderGroup(stage02Open, "Этап 02 · арт, камеры 60/50/40, фишка");
+            if (stage02Open)
+            {
+                MapLabArtSet set = view.ResolvedArtSet;
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button(new GUIContent("Подключить пакет этапа 02…", "Выбрать распакованную папку ZIP с ASSET_MANIFEST.json: проверка, копирование, импорт, ArtSet.")))
+                    RunGuarded(() => { MapLabArtImport.ImportMenu(); });
+                using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(MapLabArtImport.LastPackageFolder)))
+                {
+                    if (GUILayout.Button(new GUIContent("Переподключить", "Повторный импорт из той же папки: обновление по стабильным ID, без дубликатов.\n" + MapLabArtImport.LastPackageFolder)))
+                        RunGuarded(() => { MapLabArtImport.ReimportMenu(); });
+                }
+                if (GUILayout.Button(new GUIContent("Калибровка арта…", "Опора, порог альфы, рост; проверка регистрации кадров фишки.")))
+                    MapLabArtCalibrationWindow.Open();
+                EditorGUILayout.EndHorizontal();
+                if (set == null)
+                    EditorGUILayout.HelpBox("Набор арта не подключён — карта строится процедурно. Нажмите «Подключить пакет этапа 02…».", MessageType.Info);
+                else
+                {
+                    int missing = set.MissingTextures;
+                    string cards = view.ArtPlan != null ? $" · карточек на карте {view.ArtPlan.Count}, материалов арта {view.ArtMaterialCount}" : "";
+                    EditorGUILayout.HelpBox($"{set.PackageId} · подключение №{set.ImportVersion} ({set.ImportedAt}) · записей {set.Entries.Count}" +
+                                            (missing > 0 ? $" · без картинки {missing} (fallback)" : "") + cards, missing > 0 ? MessageType.Warning : MessageType.None);
+                }
+
+                MapLabCameraRig rig = view.CameraRig;
+                if (rig != null)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.PrefixLabel(new GUIContent("Камера", "Фокус сохраняется при смене наклона и приближения."));
+                    if (GUILayout.Button("Атлас 60°", EditorStyles.miniButtonLeft)) SetMode(MapLabCameraMode.Atlas60);
+                    if (GUILayout.Button("Объёмная 50°", EditorStyles.miniButtonMid)) SetMode(MapLabCameraMode.Volume50);
+                    if (GUILayout.Button("Диорама 40°", EditorStyles.miniButtonRight)) SetMode(MapLabCameraMode.Diorama40);
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.PrefixLabel("Приближение");
+                    foreach (float z in new[] { 1f, 2f, 4f })
+                        if (GUILayout.Button("Zoom " + z, EditorStyles.miniButton))
+                            WithCamera(() => rig.ZoomAround(z, new Vector2(0.5f, 0.5f), false));
+                    if (GUILayout.Button(new GUIContent("Фокус: участок", "Центр кадра — демонстрационный участок (поселение)."), EditorStyles.miniButton))
+                        WithCamera(() => { Vector2 f = view.DemoFocus; rig.Target = rig.ToGround(new Vector3(f.x, view.Data != null ? view.Data.SampleHeight(f.x, f.y) : 0f, f.y)); rig.Apply(); });
+                    if (GUILayout.Button(new GUIContent("Fit Map", "Вся карта в кадре (переносит фокус в центр)."), EditorStyles.miniButton))
+                        WithCamera(() => rig.Fit());
+                    EditorGUILayout.EndHorizontal();
+                    string approx = view.ArtSpritesApproximate ? " · рисунки нарисованы под 50° — ракурс приближённый" : "";
+                    EditorGUILayout.LabelField($"Сейчас: {(rig.PitchByZoom ? "наклон от приближения" : rig.Mode.ToString())}, {rig.Pitch:0.#}°, Zoom {rig.Zoom:0.00}{approx}", EditorStyles.miniLabel);
+                    EditorGUILayout.LabelField("Edit Mode — кнопки выше; Play Mode — колесо к курсору, 1/2/3, P, WASD, ПКМ.", EditorStyles.miniLabel);
+                }
+
+                MapLabMarker marker = view.Marker;
+                if (marker != null)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.PrefixLabel(new GUIContent("Фишка", "Направление относительно камеры; кадр выбирается по сектору 60°."));
+                    for (int i = 0; i < 6; i++)
+                    {
+                        int index = i;
+                        if (GUILayout.Button(MapLabMarkerSet.DirectionNames[i].Replace("_", " "), EditorStyles.miniButton))
+                        {
+                            marker.PreviewMove = false;
+                            marker.FacingDegrees = (rig != null ? rig.Azimuth : 0f) + 180f - index * 60f;
+                            marker.Refresh();
+                            SceneView.RepaintAll();
+                        }
+                    }
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.BeginHorizontal();
+                    bool preview = GUILayout.Toggle(marker.PreviewMove, "Preview движения", EditorStyles.miniButtonLeft);
+                    if (preview != marker.PreviewMove)
+                    {
+                        marker.PreviewMove = preview;
+                        SetPreview(preview);
+                    }
+                    bool arrow = GUILayout.Toggle(marker.ShowArrow, "Стрелка", EditorStyles.miniButtonMid);
+                    if (arrow != marker.ShowArrow)
+                    {
+                        marker.ShowArrow = arrow;
+                        marker.Refresh();
+                    }
+                    bool ghost = GUILayout.Toggle(view.Settings.Art.MarkerGhost, "Контур за препятствием", EditorStyles.miniButtonRight);
+                    if (ghost != view.Settings.Art.MarkerGhost)
+                    {
+                        view.Settings.Art.MarkerGhost = ghost;
+                        EditorUtility.SetDirty(view.Settings);
+                        marker.Refresh();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                    if (!string.IsNullOrEmpty(marker.Status))
+                        EditorGUILayout.LabelField(marker.Status, EditorStyles.miniLabel);
+                }
+
+                EditorGUILayout.BeginHorizontal();
+                using (new EditorGUI.DisabledScope(set == null || view.Data == null))
+                {
+                    if (GUILayout.Button(new GUIContent("Тестовая полоса", "Перед картой: исходный PNG и экземпляр сцены (светлая панель), исходная альфа и AlphaClip (тёмная).")))
+                        RunGuarded(() => ShowStrip(set));
+                }
+                if (GUILayout.Button("Убрать полосу"))
+                    view.ClearArtStrip();
+                EditorGUILayout.EndHorizontal();
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
+        }
+
+        private void SetMode(MapLabCameraMode mode)
+        {
+            Undo.RecordObject(view.Settings, "MapLab: режим камеры");
+            WithCamera(() => view.CameraRig.SetMode(mode));
+            EditorUtility.SetDirty(view.Settings);
+            serialized = null;
+        }
+
+        private void WithCamera(Action action)
+        {
+            if (view.CameraRig == null || view.Data == null)
+            {
+                status = "Сначала нажмите Generate.";
+                return;
+            }
+            action();
+            view.OnCameraChanged();
+            SceneView.RepaintAll();
+            UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
+        }
+
+        private void ShowStrip(MapLabArtSet set)
+        {
+            System.Collections.Generic.List<MapLabArtEntry> entries = new System.Collections.Generic.List<MapLabArtEntry>();
+            foreach (string id in new[] { "Tree_Oak_01", "House_Thatch_01", "Figure_Front" })
+            {
+                MapLabArtEntry e = set.Find(id);
+                if (e != null && e.HasTexture)
+                    entries.Add(e);
+            }
+            Vector3 center = view.BuildArtStrip(entries);
+            if (view.CameraRig != null && entries.Count > 0)
+            {
+                view.CameraRig.Target = center;
+                view.CameraRig.Zoom = 3.2f;
+                view.CameraRig.Apply();
+            }
+            status = "Тестовая полоса: слева в паре — исходный PNG, справа — экземпляр сцены; ниже — альфа и AlphaClip.";
+        }
+
+        private void SetPreview(bool on)
+        {
+            EditorApplication.update -= PreviewTick;
+            previewing = on;
+            if (on)
+                EditorApplication.update += PreviewTick;
+        }
+
+        private void PreviewTick()
+        {
+            MapLabMarker marker = view != null ? view.Marker : null;
+            if (!previewing || marker == null || !marker.PreviewMove)
+            {
+                SetPreview(false);
+                return;
+            }
+            if (!Application.isPlaying)
+            {
+                marker.Tick();
+                SceneView.RepaintAll();
+                UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
+            }
+        }
+
         private void DrawStatus()
         {
             if (!string.IsNullOrEmpty(view.LastError))
@@ -212,12 +392,19 @@ namespace KingdomSurvival.MapLab.Editor
                 EditorGUILayout.LabelField(status, EditorStyles.miniLabel);
         }
 
-        private void ApplyCheap()
+        private void ApplyCheap(bool art)
         {
+            if (art)
+                view.RebuildArt();
             view.ApplyMaterialSettings();
             view.ApplyVisibility();
+            // Камера: фокус и приближение сохраняются; полный Fit — отдельной кнопкой.
             if (view.CameraRig != null)
-                view.CameraRig.Bind(view, true);
+            {
+                view.CameraRig.RecomputeFitSize();
+                view.CameraRig.Apply();
+                view.OnCameraChanged();
+            }
             SceneView.RepaintAll();
             UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
         }

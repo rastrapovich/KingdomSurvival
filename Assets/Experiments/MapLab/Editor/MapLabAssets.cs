@@ -102,11 +102,47 @@ namespace KingdomSurvival.MapLab.Editor
             view.CardShader = LoadShader("MapLabCard.shader");
             view.SolidShader = LoadShader("MapLabSolid.shader");
             view.LinesShader = LoadShader("MapLabLines.shader");
+            view.ArtCardShader = LoadShader("MapLabArtCard.shader");
+            view.ContactShader = LoadShader("MapLabContact.shader");
+            view.ArtSet = MapLabArtImport.LoadArtSet();
+            view.MarkerSet = MapLabArtImport.LoadMarkerSet();
+            mapObject.AddComponent<MapLabMarker>().View = view;
 
             Directory.CreateDirectory(SceneFolder);
             EditorSceneManager.SaveScene(scene, ScenePath);
             AssetDatabase.Refresh();
             return scene;
+        }
+
+        // Дополнить существующую сцену этапа 1 тем, что нужно этапу 02: шейдеры
+        // карточек, набор арта, фишка. Сгенерированное в сцену не сохраняется.
+        //   -executeMethod KingdomSurvival.MapLab.Editor.MapLabAssets.UpgradeSceneBatch
+        public static void UpgradeSceneBatch()
+        {
+            int code = 0;
+            try
+            {
+                Scene scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+                MapLabView view = FindView();
+                view.ArtCardShader = LoadShader("MapLabArtCard.shader");
+                view.ContactShader = LoadShader("MapLabContact.shader");
+                view.ArtSet = MapLabArtImport.LoadArtSet();
+                view.MarkerSet = MapLabArtImport.LoadMarkerSet();
+                MapLabMarker marker = view.GetComponent<MapLabMarker>();
+                if (marker == null)
+                    marker = view.gameObject.AddComponent<MapLabMarker>();
+                marker.View = view;
+                view.Clear();
+                EditorSceneManager.MarkSceneDirty(scene);
+                EditorSceneManager.SaveScene(scene);
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogException(exception);
+                code = 1;
+            }
+            if (Application.isBatchMode)
+                EditorApplication.Exit(code);
         }
 
         public static MapLabView FindView()

@@ -95,12 +95,10 @@ namespace KingdomSurvival.MapLab
             }
         }
 
-        // Пересчитать вписывание под соотношение сторон, сохранив панораму и приближение.
+        // Пересчитать «вся карта» под соотношение сторон, сохранив фокус, приближение и режим.
         private static void RefitKeepingView(MapLabCameraRig rig)
         {
-            Vector3 target = rig.Target;
-            rig.Fit();
-            rig.Target = target;
+            rig.RecomputeFitSize();
             rig.Apply();
         }
     }

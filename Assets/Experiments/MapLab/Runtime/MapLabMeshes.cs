@@ -341,7 +341,7 @@ namespace KingdomSurvival.MapLab
 
         // ---------- Карточки растительности ----------
 
-        public static List<Mesh> BuildVegetationCards(MapLabData data, float chunkSize)
+        public static List<Mesh> BuildVegetationCards(MapLabData data, float chunkSize, HashSet<MapLabObjectKind> skip = null)
         {
             Dictionary<int, List<int>> byChunk = new Dictionary<int, List<int>>();
             int chunks = Mathf.Max(1, Mathf.CeilToInt(data.Size / chunkSize));
@@ -349,7 +349,7 @@ namespace KingdomSurvival.MapLab
             {
                 MapLabObjectKind kind = data.Objects[i].Kind;
                 if (kind != MapLabObjectKind.Deciduous && kind != MapLabObjectKind.DeciduousGroup && kind != MapLabObjectKind.Conifer
-                    && kind != MapLabObjectKind.Bush && kind != MapLabObjectKind.Reed)
+                    && kind != MapLabObjectKind.Bush && kind != MapLabObjectKind.Reed || (skip != null && skip.Contains(kind)))
                     continue;
                 Vector3 p = data.Objects[i].Position;
                 int cx = Mathf.Clamp((int)(p.x / chunkSize), 0, chunks - 1);
@@ -461,9 +461,13 @@ namespace KingdomSurvival.MapLab
             MapLabRandom rng = MapLabRandom.ForStream(data.Seed, "cliff-mesh", MapLabData.AlgorithmVersion);
             float w = Mathf.Max(0.4f, settings.Cliffs.CliffSharpness);
             float jag = settings.Cliffs.Jaggedness;
+            // Крупный ритм вдоль линии (этап 02): выпуклые «бастионы», короткие впадины
+            // с травяными полками, разная высота — вместо частокола одинаковых столбов.
+            MapLabNoise rhythm = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "cliff-rhythm", MapLabData.AlgorithmVersion));
             for (int k = 0; k < data.CliffLines.Count; k++)
             {
                 MapLabCliffLine line = data.CliffLines[k];
+                float station = 0f;
                 for (int i = 0; i < line.Columns.Count; i++)
                 {
                     MapLabCliffColumn c = line.Columns[i];
@@ -480,8 +484,12 @@ namespace KingdomSurvival.MapLab
                     float height = c.Top - c.Bottom;
                     Vector2 o = c.Outward;
                     // Столбы выступают по-разному: глубина даёт тень трещин между ними.
-                    float protrude = rng.Range(0f, 0.9f) * w;
-                    bool notch = height > 3f && rng.Chance(0.12f);
+                    station += Vector2.Distance(c.Start, c.End);
+                    float lf = rhythm.Fbm(station / 15f + k * 7.3f, k * 3.1f, 2);
+                    float bastion = MapLabGeometry.SmoothStep(-0.05f, 0.55f, lf);
+                    float hollow = MapLabGeometry.SmoothStep(-0.2f, -0.55f, lf);
+                    float protrude = (rng.Range(0f, 0.3f) + bastion * 1.5f - hollow * 0.55f) * w;
+                    bool notch = height > 3f && rng.Chance(0.08f + hollow * 0.5f);
                     float top = notch ? c.Top - height * rng.Range(0.12f, 0.28f) : c.Top;
                     int facets = rng.Range(2, 5);
                     Vector2 frontA = c.Start + o * (w * 1.2f + protrude);
@@ -499,7 +507,7 @@ namespace KingdomSurvival.MapLab
                         topJag[f] = rng.Signed() * 0.45f * jag * Mathf.Min(1f, height / 4f);
                     }
                     float batter = Mathf.Min(1.1f * w, height * 0.12f);
-                    bool tiered = height > 4f && rng.Chance(0.6f);
+                    bool tiered = height > 3.2f && rng.Chance(0.25f + hollow * 0.6f + bastion * 0.15f);
                     float split = tiered ? c.Bottom + height * rng.Range(0.42f, 0.62f) : top;
                     float brightness = rng.Range(0.9f, 1.08f);
                     float shelf = tiered ? rng.Range(0.35f, 0.8f) * w : 0f;
@@ -531,14 +539,15 @@ namespace KingdomSurvival.MapLab
                         Vector2 aBack = Vector2.Lerp(backA, backB, f / (float)facets);
                         Vector2 bBack = Vector2.Lerp(backA, backB, (f + 1) / (float)facets);
                         mb.Quad(V(aT, ya), V(bT, yb), V(bT - o * rim, yb - 0.04f), V(aT - o * rim, ya - 0.04f), MapLabPaletteIndex.RockLight, MapLabPattern.Rock, 0.7f, brightness * 1.04f, false);
-                        mb.Quad(V(aT - o * rim, ya - 0.04f), V(bT - o * rim, yb - 0.04f), V(bBack, c.Top - 0.25f), V(aBack, c.Top - 0.25f), MapLabPaletteIndex.GrassB, MapLabPattern.Terrain, 0f, 1f, false);
+                        // Крышка уходит под рельеф назад: там, где земля выше, её не видно (без «стеклянных» граней).
+                        mb.Quad(V(aT - o * rim, ya - 0.06f), V(bT - o * rim, yb - 0.06f), V(bBack, c.Top - 1.5f), V(aBack, c.Top - 1.5f), MapLabPaletteIndex.GrassB, MapLabPattern.Terrain, 0f, 1f, false);
                     }
                     // Боковые грани каждого столба: соседи разного выноса без щелей.
                     Vector2 sideTopA = front[0] - o * (batter * 0.5f + shelf);
                     Vector2 sideTopB = front[facets] - o * (batter * 0.5f + shelf);
                     float sideBright = brightness * 0.95f;
-                    mb.Quad(V(backA, c.Bottom), V(frontA, c.Bottom), V(sideTopA, top + topJag[0]), V(backA, c.Top - 0.25f), MapLabPaletteIndex.RockLight, MapLabPattern.Rock, 0.45f, sideBright);
-                    mb.Quad(V(frontB, c.Bottom), V(backB, c.Bottom), V(backB, c.Top - 0.25f), V(sideTopB, top + topJag[facets]), MapLabPaletteIndex.RockLight, MapLabPattern.Rock, 0.45f, sideBright);
+                    mb.Quad(V(backA, c.Bottom), V(frontA, c.Bottom), V(sideTopA, top + topJag[0]), V(backA, c.Top - 1.5f), MapLabPaletteIndex.RockLight, MapLabPattern.Rock, 0.45f, sideBright);
+                    mb.Quad(V(frontB, c.Bottom), V(backB, c.Bottom), V(backB, c.Top - 1.5f), V(sideTopB, top + topJag[facets]), MapLabPaletteIndex.RockLight, MapLabPattern.Rock, 0.45f, sideBright);
                 }
             }
             return mb.VertexCount > 0 ? mb.ToMesh("MapLab Cliffs") : null;
@@ -551,12 +560,14 @@ namespace KingdomSurvival.MapLab
 
         // ---------- Постройки и мелкие объекты ----------
 
-        public static Mesh BuildStructures(MapLabData data, MapLabSettings settings)
+        public static Mesh BuildStructures(MapLabData data, MapLabSettings settings, HashSet<MapLabObjectKind> skip = null)
         {
             MapLabMeshBuilder mb = new MapLabMeshBuilder();
             for (int i = 0; i < data.Objects.Count; i++)
             {
                 MapLabPlacement o = data.Objects[i];
+                if (skip != null && skip.Contains(o.Kind))
+                    continue;
                 switch (o.Kind)
                 {
                     case MapLabObjectKind.House:
@@ -579,13 +590,26 @@ namespace KingdomSurvival.MapLab
             return mb.VertexCount > 0 ? mb.ToMesh("MapLab Structures") : null;
         }
 
-        public static Mesh BuildBoulders(MapLabData data)
+        // Только срубы и амбары: отдельная группа, чтобы переключаться с карточками без перестройки.
+        public static Mesh BuildHouses(MapLabData data)
         {
             MapLabMeshBuilder mb = new MapLabMeshBuilder();
             for (int i = 0; i < data.Objects.Count; i++)
             {
                 MapLabPlacement o = data.Objects[i];
-                if (o.Kind == MapLabObjectKind.Boulder)
+                if (o.Kind == MapLabObjectKind.House || o.Kind == MapLabObjectKind.Barn)
+                    House(mb, data, o, o.Kind == MapLabObjectKind.Barn);
+            }
+            return mb.VertexCount > 0 ? mb.ToMesh("MapLab Houses") : null;
+        }
+
+        public static Mesh BuildBoulders(MapLabData data, HashSet<MapLabObjectKind> skip = null)
+        {
+            MapLabMeshBuilder mb = new MapLabMeshBuilder();
+            for (int i = 0; i < data.Objects.Count; i++)
+            {
+                MapLabPlacement o = data.Objects[i];
+                if (o.Kind == MapLabObjectKind.Boulder && (skip == null || !skip.Contains(o.Kind)))
                     Boulder(mb, o);
             }
             return mb.VertexCount > 0 ? mb.ToMesh("MapLab Boulders") : null;

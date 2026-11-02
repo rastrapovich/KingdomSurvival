@@ -20,6 +20,10 @@ Shader "Kingdom Survival/MapLab/Solid"
         _Paper ("Paper grain", Range(0, 1)) = 0.25
         _Saturation ("Saturation", Float) = 1
         _DebugMode ("Debug mode", Float) = 0
+        _RockTex ("Rock color (этап 02)", 2D) = "gray" {}
+        _RockMean ("Rock mean", Color) = (0.5, 0.5, 0.5, 1)
+        _RockScale ("Rock scale", Float) = 14
+        _RockStrength ("Rock strength", Range(0, 1)) = 0
     }
 
     SubShader
@@ -59,6 +63,7 @@ Shader "Kingdom Survival/MapLab/Solid"
             TEXTURE2D(_PaletteTex); SAMPLER(sampler_PaletteTex);
             TEXTURE2D(_PaintTex); SAMPLER(sampler_PaintTex);
             TEXTURE2D(_DetailTex); SAMPLER(sampler_DetailTex);
+            TEXTURE2D(_RockTex); SAMPLER(sampler_RockTex);
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _LightDir;
@@ -73,6 +78,9 @@ Shader "Kingdom Survival/MapLab/Solid"
                 float _Saturation;
                 float _DebugMode;
                 float _MapSize;
+                float4 _RockMean;
+                float _RockScale;
+                float _RockStrength;
             CBUFFER_END
 
             Varyings Vert(Attributes input)
@@ -109,14 +117,26 @@ Shader "Kingdom Survival/MapLab/Solid"
                     float row = floor(f.y / 0.38);
                     c *= 1.0 - 0.22 * Lines(f.y, 0.38, 0.1) - 0.15 * Lines(f.x + row * 0.21, 0.42, 0.06) + (d.g - 0.5) * 0.1;
                 }
-                else if (pattern == 4)   // камень: вертикальные штрихи
+                else if (pattern == 4)   // камень: вертикальные штрихи + слабая вариация цвета Rock_Color
+                {
                     c *= 1.0 + (SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, f / float2(1.6, 7.0)).b - 0.5) * 0.5 + (d.g - 0.5) * 0.15;
+                    if (_RockStrength > 0.001)
+                    {
+                        float3 r1 = SAMPLE_TEXTURE2D(_RockTex, sampler_RockTex, f / _RockScale).rgb;
+                        float3 r2 = SAMPLE_TEXTURE2D(_RockTex, sampler_RockTex, f.yx / (_RockScale * 0.43) + float2(0.31, 0.67)).rgb;
+                        float3 rock = lerp(r1, r2, 0.4) / max(_RockMean.rgb, 0.02);
+                        c = lerp(c, c * clamp(rock, 0.6, 1.5), _RockStrength);
+                    }
+                }
                 else if (pattern == 6)   // крышка уступа: цвет живописной поверхности
                     c = SAMPLE_TEXTURE2D(_PaintTex, sampler_PaintTex, i.positionWS.xz / _MapSize).rgb * i.meta.y;
                 else if (pattern == 5)   // доски
                     c *= 1.0 - 0.2 * Lines(f.x, 0.3, 0.12) + (d.g - 0.5) * 0.1;
 
                 float3 n = normalize(i.normalWS);
+                // Крышка уступа продолжает землю: свет как у ровной площадки, без «стеклянных» граней.
+                if (pattern == 6)
+                    n = float3(0, 1, 0);
                 float3 L = normalize(_LightDir.xyz);
                 if ((int)round(_DebugMode) == 3)
                     return float4(n * 0.5 + 0.5, 1);

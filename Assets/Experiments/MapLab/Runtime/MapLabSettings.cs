@@ -38,6 +38,36 @@ namespace KingdomSurvival.MapLab
         Wireframe = 9,
     }
 
+    // Именованные режимы камеры этапа 02 (наклон вниз от горизонта).
+    public enum MapLabCameraMode
+    {
+        Custom = 0,
+        Atlas60 = 1,
+        Volume50 = 2,
+        Diorama40 = 3,
+    }
+
+    public enum MapLabArtMode
+    {
+        Procedural = 0,
+        Art = 1,
+    }
+
+    // Постройки: геометрия, нарисованная карточка или карточка только при 50°.
+    public enum MapLabBuildingDisplay
+    {
+        Geometry = 0,
+        SpriteDecorative = 1,
+        AutoByPitch = 2,
+    }
+
+    public enum MapLabAlphaView
+    {
+        Off = 0,
+        SourceAlpha = 1,
+        ClipResult = 2,
+    }
+
     [Serializable]
     public sealed class MapLabGeneralSettings
     {
@@ -161,6 +191,10 @@ namespace KingdomSurvival.MapLab
         [Range(10f, 80f)] public float Radius = 34f;
         [Tooltip("Ограды дворов.")]
         public bool Fences = true;
+        [Tooltip("Этап 02: ставить избы и амбары в ориентацию, в которой нарисованы PNG (рисунок нельзя крутить). Одинаково для геометрии и картинок.")]
+        public bool AlignToDrawnView = true;
+        [Tooltip("Угол конька на рисунке (от +X мира к +Z): изба с соломой, изба с дранкой, амбар. Оценено по PNG этапа 02.")]
+        public Vector3 DrawnRidgeYaw = new Vector3(23f, -27f, 32f);
     }
 
     [Serializable]
@@ -211,6 +245,86 @@ namespace KingdomSurvival.MapLab
         public float AzimuthDegrees;
         [Tooltip("Fit: заполнить кадр картой без полей (края обрезаются) или вписать карту целиком.")]
         public bool FillFrame = true;
+        [Tooltip("Режим сравнения: Атлас 60°, Объёмная карта 50°, Ближняя диорама 40°; Custom — наклон из поля выше.")]
+        public MapLabCameraMode Mode = MapLabCameraMode.Volume50;
+        [Tooltip("Наклон зависит от приближения: плавно от общего вида к ближнему (спрайты нарисованы под 50° — ракурс приближённый).")]
+        public bool PitchByZoom;
+        [Tooltip("Наклон при Zoom 1 и при наибольшем приближении (PitchByZoomFullAt).")]
+        public Vector2 PitchByZoomRange = new Vector2(60f, 40f);
+        [Tooltip("Приближение, при котором наклон доходит до второго значения.")]
+        [Range(1.5f, 8f)] public float PitchByZoomFullAt = 4f;
+        [Tooltip("Плавность приближения колесом (больше — быстрее).")]
+        [Range(2f, 30f)] public float ZoomSmoothing = 12f;
+
+        // Фактический наклон для данного приближения.
+        public float PitchFor(float zoom)
+        {
+            if (PitchByZoom)
+            {
+                float t = Mathf.InverseLerp(1f, Mathf.Max(1.01f, PitchByZoomFullAt), zoom);
+                t = t * t * (3f - 2f * t);
+                return Mathf.Clamp(Mathf.Lerp(PitchByZoomRange.x, PitchByZoomRange.y, t), 30f, 90f);
+            }
+            switch (Mode)
+            {
+                case MapLabCameraMode.Atlas60: return 60f;
+                case MapLabCameraMode.Volume50: return 50f;
+                case MapLabCameraMode.Diorama40: return 40f;
+                default: return Mathf.Clamp(CameraPitchDownDegrees, 30f, 90f);
+            }
+        }
+
+        public static float PitchOf(MapLabCameraMode mode)
+        {
+            switch (mode)
+            {
+                case MapLabCameraMode.Atlas60: return 60f;
+                case MapLabCameraMode.Diorama40: return 40f;
+                default: return 50f;
+            }
+        }
+    }
+
+    // Художественный набор этапа 02. Переключение Procedural/Art меняет только
+    // отображение: позиции объектов, дороги и вода от него не зависят.
+    [Serializable]
+    public sealed class MapLabArtSettings
+    {
+        [Tooltip("Деревья и кусты: процедурный атлас или нарисованные PNG.")]
+        public MapLabArtMode Vegetation = MapLabArtMode.Art;
+        [Tooltip("Постройки: геометрия, нарисованная карточка или карточка только при наклоне около 50°.")]
+        public MapLabBuildingDisplay Buildings = MapLabBuildingDisplay.AutoByPitch;
+        [Tooltip("Валуны: процедурная геометрия или нарисованный Boulder_01.")]
+        public MapLabArtMode Boulders = MapLabArtMode.Art;
+        [Tooltip("Декоративные карточки Cliff_Short/Cliff_End на обращённой к камере стороне уступов (поверх геометрии).")]
+        public bool CliffDecor = true;
+        [Tooltip("Фактуры земли (трава, земля, камень) поверх CPU-покраски.")]
+        public bool GroundTextures = true;
+        [Tooltip("Сила фактур земли.")]
+        [Range(0f, 1f)] public float GroundStrength = 0.5f;
+        [Tooltip("Размер одного повтора фактуры травы в мире, единиц.")]
+        [Range(4f, 80f)] public float GrassScale = 26f;
+        [Range(4f, 80f)] public float EarthScale = 18f;
+        [Range(4f, 80f)] public float RockScale = 14f;
+        [Tooltip("Rock_Color на стенках уступов — слабая вариация цвета, не замена света.")]
+        [Range(0f, 1f)] public float RockColorStrength = 0.35f;
+        [Tooltip("Мягкий оттенок палитры поверх рисунков (0 — рисунок как есть).")]
+        [Range(0f, 1f)] public float PaletteTint = 0.2f;
+        [Tooltip("Тень рельефа под опорой рисунка (падающая тень уступа, холма).")]
+        [Range(0f, 1f)] public float GroundShade = 0.6f;
+        [Tooltip("Наклон нарисованных карточек к камере.")]
+        [Range(0f, 1f)] public float CardLean = 0.3f;
+        [Tooltip("Диагностика альфы нарисованных карточек.")]
+        public MapLabAlphaView AlphaView = MapLabAlphaView.Off;
+        [Tooltip("Фишка отряда на дороге.")]
+        public bool ShowMarker = true;
+        [Tooltip("Призрачный контур фишки, когда её закрывает дом или скала (диагностика).")]
+        public bool MarkerGhost;
+
+        public bool BuildingSpritesAt(float pitch)
+        {
+            return Buildings == MapLabBuildingDisplay.SpriteDecorative || (Buildings == MapLabBuildingDisplay.AutoByPitch && Mathf.Abs(pitch - 50f) <= 4f);
+        }
     }
 
     [Serializable]
@@ -256,6 +370,7 @@ namespace KingdomSurvival.MapLab
         public MapLabSettlementSettings Settlement = new MapLabSettlementSettings();
         public MapLabStyleSettings PainterlyStyle = new MapLabStyleSettings();
         public MapLabCameraSettings Camera = new MapLabCameraSettings();
+        public MapLabArtSettings Art = new MapLabArtSettings();
         public MapLabDiagnosticsSettings Diagnostics = new MapLabDiagnosticsSettings();
         public MapLabAdvancedSettings Advanced = new MapLabAdvancedSettings();
 

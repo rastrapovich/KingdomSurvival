@@ -228,6 +228,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1350587407}
   - component: {fileID: 1350587406}
+  - component: {fileID: 1350587408}
   m_Layer: 0
   m_Name: MapLab
   m_TagString: Untagged
@@ -255,6 +256,10 @@ MonoBehaviour:
   CardShader: {fileID: 4800000, guid: f78bb0d682c63264dbddf52b96233c3f, type: 3}
   SolidShader: {fileID: 4800000, guid: bdbf9298991aebd4b88557d5f4176e16, type: 3}
   LinesShader: {fileID: 4800000, guid: c9e51576d4c33f645bb1b7d1208f19b0, type: 3}
+  ArtCardShader: {fileID: 4800000, guid: 383626419a283bb4993b7f7b8fcf34e2, type: 3}
+  ContactShader: {fileID: 4800000, guid: 91caacd372de3834d890904c17c35901, type: 3}
+  ArtSet: {fileID: 11400000, guid: 1e0c221c19d1f374faab702db07d55a3, type: 2}
+  MarkerSet: {fileID: 11400000, guid: f134eb708cef33d45b030267ade4c401, type: 2}
   root: {fileID: 0}
 --- !u!4 &1350587407
 Transform:
@@ -271,6 +276,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1350587408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1350587405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79a985596c1ebbd489c67c6a0921b37c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabMarker
+  View: {fileID: 1350587406}
+  AutoPlace: 1
+  Position: {x: 128, y: 128}
+  FacingDegrees: 180
+  PreviewMove: 0
+  PreviewSpeed: 3
+  PreviewLength: 22
+  ShowArrow: 0
+  root: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -106,11 +106,13 @@ Shader "Kingdom Survival/MapLab/Water"
                 float3 c = lerp(_Shallow.rgb, _Deep.rgb, deep);
                 c *= 1.0 + (strokes.g - 0.5) * 0.12;
                 // Спокойная середина, больше штрихов у берега и на течении.
-                float calm = lerp(1.0, 0.35, smoothstep(0.6, 2.2, depth));
+                float calm = lerp(1.0, 0.18, smoothstep(0.5, 2.0, depth));
                 // Штрихи собираются редкими пятнами, середина озера остаётся спокойным цветом.
                 float patch = smoothstep(0.42, 0.68, SAMPLE_TEXTURE2D(_WaterTex, sampler_WaterTex, world / 97.0 + float2(0.5, 0.2)).g);
-                float s = saturate(max(strokes.r, strokes2.r * 0.8) * 1.4 - 0.35) * _StrokeAmount * calm * lerp(0.25, 1.0, patch);
-                c = lerp(c, _Stroke.rgb, s * 0.75);
+                // Этап 02: реже и мягче; акценты — у берега, на мелях и сужениях.
+                float accent = 1.0 - smoothstep(0.15, 0.9, depth);
+                float s = saturate(max(strokes.r, strokes2.r * 0.7) * 1.5 - 0.55) * _StrokeAmount * calm * lerp(0.08, 1.0, patch) * lerp(0.55, 1.25, accent);
+                c = lerp(c, lerp(c, _Stroke.rgb, 0.8), s * 0.6);
                 // Кромка: тёплая отмель и тонкая линия у самой земли.
                 float shoal = 1.0 - smoothstep(0.0, 0.35, depth);
                 c = lerp(c, lerp(_Shallow.rgb, _ShoreColor.rgb, 0.45) * 1.08, shoal * 0.6);

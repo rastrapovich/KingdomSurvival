@@ -61,8 +61,9 @@ namespace KingdomSurvival.MapLab
             private readonly float[] r, g, b, ink;
             private readonly int[] key;
             private readonly float[] roadDistance;
+            private readonly byte[] roadKind;
             private readonly Vector3 light;
-            private readonly MapLabNoise macro, macro2, mottle, breakup, rockStreak, fieldNoise;
+            private readonly MapLabNoise macro, macro2, mottle, breakup, rockStreak, fieldNoise, roadWobble;
 
             public Context(MapLabData data, MapLabSettings settings, MapLabPalette palette, int p)
             {
@@ -79,6 +80,7 @@ namespace KingdomSurvival.MapLab
                 ink = new float[count];
                 key = new int[count];
                 roadDistance = new float[count];
+                roadKind = new byte[count];
                 light = settings.LightDirection;
                 macro = Noise("paint-macro");
                 macro2 = Noise("paint-macro2");
@@ -86,6 +88,7 @@ namespace KingdomSurvival.MapLab
                 breakup = Noise("paint-breakup");
                 rockStreak = Noise("paint-rock");
                 fieldNoise = Noise("paint-field");
+                roadWobble = Noise("paint-road-wobble");
             }
 
             private MapLabNoise Noise(string name)
@@ -103,9 +106,11 @@ namespace KingdomSurvival.MapLab
             {
                 for (int i = 0; i < roadDistance.Length; i++)
                     roadDistance[i] = float.MaxValue;
-                for (int k = 0; k < data.Roads.Count; k++)
+                List<MapLabPolyline> lines = new List<MapLabPolyline>(data.Roads);
+                lines.AddRange(data.YardPaths);
+                for (int k = 0; k < lines.Count; k++)
                 {
-                    MapLabPolyline road = data.Roads[k];
+                    MapLabPolyline road = lines[k];
                     float half = road.Width * 0.5f;
                     float reach = half + 2.5f;
                     for (int s = 0; s < road.Points.Count - 1; s++)
@@ -124,7 +129,10 @@ namespace KingdomSurvival.MapLab
                             float d = MapLabGeometry.DistanceToSegment(World(x, z), a, c, out _) - half;
                             int i = z * p + x;
                             if (d < roadDistance[i])
+                            {
+                                roadKind[i] = (byte)road.Kind;
                                 roadDistance[i] = d;
+                            }
                         }
                     }
                 }
@@ -183,12 +191,17 @@ namespace KingdomSurvival.MapLab
                     }
 
                     // Поля: полосы-наделы, свой тон у каждой, борозды по оси участка.
-                    float fieldMask = data.SampleMask(data.Field, w.x, w.y);
+                    // Край пашни — по сглаженной маске с неровностью: без «лесенки» сетки.
+                    float fieldMask = SoftMask(data.Field, w) + mottle.Fbm(w.x / 9f, w.y / 9f, 2) * 0.12f;
                     if (fieldMask > 0.3f && data.Fields != null && data.Fields.Evaluate(w, out MapLabFields.Sample fs))
                     {
-                        float edgeAa = MapLabGeometry.SmoothStep(0.42f, 0.58f, fieldMask);
+                        float edgeAa = MapLabGeometry.SmoothStep(0.4f, 0.6f, fieldMask);
                         Color fc = FieldColor(fs, w);
-                        float border = MapLabGeometry.SmoothStep(0.45f, 1.1f, fs.BorderDistance);
+                        // Межи разной толщины: местами широкая травяная полоса, местами
+                        // почти стык пашен (только тонкая линия).
+                        float widthVar = Mathf.Lerp(0.3f, 1.5f, MapLabGeometry.SmoothStep(0.25f, 0.75f, fieldNoise.Fbm(w.x / 27f + 3.1f, w.y / 27f, 2) * 0.5f + 0.5f));
+                        float border = MapLabGeometry.SmoothStep(0.22f * widthVar, 0.95f * widthVar, fs.BorderDistance);
+                        float grassy = ((fs.Block * 13 + 5) % 5) < 3 ? 1f : 0.2f;
                         float stripEdge = Mathf.Min(fs.Across, fs.StripWidth - fs.Across);
                         fc = Color.Lerp(fc * 0.9f, fc, MapLabGeometry.SmoothStep(0.05f, 0.45f, stripEdge));
                         float furrow = Mathf.Abs(Mathf.Repeat(fs.Across / 0.75f, 1f) - 0.5f) * 2f;
@@ -202,8 +215,9 @@ namespace KingdomSurvival.MapLab
                         {
                             float line = 1f - MapLabGeometry.SmoothStep(0.15f, 0.5f, fs.BorderDistance);
                             ink[i] = Mathf.Max(ink[i], 0.3f * line * Breakup(w, 0.4f));
-                            // Межа — полоса травы чуть темнее луга.
-                            c = Color.Lerp(c, pal.GrassLush * 0.92f, (1f - border) * edgeAa * 0.5f);
+                            // Межа — полоса травы чуть темнее и глуше луга, не у всех участков.
+                            Color balk = Color.Lerp(Color.Lerp(pal.GrassA, pal.GrassLush, 0.5f), pal.ForestFloor, 0.1f);
+                            c = Color.Lerp(c, balk, (1f - border) * edgeAa * 0.45f * grassy);
                         }
                     }
 
@@ -255,17 +269,24 @@ namespace KingdomSurvival.MapLab
                     }
 
                     // Дорога поверх всего: светлое полотно, тёмная кромка местами.
-                    float rd = roadDistance[i];
+                    // Ширина немного меняется вдоль дороги, тропа уже и неровнее.
+                    bool path = roadKind[i] == (byte)MapLabRoadKind.Path;
+                    float rd = roadDistance[i] + roadWobble.Fbm(w.x / 17f, w.y / 17f, 2) * (path ? 0.35f : 0.5f);
                     if (rd < 1.2f)
                     {
-                        float body = 1f - MapLabGeometry.SmoothStep(-0.15f, 0.15f, rd);
+                        // Стёртый край: мягче и шире переход, у тропы — ещё мягче.
+                        float soft = path ? 0.32f : 0.2f;
+                        float body = 1f - MapLabGeometry.SmoothStep(-soft, soft, rd + mottle.Fbm(w.x / 1.6f, w.y / 1.6f, 2) * 0.18f);
                         float rut = mottle.Fbm(w.x / 3f, w.y / 3f, 2) * 0.07f;
-                        Color rc = pal.Road * (1f + rut);
-                        rc = Color.Lerp(rc, pal.RoadEdge, MapLabGeometry.SmoothStep(-0.55f, 0f, rd) * 0.35f);
+                        Color rc = (path ? Color.Lerp(pal.Road, pal.GrassDry, 0.28f) : pal.Road) * (1f + rut);
+                        rc = Color.Lerp(rc, pal.RoadEdge, MapLabGeometry.SmoothStep(-0.55f, 0f, rd) * 0.3f);
+                        // Местами редкая трава на полотне: на тропе чаще, на главной дороге реже.
+                        float tuft = MapLabGeometry.SmoothStep(0.58f, 0.82f, breakup.Fbm(w.x / 2.4f + 11f, w.y / 2.4f, 2) * 0.5f + 0.5f) * (path ? 0.55f : 0.22f);
+                        rc = Color.Lerp(rc, Color.Lerp(c, pal.GrassDry, 0.3f), tuft);
                         rc.a = 1f;
-                        c = Color.Lerp(c, rc, body);
+                        c = Color.Lerp(c, rc, body * (path ? 0.85f : 1f));
                         float edgeLine = 1f - MapLabGeometry.SmoothStep(0f, 0.28f, Mathf.Abs(rd - 0.08f));
-                        ink[i] = Mathf.Max(ink[i], edgeLine * 0.5f * Breakup(w, 0.35f));
+                        ink[i] = Mathf.Max(ink[i], edgeLine * (path ? 0.2f : 0.42f) * Breakup(w, path ? 0.55f : 0.42f));
                         float shoulder = (1f - MapLabGeometry.SmoothStep(0.1f, 1.2f, rd)) * (rd > 0f ? 1f : 0f);
                         c = Color.Lerp(c, Color.Lerp(c, pal.RoadEdge, 0.5f), shoulder * 0.3f);
                         if (body > 0.5f) k = KeyRoad;
@@ -276,6 +297,14 @@ namespace KingdomSurvival.MapLab
                     b[i] = c.b;
                     key[i] = k;
                 }
+            }
+
+            // Маска с лёгким размытием (четыре билинейных отсчёта) — круглее изолинии.
+            private float SoftMask(float[] mask, Vector2 w)
+            {
+                float o = data.Cell * 0.75f;
+                return (data.SampleMask(mask, w.x - o, w.y - o) + data.SampleMask(mask, w.x + o, w.y - o)
+                        + data.SampleMask(mask, w.x - o, w.y + o) + data.SampleMask(mask, w.x + o, w.y + o)) * 0.25f;
             }
 
             private Color FieldColor(MapLabFields.Sample fs, Vector2 w)

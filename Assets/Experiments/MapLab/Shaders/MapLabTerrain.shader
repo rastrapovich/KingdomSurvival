@@ -30,6 +30,14 @@ Shader "Kingdom Survival/MapLab/Terrain"
         _ShowLight ("Show relief light", Float) = 1
         _HeightRange ("Height min, max", Vector) = (0, 12, 0, 0)
         _Exaggeration ("Relief exaggeration (light)", Float) = 2.4
+        _GrassTex ("Grass color (этап 02)", 2D) = "gray" {}
+        _EarthTex ("Earth color (этап 02)", 2D) = "gray" {}
+        _RockTex ("Rock color (этап 02)", 2D) = "gray" {}
+        _GrassMean ("Grass mean", Color) = (0.5, 0.5, 0.5, 1)
+        _EarthMean ("Earth mean", Color) = (0.5, 0.5, 0.5, 1)
+        _RockMean ("Rock mean", Color) = (0.5, 0.5, 0.5, 1)
+        _GroundScales ("Масштабы: трава, земля, камень", Vector) = (26, 18, 14, 0)
+        _GroundStrength ("Сила фактур земли", Range(0, 1)) = 0
     }
 
     SubShader
@@ -67,6 +75,9 @@ Shader "Kingdom Survival/MapLab/Terrain"
             TEXTURE2D(_MaskA); SAMPLER(sampler_MaskA);
             TEXTURE2D(_MaskB); SAMPLER(sampler_MaskB);
             TEXTURE2D(_DetailTex); SAMPLER(sampler_DetailTex);
+            TEXTURE2D(_GrassTex); SAMPLER(sampler_GrassTex);
+            TEXTURE2D(_EarthTex); SAMPLER(sampler_EarthTex);
+            TEXTURE2D(_RockTex); SAMPLER(sampler_RockTex);
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _PaintTex_ST;
@@ -90,6 +101,11 @@ Shader "Kingdom Survival/MapLab/Terrain"
                 float _ShowLight;
                 float4 _HeightRange;
                 float _Exaggeration;
+                float4 _GrassMean;
+                float4 _EarthMean;
+                float4 _RockMean;
+                float4 _GroundScales;
+                float _GroundStrength;
             CBUFFER_END
 
             Varyings Vert(Attributes input)
@@ -106,6 +122,17 @@ Shader "Kingdom Survival/MapLab/Terrain"
             {
                 t = saturate(t);
                 return lerp(lerp(float3(0.15, 0.25, 0.55), float3(0.45, 0.7, 0.35), saturate(t * 2)), float3(0.95, 0.9, 0.75), saturate(t * 2 - 1));
+            }
+
+            // Повторяющаяся фактура, привязанная к миру: два сэмпла в разных масштабах
+            // и повороте гасят заметный шаг повтора (контролируемое смешивание стыков).
+            float3 GroundSample(TEXTURE2D_PARAM(tex, smp), float2 world, float scale, float3 mean)
+            {
+                float2 uvA = world / scale;
+                float2 uvB = float2(world.x * 0.8 - world.y * 0.6, world.x * 0.6 + world.y * 0.8) / (scale * 2.37) + float2(0.43, 0.17);
+                float3 a = SAMPLE_TEXTURE2D(tex, smp, uvA).rgb;
+                float3 b = SAMPLE_TEXTURE2D(tex, smp, uvB).rgb;
+                return lerp(a, b, 0.42) - mean;
             }
 
             float4 Frag(Varyings i) : SV_Target
@@ -161,6 +188,24 @@ Shader "Kingdom Survival/MapLab/Terrain"
                 float paper = (p.a - 0.5) * 0.7 + (d2.g - 0.5) * 0.3 * fade;
                 c *= 1.0 + paper * _Paper * 0.22;
                 c = lerp(c, _PaperColor.rgb * c * 1.6, _Paper * 0.05);
+
+                // Фактуры этапа 02: малоконтрастная примесь поверх CPU-покраски по маскам;
+                // веса нормализуются, на воду фактура не переходит. Вдали — спокойнее.
+                if (_GroundStrength > 0.001)
+                {
+                    float water = maskB.r;
+                    float rockW = saturate(max(maskB.a, maskA.a * 0.8));
+                    float earthW = saturate(maskA.b + maskB.b * 0.35 + maskA.g * 0.45 + maskB.g * 0.4) * (1.0 - rockW);
+                    float grassW = saturate(1.0 - earthW - rockW);
+                    float sum = max(1e-3, grassW + earthW + rockW);
+                    float3 g = GroundSample(TEXTURE2D_ARGS(_GrassTex, sampler_GrassTex), world, _GroundScales.x, _GrassMean.rgb);
+                    float3 e = GroundSample(TEXTURE2D_ARGS(_EarthTex, sampler_EarthTex), world, _GroundScales.y, _EarthMean.rgb);
+                    float3 r = GroundSample(TEXTURE2D_ARGS(_RockTex, sampler_RockTex), world, _GroundScales.z, _RockMean.rgb);
+                    float3 detail = (g * grassW + e * earthW + r * rockW) / sum;
+                    float far = lerp(0.45, 1.0, 1.0 - smoothstep(0.06, 0.3, pixelWorld));
+                    float luma = dot(c, float3(0.299, 0.587, 0.114));
+                    c = max(0, c + detail * (0.35 + luma) * 1.8 * _GroundStrength * far * (1.0 - water));
+                }
 
                 c = lerp(c, _InkColor.rgb, saturate(paint.a * _Outline));
                 c = MapLabSaturate(c, _Saturation);

@@ -99,3 +99,6 @@ __pycache__/
 # Гайд создания квестов и квест-локаций лежит там же и тоже не в git
 # (решение пользователя 23.10.2026).
 /QuestWorkshop/KingdomSurvival_Quest_Guide_RU.md
+
+# MapLab (эксперимент): выгрузки PNG/JSON
+/MapLabExports/

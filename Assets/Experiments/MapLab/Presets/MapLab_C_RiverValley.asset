@@ -1,0 +1,126 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea69c171722d0e445b906a1d076c5cb6, type: 3}
+  m_Name: MapLab_C_RiverValley
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabSettings
+  General:
+    Preset: 2
+    Seed: 304
+    MapSize: 256
+    Quality: 257
+    PaintResolution: 2048
+  Relief:
+    Source: 0
+    HeightRange: 13
+    HillWidth: 110
+    HillHeight: 1
+    MediumForms: 0.45
+    FineNoise: 0.04
+    Smoothing: 2
+    ExternalHeightmap: {fileID: 0}
+    ExternalScale: 1
+    ExternalOffset: 0
+    ExternalInvert: 0
+    ExternalRemap:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  Water:
+    LevelOffset: 0
+    LakeScale: 1
+    RiverWidth: 11
+    RiverDepth: 1.2
+    BankWidth: 5
+  RoadsAndFields:
+    RoadWidth: 3.2
+    PathWidth: 1.6
+    FieldDensity: 0.75
+    FieldStripWidth: 9
+    FieldMaxSlope: 11
+    FieldRadius: 95
+  Cliffs:
+    CliffHeight: 8
+    CliffSharpness: 1.6
+    ColumnWidth: 2.4
+    Jaggedness: 0.45
+  Vegetation:
+    ForestDensity: 0.45
+    TreeSize: 4.6
+    SizeVariation: 0.22
+    ConiferShare: 0.18
+    EdgeRoughness: 0.6
+    SingleTrees: 0.4
+    Bushes: 0.4
+  Settlement:
+    HousesMin: 12
+    HousesMax: 25
+    BuildingScale: 1
+    Radius: 36
+    Fences: 1
+  PainterlyStyle:
+    Palette: {fileID: 11400000, guid: 58b7c4bd9890a8046a91309c1d90a33f, type: 2}
+    MacroScale: 60
+    BrushScale: 1.6
+    BrushStrength: 0.55
+    StrokeDensity: 0.7
+    Hatching: 0.35
+    LightStrength: 0.75
+    ReliefExaggeration: 3
+    ShadowSoftness: 0.55
+    ToneBands: 0
+    CastShadows: 0.55
+    AmbientOcclusion: 0.5
+    Outline: 0.55
+    MicroTexture: 0.35
+    PaperGrain: 0.25
+    Saturation: 1
+  Camera:
+    CameraPitchDownDegrees: 60
+    Zoom: 1
+    AzimuthDegrees: 0
+    FillFrame: 1
+  Diagnostics:
+    Mode: 0
+    ShowWater: 1
+    ShowForest: 1
+    ShowBuildings: 1
+    ShowCliffs: 1
+    ShowStrokes: 1
+    ShowOutline: 1
+    ShowPaper: 1
+    ShowPaint: 1
+    ShowReliefLight: 1
+  Advanced:
+    CardLean: 0.25
+    ChunkVertices: 129
+    LightDirection: {x: -0.62, y: 0.72, z: 0.06}
+    FlatStrokeAngle: 20

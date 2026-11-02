@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1349d993a5ed1cd40b019095975e09fe, type: 3}
+  m_Name: MapLab_Palette_Variant04
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabPalette
+  GrassA: {r: 0.6039216, g: 0.5921569, b: 0.28235295, a: 1}
+  GrassB: {r: 0.6745098, g: 0.6431373, b: 0.35686275, a: 1}
+  GrassDry: {r: 0.76862746, g: 0.6784314, b: 0.38431373, a: 1}
+  GrassLush: {r: 0.4509804, g: 0.48235294, b: 0.24705882, a: 1}
+  ForestFloor: {r: 0.18431373, g: 0.24313726, b: 0.20392157, a: 1}
+  FieldStraw: {r: 0.8666667, g: 0.7372549, b: 0.41568628, a: 1}
+  FieldOchre: {r: 0.8117647, g: 0.627451, b: 0.30588236, a: 1}
+  FieldGreen: {r: 0.6627451, g: 0.6627451, b: 0.34117648, a: 1}
+  FieldFallow: {r: 0.6431373, g: 0.5411765, b: 0.33333334, a: 1}
+  Road: {r: 0.8627451, g: 0.8039216, b: 0.64705884, a: 1}
+  RoadEdge: {r: 0.54901963, g: 0.48235294, b: 0.34509805, a: 1}
+  RockLight: {r: 0.6862745, g: 0.63529414, b: 0.6509804, a: 1}
+  RockShadow: {r: 0.49411765, g: 0.44313726, b: 0.47058824, a: 1}
+  WaterDeep: {r: 0.27450982, g: 0.34509805, b: 0.41960785, a: 1}
+  WaterShallow: {r: 0.3882353, g: 0.46666667, b: 0.5372549, a: 1}
+  WaterStroke: {r: 0.7254902, g: 0.76862746, b: 0.8, a: 1}
+  Shore: {r: 0.4862745, g: 0.45490196, b: 0.2784314, a: 1}
+  WoodWall: {r: 0.54901963, g: 0.40392157, b: 0.2784314, a: 1}
+  WoodDark: {r: 0.36078432, g: 0.27450982, b: 0.2, a: 1}
+  RoofThatch: {r: 0.6901961, g: 0.6039216, b: 0.40784314, a: 1}
+  RoofShingle: {r: 0.5019608, g: 0.42352942, b: 0.34901962, a: 1}
+  RoofDark: {r: 0.3764706, g: 0.34117648, b: 0.30980393, a: 1}
+  TreeMoss: {r: 0.41568628, g: 0.47843137, b: 0.27058825, a: 1}
+  TreeSmoky: {r: 0.20392157, g: 0.30980393, b: 0.30588236, a: 1}
+  Conifer: {r: 0.19607843, g: 0.28235295, b: 0.2509804, a: 1}
+  ForestShadow: {r: 0.10980392, g: 0.16470589, b: 0.18039216, a: 1}
+  Bush: {r: 0.4, g: 0.5019608, b: 0.24313726, a: 1}
+  Reed: {r: 0.6431373, g: 0.6039216, b: 0.33333334, a: 1}
+  ShadowTint: {r: 0.4, g: 0.42352942, b: 0.56078434, a: 1}
+  LightTint: {r: 1, g: 0.9411765, b: 0.8156863, a: 1}
+  Ink: {r: 0.16862746, g: 0.15294118, b: 0.12941177, a: 1}
+  Paper: {r: 0.9019608, g: 0.8627451, b: 0.7607843, a: 1}

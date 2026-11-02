@@ -12,18 +12,18 @@ namespace KingdomSurvival.MapLab.Editor
     {
         private static readonly string[] Groups =
         {
-            "General", "Relief", "Water", "RoadsAndFields", "Cliffs", "Vegetation", "Settlement", "PainterlyStyle", "Camera", "Art", "Diagnostics", "Advanced",
+            "General", "Relief", "Water", "RoadsAndFields", "Cliffs", "Vegetation", "Settlement", "PainterlyStyle", "Camera", "Art", "Stage03", "Diagnostics", "Advanced",
         };
 
         private static readonly string[] GroupTitles =
         {
             "Общее (General)", "Рельеф (Relief)", "Вода (Water)", "Дороги и поля (Roads And Fields)", "Уступы (Cliffs)",
             "Растительность (Vegetation)", "Поселение (Settlement)", "Живописный стиль (Painterly Style)", "Камера (Camera)", "Арт этапа 02 (Art) · применяется пересборкой объектов",
-            "Диагностика (Diagnostics)", "Дополнительно (Advanced)",
+            "Этап 03 (Stage03) · перекраска, перо, тени, акценты", "Диагностика (Diagnostics)", "Дополнительно (Advanced)",
         };
 
         // Группы, изменение которых не требует перестройки.
-        private static readonly bool[] CheapGroups = { false, false, false, false, false, false, false, true, true, true, true, false };
+        private static readonly bool[] CheapGroups = { false, false, false, false, false, false, false, true, true, true, true, true, false };
 
         private static readonly Vector2Int[] ExportSizes = { new Vector2Int(2048, 1365), new Vector2Int(3072, 2048), new Vector2Int(1536, 1024), new Vector2Int(1920, 1080) };
         private static readonly string[] ExportSizeNames = { "2048 × 1365", "3072 × 2048", "1536 × 1024", "1920 × 1080" };
@@ -31,7 +31,7 @@ namespace KingdomSurvival.MapLab.Editor
         private MapLabView view;
         private SerializedObject serialized;
         private Vector2 scroll;
-        private readonly bool[] open = { false, false, false, false, false, false, false, false, true, true, false, false };
+        private readonly bool[] open = { false, false, false, false, false, false, false, false, true, false, false, false, false };
         private int exportSize;
         private int supersample = 2;
         private string status = "";
@@ -94,6 +94,7 @@ namespace KingdomSurvival.MapLab.Editor
 
             DrawCommands();
             DrawStatus();
+            DrawStage03();
             DrawStage02();
 
             if (serialized == null || serialized.targetObject != view.Settings)
@@ -102,6 +103,7 @@ namespace KingdomSurvival.MapLab.Editor
             scroll = EditorGUILayout.BeginScrollView(scroll);
             bool cheapChanged = false;
             bool artChanged = false;
+            bool stage03Changed = false;
             for (int g = 0; g < Groups.Length; g++)
             {
                 SerializedProperty group = serialized.FindProperty(Groups[g]);
@@ -125,13 +127,140 @@ namespace KingdomSurvival.MapLab.Editor
                     {
                         cheapChanged = true;
                         artChanged |= Groups[g] == "Art";
+                        stage03Changed |= Groups[g] == "Stage03";
                     }
                 }
                 EditorGUILayout.EndFoldoutHeaderGroup();
             }
             EditorGUILayout.EndScrollView();
             if (serialized.ApplyModifiedProperties() && cheapChanged)
+            {
+                if (stage03Changed && view.Data != null)
+                    RunGuarded(() => { view.RebuildArt(); Require(view.RebuildStage03Layers()); });
                 ApplyCheap(artChanged);
+            }
+        }
+
+        // ---------- Этап 03: тушь, мировые мазки, лес, тени, камера 35° ----------
+
+        private bool stage03Open = true;
+
+        private void DrawStage03()
+        {
+            stage03Open = EditorGUILayout.BeginFoldoutHeaderGroup(stage03Open, "Этап 03 · тушь и спокойные массы, камера до 35°");
+            if (stage03Open)
+            {
+                MapLabSettings s = view.Settings;
+                MapLabStage03Settings s3 = s.Stage03;
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button(new GUIContent("Подключить пакет этапа 03…", "Отдельная папка и набор (Assets/_Project/Art/MapLabStage03); этап 02 и его калибровка не перезаписываются.")))
+                    RunGuarded(() => { MapLabArtImport.ImportStage03Menu(); });
+                using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(MapLabArtImport.LastStage03Folder)))
+                {
+                    if (GUILayout.Button(new GUIContent("Переподключить", MapLabArtImport.LastStage03Folder)))
+                        RunGuarded(() => { MapLabArtImport.ReimportStage03Menu(); });
+                }
+                EditorGUILayout.EndHorizontal();
+                MapLabArtSet set03 = view.ResolvedArtSet03;
+                if (set03 == null)
+                    EditorGUILayout.HelpBox("Набор этапа 03 не подключён — на этапе 03 деревья и дома процедурные. Нажмите «Подключить пакет этапа 03…».", MessageType.Info);
+                else
+                    EditorGUILayout.HelpBox($"{set03.PackageId} · подключение №{set03.ImportVersion} · записей {set03.Entries.Count}" + (set03.MissingTextures > 0 ? $" · без картинки {set03.MissingTextures}" : ""), set03.MissingTextures > 0 ? MessageType.Warning : MessageType.None);
+
+                // Язык карты и слои: каждый переключатель — одно понятное действие.
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel(new GUIContent("Язык карты", "Stage02 — прежний живописный вид для сравнения; Stage03 — тушь, спокойные массы. Смена — полная перестройка."));
+                MapLabLook look = GUILayout.Toggle(s3.Look == MapLabLook.Stage02, "Stage02", EditorStyles.miniButtonLeft) ? MapLabLook.Stage02 : s3.Look;
+                look = GUILayout.Toggle(s3.Look == MapLabLook.Stage03, "Stage03", EditorStyles.miniButtonRight) ? MapLabLook.Stage03 : look;
+                EditorGUILayout.EndHorizontal();
+                if (look != s3.Look)
+                {
+                    Undo.RecordObject(s, "MapLab: язык карты");
+                    s3.Look = look;
+                    EditorUtility.SetDirty(s);
+                    RunGeneration("Generate", p => view.Generate(p));
+                }
+                EditorGUILayout.BeginHorizontal();
+                bool undercoat = GUILayout.Toggle(s.Art.GroundTextures, new GUIContent("Подложка", "Принятые цветовые подложки этапа 02 (трава, земля, камень)."), EditorStyles.miniButtonLeft);
+                bool strokes = GUILayout.Toggle(s.Diagnostics.ShowStrokes, new GUIContent("Мазки", "Программные мазки покраски."), EditorStyles.miniButtonMid);
+                bool ink = GUILayout.Toggle(s3.Ink, new GUIContent("Перо", "Тушевые кромки дорог и троп."), EditorStyles.miniButtonMid);
+                bool accents = GUILayout.Toggle(s3.ForestAccents, new GUIContent("Акценты леса", "Линия и подсветка по верхним кромкам групп крон."), EditorStyles.miniButtonMid);
+                bool shadows = GUILayout.Toggle(s3.ObjectShadows, new GUIContent("Тени", "Стилизованные тени объектов (переключение — перестройка: тень рельефа считается заново)."), EditorStyles.miniButtonRight);
+                EditorGUILayout.EndHorizontal();
+                if (undercoat != s.Art.GroundTextures || strokes != s.Diagnostics.ShowStrokes || ink != s3.Ink || accents != s3.ForestAccents || shadows != s3.ObjectShadows)
+                {
+                    Undo.RecordObject(s, "MapLab: слои этапа 03");
+                    bool regenerate = shadows != s3.ObjectShadows;
+                    bool repaint = strokes != s.Diagnostics.ShowStrokes || ink != s3.Ink;
+                    s.Art.GroundTextures = undercoat;
+                    s.Diagnostics.ShowStrokes = strokes;
+                    s3.Ink = ink;
+                    s3.ForestAccents = accents;
+                    s3.ObjectShadows = shadows;
+                    EditorUtility.SetDirty(s);
+                    if (regenerate)
+                        RunGeneration("Generate", p => view.Generate(p));
+                    else if (repaint)
+                        RunGuarded(() => Require(view.RebuildStage03Layers()));
+                    else
+                        ApplyCheap(false);
+                }
+
+                MapLabCameraRig rig = view.CameraRig;
+                if (rig != null)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.PrefixLabel(new GUIContent("Наклон", "Фокус сохраняется. «От приближения» — 60° на общем виде, 35° на наибольшем фактическом приближении."));
+                    if (GUILayout.Button("50°", EditorStyles.miniButtonLeft)) SetMode(MapLabCameraMode.Volume50);
+                    if (GUILayout.Button("35°", EditorStyles.miniButtonMid)) SetMode(MapLabCameraMode.Low35);
+                    bool byZoom = GUILayout.Toggle(s.Camera.PitchByZoom, "От приближения", EditorStyles.miniButtonRight);
+                    EditorGUILayout.EndHorizontal();
+                    if (byZoom != s.Camera.PitchByZoom)
+                    {
+                        Undo.RecordObject(s, "MapLab: наклон от приближения");
+                        s.Camera.PitchByZoom = byZoom;
+                        EditorUtility.SetDirty(s);
+                        WithCamera(() => { rig.RecomputeFitSize(); rig.Apply(); view.OnCameraChanged(); });
+                    }
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.PrefixLabel("Приближение");
+                    foreach (float z in new[] { 1f, 2f, 4f, rig.ZoomLimits.y })
+                        if (GUILayout.Button(z >= rig.ZoomLimits.y ? $"Max {z:0.#}" : "Zoom " + z, EditorStyles.miniButton))
+                            WithCamera(() => rig.ZoomAround(z, new Vector2(0.5f, 0.5f), false));
+                    EditorGUILayout.EndHorizontal();
+                    string houses = s.IsStage03 && view.HasArtHouses03 ? $" · кадр домов {view.HouseView}°" : "";
+                    EditorGUILayout.LabelField($"Сейчас {rig.Pitch:0.#}°, Zoom {rig.Zoom:0.00}{houses}{(view.ArtSpritesApproximate ? " · ракурс рисунков приближённый" : "")}", EditorStyles.miniLabel);
+                }
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Диагностика");
+                DiagButton("Итог", MapLabDiagnosticMode.Final);
+                DiagButton("Краска", MapLabDiagnosticMode.SourcePaint);
+                DiagButton("Мазки", MapLabDiagnosticMode.StrokeContribution);
+                DiagButton("Дороги", MapLabDiagnosticMode.RoadGraph);
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel(" ");
+                DiagButton("Группы леса", MapLabDiagnosticMode.ForestGroups);
+                DiagButton("Акценты", MapLabDiagnosticMode.ForestAccents);
+                DiagButton("Тени", MapLabDiagnosticMode.ShadowMask);
+                EditorGUILayout.EndHorizontal();
+                MapLabTiledPainter.Result paint = view.LastTiledPaint;
+                if (s.IsStage03 && paint != null)
+                    EditorGUILayout.LabelField($"Покраска {paint.TexelsPerUnit:0.#} текс./ед., тайлов {paint.Tiles.Count}, мазков {paint.Strokes}, {paint.Milliseconds:0} мс · перо {view.InkStats.Polylines} линий · теней {view.ShadowShapes}", EditorStyles.miniLabel);
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
+        }
+
+        private void DiagButton(string label, MapLabDiagnosticMode mode)
+        {
+            bool on = view.Settings.Diagnostics.Mode == mode;
+            if (GUILayout.Toggle(on, label, EditorStyles.miniButton) == on)
+                return;
+            Undo.RecordObject(view.Settings, "MapLab: диагностика");
+            view.Settings.Diagnostics.Mode = on ? MapLabDiagnosticMode.Final : mode;
+            EditorUtility.SetDirty(view.Settings);
+            ApplyCheap(false);
         }
 
         private void DrawPresetSwitch()

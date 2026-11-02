@@ -1,0 +1,403 @@
+fileFormatVersion: 2
+guid: 54733cd0b4176f54c993b07d187aa9f6
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1000609060105782385
+    second: Tree_Broad_Elongated_B_0
+  - first:
+      213: -5933077188554920967
+    second: Tree_Broad_Elongated_B_1
+  - first:
+      213: 1491921298452365857
+    second: Tree_Broad_Elongated_B_2
+  - first:
+      213: -3287744099428625513
+    second: Tree_Broad_Elongated_B_3
+  - first:
+      213: -14891763201727927
+    second: Tree_Broad_Elongated_B_4
+  - first:
+      213: 4990020287614904920
+    second: Tree_Broad_Elongated_B_5
+  - first:
+      213: -5891673498767059533
+    second: Tree_Broad_Elongated_B_6
+  - first:
+      213: -4470999287252378257
+    second: Tree_Broad_Elongated_B_7
+  - first:
+      213: 1543091006628931641
+    second: Tree_Broad_Elongated_B_8
+  - first:
+      213: -126958317144893609
+    second: Tree_Broad_Elongated_B_9
+  - first:
+      213: 5768619989777089263
+    second: Tree_Broad_Elongated_B_10
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Tree_Broad_Elongated_B_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 23
+        width: 957
+        height: 1226
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8b7b5d7c5f1d12f0800000000000000
+      internalID: -1000609060105782385
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Broad_Elongated_B_1
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 1238
+        width: 467
+        height: 282
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9fbe5375bb979ada0800000000000000
+      internalID: -5933077188554920967
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Broad_Elongated_B_2
+      rect:
+        serializedVersion: 2
+        x: 584
+        y: 1245
+        width: 197
+        height: 269
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 122c713348e54b410800000000000000
+      internalID: 1491921298452365857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Broad_Elongated_B_3
+      rect:
+        serializedVersion: 2
+        x: 670
+        y: 1233
+        width: 9
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7939b2929269f52d0800000000000000
+      internalID: -3287744099428625513
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Broad_Elongated_B_4
+      rect:
+        serializedVersion: 2
+        x: 750
+        y: 1237
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 942284035081bcff0800000000000000
+      internalID: -14891763201727927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Broad_Elongated_B_5
+      rect:
+        serializedVersion: 2
+        x: 758
+        y: 1233
+        width: 27
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85a6749630d104540800000000000000
+      internalID: 4990020287614904920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Broad_Elongated_B_6
+      rect:
+        serializedVersion: 2
+        x: 840
+        y: 1063
+        width: 153
+        height: 253
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b518651b229c3ea0800000000000000
+      internalID: -5891673498767059533
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Broad_Elongated_B_7
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 673
+        width: 117
+        height: 289
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6d1c4c26d1d3f1c0800000000000000
+      internalID: -4470999287252378257
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Broad_Elongated_B_8
+      rect:
+        serializedVersion: 2
+        x: 728
+        y: 277
+        width: 7
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 938a73a48192a6510800000000000000
+      internalID: 1543091006628931641
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Broad_Elongated_B_9
+      rect:
+        serializedVersion: 2
+        x: 734
+        y: 273
+        width: 9
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7571c4d4514fc3ef0800000000000000
+      internalID: -126958317144893609
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Broad_Elongated_B_10
+      rect:
+        serializedVersion: 2
+        x: 535
+        y: 169
+        width: 20
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe281e631514e0050800000000000000
+      internalID: 5768619989777089263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Tree_Broad_Elongated_B_0: -1000609060105782385
+      Tree_Broad_Elongated_B_1: -5933077188554920967
+      Tree_Broad_Elongated_B_10: 5768619989777089263
+      Tree_Broad_Elongated_B_2: 1491921298452365857
+      Tree_Broad_Elongated_B_3: -3287744099428625513
+      Tree_Broad_Elongated_B_4: -14891763201727927
+      Tree_Broad_Elongated_B_5: 4990020287614904920
+      Tree_Broad_Elongated_B_6: -5891673498767059533
+      Tree_Broad_Elongated_B_7: -4470999287252378257
+      Tree_Broad_Elongated_B_8: 1543091006628931641
+      Tree_Broad_Elongated_B_9: -126958317144893609
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

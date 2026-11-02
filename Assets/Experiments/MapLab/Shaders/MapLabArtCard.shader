@@ -25,6 +25,13 @@ Shader "Kingdom Survival/MapLab/Art Card"
         _AlphaView ("Диагностика альфы: 0 нет, 1 исходная, 2 после clip", Float) = 0
         _Ghost ("Призрачный контур", Float) = 0
         _GhostColor ("Цвет контура", Color) = (0.95, 0.85, 0.6, 0.45)
+        _AccentInk ("Этап 03: перо акцента (sRGB)", Color) = (0.33, 0.25, 0.16, 1)
+        _AccentOpacity ("Непрозрачность акцента", Range(0, 1)) = 0.85
+        _AccentLight ("Подсветка массы", Color) = (0.62, 0.64, 0.42, 1)
+        _AccentLightStrength ("Сила подсветки", Range(0, 1)) = 0.35
+        _AccentHighlight ("Ширина подсветки, толщин линии", Float) = 2.2
+        _AccentOn ("Акценты включены", Float) = 1
+        _DiagMode ("Диагностика: 12 группы, 13 акценты", Float) = 0
         [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("ZTest", Float) = 4
         [Enum(Off, 0, On, 1)] _ZWrite ("ZWrite", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Src blend", Float) = 1
@@ -52,7 +59,8 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float3 positionOS : POSITION;
                 float2 uv : TEXCOORD0;
                 float2 offset : TEXCOORD1;   // x — вправо по кадру, y — вверх от опоры (мир)
-                float4 color : COLOR;        // r — яркость/1.25, g — сила оттенка, b — доля тени рельефа
+                float4 color : COLOR;        // r — яркость/1.25, g — сила оттенка, b — доля тени рельефа, a — низ кроны (v)
+                float4 extra : TEXCOORD2;    // этап 03: x — акцент, y — метка группы, z/w — толщина пера (v/u)
             };
 
             struct Varyings
@@ -61,6 +69,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float2 uv : TEXCOORD0;
                 float4 color : TEXCOORD1;
                 float shade : TEXCOORD2;
+                float4 extra : TEXCOORD3;
             };
 
             TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
@@ -80,7 +89,19 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float _AlphaView;
                 float _Ghost;
                 float4 _GhostColor;
+                float4 _AccentInk;
+                float _AccentOpacity;
+                float4 _AccentLight;
+                float _AccentLightStrength;
+                float _AccentHighlight;
+                float _AccentOn;
+                float _DiagMode;
             CBUFFER_END
+
+            float3 Hue(float h)
+            {
+                return saturate(abs(frac(h + float3(0, 2.0 / 3.0, 1.0 / 3.0)) * 6.0 - 3.0) - 1.0);
+            }
 
             Varyings Vert(Attributes input)
             {
@@ -105,6 +126,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 o.positionCS = TransformWorldToHClip(world);
                 o.uv = input.uv;
                 o.color = input.color;
+                o.extra = input.extra;
                 float4 s = SAMPLE_TEXTURE2D_LOD(_ShadeTex, sampler_ShadeTex, basePoint.xz / max(1.0, _MapSize), 0);
                 o.shade = saturate((1.0 - s.r) * 0.9 + (1.0 - s.g) * 0.35);
                 return o;
@@ -136,6 +158,36 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 c = lerp(c, toned, tint * 0.5);
                 c *= i.color.r * 1.25;
                 c = MapLabShadow(c, i.shade * i.color.b * _GroundShade, _ShadowTint.rgb);
+
+                // Этап 03: акцент массы крон — линия по верхней/освещённой кромке
+                // силуэта и узкая приглушённая подсветка под ней. Только на
+                // непрозрачных пикселях этой же карточки (её глубина и её alpha):
+                // не ложится на землю, не просвечивает сквозь ближнее дерево.
+                float edgeMask = 0, bandMask = 0;
+                float2 uvDx = ddx(i.uv), uvDy = ddy(i.uv);
+                float2 uvWidth = abs(uvDx) + abs(uvDy);
+                if (_AccentOn > 0.5 && i.extra.x > 0.01 && i.uv.y > i.color.a)
+                {
+                    float2 t = max(i.extra.wz, uvWidth * 0.9);
+                    float up1 = SAMPLE_TEXTURE2D_GRAD(_MainTex, sampler_MainTex, i.uv + float2(0, t.y), uvDx, uvDy).a;
+                    float ul1 = SAMPLE_TEXTURE2D_GRAD(_MainTex, sampler_MainTex, i.uv + float2(-t.x * 0.7, t.y * 0.7), uvDx, uvDy).a;
+                    float k = 1.0 + _AccentHighlight;
+                    float up2 = SAMPLE_TEXTURE2D_GRAD(_MainTex, sampler_MainTex, i.uv + float2(0, t.y * k), uvDx, uvDy).a;
+                    float ul2 = SAMPLE_TEXTURE2D_GRAD(_MainTex, sampler_MainTex, i.uv + float2(-t.x * k * 0.8, t.y * k * 0.6), uvDx, uvDy).a;
+                    edgeMask = smoothstep(_Cutoff + 0.18, _Cutoff - 0.18, min(up1, ul1));
+                    bandMask = smoothstep(_Cutoff + 0.18, _Cutoff - 0.18, min(up2, ul2)) * (1.0 - edgeMask);
+                    float fade = saturate((i.uv.y - i.color.a) * 12.0);
+                    edgeMask *= fade * i.extra.x;
+                    bandMask *= fade * i.extra.x;
+                    float3 light = lerp(c, _AccentLight.rgb * (dot(c, w) / max(1e-3, dot(_AccentLight.rgb, w))) * 1.18, 0.7);
+                    c = lerp(c, light, bandMask * _AccentLightStrength);
+                    c = lerp(c, _AccentInk.rgb, edgeMask * _AccentOpacity);
+                }
+                int diag = (int)round(_DiagMode);
+                if (diag == 12)
+                    return float4(lerp(Hue(i.extra.y) * 0.8 + 0.1, float3(0.1, 0.1, 0.1), edgeMask), 1);
+                if (diag == 13)
+                    return float4(lerp(lerp(float3(0.82, 0.82, 0.78), float3(0.95, 0.85, 0.2), bandMask), float3(0.75, 0.1, 0.05), edgeMask), 1);
                 c = MapLabSaturate(c, _Saturation);
                 return float4(c, 1);
             }

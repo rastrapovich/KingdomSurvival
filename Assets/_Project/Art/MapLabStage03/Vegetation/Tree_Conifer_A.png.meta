@@ -1,0 +1,559 @@
+fileFormatVersion: 2
+guid: d40a9eb860021f34aa6a2249b1c115c7
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4786273927340858174
+    second: Tree_Conifer_A_0
+  - first:
+      213: -3329593440596430731
+    second: Tree_Conifer_A_1
+  - first:
+      213: -5793872372375815007
+    second: Tree_Conifer_A_2
+  - first:
+      213: -8492601507005726076
+    second: Tree_Conifer_A_3
+  - first:
+      213: 8464392858262625893
+    second: Tree_Conifer_A_4
+  - first:
+      213: 8268852432682705327
+    second: Tree_Conifer_A_5
+  - first:
+      213: -7675708429322616406
+    second: Tree_Conifer_A_6
+  - first:
+      213: 5985918619964056570
+    second: Tree_Conifer_A_7
+  - first:
+      213: 1399824922126774287
+    second: Tree_Conifer_A_8
+  - first:
+      213: 3592517433905355809
+    second: Tree_Conifer_A_9
+  - first:
+      213: -2755747333946174558
+    second: Tree_Conifer_A_10
+  - first:
+      213: 2489180074235953757
+    second: Tree_Conifer_A_11
+  - first:
+      213: 5026948705386976473
+    second: Tree_Conifer_A_12
+  - first:
+      213: -3771191337922593134
+    second: Tree_Conifer_A_13
+  - first:
+      213: 2160186177021317553
+    second: Tree_Conifer_A_14
+  - first:
+      213: -7488764063447719039
+    second: Tree_Conifer_A_15
+  - first:
+      213: 2705857723399221715
+    second: Tree_Conifer_A_16
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Tree_Conifer_A_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 39
+        width: 1248
+        height: 1172
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c4622bc83db39db0800000000000000
+      internalID: -4786273927340858174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_1
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 1027
+        width: 68
+        height: 198
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57077ce1868eac1d0800000000000000
+      internalID: -3329593440596430731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_2
+      rect:
+        serializedVersion: 2
+        x: 113
+        y: 995
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1acf69a46c7089fa0800000000000000
+      internalID: -5793872372375815007
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_3
+      rect:
+        serializedVersion: 2
+        x: 790
+        y: 1139
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4820af3dce7342a80800000000000000
+      internalID: -8492601507005726076
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_4
+      rect:
+        serializedVersion: 2
+        x: 1121
+        y: 954
+        width: 119
+        height: 257
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56ed8145570977570800000000000000
+      internalID: 8464392858262625893
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_5
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 914
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fa16d2e2a7dd0c270800000000000000
+      internalID: 8268852432682705327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_6
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 809
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa101c6e9d76a7590800000000000000
+      internalID: -7675708429322616406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_7
+      rect:
+        serializedVersion: 2
+        x: 919
+        y: 469
+        width: 48
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af3aa552541421350800000000000000
+      internalID: 5985918619964056570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_8
+      rect:
+        serializedVersion: 2
+        x: 1144
+        y: 460
+        width: 11
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f00fa1f995d2d6310800000000000000
+      internalID: 1399824922126774287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_9
+      rect:
+        serializedVersion: 2
+        x: 1010
+        y: 177
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 12c9359729f2bd130800000000000000
+      internalID: 3592517433905355809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_10
+      rect:
+        serializedVersion: 2
+        x: 1012
+        y: 179
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a3986d766e91c9d0800000000000000
+      internalID: -2755747333946174558
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_11
+      rect:
+        serializedVersion: 2
+        x: 727
+        y: 62
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5280dad6185b8220800000000000000
+      internalID: 2489180074235953757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_12
+      rect:
+        serializedVersion: 2
+        x: 521
+        y: 21
+        width: 22
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d453b0b63f43c540800000000000000
+      internalID: 5026948705386976473
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_13
+      rect:
+        serializedVersion: 2
+        x: 536
+        y: 34
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29ef71375790aabc0800000000000000
+      internalID: -3771191337922593134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_14
+      rect:
+        serializedVersion: 2
+        x: 548
+        y: 0
+        width: 25
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b1901202e58afd10800000000000000
+      internalID: 2160186177021317553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_15
+      rect:
+        serializedVersion: 2
+        x: 572
+        y: 23
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 183ec7fe2c0921890800000000000000
+      internalID: -7488764063447719039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tree_Conifer_A_16
+      rect:
+        serializedVersion: 2
+        x: 525
+        y: 15
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d135ff53432d8520800000000000000
+      internalID: 2705857723399221715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Tree_Conifer_A_0: -4786273927340858174
+      Tree_Conifer_A_1: -3329593440596430731
+      Tree_Conifer_A_10: -2755747333946174558
+      Tree_Conifer_A_11: 2489180074235953757
+      Tree_Conifer_A_12: 5026948705386976473
+      Tree_Conifer_A_13: -3771191337922593134
+      Tree_Conifer_A_14: 2160186177021317553
+      Tree_Conifer_A_15: -7488764063447719039
+      Tree_Conifer_A_16: 2705857723399221715
+      Tree_Conifer_A_2: -5793872372375815007
+      Tree_Conifer_A_3: -8492601507005726076
+      Tree_Conifer_A_4: 8464392858262625893
+      Tree_Conifer_A_5: 8268852432682705327
+      Tree_Conifer_A_6: -7675708429322616406
+      Tree_Conifer_A_7: 5985918619964056570
+      Tree_Conifer_A_8: 1399824922126774287
+      Tree_Conifer_A_9: 3592517433905355809
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

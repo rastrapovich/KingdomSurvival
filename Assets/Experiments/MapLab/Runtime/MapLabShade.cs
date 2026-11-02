@@ -24,7 +24,10 @@ namespace KingdomSurvival.MapLab
                 ground[z * r + x] = h;
                 occluder[z * r + x] = h;
             }
-            RasterizeOccluders(data, occluder, canopy, r, cell);
+            // Этап 03: тени крон и домов рисует MapLabObjectShadows (собранные
+            // пятна), здесь — только рельеф: две тени от одного объекта не складываются.
+            if (!(settings.IsStage03 && settings.Stage03.ObjectShadows))
+                RasterizeOccluders(data, occluder, canopy, r, cell);
 
             Vector3 light = settings.LightDirection;
             Vector2 dir = new Vector2(light.x, light.z);

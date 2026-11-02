@@ -36,15 +36,31 @@ namespace KingdomSurvival.MapLab
         RoadGraph = 7,
         CliffLines = 8,
         Wireframe = 9,
+        // Этап 03 (значения дописаны в конец — старые не сдвигаются).
+        SourcePaint = 10,
+        StrokeContribution = 11,
+        ForestGroups = 12,
+        ForestAccents = 13,
+        ShadowMask = 14,
     }
 
-    // Именованные режимы камеры этапа 02 (наклон вниз от горизонта).
+    // Именованные режимы камеры (наклон вниз от горизонта). Low35 — этап 03,
+    // дописан в конец: сохранённые 60/50/40 не сдвигаются.
     public enum MapLabCameraMode
     {
         Custom = 0,
         Atlas60 = 1,
         Volume50 = 2,
         Diorama40 = 3,
+        Low35 = 4,
+    }
+
+    // Художественный язык карты: этап 02 (живописный, для сравнения) или этап 03
+    // (тушь, спокойные массы, мировые мазки, лес из отдельных деревьев).
+    public enum MapLabLook
+    {
+        Stage02 = 0,
+        Stage03 = 1,
     }
 
     public enum MapLabArtMode
@@ -195,6 +211,11 @@ namespace KingdomSurvival.MapLab
         public bool AlignToDrawnView = true;
         [Tooltip("Угол конька на рисунке (от +X мира к +Z): изба с соломой, изба с дранкой, амбар. Оценено по PNG этапа 02.")]
         public Vector3 DrawnRidgeYaw = new Vector3(23f, -27f, 32f);
+        [Tooltip("Этап 03: угол конька по варианту избы (0 — House_Thatch_A, 1 — House_Thatch_B, 2 и 3 — House_Shingle_A); среднее по кадрам 50° и 35°. Выключено — углы этапа 02.")]
+        public bool UseVariantYaw = true;
+        public Vector4 DrawnRidgeYawVariants = new Vector4(11f, -12f, 12f, 12f);
+        [Tooltip("Этап 03: угол конька амбара Barn_A.")]
+        public float DrawnBarnYaw = 14f;
     }
 
     [Serializable]
@@ -247,31 +268,38 @@ namespace KingdomSurvival.MapLab
         public bool FillFrame = true;
         [Tooltip("Режим сравнения: Атлас 60°, Объёмная карта 50°, Ближняя диорама 40°; Custom — наклон из поля выше.")]
         public MapLabCameraMode Mode = MapLabCameraMode.Volume50;
-        [Tooltip("Наклон зависит от приближения: плавно от общего вида к ближнему (спрайты нарисованы под 50° — ракурс приближённый).")]
-        public bool PitchByZoom;
-        [Tooltip("Наклон при Zoom 1 и при наибольшем приближении (PitchByZoomFullAt).")]
-        public Vector2 PitchByZoomRange = new Vector2(60f, 40f);
-        [Tooltip("Приближение, при котором наклон доходит до второго значения.")]
-        [Range(1.5f, 8f)] public float PitchByZoomFullAt = 4f;
+        [Tooltip("Наклон зависит от приближения: плавно от общего вида к ближнему. Конечная точка — наибольшее ФАКТИЧЕСКОЕ приближение камеры (ZoomLimits.y рига).")]
+        public bool PitchByZoom = true;
+        [Tooltip("Наклон при Zoom 1 и при наибольшем приближении рига. Этап 03: до 35°.")]
+        public Vector2 PitchByZoomRange = new Vector2(60f, 35f);
         [Tooltip("Плавность приближения колесом (больше — быстрее).")]
         [Range(2f, 30f)] public float ZoomSmoothing = 12f;
 
-        // Фактический наклон для данного приближения.
-        public float PitchFor(float zoom)
+        public const float DefaultMaxZoom = 8f;
+
+        // Фактический наклон для данного приближения. Кривая наклона от
+        // приближения идёт в логарифме приближения от Zoom 1 до maxZoom и
+        // заканчивается ровно на втором значении диапазона.
+        public float PitchFor(float zoom, float maxZoom = DefaultMaxZoom)
         {
             if (PitchByZoom)
-            {
-                float t = Mathf.InverseLerp(1f, Mathf.Max(1.01f, PitchByZoomFullAt), zoom);
-                t = t * t * (3f - 2f * t);
-                return Mathf.Clamp(Mathf.Lerp(PitchByZoomRange.x, PitchByZoomRange.y, t), 30f, 90f);
-            }
+                return PitchCurve(zoom, maxZoom, PitchByZoomRange);
             switch (Mode)
             {
                 case MapLabCameraMode.Atlas60: return 60f;
                 case MapLabCameraMode.Volume50: return 50f;
                 case MapLabCameraMode.Diorama40: return 40f;
+                case MapLabCameraMode.Low35: return 35f;
                 default: return Mathf.Clamp(CameraPitchDownDegrees, 30f, 90f);
             }
+        }
+
+        public static float PitchCurve(float zoom, float maxZoom, Vector2 range)
+        {
+            float t = Mathf.Log(Mathf.Max(1f, zoom)) / Mathf.Log(Mathf.Max(1.01f, maxZoom));
+            t = Mathf.Clamp01(t);
+            t = t * t * (3f - 2f * t);
+            return Mathf.Clamp(Mathf.Lerp(range.x, range.y, t), 30f, 90f);
         }
 
         public static float PitchOf(MapLabCameraMode mode)
@@ -280,9 +308,99 @@ namespace KingdomSurvival.MapLab
             {
                 case MapLabCameraMode.Atlas60: return 60f;
                 case MapLabCameraMode.Diorama40: return 40f;
+                case MapLabCameraMode.Low35: return 35f;
                 default: return 50f;
             }
         }
+    }
+
+    // Общее перо мира (этап 03): дороги, межи, берега и акценты леса рисуются
+    // одной тушью, подобранной по линиям новых PNG (Tree_Broad_Round_A,
+    // House_Thatch_A). Толщина задана в мире на контрольном масштабе и
+    // ограничена в экранных пикселях, чтобы линия не исчезала вдали и не
+    // становилась жирной вблизи.
+    [Serializable]
+    public sealed class MapLabInkStyle
+    {
+        [Tooltip("Цвет пера (sRGB). Начальная точка — Docs/INK_PROFILE.json (#5C4A30, #583E2B), подобрано по сцене.")]
+        public Color Color = new Color(0.33f, 0.25f, 0.16f, 1f);
+        [Tooltip("Толщина линии в мире, ед. (контрольный масштаб — край кроны Tree_Broad_Round_A).")]
+        [Range(0.01f, 0.4f)] public float Width = 0.085f;
+        [Tooltip("Наименьшая видимая толщина, экранных пикселей.")]
+        [Range(0.3f, 3f)] public float MinPixels = 1.1f;
+        [Tooltip("Наибольшая толщина, экранных пикселей (вблизи линия не жиреет).")]
+        [Range(1f, 12f)] public float MaxPixels = 4.5f;
+        [Tooltip("Непрозрачность пера.")]
+        [Range(0f, 1f)] public float Opacity = 0.85f;
+        [Tooltip("Зернистость края: рваность в мировых координатах.")]
+        [Range(0f, 1f)] public float Grain = 0.35f;
+        [Tooltip("Длина участка линии между разрывами, ед.")]
+        [Range(0.5f, 30f)] public float BreakLength = 6f;
+        [Tooltip("Доля разрывов, 0 — сплошная линия.")]
+        [Range(0f, 0.6f)] public float BreakFrequency = 0.16f;
+        [Tooltip("Ослабление на освещённой стороне.")]
+        [Range(0f, 1f)] public float LitSideFade = 0.45f;
+        [Tooltip("Вес пера: дорога, тропа, межа поля, берег.")]
+        public Vector4 Weights = new Vector4(1f, 0.6f, 0.55f, 0.7f);
+    }
+
+    // Этап 03: переключатели нового языка и его параметры. Минимальный набор,
+    // без дублирования ручек этапа 02.
+    [Serializable]
+    public sealed class MapLabStage03Settings
+    {
+        [Tooltip("Stage02 — прежний живописный вид (набор арта этапа 02); Stage03 — тушь и спокойные массы (набор этапа 03).")]
+        public MapLabLook Look = MapLabLook.Stage03;
+        [Tooltip("Плотность запекания покраски, текселей на единицу мира (тайлы по чанкам рельефа). Этап 02 — 2048 на всю карту (8 на 256 ед.).")]
+        [Range(6f, 24f)] public float PaintTexelsPerUnit = 16f;
+        [Tooltip("Тушевые линии дорог, троп и берегов (общий профиль пера).")]
+        public bool Ink = true;
+        [Tooltip("Выборочные тушевые линии и подсветка по верхним кромкам групп крон.")]
+        public bool ForestAccents = true;
+        [Tooltip("Стилизованные цветные тени объектов (падающая + контактная) вместо мягких пятен этапа 02.")]
+        public bool ObjectShadows = true;
+        public MapLabInkStyle InkStyle = new MapLabInkStyle();
+
+        [Header("Мазки (мировой масштаб)")]
+        [Tooltip("Сторона ячейки, к которой привязаны мазки, ед.: их число и форма не зависят от плотности запекания.")]
+        [Range(2f, 12f)] public float StrokeCell = 4f;
+        [Tooltip("Мазков на квадратную единицу мира (широкие следы).")]
+        [Range(0.1f, 3f)] public float StrokesPerUnit = 0.9f;
+        [Tooltip("Ширина мягкого края мазка, текселей (основная часть — плотная).")]
+        [Range(0.3f, 3f)] public float StrokeEdge = 0.9f;
+        [Tooltip("Разделение оттенков соседних мазков.")]
+        [Range(0f, 1f)] public float StrokeColorSplit = 0.55f;
+
+        [Header("Лес")]
+        [Tooltip("Размер группы крон для акцентов, ед. (ячейки Вороного по миру).")]
+        [Range(6f, 40f)] public float ForestGroupSize = 15f;
+        [Tooltip("Доля групп с акцентом.")]
+        [Range(0f, 1f)] public float AccentShare = 0.4f;
+        [Tooltip("Наименьшая длина цепочки крон с акцентом.")]
+        [Range(2, 12)] public int AccentMinChain = 3;
+        [Tooltip("Ширина подсветки под линией, в толщинах линии.")]
+        [Range(0.5f, 5f)] public float AccentHighlight = 2.6f;
+        [Tooltip("Сила подсветки (приглушённая оливковая).")]
+        [Range(0f, 1f)] public float AccentHighlightStrength = 0.55f;
+        [Tooltip("Разброс яркости крон (спокойный массив — мало).")]
+        [Range(0f, 0.2f)] public float CrownToneRange = 0.05f;
+
+        [Header("Тени")]
+        [Tooltip("Сила падающей тени.")]
+        [Range(0f, 1f)] public float ShadowStrength = 0.4f;
+        [Tooltip("Контактная тень у основания — плотнее и компактнее.")]
+        [Range(0f, 1f)] public float ContactStrength = 0.25f;
+        [Tooltip("Число тонов тени (1 — одна заливка; 2–3 — близкие ступени).")]
+        [Range(1, 3)] public int ShadowTones = 2;
+        [Tooltip("Цвет тени (умножение), согласованный с оливковой палитрой.")]
+        public Color ShadowColor = new Color(0.56f, 0.6f, 0.62f, 1f);
+        [Tooltip("Разрешение маски теней объектов, текселей на единицу.")]
+        [Range(2f, 8f)] public float ShadowTexelsPerUnit = 4f;
+
+        [Header("Дома")]
+        [Tooltip("Наклон, ниже которого показывается кадр 35° (и выше — 50°). Гистерезис ± половина зазора.")]
+        [Range(36f, 49f)] public float HouseViewSwitch = 42.5f;
+        [Range(0f, 6f)] public float HouseViewHysteresis = 2f;
     }
 
     // Художественный набор этапа 02. Переключение Procedural/Art меняет только
@@ -320,6 +438,10 @@ namespace KingdomSurvival.MapLab
         public bool ShowMarker = true;
         [Tooltip("Призрачный контур фишки, когда её закрывает дом или скала (диагностика).")]
         public bool MarkerGhost;
+        [Tooltip("Этап 03: группа ракурсов (variant_group) для варианта избы 0..3; угол конька — Settlement.DrawnRidgeYawVariants.")]
+        public string[] HouseGroupsByVariant = { "House_Thatch_A", "House_Thatch_B", "House_Shingle_A", "House_Shingle_A" };
+        [Tooltip("Этап 03: группа ракурсов амбара.")]
+        public string BarnGroup = "Barn_A";
 
         public bool BuildingSpritesAt(float pitch)
         {
@@ -371,7 +493,10 @@ namespace KingdomSurvival.MapLab
         public MapLabStyleSettings PainterlyStyle = new MapLabStyleSettings();
         public MapLabCameraSettings Camera = new MapLabCameraSettings();
         public MapLabArtSettings Art = new MapLabArtSettings();
+        public MapLabStage03Settings Stage03 = new MapLabStage03Settings();
         public MapLabDiagnosticsSettings Diagnostics = new MapLabDiagnosticsSettings();
+
+        public bool IsStage03 => Stage03.Look == MapLabLook.Stage03;
         public MapLabAdvancedSettings Advanced = new MapLabAdvancedSettings();
 
         public int Resolution => Mathf.Clamp((int)General.Quality, 33, 1025);

@@ -107,6 +107,9 @@ namespace KingdomSurvival.MapLab.Tests
             MapLabSettings.ApplyPresetDefaults(s, MapLabPresetKind.RiverValley);
             s.General.Quality = MapLabQuality.Samples129;
             s.General.PaintResolution = 512;
+            // Тесты этапа 02: прежний язык и углы домов этапа 02.
+            s.Stage03.Look = MapLabLook.Stage02;
+            s.Settlement.UseVariantYaw = false;
             return s;
         }
 
@@ -297,6 +300,7 @@ namespace KingdomSurvival.MapLab.Tests
         public void CameraModes_PitchValues_AndPitchByZoomIsMonotonic()
         {
             MapLabCameraSettings c = new MapLabCameraSettings();
+            c.PitchByZoom = false;
             c.Mode = MapLabCameraMode.Atlas60;
             Assert.AreEqual(60f, c.PitchFor(3f));
             c.Mode = MapLabCameraMode.Volume50;
@@ -304,8 +308,9 @@ namespace KingdomSurvival.MapLab.Tests
             c.Mode = MapLabCameraMode.Diorama40;
             Assert.AreEqual(40f, c.PitchFor(1f));
             c.PitchByZoom = true;
-            Assert.AreEqual(60f, c.PitchFor(1f), 0.01f);
-            Assert.AreEqual(40f, c.PitchFor(4f), 0.01f);
+            c.PitchByZoomRange = new Vector2(60f, 40f);
+            Assert.AreEqual(60f, c.PitchFor(1f, 4f), 0.01f);
+            Assert.AreEqual(40f, c.PitchFor(4f, 4f), 0.01f);
             float previous = 61f;
             for (float z = 1f; z <= 6f; z += 0.25f)
             {

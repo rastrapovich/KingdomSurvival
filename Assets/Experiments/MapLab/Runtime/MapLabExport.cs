@@ -48,7 +48,10 @@ namespace KingdomSurvival.MapLab
                 cam.targetTexture = rt;
                 cam.aspect = width / (float)height;
                 RefitKeepingView(rig);
+                // Пределы толщины пера в пикселях — в пикселях итогового кадра.
+                Shader.SetGlobalFloat("_MapLabPixelScale", supersample);
                 cam.Render();
+                Shader.SetGlobalFloat("_MapLabPixelScale", 1f);
                 RenderTexture.active = rt;
                 full = new Texture2D(rw, rh, TextureFormat.RGBA32, false, false);
                 full.ReadPixels(new Rect(0, 0, rw, rh), 0, 0, false);

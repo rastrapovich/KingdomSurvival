@@ -19,9 +19,41 @@ namespace KingdomSurvival.MapLab.Editor
         public const string ArtFolder = "Assets/_Project/Art/MapLabStage02";
         public const string ArtSetPath = ArtFolder + "/MapLabArtSet_Stage02.asset";
         public const string MarkerSetPath = ArtFolder + "/MapLabMarkerSet_Stage02.asset";
+        public const string Stage03Folder = "Assets/_Project/Art/MapLabStage03";
+        public const string Stage03SetPath = Stage03Folder + "/MapLabArtSet_Stage03.asset";
+        public const string Stage03MarkerPath = Stage03Folder + "/MapLabMarkerSet_Stage03.asset";
         public const string ManifestName = "ASSET_MANIFEST.json";
         public const int SupportedSchema = 1;
         private const string LastFolderKey = "KingdomSurvival.MapLab.Stage02Package";
+
+        // Этап импорта: своя папка, свой набор и допустимые ревизии пакета.
+        // Пакет этапа 03 не попадает в папку и набор этапа 02.
+        public sealed class Profile
+        {
+            public string Name;
+            public string Folder;
+            public string SetPath;
+            public string MarkerPath;
+            public string LastFolderKey;
+            public int MinRevision;
+            public int MaxRevision;
+            // Необязательные копии этапа 02 (тот же SHA-256 уже подключён в
+            // этапе 02) не копируются повторно: остаются прежние материалы,
+            // фишка и их калибровка.
+            public bool ReuseStage02;
+        }
+
+        public static readonly Profile Stage02 = new Profile
+        {
+            Name = "этап 02", Folder = ArtFolder, SetPath = ArtSetPath, MarkerPath = MarkerSetPath,
+            LastFolderKey = LastFolderKey, MinRevision = 0, MaxRevision = 2,
+        };
+
+        public static readonly Profile Stage03 = new Profile
+        {
+            Name = "этап 03", Folder = Stage03Folder, SetPath = Stage03SetPath, MarkerPath = Stage03MarkerPath,
+            LastFolderKey = "KingdomSurvival.MapLab.Stage03Package", MinRevision = 3, MaxRevision = 99, ReuseStage02 = true,
+        };
 
         private static readonly string[] KnownCategories = { "vegetation", "building", "rock", "cliff", "texture", "figure", "figure_calibration" };
 
@@ -31,6 +63,7 @@ namespace KingdomSurvival.MapLab.Editor
             public readonly List<string> Warnings = new List<string>();
             public readonly List<string> Imported = new List<string>();
             public readonly List<string> Unchanged = new List<string>();
+            public readonly List<string> Reused = new List<string>();
             public string PackageRoot;
 
             public bool Ok => Errors.Count == 0;
@@ -39,7 +72,7 @@ namespace KingdomSurvival.MapLab.Editor
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"Пакет: {PackageRoot}");
-                sb.AppendLine($"Подключено/обновлено: {Imported.Count}, без изменений: {Unchanged.Count}, ошибок: {Errors.Count}, предупреждений: {Warnings.Count}");
+                sb.AppendLine($"Подключено/обновлено: {Imported.Count}, без изменений: {Unchanged.Count}, взято из этапа 02: {Reused.Count}, ошибок: {Errors.Count}, предупреждений: {Warnings.Count}");
                 foreach (string e in Errors)
                     sb.AppendLine("Ошибка: " + e);
                 foreach (string w in Warnings)
@@ -68,6 +101,10 @@ namespace KingdomSurvival.MapLab.Editor
             public float PitchDown = 50f;
             public string UsageNote;
             public float EdgeDifference;
+            public string Role;
+            public string VariantGroup;
+            public string Provenance;
+            public bool Optional;
         }
 
         [MenuItem("Kingdom Survival/MapLab (эксперимент)/Подключить пакет этапа 02…", priority = 410)]
@@ -92,23 +129,48 @@ namespace KingdomSurvival.MapLab.Editor
             ImportInteractive(folder);
         }
 
+        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Подключить пакет этапа 03…", priority = 412)]
+        public static void ImportStage03Menu()
+        {
+            string start = EditorPrefs.GetString(Stage03.LastFolderKey, "");
+            string folder = EditorUtility.OpenFolderPanel("Распакованная папка пакета MapLab этапа 03 (с ASSET_MANIFEST.json)", start, "");
+            if (string.IsNullOrEmpty(folder))
+                return;
+            ImportInteractive(folder, Stage03);
+        }
+
+        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Переподключить пакет этапа 03", priority = 413)]
+        public static void ReimportStage03Menu()
+        {
+            string folder = EditorPrefs.GetString(Stage03.LastFolderKey, "");
+            if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder))
+            {
+                ImportStage03Menu();
+                return;
+            }
+            ImportInteractive(folder, Stage03);
+        }
+
         public static string LastPackageFolder => EditorPrefs.GetString(LastFolderKey, "");
 
-        public static Report ImportInteractive(string folder)
+        public static string LastStage03Folder => EditorPrefs.GetString(Stage03.LastFolderKey, "");
+
+        public static Report ImportInteractive(string folder, Profile profile = null)
         {
+            profile = profile ?? Stage02;
             Report report;
             try
             {
-                report = Import(folder, (stage, f) => EditorUtility.DisplayProgressBar("MapLab — пакет этапа 02", stage, f));
+                report = Import(folder, (stage, f) => EditorUtility.DisplayProgressBar("MapLab — пакет " + profile.Name, stage, f), profile);
             }
             finally
             {
                 EditorUtility.ClearProgressBar();
             }
-            if (report.Imported.Count + report.Unchanged.Count > 0)
-                EditorPrefs.SetString(LastFolderKey, folder);
-            Debug.Log("MapLab: подключение пакета этапа 02\n" + report);
-            EditorUtility.DisplayDialog("MapLab — пакет этапа 02", Shorten(report.ToString(), 1800), "OK");
+            if (report.Imported.Count + report.Unchanged.Count + report.Reused.Count > 0)
+                EditorPrefs.SetString(profile.LastFolderKey, folder);
+            Debug.Log("MapLab: подключение пакета " + profile.Name + "\n" + report);
+            EditorUtility.DisplayDialog("MapLab — пакет " + profile.Name, Shorten(report.ToString(), 1800), "OK");
             MapLabView view = MapLabAssets.FindView();
             if (view != null && view.Data != null)
                 view.RebuildArt();
@@ -122,12 +184,17 @@ namespace KingdomSurvival.MapLab.Editor
             try
             {
                 string folder = null;
+                Profile profile = Stage02;
                 string[] args = Environment.GetCommandLineArgs();
                 for (int i = 0; i < args.Length - 1; i++)
+                {
                     if (args[i] == "-mapLabPackage")
                         folder = args[i + 1];
-                Report report = Import(folder, null);
-                Debug.Log("MapLab: подключение пакета этапа 02\n" + report);
+                    if (args[i] == "-mapLabStage" && args[i + 1] == "03")
+                        profile = Stage03;
+                }
+                Report report = Import(folder, null, profile);
+                Debug.Log("MapLab: подключение пакета " + profile.Name + "\n" + report);
                 if (!report.Ok)
                     code = 2;
             }
@@ -140,13 +207,21 @@ namespace KingdomSurvival.MapLab.Editor
                 EditorApplication.Exit(code);
         }
 
-        public static Report Import(string packageRoot, Action<string, float> progress)
+        public static Report Import(string packageRoot, Action<string, float> progress, Profile profile = null)
         {
+            profile = profile ?? Stage02;
             Report report = new Report { PackageRoot = packageRoot };
             List<Item> items = ReadManifest(packageRoot, report, out Dictionary<string, object> manifest, out string manifestSha);
             if (items == null)
                 return report;
-            Directory.CreateDirectory(ArtFolder);
+            int revision = (int)MapLabJson.GetNumber(manifest, "package_revision", 2);
+            if (revision < profile.MinRevision || revision > profile.MaxRevision)
+            {
+                report.Errors.Add($"Пакет ревизии {revision} не подходит для пункта «{profile.Name}» (ожидается {profile.MinRevision}–{profile.MaxRevision}) — ничего не подключено, выберите пункт меню своего этапа.");
+                return report;
+            }
+            MapLabArtSet stage02 = profile.ReuseStage02 ? AssetDatabase.LoadAssetAtPath<MapLabArtSet>(ArtSetPath) : null;
+            Directory.CreateDirectory(profile.Folder);
             List<(Item item, string assetPath)> copied = new List<(Item, string)>();
             for (int i = 0; i < items.Count; i++)
             {
@@ -154,7 +229,14 @@ namespace KingdomSurvival.MapLab.Editor
                 progress?.Invoke("Проверка " + item.Id, i / (float)items.Count * 0.5f);
                 if (!VerifyFile(item, report))
                     continue;
-                string assetPath = ArtFolder + "/" + DestinationName(item.RelativePath);
+                MapLabArtEntry existing = stage02 != null && item.Optional ? stage02.Find(item.Id) : null;
+                if (existing != null && existing.HasTexture && existing.Sha256 == item.Sha256)
+                {
+                    // Тот же файл уже подключён (и, возможно, откалиброван) в этапе 02.
+                    report.Reused.Add(item.Id);
+                    continue;
+                }
+                string assetPath = profile.Folder + "/" + DestinationName(item.RelativePath);
                 string full = Path.GetFullPath(assetPath);
                 Directory.CreateDirectory(Path.GetDirectoryName(full));
                 bool same = File.Exists(full) && Sha256(File.ReadAllBytes(full)) == item.Sha256;
@@ -165,14 +247,15 @@ namespace KingdomSurvival.MapLab.Editor
             }
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
 
-            MapLabArtSet set = AssetDatabase.LoadAssetAtPath<MapLabArtSet>(ArtSetPath);
+            MapLabArtSet set = AssetDatabase.LoadAssetAtPath<MapLabArtSet>(profile.SetPath);
             if (set == null)
             {
                 set = ScriptableObject.CreateInstance<MapLabArtSet>();
-                AssetDatabase.CreateAsset(set, ArtSetPath);
+                AssetDatabase.CreateAsset(set, profile.SetPath);
             }
             Undo.RecordObject(set, "MapLab: подключение пакета");
             set.SchemaVersion = (int)MapLabJson.GetNumber(manifest, "schema_version", 0);
+            set.PackageRevision = revision;
             set.PackageId = MapLabJson.GetString(manifest, "package_id") ?? "";
             set.ManifestSha256 = manifestSha;
             set.ImportVersion++;
@@ -206,9 +289,13 @@ namespace KingdomSurvival.MapLab.Editor
 
             RegisterFigure(set, report);
             EditorUtility.SetDirty(set);
-            MapLabMarkerSet markers = EnsureMarkerSet(set);
+            bool figures = set.Entries.Exists(e => e != null && e.Category == MapLabArtCategory.Figure);
+            MapLabMarkerSet markers = figures || profile == Stage02 ? EnsureMarkerSet(set, profile.MarkerPath) : null;
             AssetDatabase.SaveAssets();
-            AssignToScene(set, markers);
+            if (profile == Stage02)
+                AssignToScene(set, markers);
+            else if (profile == Stage03)
+                AssignStage03ToScene(set);
             progress?.Invoke("Готово", 1f);
             return report;
         }
@@ -358,7 +445,16 @@ namespace KingdomSurvival.MapLab.Editor
                 CutoffHint = Mathf.Clamp((float)MapLabJson.GetNumber(raw, "cutoff_start_hint", 0.5), 0.05f, 0.95f),
                 PitchDown = (float)MapLabJson.GetNumber(raw, "intended_pitch_down_degrees", 50),
                 EdgeDifference = (float)Math.Max(MapLabJson.GetNumber(raw, "edge_mean_abs_rgb_difference_x", 0), MapLabJson.GetNumber(raw, "edge_mean_abs_rgb_difference_y", 0)),
+                Role = MapLabJson.GetString(raw, "role"),
+                VariantGroup = MapLabJson.GetString(raw, "variant_group"),
+                Provenance = MapLabJson.GetString(raw, "provenance"),
+                Optional = MapLabJson.GetBool(raw, "optional", false),
             };
+            if (!string.IsNullOrEmpty(item.VariantGroup) && !IsSafeId(item.VariantGroup))
+            {
+                report.Errors.Add($"{id}: недопустимые символы в variant_group.");
+                return null;
+            }
             double[] pivot = MapLabJson.GetNumbers(raw, "pivot_hint_unity_bottom_left");
             if (pivot != null && pivot.Length == 2)
                 item.PivotHint = new[] { (float)pivot[0], (float)pivot[1] };
@@ -509,6 +605,9 @@ namespace KingdomSurvival.MapLab.Editor
             entry.PitchDownDegrees = item.PitchDown;
             entry.Notes = item.UsageNote ?? "";
             entry.TileEdgeDifference = item.EdgeDifference;
+            entry.Role = item.Role ?? "";
+            entry.VariantGroup = item.VariantGroup ?? "";
+            entry.Provenance = item.Provenance ?? "";
             if (item.PivotHint != null)
                 entry.PivotHint = new Vector2(item.PivotHint[0], item.PivotHint[1]);
             MapLabArtAnalysis.Result analysis = MapLabArtAnalysis.Analyze(bytes, 160);
@@ -536,11 +635,17 @@ namespace KingdomSurvival.MapLab.Editor
                 case MapLabArtCategory.Vegetation:
                     entry.MaxSlope = entry.Kind == MapLabObjectKind.Bush ? 26f : 22f;
                     entry.ScaleRange = entry.Kind == MapLabObjectKind.Bush ? new Vector2(0.8f, 1.2f) : new Vector2(0.85f, 1.12f);
-                    entry.Weight = item.Id.Contains("Oak") ? 1f : item.Id.Contains("Spreading") ? 0.45f : item.Id.Contains("Birch") ? 0.35f : 1f;
+                    // Начальный вес — данные набора (правится в калибровке); выбор в
+                    // сцене этапа 03 идёт только по Weight, без проверок имён.
+                    entry.Weight = InitialWeight(item.Id);
                     break;
                 case MapLabArtCategory.Building:
                     entry.MaxSlope = 12f;
                     entry.ScaleRange = new Vector2(0.96f, 1.04f);
+                    // Подсказка manifest — низ силуэта (передний угол сруба); опора
+                    // пары ракурсов — середина основания, немного выше.
+                    if (!string.IsNullOrEmpty(item.VariantGroup))
+                        entry.Pivot = new Vector2(entry.SolidRect.center.x, entry.SolidRect.yMin + entry.SolidRect.height * 0.21f);
                     break;
                 case MapLabArtCategory.Rock:
                     entry.MaxSlope = 32f;
@@ -561,6 +666,19 @@ namespace KingdomSurvival.MapLab.Editor
             }
             float drawnWidth = entry.CardHeight * entry.Aspect * entry.SolidRect.width;
             entry.Footprint = new Vector2(drawnWidth * 0.72f, drawnWidth * 0.5f);
+        }
+
+        public static float InitialWeight(string id)
+        {
+            switch (id)
+            {
+                case "Tree_Spreading_01": return 0.45f;
+                case "Tree_Birch_01": return 0.35f;
+                case "Tree_Broad_Wide_C": return 0.8f;
+                case "Tree_Broad_Elongated_B": return 0.7f;
+                case "Tree_Broad_Leaning_D": return 0.35f;
+                default: return 1f;
+            }
         }
 
         // Регистрация шести кадров фигурки: опора — центр основания (между
@@ -619,13 +737,13 @@ namespace KingdomSurvival.MapLab.Editor
             importer.SaveAndReimport();
         }
 
-        private static MapLabMarkerSet EnsureMarkerSet(MapLabArtSet set)
+        private static MapLabMarkerSet EnsureMarkerSet(MapLabArtSet set, string path)
         {
-            MapLabMarkerSet markers = AssetDatabase.LoadAssetAtPath<MapLabMarkerSet>(MarkerSetPath);
+            MapLabMarkerSet markers = AssetDatabase.LoadAssetAtPath<MapLabMarkerSet>(path);
             if (markers == null)
             {
                 markers = ScriptableObject.CreateInstance<MapLabMarkerSet>();
-                AssetDatabase.CreateAsset(markers, MarkerSetPath);
+                AssetDatabase.CreateAsset(markers, path);
             }
             markers.ArtSet = set;
             if (markers.ViewIds == null || markers.ViewIds.Length != 6)
@@ -675,7 +793,21 @@ namespace KingdomSurvival.MapLab.Editor
             }
         }
 
+        // Набор этапа 03 назначается отдельным полем: фишка и подложки по
+        // умолчанию остаются от этапа 02.
+        private static void AssignStage03ToScene(MapLabArtSet set)
+        {
+            MapLabView view = MapLabAssets.FindView();
+            if (view == null || view.ArtSet03 == set)
+                return;
+            view.ArtSet03 = set;
+            EditorUtility.SetDirty(view);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(view.gameObject.scene);
+        }
+
         public static MapLabArtSet LoadArtSet() => AssetDatabase.LoadAssetAtPath<MapLabArtSet>(ArtSetPath);
+
+        public static MapLabArtSet LoadStage03Set() => AssetDatabase.LoadAssetAtPath<MapLabArtSet>(Stage03SetPath);
 
         public static MapLabMarkerSet LoadMarkerSet() => AssetDatabase.LoadAssetAtPath<MapLabMarkerSet>(MarkerSetPath);
 

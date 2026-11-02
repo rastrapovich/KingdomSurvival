@@ -23,6 +23,10 @@ namespace KingdomSurvival.MapLab
         private readonly Dictionary<long, List<int>> grid = new Dictionary<long, List<int>>();
         private readonly float stripWidth;
         private readonly uint seed;
+        // Кандидаты 3 × 3 соседних ячеек, заранее склеенные в том же порядке,
+        // что и обход словаря: результат тот же, без 18 поисков на точку.
+        private int[][] near;
+        private int nearX0, nearZ0, nearW, nearH;
 
         public MapLabFields(List<MapLabFieldBlock> blocks, float stripWidth, int seed)
         {
@@ -39,6 +43,36 @@ namespace KingdomSurvival.MapLab
                 }
                 list.Add(i);
             }
+            BuildNeighborhoods();
+        }
+
+        private void BuildNeighborhoods()
+        {
+            if (blocks.Count == 0)
+                return;
+            int minX = int.MaxValue, minZ = int.MaxValue, maxX = int.MinValue, maxZ = int.MinValue;
+            foreach (MapLabFieldBlock b in blocks)
+            {
+                int x = Mathf.FloorToInt(b.Site.x / CellSize), z = Mathf.FloorToInt(b.Site.y / CellSize);
+                minX = Mathf.Min(minX, x); maxX = Mathf.Max(maxX, x);
+                minZ = Mathf.Min(minZ, z); maxZ = Mathf.Max(maxZ, z);
+            }
+            nearX0 = minX - 1;
+            nearZ0 = minZ - 1;
+            nearW = maxX - minX + 3;
+            nearH = maxZ - minZ + 3;
+            near = new int[nearW * nearH][];
+            List<int> merged = new List<int>();
+            for (int z = 0; z < nearH; z++)
+            for (int x = 0; x < nearW; x++)
+            {
+                merged.Clear();
+                for (int dz = -1; dz <= 1; dz++)
+                for (int dx = -1; dx <= 1; dx++)
+                    if (grid.TryGetValue(Key(nearX0 + x + dx, nearZ0 + z + dz), out List<int> list))
+                        merged.AddRange(list);
+                near[z * nearW + x] = merged.ToArray();
+            }
         }
 
         public int Count => blocks.Count;
@@ -48,46 +82,37 @@ namespace KingdomSurvival.MapLab
             sample = default;
             if (blocks.Count == 0)
                 return false;
-            int cx = Mathf.FloorToInt(p.x / CellSize);
-            int cz = Mathf.FloorToInt(p.y / CellSize);
+            int cx = Mathf.FloorToInt(p.x / CellSize) - nearX0;
+            int cz = Mathf.FloorToInt(p.y / CellSize) - nearZ0;
+            if (cx < 0 || cz < 0 || cx >= nearW || cz >= nearH)
+                return false;
+            int[] list = near[cz * nearW + cx];
             int best = -1;
             float bestD = float.MaxValue;
-            for (int dz = -1; dz <= 1; dz++)
-            for (int dx = -1; dx <= 1; dx++)
+            for (int k = 0; k < list.Length; k++)
             {
-                if (!grid.TryGetValue(Key(cx + dx, cz + dz), out List<int> list))
-                    continue;
-                for (int k = 0; k < list.Count; k++)
+                float d = (blocks[list[k]].Site - p).sqrMagnitude;
+                if (d < bestD)
                 {
-                    float d = (blocks[list[k]].Site - p).sqrMagnitude;
-                    if (d < bestD)
-                    {
-                        bestD = d;
-                        best = list[k];
-                    }
+                    bestD = d;
+                    best = list[k];
                 }
             }
             if (best < 0)
                 return false;
             Vector2 site = blocks[best].Site;
             float border = float.MaxValue;
-            for (int dz = -1; dz <= 1; dz++)
-            for (int dx = -1; dx <= 1; dx++)
+            for (int k = 0; k < list.Length; k++)
             {
-                if (!grid.TryGetValue(Key(cx + dx, cz + dz), out List<int> list))
+                if (list[k] == best)
                     continue;
-                for (int k = 0; k < list.Count; k++)
-                {
-                    if (list[k] == best)
-                        continue;
-                    Vector2 other = blocks[list[k]].Site;
-                    float ab = Vector2.Distance(site, other);
-                    if (ab < 1e-4f)
-                        continue;
-                    // Расстояние до серединного перпендикуляра двух участков.
-                    float d = ((other - p).sqrMagnitude - (site - p).sqrMagnitude) / (2f * ab);
-                    border = Mathf.Min(border, d);
-                }
+                Vector2 other = blocks[list[k]].Site;
+                float ab = Vector2.Distance(site, other);
+                if (ab < 1e-4f)
+                    continue;
+                // Расстояние до серединного перпендикуляра двух участков.
+                float d = ((other - p).sqrMagnitude - (site - p).sqrMagnitude) / (2f * ab);
+                border = Mathf.Min(border, d);
             }
             MapLabFieldBlock block = blocks[best];
             float width = stripWidth * (0.7f + 0.7f * MapLabRandom.Hash01(block.ToneSeed, 3, seed));

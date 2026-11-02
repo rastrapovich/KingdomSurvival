@@ -79,6 +79,12 @@ namespace KingdomSurvival.MapLab
         public float FootX = 0.5f;
         public string Direction;
         public float PitchDownDegrees = 50f;
+        [Tooltip("Этап 03: роль из manifest (single_tree, bush, house, barn…).")]
+        public string Role;
+        [Tooltip("Этап 03: группа ракурсов одного типа постройки (кадры P50/P35 — один дом, не два типа).")]
+        public string VariantGroup;
+        [Tooltip("Происхождение файла (new_stage03_imagegen, unchanged_stage02).")]
+        public string Provenance;
         [Tooltip("Средний цвет (для фактур — нейтральная точка примеси).")]
         public Color MeanColor = Color.gray;
         [Tooltip("Средняя разница противоположных краёв (RGB, 0..255) — проверка повторения фактуры.")]
@@ -93,12 +99,14 @@ namespace KingdomSurvival.MapLab
         public float CardHeight => WorldHeight * HeightCorrection / Mathf.Max(0.05f, SolidRect.height);
     }
 
-    // Подключённый художественный набор этапа 02. В git — этот ассет и .meta
-    // картинок; сами PNG — локально (их восстанавливает повторный импорт).
+    // Подключённый художественный набор (этап 02 или 03). В git — этот ассет и
+    // .meta картинок; сами PNG — локально (их восстанавливает повторный импорт).
     [CreateAssetMenu(menuName = "Kingdom Survival/MapLab/Набор арта", fileName = "MapLabArtSet")]
     public sealed class MapLabArtSet : ScriptableObject
     {
         public int SchemaVersion;
+        [Tooltip("package_revision из manifest (2 — этап 02, 3 — этап 03).")]
+        public int PackageRevision;
         public string PackageId;
         [Tooltip("Номер подключения: растёт при каждом импорте.")]
         public int ImportVersion;
@@ -113,6 +121,21 @@ namespace KingdomSurvival.MapLab
                 if (Entries[i] != null && Entries[i].Id == id)
                     return Entries[i];
             return null;
+        }
+
+        // Кадры одной группы ракурсов (P50/P35 одного дома).
+        public MapLabArtEntry FindView(string variantGroup, float pitch)
+        {
+            MapLabArtEntry best = null;
+            for (int i = 0; i < Entries.Count; i++)
+            {
+                MapLabArtEntry e = Entries[i];
+                if (e == null || !e.HasTexture || e.VariantGroup != variantGroup)
+                    continue;
+                if (best == null || Mathf.Abs(e.PitchDownDegrees - pitch) < Mathf.Abs(best.PitchDownDegrees - pitch))
+                    best = e;
+            }
+            return best;
         }
 
         // Рисунки, заменяющие данный тип объекта (только с картинкой).

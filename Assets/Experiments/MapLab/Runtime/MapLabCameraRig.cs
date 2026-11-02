@@ -52,7 +52,7 @@ namespace KingdomSurvival.MapLab
 
         public float FitSize => fitSize;
 
-        public float Pitch => view != null && view.Settings != null ? view.Settings.Camera.PitchFor(zoom) : 60f;
+        public float Pitch => view != null && view.Settings != null ? view.Settings.Camera.PitchFor(zoom, ZoomLimits.y) : 60f;
 
         public float Azimuth => view != null && view.Settings != null ? view.Settings.Camera.AzimuthDegrees : 0f;
 
@@ -303,6 +303,7 @@ namespace KingdomSurvival.MapLab
                 if (keyboard.digit1Key.wasPressedThisFrame) SetMode(MapLabCameraMode.Atlas60);
                 if (keyboard.digit2Key.wasPressedThisFrame) SetMode(MapLabCameraMode.Volume50);
                 if (keyboard.digit3Key.wasPressedThisFrame) SetMode(MapLabCameraMode.Diorama40);
+                if (keyboard.digit4Key.wasPressedThisFrame) SetMode(MapLabCameraMode.Low35);
                 if (keyboard.pKey.wasPressedThisFrame)
                 {
                     view.Settings.Camera.PitchByZoom = !view.Settings.Camera.PitchByZoom;
@@ -365,14 +366,14 @@ namespace KingdomSurvival.MapLab
 
         public string ControlsHint =>
             "Play Mode: WASD/стрелки — сдвиг, ПКМ/СКМ — перетаскивание, колесо — плавное приближение к курсору, " +
-            "1/2/3 — Атлас 60° / Объёмная 50° / Диорама 40°, P — наклон от приближения, F — вся карта, R — сброс, ЛКМ — диагностика точки.";
+            "1/2/3/4 — Атлас 60° / Объёмная 50° / Диорама 40° / Низкая 35°, P — наклон от приближения (до 35° на наибольшем приближении), F — вся карта, R — сброс, ЛКМ — диагностика точки.";
 
         private void OnGUI()
         {
             if (!Application.isPlaying || view == null)
                 return;
             string mode = PitchByZoom ? "наклон от приближения" : Mode.ToString();
-            string approx = view.ArtSpritesApproximate ? " · спрайты нарисованы под 50° — ракурс приближённый" : "";
+            string approx = view.ArtSpritesApproximate ? " · ракурс рисунков приближённый" : "";
             GUI.Label(new Rect(12, 10, 1400, 22), $"{mode} · наклон {Pitch:0.#}° · Zoom {zoom:0.00}{approx}");
             GUI.Label(new Rect(12, 30, 1600, 22), ControlsHint);
             if (!string.IsNullOrEmpty(diagnostics))

@@ -29,10 +29,14 @@ namespace KingdomSurvival.MapLab
         public Shader LinesShader;
         public Shader ArtCardShader;
         public Shader ContactShader;
+        public Shader InkShader;
 
         [Header("Художественный набор этапа 02 (локальные PNG; без них — процедурный вид)")]
         public MapLabArtSet ArtSet;
         public MapLabMarkerSet MarkerSet;
+
+        [Header("Набор этапа 03 (деревья, кусты, дома P50/P35); фишка и подложки — от этапа 02")]
+        public MapLabArtSet ArtSet03;
 
         [SerializeField, HideInInspector] private GameObject root;
 
@@ -47,8 +51,30 @@ namespace KingdomSurvival.MapLab
         private readonly Dictionary<MapLabArtEntry, Material> artMaterials = new Dictionary<MapLabArtEntry, Material>();
         private MapLabArtBuilder.Plan artPlan;
         private bool buildingSprites;
+        // Этап 03: тайлы краски, обзорная копия, перо, тени объектов, кадр домов.
+        private Material inkMaterial;
+        private readonly List<Texture2D> paintTiles = new List<Texture2D>();
+        private readonly List<Vector4> paintRects = new List<Vector4>();
+        private Texture2D overviewTexture, objShadowTexture;
+        private MapLabPaintFields paintFields;
+        private float tileWorld = 64f;
+        private int tilesPerSide = 1;
+        private readonly List<MeshRenderer> terrainRenderers = new List<MeshRenderer>();
+        private MaterialPropertyBlock paintBlock;
+        private bool paintContribution;
+        private int houseView = 50;
+        private bool artHouses03;
 
         public MapLabData Data => data;
+        public MapLabTiledPainter.Result LastTiledPaint { get; private set; }
+        public MapLabInk.Stats InkStats { get; private set; }
+        public int ShadowShapes { get; private set; }
+        public int ShadowResolution { get; private set; }
+        public float ShadowMs { get; private set; }
+        // Этап 03: какой кадр домов показан (50 или 35) — с гистерезисом.
+        public int HouseView => houseView;
+        public bool HasArtHouses03 => artHouses03;
+        public float PaintTexelsPerUnit => Settings != null && Settings.IsStage03 && LastTiledPaint != null ? LastTiledPaint.TexelsPerUnit : (data != null && Settings != null ? Settings.PaintResolution / data.Size : 0f);
         public MapLabArtBuilder.Plan ArtPlan => artPlan;
         public int ArtMaterialCount => artMaterials.Count;
 
@@ -72,7 +98,25 @@ namespace KingdomSurvival.MapLab
             {
                 if (artPlan == null || artPlan.Count == 0 || CameraRig == null)
                     return false;
+                // Этап 03: кадры домов 50° и 35°; дальше 5° от показанного — приближённо.
+                if (Settings != null && Settings.IsStage03)
+                    return Mathf.Abs(CameraRig.Pitch - houseView) > 5f;
                 return Mathf.Abs(CameraRig.Pitch - 50f) > 4f;
+            }
+        }
+
+        // Набор для деревьев и домов: этапа 03 или 02 по выбранному языку.
+        public MapLabArtSet ObjectArtSet => Settings != null && Settings.IsStage03 ? ResolvedArtSet03 : ResolvedArtSet;
+
+        public MapLabArtSet ResolvedArtSet03
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (ArtSet03 == null)
+                    ArtSet03 = UnityEditor.AssetDatabase.LoadAssetAtPath<MapLabArtSet>("Assets/_Project/Art/MapLabStage03/MapLabArtSet_Stage03.asset");
+#endif
+                return ArtSet03;
             }
         }
 
@@ -232,7 +276,14 @@ namespace KingdomSurvival.MapLab
             MapLabMarker marker = Marker;
             if (marker != null)
                 marker.Clear();
-            terrainMaterial = waterMaterial = cardMaterial = solidMaterial = linesMaterial = null;
+            terrainMaterial = waterMaterial = cardMaterial = solidMaterial = linesMaterial = inkMaterial = null;
+            paintTiles.Clear();
+            paintRects.Clear();
+            terrainRenderers.Clear();
+            overviewTexture = objShadowTexture = null;
+            paintFields = null;
+            LastTiledPaint = null;
+            artHouses03 = false;
             paintTexture = shadeTexture = maskATexture = maskBTexture = heightTexture = null;
             paletteTexture = detailTexture = waterTexture = atlasTexture = null;
             data = null;
@@ -253,6 +304,7 @@ namespace KingdomSurvival.MapLab
             if (LinesShader == null) LinesShader = Shader.Find("Kingdom Survival/MapLab/Lines");
             if (ArtCardShader == null) ArtCardShader = Shader.Find("Kingdom Survival/MapLab/Art Card");
             if (ContactShader == null) ContactShader = Shader.Find("Kingdom Survival/MapLab/Contact");
+            if (InkShader == null) InkShader = Shader.Find("Kingdom Survival/MapLab/Ink");
             if (TerrainShader == null || WaterShader == null || CardShader == null || SolidShader == null)
             {
                 LastError = "Не найдены шейдеры MapLab (Assets/Experiments/MapLab/Shaders).";
@@ -277,6 +329,7 @@ namespace KingdomSurvival.MapLab
             BuildWater();
             BuildCliffs();
             BuildObjects();
+            BuildInk();
             BuildWireframe();
             ApplyMaterialSettings();
             if (CameraRig != null)
@@ -326,10 +379,10 @@ namespace KingdomSurvival.MapLab
             groups.Remove(name);
         }
 
-        private void AddRenderer(GameObject parent, string name, Mesh mesh, Material material)
+        private MeshRenderer AddRenderer(GameObject parent, string name, Mesh mesh, Material material)
         {
             if (mesh == null)
-                return;
+                return null;
             owned.Add(mesh);
             GameObject go = new GameObject(name) { hideFlags = HideFlags.DontSave };
             go.transform.SetParent(parent.transform, false);
@@ -340,6 +393,7 @@ namespace KingdomSurvival.MapLab
             renderer.receiveShadows = false;
             renderer.lightProbeUsage = LightProbeUsage.Off;
             renderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
+            return renderer;
         }
 
         private T Own<T>(T obj) where T : Object
@@ -357,6 +411,9 @@ namespace KingdomSurvival.MapLab
             solidMaterial = Own(new Material(SolidShader) { name = "MapLab Solid" });
             if (LinesShader != null)
                 linesMaterial = Own(new Material(LinesShader) { name = "MapLab Lines" });
+            if (InkShader != null)
+                inkMaterial = Own(new Material(InkShader) { name = "MapLab Ink" });
+            paintBlock = new MaterialPropertyBlock();
             paletteTexture = Own(MapLabArt.CreatePaletteTexture(Palette));
             // Процедурные фактуры и атлас не зависят от карты — общие на сессию редактора.
             detailTexture = cachedDetail != null ? cachedDetail : cachedDetail = MapLabArt.CreateDetailTexture(1);
@@ -425,10 +482,19 @@ namespace KingdomSurvival.MapLab
                 UploadMasks();
         }
 
+        // Сторона чанка рельефа и тайла краски этапа 03: около 64 единиц, кратно шагу сетки.
+        private int TerrainSpan => Settings.IsStage03 ? Mathf.Clamp(Mathf.RoundToInt(64f / data.Cell), 8, 128) : Mathf.Clamp(Settings.Advanced.ChunkVertices, 9, 129) - 1;
+
         private void Repaint()
         {
             if (paletteTexture != null)
                 MapLabArt.WritePalette(paletteTexture, Palette);
+            if (Settings.IsStage03)
+            {
+                RepaintTiled();
+                return;
+            }
+            DestroyTiles();
             MapLabPainter.Result paint = MapLabPainter.Paint(data, Settings, Palette);
             if (paintTexture == null || paintTexture.width != paint.Resolution)
             {
@@ -450,14 +516,135 @@ namespace KingdomSurvival.MapLab
             MapLabStats stats = data.Stats;
             stats.PaintMs = paint.Milliseconds;
             data.Stats = stats;
+            ApplyPaintBlocks();
+        }
+
+        // Этап 03: тайлы по чанкам рельефа с плотностью PaintTexelsPerUnit.
+        private void RepaintTiled()
+        {
+            tileWorld = TerrainSpan * data.Cell;
+            MapLabTiledPainter.Options options = new MapLabTiledPainter.Options
+            {
+                StrokeContribution = Settings.Diagnostics.Mode == MapLabDiagnosticMode.StrokeContribution,
+                RoadInkInPaint = !Settings.Stage03.Ink,
+            };
+            paintContribution = options.StrokeContribution;
+            MapLabTiledPainter.Result result = MapLabTiledPainter.Paint(data, Settings, Palette, tileWorld, options);
+            DestroyTiles();
+            if (paintTexture != null)
+            {
+                owned.Remove(paintTexture);
+                DestroySafe(paintTexture);
+                paintTexture = null;
+            }
+            tilesPerSide = result.TilesPerSide;
+            foreach (MapLabTiledPainter.Tile tile in result.Tiles)
+            {
+                Texture2D t = Own(new Texture2D(tile.Size, tile.Size, TextureFormat.RGBA32, true, false)
+                {
+                    name = $"MapLab Paint {tile.X},{tile.Z}",
+                    wrapMode = TextureWrapMode.Clamp,
+                    filterMode = FilterMode.Trilinear,
+                    anisoLevel = 8,
+                });
+                t.SetPixels32(tile.Pixels);
+                t.Apply(true, true);
+                tile.Pixels = null;
+                paintTiles.Add(t);
+                paintRects.Add(tile.Rect);
+            }
+            overviewTexture = Own(new Texture2D(result.OverviewResolution, result.OverviewResolution, TextureFormat.RGBA32, true, false)
+            {
+                name = "MapLab Paint Overview",
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Trilinear,
+            });
+            overviewTexture.SetPixels32(result.Overview);
+            overviewTexture.Apply(true, true);
+            result.Overview = null;
+            paintFields = result.Fields;
+            LastTiledPaint = result;
+            MapLabStats stats = data.Stats;
+            stats.PaintMs = result.Milliseconds;
+            data.Stats = stats;
+            ApplyPaintBlocks();
+        }
+
+        private void DestroyTiles()
+        {
+            foreach (Texture2D t in paintTiles)
+            {
+                owned.Remove(t);
+                DestroySafe(t);
+            }
+            paintTiles.Clear();
+            paintRects.Clear();
+            if (overviewTexture != null)
+            {
+                owned.Remove(overviewTexture);
+                DestroySafe(overviewTexture);
+                overviewTexture = null;
+            }
+        }
+
+        // Каждому чанку рельефа — свой тайл краски (порядок чанков и тайлов один:
+        // по Z, затем по X); этап 02 — одна текстура на всю карту.
+        private void ApplyPaintBlocks()
+        {
+            if (paintBlock == null)
+                paintBlock = new MaterialPropertyBlock();
+            for (int i = 0; i < terrainRenderers.Count; i++)
+            {
+                MeshRenderer renderer = terrainRenderers[i];
+                if (renderer == null)
+                    continue;
+                if (i < paintTiles.Count)
+                {
+                    paintBlock.Clear();
+                    paintBlock.SetTexture("_PaintTex", paintTiles[i]);
+                    paintBlock.SetVector("_PaintRect", paintRects[i]);
+                    renderer.SetPropertyBlock(paintBlock);
+                }
+                else
+                {
+                    renderer.SetPropertyBlock(null);
+                }
+            }
         }
 
         private void BuildTerrain()
         {
             GameObject group = Group("Terrain");
-            List<Mesh> chunks = MapLabMeshes.BuildTerrainChunks(data, Settings.Advanced.ChunkVertices);
+            terrainRenderers.Clear();
+            List<Mesh> chunks = MapLabMeshes.BuildTerrainChunks(data, TerrainSpan + 1);
             for (int i = 0; i < chunks.Count; i++)
-                AddRenderer(group, chunks[i].name, chunks[i], terrainMaterial);
+                terrainRenderers.Add(AddRenderer(group, chunks[i].name, chunks[i], terrainMaterial));
+            ApplyPaintBlocks();
+        }
+
+        // Этап 03: тушевые кромки дорог и троп по общему профилю пера.
+        private void BuildInk()
+        {
+            DestroyGroup("Ink");
+            InkStats = default;
+            if (!Settings.IsStage03 || !Settings.Stage03.Ink || inkMaterial == null || paintFields == null)
+                return;
+            Mesh mesh = MapLabInk.BuildRoadInk(data, Settings, paintFields, out MapLabInk.Stats stats);
+            InkStats = stats;
+            AddRenderer(Group("Ink"), "Road Ink", mesh, inkMaterial);
+        }
+
+        // Этап 03: перекрасить и пересобрать перо и тени (переключатели окна).
+        public bool RebuildStage03Layers()
+        {
+            if (data == null || !Validate())
+                return false;
+            Repaint();
+            BuildInk();
+            BuildObjectShadows();
+            ApplyMaterialSettings();
+            ApplyVisibility();
+            return true;
         }
 
         private void BuildWater()
@@ -473,7 +660,7 @@ namespace KingdomSurvival.MapLab
             AddRenderer(group, "Cliff Walls", MapLabMeshes.BuildCliffs(data, Settings), solidMaterial);
         }
 
-        private static readonly string[] ObjectGroups = { "Vegetation", "Structures", "Houses", "Boulders", "ArtVegetation", "ArtHouses", "ArtBoulders", "ArtCliffDecor" };
+        private static readonly string[] ObjectGroups = { "Vegetation", "Structures", "Houses", "Boulders", "ArtVegetation", "ArtHouses", "ArtHouses50", "ArtHouses35", "ArtBoulders", "ArtCliffDecor" };
 
         private void DestroyObjectGroups()
         {
@@ -488,15 +675,25 @@ namespace KingdomSurvival.MapLab
         {
             artPlan = new MapLabArtBuilder.Plan();
             MapLabArtBuilder.Plan housePlan = new MapLabArtBuilder.Plan();
-            MapLabArtSet set = ResolvedArtSet;
+            MapLabArtBuilder.Plan housePlan35 = new MapLabArtBuilder.Plan();
+            MapLabArtSet set = ObjectArtSet;
+            bool stage03 = Settings.IsStage03;
             if (set != null)
             {
                 MapLabArtBuilder.PlanVegetation(data, Settings, set, artPlan);
                 MapLabArtBuilder.PlanBoulders(data, Settings, set, artPlan);
                 MapLabArtBuilder.PlanCliffDecor(data, Settings, set, Settings.Camera.AzimuthDegrees, artPlan);
-                if (Settings.Art.Buildings != MapLabBuildingDisplay.Geometry)
+                if (stage03)
+                {
+                    // Пары ракурсов одного дома: кадр 50° и кадр 35°, без
+                    // скрытого возврата к процедурной геометрии.
+                    MapLabArtBuilder.PlanHouses03(data, Settings, set, 50f, housePlan);
+                    MapLabArtBuilder.PlanHouses03(data, Settings, set, 35f, housePlan35);
+                }
+                else if (Settings.Art.Buildings != MapLabBuildingDisplay.Geometry)
                     MapLabArtBuilder.PlanBuildings(data, Settings, set, housePlan);
             }
+            artHouses03 = stage03 && housePlan.Count > 0;
             GameObject vegetation = Group("Vegetation");
             List<Mesh> cards = MapLabMeshes.BuildVegetationCards(data, 64f, artPlan.Replaced);
             for (int i = 0; i < cards.Count; i++)
@@ -508,12 +705,113 @@ namespace KingdomSurvival.MapLab
             BuildArtGroup("ArtVegetation", artPlan, e => e.Category == MapLabArtCategory.Vegetation);
             BuildArtGroup("ArtBoulders", artPlan, e => e.Category == MapLabArtCategory.Rock);
             BuildArtGroup("ArtCliffDecor", artPlan, e => e.Category == MapLabArtCategory.Cliff);
-            BuildArtGroup("ArtHouses", housePlan, e => e.Category == MapLabArtCategory.Building);
+            if (stage03)
+            {
+                BuildArtGroup("ArtHouses50", housePlan, e => e.Category == MapLabArtCategory.Building);
+                BuildArtGroup("ArtHouses35", housePlan35, e => e.Category == MapLabArtCategory.Building);
+                houseView = (CameraRig != null ? CameraRig.Pitch : Settings.Camera.PitchFor(1f)) < Settings.Stage03.HouseViewSwitch ? 35 : 50;
+            }
+            else
+                BuildArtGroup("ArtHouses", housePlan, e => e.Category == MapLabArtCategory.Building);
             foreach (KeyValuePair<MapLabArtEntry, List<MapLabArtInstance>> pair in housePlan.Cards)
                 foreach (MapLabArtInstance inst in pair.Value)
                     artPlan.Add(pair.Key, inst);
             foreach (MapLabObjectKind kind in housePlan.Replaced)
                 artPlan.Replaced.Add(kind);
+            BuildObjectShadows();
+        }
+
+        // Этап 03: маска стилизованных теней по фактическим объектам (размеры
+        // крон — по рисункам, если они подключены).
+        private void BuildObjectShadows()
+        {
+            if (objShadowTexture != null)
+            {
+                owned.Remove(objShadowTexture);
+                DestroySafe(objShadowTexture);
+                objShadowTexture = null;
+            }
+            ShadowShapes = 0;
+            if (!Settings.IsStage03 || !Settings.Stage03.ObjectShadows)
+                return;
+            List<MapLabObjectShadows.Caster> casters = new List<MapLabObjectShadows.Caster>();
+            HashSet<MapLabObjectKind> replaced = artPlan != null ? artPlan.Replaced : new HashSet<MapLabObjectKind>();
+            if (artPlan != null)
+            {
+                foreach (KeyValuePair<MapLabArtEntry, List<MapLabArtInstance>> pair in artPlan.Cards)
+                {
+                    MapLabArtEntry e = pair.Key;
+                    if (e.Category != MapLabArtCategory.Vegetation && e.Category != MapLabArtCategory.Rock)
+                        continue;
+                    bool bush = e.Kind == MapLabObjectKind.Bush || e.Category == MapLabArtCategory.Rock;
+                    foreach (MapLabArtInstance inst in pair.Value)
+                    {
+                        float w = inst.Width * e.SolidRect.width, h = inst.Height * e.SolidRect.height;
+                        casters.Add(new MapLabObjectShadows.Caster
+                        {
+                            Base = inst.Base,
+                            Radius = w * (bush ? 0.36f : 0.32f),
+                            CenterHeight = h * (bush ? 0.35f : 0.6f),
+                            ContactRadius = w * (bush ? 0.38f : 0.2f),
+                        });
+                    }
+                }
+            }
+            foreach (MapLabPlacement o in data.Objects)
+            {
+                switch (o.Kind)
+                {
+                    case MapLabObjectKind.House:
+                    case MapLabObjectKind.Barn:
+                        casters.Add(new MapLabObjectShadows.Caster { Base = o.Position, Building = true, Size = o.Size, Yaw = o.Yaw, Height = o.Kind == MapLabObjectKind.House ? 3.4f : 2.6f });
+                        break;
+                    case MapLabObjectKind.Deciduous:
+                    case MapLabObjectKind.DeciduousGroup:
+                    case MapLabObjectKind.Conifer:
+                    case MapLabObjectKind.Bush:
+                        if (replaced.Contains(o.Kind))
+                            break;
+                        float r = o.Scale * (o.Kind == MapLabObjectKind.Conifer ? 0.3f : 0.42f);
+                        casters.Add(new MapLabObjectShadows.Caster { Base = o.Position, Radius = r, CenterHeight = o.Scale * (o.Kind == MapLabObjectKind.Bush ? 0.3f : 0.6f), ContactRadius = r * 0.5f });
+                        break;
+                    case MapLabObjectKind.Boulder:
+                        if (replaced.Contains(o.Kind))
+                            break;
+                        casters.Add(new MapLabObjectShadows.Caster { Base = o.Position, Radius = o.Scale * 0.5f, CenterHeight = o.Scale * 0.35f, ContactRadius = o.Scale * 0.5f });
+                        break;
+                }
+            }
+            MapLabObjectShadows.Result result = MapLabObjectShadows.Compute(data, Settings, casters);
+            int res = result.Resolution;
+            Color32[] pixels = new Color32[res * res];
+            for (int i = 0; i < pixels.Length; i++)
+                pixels[i] = new Color32(B(result.Cast[i]), B(result.Contact[i]), 0, 255);
+            objShadowTexture = Own(new Texture2D(res, res, TextureFormat.RGBA32, true, true)
+            {
+                name = "MapLab Object Shadows",
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Trilinear,
+            });
+            objShadowTexture.SetPixels32(pixels);
+            objShadowTexture.Apply(true, true);
+            ShadowShapes = result.Shapes;
+            ShadowResolution = res;
+            ShadowMs = result.Milliseconds;
+        }
+
+        // Кадр домов этапа 03 по наклону, с гистерезисом вокруг порога.
+        private bool UpdateHouseView(float pitch)
+        {
+            MapLabStage03Settings s3 = Settings.Stage03;
+            int next = houseView;
+            if (houseView == 50 && pitch < s3.HouseViewSwitch - s3.HouseViewHysteresis * 0.5f)
+                next = 35;
+            else if (houseView == 35 && pitch > s3.HouseViewSwitch + s3.HouseViewHysteresis * 0.5f)
+                next = 50;
+            if (next == houseView)
+                return false;
+            houseView = next;
+            return true;
         }
 
         private void BuildArtGroup(string name, MapLabArtBuilder.Plan plan, System.Predicate<MapLabArtEntry> filter)
@@ -575,6 +873,14 @@ namespace KingdomSurvival.MapLab
             m.SetTexture("_ShadeTex", shadeTexture != null ? shadeTexture : Texture2D.whiteTexture);
             m.SetFloat("_Saturation", Settings.PainterlyStyle.Saturation);
             m.SetFloat("_AlphaView", (float)art.AlphaView);
+            MapLabStage03Settings s3 = Settings.Stage03;
+            m.SetColor("_AccentInk", s3.InkStyle.Color);
+            m.SetFloat("_AccentOpacity", s3.InkStyle.Opacity);
+            m.SetColor("_AccentLight", Color.Lerp(palette.TreeMoss, palette.GrassDry, 0.45f));
+            m.SetFloat("_AccentLightStrength", s3.AccentHighlightStrength);
+            m.SetFloat("_AccentHighlight", s3.AccentHighlight);
+            m.SetFloat("_AccentOn", Settings.IsStage03 && s3.ForestAccents ? 1f : 0f);
+            m.SetFloat("_DiagMode", (float)Settings.Diagnostics.Mode);
         }
 
         // Пересобрать только нарисованные объекты (после импорта или смены режима).
@@ -688,8 +994,13 @@ namespace KingdomSurvival.MapLab
         {
             if (data == null)
                 return;
-            bool sprites = Settings.Art.BuildingSpritesAt(CameraRig != null ? CameraRig.Pitch : 50f);
-            if (sprites != buildingSprites)
+            float pitch = CameraRig != null ? CameraRig.Pitch : 50f;
+            if (Settings.IsStage03)
+            {
+                if (UpdateHouseView(pitch))
+                    ApplyVisibility();
+            }
+            else if (Settings.Art.BuildingSpritesAt(pitch) != buildingSprites)
                 ApplyVisibility();
             MapLabMarker marker = Marker;
             if (marker != null)
@@ -722,8 +1033,19 @@ namespace KingdomSurvival.MapLab
             float micro = diag.ShowStrokes ? style.MicroTexture : 0f;
             float mode = (float)diag.Mode;
 
+            bool stage03 = Settings.IsStage03;
+            MapLabStage03Settings s3 = Settings.Stage03;
+            // Вклад мазков — отдельная перепечка краски в режиме разницы.
+            if (stage03 && (diag.Mode == MapLabDiagnosticMode.StrokeContribution) != paintContribution)
+                Repaint();
+
             Material t = terrainMaterial;
-            t.SetTexture("_PaintTex", paintTexture);
+            t.SetTexture("_PaintTex", paintTexture != null ? paintTexture : (paintTiles.Count > 0 ? paintTiles[0] : Texture2D.grayTexture));
+            t.SetVector("_PaintRect", new Vector4(0f, 0f, 1f / data.Size, 1f / data.Size));
+            t.SetTexture("_ObjShadowTex", objShadowTexture != null ? objShadowTexture : Texture2D.blackTexture);
+            bool shadowsOn = stage03 && s3.ObjectShadows && objShadowTexture != null && diag.ShowReliefLight;
+            t.SetVector("_ObjShadow", new Vector4(shadowsOn ? s3.ShadowStrength : 0f, shadowsOn ? s3.ContactStrength : 0f, s3.ShadowTones, data.Size));
+            t.SetColor("_ObjShadowColor", s3.ShadowColor);
             t.SetTexture("_ShadeTex", shadeTexture);
             t.SetTexture("_MaskA", maskATexture);
             t.SetTexture("_MaskB", maskBTexture);
@@ -731,7 +1053,7 @@ namespace KingdomSurvival.MapLab
             t.SetVector("_LightDir", light);
             t.SetVector("_ShadowTint", shadowTint);
             t.SetVector("_LightTint", lightTint);
-            t.SetColor("_InkColor", palette.Ink);
+            t.SetColor("_InkColor", stage03 ? s3.InkStyle.Color : palette.Ink);
             t.SetColor("_PaperColor", palette.Paper);
             t.SetFloat("_LightStrength", style.LightStrength);
             t.SetFloat("_ShadowSoftness", style.ShadowSoftness);
@@ -758,7 +1080,7 @@ namespace KingdomSurvival.MapLab
             w.SetColor("_Shallow", palette.WaterShallow);
             w.SetColor("_Stroke", palette.WaterStroke);
             w.SetColor("_ShoreColor", palette.Shore);
-            w.SetColor("_InkColor", palette.Ink);
+            w.SetColor("_InkColor", stage03 ? s3.InkStyle.Color : palette.Ink);
             w.SetVector("_ShadowTint", shadowTint);
             w.SetFloat("_MapSize", data.Size);
             w.SetFloat("_StrokeAmount", diag.ShowStrokes ? Mathf.Lerp(0.25f, 0.75f, style.BrushStrength) : 0f);
@@ -781,8 +1103,9 @@ namespace KingdomSurvival.MapLab
             Material s = solidMaterial;
             s.SetTexture("_PaletteTex", paletteTexture);
             s.SetTexture("_DetailTex", detailTexture);
-            s.SetTexture("_PaintTex", paintTexture);
-            s.SetFloat("_MapSize", data.Size);
+            // Этап 03: верх уступов берёт обзорную копию тайлов (она покрывает все тайлы).
+            s.SetTexture("_PaintTex", stage03 && overviewTexture != null ? overviewTexture : paintTexture);
+            s.SetFloat("_MapSize", stage03 && overviewTexture != null ? tilesPerSide * tileWorld : data.Size);
             s.SetVector("_LightDir", light);
             s.SetVector("_ShadowTint", shadowTint);
             s.SetVector("_LightTint", lightTint);
@@ -797,6 +1120,16 @@ namespace KingdomSurvival.MapLab
 
             if (linesMaterial != null)
                 linesMaterial.SetColor("_Color", new Color(0.12f, 0.12f, 0.14f, 1f));
+            if (inkMaterial != null)
+            {
+                MapLabInkStyle ink = s3.InkStyle;
+                inkMaterial.SetColor("_Color", ink.Color);
+                inkMaterial.SetFloat("_Width", ink.Width);
+                inkMaterial.SetFloat("_MinPx", ink.MinPixels);
+                inkMaterial.SetFloat("_MaxPx", ink.MaxPixels);
+                inkMaterial.SetFloat("_Opacity", diag.ShowOutline ? ink.Opacity : 0f);
+                inkMaterial.SetFloat("_Grain", ink.Grain);
+            }
 
             ApplyGroundTextures(t, s);
             foreach (KeyValuePair<MapLabArtEntry, Material> pair in artMaterials)
@@ -840,15 +1173,23 @@ namespace KingdomSurvival.MapLab
             if (Settings == null || root == null)
                 return;
             MapLabDiagnosticsSettings d = Settings.Diagnostics;
-            bool final = d.Mode == MapLabDiagnosticMode.Final || d.Mode == MapLabDiagnosticMode.Wireframe;
+            bool final = d.Mode == MapLabDiagnosticMode.Final || d.Mode == MapLabDiagnosticMode.Wireframe
+                         || d.Mode == MapLabDiagnosticMode.ForestGroups || d.Mode == MapLabDiagnosticMode.ForestAccents;
             bool forest = d.ShowForest && (final || d.Mode == MapLabDiagnosticMode.ForestDensity);
-            buildingSprites = Settings.Art.BuildingSpritesAt(CameraRig != null ? CameraRig.Pitch : Settings.Camera.PitchFor(1f)) && groups.ContainsKey("ArtHouses");
+            bool stage03 = Settings.IsStage03;
+            float pitch = CameraRig != null ? CameraRig.Pitch : Settings.Camera.PitchFor(1f);
+            if (stage03)
+                UpdateHouseView(pitch);
+            buildingSprites = stage03 ? artHouses03 : Settings.Art.BuildingSpritesAt(pitch) && groups.ContainsKey("ArtHouses");
             SetActive("Water", d.ShowWater);
             SetActive("Vegetation", forest);
             SetActive("ArtVegetation", forest);
             SetActive("Structures", d.ShowBuildings && final);
             SetActive("Houses", d.ShowBuildings && final && !buildingSprites);
-            SetActive("ArtHouses", d.ShowBuildings && final && buildingSprites);
+            SetActive("ArtHouses", d.ShowBuildings && final && buildingSprites && !stage03);
+            SetActive("ArtHouses50", d.ShowBuildings && final && buildingSprites && houseView == 50);
+            SetActive("ArtHouses35", d.ShowBuildings && final && buildingSprites && houseView == 35);
+            SetActive("Ink", stage03 && Settings.Stage03.Ink && (final || d.Mode == MapLabDiagnosticMode.RoadGraph));
             SetActive("Boulders", d.ShowCliffs && final);
             SetActive("ArtBoulders", d.ShowCliffs && final);
             SetActive("ArtCliffDecor", d.ShowCliffs && final);

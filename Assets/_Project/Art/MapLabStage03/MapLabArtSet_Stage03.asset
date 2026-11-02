@@ -1,0 +1,525 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2c60839abb5890419d130d947cec017, type: 3}
+  m_Name: MapLabArtSet_Stage03
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabArtSet
+  SchemaVersion: 1
+  PackageRevision: 3
+  PackageId: KS_MapLab_Stage03_Cartographic_2026-11-02
+  ImportVersion: 1
+  ImportedAt: 2026-11-02 23:48:42
+  ManifestSha256: 14507b3d96917bc5aeed43e491342a6382e8bd35531d3f49cbcd6f55a03fa168
+  Entries:
+  - Id: Barn_A_P35
+    Category: 1
+    Kind: 7
+    ManifestKind: Barn
+    Texture: {fileID: 2800000, guid: 3e245f7ce43b17246b7a5565edd39264, type: 3}
+    Weight: 1
+    WorldHeight: 3.2
+    Pivot: {x: 0.49802703, y: 0.29611048}
+    Footprint: {x: 4.8567505, y: 3.3727434}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/Pitch35/Barn_A.png
+    Sha256: df58407c9247615c93bdb44d476212a1019e1112ecae3c20c96f051d3df7d5bf
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.16234498
+      y: 0.16234498
+      width: 0.6713641
+      height: 0.63697857
+    PivotHint: {x: 0.498027, y: 0.162345}
+    FootX: 0.3581242
+    Direction: 
+    PitchDownDegrees: 35
+    Role: barn
+    VariantGroup: Barn_A
+    Provenance: new_stage03_imagegen
+    MeanColor: {r: 0.6637996, g: 0.53504854, b: 0.37991193, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: House_Shingle_A_P35
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 705dcbbbae9f47343acb4672d2d40403, type: 3}
+    Weight: 1
+    WorldHeight: 4.5
+    Pivot: {x: 0.49804688, y: 0.28572264}
+    Footprint: {x: 4.5211463, y: 3.139685}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/Pitch35/House_Shingle_A.png
+    Sha256: aafacc6ddf1a87551307cc800440fddd20e2b08d6c1359b10112a42031516c67
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.18098958
+      y: 0.14257812
+      width: 0.63411456
+      height: 0.6816406
+    PivotHint: {x: 0.498372, y: 0.142578}
+    FootX: 0.3736312
+    Direction: 
+    PitchDownDegrees: 35
+    Role: house
+    VariantGroup: House_Shingle_A
+    Provenance: new_stage03_imagegen
+    MeanColor: {r: 0.6389641, g: 0.5078109, b: 0.39838654, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: House_Thatch_A_P35
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: cfd3127ae84f6cc4590f2eaa8c0f73af, type: 3}
+    Weight: 1
+    WorldHeight: 4.1
+    Pivot: {x: 0.49837238, y: 0.3319043}
+    Footprint: {x: 4.3875246, y: 3.046892}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/Pitch35/House_Thatch_A.png
+    Sha256: 7a522f37b479332ab51bbbd5e047d78aab94ca1ff0e80fe046eee1b48e077fd1
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.23372395
+      y: 0.21972656
+      width: 0.5292969
+      height: 0.5341797
+    PivotHint: {x: 0.498372, y: 0.219727}
+    FootX: 0.40533558
+    Direction: 
+    PitchDownDegrees: 35
+    Role: house
+    VariantGroup: House_Thatch_A
+    Provenance: new_stage03_imagegen
+    MeanColor: {r: 0.6625736, g: 0.5323208, b: 0.4014589, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: House_Thatch_B_P35
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: f80db62ba2651ff449df130447d4cd69, type: 3}
+    Weight: 1
+    WorldHeight: 3.7
+    Pivot: {x: 0.48697916, y: 0.35845703}
+    Footprint: {x: 4.0672593, y: 2.8244855}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/Pitch35/House_Thatch_B.png
+    Sha256: d20f366cb5168b64fda20455a5742d1d45e67f723cbd24fbbfd7001f44c805fd
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2454427
+      y: 0.25878906
+      width: 0.4830729
+      height: 0.47460938
+    PivotHint: {x: 0.486979, y: 0.258789}
+    FootX: 0.48319975
+    Direction: 
+    PitchDownDegrees: 35
+    Role: house
+    VariantGroup: House_Thatch_B
+    Provenance: new_stage03_imagegen
+    MeanColor: {r: 0.6919313, g: 0.572107, b: 0.4328315, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Barn_A_P50
+    Category: 1
+    Kind: 7
+    ManifestKind: Barn
+    Texture: {fileID: 2800000, guid: b30a137d5ffe9e94db85a04e2b7d47fe, type: 3}
+    Weight: 1
+    WorldHeight: 3.2
+    Pivot: {x: 0.50056374, y: 0.29098082}
+    Footprint: {x: 4.6759872, y: 3.2472134}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/Pitch50/Barn_A.png
+    Sha256: 1ca9a3433f18299d3eaa841c8b208f7d5baea3bb237fcff50d99b5380a222030
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.15163472
+      y: 0.14656144
+      width: 0.697858
+      height: 0.68771136
+    PivotHint: {x: 0.500564, y: 0.146561}
+    FootX: 0.35530597
+    Direction: 
+    PitchDownDegrees: 50
+    Role: barn
+    VariantGroup: Barn_A
+    Provenance: new_stage03_imagegen
+    MeanColor: {r: 0.63855624, g: 0.51664025, b: 0.34106895, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: House_Shingle_A_P50
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: e6e77ca8f419d1943a326f7c81946eb7, type: 3}
+    Weight: 1
+    WorldHeight: 4.5
+    Pivot: {x: 0.5026041, y: 0.26327148}
+    Footprint: {x: 4.0510397, y: 2.813222}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/Pitch50/House_Shingle_A.png
+    Sha256: cde4a9dd26590d7cb994b711c3543c0f5d0e7009459ad8cd928ffd3ce84dc5f7
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.18554688
+      y: 0.103515625
+      width: 0.63411456
+      height: 0.7607422
+    PivotHint: {x: 0.502604, y: 0.102539}
+    FootX: 0.38580558
+    Direction: 
+    PitchDownDegrees: 50
+    Role: house
+    VariantGroup: House_Shingle_A
+    Provenance: new_stage03_imagegen
+    MeanColor: {r: 0.62275875, g: 0.46312287, b: 0.3419784, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: House_Thatch_A_P50
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 8cda809bab33f2b4cba63dc83e7f41a2, type: 3}
+    Weight: 1
+    WorldHeight: 4.1
+    Pivot: {x: 0.5003255, y: 0.33410156}
+    Footprint: {x: 4.4125175, y: 3.064248}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/Pitch50/House_Thatch_A.png
+    Sha256: c2059b2897cbc04e33e0901bafc9f95dc17a14a284ae87b9e2fd305395a93f56
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2220052
+      y: 0.21679688
+      width: 0.5566406
+      height: 0.55859375
+    PivotHint: {x: 0.500326, y: 0.21582}
+    FootX: 0.4227067
+    Direction: 
+    PitchDownDegrees: 50
+    Role: house
+    VariantGroup: House_Thatch_A
+    Provenance: new_stage03_imagegen
+    MeanColor: {r: 0.6301598, g: 0.50721765, b: 0.35838562, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: House_Thatch_B_P50
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 8f01763164dca6a4fb9f19ade232e95a, type: 3}
+    Weight: 1
+    WorldHeight: 3.7
+    Pivot: {x: 0.48632812, y: 0.33393553}
+    Footprint: {x: 3.393802, y: 2.3568068}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/Pitch50/House_Thatch_B.png
+    Sha256: 4422f65ef1ae0d5785df4d97a86090bdf5cf58f7be0360b67940f39f96598f2a
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.23958333
+      y: 0.21191406
+      width: 0.4934896
+      height: 0.5810547
+    PivotHint: {x: 0.486003, y: 0.211914}
+    FootX: 0.49732825
+    Direction: 
+    PitchDownDegrees: 50
+    Role: house
+    VariantGroup: House_Thatch_B
+    Provenance: new_stage03_imagegen
+    MeanColor: {r: 0.68301994, g: 0.56111896, b: 0.39778244, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Bush_A
+    Category: 0
+    Kind: 3
+    ManifestKind: Bush
+    Texture: {fileID: 2800000, guid: 88db4e20dfe2ce244aa1c4407b5a2ed9, type: 3}
+    Weight: 1
+    WorldHeight: 1.25
+    Pivot: {x: 0.488162, y: 0.314543}
+    Footprint: {x: 1.5476637, y: 1.0747664}
+    MaxSlope: 26
+    Orientation: 0
+    ScaleRange: {x: 0.8, y: 1.2}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Vegetation/Bush_A.png
+    Sha256: eaa3473b796b2114a4a07129abdb35d3d17622222c59b10f3ae0d33ccbb3731d
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.33258173
+      y: 0.3156708
+      width: 0.31116122
+      height: 0.361894
+    PivotHint: {x: 0.488162, y: 0.314543}
+    FootX: 0.4991943
+    Direction: 
+    PitchDownDegrees: 40
+    Role: bush
+    VariantGroup: 
+    Provenance: new_stage03_imagegen
+    MeanColor: {r: 0.5396029, g: 0.493072, b: 0.33337346, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Tree_Broad_Elongated_B
+    Category: 0
+    Kind: 0
+    ManifestKind: Deciduous
+    Texture: {fileID: 2800000, guid: 54733cd0b4176f54c993b07d187aa9f6, type: 3}
+    Weight: 0.7
+    WorldHeight: 4.9
+    Pivot: {x: 0.502441, y: 0.193359}
+    Footprint: {x: 2.128836, y: 1.4783583}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Vegetation/Tree_Broad_Elongated_B.png
+    Sha256: 5db2ecaf8eb3ee919f3357c5d03544d08e90508a6e1db0c2b01a805a6b21ad56
+    Width: 1024
+    Height: 1536
+    SolidRect:
+      serializedVersion: 2
+      x: 0.22558594
+      y: 0.19335938
+      width: 0.5527344
+      height: 0.61067706
+    PivotHint: {x: 0.502441, y: 0.193359}
+    FootX: 0.47972864
+    Direction: 
+    PitchDownDegrees: 40
+    Role: single_tree
+    VariantGroup: 
+    Provenance: new_stage03_imagegen
+    MeanColor: {r: 0.560026, g: 0.5174919, b: 0.34879884, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Tree_Broad_Leaning_D
+    Category: 0
+    Kind: 0
+    ManifestKind: Deciduous
+    Texture: {fileID: 2800000, guid: 2757b011d0a379f4cbea932a3dd64d38, type: 3}
+    Weight: 0.35
+    WorldHeight: 4.6
+    Pivot: {x: 0.508378, y: 0.237896}
+    Footprint: {x: 2.6422749, y: 1.834913}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Vegetation/Tree_Broad_Leaning_D.png
+    Sha256: c43b309958e26117b423ed8bf74ebe20a63c6aba627187e129e03d75711493f8
+    Width: 1313
+    Height: 1198
+    SolidRect:
+      serializedVersion: 2
+      x: 0.31607008
+      y: 0.23789649
+      width: 0.3846154
+      height: 0.52838063
+    PivotHint: {x: 0.508378, y: 0.237896}
+    FootX: 0.48956856
+    Direction: 
+    PitchDownDegrees: 40
+    Role: single_tree
+    VariantGroup: 
+    Provenance: new_stage03_imagegen
+    MeanColor: {r: 0.55876875, g: 0.5248757, b: 0.36375976, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Tree_Broad_Round_A
+    Category: 0
+    Kind: 0
+    ManifestKind: Deciduous
+    Texture: {fileID: 2800000, guid: afb17a5b2f5c4c04399f4dbc7d183369, type: 3}
+    Weight: 1
+    WorldHeight: 4.7
+    Pivot: {x: 0.487043, y: 0.211009}
+    Footprint: {x: 3.3930607, y: 2.356292}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Vegetation/Tree_Broad_Round_A.png
+    Sha256: 38d482e33704ca2d7e9dda48054b2d2b0a1a90ddf1b3694ce17bd1d9ff2564d3
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.20198171
+      y: 0.21100917
+      width: 0.57088417
+      height: 0.62301916
+    PivotHint: {x: 0.487043, y: 0.211009}
+    FootX: 0.4960906
+    Direction: 
+    PitchDownDegrees: 40
+    Role: single_tree
+    VariantGroup: 
+    Provenance: new_stage03_imagegen
+    MeanColor: {r: 0.55738854, g: 0.51657814, b: 0.3548166, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Tree_Broad_Wide_C
+    Category: 0
+    Kind: 0
+    ManifestKind: Deciduous
+    Texture: {fileID: 2800000, guid: 4900975ec1861dc43891b4e0e9a9c14e, type: 3}
+    Weight: 0.8
+    WorldHeight: 4.4
+    Pivot: {x: 0.492867, y: 0.209447}
+    Footprint: {x: 5.4702706, y: 3.798799}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Vegetation/Tree_Broad_Wide_C.png
+    Sha256: 810dc57f1913f2b7738a3d04d92f38938afd04aae48d19acbeb9c3f84626164d
+    Width: 1402
+    Height: 1122
+    SolidRect:
+      serializedVersion: 2
+      x: 0.08273894
+      y: 0.20944741
+      width: 0.82025677
+      height: 0.59358287
+    PivotHint: {x: 0.492867, y: 0.209447}
+    FootX: 0.46258622
+    Direction: 
+    PitchDownDegrees: 40
+    Role: single_tree
+    VariantGroup: 
+    Provenance: new_stage03_imagegen
+    MeanColor: {r: 0.57949084, g: 0.53971905, b: 0.3821665, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Tree_Conifer_A
+    Category: 0
+    Kind: 2
+    ManifestKind: Conifer
+    Texture: {fileID: 2800000, guid: d40a9eb860021f34aa6a2249b1c115c7, type: 3}
+    Weight: 1
+    WorldHeight: 5
+    Pivot: {x: 0.48414, y: 0.103448}
+    Footprint: {x: 2.2123504, y: 1.5363544}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Vegetation/Tree_Conifer_A.png
+    Sha256: ebaf9b97f750237f06700070084f7ee10784e726d9d2c1b4f73d69170bde34a1
+    Width: 1261
+    Height: 1247
+    SolidRect:
+      serializedVersion: 2
+      x: 0.23949246
+      y: 0.10344828
+      width: 0.4892942
+      height: 0.8051323
+    PivotHint: {x: 0.48414, y: 0.103448}
+    FootX: 0.48909935
+    Direction: 
+    PitchDownDegrees: 40
+    Role: single_tree
+    VariantGroup: 
+    Provenance: new_stage03_imagegen
+    MeanColor: {r: 0.5097583, g: 0.48090962, b: 0.3507123, a: 1}
+    TileEdgeDifference: 0
+    Notes: 

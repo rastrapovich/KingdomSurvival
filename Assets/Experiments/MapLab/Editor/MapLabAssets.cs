@@ -104,8 +104,10 @@ namespace KingdomSurvival.MapLab.Editor
             view.LinesShader = LoadShader("MapLabLines.shader");
             view.ArtCardShader = LoadShader("MapLabArtCard.shader");
             view.ContactShader = LoadShader("MapLabContact.shader");
+            view.InkShader = LoadShader("MapLabInk.shader");
             view.ArtSet = MapLabArtImport.LoadArtSet();
             view.MarkerSet = MapLabArtImport.LoadMarkerSet();
+            view.ArtSet03 = MapLabArtImport.LoadStage03Set();
             mapObject.AddComponent<MapLabMarker>().View = view;
 
             Directory.CreateDirectory(SceneFolder);
@@ -126,8 +128,10 @@ namespace KingdomSurvival.MapLab.Editor
                 MapLabView view = FindView();
                 view.ArtCardShader = LoadShader("MapLabArtCard.shader");
                 view.ContactShader = LoadShader("MapLabContact.shader");
+                view.InkShader = LoadShader("MapLabInk.shader");
                 view.ArtSet = MapLabArtImport.LoadArtSet();
                 view.MarkerSet = MapLabArtImport.LoadMarkerSet();
+                view.ArtSet03 = MapLabArtImport.LoadStage03Set();
                 MapLabMarker marker = view.GetComponent<MapLabMarker>();
                 if (marker == null)
                     marker = view.gameObject.AddComponent<MapLabMarker>();

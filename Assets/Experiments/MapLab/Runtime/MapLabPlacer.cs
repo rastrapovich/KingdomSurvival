@@ -116,7 +116,7 @@ namespace KingdomSurvival.MapLab
             // Этап 02: изба ставится в ту ориентацию, в которой нарисована её
             // картинка (рисунок нельзя крутить). Одинаково для геометрии и PNG.
             if (s.AlignToDrawnView)
-                yaw = DrawnYaw(s, variant % 4 < 2 ? 0 : 1, yaw);
+                yaw = DrawnYaw(s, s.UseVariantYaw ? 10 + variant : variant % 4 < 2 ? 0 : 1, yaw);
             MapLabPlacement house = new MapLabPlacement
             {
                 Kind = MapLabObjectKind.House,
@@ -204,11 +204,18 @@ namespace KingdomSurvival.MapLab
         }
 
         // Ориентация конька, в которой нарисована картинка: 0 — изба с соломой,
-        // 1 — изба с дранкой, 2 — амбар. Ось конька без направления: из двух
-        // вариантов берётся ближайший к предложенному.
-        private static float DrawnYaw(MapLabSettlementSettings s, int type, float suggested)
+        // 1 — изба с дранкой, 2 — амбар (углы этапа 02); 10 + вариант — изба
+        // этапа 03 по варианту. Ось конька без направления: из двух вариантов
+        // берётся ближайший к предложенному.
+        public static float DrawnYaw(MapLabSettlementSettings s, int type, float suggested)
         {
-            float drawn = type == 0 ? s.DrawnRidgeYaw.x : type == 1 ? s.DrawnRidgeYaw.y : s.DrawnRidgeYaw.z;
+            float drawn;
+            if (type >= 10)
+                drawn = s.DrawnRidgeYawVariants[Mathf.Clamp(type - 10, 0, 3)];
+            else if (type == 2)
+                drawn = s.UseVariantYaw ? s.DrawnBarnYaw : s.DrawnRidgeYaw.z;
+            else
+                drawn = type == 0 ? s.DrawnRidgeYaw.x : s.DrawnRidgeYaw.y;
             return Mathf.Abs(Mathf.DeltaAngle(suggested, drawn)) <= 90f ? drawn : drawn + 180f;
         }
 

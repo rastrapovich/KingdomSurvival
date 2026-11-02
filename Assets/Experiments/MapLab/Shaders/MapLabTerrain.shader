@@ -38,6 +38,10 @@ Shader "Kingdom Survival/MapLab/Terrain"
         _RockMean ("Rock mean", Color) = (0.5, 0.5, 0.5, 1)
         _GroundScales ("Масштабы: трава, земля, камень", Vector) = (26, 18, 14, 0)
         _GroundStrength ("Сила фактур земли", Range(0, 1)) = 0
+        _PaintRect ("Этап 03: прямоугольник краски в мире (uv = (xz - xy) * zw)", Vector) = (0, 0, 0.00390625, 0.00390625)
+        _ObjShadowTex ("Этап 03: тени объектов (R падающая, G контактная)", 2D) = "black" {}
+        _ObjShadow ("Сила падающей, контактной, тонов, размер карты", Vector) = (0, 0, 2, 256)
+        _ObjShadowColor ("Цвет тени объектов", Color) = (0.56, 0.6, 0.62, 1)
     }
 
     SubShader
@@ -78,6 +82,7 @@ Shader "Kingdom Survival/MapLab/Terrain"
             TEXTURE2D(_GrassTex); SAMPLER(sampler_GrassTex);
             TEXTURE2D(_EarthTex); SAMPLER(sampler_EarthTex);
             TEXTURE2D(_RockTex); SAMPLER(sampler_RockTex);
+            TEXTURE2D(_ObjShadowTex); SAMPLER(sampler_ObjShadowTex);
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _PaintTex_ST;
@@ -106,6 +111,9 @@ Shader "Kingdom Survival/MapLab/Terrain"
                 float4 _RockMean;
                 float4 _GroundScales;
                 float _GroundStrength;
+                float4 _PaintRect;
+                float4 _ObjShadow;
+                float4 _ObjShadowColor;
             CBUFFER_END
 
             Varyings Vert(Attributes input)
@@ -139,7 +147,9 @@ Shader "Kingdom Survival/MapLab/Terrain"
             {
                 float3 n = normalize(i.normalWS);
                 float3 L = normalize(_LightDir.xyz);
-                float4 paint = SAMPLE_TEXTURE2D(_PaintTex, sampler_PaintTex, i.uv);
+                // Краска — по миру: этап 03 запекает её тайлами по чанкам рельефа
+                // (у каждого чанка свой прямоугольник), этап 02 — одной текстурой.
+                float4 paint = SAMPLE_TEXTURE2D(_PaintTex, sampler_PaintTex, (i.positionWS.xz - _PaintRect.xy) * _PaintRect.zw);
                 float4 shade = SAMPLE_TEXTURE2D(_ShadeTex, sampler_ShadeTex, i.uv);
                 float4 maskA = SAMPLE_TEXTURE2D(_MaskA, sampler_MaskA, i.uv);
                 float4 maskB = SAMPLE_TEXTURE2D(_MaskB, sampler_MaskB, i.uv);
@@ -164,6 +174,10 @@ Shader "Kingdom Survival/MapLab/Terrain"
                     return float4(lerp(float3(0.75, 0.75, 0.72) * (0.6 + 0.4 * n.y), float3(0.85, 0.15, 0.1), maskA.b), 1);
                 if (mode == 8)
                     return float4(lerp(float3(0.75, 0.75, 0.72) * (0.6 + 0.4 * n.y), float3(0.6, 0.2, 0.75), maskA.a), 1);
+                // Этап 03: исходная краска без света, бумаги и фактур (alpha — тушь, не прозрачность)
+                // и вклад мазков (краска перепечена в режиме разницы).
+                if (mode == 10 || mode == 11)
+                    return float4(paint.rgb, 1);
 
                 float3 albedo = _ShowPaint > 0.5 ? paint.rgb : float3(0.58, 0.58, 0.56);
                 float3 c = albedo;
@@ -205,6 +219,28 @@ Shader "Kingdom Survival/MapLab/Terrain"
                     float far = lerp(0.45, 1.0, 1.0 - smoothstep(0.06, 0.3, pixelWorld));
                     float luma = dot(c, float3(0.299, 0.587, 0.114));
                     c = max(0, c + detail * (0.35 + luma) * 1.8 * _GroundStrength * far * (1.0 - water));
+                }
+
+                // Этап 03: собранные цветные тени объектов. Маска билинейна,
+                // порог с шириной в пиксель даёт чёткую форму с узким мягким
+                // краем; тоны — близкие ступени, контактная плотнее.
+                if (_ObjShadow.x > 0.001 || mode == 14)
+                {
+                    float2 sh = SAMPLE_TEXTURE2D(_ObjShadowTex, sampler_ObjShadowTex, world / max(1.0, _ObjShadow.w)).rg;
+                    float grain = (SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, world / 3.7).r - 0.5) * 0.12;
+                    float aaC = max(fwidth(sh.r), 0.02);
+                    float aaK = max(fwidth(sh.g), 0.02);
+                    float cast = smoothstep(0.5 - aaC, 0.5 + aaC, sh.r + grain);
+                    float contact = smoothstep(0.5 - aaK, 0.5 + aaK, sh.g + grain);
+                    float tones = _ObjShadow.z;
+                    float tone = cast * _ObjShadow.x;
+                    if (tones > 1.5)
+                        tone = max(tone, contact * saturate(_ObjShadow.x + _ObjShadow.y));
+                    if (tones > 2.5)
+                        tone = max(tone, smoothstep(0.82 - aaC, 0.82 + aaC, sh.r + grain) * saturate(_ObjShadow.x * 1.25));
+                    if (mode == 14)
+                        return float4(lerp(float3(0.95, 0.95, 0.92), float3(0.2, 0.25, 0.45), saturate(tone * 1.6)), 1);
+                    c = lerp(c, c * _ObjShadowColor.rgb, saturate(tone));
                 }
 
                 c = lerp(c, _InkColor.rgb, saturate(paint.a * _Outline));

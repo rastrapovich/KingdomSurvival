@@ -67,6 +67,32 @@ namespace KingdomSurvival.MapLab.Editor
         public int Materials;
         public int Trees;
         public int Houses;
+        // Этап 03: язык карты, фактическая плотность запекания, слои и кадр домов.
+        public string Look;
+        public float PaintTexelsPerUnit;
+        public int PaintTiles;
+        public int PaintTileSize;
+        public float PaintTileWorld;
+        public long PaintStrokes;
+        public float PaintFieldsMs;
+        public bool LayerUndercoat;
+        public bool LayerStrokes;
+        public bool LayerInk;
+        public bool LayerForestAccents;
+        public bool LayerObjectShadows;
+        public string DiagnosticMode;
+        public int InkPolylines;
+        public float InkLengthUnits;
+        public int ShadowShapes;
+        public int ShadowMaskResolution;
+        public int HouseView;
+        public bool ArtApproximateView;
+        public int ForestTrees;
+        public int ForestGroups;
+        public int ForestAccentGroups;
+        public int ForestAccentChains;
+        public int ForestAccentTrees;
+        public int Supersample;
         public string SettingsJson;
 
         public static MapLabExportInfo From(MapLabView view, int width, int height)
@@ -108,12 +134,45 @@ namespace KingdomSurvival.MapLab.Editor
                 info.Projection = cam.orthographic ? "Orthographic" : "Perspective";
                 info.Target = rig.Target;
                 info.CameraPosition = rig.transform.position;
-                info.ArtBuildingSpritesShown = view.ArtPlan != null && s.Art.BuildingSpritesAt(rig.Pitch) && view.ArtPlan.Replaced.Contains(MapLabObjectKind.House);
+                info.ArtBuildingSpritesShown = view.ArtPlan != null && (s.IsStage03 ? view.HasArtHouses03 : s.Art.BuildingSpritesAt(rig.Pitch)) && view.ArtPlan.Replaced.Contains(MapLabObjectKind.House);
+                info.ArtApproximateView = view.ArtSpritesApproximate;
+            }
+            info.Look = s.Stage03.Look.ToString();
+            info.LayerUndercoat = s.Art.GroundTextures;
+            info.LayerStrokes = s.Diagnostics.ShowStrokes;
+            info.LayerInk = s.IsStage03 && s.Stage03.Ink;
+            info.LayerForestAccents = s.IsStage03 && s.Stage03.ForestAccents;
+            info.LayerObjectShadows = s.IsStage03 && s.Stage03.ObjectShadows;
+            info.DiagnosticMode = s.Diagnostics.Mode.ToString();
+            info.PaintTexelsPerUnit = view.PaintTexelsPerUnit;
+            MapLabTiledPainter.Result tiles = view.LastTiledPaint;
+            if (s.IsStage03 && tiles != null)
+            {
+                info.PaintTiles = tiles.Tiles.Count;
+                info.PaintTileSize = tiles.Tiles.Count > 0 ? tiles.Tiles[0].Size : 0;
+                info.PaintTileWorld = tiles.TileWorld;
+                info.PaintStrokes = tiles.Strokes;
+                info.PaintFieldsMs = tiles.FieldsMs;
+                info.PaintResolution = tiles.TilesPerSide * (tiles.Tiles.Count > 0 ? tiles.Tiles[0].Core : 0);
+            }
+            info.InkPolylines = view.InkStats.Polylines;
+            info.InkLengthUnits = view.InkStats.Length;
+            info.ShadowShapes = view.ShadowShapes;
+            info.ShadowMaskResolution = view.ShadowResolution;
+            info.HouseView = s.IsStage03 ? view.HouseView : 0;
+            MapLabArtBuilder.ForestStats forest = MapLabArtBuilder.LastForest;
+            if (s.IsStage03 && forest != null)
+            {
+                info.ForestTrees = forest.Trees;
+                info.ForestGroups = forest.Groups;
+                info.ForestAccentGroups = forest.AccentGroups;
+                info.ForestAccentChains = forest.Chains;
+                info.ForestAccentTrees = forest.AccentTrees;
             }
             Describe(s, out info.SettingsAsset, out info.SettingsGuid);
             Describe(s.PainterlyStyle.Palette, out info.PaletteAsset, out info.PaletteGuid);
             Describe(s.Relief.ExternalHeightmap, out info.HeightmapAsset, out info.HeightmapGuid);
-            MapLabArtSet set = view.ResolvedArtSet;
+            MapLabArtSet set = view.ObjectArtSet;
             if (set != null)
             {
                 Describe(set, out info.ArtSetAsset, out _);
@@ -159,9 +218,11 @@ namespace KingdomSurvival.MapLab.Editor
             guid = string.IsNullOrEmpty(path) ? "" : AssetDatabase.AssetPathToGUID(path);
         }
 
-        public static void Write(MapLabView view, string pngPath, int width, int height)
+        public static void Write(MapLabView view, string pngPath, int width, int height, int supersample = 2)
         {
-            string json = JsonUtility.ToJson(From(view, width, height), true);
+            MapLabExportInfo info = From(view, width, height);
+            info.Supersample = supersample;
+            string json = JsonUtility.ToJson(info, true);
             File.WriteAllText(Path.ChangeExtension(pngPath, ".json"), json);
         }
     }

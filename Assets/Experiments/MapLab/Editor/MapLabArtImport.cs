@@ -41,6 +41,8 @@ namespace KingdomSurvival.MapLab.Editor
             // этапе 02) не копируются повторно: остаются прежние материалы,
             // фишка и их калибровка.
             public bool ReuseStage02;
+            // Опора фигурок — по подсказке manifest (нижняя зона сапог), без плинта.
+            public bool BootHintPivots;
         }
 
         public static readonly Profile Stage02 = new Profile
@@ -52,8 +54,44 @@ namespace KingdomSurvival.MapLab.Editor
         public static readonly Profile Stage03 = new Profile
         {
             Name = "этап 03", Folder = Stage03Folder, SetPath = Stage03SetPath, MarkerPath = Stage03MarkerPath,
-            LastFolderKey = "KingdomSurvival.MapLab.Stage03Package", MinRevision = 3, MaxRevision = 99, ReuseStage02 = true,
+            LastFolderKey = "KingdomSurvival.MapLab.Stage03Package", MinRevision = 3, MaxRevision = 3, ReuseStage02 = true,
         };
+
+        public const string Stage04Folder = "Assets/_Project/Art/MapLabStage04";
+        public const string Stage04SetPath = Stage04Folder + "/MapLabArtSet_Stage04.asset";
+        public const string Stage04MarkerPath = Stage04Folder + "/MapLabMarkerSet_Stage04.asset";
+
+        // Этап 04: герой — два полных набора направлений (50° и 35°) в своём
+        // наборе фишки; наборы этапов 02 и 03 и их калибровка не меняются.
+        public static readonly Profile Stage04 = new Profile
+        {
+            Name = "этап 04", Folder = Stage04Folder, SetPath = Stage04SetPath, MarkerPath = Stage04MarkerPath,
+            LastFolderKey = "KingdomSurvival.MapLab.Stage04Package", MinRevision = 4, MaxRevision = 99, BootHintPivots = true,
+        };
+
+        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Подключить пакет этапа 04 (герой)…", priority = 414)]
+        public static void ImportStage04Menu()
+        {
+            string start = EditorPrefs.GetString(Stage04.LastFolderKey, "");
+            string folder = EditorUtility.OpenFolderPanel("Распакованная папка пакета MapLab этапа 04 (с ASSET_MANIFEST.json)", start, "");
+            if (string.IsNullOrEmpty(folder))
+                return;
+            ImportInteractive(folder, Stage04);
+        }
+
+        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Переподключить пакет этапа 04", priority = 415)]
+        public static void ReimportStage04Menu()
+        {
+            string folder = EditorPrefs.GetString(Stage04.LastFolderKey, "");
+            if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder))
+            {
+                ImportStage04Menu();
+                return;
+            }
+            ImportInteractive(folder, Stage04);
+        }
+
+        public static string LastStage04Folder => EditorPrefs.GetString(Stage04.LastFolderKey, "");
 
         private static readonly string[] KnownCategories = { "vegetation", "building", "rock", "cliff", "texture", "figure", "figure_calibration" };
 
@@ -192,6 +230,8 @@ namespace KingdomSurvival.MapLab.Editor
                         folder = args[i + 1];
                     if (args[i] == "-mapLabStage" && args[i + 1] == "03")
                         profile = Stage03;
+                    if (args[i] == "-mapLabStage" && args[i + 1] == "04")
+                        profile = Stage04;
                 }
                 Report report = Import(folder, null, profile);
                 Debug.Log("MapLab: подключение пакета " + profile.Name + "\n" + report);
@@ -287,11 +327,13 @@ namespace KingdomSurvival.MapLab.Editor
                 if (e != null && !e.HasTexture)
                     report.Warnings.Add($"{e.Id}: нет картинки — используется процедурный вариант.");
 
-            RegisterFigure(set, report);
+            RegisterFigure(set, report, profile.BootHintPivots);
             EditorUtility.SetDirty(set);
             bool figures = set.Entries.Exists(e => e != null && e.Category == MapLabArtCategory.Figure);
-            MapLabMarkerSet markers = figures || profile == Stage02 ? EnsureMarkerSet(set, profile.MarkerPath) : null;
+            MapLabMarkerSet markers = figures || profile == Stage02 ? EnsureMarkerSet(set, profile.MarkerPath, manifest, report) : null;
             AssetDatabase.SaveAssets();
+            if (profile == Stage04)
+                AssignStage04ToScene(markers);
             if (profile == Stage02)
                 AssignToScene(set, markers);
             else if (profile == Stage03)
@@ -684,7 +726,9 @@ namespace KingdomSurvival.MapLab.Editor
         // Регистрация шести кадров фигурки: опора — центр основания (между
         // ступнями) по силуэту, рост выравнивается к медиане. Ширина не
         // нормализуется: боковой вид естественно уже.
-        private static void RegisterFigure(MapLabArtSet set, Report report)
+        // bootHints (этап 04): опора — подсказка manifest по нижней зоне сапог
+        // (середина между ними), чуть выше подошвы переднего сапога; плинта нет.
+        private static void RegisterFigure(MapLabArtSet set, Report report, bool bootHints = false)
         {
             List<MapLabArtEntry> figure = new List<MapLabArtEntry>();
             foreach (MapLabArtEntry e in set.Entries)
@@ -703,7 +747,7 @@ namespace KingdomSurvival.MapLab.Editor
             {
                 if (!e.PivotEdited)
                 {
-                    e.Pivot = new Vector2(e.FootX, e.SolidRect.yMin + e.SolidRect.height * 0.035f);
+                    e.Pivot = bootHints ? new Vector2(e.PivotHint.x, e.PivotHint.y + e.SolidRect.height * 0.015f) : new Vector2(e.FootX, e.SolidRect.yMin + e.SolidRect.height * 0.035f);
                     e.HeightCorrection = e.Category == MapLabArtCategory.Figure && median > 0f ? Mathf.Clamp(median / Mathf.Max(0.01f, e.SolidRect.height), 0.9f, 1.1f) : 1f;
                 }
                 sb.Append($"\n  {e.Id}: {e.SolidRect.height:0.000} → ×{e.HeightCorrection:0.000}, опора ({e.Pivot.x:0.000}; {e.Pivot.y:0.000}), подсказка ({e.PivotHint.x:0.000}; {e.PivotHint.y:0.000})");
@@ -737,7 +781,7 @@ namespace KingdomSurvival.MapLab.Editor
             importer.SaveAndReimport();
         }
 
-        private static MapLabMarkerSet EnsureMarkerSet(MapLabArtSet set, string path)
+        private static MapLabMarkerSet EnsureMarkerSet(MapLabArtSet set, string path, Dictionary<string, object> manifest = null, Report report = null)
         {
             MapLabMarkerSet markers = AssetDatabase.LoadAssetAtPath<MapLabMarkerSet>(path);
             if (markers == null)
@@ -766,9 +810,88 @@ namespace KingdomSurvival.MapLab.Editor
                         markers.Front60Id = e.Id;
                 }
             }
+            ReadPitchSets(markers, set, manifest, report);
             EditorUtility.SetDirty(markers);
             return markers;
         }
+
+        // Этап 04: таблица marker_pitch_sets — по набору на наклон, кадр
+        // адресуется парой «наклон + направление». ID проверяются по набору до
+        // присвоения (нет записи или картинки — слот пуст и предупреждение).
+        // Без таблицы, но с кадрами разных наклонов — наборы по PitchDownDegrees.
+        // Прежний ViewIds — набор, ближайший к 50°.
+        public static void ReadPitchSets(MapLabMarkerSet markers, MapLabArtSet set, Dictionary<string, object> manifest, Report report)
+        {
+            List<MapLabMarkerPitchSet> sets = new List<MapLabMarkerPitchSet>();
+            List<object> table = manifest != null ? MapLabJson.AsArray(manifest.TryGetValue("marker_pitch_sets", out object raw) ? raw : null) : null;
+            if (table != null)
+            {
+                foreach (object rowObject in table)
+                {
+                    Dictionary<string, object> row = MapLabJson.AsObject(rowObject);
+                    List<object> ids = row != null ? MapLabJson.AsArray(row.TryGetValue("view_ids", out object v) ? v : null) : null;
+                    if (row == null || ids == null || ids.Count != 6 || !MapLabJson.TryGetNumber(row, "pitch_down_degrees", out double pitch))
+                    {
+                        report?.Warnings.Add("marker_pitch_sets: строка без pitch_down_degrees или без шести view_ids — пропущена.");
+                        continue;
+                    }
+                    MapLabMarkerPitchSet ps = new MapLabMarkerPitchSet { Pitch = (float)pitch };
+                    for (int k = 0; k < 6; k++)
+                    {
+                        string id = ids[k] as string;
+                        MapLabArtEntry e = id != null ? set.Find(id) : null;
+                        if (e == null || !e.HasTexture || e.Category != MapLabArtCategory.Figure)
+                        {
+                            report?.Warnings.Add($"marker_pitch_sets {pitch}°: кадр «{id}» ({MapLabMarkerSet.DirectionNames[k]}) не подключён — будет приближённая замена.");
+                            continue;
+                        }
+                        ps.ViewIds[k] = id;
+                    }
+                    sets.Add(ps);
+                }
+            }
+            else
+            {
+                Dictionary<int, MapLabMarkerPitchSet> byPitch = new Dictionary<int, MapLabMarkerPitchSet>();
+                foreach (MapLabArtEntry e in set.Entries)
+                {
+                    if (e == null || e.Category != MapLabArtCategory.Figure)
+                        continue;
+                    int index = Array.IndexOf(MapLabMarkerSet.DirectionNames, e.Direction);
+                    if (index < 0)
+                        continue;
+                    int key = Mathf.RoundToInt(e.PitchDownDegrees);
+                    if (!byPitch.TryGetValue(key, out MapLabMarkerPitchSet ps))
+                        byPitch[key] = ps = new MapLabMarkerPitchSet { Pitch = key };
+                    ps.ViewIds[index] = e.Id;
+                }
+                if (byPitch.Count > 1)
+                    sets.AddRange(byPitch.Values);
+            }
+            sets.Sort((a, b) => b.Pitch.CompareTo(a.Pitch));
+            markers.PitchSets = sets;
+            if (sets.Count > 0)
+            {
+                MapLabMarkerPitchSet main = sets[0];
+                foreach (MapLabMarkerPitchSet ps in sets)
+                    if (Mathf.Abs(ps.Pitch - 50f) < Mathf.Abs(main.Pitch - 50f))
+                        main = ps;
+                markers.ViewIds = (string[])main.ViewIds.Clone();
+                markers.FullSetPitch = main.Pitch;
+            }
+        }
+
+        private static void AssignStage04ToScene(MapLabMarkerSet markers)
+        {
+            MapLabView view = MapLabAssets.FindView();
+            if (view == null || markers == null || view.MarkerSet04 == markers)
+                return;
+            view.MarkerSet04 = markers;
+            EditorUtility.SetDirty(view);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(view.gameObject.scene);
+        }
+
+        public static MapLabMarkerSet LoadStage04Markers() => AssetDatabase.LoadAssetAtPath<MapLabMarkerSet>(Stage04MarkerPath);
 
         private static void AssignToScene(MapLabArtSet set, MapLabMarkerSet markers)
         {

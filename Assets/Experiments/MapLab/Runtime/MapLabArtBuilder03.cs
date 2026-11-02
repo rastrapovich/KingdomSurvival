@@ -50,6 +50,10 @@ namespace KingdomSurvival.MapLab
             // умножается на его значение — рощи и смены пород без имён в коде.
             MapLabNoise grove = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "art03-grove", MapLabData.AlgorithmVersion));
             MapLabNoise tone = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "art03-tone", MapLabData.AlgorithmVersion));
+            // Этап 04: крупный ритм — связные массы теплее/холоднее (медленный шум
+            // в мире, общий для соседних деревьев), не случайный tint каждого дерева.
+            MapLabNoise rhythm = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "art04-rhythm", MapLabData.AlgorithmVersion));
+            float rhythmAmount = settings.IsStage04 ? settings.Stage04.ForestRhythm : 0f;
             List<float> weights = new List<float>();
             float treeSize = Mathf.Max(0.5f, settings.Vegetation.TreeSize);
             float range = s3.CrownToneRange;
@@ -110,6 +114,8 @@ namespace KingdomSurvival.MapLab
                     float brightness = 1f + (place * 0.6f + (Pick01(data.Seed, i, 71 + c) * 2f - 1f) * 0.4f) * range;
                     MapLabArtInstance inst = Make(entry, basePoint, scale, brightness, settings.Art.PaletteTint, 0.5f, i);
                     inst.CrownMinV = entry.SolidRect.yMin + entry.SolidRect.height * 0.3f;
+                    if (rhythmAmount > 0f)
+                        inst.Warmth = Mathf.Clamp(rhythm.Fbm(basePoint.x / 48f, basePoint.z / 48f, 2) * 2.2f, -1f, 1f) * rhythmAmount;
                     float ink = s3.InkStyle.Width * 1.7f;
                     inst.InkUv = new Vector2(ink / Mathf.Max(0.1f, inst.Width), ink / Mathf.Max(0.1f, inst.Height));
                     plan.Add(entry, inst);
@@ -224,9 +230,10 @@ namespace KingdomSurvival.MapLab
                     if (chain.Count < s3.AccentMinChain)
                         continue;
                     stats.Chains++;
+                    float ridge = settings.IsStage04 ? settings.Stage04.ForestRhythm : 0f;
                     foreach (int t in chain)
                     {
-                        SetInstance(plan, trees[t], inst => { inst.Accent = 1f; return inst; });
+                        SetInstance(plan, trees[t], inst => { inst.Accent = 1f; inst.Ridge = ridge; return inst; });
                         stats.AccentTrees++;
                     }
                 }

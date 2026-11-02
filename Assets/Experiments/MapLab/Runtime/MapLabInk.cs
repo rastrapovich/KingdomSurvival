@@ -30,7 +30,9 @@ namespace KingdomSurvival.MapLab
         }
 
         // Поле кромки на сетке GridStep: значение < 0 — на полотне.
-        public static float[] RoadField(MapLabData data, MapLabPaintFields fields, Vector4 weights, out int n, out float[] weightField)
+        // Сначала главные дороги (с расстоянием до их кромки), затем тропы с
+        // устьем у узла — та же форма, что у заливки MapLabTiledPainter.
+        public static float[] RoadField(MapLabData data, MapLabPaintFields fields, Vector4 weights, out int n, out float[] weightField, MapLabRoadJunction junction = default)
         {
             n = Mathf.CeilToInt(data.Size / GridStep) + 1;
             float[] f = new float[n * n];
@@ -38,14 +40,21 @@ namespace KingdomSurvival.MapLab
             byte[] kind = new byte[n * n];
             for (int i = 0; i < f.Length; i++)
                 f[i] = 9f;
-            List<MapLabPolyline> roads = new List<MapLabPolyline>(data.Roads);
+            List<MapLabPolyline> roads = new List<MapLabPolyline>();
+            foreach (MapLabPolyline r in data.Roads)
+                if (r.Kind != MapLabRoadKind.Path)
+                    roads.Add(r);
+            foreach (MapLabPolyline r in data.Roads)
+                if (r.Kind == MapLabRoadKind.Path)
+                    roads.Add(r);
             roads.AddRange(data.YardPaths);
             float inv = 1f / GridStep;
             int size = n;
             foreach (MapLabPolyline road in roads)
             {
+                bool isPath = road.Kind == MapLabRoadKind.Path;
                 float half = road.Width * 0.5f;
-                float reach = half + 1.2f;
+                float reach = half + 1.2f + (isPath ? junction.Mouth : 0f);
                 for (int s = 0; s < road.Points.Count - 1; s++)
                 {
                     Vector2 a = road.Points[s], c = road.Points[s + 1];
@@ -60,6 +69,8 @@ namespace KingdomSurvival.MapLab
                     {
                         float d = MapLabGeometry.DistanceToSegment(new Vector2(x * GridStep, z * GridStep), a, c, out _) - half;
                         int i = z * size + x;
+                        if (isPath && junction.Mouth > 0f && d < junction.Mouth + 0.5f)
+                            d -= junction.MouthAt(fields.MainRoadAt(new Vector2(x * GridStep, z * GridStep)));
                         if (d < f[i])
                         {
                             f[i] = d;
@@ -73,10 +84,11 @@ namespace KingdomSurvival.MapLab
             {
                 int i = z * size + x;
                 bool path = kind[i] == (byte)MapLabRoadKind.Path;
-                weightField[i] = path ? weights.y : weights.x;
+                float pathness = path ? 1f - junction.BlendAt(fields.MainRoadAt(new Vector2(x * GridStep, z * GridStep))) : 0f;
+                weightField[i] = Mathf.Lerp(weights.x, weights.y, pathness);
                 if (f[i] > 1.6f)
                     continue;
-                f[i] += fields.RoadEdgeOffset(new Vector2(x * GridStep, z * GridStep), path);
+                f[i] += fields.RoadEdgeOffset(new Vector2(x * GridStep, z * GridStep), pathness);
             }
             return f;
         }
@@ -217,7 +229,7 @@ namespace KingdomSurvival.MapLab
         public static Mesh BuildRoadInk(MapLabData data, MapLabSettings settings, MapLabPaintFields fields, out Stats stats)
         {
             MapLabInkStyle ink = settings.Stage03.InkStyle;
-            float[] f = RoadField(data, fields, ink.Weights, out int n, out float[] weights);
+            float[] f = RoadField(data, fields, ink.Weights, out int n, out float[] weights, MapLabRoadJunction.From(settings));
             List<Contour> contours = Trace(f, weights, n, GridStep);
             return BuildRibbon(data, settings, contours, f, n, "MapLab Road Ink", out stats);
         }

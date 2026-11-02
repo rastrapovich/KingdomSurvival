@@ -246,7 +246,7 @@ namespace KingdomSurvival.MapLab.Editor
                 EditorApplication.Exit(code);
         }
 
-        private static string Paint(MapLabView view)
+        public static string Paint(MapLabView view)
         {
             MapLabTiledPainter.Result p = view.LastTiledPaint;
             MapLabStats st = view.Data.Stats;
@@ -259,7 +259,7 @@ namespace KingdomSurvival.MapLab.Editor
             return $"покраска {st.PaintMs:0} мс, {view.Settings.PaintResolution}²";
         }
 
-        private static float PaintTextureMb(MapLabView view)
+        public static float PaintTextureMb(MapLabView view)
         {
             MapLabTiledPainter.Result p = view.LastTiledPaint;
             if (!view.Settings.IsStage03 || p == null || p.Tiles.Count == 0)
@@ -269,7 +269,7 @@ namespace KingdomSurvival.MapLab.Editor
             return (tile * p.Tiles.Count + overview) / 1048576f;
         }
 
-        private static string Counts(MapLabView view)
+        public static string Counts(MapLabView view)
         {
             MapLabData d = view.Data;
             MapLabStats s = d.Stats;
@@ -348,7 +348,7 @@ namespace KingdomSurvival.MapLab.Editor
             return best;
         }
 
-        private static float MeasureFrame(MapLabCameraRig rig, int width, int height)
+        public static float MeasureFrame(MapLabCameraRig rig, int width, int height)
         {
             Camera cam = rig.Camera;
             RenderTexture rt = new RenderTexture(width, height, 24, UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_SRGB);
@@ -378,7 +378,7 @@ namespace KingdomSurvival.MapLab.Editor
             }
         }
 
-        private static string Argument(string name, string fallback)
+        public static string Argument(string name, string fallback)
         {
             string[] args = Environment.GetCommandLineArgs();
             for (int i = 0; i < args.Length - 1; i++)
@@ -387,7 +387,7 @@ namespace KingdomSurvival.MapLab.Editor
             return fallback;
         }
 
-        private static Vector2Int ParseSize(string text)
+        public static Vector2Int ParseSize(string text)
         {
             string[] parts = text.ToLowerInvariant().Split('x');
             if (parts.Length == 2 && int.TryParse(parts[0], out int w) && int.TryParse(parts[1], out int h))

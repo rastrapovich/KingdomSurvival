@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KingdomSurvival.MapLab
@@ -14,9 +16,20 @@ namespace KingdomSurvival.MapLab
         FrontLeft = 5,
     }
 
-    // Набор кадров деревянной фишки отряда: шесть направлений при условных 50°
-    // и два передних калибровочных кадра для 40° и 60°. Кадры — записи ArtSet
-    // по стабильным ID; поправки регистрации хранятся в самих записях.
+    // Этап 04: полный набор шести направлений для одного номинального наклона.
+    [Serializable]
+    public sealed class MapLabMarkerPitchSet
+    {
+        public float Pitch = 50f;
+        [Tooltip("ID кадров в порядке Front → Front_Right → Back_Right → Back → Back_Left → Front_Left.")]
+        public string[] ViewIds = new string[6];
+    }
+
+    // Набор кадров фишки отряда: шесть направлений при условных 50° и два
+    // передних калибровочных кадра для 40° и 60° (этап 02) либо несколько
+    // полных наборов по наклонам (этап 04, PitchSets: кадр адресуется парой
+    // «наклон + направление», наборы не перезаписывают друг друга). Кадры —
+    // записи ArtSet по стабильным ID; поправки регистрации хранятся в записях.
     [CreateAssetMenu(menuName = "Kingdom Survival/MapLab/Набор фишки", fileName = "MapLabMarkerSet")]
     public sealed class MapLabMarkerSet : ScriptableObject
     {
@@ -31,6 +44,61 @@ namespace KingdomSurvival.MapLab
         public float FullSetPitch = 50f;
         [Tooltip("Допуск по наклону, в котором калибровочный кадр считается подходящим.")]
         public float CalibrationTolerance = 4f;
+        [Tooltip("Этап 04: полные наборы направлений по наклонам (50°, 35°). Пусто — прежний набор ViewIds.")]
+        public List<MapLabMarkerPitchSet> PitchSets = new List<MapLabMarkerPitchSet>();
+
+        public bool HasPitchSets => PitchSets != null && PitchSets.Count > 0;
+
+        // Набор для наклона: ближайший, но у порога между соседними наборами —
+        // с гистерезисом (switchPitch ± hysteresis/2), чтобы кадр не мигал.
+        // current — прежний выбор (−1 — нет).
+        public int ChooseSet(float pitch, int current, float switchPitch, float hysteresis)
+        {
+            if (!HasPitchSets)
+                return -1;
+            int nearest = 0;
+            for (int i = 1; i < PitchSets.Count; i++)
+                if (Mathf.Abs(PitchSets[i].Pitch - pitch) < Mathf.Abs(PitchSets[nearest].Pitch - pitch))
+                    nearest = i;
+            if (current < 0 || current >= PitchSets.Count || current == nearest)
+                return nearest;
+            float a = PitchSets[current].Pitch, b = PitchSets[nearest].Pitch;
+            float boundary = (Mathf.Min(a, b) < switchPitch && switchPitch < Mathf.Max(a, b)) ? switchPitch : (a + b) * 0.5f;
+            float past = b > a ? pitch - boundary : boundary - pitch;
+            return past > hysteresis * 0.5f ? nearest : current;
+        }
+
+        // Кадр пары (набор, направление). Нет кадра — то же направление другого
+        // набора (приближённо), затем прежний ViewIds.
+        public MapLabArtEntry ResolveSet(MapLabMarkerDirection direction, float pitch, int set, out bool approximate)
+        {
+            approximate = true;
+            if (ArtSet == null || !HasPitchSets)
+                return Resolve(direction, pitch, out approximate);
+            set = Mathf.Clamp(set, 0, PitchSets.Count - 1);
+            MapLabArtEntry entry = Find(PitchSets[set], direction);
+            if (entry != null)
+            {
+                approximate = Mathf.Abs(pitch - PitchSets[set].Pitch) > CalibrationTolerance + 1f;
+                return entry;
+            }
+            for (int i = 0; i < PitchSets.Count; i++)
+            {
+                entry = Find(PitchSets[i], direction);
+                if (entry != null)
+                    return entry;
+            }
+            entry = View(direction);
+            return entry != null && entry.HasTexture ? entry : null;
+        }
+
+        private MapLabArtEntry Find(MapLabMarkerPitchSet set, MapLabMarkerDirection direction)
+        {
+            if (set == null || set.ViewIds == null || set.ViewIds.Length < 6)
+                return null;
+            MapLabArtEntry e = ArtSet.Find(set.ViewIds[(int)direction]);
+            return e != null && e.HasTexture ? e : null;
+        }
 
         // Сектор по направлению взгляда фигурки и азимуту камеры (градусы, 0 — +Z).
         // Лицом к камере — Front; повернулась вправо по кадру (видна её правая
@@ -76,6 +144,14 @@ namespace KingdomSurvival.MapLab
         {
             get
             {
+                if (HasPitchSets)
+                {
+                    foreach (MapLabMarkerPitchSet set in PitchSets)
+                        for (int i = 0; i < 6; i++)
+                            if (Find(set, (MapLabMarkerDirection)i) == null)
+                                return false;
+                    return true;
+                }
                 for (int i = 0; i < 6; i++)
                 {
                     MapLabArtEntry e = View((MapLabMarkerDirection)i);

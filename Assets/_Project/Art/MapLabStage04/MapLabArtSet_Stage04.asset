@@ -1,0 +1,453 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2c60839abb5890419d130d947cec017, type: 3}
+  m_Name: MapLabArtSet_Stage04
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabArtSet
+  SchemaVersion: 1
+  PackageRevision: 4
+  PackageId: KS_MapLab_Stage04_Polish_Hero_2026-11-03
+  ImportVersion: 2
+  ImportedAt: 2026-11-03 02:15:08
+  ManifestSha256: cf41801d0633b470ad7c8b362e055ea4f39d67a0cb6b6d56a51dd29f616a507c
+  Entries:
+  - Id: Hero_MapInk_Front_P50
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 20e1d0e781d0cef44a3e98fae62ab48b, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.489633, y: 0.12685452}
+    Footprint: {x: 1.3018746, y: 0.90407956}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 0.97625303
+    PivotEdited: 0
+    SourcePath: Assets/Hero/Pitch50/Hero_Front.png
+    Sha256: a53e366470a76edde314199774301854f81c1362fd865491e8a8b34e8fa54aaa
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.25199363
+      y: 0.114832535
+      width: 0.51754385
+      height: 0.8014354
+    PivotHint: {x: 0.489633, y: 0.114833}
+    FootX: 0.49022236
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.6091069, g: 0.41264915, b: 0.30499715, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Hero_MapInk_Front_Right_P50
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: b954800f984e3f4409649362fdd79b30, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.521268, y: 0.10778163}
+    Footprint: {x: 1.0190567, y: 0.70767826}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 0.9383124
+    PivotEdited: 0
+    SourcePath: Assets/Hero/Pitch50/Hero_Front_Right.png
+    Sha256: 4dbc0683597e779861853731e451a223730b53115dd545312c7c66277cfd0eeb
+    Width: 1199
+    Height: 1312
+    SolidRect:
+      serializedVersion: 2
+      x: 0.27272728
+      y: 0.09527439
+      width: 0.46121767
+      height: 0.83384144
+    PivotHint: {x: 0.521268, y: 0.095274}
+    FootX: 0.45350114
+    Direction: Front_Right
+    PitchDownDegrees: 50
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.609954, g: 0.41056022, b: 0.31133065, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Hero_MapInk_Back_Right_P50
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 0c87612d5fd216e4ea0013779456098c, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.479983, y: 0.13110094}
+    Footprint: {x: 0.96359885, y: 0.66916585}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 0.962056
+    PivotEdited: 0
+    SourcePath: Assets/Hero/Pitch50/Hero_Back_Right.png
+    Sha256: a2d3f1666b3dff9e1e261cd04645f26c0d598880b69e9d7038cc590965d1ffaf
+    Width: 1199
+    Height: 1312
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2702252
+      y: 0.11890244
+      width: 0.42535445
+      height: 0.8132622
+    PivotHint: {x: 0.479983, y: 0.118902}
+    FootX: 0.5374503
+    Direction: Back_Right
+    PitchDownDegrees: 50
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.6298218, g: 0.41862255, b: 0.32358608, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Hero_MapInk_Back_P50
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 2084a01c96d6be343b21854598cc04c1, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.494817, y: 0.15172659}
+    Footprint: {x: 1.2549654, y: 0.8715037}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1.031687
+    PivotEdited: 0
+    SourcePath: Assets/Hero/Pitch50/Hero_Back.png
+    Sha256: a09e2c26f99aeb46c557fd1b4a160d7e6a7e8df2dcd19daf50e401ec0c29e47e
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.24960127
+      y: 0.14035088
+      width: 0.47208932
+      height: 0.7583732
+    PivotHint: {x: 0.494817, y: 0.140351}
+    FootX: 0.4944903
+    Direction: Back
+    PitchDownDegrees: 50
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.6401918, g: 0.42933604, b: 0.33113337, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Hero_MapInk_Back_Left_P50
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 39db3163f9442f24d88dfde22c184b44, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.505981, y: 0.14472902}
+    Footprint: {x: 1.0580871, y: 0.7347827}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1.0156671
+    PivotEdited: 0
+    SourcePath: Assets/Hero/Pitch50/Hero_Back_Left.png
+    Sha256: 1176a66de76b53ac01f3b24d5dc0f8690596c2c160ae573e252d1b1b3ddea6ec
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.29346094
+      y: 0.13317384
+      width: 0.40430623
+      height: 0.7703349
+    PivotHint: {x: 0.505981, y: 0.133174}
+    FootX: 0.4643282
+    Direction: Back_Left
+    PitchDownDegrees: 50
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.6388697, g: 0.42928168, b: 0.32872495, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Hero_MapInk_Front_Left_P50
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 3ff6904668e5eab4bbde0ae3189603d5, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.456214, y: 0.13215718}
+    Footprint: {x: 1.1376841, y: 0.7900584}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1.0005007
+    PivotEdited: 0
+    SourcePath: Assets/Hero/Pitch50/Hero_Front_Left.png
+    Sha256: 877d43a2f029218905e66e0bb508e02acfcf28528f5af99ff79ed808d36d3806
+    Width: 1199
+    Height: 1312
+    SolidRect:
+      serializedVersion: 2
+      x: 0.27606338
+      y: 0.120426826
+      width: 0.4829024
+      height: 0.7820122
+    PivotHint: {x: 0.456214, y: 0.120427}
+    FootX: 0.52160496
+    Direction: Front_Left
+    PitchDownDegrees: 50
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.6351196, g: 0.42771792, b: 0.32375598, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Hero_MapInk_Front_P35
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: c817a4ef1c341034fbfb467f42588271, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.482201, y: 0.14527905}
+    Footprint: {x: 1.341976, y: 0.93192774}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Hero/Pitch35/Hero_Front.png
+    Sha256: d84521c8c65c218408618d39be03db7875557a6f7af61acd3dc8ac2868208257
+    Width: 1236
+    Height: 1273
+    SolidRect:
+      serializedVersion: 2
+      x: 0.23786408
+      y: 0.1335428
+      width: 0.53640777
+      height: 0.78240377
+    PivotHint: {x: 0.482201, y: 0.133543}
+    FootX: 0.48314428
+    Direction: Front
+    PitchDownDegrees: 35
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.6314834, g: 0.4328859, b: 0.3302166, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Hero_MapInk_Front_Right_P35
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: a44ae0241d18473489060971eab2ba5f, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.507923, y: 0.13323529}
+    Footprint: {x: 1.0764254, y: 0.74751765}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1.0400342
+    PivotEdited: 0
+    SourcePath: Assets/Hero/Pitch35/Hero_Front_Right.png
+    Sha256: 1ca5e6f7c4bd38d472bca44e0beffdd4bd4af527a97f9c5215b04eceade87f0d
+    Width: 1199
+    Height: 1312
+    SolidRect:
+      serializedVersion: 2
+      x: 0.26605505
+      y: 0.12195122
+      width: 0.43953294
+      height: 0.7522866
+    PivotHint: {x: 0.507923, y: 0.121951}
+    FootX: 0.43876392
+    Direction: Front_Right
+    PitchDownDegrees: 35
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.6224794, g: 0.4161707, b: 0.31587094, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Hero_MapInk_Back_Right_P35
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 27ae053682e60144db2382b24ede768c, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.481234, y: 0.12858628}
+    Footprint: {x: 1.0359198, y: 0.7193887}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 0.9804334
+    PivotEdited: 0
+    SourcePath: Assets/Hero/Pitch35/Hero_Back_Right.png
+    Sha256: f1d18b3d2d2b1ae5cecf5269773efecb812565c7859daef4bfefd6c49ff146cf
+    Width: 1199
+    Height: 1312
+    SolidRect:
+      serializedVersion: 2
+      x: 0.25688073
+      y: 0.116615854
+      width: 0.44870725
+      height: 0.7980183
+    PivotHint: {x: 0.481234, y: 0.116616}
+    FootX: 0.53315413
+    Direction: Back_Right
+    PitchDownDegrees: 35
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.63521504, g: 0.42713937, b: 0.3386299, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Hero_MapInk_Back_P35
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 8c1b38ad7042e9e4b8fa183093a0b8fd, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.489633, y: 0.11645164}
+    Footprint: {x: 1.1910899, y: 0.8271457}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 0.979176
+    PivotEdited: 0
+    SourcePath: Assets/Hero/Pitch35/Hero_Back.png
+    Sha256: ecc1d81abb4650f4b598f1a2c7ef766323cac5fabd5dd29863b5d67e3045f5d3
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.24481659
+      y: 0.10446571
+      width: 0.47208932
+      height: 0.79904306
+    PivotHint: {x: 0.489633, y: 0.104466}
+    FootX: 0.4896936
+    Direction: Back
+    PitchDownDegrees: 35
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.63653183, g: 0.43387663, b: 0.33916113, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Hero_MapInk_Back_Left_P35
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 4cf798e3bcd3e0847983b64bb11f7f3f, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.497081, y: 0.13279341}
+    Footprint: {x: 1.0288552, y: 0.7144827}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1.0113436
+    PivotEdited: 0
+    SourcePath: Assets/Hero/Pitch35/Hero_Back_Left.png
+    Sha256: 3d4f645a0343ae09d574ea9fe45236877d0d83170f108634f643fb735bf16dba
+    Width: 1199
+    Height: 1312
+    SolidRect:
+      serializedVersion: 2
+      x: 0.26939115
+      y: 0.12118903
+      width: 0.43202668
+      height: 0.77362806
+    PivotHint: {x: 0.497081, y: 0.121189}
+    FootX: 0.46808323
+    Direction: Back_Left
+    PitchDownDegrees: 35
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.63832074, g: 0.42516327, b: 0.32880497, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+  - Id: Hero_MapInk_Front_Left_P35
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: dc8b330f88c1eba43899fd29e305e116, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.463333, y: 0.15622185}
+    Footprint: {x: 1.260554, y: 0.8753846}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1.1
+    PivotEdited: 0
+    SourcePath: Assets/Hero/Pitch35/Hero_Front_Left.png
+    Sha256: 109ac55064ff4fbd26701eb79f75a4be8a098a936900fff463c77d563200dc5d
+    Width: 1200
+    Height: 1310
+    SolidRect:
+      serializedVersion: 2
+      x: 0.27416667
+      y: 0.14580153
+      width: 0.47416666
+      height: 0.6946565
+    PivotHint: {x: 0.463333, y: 0.145802}
+    FootX: 0.5252187
+    Direction: Front_Left
+    PitchDownDegrees: 35
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.63007766, g: 0.43657333, b: 0.33549115, a: 1}
+    TileEdgeDifference: 0
+    Notes: 

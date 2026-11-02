@@ -184,6 +184,7 @@ namespace KingdomSurvival.MapLab
                 Ink = new float[count];
                 Key = new int[count];
                 RoadDistance = new float[count];
+
                 RoadKind = new byte[count];
                 RoadAngle = new byte[count];
                 if (contribution)
@@ -213,6 +214,8 @@ namespace KingdomSurvival.MapLab
             private readonly float[] r0, g0, b0;
             private readonly int[] key;
             private readonly float[] roadDistance;
+            private readonly bool stage04;
+            private readonly MapLabRoadJunction junction;
             private readonly byte[] roadKind;
             private readonly byte[] roadAngle;
             private readonly Vector3 light;
@@ -242,6 +245,9 @@ namespace KingdomSurvival.MapLab
                 ink = buffers.Ink;
                 key = buffers.Key;
                 roadDistance = buffers.RoadDistance;
+
+                stage04 = settings.IsStage04;
+                junction = MapLabRoadJunction.From(settings);
                 roadKind = buffers.RoadKind;
                 roadAngle = buffers.RoadAngle;
                 System.Array.Clear(ink, 0, ink.Length);
@@ -271,16 +277,28 @@ namespace KingdomSurvival.MapLab
                 return new Vector2(ox + (x + 0.5f) * texel, oz + (z + 0.5f) * texel);
             }
 
+            // Сначала главные дороги (и расстояние до их кромки — для узлов),
+            // затем тропы; на этапе 04 устье тропы у дороги плавно расширяется
+            // (MapLabRoadJunction — та же форма, что у пера).
             public void RasterizeRoads()
             {
                 for (int i = 0; i < roadDistance.Length; i++)
                     roadDistance[i] = float.MaxValue;
+                RasterizePass(MapLabRoadKind.Road);
+                RasterizePass(MapLabRoadKind.Path);
+            }
+
+            private void RasterizePass(MapLabRoadKind kind)
+            {
                 float x0w = ox, z0w = oz, x1w = ox + Width * texel, z1w = oz + Width * texel;
                 for (int k = 0; k < roads.Count; k++)
                 {
                     MapLabPolyline road = roads[k];
+                    if ((road.Kind == MapLabRoadKind.Path) != (kind == MapLabRoadKind.Path))
+                        continue;
+                    bool path = kind == MapLabRoadKind.Path;
                     float half = road.Width * 0.5f;
-                    float reach = half + 2.5f;
+                    float reach = half + 2.5f + (path ? junction.Mouth : 0f);
                     for (int s = 0; s < road.Points.Count - 1; s++)
                     {
                         Vector2 a = road.Points[s];
@@ -299,8 +317,10 @@ namespace KingdomSurvival.MapLab
                         for (int z = pz0; z <= pz1; z++)
                         for (int x = px0; x <= px1; x++)
                         {
-                            float d = MapLabGeometry.DistanceToSegment(World(x, z), a, c, out _) - half;
                             int i = z * Width + x;
+                            float d = MapLabGeometry.DistanceToSegment(World(x, z), a, c, out _) - half;
+                            if (path && junction.Mouth > 0f && d < junction.Mouth + 0.5f)
+                                d -= junction.MouthAt(fields.MainRoadAt(World(x, z)));
                             if (d < roadDistance[i])
                             {
                                 roadDistance[i] = d;
@@ -337,6 +357,8 @@ namespace KingdomSurvival.MapLab
                     // То же, что pow(forest · 1.25, 0.7) > 0.5 у этапа 02, без pow на тексель.
                     if (s.Forest > 0.2971f)
                         k = KeyForest;
+                    if (stage04 && k == KeyGrass && blotStrength > 0f)
+                        c = Blot(c, s);
 
                     // Поля: чёткий край пашни (узкий переход маски), полосы и межа.
                     if (s.FieldMask > 0.3f && data.Fields != null && data.Fields.Evaluate(w, out MapLabFields.Sample fs))
@@ -357,9 +379,20 @@ namespace KingdomSurvival.MapLab
                             k = KeyFieldBase + ((fs.Block * 37 + fs.Strip) & 0xFFFF);
                         if (edge > 0.5f)
                         {
-                            // Межа — тонкая линия тем же пером, местами прервана.
+                            // Межа — тонкая линия тем же пером, местами прервана. Этап 04:
+                            // только выбранные участки — у дороги, на склоне и длинные
+                            // отрезки по мировому шуму; остальное читается цветом и бороздами.
                             float line = 1f - MapLabGeometry.SmoothStep(0.05f, 0.14f, fs.BorderDistance);
-                            ink[i] = Mathf.Max(ink[i], 0.55f * inkWeights.z * line * Breakup(s.Breakup, 0.4f));
+                            float select = 1f;
+                            if (stage04 && line > 0f)
+                            {
+                                float share = settings.Stage04.FieldInkShare;
+                                float nearRoad = 1f - MapLabGeometry.SmoothStep(1.2f, 2.6f, roadDistance[i]);
+                                float slope = MapLabGeometry.SmoothStep(5f, 10f, data.SampleSlope(w.x, w.y)) * 0.8f;
+                                float chosen = MapLabGeometry.SmoothStep(1.5f - share * 1.9f, 1.58f - share * 1.9f, widthVar);
+                                select = Mathf.Max(nearRoad, Mathf.Max(slope, chosen));
+                            }
+                            ink[i] = Mathf.Max(ink[i], 0.55f * inkWeights.z * line * select * Breakup(s.Breakup, 0.4f));
                             Color balk = Color.Lerp(Color.Lerp(pal.GrassA, pal.GrassLush, 0.5f), pal.ForestFloor, 0.1f);
                             c = Color.Lerp(c, balk, (1f - border) * edge * 0.45f * grassy);
                         }
@@ -404,24 +437,27 @@ namespace KingdomSurvival.MapLab
                     }
 
                     // Дорога: чёткое полотно (переход ~1 тексель) по неровной кромке.
+                    // Этап 04: у узла тропа плавно перенимает цвет, плотность и вес
+                    // пера главной дороги (pathness 1 → 0 вдоль тропы).
                     bool path = roadKind[i] == (byte)MapLabRoadKind.Path;
+                    float pathness = path ? 1f - junction.BlendAt(s.MainRoad) : 0f;
                     float rd = roadDistance[i];
                     if (rd < 1.8f)
                     {
-                        float edge = rd + MapLabPaintFields.RoadEdgeOffset(s, path);
+                        float edge = rd + MapLabPaintFields.RoadEdgeOffset(s, pathness);
                         float soft = texel * 0.75f;
                         float body = 1f - MapLabGeometry.SmoothStep(-soft, soft, edge);
                         float rut = s.Rut * 0.07f;
-                        Color rc = (path ? Color.Lerp(pal.Road, pal.GrassDry, 0.28f) : pal.Road) * (1f + rut);
+                        Color rc = Color.Lerp(pal.Road, Color.Lerp(pal.Road, pal.GrassDry, 0.28f), pathness) * (1f + rut);
                         rc = Color.Lerp(rc, pal.RoadEdge, MapLabGeometry.SmoothStep(-0.45f, 0f, edge) * 0.22f);
-                        float tuft = MapLabGeometry.SmoothStep(0.58f, 0.82f, s.Tuft) * (path ? 0.5f : 0.2f);
+                        float tuft = MapLabGeometry.SmoothStep(0.58f, 0.82f, s.Tuft) * Mathf.Lerp(0.2f, 0.5f, pathness);
                         rc = Color.Lerp(rc, Color.Lerp(c, pal.GrassDry, 0.3f), tuft);
                         rc.a = 1f;
-                        c = Color.Lerp(c, rc, body * (path ? 0.88f : 1f));
+                        c = Color.Lerp(c, rc, body * Mathf.Lerp(1f, 0.88f, pathness));
                         if (options.RoadInkInPaint)
                         {
                             float line = 1f - MapLabGeometry.SmoothStep(0f, texel * 1.5f, Mathf.Abs(edge));
-                            ink[i] = Mathf.Max(ink[i], line * (path ? inkWeights.y : inkWeights.x) * 0.6f * Breakup(s.Breakup, 0.35f));
+                            ink[i] = Mathf.Max(ink[i], line * Mathf.Lerp(inkWeights.x, inkWeights.y, pathness) * 0.6f * Breakup(s.Breakup, 0.35f));
                         }
                         // Узкая притоптанная обочина — без широкого мутного ореола.
                         float shoulder = edge > 0f ? 1f - MapLabGeometry.SmoothStep(0.05f, 0.45f, edge) : 0f;
@@ -434,6 +470,27 @@ namespace KingdomSurvival.MapLab
                     b[i] = c.b;
                     key[i] = k;
                 }
+            }
+
+            // Этап 04: редкое акварельное пятно луга — сухая охра или приглушённая
+            // зелень, с лёгким оседанием пигмента по краю; между пятнами тишина.
+            private float blotStrength => settings.Stage04.Blots;
+
+            private Color Blot(Color c, in MapLabPaintFields.Sample s)
+            {
+                float threshold = 0.29f * (1f - 2f * Mathf.Clamp(settings.Stage04.BlotShare, 0f, 0.6f));
+                float inside = MapLabGeometry.SmoothStep(threshold, threshold + 0.05f, s.Blot);
+                if (inside <= 0f && s.Blot < threshold - 0.02f)
+                    return c;
+                float rim = MapLabGeometry.SmoothStep(threshold - 0.005f, threshold + 0.02f, s.Blot) * (1f - MapLabGeometry.SmoothStep(threshold + 0.03f, threshold + 0.09f, s.Blot));
+                Color dry = Color.Lerp(pal.GrassDry, pal.FieldOchre, 0.25f);
+                Color muted = Color.Lerp(pal.GrassLush, pal.ForestFloor, 0.35f);
+                Color tone = s.BlotHue > 0f ? dry : muted;
+                float strength = blotStrength * 0.32f;
+                Color result = Color.Lerp(c, tone * (c.grayscale / Mathf.Max(0.05f, tone.grayscale)) * 0.6f + tone * 0.4f, inside * strength);
+                result *= 1f - rim * 0.07f * blotStrength;
+                result.a = 1f;
+                return result;
             }
 
             private static float Breakup(float v, float holes)

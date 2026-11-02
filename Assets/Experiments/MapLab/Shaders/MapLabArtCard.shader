@@ -61,6 +61,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float2 offset : TEXCOORD1;   // x — вправо по кадру, y — вверх от опоры (мир)
                 float4 color : COLOR;        // r — яркость/1.25, g — сила оттенка, b — доля тени рельефа, a — низ кроны (v)
                 float4 extra : TEXCOORD2;    // этап 03: x — акцент, y — метка группы, z/w — толщина пера (v/u)
+                float2 rhythm : TEXCOORD3;   // этап 04: x — тепло/холод массы, y — светлый гребень
             };
 
             struct Varyings
@@ -70,6 +71,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float4 color : TEXCOORD1;
                 float shade : TEXCOORD2;
                 float4 extra : TEXCOORD3;
+                float2 rhythm : TEXCOORD4;
             };
 
             TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
@@ -127,6 +129,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 o.uv = input.uv;
                 o.color = input.color;
                 o.extra = input.extra;
+                o.rhythm = input.rhythm;
                 float4 s = SAMPLE_TEXTURE2D_LOD(_ShadeTex, sampler_ShadeTex, basePoint.xz / max(1.0, _MapSize), 0);
                 o.shade = saturate((1.0 - s.r) * 0.9 + (1.0 - s.g) * 0.35);
                 return o;
@@ -157,6 +160,9 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float3 toned = _TintColor.rgb * (dot(c, w) / max(1e-3, dot(_TintColor.rgb, w)));
                 c = lerp(c, toned, tint * 0.5);
                 c *= i.color.r * 1.25;
+                // Этап 04: тёплая или холодная масса, светлее выбранный гребень.
+                c *= lerp(float3(1, 1, 1), float3(1.05, 1.0, 0.86), saturate(i.rhythm.x)) * lerp(float3(1, 1, 1), float3(0.93, 0.99, 1.07), saturate(-i.rhythm.x));
+                c *= 1.0 + i.rhythm.y * 0.08;
                 c = MapLabShadow(c, i.shade * i.color.b * _GroundShade, _ShadowTint.rgb);
 
                 // Этап 03: акцент массы крон — линия по верхней/освещённой кромке

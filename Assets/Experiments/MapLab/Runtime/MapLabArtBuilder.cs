@@ -21,6 +21,9 @@ namespace KingdomSurvival.MapLab
         public float Group;
         public Vector2 InkUv;
         public float CrownMinV;
+        // Этап 04: крупный ритм леса — тепло (+) / холод (−) массы и светлый гребень.
+        public float Warmth;
+        public float Ridge;
     }
 
     // Выбор и сборка нарисованных карточек поверх готовых данных карты. Выбор
@@ -369,6 +372,7 @@ namespace KingdomSurvival.MapLab
                 List<Vector2> uv1 = new List<Vector2>(list.Count * 8);
                 List<Color> colors = new List<Color>(list.Count * 8);
                 List<Vector4> uv2 = new List<Vector4>(list.Count * 8);
+                List<Vector2> uv3 = new List<Vector2>(list.Count * 8);
                 List<int> indices = new List<int>(list.Count * 12);
                 Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
                 Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
@@ -381,6 +385,8 @@ namespace KingdomSurvival.MapLab
                     Vector4 extra = new Vector4(o.Accent, o.Group, o.InkUv.y, o.InkUv.x);
                     while (uv2.Count < positions.Count)
                         uv2.Add(extra);
+                    while (uv3.Count < positions.Count)
+                        uv3.Add(new Vector2(o.Warmth, o.Ridge));
                     float reach = Mathf.Max(o.Width, o.Height) * 2.5f + 4f;
                     min = Vector3.Min(min, o.Base - new Vector3(reach, reach, reach));
                     max = Vector3.Max(max, o.Base + new Vector3(reach, reach, reach));
@@ -392,6 +398,7 @@ namespace KingdomSurvival.MapLab
                 mesh.SetUVs(0, uv0);
                 mesh.SetUVs(1, uv1);
                 mesh.SetUVs(2, uv2);
+                mesh.SetUVs(3, uv3);
                 mesh.SetColors(colors);
                 mesh.SetTriangles(indices, 0, false);
                 // Карточки разворачиваются и сдвигаются в шейдере — границы с запасом.

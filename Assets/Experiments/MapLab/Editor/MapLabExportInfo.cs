@@ -93,6 +93,19 @@ namespace KingdomSurvival.MapLab.Editor
         public int ForestAccentChains;
         public int ForestAccentTrees;
         public int Supersample;
+        // Этап 04: активные эффекты прохода согласования и кадр героя.
+        public bool Stage04Effects;
+        public float ContactDensity;
+        public float CrownLobes;
+        public float Grain;
+        public float Blots;
+        public float JunctionLength;
+        public float FieldInkShare;
+        public int GrassTufts;
+        public float ForestRhythm;
+        public string HeroMarkerSet;
+        public int HeroPitchSets;
+        public float HeroSetPitch;
         public string SettingsJson;
 
         public static MapLabExportInfo From(MapLabView view, int width, int height)
@@ -154,6 +167,26 @@ namespace KingdomSurvival.MapLab.Editor
                 info.PaintStrokes = tiles.Strokes;
                 info.PaintFieldsMs = tiles.FieldsMs;
                 info.PaintResolution = tiles.TilesPerSide * (tiles.Tiles.Count > 0 ? tiles.Tiles[0].Core : 0);
+            }
+            if (s.IsStage04)
+            {
+                MapLabStage04Settings s4 = s.Stage04;
+                info.Stage04Effects = true;
+                info.ContactDensity = s4.ContactDensity;
+                info.CrownLobes = s4.CrownLobes;
+                info.Grain = s4.Grain;
+                info.Blots = s4.Blots;
+                info.JunctionLength = s4.JunctionLength;
+                info.FieldInkShare = s4.FieldInkShare;
+                info.GrassTufts = view.GrassTufts;
+                info.ForestRhythm = s4.ForestRhythm;
+            }
+            MapLabMarkerSet heroSet = view.ActiveMarkerSet;
+            if (heroSet != null)
+            {
+                Describe(heroSet, out info.HeroMarkerSet, out _);
+                info.HeroPitchSets = heroSet.PitchSets != null ? heroSet.PitchSets.Count : 0;
+                info.HeroSetPitch = view.Marker != null ? view.Marker.PitchSetPitch : heroSet.FullSetPitch;
             }
             info.InkPolylines = view.InkStats.Polylines;
             info.InkLengthUnits = view.InkStats.Length;

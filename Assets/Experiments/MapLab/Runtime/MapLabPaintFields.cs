@@ -10,7 +10,7 @@ namespace KingdomSurvival.MapLab
     // дороги тушевым линиям (MapLabInk), поэтому линия и заливка совпадают.
     public sealed class MapLabPaintFields
     {
-        public const int Channels = 16;
+        public const int Channels = 19;
         public const float SamplesPerUnit = 4f;
 
         public struct Sample
@@ -21,6 +21,10 @@ namespace KingdomSurvival.MapLab
             public float Above, WaterDistance;
             public float RoadWobble, Mottle16, Rut, Tuft;
             public float Forest;
+            // Этап 04: поле акварельных пятен луга (−1..1 до порога) и выбор тона пятна.
+            public float Blot, BlotHue;
+            // Этап 04: расстояние до кромки главной дороги (для узлов троп).
+            public float MainRoad;
         }
 
         private readonly float[] values;
@@ -41,6 +45,9 @@ namespace KingdomSurvival.MapLab
             MapLabNoise rockStreak = Noise(data, "paint-rock");
             MapLabNoise fieldNoise = Noise(data, "paint-field");
             MapLabNoise roadWobble = Noise(data, "paint-road-wobble");
+            MapLabNoise blots = Noise(data, "paint04-blots");
+            MapLabNoise blotHue = Noise(data, "paint04-blot-hue");
+            float blotScale = Mathf.Max(4f, settings.Stage04.BlotScale);
             MapLabStyleSettings style = settings.PainterlyStyle;
             float macroScale = Mathf.Max(5f, style.MacroScale);
             bool showForest = settings.Diagnostics.ShowForest;
@@ -87,9 +94,55 @@ namespace KingdomSurvival.MapLab
                     values[o + 13] = mottle.Fbm(w.x / 3f, w.y / 3f, 2);
                     values[o + 14] = breakup.Fbm(w.x / 2.4f + 11f, w.y / 2.4f, 2) * 0.5f + 0.5f;
                     values[o + 15] = forest;
+                    values[o + 16] = blots.Fbm(w.x / blotScale, w.y / blotScale, 3) + blots.Fbm(w.x / (blotScale * 0.31f) + 7.3f, w.y / (blotScale * 0.31f), 2) * 0.22f;
+                    values[o + 17] = blotHue.Fbm(w.x / (blotScale * 2.3f), w.y / (blotScale * 2.3f), 2);
                 }
             });
+            FillMainRoad(data, settings);
             Milliseconds = (float)watch.Elapsed.TotalMilliseconds;
+        }
+
+        // Расстояние до кромки главных дорог на той же сетке, до длины перехода
+        // узла: одно поле для заливки и пера — переход совпадает и не обрывается.
+        private void FillMainRoad(MapLabData data, MapLabSettings settings)
+        {
+            float limit = (settings.IsStage04 ? settings.Stage04.JunctionLength : 0f) + 1f;
+            for (int i = 0; i < n * n; i++)
+                values[i * Channels + 18] = limit;
+            if (!settings.IsStage04)
+                return;
+            float inv = 1f / step;
+            foreach (MapLabPolyline road in data.Roads)
+            {
+                if (road.Kind == MapLabRoadKind.Path)
+                    continue;
+                float half = road.Width * 0.5f;
+                float reach = half + limit;
+                for (int s = 0; s < road.Points.Count - 1; s++)
+                {
+                    Vector2 a = road.Points[s], c = road.Points[s + 1];
+                    if (MapLabTiledPainter.OnBridge(data, (a + c) * 0.5f))
+                        continue;
+                    int x0 = Mathf.Max(0, Mathf.FloorToInt((Mathf.Min(a.x, c.x) - reach) * inv));
+                    int x1 = Mathf.Min(n - 1, Mathf.CeilToInt((Mathf.Max(a.x, c.x) + reach) * inv));
+                    int z0 = Mathf.Max(0, Mathf.FloorToInt((Mathf.Min(a.y, c.y) - reach) * inv));
+                    int z1 = Mathf.Min(n - 1, Mathf.CeilToInt((Mathf.Max(a.y, c.y) + reach) * inv));
+                    for (int z = z0; z <= z1; z++)
+                    for (int x = x0; x <= x1; x++)
+                    {
+                        float d = Mathf.Max(0f, MapLabGeometry.DistanceToSegment(new Vector2(x * step, z * step), a, c, out _) - half);
+                        int o = (z * n + x) * Channels + 18;
+                        if (d < values[o])
+                            values[o] = d;
+                    }
+                }
+            }
+        }
+
+        public float MainRoadAt(Vector2 w)
+        {
+            Get(w, out Sample s);
+            return s.MainRoad;
         }
 
         private static MapLabNoise Noise(MapLabData data, string name)
@@ -112,6 +165,9 @@ namespace KingdomSurvival.MapLab
             s.Above = V(9); s.WaterDistance = V(10);
             s.RoadWobble = V(11); s.Mottle16 = V(12); s.Rut = V(13); s.Tuft = V(14);
             s.Forest = V(15);
+            s.Blot = V(16);
+            s.BlotHue = V(17);
+            s.MainRoad = V(18);
         }
 
         // Сдвиг кромки полотна дороги (ед.): неровная, но чёткая граница. Ноль
@@ -124,7 +180,19 @@ namespace KingdomSurvival.MapLab
 
         public static float RoadEdgeOffset(in Sample s, bool path)
         {
-            return s.RoadWobble * (path ? 0.35f : 0.5f) + s.Mottle16 * 0.18f;
+            return RoadEdgeOffset(s, path ? 1f : 0f);
+        }
+
+        // pathness: 1 — тропа, 0 — дорога; у узла этапа 04 — плавно между ними.
+        public static float RoadEdgeOffset(in Sample s, float pathness)
+        {
+            return s.RoadWobble * Mathf.Lerp(0.5f, 0.35f, pathness) + s.Mottle16 * 0.18f;
+        }
+
+        public float RoadEdgeOffset(Vector2 w, float pathness)
+        {
+            Get(w, out Sample s);
+            return RoadEdgeOffset(s, pathness);
         }
     }
 }

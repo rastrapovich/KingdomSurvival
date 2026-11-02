@@ -105,6 +105,8 @@ namespace KingdomSurvival.MapLab.Editor
             view.ArtCardShader = LoadShader("MapLabArtCard.shader");
             view.ContactShader = LoadShader("MapLabContact.shader");
             view.InkShader = LoadShader("MapLabInk.shader");
+            view.GrassShader = LoadShader("MapLabGrass.shader");
+            view.MarkerSet04 = MapLabArtImport.LoadStage04Markers();
             view.ArtSet = MapLabArtImport.LoadArtSet();
             view.MarkerSet = MapLabArtImport.LoadMarkerSet();
             view.ArtSet03 = MapLabArtImport.LoadStage03Set();
@@ -129,6 +131,8 @@ namespace KingdomSurvival.MapLab.Editor
                 view.ArtCardShader = LoadShader("MapLabArtCard.shader");
                 view.ContactShader = LoadShader("MapLabContact.shader");
                 view.InkShader = LoadShader("MapLabInk.shader");
+                view.GrassShader = LoadShader("MapLabGrass.shader");
+                view.MarkerSet04 = MapLabArtImport.LoadStage04Markers();
                 view.ArtSet = MapLabArtImport.LoadArtSet();
                 view.MarkerSet = MapLabArtImport.LoadMarkerSet();
                 view.ArtSet03 = MapLabArtImport.LoadStage03Set();

@@ -37,6 +37,11 @@ namespace KingdomSurvival.MapLab
         private readonly List<Vector2> path = new List<Vector2>();
         private float pathLength;
         private float previewStart;
+        private int pitchSet = -1;
+
+        // Этап 04: выбранный набор наклона героя (−1 — прежний набор).
+        public int PitchSet => pitchSet;
+        public float PitchSetPitch { get; private set; }
 
         public MapLabArtEntry CurrentEntry { get; private set; }
         public MapLabMarkerDirection CurrentDirection { get; private set; }
@@ -83,17 +88,33 @@ namespace KingdomSurvival.MapLab
         public void Refresh()
         {
             MapLabView view = View;
-            if (view == null || view.Data == null || view.Settings == null || !view.Settings.Art.ShowMarker || view.MarkerSet == null)
+            MapLabMarkerSet markers = view != null ? view.ActiveMarkerSet : null;
+            if (view == null || view.Data == null || view.Settings == null || !view.Settings.Art.ShowMarker || markers == null)
             {
                 SetVisible(false);
-                Status = view != null && view.MarkerSet == null ? "Фишка: набор не подключён." : "";
+                Status = view != null && markers == null ? "Фишка: набор не подключён." : "";
                 return;
             }
             MapLabData data = view.Data;
             float azimuth = view.CameraRig != null ? view.CameraRig.Azimuth : view.Settings.Camera.AzimuthDegrees;
             float pitch = view.CameraRig != null ? view.CameraRig.Pitch : view.Settings.Camera.PitchFor(1f);
             CurrentDirection = MapLabMarkerSet.Sector(FacingDegrees, azimuth);
-            MapLabArtEntry entry = view.MarkerSet.Resolve(CurrentDirection, pitch, out bool approximate);
+            MapLabArtEntry entry;
+            bool approximate;
+            if (markers.HasPitchSets)
+            {
+                // Смена набора наклона не меняет направление, место и скорость.
+                MapLabStage04Settings s4 = view.Settings.Stage04;
+                pitchSet = markers.ChooseSet(pitch, pitchSet, s4.HeroViewSwitch, s4.HeroViewHysteresis);
+                PitchSetPitch = markers.PitchSets[pitchSet].Pitch;
+                entry = markers.ResolveSet(CurrentDirection, pitch, pitchSet, out approximate);
+            }
+            else
+            {
+                pitchSet = -1;
+                PitchSetPitch = markers.FullSetPitch;
+                entry = markers.Resolve(CurrentDirection, pitch, out approximate);
+            }
             Approximate = approximate;
             if (entry == null || !entry.HasTexture)
             {
@@ -137,12 +158,15 @@ namespace KingdomSurvival.MapLab
             ghostMaterial.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
             ghostMaterial.renderQueue = (int)RenderQueue.Transparent + 10;
             float radius = Mathf.Max(0.4f, instance.Width * entry.SolidRect.width * 0.42f);
-            BuildContact(data, BasePoint, radius);
+            if (view.Settings.IsStage04)
+                BuildCastShadow(view, entry, instance);
+            else
+                BuildContact(data, BasePoint, radius);
             BuildArrow(data);
             SetVisible(true);
             ghostRenderer.enabled = view.Settings.Art.MarkerGhost;
             arrowRenderer.enabled = ShowArrow;
-            Status = $"Фишка: {MapLabMarkerSet.DirectionNames[(int)CurrentDirection]} ({entry.Id})" + (approximate ? $" · приближённый ракурс: кадры нарисованы под {view.MarkerSet.FullSetPitch:0}°, камера {pitch:0}°" : "");
+            Status = $"Фишка: {MapLabMarkerSet.DirectionNames[(int)CurrentDirection]} ({entry.Id})" + (approximate ? $" · приближённый ракурс: кадры нарисованы под {PitchSetPitch:0}°, камера {pitch:0}°" : "");
         }
 
         private void EnsureObjects(MapLabView view)
@@ -187,6 +211,54 @@ namespace KingdomSurvival.MapLab
                 root.SetActive(visible);
         }
 
+        // Этап 04: та же логика, что у мировых теней — собранная падающая
+        // форма с чётким краем и градиент плотности от опоры; без чёрного круга.
+        // Форму считает шейдер Contact по мировым точкам (опора, пятно), сетка
+        // лежит на рельефе.
+        private void BuildCastShadow(MapLabView view, MapLabArtEntry entry, MapLabArtInstance instance)
+        {
+            MapLabData data = view.Data;
+            MapLabSettings s = view.Settings;
+            Vector3 L = s.LightDirection;
+            float w = instance.Width * entry.SolidRect.width, h = instance.Height * entry.SolidRect.height;
+            float radius = Mathf.Max(0.25f, w * 0.3f);
+            Vector2 foot = new Vector2(BasePoint.x, BasePoint.z);
+            Vector2 hit = MapLabObjectShadows.Hit(data, BasePoint + Vector3.up * h * 0.55f, L);
+            Vector2 center = (foot + hit) * 0.5f;
+            float extent = Vector2.Distance(foot, hit) * 0.5f + radius * 1.8f + 0.3f;
+            const int n = 13;
+            Vector3[] v = new Vector3[n * n];
+            Vector2[] uv = new Vector2[n * n];
+            for (int z = 0; z < n; z++)
+            for (int x = 0; x < n; x++)
+            {
+                float px = center.x + (x / (n - 1f) * 2f - 1f) * extent;
+                float pz = center.y + (z / (n - 1f) * 2f - 1f) * extent;
+                v[z * n + x] = new Vector3(px, data.SampleHeight(px, pz) + 0.04f, pz);
+                uv[z * n + x] = new Vector2(px, pz);
+            }
+            int[] t = new int[(n - 1) * (n - 1) * 6];
+            int k = 0;
+            for (int z = 0; z < n - 1; z++)
+            for (int x = 0; x < n - 1; x++)
+            {
+                int i = z * n + x;
+                t[k++] = i; t[k++] = i + n; t[k++] = i + n + 1;
+                t[k++] = i; t[k++] = i + n + 1; t[k++] = i + 1;
+            }
+            contactMesh.Clear();
+            contactMesh.vertices = v;
+            contactMesh.uv = uv;
+            contactMesh.triangles = t;
+            contactMesh.RecalculateBounds();
+            Vector2 lightDir = new Vector2(L.x, L.z).normalized;
+            contactMaterial.SetFloat("_Mode", 1f);
+            contactMaterial.SetVector("_Foot", new Vector4(foot.x, foot.y, hit.x, hit.y));
+            contactMaterial.SetVector("_Shape", new Vector4(radius, 1f / Mathf.Max(0.35f, L.y), lightDir.x, lightDir.y));
+            contactMaterial.SetVector("_Tone", new Vector4(s.Stage03.ShadowStrength, s.Stage04.ContactDensity, Mathf.Max(radius, w * 0.3f * s.Stage04.ContactReach), 0f));
+            contactMaterial.SetColor("_Color", s.Stage03.ShadowColor);
+        }
+
         // Мягкое пятно, повторяющее рельеф под опорой.
         private void BuildContact(MapLabData data, Vector3 center, float radius)
         {
@@ -221,6 +293,7 @@ namespace KingdomSurvival.MapLab
             contactMesh.uv = uv;
             contactMesh.triangles = t;
             contactMesh.RecalculateBounds();
+            contactMaterial.SetFloat("_Mode", 0f);
         }
 
         // Тестовая стрелка: куда смотрит фигурка (мир), лежит на рельефе.

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05d85f2f42b84b6448781b2fa872cf21, type: 3}
+  m_Name: MapLabMarkerSet_Stage04
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabMarkerSet
+  ArtSet: {fileID: 11400000, guid: 9bd0d9ccba5e01a4783d65af88351ac7, type: 2}
+  ViewIds:
+  - Hero_MapInk_Front_P50
+  - Hero_MapInk_Front_Right_P50
+  - Hero_MapInk_Back_Right_P50
+  - Hero_MapInk_Back_P50
+  - Hero_MapInk_Back_Left_P50
+  - Hero_MapInk_Front_Left_P50
+  Front40Id: 
+  Front60Id: 
+  FullSetPitch: 50
+  CalibrationTolerance: 4
+  PitchSets:
+  - Pitch: 50
+    ViewIds:
+    - Hero_MapInk_Front_P50
+    - Hero_MapInk_Front_Right_P50
+    - Hero_MapInk_Back_Right_P50
+    - Hero_MapInk_Back_P50
+    - Hero_MapInk_Back_Left_P50
+    - Hero_MapInk_Front_Left_P50
+  - Pitch: 35
+    ViewIds:
+    - Hero_MapInk_Front_P35
+    - Hero_MapInk_Front_Right_P35
+    - Hero_MapInk_Back_Right_P35
+    - Hero_MapInk_Back_P35
+    - Hero_MapInk_Back_Left_P35
+    - Hero_MapInk_Front_Left_P35

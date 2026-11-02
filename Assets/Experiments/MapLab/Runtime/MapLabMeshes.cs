@@ -581,8 +581,9 @@ namespace KingdomSurvival.MapLab
                         break;
                 }
             }
+            bool vary = settings != null && settings.IsStage04;
             for (int i = 0; i < data.Fences.Count; i++)
-                Fence(mb, data, data.Fences[i]);
+                Fence(mb, data, data.Fences[i], vary);
             for (int i = 0; i < data.Bridges.Count; i++)
                 Bridge(mb, data, data.Bridges[i]);
             for (int i = 0; i < data.Piers.Count; i++)
@@ -678,7 +679,9 @@ namespace KingdomSurvival.MapLab
             }
         }
 
-        private static void Fence(MapLabMeshBuilder mb, MapLabData data, MapLabFence f)
+        // vary (этап 04): небольшие устойчивые различия высоты и толщины
+        // столбов и жердей, тона дерева — от места пролёта; соединения те же.
+        private static void Fence(MapLabMeshBuilder mb, MapLabData data, MapLabFence f, bool vary = false)
         {
             Vector2 dir = f.B - f.A;
             float length = dir.magnitude;
@@ -686,11 +689,19 @@ namespace KingdomSurvival.MapLab
                 return;
             float yaw = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
             float ha = data.SampleHeight(f.A.x, f.A.y), hb = data.SampleHeight(f.B.x, f.B.y);
-            mb.Box(new Vector3(f.A.x, ha + 0.35f, f.A.y), new Vector3(0.16f, 1.1f, 0.16f), yaw, MapLabPaletteIndex.WoodDark, MapLabPattern.Plain, 0.25f);
+            MapLabRandom rng = new MapLabRandom((ulong)MapLabRandom.Hash(Mathf.RoundToInt(f.A.x * 10f), Mathf.RoundToInt(f.A.y * 10f), 0x0FE11CEu) + 1UL);
+            float postH = vary ? 1.1f * rng.Range(0.9f, 1.08f) : 1.1f;
+            float postW = vary ? rng.Range(0.13f, 0.17f) : 0.16f;
+            float tone = vary ? rng.Range(0.9f, 1.06f) : 1f;
+            float upper = vary ? 0.62f + rng.Signed() * 0.05f : 0.62f;
+            float lower = vary ? 0.3f + rng.Signed() * 0.04f : 0.3f;
+            float railA = vary ? rng.Range(0.1f, 0.13f) : 0.12f;
+            float railB = vary ? rng.Range(0.09f, 0.11f) : 0.1f;
+            mb.Box(new Vector3(f.A.x, ha + postH * 0.5f - 0.2f, f.A.y), new Vector3(postW, postH, postW), yaw, MapLabPaletteIndex.WoodDark, MapLabPattern.Plain, 0.25f, tone);
             Vector2 mid = (f.A + f.B) * 0.5f;
             float hm = (ha + hb) * 0.5f;
-            mb.Box(new Vector3(mid.x, hm + 0.62f, mid.y), new Vector3(length, 0.12f, 0.08f), yaw, MapLabPaletteIndex.WoodDark, MapLabPattern.Planks, 0.2f);
-            mb.Box(new Vector3(mid.x, hm + 0.3f, mid.y), new Vector3(length, 0.1f, 0.08f), yaw, MapLabPaletteIndex.WoodDark, MapLabPattern.Planks, 0.2f);
+            mb.Box(new Vector3(mid.x, hm + upper, mid.y), new Vector3(length, railA, 0.08f), yaw, MapLabPaletteIndex.WoodDark, MapLabPattern.Planks, 0.2f, tone * (vary ? rng.Range(0.96f, 1.04f) : 1f));
+            mb.Box(new Vector3(mid.x, hm + lower, mid.y), new Vector3(length, railB, 0.08f), yaw, MapLabPaletteIndex.WoodDark, MapLabPattern.Planks, 0.2f, tone * (vary ? rng.Range(0.94f, 1.02f) : 1f));
         }
 
         // Мост: настил поперёк русла, перила, сваи в воде.

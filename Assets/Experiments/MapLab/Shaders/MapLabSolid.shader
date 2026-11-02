@@ -24,6 +24,9 @@ Shader "Kingdom Survival/MapLab/Solid"
         _RockMean ("Rock mean", Color) = (0.5, 0.5, 0.5, 1)
         _RockScale ("Rock scale", Float) = 14
         _RockStrength ("Rock strength", Range(0, 1)) = 0
+        _Stage04 ("Этап 04: дерево и камень в общем рисунке", Float) = 0
+        _WoodColor ("Этап 04: древесина", Color) = (0.62, 0.5, 0.36, 1)
+        _StoneColor ("Этап 04: камень уступов", Color) = (0.6, 0.58, 0.52, 1)
     }
 
     SubShader
@@ -81,6 +84,9 @@ Shader "Kingdom Survival/MapLab/Solid"
                 float4 _RockMean;
                 float _RockScale;
                 float _RockStrength;
+                float _Stage04;
+                float4 _WoodColor;
+                float4 _StoneColor;
             CBUFFER_END
 
             Varyings Vert(Attributes input)
@@ -108,7 +114,47 @@ Shader "Kingdom Survival/MapLab/Solid"
                 int pattern = (int)floor(i.meta.z * 8.0 + 0.5);
                 float2 f = i.face;
                 float4 d = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, f / float2(2.0, 6.0));
-                if (pattern == 1)        // бревенчатый сруб
+                float3 nRaw = normalize(i.normalWS);
+                int paletteIndex = (int)round(index);
+                bool stage04 = _Stage04 > 0.5;
+                bool wood = stage04 && (paletteIndex == 17 || paletteIndex == 18);
+                bool stone = stage04 && pattern == 4;
+                float inkWeight = 1.0;
+                if (wood)
+                {
+                    // Выцветшее охристое дерево: светлая широкая плоскость, тень —
+                    // от общего света; пара выбранных стыков вместо мелкой фактуры.
+                    c = _WoodColor.rgb * (paletteIndex == 18 ? 0.9 : 1.0) * i.meta.y * (1.0 + (d.g - 0.5) * 0.08);
+                    if (pattern == 5)
+                        c *= 1.0 - 0.07 * Lines(f.x, 1.7, 0.05);
+                    inkWeight = 0.8;
+                }
+                else if (stone)
+                {
+                    // Крупные неравные плоскости тёплого серо-оливкового камня, слабые
+                    // вертикальные штрихи, редкие трещины пером, травяные наплывы
+                    // сверху и осыпь у основания; горизонтальные полки — как земля.
+                    float plane = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, i.positionWS.xz / 13.0 + float2(0.3, 0.1)).g;
+                    c = _StoneColor.rgb * i.meta.y * (0.88 + plane * 0.24);
+                    c *= 1.0 + (SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, f / float2(2.4, 9.0)).b - 0.5) * 0.12;
+                    float3 ground = SAMPLE_TEXTURE2D(_PaintTex, sampler_PaintTex, i.positionWS.xz / _MapSize).rgb;
+                    if (abs(nRaw.y) > 0.6)
+                        c = ground * 0.9;
+                    else if (i.size.y > 0)
+                    {
+                        float top = i.size.y - f.y;
+                        float shelf = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, i.positionWS.xz / 5.0 + float2(0.7, 0.2)).g;
+                        float overhang = (1.0 - smoothstep(0.12 + shelf * 0.55, 0.2 + shelf * 0.55, top)) * smoothstep(0.42, 0.5, shelf);
+                        c = lerp(c, ground * 0.92, overhang);
+                        float scree = 1.0 - smoothstep(0.25 + plane * 0.45, 0.4 + plane * 0.45, f.y);
+                        c = lerp(c, c * float3(1.03, 0.98, 0.92) * 0.9, scree * 0.6);
+                        float crackMask = step(0.6, SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, float2(floor(f.x / 2.9) * 0.173, i.positionWS.y * 0.01 + 0.4)).r);
+                        float crack = Lines(f.x + (d.b - 0.5) * 1.1, 2.9, 0.018) * crackMask * smoothstep(0.3, 0.8, f.y) * (1.0 - smoothstep(0.5, 0.9, 1.0 - top / max(0.5, i.size.y)));
+                        c = lerp(c, _InkColor.rgb, crack * 0.55 * _Outline);
+                    }
+                    inkWeight = 0.75;
+                }
+                else if (pattern == 1)        // бревенчатый сруб
                     c *= 1.0 - 0.28 * Lines(f.y, 0.34, 0.18) + (d.g - 0.5) * 0.12;
                 else if (pattern == 2)   // солома: штрихи по скату
                     c *= 1.0 + (SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, f / float2(0.9, 5.0)).b - 0.5) * 0.42 - 0.12 * Lines(f.y, 0.55, 0.08);
@@ -135,14 +181,16 @@ Shader "Kingdom Survival/MapLab/Solid"
 
                 float3 n = normalize(i.normalWS);
                 // Крышка уступа продолжает землю: свет как у ровной площадки, без «стеклянных» граней.
-                if (pattern == 6)
+                if (pattern == 6 || (stone && abs(nRaw.y) > 0.6))
                     n = float3(0, 1, 0);
                 float3 L = normalize(_LightDir.xyz);
                 if ((int)round(_DebugMode) == 3)
                     return float4(n * 0.5 + 0.5, 1);
-                // Стены и камень — с усиленным делением на свет и тень.
+                // Стены и камень — с усиленным делением на свет и тень. Этап 04:
+                // тень камня и дерева теплее (без лиловых провалов).
                 float wall = 1.0 - saturate(abs(n.y) * 1.3);
-                c = MapLabLight(c, n, L, saturate(_LightStrength * (1.0 + wall * 0.15)), _ShadowSoftness * (1.0 - wall * 0.2), _ToneBands, _ShadowTint.rgb, _LightTint.rgb);
+                float3 shadowTint = (wood || stone) ? lerp(_ShadowTint.rgb, float3(0.66, 0.62, 0.58), 0.55) : _ShadowTint.rgb;
+                c = MapLabLight(c, n, L, saturate(_LightStrength * (1.0 + wall * 0.15) * ((wood || stone) ? 0.8 : 1.0)), _ShadowSoftness * (1.0 - wall * 0.2), _ToneBands, shadowTint, _LightTint.rgb);
 
                 // Линия по рёбрам грани: толщина около пикселя при любом приближении.
                 float2 size = i.size;
@@ -153,7 +201,7 @@ Shader "Kingdom Survival/MapLab/Solid"
                     e = min(min(f.x, abs(size.x) - f.x), min(f.y, size.y - f.y));
                 float px = max(fwidth(e), 1e-4);
                 float edge = 1.0 - saturate(e / (px * 1.3) - 0.4);
-                c = lerp(c, _InkColor.rgb, edge * i.meta.w * _Outline);
+                c = lerp(c, _InkColor.rgb, edge * i.meta.w * _Outline * inkWeight);
                 float4 p = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, i.positionWS.xz / 23.0 + float2(0.11, 0.53));
                 c *= 1.0 + (p.a - 0.5) * _Paper * 0.15;
                 c = MapLabSaturate(c, _Saturation);

@@ -42,6 +42,7 @@ Shader "Kingdom Survival/MapLab/Terrain"
         _ObjShadowTex ("Этап 03: тени объектов (R падающая, G контактная)", 2D) = "black" {}
         _ObjShadow ("Сила падающей, контактной, тонов, размер карты", Vector) = (0, 0, 2, 256)
         _ObjShadowColor ("Цвет тени объектов", Color) = (0.56, 0.6, 0.62, 1)
+        _Stage04 ("Этап 04: градиент контакта, зерно, пятна", Vector) = (0, 0, 0, 0)
     }
 
     SubShader
@@ -114,6 +115,7 @@ Shader "Kingdom Survival/MapLab/Terrain"
                 float4 _PaintRect;
                 float4 _ObjShadow;
                 float4 _ObjShadowColor;
+                float4 _Stage04;    // x — градиентный контакт, y — зерно, z — пятна (сила в краске), w — резерв
             CBUFFER_END
 
             Varyings Vert(Attributes input)
@@ -224,7 +226,7 @@ Shader "Kingdom Survival/MapLab/Terrain"
                 // Этап 03: собранные цветные тени объектов. Маска билинейна,
                 // порог с шириной в пиксель даёт чёткую форму с узким мягким
                 // краем; тоны — близкие ступени, контактная плотнее.
-                if (_ObjShadow.x > 0.001 || mode == 14)
+                if (_ObjShadow.x > 0.001 || mode == 14 || mode == 15)
                 {
                     float2 sh = SAMPLE_TEXTURE2D(_ObjShadowTex, sampler_ObjShadowTex, world / max(1.0, _ObjShadow.w)).rg;
                     float grain = (SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, world / 3.7).r - 0.5) * 0.12;
@@ -234,16 +236,39 @@ Shader "Kingdom Survival/MapLab/Terrain"
                     float contact = smoothstep(0.5 - aaK, 0.5 + aaK, sh.g + grain);
                     float tones = _ObjShadow.z;
                     float tone = cast * _ObjShadow.x;
-                    if (tones > 1.5)
-                        tone = max(tone, contact * saturate(_ObjShadow.x + _ObjShadow.y));
-                    if (tones > 2.5)
-                        tone = max(tone, smoothstep(0.82 - aaC, 0.82 + aaC, sh.r + grain) * saturate(_ObjShadow.x * 1.25));
+                    if (_Stage04.x > 0.5)
+                    {
+                        // Этап 04: одна тень — чёткий внешний край падающей формы,
+                        // внутри непрерывный градиент плотности от опоры; без
+                        // отдельного порога контакта и без второго ореола.
+                        tone = cast * saturate(_ObjShadow.x + _ObjShadow.y * sh.g);
+                    }
+                    else
+                    {
+                        if (tones > 1.5)
+                            tone = max(tone, contact * saturate(_ObjShadow.x + _ObjShadow.y));
+                        if (tones > 2.5)
+                            tone = max(tone, smoothstep(0.82 - aaC, 0.82 + aaC, sh.r + grain) * saturate(_ObjShadow.x * 1.25));
+                    }
                     if (mode == 14)
                         return float4(lerp(float3(0.95, 0.95, 0.92), float3(0.2, 0.25, 0.45), saturate(tone * 1.6)), 1);
+                    if (mode == 15)
+                        return float4(lerp(float3(0.95, 0.95, 0.92), float3(0.75, 0.25, 0.15), sh.g), 1);
                     c = lerp(c, c * _ObjShadowColor.rgb, saturate(tone));
                 }
 
                 c = lerp(c, _InkColor.rgb, saturate(paint.a * _Outline));
+                // Этап 04: мелкое пигментное зерно — только на земле (не вода,
+                // не полотно дороги, не камень), в мире, по mip-текстуре без муара;
+                // вдали гаснет. Перо и тени-ленты — отдельная геометрия, его не получают.
+                if (_Stage04.y > 0.001)
+                {
+                    float ground = (1.0 - maskB.r) * (1.0 - saturate(maskA.b * 1.4)) * (1.0 - saturate(maskB.a * 1.2));
+                    float near = 1.0 - smoothstep(0.05, 0.22, pixelWorld);
+                    float g1 = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, world / 1.3 + float2(0.21, 0.77)).g - 0.5;
+                    float g2 = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, float2(world.x * 0.6 - world.y * 0.8, world.x * 0.8 + world.y * 0.6) / 0.55).r - 0.5;
+                    c *= 1.0 + (g1 * 0.6 + g2 * 0.4) * 0.16 * _Stage04.y * ground * near;
+                }
                 c = MapLabSaturate(c, _Saturation);
                 if (mode == 9)
                     c = lerp(float3(0.62, 0.62, 0.6), c, 0.25);

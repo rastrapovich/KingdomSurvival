@@ -14,6 +14,7 @@ namespace KingdomSurvival.MapLab
     {
         public sealed class Result
         {
+            public bool Gradient;
             public int Resolution;
             public float[] Cast;
             public float[] Contact;
@@ -44,6 +45,13 @@ namespace KingdomSurvival.MapLab
             float horizontal = lightDir.magnitude;
             lightDir = horizontal > 1e-4f ? lightDir / horizontal : Vector2.right;
             float stretch = 1f / Mathf.Max(0.35f, L.y);
+            // Этап 04: контакт — плавное поле плотности (1 у опоры → 0), а не
+            // вторая бинарная форма; шейдер умножает его на маску падающей тени.
+            bool gradient = settings.IsStage04;
+            MapLabStage04Settings s4 = settings.Stage04;
+            float lobes = gradient ? s4.CrownLobes : 0f;
+            uint lobeSeed = (uint)MapLabRandom.StreamSeed(data.Seed, "shadow-lobes", MapLabData.AlgorithmVersion);
+            result.Gradient = gradient;
             foreach (Caster c in casters)
             {
                 if (c.Building)
@@ -52,7 +60,29 @@ namespace KingdomSurvival.MapLab
                     Vector2 shift = Hit(data, c.Base + Vector3.up * c.Height, L) - new Vector2(c.Base.x, c.Base.z);
                     List<Vector2> hull = BuildingHull(c, shift);
                     Polygon(result.Cast, res, texel, hull);
-                    Polygon(result.Contact, res, texel, Footprint(c, 0.25f));
+                    if (gradient)
+                        PolygonFalloff(result.Contact, res, texel, Footprint(c, 0f), 1.2f * s4.ContactReach);
+                    else
+                        Polygon(result.Contact, res, texel, Footprint(c, 0.25f));
+                }
+                else if (gradient)
+                {
+                    Vector3 crown = c.Base + Vector3.up * c.CenterHeight;
+                    Vector2 hit = Hit(data, crown, L);
+                    Vector2 foot = new Vector2(c.Base.x, c.Base.z);
+                    // Стабильные крупные выступы контура: фаза — от места опоры.
+                    float phase = MapLabRandom.Hash01(Mathf.RoundToInt(foot.x * 16f), Mathf.RoundToInt(foot.y * 16f), lobeSeed) * 6.283f;
+                    Ellipse(result.Cast, res, texel, hit, lightDir, c.Radius * stretch, c.Radius, lobes, phase);
+                    for (int k = 1; k <= 3; k++)
+                    {
+                        float t = k / 4f;
+                        float r = Mathf.Lerp(c.ContactRadius * 1.1f, c.Radius * 0.85f, t);
+                        Ellipse(result.Cast, res, texel, Vector2.Lerp(foot, hit, t), lightDir, r * Mathf.Lerp(1f, stretch, t), r, lobes * 0.5f, phase + k);
+                    }
+                    Ellipse(result.Cast, res, texel, foot, lightDir, c.ContactRadius * 1.2f, c.ContactRadius * 1.05f);
+                    // Градиент: максимум у ствола, вытянут по свету к пятну кроны.
+                    float reach = Mathf.Max(c.ContactRadius, c.Radius * s4.ContactReach);
+                    Falloff(result.Contact, res, texel, Vector2.Lerp(foot, hit, 0.18f), lightDir, reach * 1.25f, reach * 0.8f);
                 }
                 else
                 {
@@ -149,7 +179,8 @@ namespace KingdomSurvival.MapLab
             return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
         }
 
-        private static void Ellipse(float[] mask, int res, float texel, Vector2 center, Vector2 axis, float a, float b)
+        // Плавное поле плотности эллипса: 1 в центре, 0 на краю (без порога).
+        private static void Falloff(float[] mask, int res, float texel, Vector2 center, Vector2 axis, float a, float b)
         {
             float reach = Mathf.Max(a, b) + texel * 2f;
             Vector2 perp = new Vector2(-axis.y, axis.x);
@@ -159,8 +190,66 @@ namespace KingdomSurvival.MapLab
             {
                 Vector2 rel = new Vector2((x + 0.5f) * texel, (z + 0.5f) * texel) - center;
                 float u = Vector2.Dot(rel, axis) / a, v = Vector2.Dot(rel, perp) / b;
+                float q = Mathf.Clamp01(1f - Mathf.Sqrt(u * u + v * v));
+                float density = q * q * (3f - 2f * q);
+                int i = z * res + x;
+                if (density > mask[i])
+                    mask[i] = density;
+            }
+        }
+
+        // Плотность у основания постройки: 1 под стенами, плавно к нулю за reach.
+        private static void PolygonFalloff(float[] mask, int res, float texel, List<Vector2> poly, float reach)
+        {
+            Vector2 min = poly[0], max = poly[0];
+            foreach (Vector2 p in poly)
+            {
+                min = Vector2.Min(min, p);
+                max = Vector2.Max(max, p);
+            }
+            int x0 = Mathf.Clamp(Mathf.FloorToInt((min.x - reach) / texel), 0, res - 1), x1 = Mathf.Clamp(Mathf.CeilToInt((max.x + reach) / texel), 0, res - 1);
+            int z0 = Mathf.Clamp(Mathf.FloorToInt((min.y - reach) / texel), 0, res - 1), z1 = Mathf.Clamp(Mathf.CeilToInt((max.y + reach) / texel), 0, res - 1);
+            float area = 0f;
+            for (int i = 0; i < poly.Count; i++)
+                area += Cross(Vector2.zero, poly[i], poly[(i + 1) % poly.Count]);
+            float sign = area >= 0f ? 1f : -1f;
+            for (int z = z0; z <= z1; z++)
+            for (int x = x0; x <= x1; x++)
+            {
+                Vector2 p = new Vector2((x + 0.5f) * texel, (z + 0.5f) * texel);
+                float d = float.MinValue;
+                for (int k = 0; k < poly.Count; k++)
+                {
+                    Vector2 a = poly[k], b = poly[(k + 1) % poly.Count];
+                    Vector2 e = (b - a).normalized;
+                    d = Mathf.Max(d, Vector2.Dot(p - a, new Vector2(e.y, -e.x) * sign));
+                }
+                float q = 1f - Mathf.Clamp01(d / reach);
+                float density = q * q * (3f - 2f * q);
+                int i = z * res + x;
+                if (density > mask[i])
+                    mask[i] = density;
+            }
+        }
+
+        private static void Ellipse(float[] mask, int res, float texel, Vector2 center, Vector2 axis, float a, float b, float lobes = 0f, float phase = 0f)
+        {
+            float reach = Mathf.Max(a, b) * (1f + lobes * 0.2f) + texel * 2f;
+            Vector2 perp = new Vector2(-axis.y, axis.x);
+            Bounds(res, texel, center, reach, out int x0, out int x1, out int z0, out int z1);
+            for (int z = z0; z <= z1; z++)
+            for (int x = x0; x <= x1; x++)
+            {
+                Vector2 rel = new Vector2((x + 0.5f) * texel, (z + 0.5f) * texel) - center;
+                float u = Vector2.Dot(rel, axis) / a, v = Vector2.Dot(rel, perp) / b;
                 // Расстояние до края эллипса в мире (приближённо) → сглаживание ~1 тексель.
                 float q = Mathf.Sqrt(u * u + v * v);
+                if (lobes > 0f)
+                {
+                    // Несколько крупных согласованных выступов, не рябь.
+                    float angle = Mathf.Atan2(v, u);
+                    q /= 1f + lobes * (0.11f * Mathf.Sin(3f * angle + phase) + 0.07f * Mathf.Sin(5f * angle + phase * 1.7f));
+                }
                 float d = (q - 1f) * Mathf.Min(a, b);
                 float cover = Mathf.Clamp01(0.5f - d / (texel * 1.2f));
                 int i = z * res + x;

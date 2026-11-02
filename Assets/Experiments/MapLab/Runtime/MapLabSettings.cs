@@ -42,6 +42,8 @@ namespace KingdomSurvival.MapLab
         ForestGroups = 12,
         ForestAccents = 13,
         ShadowMask = 14,
+        // Этап 04.
+        ContactGradient = 15,
     }
 
     // Именованные режимы камеры (наклон вниз от горизонта). Low35 — этап 03,
@@ -61,6 +63,10 @@ namespace KingdomSurvival.MapLab
     {
         Stage02 = 0,
         Stage03 = 1,
+        // Этап 04 — тот же язык, что этап 03, плюс проход согласования: единая
+        // тень, ограды и уступы в общем рисунке, примыкания троп, зерно и пятна,
+        // травинки, ритм леса, новый герой.
+        Stage04 = 2,
     }
 
     public enum MapLabArtMode
@@ -349,8 +355,8 @@ namespace KingdomSurvival.MapLab
     [Serializable]
     public sealed class MapLabStage03Settings
     {
-        [Tooltip("Stage02 — прежний живописный вид (набор арта этапа 02); Stage03 — тушь и спокойные массы (набор этапа 03).")]
-        public MapLabLook Look = MapLabLook.Stage03;
+        [Tooltip("Stage02 — прежний живописный вид (набор арта этапа 02); Stage03 — тушь и спокойные массы (набор этапа 03); Stage04 — то же с проходом согласования этапа 04.")]
+        public MapLabLook Look = MapLabLook.Stage04;
         [Tooltip("Плотность запекания покраски, текселей на единицу мира (тайлы по чанкам рельефа). Этап 02 — 2048 на всю карту (8 на 256 ед.).")]
         [Range(6f, 24f)] public float PaintTexelsPerUnit = 16f;
         [Tooltip("Тушевые линии дорог, троп и берегов (общий профиль пера).")]
@@ -479,6 +485,52 @@ namespace KingdomSurvival.MapLab
         public float FlatStrokeAngle = 20f;
     }
 
+    // Этап 04: компактные ручки прохода согласования (остальное — этапа 03).
+    [Serializable]
+    public sealed class MapLabStage04Settings
+    {
+        [Header("Тень")]
+        [Tooltip("Плотность у опоры: насколько темнее падающей тени место у ствола или стены (плавный градиент, без внутреннего диска).")]
+        [Range(0f, 1f)] public float ContactDensity = 0.45f;
+        [Tooltip("Длина градиента контакта, доля радиуса кроны.")]
+        [Range(0.2f, 2f)] public float ContactReach = 0.9f;
+        [Tooltip("Крупные выступы контура тени кроны, 0 — ровный эллипс.")]
+        [Range(0f, 1f)] public float CrownLobes = 0.4f;
+
+        [Header("Луг")]
+        [Tooltip("Мелкое пигментное зерно заливки (только земля, без воды, дорог и пера).")]
+        [Range(0f, 1f)] public float Grain = 0.35f;
+        [Tooltip("Редкие акварельные пятна: сила.")]
+        [Range(0f, 1f)] public float Blots = 0.45f;
+        [Tooltip("Размер пятен, ед.")]
+        [Range(8f, 80f)] public float BlotScale = 26f;
+        [Tooltip("Доля луга под пятнами.")]
+        [Range(0f, 0.6f)] public float BlotShare = 0.22f;
+
+        [Header("Дороги и поля")]
+        [Tooltip("Длина перехода тропы к главной дороге у узла, ед.")]
+        [Range(0f, 20f)] public float JunctionLength = 7f;
+        [Tooltip("Расширение устья тропы у дороги, ед.")]
+        [Range(0f, 1.5f)] public float JunctionMouth = 0.55f;
+        [Tooltip("Доля меж с пером (выбранные участки; остальное — цвет и борозды).")]
+        [Range(0f, 1f)] public float FieldInkShare = 0.3f;
+
+        [Header("Детали")]
+        [Tooltip("Редкость пучков травы: 0 — нет, 1 — чаще.")]
+        [Range(0f, 1f)] public float Grass = 0.5f;
+        [Tooltip("Крупный ритм леса: тёплые и холодные массы, светлее выбранные гребни.")]
+        [Range(0f, 1f)] public float ForestRhythm = 0.5f;
+        [Tooltip("Древесина оград и мостов (светлая плоскость).")]
+        public Color WoodColor = new Color(0.62f, 0.5f, 0.36f, 1f);
+        [Tooltip("Заливка стенок уступов: тёплый серо-оливковый.")]
+        public Color RockColor = new Color(0.6f, 0.58f, 0.52f, 1f);
+
+        [Header("Герой")]
+        [Tooltip("Наклон смены набора героя 50° ↔ 35° и его гистерезис (как у домов).")]
+        [Range(36f, 49f)] public float HeroViewSwitch = 42.5f;
+        [Range(0f, 6f)] public float HeroViewHysteresis = 2f;
+    }
+
     // Описание карты: все ручки художника. Сама генерация — MapLabGenerator.
     [CreateAssetMenu(menuName = "Kingdom Survival/MapLab/Настройки карты", fileName = "MapLabSettings")]
     public sealed class MapLabSettings : ScriptableObject
@@ -494,9 +546,12 @@ namespace KingdomSurvival.MapLab
         public MapLabCameraSettings Camera = new MapLabCameraSettings();
         public MapLabArtSettings Art = new MapLabArtSettings();
         public MapLabStage03Settings Stage03 = new MapLabStage03Settings();
+        public MapLabStage04Settings Stage04 = new MapLabStage04Settings();
         public MapLabDiagnosticsSettings Diagnostics = new MapLabDiagnosticsSettings();
 
-        public bool IsStage03 => Stage03.Look == MapLabLook.Stage03;
+        // Конвейер этапа 03 (тайлы, перо, акценты, тени) — и у этапа 04.
+        public bool IsStage03 => Stage03.Look >= MapLabLook.Stage03;
+        public bool IsStage04 => Stage03.Look == MapLabLook.Stage04;
         public MapLabAdvancedSettings Advanced = new MapLabAdvancedSettings();
 
         public int Resolution => Mathf.Clamp((int)General.Quality, 33, 1025);

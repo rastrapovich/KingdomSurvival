@@ -67,7 +67,7 @@ namespace KingdomSurvival.MapLab
         // тень, ограды и уступы в общем рисунке, примыкания троп, зерно и пятна,
         // травинки, ритм леса, новый герой.
         Stage04 = 2,
-        // Этап 05 — конвейер этапа 04 плюс камера до Zoom 3 и 50°, единое перо,
+        // Этап 05 — конвейер этапа 04 плюс камера до Zoom 3 и 35°, единое перо,
         // живые края, модули оград и мостов, деревня, новый пакет ассетов.
         Stage05 = 3,
     }
@@ -358,7 +358,7 @@ namespace KingdomSurvival.MapLab
     [Serializable]
     public sealed class MapLabStage03Settings
     {
-        [Tooltip("Stage02 — прежний живописный вид (набор арта этапа 02); Stage03 — тушь и спокойные массы (набор этапа 03); Stage04 — то же с проходом согласования этапа 04; Stage05 — камера до Zoom 3 и 50°, единое перо, модули оград и мостов, деревня.")]
+        [Tooltip("Stage02 — прежний живописный вид (набор арта этапа 02); Stage03 — тушь и спокойные массы (набор этапа 03); Stage04 — то же с проходом согласования этапа 04; Stage05 — камера до Zoom 3 и 35°, единое перо, модули оград и мостов, деревня.")]
         public MapLabLook Look = MapLabLook.Stage05;
         [Tooltip("Плотность запекания покраски, текселей на единицу мира (тайлы по чанкам рельефа). Этап 02 — 2048 на всю карту (8 на 256 ед.).")]
         [Range(6f, 24f)] public float PaintTexelsPerUnit = 16f;
@@ -566,7 +566,7 @@ namespace KingdomSurvival.MapLab
             return IsStage05 ? Mathf.Min(rigLimit, Mathf.Clamp(Stage05.ZoomMax, 2f, 4f)) : rigLimit;
         }
 
-        // Наклон для приближения: этап 05 — от 60° к 50° ровно на фактическом пределе.
+        // Наклон для приближения: этап 05 — от 60° к 35° ровно на фактическом пределе.
         public float PitchFor(float zoom, float rigLimit)
         {
             float max = MaxZoom(rigLimit);

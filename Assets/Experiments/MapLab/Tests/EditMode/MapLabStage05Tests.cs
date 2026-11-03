@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace KingdomSurvival.MapLab.Tests
 {
-    // Этап 05: ограничение прежнего Zoom 8 и 50° на фактическом пределе, один
+    // Этап 05: ограничение прежнего Zoom 8 и 35° на фактическом пределе, один
     // ракурс дома и набор героя при любом приближении, граф оград (уникальные
     // узлы и рёбра, общие границы — один раз, ворота не на дорогах и домах),
     // сухие опоры мостов, общая граница берега без NaN и обрывов, импорт
@@ -70,7 +70,7 @@ namespace KingdomSurvival.MapLab.Tests
                     Assert.AreEqual(3f, rig.MaxZoom, 1e-4f, "Фактический предел этапа 05 — 3");
                     rig.Zoom = 8f;
                     Assert.AreEqual(3f, rig.Zoom, 1e-4f, "Zoom 8 не ограничен");
-                    Assert.AreEqual(50f, rig.Pitch, 0.01f, "На фактическом пределе — 50°");
+                    Assert.AreEqual(35f, rig.Pitch, 0.01f, "На фактическом пределе — 35°");
                     rig.ZoomAround(8f, new Vector2(0.5f, 0.5f), false);
                     Assert.AreEqual(3f, rig.Zoom, 1e-4f, "Приближение к курсору выходит за предел");
                     rig.Zoom = 1f;
@@ -80,16 +80,16 @@ namespace KingdomSurvival.MapLab.Tests
                     {
                         rig.Zoom = z;
                         Assert.LessOrEqual(rig.Pitch, previous + 1e-4f);
-                        Assert.GreaterOrEqual(rig.Pitch, 50f - 1e-3f);
+                        Assert.GreaterOrEqual(rig.Pitch, 35f - 1e-3f);
                         previous = rig.Pitch;
                     }
-                    // Предел настраивается в 2–4, наклон 50° — всегда на нём.
+                    // Предел настраивается в 2–4, наклон 35° — всегда на нём.
                     foreach (float max in new[] { 2f, 4f })
                     {
                         s.Stage05.ZoomMax = max;
                         rig.Zoom = 8f;
                         Assert.AreEqual(max, rig.Zoom, 1e-4f);
-                        Assert.AreEqual(50f, rig.Pitch, 0.01f);
+                        Assert.AreEqual(35f, rig.Pitch, 0.01f);
                     }
                     s.Stage05.ZoomMax = 9f;
                     Assert.AreEqual(4f, rig.MaxZoom, 1e-4f, "Вне диапазона 2–4");

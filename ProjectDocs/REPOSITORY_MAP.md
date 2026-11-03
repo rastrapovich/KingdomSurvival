@@ -26,7 +26,8 @@
 | Планирование квестов и перенос | Локальная `QuestWorkshop/` (не в Git); Unity-мост — [QuestWorkshopBridge/](../Assets/_Project/QuestWorkshopBridge/) |
 | Трекер разработки | [DevelopmentTracker/Editor/](../Assets/_Project/DevelopmentTracker/Editor/); фактический журнал — [DEVELOPMENT_STATUS.md](DEVELOPMENT_STATUS.md) |
 | Эксперимент MapLab | [Assets/Experiments/MapLab/README.md](../Assets/Experiments/MapLab/README.md): `Runtime/`, `Editor/`, `Shaders/`, `Tests/EditMode/`; сцена `Scenes/MapLab_Painterly_Test.unity`, выгрузки — `MapLabExports/` (не в Git) |
-| Стиль карты и художественные брифы MapLab | [MAP_STYLE_GUIDE.md](MAP_STYLE_GUIDE.md): тушь/акварель, формы 70/25/5, списывание деталей, живой ритм штрихов и травы; читать перед созданием арта и правкой программного рисунка |
+| Карта, окружение и стилизация 3D-анимационных рендеров | [MAP_STYLE_GUIDE.md](MAP_STYLE_GUIDE.md): тушь/акварель, формы 70/25/5; §1.1 — точное сохранение всех пропорций, поз, силуэтов и альфа-каналов; конвейер — [ART_PIPELINE_GUIDE.md](ART_PIPELINE_GUIDE.md) |
+| Концепты персонажей/существ, портреты и отдельные изображения | [ART_STYLE_GUIDE.md](ART_STYLE_GUIDE.md) и [иллюстрированная книга](KingdomSurvival_Art_Style_Canon_v1_1.html); старые растения в книге — исторические примеры |
 | Blender: KS Ground Renderer | [Tools/Blender/ks_ground_renderer/README_RU.md](../Tools/Blender/ks_ground_renderer/README_RU.md); исходники рядом, проверки — `Tools/Blender/tests/` |
 
 ### Где лежат авторские данные

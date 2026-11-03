@@ -180,6 +180,22 @@ namespace KingdomSurvival.MapLab.Editor
                         RunGuarded(() => { MapLabArtImport.ReimportStage05Menu(); });
                 }
                 EditorGUILayout.EndHorizontal();
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button(new GUIContent("Подключить пакет скал 06…", "Пакет ревизии 6: рисованные стены уступов (tall/medium/low), торцы, контрфорс вида спереди и осыпи 50°. Папка Assets/_Project/Art/MapLabCliffs06.")))
+                    RunGuarded(() => { MapLabArtImport.ImportCliffs06Menu(); });
+                using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(MapLabArtImport.LastCliffs06Folder)))
+                {
+                    if (GUILayout.Button(new GUIContent("Переподключить скалы 06", MapLabArtImport.LastCliffs06Folder)))
+                        RunGuarded(() => { MapLabArtImport.ReimportCliffs06Menu(); });
+                }
+                EditorGUILayout.EndHorizontal();
+                if (s.IsStage05)
+                {
+                    MapLabCliffs06.Stats cs = MapLabCliffs06.LastStats;
+                    EditorGUILayout.LabelField(view.DrawnCliffs06
+                        ? $"Скалы: рисованные (ревизия 06) · линий {cs.Lines}, кусков {cs.Pieces}, торцов {cs.Ends}, контрфорсов {cs.Buttresses}"
+                        : (view.ResolvedArtSet06 == null ? "Скалы: пакет 06 не подключён — грани этапа 05" : "Скалы: грани этапа 05 (рисованные выключены в Stage05 → Drawn Cliffs)"), EditorStyles.miniLabel);
+                }
                 MapLabArtSet set05 = view.ResolvedArtSet05;
                 if (s.IsStage05)
                 {

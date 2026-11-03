@@ -312,6 +312,21 @@ namespace KingdomSurvival.MapLab
             }
         }
 
+        // Скалы ревизии 06: осыпи-спрайты (50°) у подножия рисованной стены.
+        public static void PlanCliffScree06(MapLabData data, MapLabSettings settings, MapLabCliffs06.Kit kit, Plan plan)
+        {
+            if (kit == null || kit.Scree.Count == 0)
+                return;
+            MapLabRandom rng = MapLabRandom.ForStream(data.Seed, "cliff06-scree", MapLabData.AlgorithmVersion);
+            foreach (Vector3 spot in MapLabCliffs06.ScreeSpots)
+            {
+                MapLabArtEntry e = Pick(kit.Scree, rng.Value());
+                float s = Mathf.Lerp(e.ScaleRange.x, e.ScaleRange.y, rng.Value());
+                plan.Add(e, Make(e, spot - Vector3.up * 0.05f, s, rng.Range(0.95f, 1.03f), 0f, 1f, -1));
+                LastDecor05.Rocks++;
+            }
+        }
+
         // Мелкие спрайты, которые плавно гаснут вдали (без появления рывком).
         public static bool IsDetail05(MapLabArtEntry e)
         {

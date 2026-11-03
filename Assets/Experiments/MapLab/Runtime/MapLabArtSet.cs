@@ -18,6 +18,8 @@ namespace KingdomSurvival.MapLab
         Decal = 8,
         FenceModule = 9,
         BridgeModule = 10,
+        // Ревизия 06: рисованные отвесные скалы.
+        CliffModule = 11,
     }
 
     // Как рисунок получает свет: художественное затенение уже в рисунке (не
@@ -115,6 +117,18 @@ namespace KingdomSurvival.MapLab
         public bool BaseRegistered;
         [Tooltip("Запись взята из набора другого этапа (тот же SHA-256) — файл не дублируется.")]
         public string ReusedFrom;
+
+        [Header("Скалы ревизии 06")]
+        [Tooltip("Класс высоты стены: tall, medium, low.")]
+        public string HeightClass;
+        [Tooltip("Сторона торца: left, right.")]
+        public string Side;
+        [Tooltip("Линия края площадки и линия подножия, px от верхнего края полного холста.")]
+        public float RockTopPx = -1f;
+        public float BasePx = -1f;
+        public float PxPerUnit = 100f;
+        [Tooltip("Ширина видимого рисунка в мире (осыпи).")]
+        public float WorldWidthHint;
 
         public bool HasTexture => Texture != null;
 

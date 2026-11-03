@@ -44,6 +44,8 @@ namespace KingdomSurvival.MapLab.Editor
                 view.MarkerSet04 = MapLabArtImport.LoadStage04Markers();
                 view.ArtSet05 = MapLabArtImport.LoadStage05Set();
                 view.MarkerSet05 = MapLabArtImport.LoadStage05Markers();
+                view.ArtSet06 = MapLabArtImport.LoadCliffs06Set();
+                view.CliffShader = MapLabAssets.LoadShader("MapLabCliff.shader");
                 view.InkShader = MapLabAssets.LoadShader("MapLabInk.shader");
                 view.GrassShader = MapLabAssets.LoadShader("MapLabGrass.shader");
                 view.ModuleShader = MapLabAssets.LoadShader("MapLabModule.shader");
@@ -196,6 +198,36 @@ namespace KingdomSurvival.MapLab.Editor
                     View(Mathf.Min(3f, rig.MaxZoom), (l.LandA + l.LandB) * 0.5f);
                     Shot($"stage05/bridges/bridge_{b}_z3");
                 }
+                // Скалы ревизии 06: рисованные стены против граней этапа 05 на тех же местах.
+                report.AppendLine("Пресет В: " + Cliffs06(view));
+                // Крупные уступы — пресет А (холм и уступ), тот же размер кадра и наклон.
+                MapLabSettings hill = UnityEngine.Object.Instantiate(MapLabAssets.EnsurePreset(MapLabPresetKind.HillAndLedge));
+                hill.Stage03.Look = MapLabLook.Stage05;
+                hill.Camera.PitchByZoom = true;
+                view.Settings = hill;
+                view.Generate(null);
+                report.AppendLine($"Пресет А seed {hill.General.Seed}: " + Cliffs06(view));
+                List<Vector2> cliffSpots = CliffSpots(view.Data, 3);
+                MapLabSettings keep = settings;
+                settings = hill;
+                foreach (bool drawn in new[] { true, false })
+                {
+                    settings.Stage05.DrawnCliffs = drawn;
+                    view.Generate(null);
+                    string tag = drawn ? "drawn" : "faces05";
+                    for (int c = 0; c < cliffSpots.Count; c++)
+                    {
+                        foreach (float z in new[] { 3f, 2f, 1.3f })
+                        {
+                            View(z, cliffSpots[c]);
+                            Shot($"stage05/cliffs06/{tag}/spot{c}_z{z:0.#}");
+                        }
+                    }
+                }
+                settings = keep;
+                view.Settings = settings;
+                UnityEngine.Object.DestroyImmediate(hill);
+                view.Generate(null);
                 // Слои: без пятен, без спрайтов, без пера берега.
                 if (spots.HasRiver)
                 {
@@ -343,6 +375,36 @@ namespace KingdomSurvival.MapLab.Editor
             }
             sb.Append("Зависимость: деревья и кусты этапа 05 — набор этапа 03 (").Append(s03 != null ? $"{s03.PackageId}, записей {s03.Entries.Count}" : "НЕ ПОДКЛЮЧЁН — деревья процедурные").Append(").");
             return sb.ToString();
+        }
+
+        private static string Cliffs06(MapLabView view)
+        {
+            MapLabArtSet set = view.ResolvedArtSet06;
+            if (set == null)
+                return "Скалы 06: набор не подключён — грани этапа 05.";
+            MapLabCliffs06.Stats st = MapLabCliffs06.LastStats;
+            return $"Скалы 06: {set.PackageId} · записей {set.Entries.Count} · на карте {(view.DrawnCliffs06 ? "рисованные" : "грани 05")}; линий {st.Lines} (" +
+                   string.Join(", ", st.ClassLines.Select(p => $"{p.Key} {p.Value}")) + $"), кусков {st.Pieces}, торцов {st.Ends}, растворённых концов {st.Faded}, контрфорсов {st.Buttresses}, пропущено линий {st.Skipped}, средний масштаб {st.MeanScale:0.00}, осыпей {MapLabCliffs06.ScreeSpots.Count}";
+        }
+
+        // Места уступов, обращённых к камере, разнесённые по карте.
+        private static List<Vector2> CliffSpots(MapLabData d, int count)
+        {
+            List<(Vector2 p, float h)> candidates = new List<(Vector2, float)>();
+            foreach (MapLabCliffLine line in d.CliffLines)
+                foreach (MapLabCliffColumn c in line.Columns)
+                    if (Vector2.Dot(c.Outward, Vector2.down) > 0.5f && c.Top - c.Bottom > 2.5f)
+                        candidates.Add(((c.Start + c.End) * 0.5f + c.Outward * 2.5f, c.Top - c.Bottom));
+            candidates.Sort((a, b) => b.h.CompareTo(a.h));
+            List<Vector2> spots = new List<Vector2>();
+            foreach ((Vector2 p, float h) in candidates)
+            {
+                if (spots.Count >= count)
+                    break;
+                if (spots.All(s => Vector2.Distance(s, p) > 40f) && p.x > 45f && p.y > 35f && p.x < d.Size - 45f && p.y < d.Size - 35f)
+                    spots.Add(p);
+            }
+            return spots;
         }
 
         private static string Village(MapLabData d)

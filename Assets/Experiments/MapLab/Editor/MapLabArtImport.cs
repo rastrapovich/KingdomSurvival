@@ -85,7 +85,7 @@ namespace KingdomSurvival.MapLab.Editor
         public static readonly Profile Stage05 = new Profile
         {
             Name = "этап 05", Folder = Stage05Folder, SetPath = Stage05SetPath, MarkerPath = Stage05MarkerPath,
-            LastFolderKey = "KingdomSurvival.MapLab.Stage05Package", MinRevision = 5, MaxRevision = 99, BootHintPivots = true,
+            LastFolderKey = "KingdomSurvival.MapLab.Stage05Package", MinRevision = 5, MaxRevision = 5, BootHintPivots = true,
             ReuseSetPath = Stage04SetPath, RegisterBuildings = true,
         };
 
@@ -117,6 +117,47 @@ namespace KingdomSurvival.MapLab.Editor
 
         public static MapLabMarkerSet LoadStage05Markers() => AssetDatabase.LoadAssetAtPath<MapLabMarkerSet>(Stage05MarkerPath);
 
+        public const string Cliffs06Folder = "Assets/_Project/Art/MapLabCliffs06";
+        public const string Cliffs06SetPath = Cliffs06Folder + "/MapLabArtSet_Cliffs06.asset";
+
+        // Ревизия 06: рисованные отвесные скалы (cliff_module) — стены, торцы,
+        // контрфорс вида спереди и осыпи 50°. Свой набор; наборы этапов 02–05
+        // не меняются. Фишки в пакете нет.
+        public static readonly Profile Cliffs06 = new Profile
+        {
+            Name = "скалы 06", Folder = Cliffs06Folder, SetPath = Cliffs06SetPath, MarkerPath = Cliffs06Folder + "/MapLabMarkerSet_Cliffs06.asset",
+            LastFolderKey = "KingdomSurvival.MapLab.Cliffs06Package", MinRevision = 6, MaxRevision = 99,
+        };
+
+        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Подключить пакет скал 06…", priority = 418)]
+        public static void ImportCliffs06Menu()
+        {
+            string start = EditorPrefs.GetString(Cliffs06.LastFolderKey, "");
+            string folder = EditorUtility.OpenFolderPanel("Распакованная папка пакета скал MapLab ревизии 06 (с ASSET_MANIFEST.json)", start, "");
+            if (string.IsNullOrEmpty(folder))
+                return;
+            ImportInteractive(folder, Cliffs06);
+        }
+
+        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Переподключить пакет скал 06", priority = 419)]
+        public static void ReimportCliffs06Menu()
+        {
+            string folder = EditorPrefs.GetString(Cliffs06.LastFolderKey, "");
+            if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder))
+            {
+                ImportCliffs06Menu();
+                return;
+            }
+            ImportInteractive(folder, Cliffs06);
+        }
+
+        public static string LastCliffs06Folder => EditorPrefs.GetString(Cliffs06.LastFolderKey, "");
+
+        public static MapLabArtSet LoadCliffs06Set() => AssetDatabase.LoadAssetAtPath<MapLabArtSet>(Cliffs06SetPath);
+
+        // Ревизия 06 пишет bbox как [x, y, ширина, высота] (coordinate_system).
+        private static bool bboxIsSize;
+
         [MenuItem("Kingdom Survival/MapLab (эксперимент)/Подключить пакет этапа 04 (герой)…", priority = 414)]
         public static void ImportStage04Menu()
         {
@@ -141,7 +182,7 @@ namespace KingdomSurvival.MapLab.Editor
 
         public static string LastStage04Folder => EditorPrefs.GetString(Stage04.LastFolderKey, "");
 
-        private static readonly string[] KnownCategories = { "vegetation", "building", "rock", "cliff", "texture", "figure", "figure_calibration", "prop", "decal", "fence_module", "bridge_module" };
+        private static readonly string[] KnownCategories = { "vegetation", "building", "rock", "cliff", "texture", "figure", "figure_calibration", "prop", "decal", "fence_module", "bridge_module", "cliff_module" };
 
         public sealed class Report
         {
@@ -197,6 +238,13 @@ namespace KingdomSurvival.MapLab.Editor
             public string EntranceLocation;
             public float[] ModuleBox;      // visual_bbox: доли холста, левый верхний угол
             public float[] OpacityRange;
+            // Ревизия 06 (скалы).
+            public string HeightClass;
+            public string Side;
+            public float RockTopPx = -1f;
+            public float BasePx = -1f;
+            public float PxPerUnit = 100f;
+            public float WorldWidthHint;
             public bool HasPitch;
         }
 
@@ -287,6 +335,8 @@ namespace KingdomSurvival.MapLab.Editor
                         profile = Stage03;
                     if (args[i] == "-mapLabStage" && args[i + 1] == "04")
                         profile = Stage04;
+                    if (args[i] == "-mapLabStage" && args[i + 1] == "06")
+                        profile = Cliffs06;
                     if (args[i] == "-mapLabStage" && args[i + 1] == "05")
                         profile = Stage05;
                 }
@@ -429,6 +479,8 @@ namespace KingdomSurvival.MapLab.Editor
                 AssignStage04ToScene(markers);
             if (profile == Stage05)
                 AssignStage05ToScene(set, markers);
+            if (profile == Cliffs06)
+                AssignCliffs06ToScene(set);
             if (profile == Stage02)
                 AssignToScene(set, markers);
             else if (profile == Stage03)
@@ -495,6 +547,7 @@ namespace KingdomSurvival.MapLab.Editor
                 report.Errors.Add($"manifest: schema_version {schema} не поддерживается (ожидается {SupportedSchema}).");
                 return null;
             }
+            bboxIsSize = (MapLabJson.GetString(manifest, "coordinate_system") ?? "").Contains("width");
             List<object> rawItems = MapLabJson.AsArray(manifest.TryGetValue("items", out object v) ? v : null);
             if (rawItems == null)
             {
@@ -586,6 +639,12 @@ namespace KingdomSurvival.MapLab.Editor
                 ViewTag = MapLabJson.GetString(raw, "view_tag"),
                 EntranceLocation = MapLabJson.GetString(raw, "entrance_location"),
                 OpacityRange = ToFloats(MapLabJson.GetNumbers(raw, "opacity_start_range"), 2),
+                HeightClass = MapLabJson.GetString(raw, "height_class"),
+                Side = MapLabJson.GetString(raw, "side"),
+                RockTopPx = (float)MapLabJson.GetNumber(raw, "rock_top_y_px", -1),
+                BasePx = (float)MapLabJson.GetNumber(raw, "base_y_px", -1),
+                PxPerUnit = (float)MapLabJson.GetNumber(raw, "px_per_unit", 100),
+                WorldWidthHint = (float)MapLabJson.GetNumber(raw, "world_width_hint", 0),
                 EdgeDifference = (float)Math.Max(MapLabJson.GetNumber(raw, "edge_mean_abs_rgb_difference_x", 0), MapLabJson.GetNumber(raw, "edge_mean_abs_rgb_difference_y", 0)),
                 Role = MapLabJson.GetString(raw, "role"),
                 VariantGroup = MapLabJson.GetString(raw, "variant_group"),
@@ -605,7 +664,9 @@ namespace KingdomSurvival.MapLab.Editor
                 item.PivotHint = new[] { (float)pivot[0], (float)pivot[1] };
             double[] bbox = MapLabJson.GetNumbers(raw, "measured_bbox_alpha160_top_left");
             if (bbox != null && bbox.Length == 4)
-                item.BboxTopLeft = new[] { (int)bbox[0], (int)bbox[1], (int)bbox[2], (int)bbox[3] };
+                item.BboxTopLeft = bboxIsSize
+                    ? new[] { (int)bbox[0], (int)bbox[1], (int)(bbox[0] + bbox[2]), (int)(bbox[1] + bbox[3]) }
+                    : new[] { (int)bbox[0], (int)bbox[1], (int)bbox[2], (int)bbox[3] };
             if (category != "texture" && item.PivotHint == null)
                 report.Warnings.Add($"{id}: нет pivot_hint — опора будет найдена по силуэту.");
             return item;
@@ -740,6 +801,7 @@ namespace KingdomSurvival.MapLab.Editor
                 case "decal": return MapLabArtCategory.Decal;
                 case "fence_module": return MapLabArtCategory.FenceModule;
                 case "bridge_module": return MapLabArtCategory.BridgeModule;
+                case "cliff_module": return MapLabArtCategory.CliffModule;
                 default: return MapLabArtCategory.Vegetation;
             }
         }
@@ -764,7 +826,13 @@ namespace KingdomSurvival.MapLab.Editor
         private static void FillSource(MapLabArtEntry entry, Item item, byte[] bytes)
         {
             entry.Category = Category(item.Category);
-            bool stage05Only = entry.Category == MapLabArtCategory.Prop || entry.Category == MapLabArtCategory.Decal || entry.Category == MapLabArtCategory.FenceModule || entry.Category == MapLabArtCategory.BridgeModule;
+            bool stage05Only = entry.Category == MapLabArtCategory.Prop || entry.Category == MapLabArtCategory.Decal || entry.Category == MapLabArtCategory.FenceModule || entry.Category == MapLabArtCategory.BridgeModule || entry.Category == MapLabArtCategory.CliffModule;
+            entry.HeightClass = item.HeightClass ?? "";
+            entry.Side = item.Side ?? "";
+            entry.RockTopPx = item.RockTopPx;
+            entry.BasePx = item.BasePx;
+            entry.PxPerUnit = item.PxPerUnit > 0f ? item.PxPerUnit : 100f;
+            entry.WorldWidthHint = item.WorldWidthHint;
             entry.Kind = stage05Only ? (item.Kind == "Hay" ? MapLabObjectKind.Haystack : MapLabObjectKind.Prop) : Kind(item.Kind);
             entry.AuthoringPlane = item.AuthoringPlane ?? "";
             entry.ViewTag = item.ViewTag ?? "";
@@ -856,6 +924,13 @@ namespace KingdomSurvival.MapLab.Editor
                 case MapLabArtCategory.BridgeModule:
                     entry.Pivot = new Vector2(entry.ModuleRect.center.x, entry.ModuleRect.yMin);
                     entry.ScaleRange = Vector2.one;
+                    break;
+                case MapLabArtCategory.CliffModule:
+                    // Полный холст и привязки manifest (не обрезать по альфе); осыпь —
+                    // спрайт 50° с опорой в нижнем центре видимого рисунка.
+                    entry.Pivot = entry.PivotHint;
+                    entry.ScaleRange = entry.Role == "cliff_scree" ? new Vector2(0.85f, 1.15f) : Vector2.one;
+                    entry.MaxSlope = 40f;
                     break;
             }
             // Этап 05: корни травы, тростника, камней и реквизита — чуть ниже
@@ -952,6 +1027,13 @@ namespace KingdomSurvival.MapLab.Editor
                     // Поверхности под углом к камере — анизотропия против мыла.
                     importer.anisoLevel = 8;
                     importer.maxTextureSize = 1024;
+                    break;
+                case MapLabArtCategory.CliffModule:
+                    // Полный холст 2400 px (без уменьшения до 2048 — стыки по краю
+                    // точны), Clamp: куски стыкуются по совпадающим крайним столбцам.
+                    importer.anisoLevel = 8;
+                    importer.maxTextureSize = 4096;
+                    importer.wrapMode = TextureWrapMode.Clamp;
                     break;
                 case MapLabArtCategory.Prop:
                     importer.maxTextureSize = 1024;
@@ -1112,6 +1194,16 @@ namespace KingdomSurvival.MapLab.Editor
             Vector2 visibleGableOut = -(leftView ? eRight : eLeft);
             Vector2 entrance = frontView ? visibleGableOut : -visibleGableOut;
             e.EntranceDirection = entrance.sqrMagnitude > 1e-6f ? entrance.normalized : Vector2.down;
+        }
+
+        private static void AssignCliffs06ToScene(MapLabArtSet set)
+        {
+            MapLabView view = MapLabAssets.FindView();
+            if (view == null || view.ArtSet06 == set)
+                return;
+            view.ArtSet06 = set;
+            EditorUtility.SetDirty(view);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(view.gameObject.scene);
         }
 
         private static void AssignStage05ToScene(MapLabArtSet set, MapLabMarkerSet markers)

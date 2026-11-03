@@ -1,0 +1,861 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2c60839abb5890419d130d947cec017, type: 3}
+  m_Name: MapLabArtSet_Cliffs06
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabArtSet
+  SchemaVersion: 1
+  PackageRevision: 6
+  PackageId: KingdomSurvival_MapLab_Cliffs_Rev06
+  ImportVersion: 1
+  ImportedAt: 2026-11-04 01:27:18
+  ManifestSha256: 15a48838ed05a405cf4c46ce7c06ff108bece33507b51b0d3c54398ce5877969
+  Entries:
+  - Id: Cliff_Face_Tall_A
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 7fba970d6c35f784e96e0176aaba341e, type: 3}
+    Weight: 1
+    WorldHeight: 8
+    Pivot: {x: 0.5, y: 0.1}
+    Footprint: {x: 15.207923, y: 10.561057}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_Face_Tall_A.png
+    Sha256: c68ebd6108adce7eedceee6fb7bdd1947c34b95415f750fb4bf4d7b745eddffe
+    Width: 2400
+    Height: 1000
+    SolidRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.046
+      width: 1
+      height: 0.909
+    PivotHint: {x: 0.5, y: 0.1}
+    FootX: 0.4972548
+    Direction: 
+    PitchDownDegrees: 0
+    Role: cliff_face
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.61576384, g: 0.5088627, b: 0.36241764, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: tall
+    Side: 
+    RockTopPx: 100
+    BasePx: 900
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cliff_Face_Tall_B
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: d30be00a2247cd548a8b2b121d6817a6, type: 3}
+    Weight: 1
+    WorldHeight: 8
+    Pivot: {x: 0.5, y: 0.1}
+    Footprint: {x: 15.411372, y: 10.702341}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_Face_Tall_B.png
+    Sha256: 0b68064d09972ec583f62debfda7877254e0752f9806aabdce20ecceb64d15c9
+    Width: 2400
+    Height: 1000
+    SolidRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.049
+      width: 1
+      height: 0.897
+    PivotHint: {x: 0.5, y: 0.1}
+    FootX: 0.50593084
+    Direction: 
+    PitchDownDegrees: 0
+    Role: cliff_face
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.59703934, g: 0.49178842, b: 0.3514337, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: tall
+    Side: 
+    RockTopPx: 100
+    BasePx: 900
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cliff_Face_Medium_A
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 4690fbaabee694a419f9bb7dd5912cd9, type: 3}
+    Weight: 1
+    WorldHeight: 5
+    Pivot: {x: 0.5, y: 0.157143}
+    Footprint: {x: 14.71891, y: 10.221465}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_Face_Medium_A.png
+    Sha256: 87067ec5d61c097725d2d6af20efa20fb8a3c737969f24de5961e7f64c83049c
+    Width: 2400
+    Height: 700
+    SolidRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.092857145
+      width: 1
+      height: 0.8385714
+    PivotHint: {x: 0.5, y: 0.157143}
+    FootX: 0.49320212
+    Direction: 
+    PitchDownDegrees: 0
+    Role: cliff_face
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.62142646, g: 0.51457554, b: 0.35116056, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: medium
+    Side: 
+    RockTopPx: 90
+    BasePx: 590
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cliff_Face_Medium_B
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 873721cfec109d148a840e7bd272402a, type: 3}
+    Weight: 1
+    WorldHeight: 5
+    Pivot: {x: 0.5, y: 0.157143}
+    Footprint: {x: 14.794521, y: 10.2739725}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_Face_Medium_B.png
+    Sha256: 44ee693e3b435f9839a7ff61a5685794dce217c1dc1ba561867ab8aef5dab5dc
+    Width: 2400
+    Height: 700
+    SolidRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.08142857
+      width: 1
+      height: 0.83428574
+    PivotHint: {x: 0.5, y: 0.157143}
+    FootX: 0.49865437
+    Direction: 
+    PitchDownDegrees: 0
+    Role: cliff_face
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.616062, g: 0.49415797, b: 0.34078205, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: medium
+    Side: 
+    RockTopPx: 90
+    BasePx: 590
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cliff_Face_Medium_C
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: c4e168142349bb54f8559e4f6311af96, type: 3}
+    Weight: 1
+    WorldHeight: 5
+    Pivot: {x: 0.5, y: 0.157143}
+    Footprint: {x: 14.8709135, y: 10.327023}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_Face_Medium_C.png
+    Sha256: 2f1d792c4380360d0b00f560bc2293cbab9837c8dd051f068eec75d9b38a5153
+    Width: 2400
+    Height: 700
+    SolidRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.07285714
+      width: 1
+      height: 0.83
+    PivotHint: {x: 0.5, y: 0.157143}
+    FootX: 0.48752818
+    Direction: 
+    PitchDownDegrees: 0
+    Role: cliff_face
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6573016, g: 0.5545976, b: 0.41719592, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: medium
+    Side: 
+    RockTopPx: 90
+    BasePx: 590
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cliff_Face_Low_A
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 3426a2298ead54e40aadec47d7cee169, type: 3}
+    Weight: 1
+    WorldHeight: 2.5
+    Pivot: {x: 0.5, y: 0.266667}
+    Footprint: {x: 14.845362, y: 10.3092785}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_Face_Low_A.png
+    Sha256: 3c1b3667a2c3e662410c5bdd13eadd74d1135e5c1c07c003fcc5482ac4b1ee55
+    Width: 2400
+    Height: 450
+    SolidRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.22444445
+      width: 1
+      height: 0.64666665
+    PivotHint: {x: 0.5, y: 0.266667}
+    FootX: 0.5062102
+    Direction: 
+    PitchDownDegrees: 0
+    Role: cliff_face
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.64856094, g: 0.5518918, b: 0.41706592, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: low
+    Side: 
+    RockTopPx: 80
+    BasePx: 330
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cliff_Face_Low_B
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 18e4b1f1b326e7248af5bd1704ecd88f, type: 3}
+    Weight: 1
+    WorldHeight: 2.5
+    Pivot: {x: 0.5, y: 0.266667}
+    Footprint: {x: 14.545455, y: 10.10101}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_Face_Low_B.png
+    Sha256: fa5dbe2e206894af9a3a3e88dc1db72e1b69aa9d4cc0a93211f36e5ccd5262ca
+    Width: 2400
+    Height: 450
+    SolidRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.2
+      width: 1
+      height: 0.66
+    PivotHint: {x: 0.5, y: 0.266667}
+    FootX: 0.4921826
+    Direction: 
+    PitchDownDegrees: 0
+    Role: cliff_face
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.63993555, g: 0.53918993, b: 0.3857677, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: low
+    Side: 
+    RockTopPx: 80
+    BasePx: 330
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cliff_End_Left_Tall
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 6f939fc3549166a44b5d0e1603160df0, type: 3}
+    Weight: 1
+    WorldHeight: 8
+    Pivot: {x: 0.5, y: 0.1}
+    Footprint: {x: 7.5627975, y: 5.2519426}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_End_Left_Tall.png
+    Sha256: a31b8948d67350946c8b92742c652c61a27de5ebd581cfb8b2b29aa61e0cf4ef
+    Width: 1200
+    Height: 1000
+    SolidRect:
+      serializedVersion: 2
+      x: 0.014166667
+      y: 0.04
+      width: 0.98583335
+      height: 0.901
+    PivotHint: {x: 0.5, y: 0.1}
+    FootX: 0.5529731
+    Direction: 
+    PitchDownDegrees: 0
+    Role: cliff_end
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.64208674, g: 0.5353276, b: 0.3889612, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: tall
+    Side: left
+    RockTopPx: 100
+    BasePx: 900
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cliff_End_Right_Tall
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: dda8ae22db20de8459145541d58aa775, type: 3}
+    Weight: 1
+    WorldHeight: 8
+    Pivot: {x: 0.5, y: 0.1}
+    Footprint: {x: 7.568448, y: 5.2558665}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_End_Right_Tall.png
+    Sha256: 4caedf6dd74bba5d63311b03f9dfa7429a45939db91d274fc0e1b77b24178e3d
+    Width: 1200
+    Height: 1000
+    SolidRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.051
+      width: 0.98
+      height: 0.895
+    PivotHint: {x: 0.5, y: 0.1}
+    FootX: 0.36800298
+    Direction: 
+    PitchDownDegrees: 0
+    Role: cliff_end
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6321589, g: 0.52984196, b: 0.38946572, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: tall
+    Side: right
+    RockTopPx: 100
+    BasePx: 900
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cliff_End_Left_Low
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 2f16caf8ce351be448fd5987b4cc5964, type: 3}
+    Weight: 1
+    WorldHeight: 2.5
+    Pivot: {x: 0.5, y: 0.266667}
+    Footprint: {x: 4.891166, y: 3.3966432}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_End_Left_Low.png
+    Sha256: 6080d96c2a8ee99b78e6d3ffe75d203a8b5598d987c266afb3a1447a9b4bd3e7
+    Width: 800
+    Height: 450
+    SolidRect:
+      serializedVersion: 2
+      x: 0.03875
+      y: 0.22888888
+      width: 0.96125
+      height: 0.6288889
+    PivotHint: {x: 0.5, y: 0.266667}
+    FootX: 0.5632545
+    Direction: 
+    PitchDownDegrees: 0
+    Role: cliff_end
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.64776903, g: 0.5590971, b: 0.4160554, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: low
+    Side: left
+    RockTopPx: 80
+    BasePx: 330
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cliff_End_Right_Low
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 047d2302f3fe45d45b063070351d431b, type: 3}
+    Weight: 1
+    WorldHeight: 2.5
+    Pivot: {x: 0.5, y: 0.266667}
+    Footprint: {x: 5.056537, y: 3.5114841}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_End_Right_Low.png
+    Sha256: 4a14739cac86c87b56b865e3eac312a1dbaed508500c45c12f94615635559b63
+    Width: 800
+    Height: 450
+    SolidRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.23111111
+      width: 0.99375
+      height: 0.6288889
+    PivotHint: {x: 0.5, y: 0.266667}
+    FootX: 0.49628654
+    Direction: 
+    PitchDownDegrees: 0
+    Role: cliff_end
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6052292, g: 0.5049835, b: 0.36326858, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: low
+    Side: right
+    RockTopPx: 80
+    BasePx: 330
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cliff_Buttress_A
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 0d6db68d61099044bb2c7268f2927d9e, type: 3}
+    Weight: 1
+    WorldHeight: 8
+    Pivot: {x: 0.5, y: 0.1}
+    Footprint: {x: 1.9951603, y: 1.385528}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_Buttress_A.png
+    Sha256: 4f6e9938f407864cddb7935528da8b4e60b5f60cf473ecc5699df4ac23bf15e5
+    Width: 600
+    Height: 1000
+    SolidRect:
+      serializedVersion: 2
+      x: 0.23666666
+      y: 0.081
+      width: 0.48666668
+      height: 0.843
+    PivotHint: {x: 0.5, y: 0.1}
+    FootX: 0.48001933
+    Direction: 
+    PitchDownDegrees: 0
+    Role: cliff_buttress
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6452591, g: 0.54471517, b: 0.4051863, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: tall
+    Side: 
+    RockTopPx: 100
+    BasePx: 900
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cliff_Scree_A
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 04afb0d0f3c15b947ba0ef7ceb5bf440, type: 3}
+    Weight: 1
+    WorldHeight: 0.76
+    Pivot: {x: 0.5, y: 0.225}
+    Footprint: {x: 2.1456, y: 1.49}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.15}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_Scree_A.png
+    Sha256: b8e7d84cc5d149cc8143ac3eb6a910a79a3f26a4a36c5a4cbf7ec4f2ea923e92
+    Width: 900
+    Height: 600
+    SolidRect:
+      serializedVersion: 2
+      x: 0.33444443
+      y: 0.22333333
+      width: 0.3311111
+      height: 0.12666667
+    PivotHint: {x: 0.5, y: 0.225}
+    FootX: 0.5076325
+    Direction: 
+    PitchDownDegrees: 50
+    Role: cliff_scree
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.66285837, g: 0.57179976, b: 0.4504718, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 3
+  - Id: Cliff_Scree_B
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: a0c0d376cab9d8f418942b4fb2855c04, type: 3}
+    Weight: 1
+    WorldHeight: 1.11
+    Pivot: {x: 0.5, y: 0.225}
+    Footprint: {x: 4.384602, y: 3.0448623}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.15}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_Scree_B.png
+    Sha256: 4d2280442b787ec307ee5b40e434192eb24a12336d3f408dfbd00c7ba5587269
+    Width: 900
+    Height: 600
+    SolidRect:
+      serializedVersion: 2
+      x: 0.16888888
+      y: 0.225
+      width: 0.66444445
+      height: 0.18166667
+    PivotHint: {x: 0.5, y: 0.225}
+    FootX: 0.48565277
+    Direction: 
+    PitchDownDegrees: 50
+    Role: cliff_scree
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.61884105, g: 0.52092195, b: 0.36340722, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 6.01
+  - Id: Cliff_Scree_C
+    Category: 11
+    Kind: 10
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 6c3c2fd266ff61e4c8745b121e50f6ae, type: 3}
+    Weight: 1
+    WorldHeight: 1.04
+    Pivot: {x: 0.5, y: 0.224}
+    Footprint: {x: 1.7545413, y: 1.2184314}
+    MaxSlope: 40
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.15}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Cliffs/Cliff_Scree_C.png
+    Sha256: ab92403dc8cf375423b3705951e37166c9207bc39aa4a83a280b505cebcbec31
+    Width: 700
+    Height: 500
+    SolidRect:
+      serializedVersion: 2
+      x: 0.33
+      y: 0.224
+      width: 0.34142858
+      height: 0.204
+    PivotHint: {x: 0.5, y: 0.224}
+    FootX: 0.41478798
+    Direction: 
+    PitchDownDegrees: 50
+    Role: cliff_scree
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.58174354, g: 0.48974407, b: 0.37903133, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 2.41

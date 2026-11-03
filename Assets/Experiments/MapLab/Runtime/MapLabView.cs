@@ -47,6 +47,10 @@ namespace KingdomSurvival.MapLab
         public MapLabMarkerSet MarkerSet05;
         public Shader ModuleShader;
 
+        [Header("Скалы ревизии 06: рисованные стены уступов, торцы, контрфорс, осыпи")]
+        public MapLabArtSet ArtSet06;
+        public Shader CliffShader;
+
         [SerializeField, HideInInspector] private GameObject root;
 
         private MapLabData data;
@@ -70,6 +74,20 @@ namespace KingdomSurvival.MapLab
         public MapLabInk.Stats ShoreInkStats { get; private set; }
         public int WashPatches => washLayer != null ? washLayer.Patches.Count : 0;
         public bool BridgesProcedural05 { get; private set; }
+        private readonly Dictionary<MapLabArtEntry, Material> cliffMaterials = new Dictionary<MapLabArtEntry, Material>();
+        public bool DrawnCliffs06 { get; private set; }
+
+        public MapLabArtSet ResolvedArtSet06
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (ArtSet06 == null)
+                    ArtSet06 = UnityEditor.AssetDatabase.LoadAssetAtPath<MapLabArtSet>("Assets/_Project/Art/MapLabCliffs06/MapLabArtSet_Cliffs06.asset");
+#endif
+                return ArtSet06;
+            }
+        }
         private readonly List<Texture2D> paintTiles = new List<Texture2D>();
         private readonly List<Vector4> paintRects = new List<Vector4>();
         private Texture2D overviewTexture, objShadowTexture;
@@ -327,6 +345,8 @@ namespace KingdomSurvival.MapLab
             owned.Clear();
             artMaterials.Clear();
             moduleMaterials.Clear();
+            cliffMaterials.Clear();
+            DrawnCliffs06 = false;
             artPlan = null;
             shoreTexture = null;
             washLayer = null;
@@ -365,6 +385,7 @@ namespace KingdomSurvival.MapLab
             if (InkShader == null) InkShader = Shader.Find("Kingdom Survival/MapLab/Ink");
             if (GrassShader == null) GrassShader = Shader.Find("Kingdom Survival/MapLab/Grass");
             if (ModuleShader == null) ModuleShader = Shader.Find("Kingdom Survival/MapLab/Module");
+            if (CliffShader == null) CliffShader = Shader.Find("Kingdom Survival/MapLab/Cliff");
             if (TerrainShader == null || WaterShader == null || CardShader == null || SolidShader == null)
             {
                 LastError = "Не найдены шейдеры MapLab (Assets/Experiments/MapLab/Shaders).";
@@ -787,7 +808,45 @@ namespace KingdomSurvival.MapLab
         private void BuildCliffs()
         {
             GameObject group = Group("Cliffs");
+            // Рисованные скалы ревизии 06 вместо граней; без набора — грани этапа 05.
+            DrawnCliffs06 = false;
+            MapLabCliffs06.ScreeSpots.Clear();
+            if (Settings.IsStage05 && Settings.Stage05.DrawnCliffs && CliffShader != null)
+            {
+                MapLabCliffs06.Kit kit = MapLabCliffs06.KitOf(ResolvedArtSet06);
+                if (kit.HasFaces)
+                {
+                    MapLabCliffs05.ScreeSpots.Clear();
+                    MapLabCliffs06.Result cliffs = MapLabCliffs06.Build(data, Settings, kit);
+                    List<MapLabArtEntry> keys = new List<MapLabArtEntry>(cliffs.Meshes.Keys);
+                    keys.Sort((a, b) => string.CompareOrdinal(a.Id, b.Id));
+                    foreach (MapLabArtEntry e in keys)
+                        AddRenderer(group, "Cliff " + e.Id, cliffs.Meshes[e].ToMesh("MapLab Cliff " + e.Id), CliffMaterial(e));
+                    DrawnCliffs06 = true;
+                    return;
+                }
+            }
             AddRenderer(group, "Cliff Walls", Settings.IsStage05 ? MapLabCliffs05.Build(data, Settings) : MapLabMeshes.BuildCliffs(data, Settings), solidMaterial);
+        }
+
+        private Material CliffMaterial(MapLabArtEntry entry)
+        {
+            if (cliffMaterials.TryGetValue(entry, out Material material) && material != null)
+                return material;
+            material = Own(new Material(CliffShader) { name = "MapLab Cliff " + entry.Id });
+            cliffMaterials[entry] = material;
+            ConfigureCliffMaterial(material, entry);
+            return material;
+        }
+
+        private void ConfigureCliffMaterial(Material m, MapLabArtEntry entry)
+        {
+            m.SetTexture("_MainTex", entry.Texture);
+            m.SetTexture("_ShadeTex", shadeTexture != null ? shadeTexture : Texture2D.whiteTexture);
+            m.SetFloat("_MapSize", data != null ? data.Size : Settings.General.MapSize);
+            m.SetFloat("_GroundShade", Settings.Diagnostics.ShowReliefLight ? 0.45f : 0f);
+            m.SetVector("_LightDir", Settings.LightDirection);
+            m.SetFloat("_Saturation", Settings.PainterlyStyle.Saturation);
         }
 
         private static readonly string[] ObjectGroups = { "Vegetation", "Structures", "Houses", "Boulders", "ArtVegetation", "ArtHouses", "ArtHouses50", "ArtHouses35", "ArtBoulders", "ArtCliffDecor", "ArtHouses05", "ArtDecor05", "Modules05" };
@@ -816,6 +875,8 @@ namespace KingdomSurvival.MapLab
                 // Этап 05: деревья — набор этапа 03; дома, трава, камни, сено, реквизит — этап 05.
                 MapLabArtBuilder.PlanHouses05(data, Settings, set05, housePlan);
                 MapLabArtBuilder.PlanDecor05(data, Settings, set05, paintFields != null ? paintFields.Shore : new MapLabShore(data, Settings.Stage05.ShoreSmoothing), decorPlan);
+                if (DrawnCliffs06)
+                    MapLabArtBuilder.PlanCliffScree06(data, Settings, MapLabCliffs06.KitOf(ResolvedArtSet06), decorPlan);
                 foreach (MapLabObjectKind kind in decorPlan.Replaced)
                     artPlan.Replaced.Add(kind);
             }
@@ -1264,7 +1325,9 @@ namespace KingdomSurvival.MapLab
             t.SetTexture("_MaskB", maskBTexture);
             t.SetTexture("_DetailTex", detailTexture);
             t.SetVector("_LightDir", light);
-            t.SetVector("_ShadowTint", shadowTint);
+            // Этап 05: тень рельефа на земле — тёплая оливково-серая (без серо-лиловых
+            // пятен у подножия уступов), согласованная с тенью объектов.
+            t.SetVector("_ShadowTint", stage05 ? (Vector4)Color.Lerp(palette.ShadowTint, new Color(0.6f, 0.6f, 0.5f, 1f), 0.65f) : shadowTint);
             t.SetVector("_LightTint", lightTint);
             t.SetColor("_InkColor", stage05 ? s5.InkColor : stage03 ? s3.InkStyle.Color : palette.Ink);
             t.SetColor("_PaperColor", palette.Paper);
@@ -1376,6 +1439,8 @@ namespace KingdomSurvival.MapLab
             }
             foreach (KeyValuePair<MapLabArtEntry, Material> pair in moduleMaterials)
                 ConfigureModuleMaterial(pair.Value, pair.Key);
+            foreach (KeyValuePair<MapLabArtEntry, Material> pair in cliffMaterials)
+                ConfigureCliffMaterial(pair.Value, pair.Key);
 
             ApplyGroundTextures(t, s);
             foreach (KeyValuePair<MapLabArtEntry, Material> pair in artMaterials)

@@ -94,6 +94,9 @@ namespace KingdomSurvival.MapLab
         [Tooltip("Тёплый серо-охристый камень.")]
         public Color CliffColor = new Color(0.63f, 0.58f, 0.49f, 1f);
 
+        [Tooltip("Рисованные скалы пакета ревизии 06 вместо граней (если пакет подключён).")]
+        public bool DrawnCliffs = true;
+
         [Header("Вода и берег")]
         [Tooltip("Спокойная серо-синяя основа.")]
         public Color WaterBase = new Color(0.4f, 0.48f, 0.53f, 1f);

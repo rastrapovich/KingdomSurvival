@@ -428,6 +428,14 @@ namespace KingdomSurvival.MapLab
                     if (s.Rock > 0.02f)
                     {
                         Color rc = Color.Lerp(pal.RockShadow, pal.RockLight, MapLabGeometry.SmoothStep(0.25f, 0.75f, s.RockStreak));
+                        // Этап 05: камень на земле — тёплый серо-охристый, как рисованные
+                        // скалы (без серо-лиловых пятен у подножия).
+                        if (stage05)
+                        {
+                            Color warm = settings.Stage05.CliffColor;
+                            rc = Color.Lerp(rc, warm * Mathf.Lerp(0.82f, 1.05f, s.RockStreak), 0.75f);
+                            rc.a = 1f;
+                        }
                         float t = MapLabGeometry.SmoothStep(0.15f, 0.6f, s.Rock);
                         c = Color.Lerp(c, rc, t);
                         if (t > 0.5f) k = KeyRock;
@@ -677,7 +685,7 @@ namespace KingdomSurvival.MapLab
                         if (dir.sqrMagnitude < 0.5f)
                             continue;
                         Color baseColor = new Color(r[ci], g[ci], b[ci]);
-                        Color dark = Color.Lerp(baseColor * 0.72f, pal.ShadowTint, 0.2f);
+                        Color dark = Color.Lerp(baseColor * 0.72f, stage05 ? new Color(0.5f, 0.47f, 0.38f) : pal.ShadowTint, 0.2f);
                         hatch.Add(Make(px, pz, dir, brush * 1.2f * lengthJ * ppu, Mathf.Max(1.1f, 0.075f * ppu), dark, 0.5f * style.Hatching + 0.25f, k, 0f, 0f));
                     }
 

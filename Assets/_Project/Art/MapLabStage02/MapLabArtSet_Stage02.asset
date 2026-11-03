@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: MapLabArtSet_Stage02
   m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabArtSet
   SchemaVersion: 1
+  PackageRevision: 0
   PackageId: KS_MapLab_Stage02_2026-11-02
   ImportVersion: 1
   ImportedAt: 2026-11-02 17:53:27
@@ -24,7 +25,7 @@ MonoBehaviour:
     ManifestKind: Barn
     Texture: {fileID: 2800000, guid: 5a40ef388313a02449538893d52fb2f2, type: 3}
     Weight: 1
-    WorldHeight: 3.3
+    WorldHeight: 2.93
     Pivot: {x: 0.5, y: 0.24}
     Footprint: {x: 3.4329495, y: 2.3839927}
     MaxSlope: 12
@@ -48,6 +49,9 @@ MonoBehaviour:
     FootX: 0.39913544
     Direction: 
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.57038707, g: 0.45655987, b: 0.3064455, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -81,6 +85,9 @@ MonoBehaviour:
     FootX: 0.6103479
     Direction: 
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.44764367, g: 0.36167324, b: 0.2776948, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -114,6 +121,9 @@ MonoBehaviour:
     FootX: 0.4587729
     Direction: 
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.5697825, g: 0.45571142, b: 0.28936613, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -147,6 +157,9 @@ MonoBehaviour:
     FootX: 0.5052316
     Direction: Front
     PitchDownDegrees: 40
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.50302714, g: 0.27719432, b: 0.18472892, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -180,6 +193,9 @@ MonoBehaviour:
     FootX: 0.5057
     Direction: Front
     PitchDownDegrees: 60
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.52176064, g: 0.2747556, b: 0.18160918, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -213,6 +229,9 @@ MonoBehaviour:
     FootX: 0.5179697
     Direction: Back
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.5213237, g: 0.26701444, b: 0.17804551, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -246,6 +265,9 @@ MonoBehaviour:
     FootX: 0.4788148
     Direction: Back_Left
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.49213955, g: 0.2558642, b: 0.17768136, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -279,6 +301,9 @@ MonoBehaviour:
     FootX: 0.5692875
     Direction: Back_Right
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.49362814, g: 0.24523109, b: 0.17112043, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -312,6 +337,9 @@ MonoBehaviour:
     FootX: 0.50307226
     Direction: Front
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.4424165, g: 0.24822819, b: 0.1620437, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -345,6 +373,9 @@ MonoBehaviour:
     FootX: 0.5258455
     Direction: Front_Left
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.46489775, g: 0.2514069, b: 0.16733277, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -378,6 +409,9 @@ MonoBehaviour:
     FootX: 0.53060055
     Direction: Front_Right
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.5093464, g: 0.28105235, b: 0.1878894, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -411,6 +445,9 @@ MonoBehaviour:
     FootX: 0.61824226
     Direction: 
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.54300815, g: 0.47149113, b: 0.4382081, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -444,6 +481,9 @@ MonoBehaviour:
     FootX: 0.8286808
     Direction: 
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.5843478, g: 0.52035195, b: 0.42706183, a: 1}
     TileEdgeDifference: 0
     Notes: Fixed-view end facade; no arbitrary yaw/mirroring.
@@ -477,6 +517,9 @@ MonoBehaviour:
     FootX: 0.86554796
     Direction: 
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.5608628, g: 0.49834594, b: 0.41494796, a: 1}
     TileEdgeDifference: 0
     Notes: Fixed-view decorative facade; keep underlying heightfield/cliff mesh.
@@ -510,6 +553,9 @@ MonoBehaviour:
     FootX: 0.5
     Direction: 
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.73419595, g: 0.56828374, b: 0.37052703, a: 1}
     TileEdgeDifference: 6.692
     Notes: 
@@ -543,6 +589,9 @@ MonoBehaviour:
     FootX: 0.5
     Direction: 
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.5201192, g: 0.53711116, b: 0.24338147, a: 1}
     TileEdgeDifference: 5.491
     Notes: 
@@ -576,6 +625,9 @@ MonoBehaviour:
     FootX: 0.5
     Direction: 
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.70151496, g: 0.6652954, b: 0.65979815, a: 1}
     TileEdgeDifference: 5.234
     Notes: 
@@ -609,6 +661,9 @@ MonoBehaviour:
     FootX: 0.60924613
     Direction: 
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.462121, g: 0.5050786, b: 0.2952647, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -642,6 +697,9 @@ MonoBehaviour:
     FootX: 0.54871225
     Direction: 
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.48779556, g: 0.47585052, b: 0.32197595, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -675,6 +733,9 @@ MonoBehaviour:
     FootX: 0.7054018
     Direction: 
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.3700027, g: 0.3868523, b: 0.25579578, a: 1}
     TileEdgeDifference: 0
     Notes: 
@@ -708,6 +769,9 @@ MonoBehaviour:
     FootX: 0.767691
     Direction: 
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.35122246, g: 0.3685125, b: 0.26009622, a: 1}
     TileEdgeDifference: 0
     Notes: Generated crown resembles broadleaf tree; classified by actual silhouette
@@ -742,6 +806,9 @@ MonoBehaviour:
     FootX: 0.5108129
     Direction: 
     PitchDownDegrees: 50
+    Role: 
+    VariantGroup: 
+    Provenance: 
     MeanColor: {r: 0.25062433, g: 0.28597456, b: 0.22495575, a: 1}
     TileEdgeDifference: 0
     Notes: 

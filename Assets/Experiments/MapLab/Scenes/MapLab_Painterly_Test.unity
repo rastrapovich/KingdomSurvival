@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &1094261338
+--- !u!1 &1850171887
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,9 +127,88 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1094261341}
-  - component: {fileID: 1094261340}
-  - component: {fileID: 1094261339}
+  - component: {fileID: 1850171890}
+  - component: {fileID: 1850171889}
+  - component: {fileID: 1850171888}
+  m_Layer: 0
+  m_Name: MapLab
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1850171888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1850171887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79a985596c1ebbd489c67c6a0921b37c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabMarker
+  View: {fileID: 1850171889}
+  AutoPlace: 1
+  Position: {x: 128, y: 128}
+  FacingDegrees: 180
+  PreviewMove: 0
+  PreviewSpeed: 3
+  PreviewLength: 22
+  ShowArrow: 0
+  root: {fileID: 0}
+--- !u!114 &1850171889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1850171887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4586ed1039345c44d8a71c7ed87f9908, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabView
+  Settings: {fileID: 11400000, guid: ae462f7fc5c4f3b4693b201bb1341594, type: 2}
+  CameraRig: {fileID: 1937622106}
+  GenerateOnLoad: 1
+  TerrainShader: {fileID: 4800000, guid: 27c7fd7d33924d6499813e3e8260c88b, type: 3}
+  WaterShader: {fileID: 4800000, guid: ed75a03a1dfa7c44f8b9e1a58b1a2bba, type: 3}
+  CardShader: {fileID: 4800000, guid: f78bb0d682c63264dbddf52b96233c3f, type: 3}
+  SolidShader: {fileID: 4800000, guid: bdbf9298991aebd4b88557d5f4176e16, type: 3}
+  LinesShader: {fileID: 4800000, guid: c9e51576d4c33f645bb1b7d1208f19b0, type: 3}
+  ArtCardShader: {fileID: 4800000, guid: 383626419a283bb4993b7f7b8fcf34e2, type: 3}
+  ContactShader: {fileID: 4800000, guid: 91caacd372de3834d890904c17c35901, type: 3}
+  ArtSet: {fileID: 11400000, guid: 1e0c221c19d1f374faab702db07d55a3, type: 2}
+  MarkerSet: {fileID: 11400000, guid: f134eb708cef33d45b030267ade4c401, type: 2}
+  root: {fileID: 0}
+--- !u!4 &1850171890
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1850171887}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1937622105
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1937622108}
+  - component: {fileID: 1937622107}
+  - component: {fileID: 1937622106}
   m_Layer: 0
   m_Name: MapLabCamera
   m_TagString: MainCamera
@@ -137,13 +216,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1094261339
+--- !u!114 &1937622106
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1094261338}
+  m_GameObject: {fileID: 1937622105}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: acf0e0d3834653c469e530c86035f700, type: 3}
@@ -152,13 +231,13 @@ MonoBehaviour:
   Target: {x: 128, y: 0, z: 128}
   PanSpeed: 0.6
   ZoomLimits: {x: 0.6, y: 8}
---- !u!20 &1094261340
+--- !u!20 &1937622107
 Camera:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1094261338}
+  m_GameObject: {fileID: 1937622105}
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
@@ -203,13 +282,13 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!4 &1094261341
+--- !u!4 &1937622108
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1094261338}
+  m_GameObject: {fileID: 1937622105}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -218,88 +297,9 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1350587405
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1350587407}
-  - component: {fileID: 1350587406}
-  - component: {fileID: 1350587408}
-  m_Layer: 0
-  m_Name: MapLab
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1350587406
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1350587405}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4586ed1039345c44d8a71c7ed87f9908, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabView
-  Settings: {fileID: 11400000, guid: 7a11c53f051aa51468a2971fcbf8897d, type: 2}
-  CameraRig: {fileID: 1094261339}
-  GenerateOnLoad: 1
-  TerrainShader: {fileID: 4800000, guid: 27c7fd7d33924d6499813e3e8260c88b, type: 3}
-  WaterShader: {fileID: 4800000, guid: ed75a03a1dfa7c44f8b9e1a58b1a2bba, type: 3}
-  CardShader: {fileID: 4800000, guid: f78bb0d682c63264dbddf52b96233c3f, type: 3}
-  SolidShader: {fileID: 4800000, guid: bdbf9298991aebd4b88557d5f4176e16, type: 3}
-  LinesShader: {fileID: 4800000, guid: c9e51576d4c33f645bb1b7d1208f19b0, type: 3}
-  ArtCardShader: {fileID: 4800000, guid: 383626419a283bb4993b7f7b8fcf34e2, type: 3}
-  ContactShader: {fileID: 4800000, guid: 91caacd372de3834d890904c17c35901, type: 3}
-  ArtSet: {fileID: 11400000, guid: 1e0c221c19d1f374faab702db07d55a3, type: 2}
-  MarkerSet: {fileID: 11400000, guid: f134eb708cef33d45b030267ade4c401, type: 2}
-  root: {fileID: 0}
---- !u!4 &1350587407
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1350587405}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1350587408
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1350587405}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79a985596c1ebbd489c67c6a0921b37c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabMarker
-  View: {fileID: 1350587406}
-  AutoPlace: 1
-  Position: {x: 128, y: 128}
-  FacingDegrees: 180
-  PreviewMove: 0
-  PreviewSpeed: 3
-  PreviewLength: 22
-  ShowArrow: 0
-  root: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1094261341}
-  - {fileID: 1350587407}
+  - {fileID: 1937622108}
+  - {fileID: 1850171890}

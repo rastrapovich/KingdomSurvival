@@ -86,6 +86,11 @@ MonoBehaviour:
     BuildingScale: 1
     Radius: 34
     Fences: 1
+    AlignToDrawnView: 1
+    DrawnRidgeYaw: {x: 23, y: -27, z: 32}
+    UseVariantYaw: 1
+    DrawnRidgeYawVariants: {x: 11, y: -12, z: 12, w: 12}
+    DrawnBarnYaw: 14
   PainterlyStyle:
     Palette: {fileID: 11400000, guid: 58b7c4bd9890a8046a91309c1d90a33f, type: 2}
     MacroScale: 60
@@ -108,6 +113,84 @@ MonoBehaviour:
     Zoom: 1
     AzimuthDegrees: 0
     FillFrame: 1
+    Mode: 2
+    PitchByZoom: 1
+    PitchByZoomRange: {x: 60, y: 35}
+    ZoomSmoothing: 12
+  Art:
+    Vegetation: 1
+    Buildings: 2
+    Boulders: 1
+    CliffDecor: 1
+    GroundTextures: 1
+    GroundStrength: 0.5
+    GrassScale: 26
+    EarthScale: 18
+    RockScale: 14
+    RockColorStrength: 0.35
+    PaletteTint: 0.2
+    GroundShade: 0.6
+    CardLean: 0.3
+    AlphaView: 0
+    ShowMarker: 1
+    MarkerGhost: 0
+    HouseGroupsByVariant:
+    - House_Thatch_A
+    - House_Thatch_B
+    - House_Shingle_A
+    - House_Shingle_A
+    BarnGroup: Barn_A
+  Stage03:
+    Look: 2
+    PaintTexelsPerUnit: 16
+    Ink: 1
+    ForestAccents: 1
+    ObjectShadows: 1
+    InkStyle:
+      Color: {r: 0.33, g: 0.25, b: 0.16, a: 1}
+      Width: 0.085
+      MinPixels: 1.1
+      MaxPixels: 4.5
+      Opacity: 0.85
+      Grain: 0.35
+      BreakLength: 6
+      BreakFrequency: 0.16
+      LitSideFade: 0.45
+      Weights: {x: 1, y: 0.6, z: 0.55, w: 0.7}
+    StrokeCell: 4
+    StrokesPerUnit: 0.9
+    StrokeEdge: 0.9
+    StrokeColorSplit: 0.55
+    ForestGroupSize: 15
+    AccentShare: 0.4
+    AccentMinChain: 3
+    AccentHighlight: 2.6
+    AccentHighlightStrength: 0.55
+    CrownToneRange: 0.05
+    ShadowStrength: 0.4
+    ContactStrength: 0.25
+    ShadowTones: 2
+    ShadowColor: {r: 0.56, g: 0.6, b: 0.62, a: 1}
+    ShadowTexelsPerUnit: 4
+    HouseViewSwitch: 42.5
+    HouseViewHysteresis: 2
+  Stage04:
+    ContactDensity: 0.542
+    ContactReach: 0.9
+    CrownLobes: 0.4
+    Grain: 0.35
+    Blots: 0.45
+    BlotScale: 26
+    BlotShare: 0.3255
+    JunctionLength: 7
+    JunctionMouth: 0.55
+    FieldInkShare: 0.3
+    Grass: 0.5
+    ForestRhythm: 0.5
+    WoodColor: {r: 0.62, g: 0.5, b: 0.36, a: 1}
+    RockColor: {r: 0.6, g: 0.58, b: 0.52, a: 1}
+    HeroViewSwitch: 42.5
+    HeroViewHysteresis: 2
   Diagnostics:
     Mode: 0
     ShowWater: 1

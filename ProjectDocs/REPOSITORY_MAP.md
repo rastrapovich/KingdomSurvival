@@ -26,6 +26,7 @@
 | Планирование квестов и перенос | Локальная `QuestWorkshop/` (не в Git); Unity-мост — [QuestWorkshopBridge/](../Assets/_Project/QuestWorkshopBridge/) |
 | Трекер разработки | [DevelopmentTracker/Editor/](../Assets/_Project/DevelopmentTracker/Editor/); фактический журнал — [DEVELOPMENT_STATUS.md](DEVELOPMENT_STATUS.md) |
 | Эксперимент MapLab | [Assets/Experiments/MapLab/README.md](../Assets/Experiments/MapLab/README.md): `Runtime/`, `Editor/`, `Shaders/`, `Tests/EditMode/`; сцена `Scenes/MapLab_Painterly_Test.unity`, выгрузки — `MapLabExports/` (не в Git) |
+| Стиль карты и художественные брифы MapLab | [MAP_STYLE_GUIDE.md](MAP_STYLE_GUIDE.md): тушь/акварель, формы 70/25/5, списывание деталей, живой ритм штрихов и травы; читать перед созданием арта и правкой программного рисунка |
 | Blender: KS Ground Renderer | [Tools/Blender/ks_ground_renderer/README_RU.md](../Tools/Blender/ks_ground_renderer/README_RU.md); исходники рядом, проверки — `Tools/Blender/tests/` |
 
 ### Где лежат авторские данные

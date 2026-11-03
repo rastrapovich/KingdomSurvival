@@ -3,9 +3,9 @@ using System.Collections.Generic;
 // Бриф правок (19 пунктов) пп. 10, 18: найм — только разговором в корчме.
 // В корчме под «Ищут работу» — кандидаты (бывает, что никого); нажатие
 // открывает разговор в слое диалога поверх поселения: кто он, чем полезен и
-// сколько просит в игровые сутки, затем «Нанять» или «Не сейчас». Нанятый
-// встаёт на свободное место бойца; ПКМ по его карточке в «Отряде» —
-// характеристики и та же плата.
+// сколько просит за найм (один раз, без жалованья), затем «Нанять» или «Не
+// сейчас». Нанятый встаёт на свободное место бойца; ПКМ по его карточке в
+// «Отряде» — характеристики и заплаченная цена.
 public partial class PrototypeUIController
 {
     private bool hireDialogueOpen;
@@ -20,7 +20,7 @@ public partial class PrototypeUIController
         {
             HireCandidateData captured = candidate;
             AddSettlementAction(candidate.Name + " — " + candidate.RoleLabel,
-                candidate.Benefit + " · " + candidate.DailyWage + " зол. в сутки", true, () => OpenHireDialogue(captured), false);
+                candidate.Benefit + " · найм " + HireService.PriceOf(candidate) + " зол.", true, () => OpenHireDialogue(captured), false);
         }
     }
 
@@ -35,12 +35,12 @@ public partial class PrototypeUIController
             new List<(string, bool)>
             {
                 ("— Возьмёте с собой — пойду. Я " + candidate.RoleLabel + ": " + candidate.Benefit + ".", false),
-                ("Плата — " + candidate.DailyWage + " зол. за игровые сутки, пока идёт с отрядом. Свободных мест в отряде: " +
+                ("Плата — " + HireService.PriceOf(candidate) + " зол. один раз, при найме; дальше жалованья нет. Свободных мест в отряде: " +
                  System.Math.Max(0, free) + "." + (canHire ? string.Empty : " " + reason), true)
             },
             new List<(string, string, bool, System.Action)>
             {
-                ("hire-dialogue-accept", "Нанять — " + candidate.DailyWage + " зол. в сутки", canHire, () => ConfirmHire(candidateId)),
+                ("hire-dialogue-accept", "Нанять — " + HireService.PriceOf(candidate) + " зол.", canHire, () => ConfirmHire(candidateId)),
                 ("hire-dialogue-decline", "Не сейчас", true, CloseHireDialogue)
             });
         hireDialogueOpen = true;
@@ -68,7 +68,7 @@ public partial class PrototypeUIController
         CloseSettlementTalk();
     }
 
-    // ПКМ по бойцу отряда: характеристики (тот же расчёт, что в бою) и плата.
+    // ПКМ по бойцу отряда: характеристики (тот же расчёт, что в бою) и цена найма.
     private void ShowRosterPersonInfo(string personId)
     {
         ResidentState resident = PeopleService.Find(gameState, personId);
@@ -84,7 +84,7 @@ public partial class PrototypeUIController
         }
         HireContractData contract = HireService.Contract(gameState, personId);
         if (contract != null)
-            text += "\n\nПлата: " + contract.DailyWage + " зол. за игровые сутки.";
+            text += contract.PaidPrice > 0 ? "\n\nНанят за " + contract.PaidPrice + " зол. (один раз, жалованья нет)." : "\n\nНаёмник (жалованья нет).";
         if (!string.IsNullOrWhiteSpace(resident.ShortDescription))
             text = resident.ShortDescription + "\n\n" + text;
         ShowHeroInfoPopup(resident.DisplayName, resident.RoleLabel, text);

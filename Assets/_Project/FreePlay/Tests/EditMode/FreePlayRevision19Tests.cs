@@ -149,7 +149,7 @@ public sealed class FreePlayRevision19Tests
     }
 
     [Test]
-    public void Hire_OneCandidateOnce_WagePaidOncePerGameDay()
+    public void Hire_OneCandidateOnce_PaidOnceAtHire_NoDailyWage()
     {
         SettlementProfileDefinition post = new SettlementProfileDefinition { Id = SettlementTradeDevFixture.TradingPostProfileId, Name = "Село" };
         post.Tavern = new TavernDefinition { Enabled = true, Id = "t", Name = "Корчма" };
@@ -174,25 +174,32 @@ public sealed class FreePlayRevision19Tests
             Assert.AreEqual(candidates.Count, HireService.Candidates(state, SettlementCampDevFixture.SettlementId).Count, "Повторный вход не плодит копий.");
 
             HireCandidateData candidate = candidates[0];
+            int price = HireService.PriceOf(candidate);
+            Assert.GreaterOrEqual(price, 20, "Цена найма поднята (разовая плата).");
+            // Без золота нанять нельзя.
+            state.ArmyGold = price - 1;
+            Assert.IsFalse(HireService.CanHire(state, SettlementCampDevFixture.SettlementId, candidate.Id, out string poor), "Нанят без нужного золота.");
+            StringAssert.Contains(price.ToString(), poor);
+            Assert.IsFalse(HireService.TryHire(state, SettlementCampDevFixture.SettlementId, candidate.Id, out _));
+            Assert.AreEqual(price - 1, state.ArmyGold, "Неудачный найм не списывает золото.");
+
+            state.ArmyGold = 100;
             int fighters = state.Fighters.Count;
             Assert.IsTrue(HireService.TryHire(state, SettlementCampDevFixture.SettlementId, candidate.Id, out string message), message);
+            Assert.AreEqual(100 - price, state.ArmyGold, "Плата — один раз, при найме.");
             Assert.IsFalse(HireService.TryHire(state, SettlementCampDevFixture.SettlementId, candidate.Id, out _), "Второй раз не нанимается.");
             Assert.AreEqual(fighters + 1, state.Fighters.Count, "Один найм — один боец.");
             Assert.IsTrue(state.ActiveExpedition.FighterIds.Contains(candidate.Id), "Встал на место бойца.");
-            Assert.AreEqual(candidate.DailyWage, HireService.Contract(state, candidate.Id).DailyWage, "Плата — та же, что до найма.");
+            Assert.AreEqual(price, HireService.Contract(state, candidate.Id).PaidPrice, "В договоре — заплаченная цена.");
             Assert.IsFalse(HireService.Candidates(state, SettlementCampDevFixture.SettlementId).Exists(c => c.Id == candidate.Id), "Нанятый больше не предлагается.");
 
-            state.ArmyGold = 100;
             state.ArmySupply = 50;
-            ContinuousSimulationSystem.AdvanceLocalHours(state, 1.0);
-            Assert.AreEqual(100, state.ArmyGold, "До полуночи плата не списывается.");
+            int afterHire = state.ArmyGold;
             double toMidnight = 24.0 - ContinuousSimulationSystem.GetClock(state).HourOfDay;
             ContinuousSimulationSystem.AdvanceLocalHours(state, toMidnight + 0.5);
-            Assert.AreEqual(100 - candidate.DailyWage, state.ArmyGold, "Полночь — одна плата.");
-            ContinuousSimulationSystem.AdvanceLocalHours(state, 2.0);
-            Assert.AreEqual(100 - candidate.DailyWage, state.ArmyGold, "Без новой полуночи — без повторной платы.");
-            ContinuousSimulationSystem.AdvanceLocalHours(state, 24.0);
-            Assert.AreEqual(100 - 2 * candidate.DailyWage, state.ArmyGold, "Следующие сутки — следующая плата.");
+            Assert.AreEqual(afterHire, state.ArmyGold, "Полночь — без жалованья.");
+            ContinuousSimulationSystem.AdvanceLocalHours(state, 48.0);
+            Assert.AreEqual(afterHire, state.ArmyGold, "Следующие сутки — тоже без платы.");
         }
         finally
         {

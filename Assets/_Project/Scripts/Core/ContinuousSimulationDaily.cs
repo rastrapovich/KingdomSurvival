@@ -4,7 +4,8 @@ using System.Collections.Generic;
 public static partial class ContinuousSimulationSystem
 {
     // Канон v1.59: Дома нет — в полночь только сутки похода: расход
-    // припасов, смена дня и плата наёмникам.
+    // припасов и смена дня. Наёмникам платят разово при найме (04.11.2026),
+    // суточного жалованья нет.
     private static void ResolveMidnight(
         GameState state,
         RuntimeState runtime,
@@ -15,8 +16,6 @@ public static partial class ContinuousSimulationSystem
 
         ResolveExpeditionSupplyAtMidnight(state, batch.Result);
         state.Day++;
-        // Бриф правок п. 10: плата наёмникам — раз за игровые сутки.
-        HireService.PayDaily(state, batch.Result.Messages);
         runtime.HourOfDay = 0.0;
         ScheduleDailyChecks(state, runtime, 0.0);
         batch.StateChanged = true;

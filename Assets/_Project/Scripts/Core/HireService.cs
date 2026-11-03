@@ -5,14 +5,13 @@ using System.Collections.Generic;
 // иногда сидят один-два человека, готовых пойти с отрядом (бывает, что
 // никого). Кандидаты заводятся один раз на экземпляр поселения и живут в
 // сохранении — повторный вход не плодит копий, нанятый больше не предлагается.
-// Найм — через разговор: до согласия видны роль, польза и личная плата в
-// монетах за игровые сутки; плата хранится в договоре нанятого. Нанятый —
-// тот же человек модели (FighterData + ResidentState, внешний участник) и
-// занимает свободное место бойца. Плата списывается раз в игровые сутки
-// (в полночь) — ни реальная пауза, ни перерисовка, ни темп ×2/×3 её не
-// меняют. Рабочие решения (не утверждены): первая плата — в первую полночь
-// после найма; не хватает золота — плата не списывается, пишется донесение,
-// без долгов и ухода. Имена, роли и суммы — [РАБОЧЕЕ].
+// Найм — через разговор: до согласия видны роль, польза и цена найма. Плата
+// разовая (решение пользователя 04.11.2026): золото списывается в момент
+// найма, суточного жалованья нет; не хватает золота — нанять нельзя.
+// Нанятый — тот же человек модели (FighterData + ResidentState, внешний
+// участник) и занимает свободное место бойца. Поля DailyWage/LastPaidDay
+// оставлены ради загрузки старых сохранений и больше не списываются.
+// Имена, роли и суммы — [РАБОЧЕЕ].
 [Serializable]
 public sealed class HireCandidateData
 {
@@ -21,7 +20,10 @@ public sealed class HireCandidateData
     public string UnitTypeId = string.Empty;
     public string RoleLabel = string.Empty;
     public string Benefit = string.Empty;
+    // Старые сохранения: суточная плата прежней модели (не списывается).
     public int DailyWage;
+    // Разовая цена найма, зол.
+    public int Price;
     public bool Hired;
 }
 
@@ -32,6 +34,8 @@ public sealed class HireContractData
     public string LocationId = string.Empty;
     public int DailyWage;
     public int LastPaidDay;
+    // Сколько заплачено при найме (разово).
+    public int PaidPrice;
 }
 
 [Serializable]
@@ -44,13 +48,28 @@ public sealed class HireTavernData
 public static class HireService
 {
     // Рабочие шаблоны кандидатов: существующие типы бойцов Базы существ.
-    private static readonly (string UnitTypeId, string Role, string Benefit, int Wage)[] Templates =
+    // Цена — разовая плата при найме (рабочие суммы; прежде было 3–5 зол. в сутки).
+    private static readonly (string UnitTypeId, string Role, string Benefit, int Price)[] Templates =
     {
-        ("guard", "щитник", "держит строй и прикрывает слабых", 5),
-        ("spearman", "копейщик", "встречает зверя на длину древка", 4),
-        ("archer", "лучник", "бьёт издали, пока враг не подошёл", 5),
-        ("scout", "следопыт", "читает следы и находит тропы", 3)
+        ("guard", "щитник", "держит строй и прикрывает слабых", 30),
+        ("spearman", "копейщик", "встречает зверя на длину древка", 25),
+        ("archer", "лучник", "бьёт издали, пока враг не подошёл", 30),
+        ("scout", "следопыт", "читает следы и находит тропы", 20)
     };
+
+    // Цена кандидата; у кандидатов из старых сохранений (без поля Price) —
+    // по шаблону его типа.
+    public static int PriceOf(HireCandidateData candidate)
+    {
+        if (candidate == null)
+            return 0;
+        if (candidate.Price > 0)
+            return candidate.Price;
+        foreach ((string unitTypeId, string _, string _, int price) in Templates)
+            if (unitTypeId == candidate.UnitTypeId)
+                return price;
+        return Math.Max(20, candidate.DailyWage * 6);
+    }
 
     private static readonly string[] Names = { "Радим", "Милош", "Тихомир", "Вышеслав", "Будимир", "Ярополк", "Любомир", "Станимир" };
 
@@ -85,7 +104,7 @@ public static class HireService
         int count = random.Next(100) < PresentPercent ? (random.Next(100) < SecondPercent ? 2 : 1) : 0;
         for (int i = 0; i < count; i++)
         {
-            (string unitTypeId, string role, string benefit, int wage) = Templates[random.Next(Templates.Length)];
+            (string unitTypeId, string role, string benefit, int price) = Templates[random.Next(Templates.Length)];
             string name = Names[random.Next(Names.Length)];
             tavern.Candidates.Add(new HireCandidateData
             {
@@ -94,7 +113,7 @@ public static class HireService
                 UnitTypeId = unitTypeId,
                 RoleLabel = role,
                 Benefit = benefit,
-                DailyWage = wage
+                Price = price
             });
         }
         state.Settlements.HireTaverns.Add(tavern);
@@ -126,6 +145,12 @@ public static class HireService
             reason = "В отряде нет свободного места.";
             return false;
         }
+        int price = PriceOf(candidate);
+        if (state.ArmyGold < price)
+        {
+            reason = "Не хватает золота: нужно " + price + " зол., есть " + state.ArmyGold + ".";
+            return false;
+        }
         reason = string.Empty;
         return true;
     }
@@ -135,6 +160,8 @@ public static class HireService
         if (!CanHire(state, locationId, candidateId, out message))
             return false;
         HireCandidateData candidate = Candidates(state, locationId).Find(c => c.Id == candidateId);
+        int price = PriceOf(candidate);
+        state.ArmyGold -= price;
         string personId = candidate.Id;
         if (state.FindFighter(personId) == null)
             state.Fighters.Add(new FighterData(personId, candidate.Name, "Наёмник", 1, 0, candidate.UnitTypeId));
@@ -160,38 +187,13 @@ public static class HireService
         {
             PersonId = personId,
             LocationId = locationId,
-            DailyWage = candidate.DailyWage,
+            PaidPrice = price,
             LastPaidDay = state.Day
         });
         Chronicle.Record(state, "hire." + personId, "Нанят: " + candidate.Name,
-            candidate.Name + ", " + candidate.RoleLabel + ", идёт с отрядом за " + candidate.DailyWage + " зол. в сутки.");
-        message = candidate.Name + " идёт с отрядом. Плата — " + candidate.DailyWage + " зол. в сутки.";
+            candidate.Name + ", " + candidate.RoleLabel + ", идёт с отрядом. Заплачено при найме " + price + " зол., жалованья нет.");
+        message = candidate.Name + " идёт с отрядом. Заплачено " + price + " зол. — один раз.";
         return true;
-    }
-
-    // Полночь: плата за прошедшие игровые сутки — один раз за сутки.
-    public static void PayDaily(GameState state, List<string> messages)
-    {
-        if (state?.Settlements?.HireContracts == null)
-            return;
-        foreach (HireContractData contract in state.Settlements.HireContracts)
-        {
-            if (contract == null || contract.LastPaidDay >= state.Day)
-                continue;
-            ResidentState resident = PeopleService.Find(state, contract.PersonId);
-            if (resident == null || !resident.IsAlive)
-                continue;
-            contract.LastPaidDay = state.Day;
-            if (state.ArmyGold >= contract.DailyWage)
-            {
-                state.ArmyGold -= contract.DailyWage;
-                messages?.Add("Плата наёмнику " + resident.DisplayName + ": " + contract.DailyWage + " зол.");
-            }
-            else
-            {
-                messages?.Add("Не хватило золота заплатить " + resident.DisplayName + " (" + contract.DailyWage + " зол.).");
-            }
-        }
     }
 
     private static int StableHash(string text)

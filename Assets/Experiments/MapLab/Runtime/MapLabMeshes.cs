@@ -211,6 +211,7 @@ namespace KingdomSurvival.MapLab
             List<Vector3> positions = new List<Vector3>();
             List<Vector2> uv0 = new List<Vector2>();
             List<Vector2> uv1 = new List<Vector2>();
+            List<Vector3> uv2 = new List<Vector3>();
             List<int> indices = new List<int>();
             int n = data.Resolution;
             if (data.Lakes.Count == 0 || data.LakeField == null)
@@ -234,6 +235,8 @@ namespace KingdomSurvival.MapLab
                         positions.Add(p);
                         uv0.Add(new Vector2(p.x, p.z));
                         uv1.Add(new Vector2(1f, 0.12f));
+                        // Этап 05: z = 0 — озеро (штрихи в мире, спокойнее реки).
+                        uv2.Add(new Vector3(p.x, p.z, 0f));
                     }
                     indices.Add(start); indices.Add(start + 3); indices.Add(start + 2);
                     indices.Add(start); indices.Add(start + 2); indices.Add(start + 1);
@@ -247,6 +250,7 @@ namespace KingdomSurvival.MapLab
             mesh.SetVertices(positions);
             mesh.SetUVs(0, uv0);
             mesh.SetUVs(1, uv1);
+            mesh.SetUVs(2, uv2);
             mesh.SetTriangles(indices, 0);
             mesh.RecalculateNormals();
             return mesh;
@@ -274,6 +278,7 @@ namespace KingdomSurvival.MapLab
             List<Vector3> positions = new List<Vector3>();
             List<Vector2> uv0 = new List<Vector2>();
             List<Vector2> uv1 = new List<Vector2>();
+            List<Vector3> uv2 = new List<Vector3>();
             List<int> indices = new List<int>();
             for (int r = 0; r < data.Rivers.Count; r++)
             {
@@ -282,9 +287,14 @@ namespace KingdomSurvival.MapLab
                 if (count < 2)
                     continue;
                 int rowStart = -1;
+                // Этап 05: параметризация русла — длина вдоль осевой и расстояние
+                // поперёк (мир): штрихи течения следуют руслу без швов на изгибах.
+                float along = r * 1000f;
                 for (int i = 0; i < count; i++)
                 {
                     Vector2 p = river.Points[i];
+                    if (i > 0)
+                        along += Vector2.Distance(river.Points[i - 1], p);
                     Vector2 tangent = (river.Points[Mathf.Min(count - 1, i + 1)] - river.Points[Mathf.Max(0, i - 1)]).normalized;
                     Vector2 normal = MapLabGeometry.LeftNormal(tangent);
                     float half = river.Widths[i] * 0.5f + 1.6f;
@@ -299,6 +309,8 @@ namespace KingdomSurvival.MapLab
                     uv0.Add(right);
                     uv1.Add(tangent);
                     uv1.Add(tangent);
+                    uv2.Add(new Vector3(along, half, 1f));
+                    uv2.Add(new Vector3(along, -half, 1f));
                     if (rowStart >= 0 && !insideLake)
                     {
                         indices.Add(rowStart); indices.Add(start); indices.Add(start + 1);
@@ -315,6 +327,7 @@ namespace KingdomSurvival.MapLab
             mesh.SetVertices(positions);
             mesh.SetUVs(0, uv0);
             mesh.SetUVs(1, uv1);
+            mesh.SetUVs(2, uv2);
             mesh.SetTriangles(indices, 0);
             FixWinding(mesh);
             mesh.RecalculateNormals();
@@ -560,7 +573,7 @@ namespace KingdomSurvival.MapLab
 
         // ---------- Постройки и мелкие объекты ----------
 
-        public static Mesh BuildStructures(MapLabData data, MapLabSettings settings, HashSet<MapLabObjectKind> skip = null)
+        public static Mesh BuildStructures(MapLabData data, MapLabSettings settings, HashSet<MapLabObjectKind> skip = null, bool skipBridges = false)
         {
             MapLabMeshBuilder mb = new MapLabMeshBuilder();
             for (int i = 0; i < data.Objects.Count; i++)
@@ -584,7 +597,8 @@ namespace KingdomSurvival.MapLab
             bool vary = settings != null && settings.IsStage04;
             for (int i = 0; i < data.Fences.Count; i++)
                 Fence(mb, data, data.Fences[i], vary);
-            for (int i = 0; i < data.Bridges.Count; i++)
+            // Этап 05: мосты собираются из модулей (MapLabModules05).
+            for (int i = 0; i < data.Bridges.Count && !skipBridges; i++)
                 Bridge(mb, data, data.Bridges[i]);
             for (int i = 0; i < data.Piers.Count; i++)
                 Pier(mb, data.Piers[i]);

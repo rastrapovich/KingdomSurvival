@@ -32,6 +32,8 @@ Shader "Kingdom Survival/MapLab/Art Card"
         _AccentHighlight ("Ширина подсветки, толщин линии", Float) = 2.2
         _AccentOn ("Акценты включены", Float) = 1
         _DiagMode ("Диагностика: 12 группы, 13 акценты", Float) = 0
+        _DetailFade ("Этап 05: исчезновение мелких спрайтов, пикс./ед. (скрыт, виден)", Vector) = (0, 0, 0, 0)
+        [Enum(Off, 0, On, 1)] _AlphaToMask ("Этап 05: AlphaToMask", Float) = 0
         [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("ZTest", Float) = 4
         [Enum(Off, 0, On, 1)] _ZWrite ("ZWrite", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Src blend", Float) = 1
@@ -48,6 +50,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
             ZTest [_ZTest]
             Blend [_SrcBlend] [_DstBlend]
             Cull Off
+            AlphaToMask [_AlphaToMask]
 
             HLSLPROGRAM
             #pragma vertex Vert
@@ -72,6 +75,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float shade : TEXCOORD2;
                 float4 extra : TEXCOORD3;
                 float2 rhythm : TEXCOORD4;
+                float fade : TEXCOORD5;
             };
 
             TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
@@ -98,7 +102,11 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float _AccentHighlight;
                 float _AccentOn;
                 float _DiagMode;
+                float4 _DetailFade;
+                float _AlphaToMask;
             CBUFFER_END
+
+            float _MapLabPixelScale;
 
             float3 Hue(float h)
             {
@@ -132,6 +140,14 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 o.rhythm = input.rhythm;
                 float4 s = SAMPLE_TEXTURE2D_LOD(_ShadeTex, sampler_ShadeTex, basePoint.xz / max(1.0, _MapSize), 0);
                 o.shade = saturate((1.0 - s.r) * 0.9 + (1.0 - s.g) * 0.35);
+                // Этап 05: плотность пикселей итогового кадра на единицу мира (орто).
+                o.fade = 1.0;
+                if (_DetailFade.y > _DetailFade.x)
+                {
+                    float scale = _MapLabPixelScale > 0.0 ? _MapLabPixelScale : 1.0;
+                    float ppu = _ScreenParams.y / max(1e-3, 2.0 * unity_OrthoParams.y) / scale;
+                    o.fade = saturate((ppu - _DetailFade.x) / (_DetailFade.y - _DetailFade.x));
+                }
                 return o;
             }
 
@@ -151,7 +167,16 @@ Shader "Kingdom Survival/MapLab/Art Card"
                     }
                     return float4(tex.rgb, 1);
                 }
-                clip(tex.a - _Cutoff);
+                // Мелкий спрайт вдали плавно истаивает (силуэт уменьшается к нулю).
+                tex.a *= i.fade;
+                float outAlpha = 1;
+                if (_AlphaToMask > 0.5)
+                {
+                    outAlpha = saturate((tex.a - _Cutoff) / max(fwidth(tex.a), 1e-4) + 0.5);
+                    clip(outAlpha - 0.002);
+                }
+                else
+                    clip(tex.a - _Cutoff);
                 if (_Ghost > 0.5)
                     return _GhostColor;
                 float3 c = tex.rgb;
@@ -195,7 +220,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 if (diag == 13)
                     return float4(lerp(lerp(float3(0.82, 0.82, 0.78), float3(0.95, 0.85, 0.2), bandMask), float3(0.75, 0.1, 0.05), edgeMask), 1);
                 c = MapLabSaturate(c, _Saturation);
-                return float4(c, 1);
+                return float4(c, outAlpha);
             }
             ENDHLSL
         }

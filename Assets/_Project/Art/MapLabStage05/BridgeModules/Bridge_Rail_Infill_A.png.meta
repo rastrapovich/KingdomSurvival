@@ -1,0 +1,1131 @@
+fileFormatVersion: 2
+guid: db27a3cb7f8bf864ebf247fc406a5a2e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6701020908927315386
+    second: Bridge_Rail_Infill_A_0
+  - first:
+      213: -261537671405383473
+    second: Bridge_Rail_Infill_A_1
+  - first:
+      213: -8061872838992777056
+    second: Bridge_Rail_Infill_A_2
+  - first:
+      213: -5327406264633840843
+    second: Bridge_Rail_Infill_A_3
+  - first:
+      213: -8961292722771680788
+    second: Bridge_Rail_Infill_A_4
+  - first:
+      213: 7558295490688696129
+    second: Bridge_Rail_Infill_A_5
+  - first:
+      213: -9191648401864516306
+    second: Bridge_Rail_Infill_A_6
+  - first:
+      213: -2570343000700190922
+    second: Bridge_Rail_Infill_A_7
+  - first:
+      213: 1118227101848268276
+    second: Bridge_Rail_Infill_A_8
+  - first:
+      213: 4887689681946960650
+    second: Bridge_Rail_Infill_A_9
+  - first:
+      213: -2418985177832620660
+    second: Bridge_Rail_Infill_A_10
+  - first:
+      213: -1558822930972895707
+    second: Bridge_Rail_Infill_A_11
+  - first:
+      213: -5451820941974804590
+    second: Bridge_Rail_Infill_A_12
+  - first:
+      213: 4262469783119404676
+    second: Bridge_Rail_Infill_A_13
+  - first:
+      213: -1933704238441403442
+    second: Bridge_Rail_Infill_A_14
+  - first:
+      213: -1493876612218427955
+    second: Bridge_Rail_Infill_A_15
+  - first:
+      213: -6589415261122346583
+    second: Bridge_Rail_Infill_A_16
+  - first:
+      213: -1573888812763391379
+    second: Bridge_Rail_Infill_A_17
+  - first:
+      213: -691341693275693297
+    second: Bridge_Rail_Infill_A_18
+  - first:
+      213: -3090224342116047569
+    second: Bridge_Rail_Infill_A_19
+  - first:
+      213: -4820572043774154267
+    second: Bridge_Rail_Infill_A_20
+  - first:
+      213: 7808710612160199970
+    second: Bridge_Rail_Infill_A_21
+  - first:
+      213: 1599736249692139367
+    second: Bridge_Rail_Infill_A_22
+  - first:
+      213: 2077097643323484574
+    second: Bridge_Rail_Infill_A_23
+  - first:
+      213: -173175180312906059
+    second: Bridge_Rail_Infill_A_24
+  - first:
+      213: 4156212530475385488
+    second: Bridge_Rail_Infill_A_25
+  - first:
+      213: 7825317983165975732
+    second: Bridge_Rail_Infill_A_26
+  - first:
+      213: 6208640442612702635
+    second: Bridge_Rail_Infill_A_27
+  - first:
+      213: 5238106282750840035
+    second: Bridge_Rail_Infill_A_28
+  - first:
+      213: 5212395329930867610
+    second: Bridge_Rail_Infill_A_29
+  - first:
+      213: 6072771887587318869
+    second: Bridge_Rail_Infill_A_30
+  - first:
+      213: -1947315211781123082
+    second: Bridge_Rail_Infill_A_31
+  - first:
+      213: -2930089175542704095
+    second: Bridge_Rail_Infill_A_32
+  - first:
+      213: 4275686411261474061
+    second: Bridge_Rail_Infill_A_33
+  - first:
+      213: -8371806263840566529
+    second: Bridge_Rail_Infill_A_34
+  - first:
+      213: -4883620702356434881
+    second: Bridge_Rail_Infill_A_35
+  - first:
+      213: 5897242917558781659
+    second: Bridge_Rail_Infill_A_36
+  - first:
+      213: 1789950668536386520
+    second: Bridge_Rail_Infill_A_37
+  - first:
+      213: 3291670899337800113
+    second: Bridge_Rail_Infill_A_38
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 8
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_0
+      rect:
+        serializedVersion: 2
+        x: 201
+        y: 602
+        width: 130
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6421ce2acf03103a0800000000000000
+      internalID: -6701020908927315386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_1
+      rect:
+        serializedVersion: 2
+        x: 314
+        y: 643
+        width: 99
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc0df70afd4de5cf0800000000000000
+      internalID: -261537671405383473
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_2
+      rect:
+        serializedVersion: 2
+        x: 601
+        y: 632
+        width: 78
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a03777dd597e1090800000000000000
+      internalID: -8061872838992777056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_3
+      rect:
+        serializedVersion: 2
+        x: 909
+        y: 618
+        width: 132
+        height: 98
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 53b2f466a304116b0800000000000000
+      internalID: -5327406264633840843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_4
+      rect:
+        serializedVersion: 2
+        x: 1088
+        y: 602
+        width: 69
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce1a6e26fb713a380800000000000000
+      internalID: -8961292722771680788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_5
+      rect:
+        serializedVersion: 2
+        x: 1167
+        y: 626
+        width: 131
+        height: 76
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14fbfe504b574e860800000000000000
+      internalID: 7558295490688696129
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_6
+      rect:
+        serializedVersion: 2
+        x: 1510
+        y: 693
+        width: 46
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2d149a5a74b07080800000000000000
+      internalID: -9191648401864516306
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_7
+      rect:
+        serializedVersion: 2
+        x: 1553
+        y: 604
+        width: 71
+        height: 114
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 63f7a5cb8ae445cd0800000000000000
+      internalID: -2570343000700190922
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_8
+      rect:
+        serializedVersion: 2
+        x: 1744
+        y: 596
+        width: 123
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fd61efdf9db48f00800000000000000
+      internalID: 1118227101848268276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_9
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 634
+        width: 104
+        height: 82
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a036ac0aedf84d340800000000000000
+      internalID: 4887689681946960650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_10
+      rect:
+        serializedVersion: 2
+        x: 297
+        y: 628
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8df95e0cc90e6ed0800000000000000
+      internalID: -2418985177832620660
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_11
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 611
+        width: 13
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52690a3adc2fd5ae0800000000000000
+      internalID: -1558822930972895707
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_12
+      rect:
+        serializedVersion: 2
+        x: 438
+        y: 655
+        width: 14
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2976e8efcbd3754b0800000000000000
+      internalID: -5451820941974804590
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_13
+      rect:
+        serializedVersion: 2
+        x: 446
+        y: 632
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48e1ba82fa5572b30800000000000000
+      internalID: 4262469783119404676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_14
+      rect:
+        serializedVersion: 2
+        x: 455
+        y: 624
+        width: 53
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecb68078d3a1a25e0800000000000000
+      internalID: -1933704238441403442
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_15
+      rect:
+        serializedVersion: 2
+        x: 617
+        y: 633
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc5e476d22fa44be0800000000000000
+      internalID: -1493876612218427955
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_16
+      rect:
+        serializedVersion: 2
+        x: 625
+        y: 598
+        width: 12
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a1c3437bb1bd84a0800000000000000
+      internalID: -6589415261122346583
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_17
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 598
+        width: 73
+        height: 78
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d6ad64fa67c682ae0800000000000000
+      internalID: -1573888812763391379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_18
+      rect:
+        serializedVersion: 2
+        x: 762
+        y: 629
+        width: 31
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0f92e1946cd766f0800000000000000
+      internalID: -691341693275693297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_19
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 632
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2568e365515d15d0800000000000000
+      internalID: -3090224342116047569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_20
+      rect:
+        serializedVersion: 2
+        x: 794
+        y: 602
+        width: 14
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e9a9a44443e91db0800000000000000
+      internalID: -4820572043774154267
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_21
+      rect:
+        serializedVersion: 2
+        x: 804
+        y: 634
+        width: 12
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 22db1afedec1e5c60800000000000000
+      internalID: 7808710612160199970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_22
+      rect:
+        serializedVersion: 2
+        x: 812
+        y: 634
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76f2731b4a7633610800000000000000
+      internalID: 1599736249692139367
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_23
+      rect:
+        serializedVersion: 2
+        x: 829
+        y: 602
+        width: 81
+        height: 82
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e99e81a3d4553dc10800000000000000
+      internalID: 2077097643323484574
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_24
+      rect:
+        serializedVersion: 2
+        x: 1174
+        y: 644
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b6f88d4712c89df0800000000000000
+      internalID: -173175180312906059
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_25
+      rect:
+        serializedVersion: 2
+        x: 1174
+        y: 598
+        width: 18
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0924302a645dda930800000000000000
+      internalID: 4156212530475385488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_26
+      rect:
+        serializedVersion: 2
+        x: 1186
+        y: 624
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4bc8511de3d199c60800000000000000
+      internalID: 7825317983165975732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_27
+      rect:
+        serializedVersion: 2
+        x: 1323
+        y: 597
+        width: 30
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: baddd087695892650800000000000000
+      internalID: 6208640442612702635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_28
+      rect:
+        serializedVersion: 2
+        x: 1359
+        y: 632
+        width: 52
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ec0b1759ed71b840800000000000000
+      internalID: 5238106282750840035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_29
+      rect:
+        serializedVersion: 2
+        x: 1422
+        y: 612
+        width: 43
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a933f65afe5265840800000000000000
+      internalID: 5212395329930867610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_30
+      rect:
+        serializedVersion: 2
+        x: 1496
+        y: 628
+        width: 36
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55cde995bd1d64450800000000000000
+      internalID: 6072771887587318869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_31
+      rect:
+        serializedVersion: 2
+        x: 1526
+        y: 632
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f35218d12fb9f4e0800000000000000
+      internalID: -1947315211781123082
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_32
+      rect:
+        serializedVersion: 2
+        x: 1639
+        y: 624
+        width: 66
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1285f8b4b6b3657d0800000000000000
+      internalID: -2930089175542704095
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_33
+      rect:
+        serializedVersion: 2
+        x: 1697
+        y: 608
+        width: 28
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d057432332a465b30800000000000000
+      internalID: 4275686411261474061
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_34
+      rect:
+        serializedVersion: 2
+        x: 1880
+        y: 600
+        width: 20
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff2946b0f8e51db80800000000000000
+      internalID: -8371806263840566529
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_35
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 37
+        width: 1979
+        height: 562
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f301d4288d4e93cb0800000000000000
+      internalID: -4883620702356434881
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_36
+      rect:
+        serializedVersion: 2
+        x: 2083
+        y: 586
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd68747403737d150800000000000000
+      internalID: 5897242917558781659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_37
+      rect:
+        serializedVersion: 2
+        x: 2081
+        y: 244
+        width: 10
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d3959346ae27d810800000000000000
+      internalID: 1789950668536386520
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Rail_Infill_A_38
+      rect:
+        serializedVersion: 2
+        x: 2087
+        y: 254
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b925803e3d5ead20800000000000000
+      internalID: 3291670899337800113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Bridge_Rail_Infill_A_0: -6701020908927315386
+      Bridge_Rail_Infill_A_1: -261537671405383473
+      Bridge_Rail_Infill_A_10: -2418985177832620660
+      Bridge_Rail_Infill_A_11: -1558822930972895707
+      Bridge_Rail_Infill_A_12: -5451820941974804590
+      Bridge_Rail_Infill_A_13: 4262469783119404676
+      Bridge_Rail_Infill_A_14: -1933704238441403442
+      Bridge_Rail_Infill_A_15: -1493876612218427955
+      Bridge_Rail_Infill_A_16: -6589415261122346583
+      Bridge_Rail_Infill_A_17: -1573888812763391379
+      Bridge_Rail_Infill_A_18: -691341693275693297
+      Bridge_Rail_Infill_A_19: -3090224342116047569
+      Bridge_Rail_Infill_A_2: -8061872838992777056
+      Bridge_Rail_Infill_A_20: -4820572043774154267
+      Bridge_Rail_Infill_A_21: 7808710612160199970
+      Bridge_Rail_Infill_A_22: 1599736249692139367
+      Bridge_Rail_Infill_A_23: 2077097643323484574
+      Bridge_Rail_Infill_A_24: -173175180312906059
+      Bridge_Rail_Infill_A_25: 4156212530475385488
+      Bridge_Rail_Infill_A_26: 7825317983165975732
+      Bridge_Rail_Infill_A_27: 6208640442612702635
+      Bridge_Rail_Infill_A_28: 5238106282750840035
+      Bridge_Rail_Infill_A_29: 5212395329930867610
+      Bridge_Rail_Infill_A_3: -5327406264633840843
+      Bridge_Rail_Infill_A_30: 6072771887587318869
+      Bridge_Rail_Infill_A_31: -1947315211781123082
+      Bridge_Rail_Infill_A_32: -2930089175542704095
+      Bridge_Rail_Infill_A_33: 4275686411261474061
+      Bridge_Rail_Infill_A_34: -8371806263840566529
+      Bridge_Rail_Infill_A_35: -4883620702356434881
+      Bridge_Rail_Infill_A_36: 5897242917558781659
+      Bridge_Rail_Infill_A_37: 1789950668536386520
+      Bridge_Rail_Infill_A_38: 3291670899337800113
+      Bridge_Rail_Infill_A_4: -8961292722771680788
+      Bridge_Rail_Infill_A_5: 7558295490688696129
+      Bridge_Rail_Infill_A_6: -9191648401864516306
+      Bridge_Rail_Infill_A_7: -2570343000700190922
+      Bridge_Rail_Infill_A_8: 1118227101848268276
+      Bridge_Rail_Infill_A_9: 4887689681946960650
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

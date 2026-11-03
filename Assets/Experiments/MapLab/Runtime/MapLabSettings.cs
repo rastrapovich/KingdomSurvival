@@ -67,6 +67,9 @@ namespace KingdomSurvival.MapLab
         // тень, ограды и уступы в общем рисунке, примыкания троп, зерно и пятна,
         // травинки, ритм леса, новый герой.
         Stage04 = 2,
+        // Этап 05 — конвейер этапа 04 плюс камера до Zoom 3 и 50°, единое перо,
+        // живые края, модули оград и мостов, деревня, новый пакет ассетов.
+        Stage05 = 3,
     }
 
     public enum MapLabArtMode
@@ -355,8 +358,8 @@ namespace KingdomSurvival.MapLab
     [Serializable]
     public sealed class MapLabStage03Settings
     {
-        [Tooltip("Stage02 — прежний живописный вид (набор арта этапа 02); Stage03 — тушь и спокойные массы (набор этапа 03); Stage04 — то же с проходом согласования этапа 04.")]
-        public MapLabLook Look = MapLabLook.Stage04;
+        [Tooltip("Stage02 — прежний живописный вид (набор арта этапа 02); Stage03 — тушь и спокойные массы (набор этапа 03); Stage04 — то же с проходом согласования этапа 04; Stage05 — камера до Zoom 3 и 50°, единое перо, модули оград и мостов, деревня.")]
+        public MapLabLook Look = MapLabLook.Stage05;
         [Tooltip("Плотность запекания покраски, текселей на единицу мира (тайлы по чанкам рельефа). Этап 02 — 2048 на всю карту (8 на 256 ед.).")]
         [Range(6f, 24f)] public float PaintTexelsPerUnit = 16f;
         [Tooltip("Тушевые линии дорог, троп и берегов (общий профиль пера).")]
@@ -547,11 +550,30 @@ namespace KingdomSurvival.MapLab
         public MapLabArtSettings Art = new MapLabArtSettings();
         public MapLabStage03Settings Stage03 = new MapLabStage03Settings();
         public MapLabStage04Settings Stage04 = new MapLabStage04Settings();
+        public MapLabStage05Settings Stage05 = new MapLabStage05Settings();
         public MapLabDiagnosticsSettings Diagnostics = new MapLabDiagnosticsSettings();
 
-        // Конвейер этапа 03 (тайлы, перо, акценты, тени) — и у этапа 04.
+        // Конвейер этапа 03 (тайлы, перо, акценты, тени) — и у этапов 04 и 05;
+        // проход согласования этапа 04 — и у этапа 05.
         public bool IsStage03 => Stage03.Look >= MapLabLook.Stage03;
-        public bool IsStage04 => Stage03.Look == MapLabLook.Stage04;
+        public bool IsStage04 => Stage03.Look >= MapLabLook.Stage04;
+        public bool IsStage05 => Stage03.Look == MapLabLook.Stage05;
+
+        // Фактический предел приближения: на этапе 05 — ZoomMax (2–4), прежний
+        // предел рига (8) ограничивается им; на ранних этапах — предел рига.
+        public float MaxZoom(float rigLimit)
+        {
+            return IsStage05 ? Mathf.Min(rigLimit, Mathf.Clamp(Stage05.ZoomMax, 2f, 4f)) : rigLimit;
+        }
+
+        // Наклон для приближения: этап 05 — от 60° к 50° ровно на фактическом пределе.
+        public float PitchFor(float zoom, float rigLimit)
+        {
+            float max = MaxZoom(rigLimit);
+            if (IsStage05 && Camera.PitchByZoom)
+                return MapLabCameraSettings.PitchCurve(Mathf.Min(zoom, max), max, Stage05.PitchRange);
+            return Camera.PitchFor(zoom, max);
+        }
         public MapLabAdvancedSettings Advanced = new MapLabAdvancedSettings();
 
         public int Resolution => Mathf.Clamp((int)General.Quality, 33, 1025);

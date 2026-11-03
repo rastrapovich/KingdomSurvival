@@ -103,7 +103,7 @@ namespace KingdomSurvival.MapLab.Editor
                     view.ApplyVisibility();
                 }
 
-                float maxZoom = rig.ZoomLimits.y;
+                float maxZoom = rig.MaxZoom;
                 // 1. Тот же участок, тот же масштаб, что в 00_baseline.
                 foreach (float pitch in new[] { 50f, 35f })
                 {

@@ -1,0 +1,455 @@
+fileFormatVersion: 2
+guid: 745b42a516049f8448faa17bbf5ef838
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8892726405492204393
+    second: Fence_Wattle_Panel_A_0
+  - first:
+      213: 4769499919080925602
+    second: Fence_Wattle_Panel_A_1
+  - first:
+      213: 7211484489969076395
+    second: Fence_Wattle_Panel_A_2
+  - first:
+      213: 6275672829571248671
+    second: Fence_Wattle_Panel_A_3
+  - first:
+      213: 6631304246133600599
+    second: Fence_Wattle_Panel_A_4
+  - first:
+      213: 524693564186028125
+    second: Fence_Wattle_Panel_A_5
+  - first:
+      213: 5789297757247789423
+    second: Fence_Wattle_Panel_A_6
+  - first:
+      213: 3396627357094458983
+    second: Fence_Wattle_Panel_A_7
+  - first:
+      213: -3089474660122343088
+    second: Fence_Wattle_Panel_A_8
+  - first:
+      213: -1424315053754726635
+    second: Fence_Wattle_Panel_A_9
+  - first:
+      213: 4596666033571907529
+    second: Fence_Wattle_Panel_A_10
+  - first:
+      213: -8764758369999773657
+    second: Fence_Wattle_Panel_A_11
+  - first:
+      213: 574734566051043198
+    second: Fence_Wattle_Panel_A_12
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 8
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Fence_Wattle_Panel_A_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1723
+        height: 865
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9636914dc8f496b70800000000000000
+      internalID: 8892726405492204393
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Wattle_Panel_A_1
+      rect:
+        serializedVersion: 2
+        x: 760
+        y: 854
+        width: 15
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a9a21118eaa03240800000000000000
+      internalID: 4769499919080925602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Wattle_Panel_A_2
+      rect:
+        serializedVersion: 2
+        x: 788
+        y: 846
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba888df7fe6541460800000000000000
+      internalID: 7211484489969076395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Wattle_Panel_A_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 759
+        width: 41
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f123a25403ba71750800000000000000
+      internalID: 6275672829571248671
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Wattle_Panel_A_4
+      rect:
+        serializedVersion: 2
+        x: 820
+        y: 819
+        width: 34
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7513554e310270c50800000000000000
+      internalID: 6631304246133600599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Wattle_Panel_A_5
+      rect:
+        serializedVersion: 2
+        x: 796
+        y: 805
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d58ed354406184700800000000000000
+      internalID: 524693564186028125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Wattle_Panel_A_6
+      rect:
+        serializedVersion: 2
+        x: 20
+        y: 698
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6958bf13a7b75050800000000000000
+      internalID: 5789297757247789423
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Wattle_Panel_A_7
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 692
+        width: 16
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7663dfdc59e332f20800000000000000
+      internalID: 3396627357094458983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Wattle_Panel_A_8
+      rect:
+        serializedVersion: 2
+        x: 314
+        y: 130
+        width: 10
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05946d45a2bff15d0800000000000000
+      internalID: -3089474660122343088
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Wattle_Panel_A_9
+      rect:
+        serializedVersion: 2
+        x: 740
+        y: 16
+        width: 19
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51745b44101db3ce0800000000000000
+      internalID: -1424315053754726635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Wattle_Panel_A_10
+      rect:
+        serializedVersion: 2
+        x: 1177
+        y: 39
+        width: 15
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c748224763aacf30800000000000000
+      internalID: 4596666033571907529
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Wattle_Panel_A_11
+      rect:
+        serializedVersion: 2
+        x: 1572
+        y: 31
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 720280e33b25d5680800000000000000
+      internalID: -8764758369999773657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Wattle_Panel_A_12
+      rect:
+        serializedVersion: 2
+        x: 1381
+        y: 17
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e775c91fa0ed9f700800000000000000
+      internalID: 574734566051043198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Fence_Wattle_Panel_A_0: 8892726405492204393
+      Fence_Wattle_Panel_A_1: 4769499919080925602
+      Fence_Wattle_Panel_A_10: 4596666033571907529
+      Fence_Wattle_Panel_A_11: -8764758369999773657
+      Fence_Wattle_Panel_A_12: 574734566051043198
+      Fence_Wattle_Panel_A_2: 7211484489969076395
+      Fence_Wattle_Panel_A_3: 6275672829571248671
+      Fence_Wattle_Panel_A_4: 6631304246133600599
+      Fence_Wattle_Panel_A_5: 524693564186028125
+      Fence_Wattle_Panel_A_6: 5789297757247789423
+      Fence_Wattle_Panel_A_7: 3396627357094458983
+      Fence_Wattle_Panel_A_8: -3089474660122343088
+      Fence_Wattle_Panel_A_9: -1424315053754726635
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

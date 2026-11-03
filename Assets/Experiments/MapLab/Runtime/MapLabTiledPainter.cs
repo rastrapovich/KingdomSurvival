@@ -60,6 +60,8 @@ namespace KingdomSurvival.MapLab
         {
             public bool StrokeContribution;
             public bool RoadInkInPaint;
+            // Этап 05: акварельные пятна (Wash PNG), уже размещённые в мире.
+            public MapLabWash.Layer Washes;
         }
 
         public static Result Paint(MapLabData data, MapLabSettings settings, MapLabPalette palette, float tileWorld, Options options)
@@ -221,6 +223,9 @@ namespace KingdomSurvival.MapLab
             private readonly Vector3 light;
             private readonly MapLabNoise flow;
             private readonly float edgeAa;
+            private readonly bool stage05;
+            private readonly MapLabWash.Layer washes;
+            private readonly MapLabNoise groups, ochre;
             public long StrokeCount;
             public long StampCount;
 
@@ -259,7 +264,11 @@ namespace KingdomSurvival.MapLab
                 }
                 light = settings.LightDirection;
                 flow = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "paint03-flow", MapLabData.AlgorithmVersion));
-                edgeAa = Mathf.Clamp(settings.Stage03.StrokeEdge, 0.3f, 3f);
+                stage05 = settings.IsStage05;
+                edgeAa = stage05 ? Mathf.Clamp(settings.Stage05.StrokeEdge, 0.2f, 3f) : Mathf.Clamp(settings.Stage03.StrokeEdge, 0.3f, 3f);
+                washes = options.Washes;
+                groups = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "paint05-groups", MapLabData.AlgorithmVersion));
+                ochre = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "paint05-shore-ochre", MapLabData.AlgorithmVersion));
                 yardMin = new Vector2(float.MaxValue, float.MaxValue);
                 yardMax = new Vector2(float.MinValue, float.MinValue);
                 foreach (Vector4 y in data.Yards)
@@ -357,7 +366,7 @@ namespace KingdomSurvival.MapLab
                     // То же, что pow(forest · 1.25, 0.7) > 0.5 у этапа 02, без pow на тексель.
                     if (s.Forest > 0.2971f)
                         k = KeyForest;
-                    if (stage04 && k == KeyGrass && blotStrength > 0f)
+                    if (stage04 && !stage05 && k == KeyGrass && blotStrength > 0f)
                         c = Blot(c, s);
 
                     // Поля: чёткий край пашни (узкий переход маски), полосы и межа.
@@ -386,13 +395,21 @@ namespace KingdomSurvival.MapLab
                             float select = 1f;
                             if (stage04 && line > 0f)
                             {
-                                float share = settings.Stage04.FieldInkShare;
+                                float share = stage05 ? settings.Stage05.FieldInkShare : settings.Stage04.FieldInkShare;
                                 float nearRoad = 1f - MapLabGeometry.SmoothStep(1.2f, 2.6f, roadDistance[i]);
                                 float slope = MapLabGeometry.SmoothStep(5f, 10f, data.SampleSlope(w.x, w.y)) * 0.8f;
                                 float chosen = MapLabGeometry.SmoothStep(1.5f - share * 1.9f, 1.58f - share * 1.9f, widthVar);
                                 select = Mathf.Max(nearRoad, Mathf.Max(slope, chosen));
                             }
-                            ink[i] = Mathf.Max(ink[i], 0.55f * inkWeights.z * line * select * Breakup(s.Breakup, 0.4f));
+                            // Этап 05: видимая тушь меж (не только зелёная полоса межи) —
+                            // плотнее и чуть шире на выбранных длинных участках.
+                            if (stage05)
+                            {
+                                float line05 = 1f - MapLabGeometry.SmoothStep(0.07f, 0.2f, fs.BorderDistance);
+                                ink[i] = Mathf.Max(ink[i], 0.95f * line05 * select * Breakup(s.Breakup, 0.3f));
+                            }
+                            else
+                                ink[i] = Mathf.Max(ink[i], 0.55f * inkWeights.z * line * select * Breakup(s.Breakup, 0.4f));
                             Color balk = Color.Lerp(Color.Lerp(pal.GrassA, pal.GrassLush, 0.5f), pal.ForestFloor, 0.1f);
                             c = Color.Lerp(c, balk, (1f - border) * edge * 0.45f * grassy);
                         }
@@ -428,6 +445,13 @@ namespace KingdomSurvival.MapLab
                         {
                             float t = 1f - MapLabGeometry.SmoothStep(0.15f, 0.7f, above);
                             c = Color.Lerp(c, pal.Shore, t * 0.85f);
+                            // Этап 05: местами узкая охристая полоса у самой кромки.
+                            if (stage05)
+                            {
+                                float pick = MapLabGeometry.SmoothStep(0.5f - settings.Stage05.ShoreOchreShare * 0.5f, 0.56f - settings.Stage05.ShoreOchreShare * 0.5f, ochre.Fbm(w.x / 11f, w.y / 11f, 2) * 0.5f + 0.5f);
+                                float strip = 1f - MapLabGeometry.SmoothStep(0.05f, 0.32f, above);
+                                c = Color.Lerp(c, Color.Lerp(pal.FieldOchre, pal.Shore, 0.4f), strip * pick * 0.55f);
+                            }
                             if (t > 0.5f) k = KeyShore;
                         }
                     }
@@ -464,6 +488,9 @@ namespace KingdomSurvival.MapLab
                         c = Color.Lerp(c, Color.Lerp(c, pal.RoadEdge, 0.5f), shoulder * 0.14f);
                         if (body > 0.5f) k = KeyRoad;
                     }
+
+                    if (stage05 && washes != null && washes.Patches.Count > 0 && (k == KeyGrass || k == KeyForest))
+                        c = MapLabWash.Apply(washes, w, c, s, settings.Stage05.WashStrength);
 
                     r[i] = c.r;
                     g[i] = c.g;
@@ -563,15 +590,32 @@ namespace KingdomSurvival.MapLab
                     Vector2 cellOrigin = new Vector2(cx * cellSize, cz * cellSize);
 
                     // Широкие следы: дрожащая сетка — ровное расстояние между соседями.
-                    float expected = cellSize * cellSize * s3.StrokesPerUnit * density;
+                    float expected = cellSize * cellSize * s3.StrokesPerUnit * density * (stage05 ? settings.Stage05.StrokeDensity : 1f);
                     int grid = Mathf.Max(1, Mathf.CeilToInt(Mathf.Sqrt(expected)));
                     float keep = expected / (grid * grid);
+                    // Этап 05: мазки собираются в группы разного размера с тихими
+                    // просветами между ними (мировой шум двух масштабов) и с
+                    // размахом размера/шага — без ровного «забора» дрожащей сетки.
+                    float grouping = stage05 ? settings.Stage05.StrokeGrouping : 0f;
                     for (int sz = 0; sz < grid; sz++)
                     for (int sx = 0; sx < grid; sx++)
                     {
                         float roll = rng.Value();
-                        Vector2 p = cellOrigin + new Vector2((sx + 0.5f + rng.Signed() * 0.42f) / grid, (sz + 0.5f + rng.Signed() * 0.42f) / grid) * cellSize;
+                        float jitter = stage05 ? 0.5f + grouping * 0.45f : 0.42f;
+                        Vector2 p = cellOrigin + new Vector2((sx + 0.5f + rng.Signed() * jitter) / grid, (sz + 0.5f + rng.Signed() * jitter) / grid) * cellSize;
                         float lengthJ = rng.Range(0.7f, 1.3f);
+                        if (grouping > 0f)
+                        {
+                            float gBig = groups.Fbm(p.x / 9f, p.y / 9f, 2) * 0.5f + 0.5f;
+                            float gSmall = groups.Fbm(p.x / 2.7f + 5.1f, p.y / 2.7f, 1) * 0.5f + 0.5f;
+                            float cluster = MapLabGeometry.SmoothStep(0.32f, 0.62f, gBig * 0.7f + gSmall * 0.3f);
+                            // В группе — гуще (но не больше 1), в просвете — редко.
+                            float scaleKeep = Mathf.Lerp(1f, Mathf.Lerp(0.18f, 1.45f, cluster), grouping);
+                            roll /= Mathf.Max(0.05f, scaleKeep);
+                            // Размер: 70/25/5 по весу — большинство средних, часть крупных, редкие очень крупные.
+                            float size = rng.Value();
+                            lengthJ *= size < 0.7f ? 1f : size < 0.95f ? 1.45f : 2.1f;
+                        }
                         float valueJ = rng.Signed();
                         float hueJ = rng.Signed();
                         float alphaJ = rng.Range(0.6f, 1f);

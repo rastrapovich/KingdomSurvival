@@ -44,7 +44,7 @@ namespace KingdomSurvival.MapLab
             get => zoom;
             set
             {
-                zoom = Mathf.Clamp(value, ZoomLimits.x, ZoomLimits.y);
+                zoom = Mathf.Clamp(value, ZoomLimits.x, MaxZoom);
                 zoomGoal = zoom;
                 anchored = false;
             }
@@ -52,7 +52,11 @@ namespace KingdomSurvival.MapLab
 
         public float FitSize => fitSize;
 
-        public float Pitch => view != null && view.Settings != null ? view.Settings.Camera.PitchFor(zoom, ZoomLimits.y) : 60f;
+        // Фактический предел приближения (этап 05 — ZoomMax, прежний предел рига
+        // ограничивается им). Его читают колесо, курсор, плавная цель, окно и экспорт.
+        public float MaxZoom => view != null && view.Settings != null ? view.Settings.MaxZoom(ZoomLimits.y) : ZoomLimits.y;
+
+        public float Pitch => view != null && view.Settings != null ? view.Settings.PitchFor(zoom, ZoomLimits.y) : 60f;
 
         public float Azimuth => view != null && view.Settings != null ? view.Settings.Camera.AzimuthDegrees : 0f;
 
@@ -73,6 +77,15 @@ namespace KingdomSurvival.MapLab
                 initialized = true;
                 initializedSize = size;
                 return;
+            }
+            // Этап 05: сохранённое приближение выше фактического предела (прежний 8)
+            // безопасно ограничивается — и текущее, и плавная цель.
+            float max = MaxZoom;
+            if (zoom > max || zoomGoal > max)
+            {
+                zoom = Mathf.Min(zoom, max);
+                zoomGoal = Mathf.Min(zoomGoal, max);
+                anchored = false;
             }
             RecomputeFitSize();
             Apply();
@@ -188,7 +201,7 @@ namespace KingdomSurvival.MapLab
         // на месте. smooth — цель для плавного приближения (Play Mode).
         public void ZoomAround(float newZoom, Vector2 viewport, bool smooth)
         {
-            newZoom = Mathf.Clamp(newZoom, ZoomLimits.x, ZoomLimits.y);
+            newZoom = Mathf.Clamp(newZoom, ZoomLimits.x, MaxZoom);
             anchorWorld = PickGround(viewport);
             anchorViewport = viewport;
             if (smooth && Application.isPlaying)
@@ -366,7 +379,7 @@ namespace KingdomSurvival.MapLab
 
         public string ControlsHint =>
             "Play Mode: WASD/стрелки — сдвиг, ПКМ/СКМ — перетаскивание, колесо — плавное приближение к курсору, " +
-            "1/2/3/4 — Атлас 60° / Объёмная 50° / Диорама 40° / Низкая 35°, P — наклон от приближения (до 35° на наибольшем приближении), F — вся карта, R — сброс, ЛКМ — диагностика точки.";
+            "1/2/3/4 — Атлас 60° / Объёмная 50° / Диорама 40° / Низкая 35°, P — наклон от приближения (до 35° на наибольшем приближении; этап 05 — Zoom 3 и 50°), F — вся карта, R — сброс, ЛКМ — диагностика точки.";
 
         private void OnGUI()
         {

@@ -6,7 +6,7 @@ namespace KingdomSurvival.MapLab
     // Растительность и постройки. Отдельные потоки seed: «forest», «singles»,
     // «bushes», «rocks», «reeds», «houses» — изменение плотности кустов не
     // сдвигает деревья и дома.
-    public static class MapLabPlacer
+    public static partial class MapLabPlacer
     {
         // Постройки текущей расстановки — для быстрых проверок отступа деревьев.
         private static readonly List<MapLabPlacement> buildings = new List<MapLabPlacement>();
@@ -19,6 +19,10 @@ namespace KingdomSurvival.MapLab
             data.YardPaths.Clear();
             data.YardRects.Clear();
             data.Piers.Clear();
+            data.Props.Clear();
+            data.FenceGraph = null;
+            data.Plaza = Vector3.zero;
+            data.Roads.RemoveAll(r => r.Widening);
             PlaceSettlement(data, settings);
             buildings.Clear();
             for (int i = 0; i < data.Objects.Count; i++)
@@ -47,6 +51,13 @@ namespace KingdomSurvival.MapLab
             if (c == null || !c.HasSettlement || s.HousesMax <= 0)
             {
                 if (c != null && c.Pier)
+                    PlacePier(data, c.SettlementCenter);
+                return;
+            }
+            if (settings.IsStage05)
+            {
+                PlaceVillage05(data, settings);
+                if (c.Pier)
                     PlacePier(data, c.SettlementCenter);
                 return;
             }

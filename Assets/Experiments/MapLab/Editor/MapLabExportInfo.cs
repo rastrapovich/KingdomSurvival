@@ -106,6 +106,36 @@ namespace KingdomSurvival.MapLab.Editor
         public string HeroMarkerSet;
         public int HeroPitchSets;
         public float HeroSetPitch;
+        // Этап 05: фактический предел приближения, профиль сглаживания, активный
+        // этап, слои этапа 05 и их счётчики.
+        public string ActiveStage;
+        public float ActualMaxZoom;
+        public float RigZoomLimit;
+        public string AntiAliasProfile;
+        public int Msaa;
+        public bool LinearDownsample;
+        public int RenderWidth;
+        public int RenderHeight;
+        public string ArtSet05Package;
+        public string ArtSet05Fingerprint;
+        public int Yards;
+        public int FenceNodes;
+        public int FenceEdges;
+        public int FenceGates;
+        public int Bridges;
+        public int DeckPanels;
+        public int Trestles;
+        public bool BridgesProcedural;
+        public int DecorGrass;
+        public int DecorReeds;
+        public int DecorRocks;
+        public int DecorHay;
+        public int DecorProps;
+        public int WashPatches;
+        public int ShoreInkPolylines;
+        public float ShoreInkLength;
+        public int CliffPlanes;
+        public List<string> ModulesMissing = new List<string>();
         public string SettingsJson;
 
         public static MapLabExportInfo From(MapLabView view, int width, int height)
@@ -181,6 +211,53 @@ namespace KingdomSurvival.MapLab.Editor
                 info.GrassTufts = view.GrassTufts;
                 info.ForestRhythm = s4.ForestRhythm;
             }
+            info.ActiveStage = s.Stage03.Look.ToString();
+            if (rig != null)
+            {
+                info.ActualMaxZoom = rig.MaxZoom;
+                info.RigZoomLimit = rig.ZoomLimits.y;
+            }
+            if (s.IsStage05)
+            {
+                MapLabArtSet set05 = view.ResolvedArtSet05;
+                if (set05 != null)
+                {
+                    info.ArtSet05Package = set05.PackageId;
+                    info.ArtSet05Fingerprint = set05.Fingerprint;
+                }
+                if (data != null)
+                {
+                    info.Yards = data.YardRects.Count;
+                    if (data.FenceGraph != null)
+                    {
+                        info.FenceNodes = data.FenceGraph.Nodes.Count;
+                        info.FenceEdges = data.FenceGraph.Edges.Count;
+                        foreach (MapLabFenceEdge e in data.FenceGraph.Edges)
+                            if (e.Gate)
+                                info.FenceGates++;
+                    }
+                    info.Bridges = data.Bridges.Count;
+                }
+                MapLabModules05.Stats ms = view.ModuleStats;
+                if (ms != null)
+                {
+                    info.DeckPanels = ms.DeckPanels;
+                    info.Trestles = ms.Trestles;
+                    info.ModulesMissing.AddRange(ms.MissingIds);
+                }
+                info.BridgesProcedural = view.BridgesProcedural05;
+                MapLabArtBuilder.Decor05Stats d5 = MapLabArtBuilder.LastDecor05;
+                info.DecorGrass = d5.Grass;
+                info.DecorReeds = d5.Reeds;
+                info.DecorRocks = d5.Rocks + d5.Outcrops;
+                info.DecorHay = d5.Hay;
+                info.DecorProps = d5.Props;
+                info.WashPatches = view.WashPatches;
+                info.ShoreInkPolylines = view.ShoreInkStats.Polylines;
+                info.ShoreInkLength = view.ShoreInkStats.Length;
+                info.CliffPlanes = MapLabCliffs05.LastStats.Planes;
+                info.FieldInkShare = s.Stage05.FieldInkShare;
+            }
             MapLabMarkerSet heroSet = view.ActiveMarkerSet;
             if (heroSet != null)
             {
@@ -255,6 +332,11 @@ namespace KingdomSurvival.MapLab.Editor
         {
             MapLabExportInfo info = From(view, width, height);
             info.Supersample = supersample;
+            info.AntiAliasProfile = MapLabExport.LastProfile;
+            info.Msaa = MapLabExport.LastMsaa;
+            info.LinearDownsample = MapLabExport.LinearDownsample;
+            info.RenderWidth = width * supersample;
+            info.RenderHeight = height * supersample;
             string json = JsonUtility.ToJson(info, true);
             File.WriteAllText(Path.ChangeExtension(pngPath, ".json"), json);
         }

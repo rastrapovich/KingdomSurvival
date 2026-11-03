@@ -12,18 +12,19 @@ namespace KingdomSurvival.MapLab.Editor
     {
         private static readonly string[] Groups =
         {
-            "General", "Relief", "Water", "RoadsAndFields", "Cliffs", "Vegetation", "Settlement", "PainterlyStyle", "Camera", "Art", "Stage03", "Stage04", "Diagnostics", "Advanced",
+            "General", "Relief", "Water", "RoadsAndFields", "Cliffs", "Vegetation", "Settlement", "PainterlyStyle", "Camera", "Art", "Stage03", "Stage04", "Stage05", "Diagnostics", "Advanced",
         };
 
         private static readonly string[] GroupTitles =
         {
             "Общее (General)", "Рельеф (Relief)", "Вода (Water)", "Дороги и поля (Roads And Fields)", "Уступы (Cliffs)",
             "Растительность (Vegetation)", "Поселение (Settlement)", "Живописный стиль (Painterly Style)", "Камера (Camera)", "Арт этапа 02 (Art) · применяется пересборкой объектов",
-            "Этап 03 (Stage03) · перекраска, перо, тени, акценты", "Этап 04 (Stage04) · тень, луг, узлы, трава, ритм леса, герой", "Диагностика (Diagnostics)", "Дополнительно (Advanced)",
+            "Этап 03 (Stage03) · перекраска, перо, тени, акценты", "Этап 04 (Stage04) · тень, луг, узлы, трава, ритм леса, герой",
+            "Этап 05 (Stage05) · камера до Zoom 3 и 50°, перо, мазки, пятна, тень, уступы, вода, ограды, мосты, деревня", "Диагностика (Diagnostics)", "Дополнительно (Advanced)",
         };
 
-        // Группы, изменение которых не требует перестройки.
-        private static readonly bool[] CheapGroups = { false, false, false, false, false, false, false, true, true, true, true, true, true, false };
+        // Группы, изменение которых не требует перестройки (Stage05 — деревня и уступы — перестройкой).
+        private static readonly bool[] CheapGroups = { false, false, false, false, false, false, false, true, true, true, true, true, false, true, false };
 
         private static readonly Vector2Int[] ExportSizes = { new Vector2Int(2048, 1365), new Vector2Int(3072, 2048), new Vector2Int(1536, 1024), new Vector2Int(1920, 1080) };
         private static readonly string[] ExportSizeNames = { "2048 × 1365", "3072 × 2048", "1536 × 1024", "1920 × 1080" };
@@ -31,7 +32,7 @@ namespace KingdomSurvival.MapLab.Editor
         private MapLabView view;
         private SerializedObject serialized;
         private Vector2 scroll;
-        private readonly bool[] open = { false, false, false, false, false, false, false, false, true, false, false, false, false, false };
+        private readonly bool[] open = { false, false, false, false, false, false, false, false, true, false, false, false, false, false, false };
         private int exportSize;
         private int supersample = 2;
         private string status = "";
@@ -127,7 +128,7 @@ namespace KingdomSurvival.MapLab.Editor
                     {
                         cheapChanged = true;
                         artChanged |= Groups[g] == "Art";
-                        stage03Changed |= Groups[g] == "Stage03" || Groups[g] == "Stage04";
+                        stage03Changed |= Groups[g] == "Stage03" || Groups[g] == "Stage04" || Groups[g] == "Stage05";
                     }
                 }
                 EditorGUILayout.EndFoldoutHeaderGroup();
@@ -170,6 +171,29 @@ namespace KingdomSurvival.MapLab.Editor
                         RunGuarded(() => { MapLabArtImport.ReimportStage04Menu(); });
                 }
                 EditorGUILayout.EndHorizontal();
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button(new GUIContent("Подключить пакет этапа 05…", "Пакет ревизии 5 (ArtR02): трава, тростник, камни, сено, Wash-декали, модули оград и мостов, дома в четырёх ракурсах; кадры героя P35 берутся из набора этапа 04 по SHA-256. Папка Assets/_Project/Art/MapLabStage05.")))
+                    RunGuarded(() => { MapLabArtImport.ImportStage05Menu(); });
+                using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(MapLabArtImport.LastStage05Folder)))
+                {
+                    if (GUILayout.Button(new GUIContent("Переподключить этап 05", MapLabArtImport.LastStage05Folder)))
+                        RunGuarded(() => { MapLabArtImport.ReimportStage05Menu(); });
+                }
+                EditorGUILayout.EndHorizontal();
+                MapLabArtSet set05 = view.ResolvedArtSet05;
+                if (s.IsStage05)
+                {
+                    if (set05 == null)
+                        EditorGUILayout.HelpBox("Набор этапа 05 не подключён — дома процедурные, оград-модулей и спрайтов нет, мосты процедурные (с отметкой). Нажмите «Подключить пакет этапа 05…».", MessageType.Warning);
+                    else
+                    {
+                        MapLabModules05.Stats ms = view.ModuleStats;
+                        MapLabArtBuilder.Decor05Stats d5 = MapLabArtBuilder.LastDecor05;
+                        EditorGUILayout.LabelField($"{set05.PackageId} · №{set05.ImportVersion} · записей {set05.Entries.Count}" + (set05.MissingTextures > 0 ? $" · без картинки {set05.MissingTextures}" : "") +
+                                                   $" · дворов {(view.Data != null ? view.Data.YardRects.Count : 0)} · трава {d5.Grass}, тростник {d5.Reeds}, камни {d5.Rocks + d5.Outcrops}, сено {d5.Hay} · пятен {view.WashPatches}" +
+                                                   (ms != null ? $" · столбов {ms.Posts}, пролётов {ms.Infills + ms.Gates}, панелей моста {ms.DeckPanels}" : "") + (view.BridgesProcedural05 ? " · мост процедурный (нет модулей)" : ""), EditorStyles.miniLabel);
+                    }
+                }
                 MapLabMarkerSet hero = view.MarkerSet04;
                 if (hero != null)
                     EditorGUILayout.LabelField($"Герой: наборов {hero.PitchSets.Count} ({string.Join("°, ", hero.PitchSets.ConvertAll(p => p.Pitch.ToString("0")))}°){(hero.Complete ? "" : " · есть пустые кадры")}" +
@@ -185,7 +209,8 @@ namespace KingdomSurvival.MapLab.Editor
                 EditorGUILayout.PrefixLabel(new GUIContent("Язык карты", "Stage02 — прежний живописный вид для сравнения; Stage03 — тушь, спокойные массы. Смена — полная перестройка."));
                 MapLabLook look = GUILayout.Toggle(s3.Look == MapLabLook.Stage02, "Stage02", EditorStyles.miniButtonLeft) ? MapLabLook.Stage02 : s3.Look;
                 look = GUILayout.Toggle(s3.Look == MapLabLook.Stage03, "Stage03", EditorStyles.miniButtonMid) ? MapLabLook.Stage03 : look;
-                look = GUILayout.Toggle(s3.Look == MapLabLook.Stage04, "Stage04", EditorStyles.miniButtonRight) ? MapLabLook.Stage04 : look;
+                look = GUILayout.Toggle(s3.Look == MapLabLook.Stage04, "Stage04", EditorStyles.miniButtonMid) ? MapLabLook.Stage04 : look;
+                look = GUILayout.Toggle(s3.Look == MapLabLook.Stage05, "Stage05", EditorStyles.miniButtonRight) ? MapLabLook.Stage05 : look;
                 EditorGUILayout.EndHorizontal();
                 if (look != s3.Look)
                 {
@@ -238,8 +263,9 @@ namespace KingdomSurvival.MapLab.Editor
                     }
                     EditorGUILayout.BeginHorizontal();
                     EditorGUILayout.PrefixLabel("Приближение");
-                    foreach (float z in new[] { 1f, 2f, 4f, rig.ZoomLimits.y })
-                        if (GUILayout.Button(z >= rig.ZoomLimits.y ? $"Max {z:0.#}" : "Zoom " + z, EditorStyles.miniButton))
+                    // Кнопки — только в пределах фактического предела (этап 05: Zoom 3).
+                    foreach (float z in new[] { 1f, 2f, 4f, rig.MaxZoom })
+                        if ((z < rig.MaxZoom - 0.01f || z == rig.MaxZoom) && GUILayout.Button(z >= rig.MaxZoom ? $"Max {z:0.#}" : "Zoom " + z, EditorStyles.miniButton))
                             WithCamera(() => rig.ZoomAround(z, new Vector2(0.5f, 0.5f), false));
                     EditorGUILayout.EndHorizontal();
                     string houses = s.IsStage03 && view.HasArtHouses03 ? $" · кадр домов {view.HouseView}°" : "";

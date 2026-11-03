@@ -1,0 +1,5681 @@
+fileFormatVersion: 2
+guid: 111a168cd0994334786b243bb7cfe7ff
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6920620704469282677
+    second: Bridge_Post_A_0
+  - first:
+      213: 6127410903995847487
+    second: Bridge_Post_A_1
+  - first:
+      213: -709294515612116135
+    second: Bridge_Post_A_2
+  - first:
+      213: 5699384854958166248
+    second: Bridge_Post_A_3
+  - first:
+      213: -1622814037487532090
+    second: Bridge_Post_A_4
+  - first:
+      213: 6591434826428859221
+    second: Bridge_Post_A_5
+  - first:
+      213: -2176702615746641012
+    second: Bridge_Post_A_6
+  - first:
+      213: -7586186118377229226
+    second: Bridge_Post_A_7
+  - first:
+      213: 6806157676725932012
+    second: Bridge_Post_A_8
+  - first:
+      213: -536985541122871612
+    second: Bridge_Post_A_9
+  - first:
+      213: -1379806350181271411
+    second: Bridge_Post_A_10
+  - first:
+      213: -2321537665423504254
+    second: Bridge_Post_A_11
+  - first:
+      213: 4330645432194678027
+    second: Bridge_Post_A_12
+  - first:
+      213: -3077524592207659276
+    second: Bridge_Post_A_13
+  - first:
+      213: -7363319554992502651
+    second: Bridge_Post_A_14
+  - first:
+      213: -6660856579232828699
+    second: Bridge_Post_A_15
+  - first:
+      213: -4935655743754355626
+    second: Bridge_Post_A_16
+  - first:
+      213: -4594968417935992485
+    second: Bridge_Post_A_17
+  - first:
+      213: -5611899143381010709
+    second: Bridge_Post_A_18
+  - first:
+      213: 1163746222822905274
+    second: Bridge_Post_A_19
+  - first:
+      213: 5291208303361266186
+    second: Bridge_Post_A_20
+  - first:
+      213: 105035406338668653
+    second: Bridge_Post_A_21
+  - first:
+      213: 4980536734471714409
+    second: Bridge_Post_A_22
+  - first:
+      213: 716261212570411512
+    second: Bridge_Post_A_23
+  - first:
+      213: 7786531718923839528
+    second: Bridge_Post_A_24
+  - first:
+      213: -189252125523798368
+    second: Bridge_Post_A_25
+  - first:
+      213: -75307325089534726
+    second: Bridge_Post_A_26
+  - first:
+      213: 6963599633673615655
+    second: Bridge_Post_A_27
+  - first:
+      213: 5193923328553968990
+    second: Bridge_Post_A_28
+  - first:
+      213: -2015902446288162816
+    second: Bridge_Post_A_29
+  - first:
+      213: 8873566187359974749
+    second: Bridge_Post_A_30
+  - first:
+      213: 818437149006101917
+    second: Bridge_Post_A_31
+  - first:
+      213: 273518624231462163
+    second: Bridge_Post_A_32
+  - first:
+      213: 9133524169478089897
+    second: Bridge_Post_A_33
+  - first:
+      213: -6192503962345771266
+    second: Bridge_Post_A_34
+  - first:
+      213: 2462625386935328078
+    second: Bridge_Post_A_35
+  - first:
+      213: -6989362730717470464
+    second: Bridge_Post_A_36
+  - first:
+      213: -4696299501022441538
+    second: Bridge_Post_A_37
+  - first:
+      213: -1048158934572271830
+    second: Bridge_Post_A_38
+  - first:
+      213: 975379266264761780
+    second: Bridge_Post_A_39
+  - first:
+      213: 2107633521019275204
+    second: Bridge_Post_A_40
+  - first:
+      213: -9141448746606634743
+    second: Bridge_Post_A_41
+  - first:
+      213: 1397285919098340706
+    second: Bridge_Post_A_42
+  - first:
+      213: 4948292072315959077
+    second: Bridge_Post_A_43
+  - first:
+      213: 3324041250814861534
+    second: Bridge_Post_A_44
+  - first:
+      213: 300800830969768296
+    second: Bridge_Post_A_45
+  - first:
+      213: 5778788701226565521
+    second: Bridge_Post_A_46
+  - first:
+      213: -4441780826361015653
+    second: Bridge_Post_A_47
+  - first:
+      213: 6371612909277040908
+    second: Bridge_Post_A_48
+  - first:
+      213: 2370733932615231852
+    second: Bridge_Post_A_49
+  - first:
+      213: 7173439626520067014
+    second: Bridge_Post_A_50
+  - first:
+      213: 3774454002509632027
+    second: Bridge_Post_A_51
+  - first:
+      213: 88489503335628917
+    second: Bridge_Post_A_52
+  - first:
+      213: 5172393503102099557
+    second: Bridge_Post_A_53
+  - first:
+      213: 281981967163893996
+    second: Bridge_Post_A_54
+  - first:
+      213: -1423002422501581856
+    second: Bridge_Post_A_55
+  - first:
+      213: -262341221546346358
+    second: Bridge_Post_A_56
+  - first:
+      213: -1674644579376275344
+    second: Bridge_Post_A_57
+  - first:
+      213: -8886471314628674178
+    second: Bridge_Post_A_58
+  - first:
+      213: -7352411995279574610
+    second: Bridge_Post_A_59
+  - first:
+      213: 9021941616431612297
+    second: Bridge_Post_A_60
+  - first:
+      213: 7115940516183770131
+    second: Bridge_Post_A_61
+  - first:
+      213: 207677188589360726
+    second: Bridge_Post_A_62
+  - first:
+      213: 1604633789774611660
+    second: Bridge_Post_A_63
+  - first:
+      213: -2029146409961084019
+    second: Bridge_Post_A_64
+  - first:
+      213: 3549411523479368036
+    second: Bridge_Post_A_65
+  - first:
+      213: -3156616752571381092
+    second: Bridge_Post_A_66
+  - first:
+      213: -4163449688488023147
+    second: Bridge_Post_A_67
+  - first:
+      213: 7730511492375234197
+    second: Bridge_Post_A_68
+  - first:
+      213: -8608548710616052251
+    second: Bridge_Post_A_69
+  - first:
+      213: 2398941786055610902
+    second: Bridge_Post_A_70
+  - first:
+      213: -3221736916295979379
+    second: Bridge_Post_A_71
+  - first:
+      213: 5034186918787567114
+    second: Bridge_Post_A_72
+  - first:
+      213: -384736180856401229
+    second: Bridge_Post_A_73
+  - first:
+      213: 4024646644954748329
+    second: Bridge_Post_A_74
+  - first:
+      213: 7721259673318737630
+    second: Bridge_Post_A_75
+  - first:
+      213: 8305531951651873657
+    second: Bridge_Post_A_76
+  - first:
+      213: -9002783201570682893
+    second: Bridge_Post_A_77
+  - first:
+      213: -4072803465782178813
+    second: Bridge_Post_A_78
+  - first:
+      213: 2977389087596341789
+    second: Bridge_Post_A_79
+  - first:
+      213: -6916490499627171673
+    second: Bridge_Post_A_80
+  - first:
+      213: -4962645242982573027
+    second: Bridge_Post_A_81
+  - first:
+      213: 4096058313866636716
+    second: Bridge_Post_A_82
+  - first:
+      213: -3257573178027158698
+    second: Bridge_Post_A_83
+  - first:
+      213: 776404015194263478
+    second: Bridge_Post_A_84
+  - first:
+      213: 8557246312062162426
+    second: Bridge_Post_A_85
+  - first:
+      213: 2437466281593620744
+    second: Bridge_Post_A_86
+  - first:
+      213: -1463929309265070082
+    second: Bridge_Post_A_87
+  - first:
+      213: -4308881432425465670
+    second: Bridge_Post_A_88
+  - first:
+      213: -7804323569755957881
+    second: Bridge_Post_A_89
+  - first:
+      213: 7681213596293389559
+    second: Bridge_Post_A_90
+  - first:
+      213: 1523567691987412245
+    second: Bridge_Post_A_91
+  - first:
+      213: 8299299590336278238
+    second: Bridge_Post_A_92
+  - first:
+      213: -8658374316792996544
+    second: Bridge_Post_A_93
+  - first:
+      213: 4852964596971004395
+    second: Bridge_Post_A_94
+  - first:
+      213: -6816156621242977446
+    second: Bridge_Post_A_95
+  - first:
+      213: 8248664325118076824
+    second: Bridge_Post_A_96
+  - first:
+      213: -3716732538206243923
+    second: Bridge_Post_A_97
+  - first:
+      213: 4678519402184911033
+    second: Bridge_Post_A_98
+  - first:
+      213: -2696664837360481803
+    second: Bridge_Post_A_99
+  - first:
+      213: -9011836824482477708
+    second: Bridge_Post_A_100
+  - first:
+      213: -1658706649303784744
+    second: Bridge_Post_A_101
+  - first:
+      213: -8865418795328644410
+    second: Bridge_Post_A_102
+  - first:
+      213: -2182774433520269145
+    second: Bridge_Post_A_103
+  - first:
+      213: -4762199198018313877
+    second: Bridge_Post_A_104
+  - first:
+      213: -8608875310552875116
+    second: Bridge_Post_A_105
+  - first:
+      213: 8919633832678481880
+    second: Bridge_Post_A_106
+  - first:
+      213: -7232161292311697541
+    second: Bridge_Post_A_107
+  - first:
+      213: 8569694106214175408
+    second: Bridge_Post_A_108
+  - first:
+      213: 2004764387340135289
+    second: Bridge_Post_A_109
+  - first:
+      213: 3497413466619843693
+    second: Bridge_Post_A_110
+  - first:
+      213: -4796338975171301872
+    second: Bridge_Post_A_111
+  - first:
+      213: -8789179461611774899
+    second: Bridge_Post_A_112
+  - first:
+      213: -3008445035201094160
+    second: Bridge_Post_A_113
+  - first:
+      213: 5628106608032934172
+    second: Bridge_Post_A_114
+  - first:
+      213: -6376790668403930396
+    second: Bridge_Post_A_115
+  - first:
+      213: -1659807970850825697
+    second: Bridge_Post_A_116
+  - first:
+      213: -7875600365346786674
+    second: Bridge_Post_A_117
+  - first:
+      213: 4987761934245076559
+    second: Bridge_Post_A_118
+  - first:
+      213: -5737357657559215307
+    second: Bridge_Post_A_119
+  - first:
+      213: -8238243978920154690
+    second: Bridge_Post_A_120
+  - first:
+      213: -7031549797641431364
+    second: Bridge_Post_A_121
+  - first:
+      213: -8519502740539384423
+    second: Bridge_Post_A_122
+  - first:
+      213: -6300910470943477139
+    second: Bridge_Post_A_123
+  - first:
+      213: 500335756214260877
+    second: Bridge_Post_A_124
+  - first:
+      213: 4219474680439731262
+    second: Bridge_Post_A_125
+  - first:
+      213: 3619344827062629377
+    second: Bridge_Post_A_126
+  - first:
+      213: 6376606200997080993
+    second: Bridge_Post_A_127
+  - first:
+      213: -5093879689874054188
+    second: Bridge_Post_A_128
+  - first:
+      213: 2719927348995372391
+    second: Bridge_Post_A_129
+  - first:
+      213: -6866716040201718014
+    second: Bridge_Post_A_130
+  - first:
+      213: -4617323615963915648
+    second: Bridge_Post_A_131
+  - first:
+      213: 4908444231826336380
+    second: Bridge_Post_A_132
+  - first:
+      213: 7429692341905441188
+    second: Bridge_Post_A_133
+  - first:
+      213: 8952369000399976319
+    second: Bridge_Post_A_134
+  - first:
+      213: 2615457108197587642
+    second: Bridge_Post_A_135
+  - first:
+      213: -2878856571111869525
+    second: Bridge_Post_A_136
+  - first:
+      213: -4260957514162273597
+    second: Bridge_Post_A_137
+  - first:
+      213: 2341394558957545854
+    second: Bridge_Post_A_138
+  - first:
+      213: -5724844203350064371
+    second: Bridge_Post_A_139
+  - first:
+      213: -1564955263587651470
+    second: Bridge_Post_A_140
+  - first:
+      213: -1714216771600086303
+    second: Bridge_Post_A_141
+  - first:
+      213: -6700104868145400973
+    second: Bridge_Post_A_142
+  - first:
+      213: -1425022229211598874
+    second: Bridge_Post_A_143
+  - first:
+      213: 3816481124794340460
+    second: Bridge_Post_A_144
+  - first:
+      213: 7994074942380121281
+    second: Bridge_Post_A_145
+  - first:
+      213: -8109907027336385799
+    second: Bridge_Post_A_146
+  - first:
+      213: -5508736577590003371
+    second: Bridge_Post_A_147
+  - first:
+      213: 5667755098993282401
+    second: Bridge_Post_A_148
+  - first:
+      213: 8614653875348959444
+    second: Bridge_Post_A_149
+  - first:
+      213: -6434083524012553135
+    second: Bridge_Post_A_150
+  - first:
+      213: -8361349662844215041
+    second: Bridge_Post_A_151
+  - first:
+      213: 2469664060240144451
+    second: Bridge_Post_A_152
+  - first:
+      213: 1914866811714367821
+    second: Bridge_Post_A_153
+  - first:
+      213: 6402458527129154323
+    second: Bridge_Post_A_154
+  - first:
+      213: -2335418057932150964
+    second: Bridge_Post_A_155
+  - first:
+      213: -8570720271689634623
+    second: Bridge_Post_A_156
+  - first:
+      213: -4841181805568987983
+    second: Bridge_Post_A_157
+  - first:
+      213: -5914064699073262056
+    second: Bridge_Post_A_158
+  - first:
+      213: 4181487525698810366
+    second: Bridge_Post_A_159
+  - first:
+      213: -7106002583275461493
+    second: Bridge_Post_A_160
+  - first:
+      213: -1918902925574509828
+    second: Bridge_Post_A_161
+  - first:
+      213: -8555567362979840045
+    second: Bridge_Post_A_162
+  - first:
+      213: 7436597264041049073
+    second: Bridge_Post_A_163
+  - first:
+      213: 2271830011451289040
+    second: Bridge_Post_A_164
+  - first:
+      213: -5140513396976836231
+    second: Bridge_Post_A_165
+  - first:
+      213: 8439016543844706797
+    second: Bridge_Post_A_166
+  - first:
+      213: -3458432540229654455
+    second: Bridge_Post_A_167
+  - first:
+      213: 1878697330979899277
+    second: Bridge_Post_A_168
+  - first:
+      213: 2827846703741053888
+    second: Bridge_Post_A_169
+  - first:
+      213: -7123952938597580029
+    second: Bridge_Post_A_170
+  - first:
+      213: -422825453927551502
+    second: Bridge_Post_A_171
+  - first:
+      213: 1626879362332869902
+    second: Bridge_Post_A_172
+  - first:
+      213: 6473809498378550561
+    second: Bridge_Post_A_173
+  - first:
+      213: -5665635004639754009
+    second: Bridge_Post_A_174
+  - first:
+      213: 372714592065209968
+    second: Bridge_Post_A_175
+  - first:
+      213: -1000782063363018460
+    second: Bridge_Post_A_176
+  - first:
+      213: 4521877479302865682
+    second: Bridge_Post_A_177
+  - first:
+      213: -1924485113473816336
+    second: Bridge_Post_A_178
+  - first:
+      213: -930365924921578631
+    second: Bridge_Post_A_179
+  - first:
+      213: 7588828622017983531
+    second: Bridge_Post_A_180
+  - first:
+      213: -462804749790834552
+    second: Bridge_Post_A_181
+  - first:
+      213: 4892450424372913489
+    second: Bridge_Post_A_182
+  - first:
+      213: 2877386671459981992
+    second: Bridge_Post_A_183
+  - first:
+      213: -2348357324422765791
+    second: Bridge_Post_A_184
+  - first:
+      213: 5788762867665878222
+    second: Bridge_Post_A_185
+  - first:
+      213: -3822945326443672790
+    second: Bridge_Post_A_186
+  - first:
+      213: 300621091890447682
+    second: Bridge_Post_A_187
+  - first:
+      213: 7304212066182050360
+    second: Bridge_Post_A_188
+  - first:
+      213: -5429743986803170566
+    second: Bridge_Post_A_189
+  - first:
+      213: -4238878302780933874
+    second: Bridge_Post_A_190
+  - first:
+      213: 1437215957349301459
+    second: Bridge_Post_A_191
+  - first:
+      213: -8033356863237268855
+    second: Bridge_Post_A_192
+  - first:
+      213: -6371251005055197278
+    second: Bridge_Post_A_193
+  - first:
+      213: -7290574642741498597
+    second: Bridge_Post_A_194
+  - first:
+      213: 7906199761448734448
+    second: Bridge_Post_A_195
+  - first:
+      213: 1619310253227817330
+    second: Bridge_Post_A_196
+  - first:
+      213: -8608342524187517792
+    second: Bridge_Post_A_197
+  - first:
+      213: -77106788223236865
+    second: Bridge_Post_A_198
+  - first:
+      213: -7303778247752766208
+    second: Bridge_Post_A_199
+  - first:
+      213: -2848909048865038496
+    second: Bridge_Post_A_200
+  - first:
+      213: -3242034886248708706
+    second: Bridge_Post_A_201
+  - first:
+      213: 4322213883600465183
+    second: Bridge_Post_A_202
+  - first:
+      213: -4396942023310542786
+    second: Bridge_Post_A_203
+  - first:
+      213: 72363366954056831
+    second: Bridge_Post_A_204
+  - first:
+      213: -2067178874621634595
+    second: Bridge_Post_A_205
+  - first:
+      213: -7698576510616905394
+    second: Bridge_Post_A_206
+  - first:
+      213: -4738392011152766672
+    second: Bridge_Post_A_207
+  - first:
+      213: -2986480185321486578
+    second: Bridge_Post_A_208
+  - first:
+      213: -6483832794518943001
+    second: Bridge_Post_A_209
+  - first:
+      213: -7900796886545860009
+    second: Bridge_Post_A_210
+  - first:
+      213: 6519993612370675891
+    second: Bridge_Post_A_211
+  - first:
+      213: -1271866669586737642
+    second: Bridge_Post_A_212
+  - first:
+      213: -81945434192775507
+    second: Bridge_Post_A_213
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 8
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Bridge_Post_A_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1178
+        width: 9
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8015e4e22405ff90800000000000000
+      internalID: -6920620704469282677
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_1
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 0
+        width: 1133
+        height: 1199
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f331785b0cfe80550800000000000000
+      internalID: 6127410903995847487
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_2
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 1183
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 95b9ec365641826f0800000000000000
+      internalID: -709294515612116135
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_3
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 1161
+        width: 69
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e0d5063458481f40800000000000000
+      internalID: 5699384854958166248
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_4
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 1162
+        width: 49
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c7c90f1b3b9a79e0800000000000000
+      internalID: -1622814037487532090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_5
+      rect:
+        serializedVersion: 2
+        x: 176
+        y: 1147
+        width: 83
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5534e6d3d0b797b50800000000000000
+      internalID: 6591434826428859221
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_6
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 1176
+        width: 9
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8302cee08ccac1e0800000000000000
+      internalID: -2176702615746641012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_7
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 1133
+        width: 39
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 654302e2be378b690800000000000000
+      internalID: -7586186118377229226
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_8
+      rect:
+        serializedVersion: 2
+        x: 1102
+        y: 1133
+        width: 35
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cef0c8ea854547e50800000000000000
+      internalID: 6806157676725932012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_9
+      rect:
+        serializedVersion: 2
+        x: 1144
+        y: 1101
+        width: 79
+        height: 83
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4cea9d3de7e3c88f0800000000000000
+      internalID: -536985541122871612
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 863
+        width: 161
+        height: 305
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d88fd9e5f61f9dce0800000000000000
+      internalID: -1379806350181271411
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_11
+      rect:
+        serializedVersion: 2
+        x: 276
+        y: 1145
+        width: 17
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28c0eb71bcd38cfd0800000000000000
+      internalID: -2321537665423504254
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_12
+      rect:
+        serializedVersion: 2
+        x: 990
+        y: 1072
+        width: 71
+        height: 105
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0db12a631b891c30800000000000000
+      internalID: 4330645432194678027
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_13
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 1141
+        width: 25
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fefee550bf6a45d0800000000000000
+      internalID: -3077524592207659276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_14
+      rect:
+        serializedVersion: 2
+        x: 1064
+        y: 1166
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5880cf490eb30d990800000000000000
+      internalID: -7363319554992502651
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_15
+      rect:
+        serializedVersion: 2
+        x: 1256
+        y: 1115
+        width: 35
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e2f00f5b32ef83a0800000000000000
+      internalID: -6660856579232828699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_16
+      rect:
+        serializedVersion: 2
+        x: 150
+        y: 1112
+        width: 39
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65cb7e35047018bb0800000000000000
+      internalID: -4935655743754355626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_17
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 1099
+        width: 41
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5959cea1946b30c0800000000000000
+      internalID: -4594968417935992485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_18
+      rect:
+        serializedVersion: 2
+        x: 212
+        y: 1107
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be6b47356778e12b0800000000000000
+      internalID: -5611899143381010709
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_19
+      rect:
+        serializedVersion: 2
+        x: 214
+        y: 1117
+        width: 39
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab5df0c1605762010800000000000000
+      internalID: 1163746222822905274
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_20
+      rect:
+        serializedVersion: 2
+        x: 254
+        y: 1101
+        width: 21
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a02127afae52e6940800000000000000
+      internalID: 5291208303361266186
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_21
+      rect:
+        serializedVersion: 2
+        x: 278
+        y: 1073
+        width: 65
+        height: 80
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d68b7a34529257100800000000000000
+      internalID: 105035406338668653
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_22
+      rect:
+        serializedVersion: 2
+        x: 1092
+        y: 1091
+        width: 29
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96678f0a5cb6e1540800000000000000
+      internalID: 4980536734471714409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_23
+      rect:
+        serializedVersion: 2
+        x: 1238
+        y: 1101
+        width: 11
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f166a527cba0f900800000000000000
+      internalID: 716261212570411512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_24
+      rect:
+        serializedVersion: 2
+        x: 1284
+        y: 1099
+        width: 20
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82864c2f7515f0c60800000000000000
+      internalID: 7786531718923839528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_25
+      rect:
+        serializedVersion: 2
+        x: 206
+        y: 1109
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a69a2dc134af5df0800000000000000
+      internalID: -189252125523798368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_26
+      rect:
+        serializedVersion: 2
+        x: 270
+        y: 1101
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: afcad07036474fef0800000000000000
+      internalID: -75307325089534726
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_27
+      rect:
+        serializedVersion: 2
+        x: 1266
+        y: 1095
+        width: 15
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 729f72bd8fca3a060800000000000000
+      internalID: 6963599633673615655
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_28
+      rect:
+        serializedVersion: 2
+        x: 150
+        y: 1085
+        width: 27
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e55e21dafb5841840800000000000000
+      internalID: 5193923328553968990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_29
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 1076
+        width: 19
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0003723e7631604e0800000000000000
+      internalID: -2015902446288162816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_30
+      rect:
+        serializedVersion: 2
+        x: 214
+        y: 1091
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d553288ee6d352b70800000000000000
+      internalID: 8873566187359974749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_31
+      rect:
+        serializedVersion: 2
+        x: 1112
+        y: 1088
+        width: 27
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9dfd71304cab5b00800000000000000
+      internalID: 818437149006101917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_32
+      rect:
+        serializedVersion: 2
+        x: 1164
+        y: 1074
+        width: 35
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31515c45dbbbbc300800000000000000
+      internalID: 273518624231462163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_33
+      rect:
+        serializedVersion: 2
+        x: 1216
+        y: 1050
+        width: 27
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9acaf2537dbc0ce70800000000000000
+      internalID: 9133524169478089897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_34
+      rect:
+        serializedVersion: 2
+        x: 146
+        y: 1048
+        width: 23
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: efe6e2e947ecf0aa0800000000000000
+      internalID: -6192503962345771266
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_35
+      rect:
+        serializedVersion: 2
+        x: 184
+        y: 1064
+        width: 9
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4d932bedb00d2220800000000000000
+      internalID: 2462625386935328078
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_36
+      rect:
+        serializedVersion: 2
+        x: 197
+        y: 1010
+        width: 66
+        height: 77
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0012b3da0abc00f90800000000000000
+      internalID: -6989362730717470464
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_37
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 1072
+        width: 9
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebf86b26c7463deb0800000000000000
+      internalID: -4696299501022441538
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_38
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 1050
+        width: 21
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a27faac90013471f0800000000000000
+      internalID: -1048158934572271830
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_39
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 1043
+        width: 15
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b50efe564e398d00800000000000000
+      internalID: 975379266264761780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_40
+      rect:
+        serializedVersion: 2
+        x: 1016
+        y: 1068
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c74f094581df3d10800000000000000
+      internalID: 2107633521019275204
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_41
+      rect:
+        serializedVersion: 2
+        x: 1029
+        y: 1056
+        width: 14
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90952166ccc032180800000000000000
+      internalID: -9141448746606634743
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_42
+      rect:
+        serializedVersion: 2
+        x: 1088
+        y: 1026
+        width: 51
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2650389e328246310800000000000000
+      internalID: 1397285919098340706
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_43
+      rect:
+        serializedVersion: 2
+        x: 1144
+        y: 1068
+        width: 19
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 527364f2c6ddba440800000000000000
+      internalID: 4948292072315959077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_44
+      rect:
+        serializedVersion: 2
+        x: 1174
+        y: 1054
+        width: 39
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed0a095f7ed512e20800000000000000
+      internalID: 3324041250814861534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_45
+      rect:
+        serializedVersion: 2
+        x: 134
+        y: 1036
+        width: 17
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 869681613c8ac2400800000000000000
+      internalID: 300800830969768296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_46
+      rect:
+        serializedVersion: 2
+        x: 157
+        y: 1022
+        width: 40
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19f76a8d4b1623050800000000000000
+      internalID: 5778788701226565521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_47
+      rect:
+        serializedVersion: 2
+        x: 190
+        y: 1060
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b925c9a3fdf9b52c0800000000000000
+      internalID: -4441780826361015653
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_48
+      rect:
+        serializedVersion: 2
+        x: 1016
+        y: 1058
+        width: 15
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0150c7ce248c6850800000000000000
+      internalID: 6371612909277040908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_49
+      rect:
+        serializedVersion: 2
+        x: 1046
+        y: 1052
+        width: 13
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c69ee7673f986e020800000000000000
+      internalID: 2370733932615231852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_50
+      rect:
+        serializedVersion: 2
+        x: 1128
+        y: 971
+        width: 107
+        height: 97
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6cb7074755d2d8360800000000000000
+      internalID: 7173439626520067014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_51
+      rect:
+        serializedVersion: 2
+        x: 1228
+        y: 945
+        width: 84
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1253a8daed816430800000000000000
+      internalID: 3774454002509632027
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_52
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 1031
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 570cba40cb06a3100800000000000000
+      internalID: 88489503335628917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_53
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 1001
+        width: 53
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56060fe8c7808c740800000000000000
+      internalID: 5172393503102099557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_54
+      rect:
+        serializedVersion: 2
+        x: 334
+        y: 1018
+        width: 21
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce8aed9ea1dc9e300800000000000000
+      internalID: 281981967163893996
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_55
+      rect:
+        serializedVersion: 2
+        x: 1000
+        y: 1010
+        width: 35
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ebd54c06da704ce0800000000000000
+      internalID: -1423002422501581856
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_56
+      rect:
+        serializedVersion: 2
+        x: 1046
+        y: 991
+        width: 39
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a88b9c78c0afb5cf0800000000000000
+      internalID: -262341221546346358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_57
+      rect:
+        serializedVersion: 2
+        x: 1228
+        y: 1037
+        width: 15
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0706e31b0a772c8e0800000000000000
+      internalID: -1674644579376275344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_58
+      rect:
+        serializedVersion: 2
+        x: 158
+        y: 994
+        width: 29
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7dfbd00c69eca480800000000000000
+      internalID: -8886471314628674178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_59
+      rect:
+        serializedVersion: 2
+        x: 198
+        y: 1004
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea93a0bbe3cf6f990800000000000000
+      internalID: -7352411995279574610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_60
+      rect:
+        serializedVersion: 2
+        x: 250
+        y: 999
+        width: 13
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98148bf8910643d70800000000000000
+      internalID: 9021941616431612297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_61
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 1003
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31481f59236e0c260800000000000000
+      internalID: 7115940516183770131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_62
+      rect:
+        serializedVersion: 2
+        x: 1014
+        y: 987
+        width: 29
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65612dd7d41d1e200800000000000000
+      internalID: 207677188589360726
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_63
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 1012
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc4ca1a1eedc44610800000000000000
+      internalID: 1604633789774611660
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_64
+      rect:
+        serializedVersion: 2
+        x: 1054
+        y: 1008
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8ba20d471607d3e0800000000000000
+      internalID: -2029146409961084019
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_65
+      rect:
+        serializedVersion: 2
+        x: 1086
+        y: 1010
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4617aaa99fa024130800000000000000
+      internalID: 3549411523479368036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_66
+      rect:
+        serializedVersion: 2
+        x: 1110
+        y: 1007
+        width: 22
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c9a8feab9c17134d0800000000000000
+      internalID: -3156616752571381092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_67
+      rect:
+        serializedVersion: 2
+        x: 178
+        y: 979
+        width: 19
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59be57531947836c0800000000000000
+      internalID: -4163449688488023147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_68
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 1000
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 596c91b8e3b484b60800000000000000
+      internalID: 7730511492375234197
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_69
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 999
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ed4518ce8a488880800000000000000
+      internalID: -8608548710616052251
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_70
+      rect:
+        serializedVersion: 2
+        x: 1074
+        y: 927
+        width: 67
+        height: 82
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6129fa228d0ca4120800000000000000
+      internalID: 2398941786055610902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_71
+      rect:
+        serializedVersion: 2
+        x: 1182
+        y: 986
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8e6a6818571a43d0800000000000000
+      internalID: -3221736916295979379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_72
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 751
+        width: 171
+        height: 248
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0e404394560dd540800000000000000
+      internalID: 5034186918787567114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_73
+      rect:
+        serializedVersion: 2
+        x: 1050
+        y: 975
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b250df5b7429aaf0800000000000000
+      internalID: -384736180856401229
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_74
+      rect:
+        serializedVersion: 2
+        x: 1060
+        y: 977
+        width: 17
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a5def2dcca6ad730800000000000000
+      internalID: 4024646644954748329
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_75
+      rect:
+        serializedVersion: 2
+        x: 1160
+        y: 985
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed646be83cc672b60800000000000000
+      internalID: 7721259673318737630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_76
+      rect:
+        serializedVersion: 2
+        x: 1214
+        y: 987
+        width: 8
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 973edd03e4d234370800000000000000
+      internalID: 8305531951651873657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_77
+      rect:
+        serializedVersion: 2
+        x: 1234
+        y: 987
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f786808060bf0380800000000000000
+      internalID: -9002783201570682893
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_78
+      rect:
+        serializedVersion: 2
+        x: 152
+        y: 961
+        width: 15
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30cc21693de7a77c0800000000000000
+      internalID: -4072803465782178813
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_79
+      rect:
+        serializedVersion: 2
+        x: 1008
+        y: 920
+        width: 67
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1aed4ca99fc15920800000000000000
+      internalID: 2977389087596341789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_80
+      rect:
+        serializedVersion: 2
+        x: 1152
+        y: 963
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a0cb552980b300a0800000000000000
+      internalID: -6916490499627171673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_81
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 973
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1cddb9d174212bb0800000000000000
+      internalID: -4962645242982573027
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_82
+      rect:
+        serializedVersion: 2
+        x: 1221
+        y: 955
+        width: 14
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cad6e49a55f18d830800000000000000
+      internalID: 4096058313866636716
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_83
+      rect:
+        serializedVersion: 2
+        x: 1238
+        y: 933
+        width: 41
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 653d9d53476cac2d0800000000000000
+      internalID: -3257573178027158698
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_84
+      rect:
+        serializedVersion: 2
+        x: 124
+        y: 890
+        width: 23
+        height: 71
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6bf47d7965756ca00800000000000000
+      internalID: 776404015194263478
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_85
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 960
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af59cfdbe2271c670800000000000000
+      internalID: 8557246312062162426
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_86
+      rect:
+        serializedVersion: 2
+        x: 1014
+        y: 937
+        width: 13
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 809416a3bae93d120800000000000000
+      internalID: 2437466281593620744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_87
+      rect:
+        serializedVersion: 2
+        x: 1182
+        y: 943
+        width: 27
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef7f8f8ac041fabe0800000000000000
+      internalID: -1463929309265070082
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_88
+      rect:
+        serializedVersion: 2
+        x: 158
+        y: 929
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab8f009aa27c334c0800000000000000
+      internalID: -4308881432425465670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_89
+      rect:
+        serializedVersion: 2
+        x: 300
+        y: 902
+        width: 19
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 785dc78ff0971b390800000000000000
+      internalID: -7804323569755957881
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_90
+      rect:
+        serializedVersion: 2
+        x: 1078
+        y: 920
+        width: 13
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7fcd7faa117299a60800000000000000
+      internalID: 7681213596293389559
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_91
+      rect:
+        serializedVersion: 2
+        x: 1108
+        y: 828
+        width: 129
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 515eb206ebcc42510800000000000000
+      internalID: 1523567691987412245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_92
+      rect:
+        serializedVersion: 2
+        x: 1254
+        y: 863
+        width: 58
+        height: 86
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: edee98e71090d2370800000000000000
+      internalID: 8299299590336278238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_93
+      rect:
+        serializedVersion: 2
+        x: 1256
+        y: 931
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04d1033de6647d780800000000000000
+      internalID: -8658374316792996544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_94
+      rect:
+        serializedVersion: 2
+        x: 1269
+        y: 939
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be1e00eb691395340800000000000000
+      internalID: 4852964596971004395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_95
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 860
+        width: 35
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a53b261aaa52861a0800000000000000
+      internalID: -6816156621242977446
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_96
+      rect:
+        serializedVersion: 2
+        x: 294
+        y: 898
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 897a91a1084297270800000000000000
+      internalID: 8248664325118076824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_97
+      rect:
+        serializedVersion: 2
+        x: 1006
+        y: 874
+        width: 35
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da3b417d2738b6cc0800000000000000
+      internalID: -3716732538206243923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_98
+      rect:
+        serializedVersion: 2
+        x: 1030
+        y: 906
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b82102cb907de040800000000000000
+      internalID: 4678519402184911033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_99
+      rect:
+        serializedVersion: 2
+        x: 1054
+        y: 898
+        width: 29
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f987d23e95839ad0800000000000000
+      internalID: -2696664837360481803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_100
+      rect:
+        serializedVersion: 2
+        x: 1094
+        y: 906
+        width: 33
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47900f6a7268fe280800000000000000
+      internalID: -9011836824482477708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_101
+      rect:
+        serializedVersion: 2
+        x: 1112
+        y: 884
+        width: 13
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d26ba537171bf8e0800000000000000
+      internalID: -1658706649303784744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_102
+      rect:
+        serializedVersion: 2
+        x: 1190
+        y: 874
+        width: 15
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ca5d5f9394b7f480800000000000000
+      internalID: -8865418795328644410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_103
+      rect:
+        serializedVersion: 2
+        x: 1226
+        y: 906
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a84831b73a35b1e0800000000000000
+      internalID: -2182774433520269145
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_104
+      rect:
+        serializedVersion: 2
+        x: 1236
+        y: 906
+        width: 27
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b61e7748f0549edb0800000000000000
+      internalID: -4762199198018313877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_105
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 873
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49f7dde4481278880800000000000000
+      internalID: -8608875310552875116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_106
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 884
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8df5b5b66b7e8cb70800000000000000
+      internalID: 8919633832678481880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_107
+      rect:
+        serializedVersion: 2
+        x: 982
+        y: 866
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b776e6d4f9332ab90800000000000000
+      internalID: -7232161292311697541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_108
+      rect:
+        serializedVersion: 2
+        x: 1124
+        y: 872
+        width: 16
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b297aaa26bade670800000000000000
+      internalID: 8569694106214175408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_109
+      rect:
+        serializedVersion: 2
+        x: 1222
+        y: 856
+        width: 21
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97b23cda69a52db10800000000000000
+      internalID: 2004764387340135289
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_110
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 574
+        width: 157
+        height: 309
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d641b8e840f498030800000000000000
+      internalID: 3497413466619843693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_111
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 811
+        width: 33
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01ead8a3d1bff6db0800000000000000
+      internalID: -4796338975171301872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_112
+      rect:
+        serializedVersion: 2
+        x: 126
+        y: 863
+        width: 11
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4c9873c8df860680800000000000000
+      internalID: -8789179461611774899
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_113
+      rect:
+        serializedVersion: 2
+        x: 1020
+        y: 841
+        width: 45
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0fd1d8e0e2bdf36d0800000000000000
+      internalID: -3008445035201094160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_114
+      rect:
+        serializedVersion: 2
+        x: 1088
+        y: 839
+        width: 21
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c19e4d9142d0b1e40800000000000000
+      internalID: 5628106608032934172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_115
+      rect:
+        serializedVersion: 2
+        x: 1156
+        y: 858
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ea02ca3ca61187a0800000000000000
+      internalID: -6376790668403930396
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_116
+      rect:
+        serializedVersion: 2
+        x: 1181
+        y: 839
+        width: 26
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1a131ec17d27f8e0800000000000000
+      internalID: -1659807970850825697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_117
+      rect:
+        serializedVersion: 2
+        x: 1196
+        y: 862
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e827196c13f34b290800000000000000
+      internalID: -7875600365346786674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_118
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 865
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f4e94ea8d07183540800000000000000
+      internalID: 4987761934245076559
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_119
+      rect:
+        serializedVersion: 2
+        x: 326
+        y: 836
+        width: 9
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 533d0d7bb9fc060b0800000000000000
+      internalID: -5737357657559215307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_120
+      rect:
+        serializedVersion: 2
+        x: 990
+        y: 754
+        width: 43
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb9a67fcfb0ebad80800000000000000
+      internalID: -8238243978920154690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_121
+      rect:
+        serializedVersion: 2
+        x: 1206
+        y: 807
+        width: 53
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb6dc1bb6baea6e90800000000000000
+      internalID: -7031549797641431364
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_122
+      rect:
+        serializedVersion: 2
+        x: 1262
+        y: 841
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99dde2f4565a4c980800000000000000
+      internalID: -8519502740539384423
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_123
+      rect:
+        serializedVersion: 2
+        x: 1286
+        y: 831
+        width: 26
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d62ffd17f4bae88a0800000000000000
+      internalID: -6300910470943477139
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_124
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 783
+        width: 41
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d84d39928bc81f600800000000000000
+      internalID: 500335756214260877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_125
+      rect:
+        serializedVersion: 2
+        x: 1082
+        y: 712
+        width: 121
+        height: 127
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e347d5abdd59e8a30800000000000000
+      internalID: 4219474680439731262
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_126
+      rect:
+        serializedVersion: 2
+        x: 1100
+        y: 817
+        width: 13
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10437b0b1fe7a3230800000000000000
+      internalID: 3619344827062629377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_127
+      rect:
+        serializedVersion: 2
+        x: 1142
+        y: 825
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1afebfa1e814e7850800000000000000
+      internalID: 6376606200997080993
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_128
+      rect:
+        serializedVersion: 2
+        x: 1168
+        y: 825
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d3ea7c1967ee49b0800000000000000
+      internalID: -5093879689874054188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_129
+      rect:
+        serializedVersion: 2
+        x: 1171
+        y: 827
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7653dbb538f1fb520800000000000000
+      internalID: 2719927348995372391
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_130
+      rect:
+        serializedVersion: 2
+        x: 1254
+        y: 783
+        width: 58
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 207bc42942684b0a0800000000000000
+      internalID: -6866716040201718014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_131
+      rect:
+        serializedVersion: 2
+        x: 982
+        y: 785
+        width: 13
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08ad27982a8fbefb0800000000000000
+      internalID: -4617323615963915648
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_132
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 799
+        width: 15
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7ae2d5d50c4e1440800000000000000
+      internalID: 4908444231826336380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_133
+      rect:
+        serializedVersion: 2
+        x: 1190
+        y: 777
+        width: 37
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a1c6bd12d19b1760800000000000000
+      internalID: 7429692341905441188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_134
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 785
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f773f079c243d3c70800000000000000
+      internalID: 8952369000399976319
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_135
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 781
+        width: 19
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aba3363f168fb4420800000000000000
+      internalID: 2615457108197587642
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_136
+      rect:
+        serializedVersion: 2
+        x: 1100
+        y: 781
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba3f39f833f3c08d0800000000000000
+      internalID: -2878856571111869525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_137
+      rect:
+        serializedVersion: 2
+        x: 1182
+        y: 765
+        width: 15
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c2835567b90ed4c0800000000000000
+      internalID: -4260957514162273597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_138
+      rect:
+        serializedVersion: 2
+        x: 1230
+        y: 752
+        width: 31
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7962b532fd4e7020800000000000000
+      internalID: 2341394558957545854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_139
+      rect:
+        serializedVersion: 2
+        x: 1246
+        y: 775
+        width: 13
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d038dd057844d80b0800000000000000
+      internalID: -5724844203350064371
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_140
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 769
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 270fa70ba79284ae0800000000000000
+      internalID: -1564955263587651470
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_141
+      rect:
+        serializedVersion: 2
+        x: 236
+        y: 730
+        width: 21
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ea82c4bde0e538e0800000000000000
+      internalID: -1714216771600086303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_142
+      rect:
+        serializedVersion: 2
+        x: 1068
+        y: 757
+        width: 29
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 373f3500f127403a0800000000000000
+      internalID: -6700104868145400973
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_143
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 750
+        width: 11
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6efaec625dd493ce0800000000000000
+      internalID: -1425022229211598874
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_144
+      rect:
+        serializedVersion: 2
+        x: 277
+        y: 750
+        width: 16
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c649957cc5dd6f430800000000000000
+      internalID: 3816481124794340460
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_145
+      rect:
+        serializedVersion: 2
+        x: 334
+        y: 750
+        width: 17
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1cc1b604ec8a0fe60800000000000000
+      internalID: 7994074942380121281
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_146
+      rect:
+        serializedVersion: 2
+        x: 1078
+        y: 744
+        width: 9
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9faab2ad682d37f80800000000000000
+      internalID: -8109907027336385799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_147
+      rect:
+        serializedVersion: 2
+        x: 152
+        y: 694
+        width: 85
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 559fb8be4490d83b0800000000000000
+      internalID: -5508736577590003371
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_148
+      rect:
+        serializedVersion: 2
+        x: 246
+        y: 723
+        width: 8
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 16d4765cb39e7ae40800000000000000
+      internalID: 5667755098993282401
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_149
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 738
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d0fd17ae066d8770800000000000000
+      internalID: 8614653875348959444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_150
+      rect:
+        serializedVersion: 2
+        x: 1046
+        y: 694
+        width: 37
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15cc908cf1b85b6a0800000000000000
+      internalID: -6434083524012553135
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_151
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 645
+        width: 87
+        height: 87
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff0a65f28c486fb80800000000000000
+      internalID: -8361349662844215041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_152
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 712
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 348a921c062064220800000000000000
+      internalID: 2469664060240144451
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_153
+      rect:
+        serializedVersion: 2
+        x: 1072
+        y: 702
+        width: 25
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d417b684839f29a10800000000000000
+      internalID: 1914866811714367821
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_154
+      rect:
+        serializedVersion: 2
+        x: 1096
+        y: 718
+        width: 19
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31334b6db1a1ad850800000000000000
+      internalID: 6402458527129154323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_155
+      rect:
+        serializedVersion: 2
+        x: 1104
+        y: 690
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c47ebee56ade69fd0800000000000000
+      internalID: -2335418057932150964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_156
+      rect:
+        serializedVersion: 2
+        x: 1124
+        y: 718
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1cc23b0925fae0980800000000000000
+      internalID: -8570720271689634623
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_157
+      rect:
+        serializedVersion: 2
+        x: 126
+        y: 704
+        width: 21
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bce9f92ccaa0dcb0800000000000000
+      internalID: -4841181805568987983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_158
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 663
+        width: 21
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81e8f018d750deda0800000000000000
+      internalID: -5914064699073262056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_159
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 659
+        width: 17
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef1310a00c0a70a30800000000000000
+      internalID: 4181487525698810366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_160
+      rect:
+        serializedVersion: 2
+        x: 148
+        y: 619
+        width: 53
+        height: 74
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b84abdabc48626d90800000000000000
+      internalID: -7106002583275461493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_161
+      rect:
+        serializedVersion: 2
+        x: 176
+        y: 679
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cfa6caab4ffae55e0800000000000000
+      internalID: -1918902925574509828
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_162
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 681
+        width: 11
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3df39ad00d4844980800000000000000
+      internalID: -8555567362979840045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_163
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 685
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1fbfec49fc9143760800000000000000
+      internalID: 7436597264041049073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_164
+      rect:
+        serializedVersion: 2
+        x: 975
+        y: 670
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0dd20a6db59278f10800000000000000
+      internalID: 2271830011451289040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_165
+      rect:
+        serializedVersion: 2
+        x: 1016
+        y: 680
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9712f021d4a39a8b0800000000000000
+      internalID: -5140513396976836231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_166
+      rect:
+        serializedVersion: 2
+        x: 1022
+        y: 655
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de92285b5d86d1570800000000000000
+      internalID: 8439016543844706797
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_167
+      rect:
+        serializedVersion: 2
+        x: 1046
+        y: 588
+        width: 53
+        height: 109
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 948a5ff9ded2100d0800000000000000
+      internalID: -3458432540229654455
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_168
+      rect:
+        serializedVersion: 2
+        x: 1078
+        y: 679
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d87088dc449721a10800000000000000
+      internalID: 1878697330979899277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_169
+      rect:
+        serializedVersion: 2
+        x: 1084
+        y: 645
+        width: 41
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0cbaebf28978e3720800000000000000
+      internalID: 2827846703741053888
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_170
+      rect:
+        serializedVersion: 2
+        x: 1110
+        y: 679
+        width: 9
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3038a42fb82a22d90800000000000000
+      internalID: -7123952938597580029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_171
+      rect:
+        serializedVersion: 2
+        x: 1118
+        y: 682
+        width: 6
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2fda7a86d72d12af0800000000000000
+      internalID: -422825453927551502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_172
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 661
+        width: 23
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e05c3441926d39610800000000000000
+      internalID: 1626879362332869902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_173
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 647
+        width: 11
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 12d3766607797d950800000000000000
+      internalID: 6473809498378550561
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_174
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 661
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e8cd692bfe9f51b0800000000000000
+      internalID: -5665635004639754009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_175
+      rect:
+        serializedVersion: 2
+        x: 218
+        y: 556
+        width: 92
+        height: 110
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 076c6ae52f52c2500800000000000000
+      internalID: 372714592065209968
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_176
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 644
+        width: 30
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4213aa704028c12f0800000000000000
+      internalID: -1000782063363018460
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_177
+      rect:
+        serializedVersion: 2
+        x: 326
+        y: 651
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 213afa70c9fe0ce30800000000000000
+      internalID: 4521877479302865682
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_178
+      rect:
+        serializedVersion: 2
+        x: 982
+        y: 641
+        width: 9
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f8add35cfada45e0800000000000000
+      internalID: -1924485113473816336
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_179
+      rect:
+        serializedVersion: 2
+        x: 117
+        y: 613
+        width: 32
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97bebedde1da613f0800000000000000
+      internalID: -930365924921578631
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_180
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 584
+        width: 29
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b24f2b4ac6fe05960800000000000000
+      internalID: 7588828622017983531
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_181
+      rect:
+        serializedVersion: 2
+        x: 186
+        y: 611
+        width: 29
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8809a583889c399f0800000000000000
+      internalID: -462804749790834552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_182
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 534
+        width: 21
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 155e4f95db975e340800000000000000
+      internalID: 4892450424372913489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_183
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 564
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8aad0d1cee78ee720800000000000000
+      internalID: 2877386671459981992
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_184
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 517
+        width: 25
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1232810a475f86fd0800000000000000
+      internalID: -2348357324422765791
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_185
+      rect:
+        serializedVersion: 2
+        x: 286
+        y: 558
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecc32307821d55050800000000000000
+      internalID: 5788762867665878222
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_186
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 573
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2bc59dfa7b22fac0800000000000000
+      internalID: -3822945326443672790
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_187
+      rect:
+        serializedVersion: 2
+        x: 308
+        y: 617
+        width: 17
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 245ce125a450c2400800000000000000
+      internalID: 300621091890447682
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_188
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 574
+        width: 13
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83237e0cc26cd5560800000000000000
+      internalID: 7304212066182050360
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_189
+      rect:
+        serializedVersion: 2
+        x: 998
+        y: 590
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af2a84dac9ca5a4b0800000000000000
+      internalID: -5429743986803170566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_190
+      rect:
+        serializedVersion: 2
+        x: 1013
+        y: 588
+        width: 10
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e09b1a464aa7c25c0800000000000000
+      internalID: -4238878302780933874
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_191
+      rect:
+        serializedVersion: 2
+        x: 1014
+        y: 611
+        width: 11
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3dcf35b6c4402f310800000000000000
+      internalID: 1437215957349301459
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_192
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 598
+        width: 15
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98adbc4de78c38090800000000000000
+      internalID: -8033356863237268855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_193
+      rect:
+        serializedVersion: 2
+        x: 1054
+        y: 565
+        width: 19
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2af95dc97f4c497a0800000000000000
+      internalID: -6371251005055197278
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_194
+      rect:
+        serializedVersion: 2
+        x: 1062
+        y: 610
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1d2ce25dfca2da90800000000000000
+      internalID: -7290574642741498597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_195
+      rect:
+        serializedVersion: 2
+        x: 1102
+        y: 550
+        width: 107
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0fe0e605bc678bd60800000000000000
+      internalID: 7906199761448734448
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_196
+      rect:
+        serializedVersion: 2
+        x: 255
+        y: 485
+        width: 16
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 279bac88812f87610800000000000000
+      internalID: 1619310253227817330
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_197
+      rect:
+        serializedVersion: 2
+        x: 270
+        y: 394
+        width: 69
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0acd9ec4516098880800000000000000
+      internalID: -8608342524187517792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_198
+      rect:
+        serializedVersion: 2
+        x: 990
+        y: 428
+        width: 17
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff4ce2ed8cf0eeef0800000000000000
+      internalID: -77106788223236865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_199
+      rect:
+        serializedVersion: 2
+        x: 1014
+        y: 450
+        width: 9
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00da8787164c3aa90800000000000000
+      internalID: -7303778247752766208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_200
+      rect:
+        serializedVersion: 2
+        x: 318
+        y: 360
+        width: 25
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06fd0017054a678d0800000000000000
+      internalID: -2848909048865038496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_201
+      rect:
+        serializedVersion: 2
+        x: 974
+        y: 396
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e95c8bfa27af103d0800000000000000
+      internalID: -3242034886248708706
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_202
+      rect:
+        serializedVersion: 2
+        x: 992
+        y: 412
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1d644780a69bfb30800000000000000
+      internalID: 4322213883600465183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_203
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 372
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e38769a968ceaf2c0800000000000000
+      internalID: -4396942023310542786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_204
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 359
+        width: 21
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7c3c0e4916110100800000000000000
+      internalID: 72363366954056831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_205
+      rect:
+        serializedVersion: 2
+        x: 306
+        y: 333
+        width: 13
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd75cf214c7ef43e0800000000000000
+      internalID: -2067178874621634595
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_206
+      rect:
+        serializedVersion: 2
+        x: 286
+        y: 315
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e495380d379292590800000000000000
+      internalID: -7698576510616905394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_207
+      rect:
+        serializedVersion: 2
+        x: 318
+        y: 291
+        width: 19
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 039c0b82299dd3eb0800000000000000
+      internalID: -4738392011152766672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_208
+      rect:
+        serializedVersion: 2
+        x: 334
+        y: 305
+        width: 9
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e078b213814ed86d0800000000000000
+      internalID: -2986480185321486578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_209
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 258
+        width: 17
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ea8bab1d6cc406a0800000000000000
+      internalID: -6483832794518943001
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_210
+      rect:
+        serializedVersion: 2
+        x: 326
+        y: 252
+        width: 9
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75afbe6871bba5290800000000000000
+      internalID: -7900796886545860009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_211
+      rect:
+        serializedVersion: 2
+        x: 530
+        y: 17
+        width: 29
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b88b2365abab7a50800000000000000
+      internalID: 6519993612370675891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_212
+      rect:
+        serializedVersion: 2
+        x: 556
+        y: 19
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6169f9da00c695ee0800000000000000
+      internalID: -1271866669586737642
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bridge_Post_A_213
+      rect:
+        serializedVersion: 2
+        x: 782
+        y: 21
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da679ffcf0fdcdef0800000000000000
+      internalID: -81945434192775507
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Bridge_Post_A_0: -6920620704469282677
+      Bridge_Post_A_1: 6127410903995847487
+      Bridge_Post_A_10: -1379806350181271411
+      Bridge_Post_A_100: -9011836824482477708
+      Bridge_Post_A_101: -1658706649303784744
+      Bridge_Post_A_102: -8865418795328644410
+      Bridge_Post_A_103: -2182774433520269145
+      Bridge_Post_A_104: -4762199198018313877
+      Bridge_Post_A_105: -8608875310552875116
+      Bridge_Post_A_106: 8919633832678481880
+      Bridge_Post_A_107: -7232161292311697541
+      Bridge_Post_A_108: 8569694106214175408
+      Bridge_Post_A_109: 2004764387340135289
+      Bridge_Post_A_11: -2321537665423504254
+      Bridge_Post_A_110: 3497413466619843693
+      Bridge_Post_A_111: -4796338975171301872
+      Bridge_Post_A_112: -8789179461611774899
+      Bridge_Post_A_113: -3008445035201094160
+      Bridge_Post_A_114: 5628106608032934172
+      Bridge_Post_A_115: -6376790668403930396
+      Bridge_Post_A_116: -1659807970850825697
+      Bridge_Post_A_117: -7875600365346786674
+      Bridge_Post_A_118: 4987761934245076559
+      Bridge_Post_A_119: -5737357657559215307
+      Bridge_Post_A_12: 4330645432194678027
+      Bridge_Post_A_120: -8238243978920154690
+      Bridge_Post_A_121: -7031549797641431364
+      Bridge_Post_A_122: -8519502740539384423
+      Bridge_Post_A_123: -6300910470943477139
+      Bridge_Post_A_124: 500335756214260877
+      Bridge_Post_A_125: 4219474680439731262
+      Bridge_Post_A_126: 3619344827062629377
+      Bridge_Post_A_127: 6376606200997080993
+      Bridge_Post_A_128: -5093879689874054188
+      Bridge_Post_A_129: 2719927348995372391
+      Bridge_Post_A_13: -3077524592207659276
+      Bridge_Post_A_130: -6866716040201718014
+      Bridge_Post_A_131: -4617323615963915648
+      Bridge_Post_A_132: 4908444231826336380
+      Bridge_Post_A_133: 7429692341905441188
+      Bridge_Post_A_134: 8952369000399976319
+      Bridge_Post_A_135: 2615457108197587642
+      Bridge_Post_A_136: -2878856571111869525
+      Bridge_Post_A_137: -4260957514162273597
+      Bridge_Post_A_138: 2341394558957545854
+      Bridge_Post_A_139: -5724844203350064371
+      Bridge_Post_A_14: -7363319554992502651
+      Bridge_Post_A_140: -1564955263587651470
+      Bridge_Post_A_141: -1714216771600086303
+      Bridge_Post_A_142: -6700104868145400973
+      Bridge_Post_A_143: -1425022229211598874
+      Bridge_Post_A_144: 3816481124794340460
+      Bridge_Post_A_145: 7994074942380121281
+      Bridge_Post_A_146: -8109907027336385799
+      Bridge_Post_A_147: -5508736577590003371
+      Bridge_Post_A_148: 5667755098993282401
+      Bridge_Post_A_149: 8614653875348959444
+      Bridge_Post_A_15: -6660856579232828699
+      Bridge_Post_A_150: -6434083524012553135
+      Bridge_Post_A_151: -8361349662844215041
+      Bridge_Post_A_152: 2469664060240144451
+      Bridge_Post_A_153: 1914866811714367821
+      Bridge_Post_A_154: 6402458527129154323
+      Bridge_Post_A_155: -2335418057932150964
+      Bridge_Post_A_156: -8570720271689634623
+      Bridge_Post_A_157: -4841181805568987983
+      Bridge_Post_A_158: -5914064699073262056
+      Bridge_Post_A_159: 4181487525698810366
+      Bridge_Post_A_16: -4935655743754355626
+      Bridge_Post_A_160: -7106002583275461493
+      Bridge_Post_A_161: -1918902925574509828
+      Bridge_Post_A_162: -8555567362979840045
+      Bridge_Post_A_163: 7436597264041049073
+      Bridge_Post_A_164: 2271830011451289040
+      Bridge_Post_A_165: -5140513396976836231
+      Bridge_Post_A_166: 8439016543844706797
+      Bridge_Post_A_167: -3458432540229654455
+      Bridge_Post_A_168: 1878697330979899277
+      Bridge_Post_A_169: 2827846703741053888
+      Bridge_Post_A_17: -4594968417935992485
+      Bridge_Post_A_170: -7123952938597580029
+      Bridge_Post_A_171: -422825453927551502
+      Bridge_Post_A_172: 1626879362332869902
+      Bridge_Post_A_173: 6473809498378550561
+      Bridge_Post_A_174: -5665635004639754009
+      Bridge_Post_A_175: 372714592065209968
+      Bridge_Post_A_176: -1000782063363018460
+      Bridge_Post_A_177: 4521877479302865682
+      Bridge_Post_A_178: -1924485113473816336
+      Bridge_Post_A_179: -930365924921578631
+      Bridge_Post_A_18: -5611899143381010709
+      Bridge_Post_A_180: 7588828622017983531
+      Bridge_Post_A_181: -462804749790834552
+      Bridge_Post_A_182: 4892450424372913489
+      Bridge_Post_A_183: 2877386671459981992
+      Bridge_Post_A_184: -2348357324422765791
+      Bridge_Post_A_185: 5788762867665878222
+      Bridge_Post_A_186: -3822945326443672790
+      Bridge_Post_A_187: 300621091890447682
+      Bridge_Post_A_188: 7304212066182050360
+      Bridge_Post_A_189: -5429743986803170566
+      Bridge_Post_A_19: 1163746222822905274
+      Bridge_Post_A_190: -4238878302780933874
+      Bridge_Post_A_191: 1437215957349301459
+      Bridge_Post_A_192: -8033356863237268855
+      Bridge_Post_A_193: -6371251005055197278
+      Bridge_Post_A_194: -7290574642741498597
+      Bridge_Post_A_195: 7906199761448734448
+      Bridge_Post_A_196: 1619310253227817330
+      Bridge_Post_A_197: -8608342524187517792
+      Bridge_Post_A_198: -77106788223236865
+      Bridge_Post_A_199: -7303778247752766208
+      Bridge_Post_A_2: -709294515612116135
+      Bridge_Post_A_20: 5291208303361266186
+      Bridge_Post_A_200: -2848909048865038496
+      Bridge_Post_A_201: -3242034886248708706
+      Bridge_Post_A_202: 4322213883600465183
+      Bridge_Post_A_203: -4396942023310542786
+      Bridge_Post_A_204: 72363366954056831
+      Bridge_Post_A_205: -2067178874621634595
+      Bridge_Post_A_206: -7698576510616905394
+      Bridge_Post_A_207: -4738392011152766672
+      Bridge_Post_A_208: -2986480185321486578
+      Bridge_Post_A_209: -6483832794518943001
+      Bridge_Post_A_21: 105035406338668653
+      Bridge_Post_A_210: -7900796886545860009
+      Bridge_Post_A_211: 6519993612370675891
+      Bridge_Post_A_212: -1271866669586737642
+      Bridge_Post_A_213: -81945434192775507
+      Bridge_Post_A_22: 4980536734471714409
+      Bridge_Post_A_23: 716261212570411512
+      Bridge_Post_A_24: 7786531718923839528
+      Bridge_Post_A_25: -189252125523798368
+      Bridge_Post_A_26: -75307325089534726
+      Bridge_Post_A_27: 6963599633673615655
+      Bridge_Post_A_28: 5193923328553968990
+      Bridge_Post_A_29: -2015902446288162816
+      Bridge_Post_A_3: 5699384854958166248
+      Bridge_Post_A_30: 8873566187359974749
+      Bridge_Post_A_31: 818437149006101917
+      Bridge_Post_A_32: 273518624231462163
+      Bridge_Post_A_33: 9133524169478089897
+      Bridge_Post_A_34: -6192503962345771266
+      Bridge_Post_A_35: 2462625386935328078
+      Bridge_Post_A_36: -6989362730717470464
+      Bridge_Post_A_37: -4696299501022441538
+      Bridge_Post_A_38: -1048158934572271830
+      Bridge_Post_A_39: 975379266264761780
+      Bridge_Post_A_4: -1622814037487532090
+      Bridge_Post_A_40: 2107633521019275204
+      Bridge_Post_A_41: -9141448746606634743
+      Bridge_Post_A_42: 1397285919098340706
+      Bridge_Post_A_43: 4948292072315959077
+      Bridge_Post_A_44: 3324041250814861534
+      Bridge_Post_A_45: 300800830969768296
+      Bridge_Post_A_46: 5778788701226565521
+      Bridge_Post_A_47: -4441780826361015653
+      Bridge_Post_A_48: 6371612909277040908
+      Bridge_Post_A_49: 2370733932615231852
+      Bridge_Post_A_5: 6591434826428859221
+      Bridge_Post_A_50: 7173439626520067014
+      Bridge_Post_A_51: 3774454002509632027
+      Bridge_Post_A_52: 88489503335628917
+      Bridge_Post_A_53: 5172393503102099557
+      Bridge_Post_A_54: 281981967163893996
+      Bridge_Post_A_55: -1423002422501581856
+      Bridge_Post_A_56: -262341221546346358
+      Bridge_Post_A_57: -1674644579376275344
+      Bridge_Post_A_58: -8886471314628674178
+      Bridge_Post_A_59: -7352411995279574610
+      Bridge_Post_A_6: -2176702615746641012
+      Bridge_Post_A_60: 9021941616431612297
+      Bridge_Post_A_61: 7115940516183770131
+      Bridge_Post_A_62: 207677188589360726
+      Bridge_Post_A_63: 1604633789774611660
+      Bridge_Post_A_64: -2029146409961084019
+      Bridge_Post_A_65: 3549411523479368036
+      Bridge_Post_A_66: -3156616752571381092
+      Bridge_Post_A_67: -4163449688488023147
+      Bridge_Post_A_68: 7730511492375234197
+      Bridge_Post_A_69: -8608548710616052251
+      Bridge_Post_A_7: -7586186118377229226
+      Bridge_Post_A_70: 2398941786055610902
+      Bridge_Post_A_71: -3221736916295979379
+      Bridge_Post_A_72: 5034186918787567114
+      Bridge_Post_A_73: -384736180856401229
+      Bridge_Post_A_74: 4024646644954748329
+      Bridge_Post_A_75: 7721259673318737630
+      Bridge_Post_A_76: 8305531951651873657
+      Bridge_Post_A_77: -9002783201570682893
+      Bridge_Post_A_78: -4072803465782178813
+      Bridge_Post_A_79: 2977389087596341789
+      Bridge_Post_A_8: 6806157676725932012
+      Bridge_Post_A_80: -6916490499627171673
+      Bridge_Post_A_81: -4962645242982573027
+      Bridge_Post_A_82: 4096058313866636716
+      Bridge_Post_A_83: -3257573178027158698
+      Bridge_Post_A_84: 776404015194263478
+      Bridge_Post_A_85: 8557246312062162426
+      Bridge_Post_A_86: 2437466281593620744
+      Bridge_Post_A_87: -1463929309265070082
+      Bridge_Post_A_88: -4308881432425465670
+      Bridge_Post_A_89: -7804323569755957881
+      Bridge_Post_A_9: -536985541122871612
+      Bridge_Post_A_90: 7681213596293389559
+      Bridge_Post_A_91: 1523567691987412245
+      Bridge_Post_A_92: 8299299590336278238
+      Bridge_Post_A_93: -8658374316792996544
+      Bridge_Post_A_94: 4852964596971004395
+      Bridge_Post_A_95: -6816156621242977446
+      Bridge_Post_A_96: 8248664325118076824
+      Bridge_Post_A_97: -3716732538206243923
+      Bridge_Post_A_98: 4678519402184911033
+      Bridge_Post_A_99: -2696664837360481803
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

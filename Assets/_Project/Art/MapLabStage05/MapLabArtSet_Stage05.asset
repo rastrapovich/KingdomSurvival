@@ -1,0 +1,2621 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2c60839abb5890419d130d947cec017, type: 3}
+  m_Name: MapLabArtSet_Stage05
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabArtSet
+  SchemaVersion: 1
+  PackageRevision: 5
+  PackageId: KS_MapLab_Stage05_Ink_Watercolor_ArtR02_2026-11-03
+  ImportVersion: 1
+  ImportedAt: 2026-11-03 20:56:28
+  ManifestSha256: 81c139770916bb1e56780ee5bf9e78725f743df93305b21876085a51fd464167
+  Entries:
+  - Id: Map05_Grass_Sparse_C
+    Category: 0
+    Kind: 9
+    ManifestKind: Grass
+    Texture: {fileID: 2800000, guid: d5e38a4931b6caf4aa592e0c37011183, type: 3}
+    Weight: 1
+    WorldHeight: 0.65
+    Pivot: {x: 0.416921, y: 0.27719766}
+    Footprint: {x: 0.7230337, y: 0.5021067}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Grass/Grass_Sparse_C.png
+    Sha256: 2fcaccc1bd502028110a167fa14370188a131d1ff7dcf4aaf9f360b1223d840a
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.22103658
+      y: 0.2593828
+      width: 0.628811
+      height: 0.44537115
+    PivotHint: {x: 0.416921, y: 0.258549}
+    FootX: 0.4165213
+    Direction: 
+    PitchDownDegrees: 50
+    Role: grass_tuft
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6373377, g: 0.5895486, b: 0.423947, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Grass_Fan_B
+    Category: 0
+    Kind: 9
+    ManifestKind: Grass
+    Texture: {fileID: 2800000, guid: a538e777ca2ef104590e5e27ec9dcedb, type: 3}
+    Weight: 1
+    WorldHeight: 0.45
+    Pivot: {x: 0.51372, y: 0.26682237}
+    Footprint: {x: 0.4845864, y: 0.33651832}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Grass/Grass_Fan_B.png
+    Sha256: 4b914bb6f0b4b42ec82a4ac6ffcad56e4e1edaa404312934512eeee2a0bacda5
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.14557926
+      y: 0.24770643
+      width: 0.6532012
+      height: 0.47789824
+    PivotHint: {x: 0.51372, y: 0.247706}
+    FootX: 0.5139212
+    Direction: 
+    PitchDownDegrees: 50
+    Role: grass_tuft
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.60193515, g: 0.5548926, b: 0.40449744, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Grass_Tuft_A
+    Category: 0
+    Kind: 9
+    ManifestKind: Grass
+    Texture: {fileID: 2800000, guid: 63eb48fa4d7735b4f9139126182ca24b, type: 3}
+    Weight: 1
+    WorldHeight: 0.55
+    Pivot: {x: 0.478516, y: 0.26035157}
+    Footprint: {x: 0.42753986, y: 0.29690266}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Grass/Grass_Tuft_A.png
+    Sha256: 6a573e4756115c8a608ad78af65e253b34b8ca4c8466af1a4f85a599779ebc50
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2981771
+      y: 0.23828125
+      width: 0.3971354
+      height: 0.5517578
+    PivotHint: {x: 0.478516, y: 0.238281}
+    FootX: 0.48100626
+    Direction: 
+    PitchDownDegrees: 35
+    Role: grass_tuft
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6553015, g: 0.56575876, b: 0.35201064, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Grass_Bent_D
+    Category: 0
+    Kind: 9
+    ManifestKind: Grass
+    Texture: {fileID: 2800000, guid: 0f14667d7f237994dafddd3a906fbe25, type: 3}
+    Weight: 1
+    WorldHeight: 0.5
+    Pivot: {x: 0.362458, y: 0.23255919}
+    Footprint: {x: 1.3251362, y: 0.9202334}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Grass/Grass_Bent_D.png
+    Sha256: 64ce74bd725a16d5b0f4f38bd962154734ad99af11fcbf2e87d2799f0e2de7db
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.23280722
+      y: 0.22096956
+      width: 0.5332582
+      height: 0.2897407
+    PivotHint: {x: 0.362458, y: 0.22097}
+    FootX: 0.364206
+    Direction: 
+    PitchDownDegrees: 50
+    Role: grass_tuft
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.59565365, g: 0.54438496, b: 0.3724429, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Reed_Low_C
+    Category: 0
+    Kind: 4
+    ManifestKind: Reed
+    Texture: {fileID: 2800000, guid: 299a198ce29e93847853301463ac288e, type: 3}
+    Weight: 1
+    WorldHeight: 0.8
+    Pivot: {x: 0.563151, y: 0.18382813}
+    Footprint: {x: 1.1054453, y: 0.76767033}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Reeds/Reed_Low_C.png
+    Sha256: 76d16f0ae40606787172ce10393e8a42e98c869051857c6a8c26602320c8f220
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.052734375
+      y: 0.15917969
+      width: 0.78841144
+      height: 0.61621094
+    PivotHint: {x: 0.563151, y: 0.15918}
+    FootX: 0.5632375
+    Direction: 
+    PitchDownDegrees: 50
+    Role: reed_clump
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.5816015, g: 0.5240587, b: 0.36042836, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Rock_Round_A
+    Category: 2
+    Kind: 5
+    ManifestKind: Boulder
+    Texture: {fileID: 2800000, guid: 9c93466f1deba3f499f37a6b56b95ffc, type: 3}
+    Weight: 1
+    WorldHeight: 0.95
+    Pivot: {x: 0.477896, y: 0.25771475}
+    Footprint: {x: 0.8940857, y: 0.6208928}
+    MaxSlope: 32
+    Orientation: 0
+    ScaleRange: {x: 0.65, y: 1.15}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Rocks/Rock_Round_A.png
+    Sha256: 571c605e1e83d27d3b8e21d2866ddc1aa120f2608d6945a331407cd8e8dd2501
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.14710365
+      y: 0.21100917
+      width: 0.69740856
+      height: 0.58381987
+    PivotHint: {x: 0.477896, y: 0.211009}
+    FootX: 0.46981794
+    Direction: 
+    PitchDownDegrees: 50
+    Role: boulder
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.65451616, g: 0.602159, b: 0.49336922, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Reed_Panicle_B
+    Category: 0
+    Kind: 4
+    ManifestKind: Reed
+    Texture: {fileID: 2800000, guid: 9fde354f7e8cd2b409f4929020da14e5, type: 3}
+    Weight: 1
+    WorldHeight: 1.35
+    Pivot: {x: 0.53125, y: 0.1989658}
+    Footprint: {x: 1.197912, y: 0.83188325}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Reeds/Reed_Panicle_B.png
+    Sha256: 9f70f4ab22829df2de858ca337912118817f9991e3fe8f840b9cf5a198360334
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.09146342
+      y: 0.17097582
+      width: 0.7881098
+      height: 0.69974977
+    PivotHint: {x: 0.53125, y: 0.170976}
+    FootX: 0.53203833
+    Direction: 
+    PitchDownDegrees: 50
+    Role: reed_clump
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6903626, g: 0.58409715, b: 0.43088797, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Reed_Cattail_A
+    Category: 0
+    Kind: 4
+    ManifestKind: Reed
+    Texture: {fileID: 2800000, guid: 0a8b695e423aea244b07a5a40d0e5e24, type: 3}
+    Weight: 1
+    WorldHeight: 1.2
+    Pivot: {x: 0.489329, y: 0.07919934}
+    Footprint: {x: 0.7891844, y: 0.5480447}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Reeds/Reed_Cattail_A.png
+    Sha256: 22ac50b4232460a813e19e76b021cc424a90af2d0fac333b21092ff214fb8edd
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.12728658
+      y: 0.043369476
+      width: 0.7477134
+      height: 0.89574647
+    PivotHint: {x: 0.489329, y: 0.043369}
+    FootX: 0.4893642
+    Direction: 
+    PitchDownDegrees: 35
+    Role: reed_clump
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.5616142, g: 0.4722318, b: 0.31029984, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Haystack_Dome_A
+    Category: 7
+    Kind: 8
+    ManifestKind: Hay
+    Texture: {fileID: 2800000, guid: eedd86d97dedd37498e4e4cbf68d91e4, type: 3}
+    Weight: 1
+    WorldHeight: 1.5
+    Pivot: {x: 0.500762, y: 0.22605504}
+    Footprint: {x: 1.046598, y: 0.7268041}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Hay/Haystack_Dome_A.png
+    Sha256: 945d6c8522cf7685c62d93617cc4bb23d7d2d0f1e368b493f9f4d070256daf95
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.20503049
+      y: 0.2001668
+      width: 0.5731707
+      height: 0.647206
+    PivotHint: {x: 0.500762, y: 0.200167}
+    FootX: 0.49798548
+    Direction: 
+    PitchDownDegrees: 35
+    Role: haystack
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.7499051, g: 0.6411855, b: 0.42215234, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Rock_Pebbles_C
+    Category: 2
+    Kind: 5
+    ManifestKind: Boulder
+    Texture: {fileID: 2800000, guid: 726df02bf1a26e34cb2950ef608bb71b, type: 3}
+    Weight: 1
+    WorldHeight: 0.45
+    Pivot: {x: 0.647866, y: 0.210809}
+    Footprint: {x: 0.44160688, y: 0.30667144}
+    MaxSlope: 32
+    Orientation: 0
+    ScaleRange: {x: 0.65, y: 1.15}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Rocks/Rock_Pebbles_C.png
+    Sha256: 72267417ef14ab81a84781906279739c5d0c369a80bc0c82537b7d036d1dfb04
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.1410061
+      y: 0.16430359
+      width: 0.7240854
+      height: 0.5813178
+    PivotHint: {x: 0.647866, y: 0.164304}
+    FootX: 0.6492219
+    Direction: 
+    PitchDownDegrees: 50
+    Role: pebble_cluster
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6634386, g: 0.6072617, b: 0.5077662, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Rock_Angular_B
+    Category: 2
+    Kind: 5
+    ManifestKind: Boulder
+    Texture: {fileID: 2800000, guid: b5bb9ae7483e46d4895697b5c3362cbc, type: 3}
+    Weight: 1
+    WorldHeight: 1.1
+    Pivot: {x: 0.459961, y: 0.22890624}
+    Footprint: {x: 1.301143, y: 0.9035715}
+    MaxSlope: 32
+    Orientation: 0
+    ScaleRange: {x: 0.65, y: 1.15}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Rocks/Rock_Angular_B.png
+    Sha256: f2e4aa5da8e8a4a163d7548c8420ad28388b295849204283efe9df5c6606c24a
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.15429688
+      y: 0.1796875
+      width: 0.6738281
+      height: 0.6152344
+    PivotHint: {x: 0.459961, y: 0.179688}
+    FootX: 0.4581617
+    Direction: 
+    PitchDownDegrees: 50
+    Role: boulder
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.67679954, g: 0.60236216, b: 0.48325023, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Rock_Outcrop_D
+    Category: 2
+    Kind: 5
+    ManifestKind: Boulder
+    Texture: {fileID: 2800000, guid: 9d26db2b3fdd65b459a575439c0c48bb, type: 3}
+    Weight: 1
+    WorldHeight: 1.6
+    Pivot: {x: 0.55741, y: 0.20171429}
+    Footprint: {x: 2.097938, y: 1.4569013}
+    MaxSlope: 32
+    Orientation: 0
+    ScaleRange: {x: 0.65, y: 1.15}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Rocks/Rock_Outcrop_D.png
+    Sha256: 558615181a70e3752e58ef4697ce765a8f8d52f95178acd1598c806029e5d154
+    Width: 1498
+    Height: 1050
+    SolidRect:
+      serializedVersion: 2
+      x: 0.06341789
+      y: 0.14761905
+      width: 0.8631509
+      height: 0.6761905
+    PivotHint: {x: 0.55741, y: 0.147619}
+    FootX: 0.5612317
+    Direction: 
+    PitchDownDegrees: 50
+    Role: small_outcrop
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6961957, g: 0.63671494, b: 0.5152252, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Hay_Sheaf_C
+    Category: 7
+    Kind: 8
+    ManifestKind: Hay
+    Texture: {fileID: 2800000, guid: bdbb6ab76992a00479f00df545404f37, type: 3}
+    Weight: 1
+    WorldHeight: 0.8
+    Pivot: {x: 0.488948, y: 0.20777315}
+    Footprint: {x: 0.51084834, y: 0.35475576}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Hay/Hay_Sheaf_C.png
+    Sha256: 0af785d04b4a558efe9d3cab8e85643a69e19e643ec6b66efd08830484dda168
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.23323171
+      y: 0.18181819
+      width: 0.5259146
+      height: 0.64887404
+    PivotHint: {x: 0.488948, y: 0.181818}
+    FootX: 0.48036635
+    Direction: 
+    PitchDownDegrees: 35
+    Role: hay_sheaf
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.7950717, g: 0.66693825, b: 0.44595996, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Hayrick_Long_B
+    Category: 7
+    Kind: 8
+    ManifestKind: Hay
+    Texture: {fileID: 2800000, guid: d6fa155ec27cfd848afd977aba116982, type: 3}
+    Weight: 1
+    WorldHeight: 1.4
+    Pivot: {x: 0.425592, y: 0.22408117}
+    Footprint: {x: 2.4606538, y: 1.7087873}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Hay/Hayrick_Long_B.png
+    Sha256: 043e1df15bb77a5aeb28133c20040c565e25a25b107141e0fa1edb417374d59f
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.10822999
+      y: 0.19842164
+      width: 0.7829763
+      height: 0.64148813
+    PivotHint: {x: 0.425592, y: 0.198422}
+    FootX: 0.43759224
+    Direction: 
+    PitchDownDegrees: 35
+    Role: haystack
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.7752633, g: 0.6495015, b: 0.42982095, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Wash_Olive_Cloud_A
+    Category: 8
+    Kind: 10
+    ManifestKind: Wash
+    Texture: {fileID: 2800000, guid: ad97fda68fe32934297fdf4bf2098428, type: 3}
+    Weight: 1
+    WorldHeight: 4
+    Pivot: {x: 0.5, y: 0.5}
+    Footprint: {x: 4.8593326, y: 3.3745365}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 0.9, y: 1.1}
+    Light: 0
+    Cutoff: 0.05
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Watercolor/Wash_Olive_Cloud_A.png
+    Sha256: fcd04b3c07832d5f6712f5f282e582c6e66a384b7527de940ca03d16a9b7a3bd
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.05859375
+      y: 0.095703125
+      width: 0.8886719
+      height: 0.79003906
+    PivotHint: {x: 0.50293, y: 0.490234}
+    FootX: 0.4819419
+    Direction: 
+    PitchDownDegrees: 50
+    Role: watercolor_patch
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.799833, g: 0.7892209, b: 0.6746094, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Wash_Moss_Rim_B
+    Category: 8
+    Kind: 10
+    ManifestKind: Wash
+    Texture: {fileID: 2800000, guid: 5986fad9c6c9f2141b319561234f51e0, type: 3}
+    Weight: 1
+    WorldHeight: 4
+    Pivot: {x: 0.5, y: 0.5}
+    Footprint: {x: 8.925148, y: 6.198019}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 0.9, y: 1.1}
+    Light: 0
+    Cutoff: 0.05
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Watercolor/Wash_Moss_Rim_B.png
+    Sha256: d5420a0d764122dae262bdd4e344f878b1b22a30857d56753312023f34c99a79
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.06257046
+      y: 0.16910936
+      width: 0.8821871
+      height: 0.56933486
+    PivotHint: {x: 0.503664, y: 0.453777}
+    FootX: 0.4451086
+    Direction: 
+    PitchDownDegrees: 50
+    Role: watercolor_patch
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.78091675, g: 0.7720419, b: 0.6664745, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Fence_Rails_Two_A
+    Category: 9
+    Kind: 10
+    ManifestKind: Rails
+    Texture: {fileID: 2800000, guid: 5b06e0f2a70036b46847ddfcf0beaa67, type: 3}
+    Weight: 1
+    WorldHeight: 0.8
+    Pivot: {x: 0.50023, y: 0.22375703}
+    Footprint: {x: 3.3902175, y: 2.3543177}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Fences/Fence_Rails_Two_A.png
+    Sha256: 8aedf39b29edf813e9b96e9a2a61af23a1cf2ef3bdb699c15cd5e8f2b9bbc9ac
+    Width: 2172
+    Height: 724
+    SolidRect:
+      serializedVersion: 2
+      x: 0.0138121545
+      y: 0.22375691
+      width: 0.9728361
+      height: 0.49585634
+    PivotHint: {x: 0.50023, y: 0.223757}
+    FootX: 0.5162047
+    Direction: 
+    PitchDownDegrees: 50
+    Role: fence_rail_panel
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6728602, g: 0.53094196, b: 0.35370794, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0.013812
+      y: 0.22375703
+      width: 0.972836
+      height: 0.49585596
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Wash_Dry_Ochre_C
+    Category: 8
+    Kind: 10
+    ManifestKind: Wash
+    Texture: {fileID: 2800000, guid: 0c7a98096d5fdd24c99a1798c2faadb3, type: 3}
+    Weight: 1
+    WorldHeight: 4
+    Pivot: {x: 0.5, y: 0.5}
+    Footprint: {x: 5.056699, y: 3.5115962}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 0.9, y: 1.1}
+    Light: 0
+    Cutoff: 0.05
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Watercolor/Wash_Dry_Ochre_C.png
+    Sha256: 14ff781f62a712034b90eb807fe59185ccf9f64855c5e8c4c9cc5c93fdb8d022
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.06966146
+      y: 0.14941406
+      width: 0.8378906
+      height: 0.7158203
+    PivotHint: {x: 0.488607, y: 0.506836}
+    FootX: 0.3666606
+    Direction: 
+    PitchDownDegrees: 50
+    Role: watercolor_patch
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.82446355, g: 0.73840225, b: 0.54991794, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Wash_GrayGreen_Bloom_D
+    Category: 8
+    Kind: 10
+    ManifestKind: Wash
+    Texture: {fileID: 2800000, guid: 028bf45802b895a4cb75f16e1e1f75e4, type: 3}
+    Weight: 1
+    WorldHeight: 4
+    Pivot: {x: 0.5, y: 0.5}
+    Footprint: {x: 4.4095697, y: 3.062201}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 0.9, y: 1.1}
+    Light: 0
+    Cutoff: 0.05
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Watercolor/Wash_GrayGreen_Bloom_D.png
+    Sha256: 2bf1c7c3e5bd6d15c39887f7b24fa7c2cfb563cc95da8aa8e6a0577fc5ad5f9d
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.19140625
+      y: 0.18359375
+      width: 0.625
+      height: 0.6123047
+    PivotHint: {x: 0.503906, y: 0.489746}
+    FootX: 0.53849113
+    Direction: 
+    PitchDownDegrees: 50
+    Role: watercolor_patch
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.7376111, g: 0.7272271, b: 0.60605395, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Fence_Rails_Three_B
+    Category: 9
+    Kind: 10
+    ManifestKind: Rails
+    Texture: {fileID: 2800000, guid: 8196bde0390873a428b6f50fed5d9d87, type: 3}
+    Weight: 1
+    WorldHeight: 1
+    Pivot: {x: 0.5, y: 0.22237599}
+    Footprint: {x: 3.6038299, y: 2.5026596}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Fences/Fence_Rails_Three_B.png
+    Sha256: 34a9c8e3c74101a03ce21e225acf489dd47f1e64fd9cf8dcbff8dd946fb8957a
+    Width: 2172
+    Height: 724
+    SolidRect:
+      serializedVersion: 2
+      x: 0.066758744
+      y: 0.22237569
+      width: 0.8664825
+      height: 0.519337
+    PivotHint: {x: 0.5, y: 0.222376}
+    FootX: 0.4781451
+    Direction: 
+    PitchDownDegrees: 50
+    Role: fence_rail_panel
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6573784, g: 0.55423516, b: 0.4069083, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0.066759
+      y: 0.22237599
+      width: 0.866482
+      height: 0.519337
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Fence_Gate_Panel_A
+    Category: 9
+    Kind: 10
+    ManifestKind: Gate
+    Texture: {fileID: 2800000, guid: b3e8f6e896ad89d4d92774ec6a896330, type: 3}
+    Weight: 1
+    WorldHeight: 1.1
+    Pivot: {x: 0.49657002, y: 0.14011699}
+    Footprint: {x: 0.7091827, y: 0.49248797}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Fences/Fence_Gate_Panel_A.png
+    Sha256: 760a6e653e99402aa5b4aa559a2062c0eced6ca24c450935488fd9c6915bbc8a
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.21265244
+      y: 0.14011677
+      width: 0.5678354
+      height: 0.6939116
+    PivotHint: {x: 0.49657, y: 0.140117}
+    FootX: 0.49701068
+    Direction: 
+    PitchDownDegrees: 50
+    Role: gate_leaf
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.7125172, g: 0.58169436, b: 0.39396498, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0.212652
+      y: 0.14011699
+      width: 0.56783605
+      height: 0.693911
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Fence_Post_Corner_B
+    Category: 9
+    Kind: 10
+    ManifestKind: Post
+    Texture: {fileID: 2800000, guid: f1efb3c2560a4d6489057d32ee7daebe, type: 3}
+    Weight: 1
+    WorldHeight: 1.25
+    Pivot: {x: 0.487805, y: 0.14095098}
+    Footprint: {x: 0.28060046, y: 0.19486143}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Fences/Fence_Post_Corner_B.png
+    Sha256: 29989a7243a70de958848c412114a310e9871b6894c74c484bf636bdf13060dc
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.38490853
+      y: 0.14178482
+      width: 0.20579268
+      height: 0.7222686
+    PivotHint: {x: 0.487805, y: 0.140951}
+    FootX: 0.4887967
+    Direction: 
+    PitchDownDegrees: 50
+    Role: fence_corner_post
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.67020077, g: 0.5371966, b: 0.38808772, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0.384909
+      y: 0.14095098
+      width: 0.20579198
+      height: 0.723936
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Fence_Wattle_Panel_A
+    Category: 9
+    Kind: 10
+    ManifestKind: WattlePanel
+    Texture: {fileID: 2800000, guid: 745b42a516049f8448faa17bbf5ef838, type: 3}
+    Weight: 1
+    WorldHeight: 1.1
+    Pivot: {x: 0.4994365, y: 0.16572702}
+    Footprint: {x: 1.9719732, y: 1.3694258}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Fences/Fence_Wattle_Panel_A.png
+    Sha256: 833b3e58f545510cdb6433b4cf6b19f6a4e5fd00a477261f21169b1c280eaff6
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.08399098
+      y: 0.16572717
+      width: 0.83089066
+      height: 0.66741824
+    PivotHint: {x: 0.499436, y: 0.165727}
+    FootX: 0.50238746
+    Direction: 
+    PitchDownDegrees: 50
+    Role: fence_infill
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.68495226, g: 0.5632338, b: 0.38773718, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0.083991
+      y: 0.16572702
+      width: 0.830891
+      height: 0.667418
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Fence_Post_End_A
+    Category: 9
+    Kind: 10
+    ManifestKind: Post
+    Texture: {fileID: 2800000, guid: cfa0cf0b93379424eb44381b88c5c4e6, type: 3}
+    Weight: 1
+    WorldHeight: 1.25
+    Pivot: {x: 0.4908535, y: 0.22518802}
+    Footprint: {x: 0.44034335, y: 0.30579397}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Fences/Fence_Post_End_A.png
+    Sha256: 77840ae91d838bde85684eb1bffd7f44ab56e58b9f8c387d0f3d8d5c398994cf
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.3605183
+      y: 0.22518766
+      width: 0.26067072
+      height: 0.5829858
+    PivotHint: {x: 0.490854, y: 0.225188}
+    FootX: 0.4873327
+    Direction: 
+    PitchDownDegrees: 50
+    Role: fence_post
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6835593, g: 0.54378706, b: 0.34774378, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0.359756
+      y: 0.22518802
+      width: 0.262195
+      height: 0.582985
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_House_Shingle_A_FrontRight
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 1ca626dc5f13beb489cc33657c67844d, type: 3}
+    Weight: 1
+    WorldHeight: 4.5
+    Pivot: {x: 0.4922663, y: 0.24669188}
+    Footprint: {x: 3.4543185, y: 2.1038766}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/House_Shingle_A_FrontRight.png
+    Sha256: bfa75acb0b1bf2ce7bf5ad3be06885824eb89dfc8b55776fb8e920018d3a6d0a
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.14593141
+      y: 0.10207939
+      width: 0.7041022
+      height: 0.77221173
+    PivotHint: {x: 0.574983, y: 0.102079}
+    FootX: 0.5805227
+    Direction: 
+    PitchDownDegrees: 50
+    Role: house
+    VariantGroup: House_Shingle_A
+    Provenance: 
+    MeanColor: {r: 0.6776108, g: 0.53568584, b: 0.39211187, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: FrontRight
+    EntranceLocation: front_gable
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: -24.208176
+    EntranceDirection: {x: 0.9120616, y: -0.41005337}
+    BaseRegistered: 1
+    ReusedFrom: 
+  - Id: Map05_House_Shingle_A_BackRight
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 4ff7408cd6d520a43a90644f0c825438, type: 3}
+    Weight: 1
+    WorldHeight: 4.5
+    Pivot: {x: 0.4942838, y: 0.25614366}
+    Footprint: {x: 3.2850542, y: 2.1874423}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/House_Shingle_A_BackRight.png
+    Sha256: 3ce700bc1750cb3dfd744f2141009d94777c8a561c89f9dd1419b87bcdd2d66c
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.14324142
+      y: 0.08695652
+      width: 0.71418965
+      height: 0.8137996
+    PivotHint: {x: 0.556153, y: 0.086957}
+    FootX: 0.5596818
+    Direction: 
+    PitchDownDegrees: 50
+    Role: house
+    VariantGroup: House_Shingle_A
+    Provenance: 
+    MeanColor: {r: 0.7214532, g: 0.5944364, b: 0.46069512, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: BackRight
+    EntranceLocation: front_gable
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: -27.99382
+    EntranceDirection: {x: -0.88299817, y: 0.46937644}
+    BaseRegistered: 1
+    ReusedFrom: 
+  - Id: Map05_House_Thatch_A_FrontRight
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: f6abb86029325b047b9d6d4547de05f1, type: 3}
+    Weight: 1
+    WorldHeight: 4.1
+    Pivot: {x: 0.4915938, y: 0.24054821}
+    Footprint: {x: 3.1150894, y: 1.7550383}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/House_Thatch_A_FrontRight.png
+    Sha256: 8e1f6aee18827e28ea1903aebb82814c171751e1635e2cb7a465b2271778c276
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.114996634
+      y: 0.07655954
+      width: 0.7599193
+      height: 0.87240076
+    PivotHint: {x: 0.594486, y: 0.07656}
+    FootX: 0.5992914
+    Direction: 
+    PitchDownDegrees: 50
+    Role: house
+    VariantGroup: House_Thatch_A
+    Provenance: 
+    MeanColor: {r: 0.75715655, g: 0.6275993, b: 0.4501833, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: FrontRight
+    EntranceLocation: front_gable
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: -24.5262
+    EntranceDirection: {x: 0.9097715, y: -0.4151094}
+    BaseRegistered: 1
+    ReusedFrom: 
+  - Id: Map05_House_Thatch_A_BackRight
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: a7c62e5c63389b44a86c47c74c9b4d64, type: 3}
+    Weight: 1
+    WorldHeight: 4.1
+    Pivot: {x: 0.49764627, y: 0.26512286}
+    Footprint: {x: 3.2019064, y: 2.0257463}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/House_Thatch_A_BackRight.png
+    Sha256: 1425094c8e96be85836d8f6a3f156e278cff438b441525a21dfa75b187770fd6
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.12911904
+      y: 0.09924386
+      width: 0.7397444
+      height: 0.80812854
+    PivotHint: {x: 0.575656, y: 0.099244}
+    FootX: 0.5745268
+    Direction: 
+    PitchDownDegrees: 50
+    Role: house
+    VariantGroup: House_Thatch_A
+    Provenance: 
+    MeanColor: {r: 0.77089894, g: 0.6465827, b: 0.4771929, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: BackRight
+    EntranceLocation: front_gable
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: -23.138947
+    EntranceDirection: {x: -0.9195545, y: 0.3929625}
+    BaseRegistered: 1
+    ReusedFrom: 
+  - Id: Map05_Barn_A_FrontLeft
+    Category: 1
+    Kind: 7
+    ManifestKind: Barn
+    Texture: {fileID: 2800000, guid: 2e8e2ecc3bc433340a883fd44e0ae269, type: 3}
+    Weight: 1
+    WorldHeight: 3.2
+    Pivot: {x: 0.5016911, y: 0.23224351}
+    Footprint: {x: 4.810079, y: 1.5861712}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/Barn_A_FrontLeft.png
+    Sha256: 1c906efbaf86c8de610e4ec68487d7f11c40f2dd3e618d8dbf1ee5ebc92085ce
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.053551298
+      y: 0.065388955
+      width: 0.8951522
+      height: 0.85231113
+    PivotHint: {x: 0.297632, y: 0.065389}
+    FootX: 0.29827505
+    Direction: 
+    PitchDownDegrees: 50
+    Role: barn
+    VariantGroup: Barn_A
+    Provenance: 
+    MeanColor: {r: 0.76418906, g: 0.634218, b: 0.4506895, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: FrontLeft
+    EntranceLocation: front_gable_double_door
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 15.320038
+    EntranceDirection: {x: -0.96446514, y: -0.26421034}
+    BaseRegistered: 1
+    ReusedFrom: 
+  - Id: Map05_House_Thatch_A_BackLeft
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 988e65d6a590257489ddff4785d414b3, type: 3}
+    Weight: 1
+    WorldHeight: 4.1
+    Pivot: {x: 0.50100875, y: 0.24338374}
+    Footprint: {x: 3.3880901, y: 1.7003472}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/House_Thatch_A_BackLeft.png
+    Sha256: fcb54cd0235584659c71babbebfdae9275c6ddf2120076f1a3c9e30a084760db
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.13046402
+      y: 0.08506616
+      width: 0.7397444
+      height: 0.81758034
+    PivotHint: {x: 0.389375, y: 0.085066}
+    FootX: 0.38959914
+    Direction: 
+    PitchDownDegrees: 50
+    Role: house
+    VariantGroup: House_Thatch_A
+    Provenance: 
+    MeanColor: {r: 0.7790066, g: 0.6600141, b: 0.4914019, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: BackLeft
+    EntranceLocation: front_gable
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 23.803421
+    EntranceDirection: {x: 0.9149356, y: 0.40359995}
+    BaseRegistered: 1
+    ReusedFrom: 
+  - Id: Map05_House_Shingle_A_BackLeft
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: ed4d5f51907ec784998cd724013a2473, type: 3}
+    Weight: 1
+    WorldHeight: 4.5
+    Pivot: {x: 0.5020175, y: 0.24574669}
+    Footprint: {x: 3.5587032, y: 2.1372528}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/House_Shingle_A_BackLeft.png
+    Sha256: ca800bffc4597d89020b3bcf6b0b4130849955f8c3dce9f202a068fb585b7bb8
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.14122394
+      y: 0.09073724
+      width: 0.7168796
+      height: 0.77032137
+    PivotHint: {x: 0.418964, y: 0.090737}
+    FootX: 0.41366974
+    Direction: 
+    PitchDownDegrees: 50
+    Role: house
+    VariantGroup: House_Shingle_A
+    Provenance: 
+    MeanColor: {r: 0.6973962, g: 0.56514794, b: 0.4223706, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: BackLeft
+    EntranceLocation: front_gable
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 26.460861
+    EntranceDirection: {x: 0.89523894, y: 0.44558632}
+    BaseRegistered: 1
+    ReusedFrom: 
+  - Id: Map05_Barn_A_FrontRight
+    Category: 1
+    Kind: 7
+    ManifestKind: Barn
+    Texture: {fileID: 2800000, guid: 024e18f0972800448a2f41b080a08661, type: 3}
+    Weight: 1
+    WorldHeight: 3.2
+    Pivot: {x: 0.49464488, y: 0.235062}
+    Footprint: {x: 4.4077086, y: 1.9531851}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/Buildings/Barn_A_FrontRight.png
+    Sha256: dbd3b2b48bf3bd8cb8d2294c68a5dc769c14e2d355db583eacae17525df42cfa
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.031003382
+      y: 0.051860202
+      width: 0.9165727
+      height: 0.88726044
+    PivotHint: {x: 0.662909, y: 0.05186}
+    FootX: 0.6593081
+    Direction: 
+    PitchDownDegrees: 50
+    Role: barn
+    VariantGroup: Barn_A
+    Provenance: 
+    MeanColor: {r: 0.76886666, g: 0.63042355, b: 0.4425104, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: FrontRight
+    EntranceLocation: front_gable_double_door
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: -15.219727
+    EntranceDirection: {x: 0.9649261, y: -0.26252154}
+    BaseRegistered: 1
+    ReusedFrom: 
+  - Id: Map05_Trough_Wood_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Trough
+    Texture: {fileID: 2800000, guid: cd510a8f3fc2c72478867911ee2d6259, type: 3}
+    Weight: 1
+    WorldHeight: 0.6
+    Pivot: {x: 0.333333, y: 0.25222656}
+    Footprint: {x: 0.81372786, y: 0.56508875}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/VillageProps/Trough_Wood_A.png
+    Sha256: 11f78019ba6e2225588fa79d41171a8106716fe31d6d6dc8f011e2595fd15289
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.18945312
+      y: 0.23242188
+      width: 0.6217448
+      height: 0.4951172
+    PivotHint: {x: 0.333333, y: 0.232422}
+    FootX: 0.3349924
+    Direction: 
+    PitchDownDegrees: 35
+    Role: village_trough
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.65612215, g: 0.5441066, b: 0.39878497, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Well_Roofed_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Well
+    Texture: {fileID: 2800000, guid: 24105539201438f47932f9405f81ab48, type: 3}
+    Weight: 1
+    WorldHeight: 2.6
+    Pivot: {x: 0.473323, y: 0.13564637}
+    Footprint: {x: 1.5184455, y: 1.054476}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/VillageProps/Well_Roofed_A.png
+    Sha256: 830296e6626d0adb06949d4b96da1d446e9d86dfca2b6e4bd29ceaa33a35a382
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.21417683
+      y: 0.10508757
+      width: 0.566311
+      height: 0.76396996
+    PivotHint: {x: 0.473323, y: 0.105088}
+    FootX: 0.4745368
+    Direction: 
+    PitchDownDegrees: 50
+    Role: village_well
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.65162766, g: 0.53356487, b: 0.400274, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Woodshed_Open_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Woodshed
+    Texture: {fileID: 2800000, guid: 61f57b7a78f34e74087085c03a603c29, type: 3}
+    Weight: 1
+    WorldHeight: 2.3
+    Pivot: {x: 0.583053, y: 0.18094517}
+    Footprint: {x: 2.208, y: 1.5333333}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/VillageProps/Woodshed_Open_A.png
+    Sha256: ce0c8176077b4af629a221c7f193889476a56f544a9c7ce22d767a4140bf47f7
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.18022865
+      y: 0.15406427
+      width: 0.6375252
+      height: 0.6720227
+    PivotHint: {x: 0.583053, y: 0.154064}
+    FootX: 0.5835628
+    Direction: 
+    PitchDownDegrees: 50
+    Role: village_woodshed
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.67625517, g: 0.52451664, b: 0.36735794, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Woodpile_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Woodpile
+    Texture: {fileID: 2800000, guid: 05aed32a221563146bc643eeb5f8054f, type: 3}
+    Weight: 1
+    WorldHeight: 0.75
+    Pivot: {x: 0.404948, y: 0.22265625}
+    Footprint: {x: 0.9401143, y: 0.6528571}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/VillageProps/Woodpile_A.png
+    Sha256: 0daa37c7de03ac5fccdb05c815e61ef3ad3f041c8cb52e503d92ae1e057df03d
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.19921875
+      y: 0.20214844
+      width: 0.59505206
+      height: 0.5126953
+    PivotHint: {x: 0.404948, y: 0.202148}
+    FootX: 0.46327493
+    Direction: 
+    PitchDownDegrees: 35
+    Role: woodpile
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.690081, g: 0.5450012, b: 0.39028606, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Bridge_Rail_Infill_B
+    Category: 10
+    Kind: 10
+    ManifestKind: Rail
+    Texture: {fileID: 2800000, guid: 3a6ff51072bfa4246bb53a5d8a164201, type: 3}
+    Weight: 1
+    WorldHeight: 0.9
+    Pivot: {x: 0.5, y: 0.240331}
+    Footprint: {x: 3.3132522, y: 2.3008695}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/BridgeModules/Bridge_Rail_Infill_B.png
+    Sha256: 74833ba7f64d7aa376a8d3161a5d4c73e7cd81ea3911a02b89d73b33463a7cf5
+    Width: 2172
+    Height: 724
+    SolidRect:
+      serializedVersion: 2
+      x: 0.09392265
+      y: 0.24033149
+      width: 0.8121547
+      height: 0.47651935
+    PivotHint: {x: 0.5, y: 0.240331}
+    FootX: 0.49894464
+    Direction: 
+    PitchDownDegrees: 50
+    Role: bridge_railing
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6621939, g: 0.55078256, b: 0.36555478, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0.093923
+      y: 0.240331
+      width: 0.81215405
+      height: 0.47652
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Bridge_Deck_Planks_A
+    Category: 10
+    Kind: 10
+    ManifestKind: Deck
+    Texture: {fileID: 2800000, guid: 26ef0237616660140815325442feb16d, type: 3}
+    Weight: 1
+    WorldHeight: 4
+    Pivot: {x: 0.49943602, y: 0.12852299}
+    Footprint: {x: 6.6316385, y: 4.6053042}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/BridgeModules/Bridge_Deck_Planks_A.png
+    Sha256: 2c97742835ce2a10c797617dcb407cab0abbe07d6bc08d62087aba836a1825ae
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.08342728
+      y: 0.12852311
+      width: 0.832018
+      height: 0.72266066
+    PivotHint: {x: 0.499436, y: 0.489853}
+    FootX: 0.50112945
+    Direction: 
+    PitchDownDegrees: 50
+    Role: bridge_deck
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6693907, g: 0.54106134, b: 0.37212062, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: horizontal_top
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0.083427
+      y: 0.12852299
+      width: 0.832018
+      height: 0.722661
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Bridge_Rail_Infill_A
+    Category: 10
+    Kind: 10
+    ManifestKind: Rail
+    Texture: {fileID: 2800000, guid: db27a3cb7f8bf864ebf247fc406a5a2e, type: 3}
+    Weight: 1
+    WorldHeight: 0.9
+    Pivot: {x: 0.50023, y: 0.129834}
+    Footprint: {x: 2.6806736, y: 1.8615788}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/BridgeModules/Bridge_Rail_Infill_A.png
+    Sha256: 68c1dd5ea4dbe367071f5abe2559e810b94db042bfdc0fa577c8d270a53a6dea
+    Width: 2172
+    Height: 724
+    SolidRect:
+      serializedVersion: 2
+      x: 0.047882136
+      y: 0.12983425
+      width: 0.9046961
+      height: 0.6560773
+    PivotHint: {x: 0.50023, y: 0.129834}
+    FootX: 0.5010132
+    Direction: 
+    PitchDownDegrees: 50
+    Role: bridge_railing
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6792672, g: 0.5514057, b: 0.38726324, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0.047882
+      y: 0.129834
+      width: 0.904696
+      height: 0.656078
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Bridge_Deck_Planks_B
+    Category: 10
+    Kind: 10
+    ManifestKind: Deck
+    Texture: {fileID: 2800000, guid: 4ecf9098c31d52a419240b772aff9ad3, type: 3}
+    Weight: 1
+    WorldHeight: 4
+    Pivot: {x: 0.49887252, y: 0.10710299}
+    Footprint: {x: 6.4156775, y: 4.4553313}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/BridgeModules/Bridge_Deck_Planks_B.png
+    Sha256: 06fff2c5f8e6c4de4a36da15064ddf0e8699efead2708eaa8e5240c7d2d36b45
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.06313416
+      y: 0.107102595
+      width: 0.8714769
+      height: 0.78241265
+    PivotHint: {x: 0.498873, y: 0.498309}
+    FootX: 0.49712068
+    Direction: 
+    PitchDownDegrees: 50
+    Role: bridge_deck
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.68655306, g: 0.5506991, b: 0.39626005, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: horizontal_top
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0.063134
+      y: 0.10710299
+      width: 0.871477
+      height: 0.782412
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Bridge_StoneAbutment_A
+    Category: 10
+    Kind: 10
+    ManifestKind: Abutment
+    Texture: {fileID: 2800000, guid: 924d8719dea03e1499e0077169dd4f76, type: 3}
+    Weight: 1
+    WorldHeight: 1
+    Pivot: {x: 0.49887252, y: 0.225479}
+    Footprint: {x: 2.4333334, y: 1.6898148}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/BridgeModules/Bridge_StoneAbutment_A.png
+    Sha256: 3e69a33ed3e8e6a8edf46b6e6b20f34ffe88f3f364f1fbee4396d5ba51cbe22b
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.08737317
+      y: 0.22547914
+      width: 0.8229989
+      height: 0.48703495
+    PivotHint: {x: 0.498873, y: 0.225479}
+    FootX: 0.50371164
+    Direction: 
+    PitchDownDegrees: 50
+    Role: bridge_bank_abutment
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6493392, g: 0.5649587, b: 0.44207323, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0.087373
+      y: 0.225479
+      width: 0.822999
+      height: 0.487035
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Bridge_Post_A
+    Category: 10
+    Kind: 10
+    ManifestKind: Post
+    Texture: {fileID: 2800000, guid: 111a168cd0994334786b243bb7cfe7ff, type: 3}
+    Weight: 1
+    WorldHeight: 1.15
+    Pivot: {x: 0.49733204, y: 0.16847402}
+    Footprint: {x: 0.45073906, y: 0.31301323}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/BridgeModules/Bridge_Post_A.png
+    Sha256: cb2f8d8addda20461478e8396bc89f3d8fa9ea74adc5fb29b4ccf263afca3342
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.34070122
+      y: 0.16930775
+      width: 0.3132622
+      height: 0.6296914
+    PivotHint: {x: 0.497332, y: 0.168474}
+    FootX: 0.49813053
+    Direction: 
+    PitchDownDegrees: 50
+    Role: bridge_post
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.6454052, g: 0.52150464, b: 0.36428338, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0.340701
+      y: 0.16847402
+      width: 0.31326202
+      height: 0.630525
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Bridge_EndRamp_Planks_A
+    Category: 10
+    Kind: 10
+    ManifestKind: Ramp
+    Texture: {fileID: 2800000, guid: bfe9898e53c43d54e9a2f6c9397754c5, type: 3}
+    Weight: 1
+    WorldHeight: 4
+    Pivot: {x: 0.492494, y: 0.16844499}
+    Footprint: {x: 3.0476367, y: 2.1164143}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/BridgeModules/Bridge_EndRamp_Planks_A.png
+    Sha256: 3d4b2dda364f724802e2a94e54be719046b58742fd30fade5114358e9ae95bf3
+    Width: 1199
+    Height: 1312
+    SolidRect:
+      serializedVersion: 2
+      x: 0.113427855
+      y: 0.16844513
+      width: 0.7581318
+      height: 0.6547256
+    PivotHint: {x: 0.492494, y: 0.496189}
+    FootX: 0.49264535
+    Direction: 
+    PitchDownDegrees: 50
+    Role: bridge_bank_ramp
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.68719685, g: 0.5756953, b: 0.38886088, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: horizontal_top
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0.113428
+      y: 0.16844499
+      width: 0.758132
+      height: 0.655488
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: Map05_Bridge_Trestle_Frame_A
+    Category: 10
+    Kind: 10
+    ManifestKind: Trestle
+    Texture: {fileID: 2800000, guid: 9b7cc2b33e535be498fd59070781070e, type: 3}
+    Weight: 1
+    WorldHeight: 2
+    Pivot: {x: 0.49923798, y: 0.18431997}
+    Footprint: {x: 1.5661176, y: 1.0875816}
+    MaxSlope: 18
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/BridgeModules/Bridge_Trestle_Frame_A.png
+    Sha256: e239e9931686b114c16cb8c304fb9f15f3c8b2102ced19d061ac8a0895e9f623
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.18216464
+      y: 0.18432027
+      width: 0.63414633
+      height: 0.6380317
+    PivotHint: {x: 0.499238, y: 0.18432}
+    FootX: 0.50213504
+    Direction: 
+    PitchDownDegrees: 50
+    Role: bridge_support
+    VariantGroup: 
+    Provenance: 
+    MeanColor: {r: 0.7634879, g: 0.6237367, b: 0.40274978, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0.182165
+      y: 0.18431997
+      width: 0.634146
+      height: 0.638032
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+  - Id: House_Thatch_A_P35
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: d336b7fe407c9414983f9aeef2e5ecc0, type: 3}
+    Weight: 1
+    WorldHeight: 4.1
+    Pivot: {x: 0.49899125, y: 0.24007562}
+    Footprint: {x: 3.2944837, y: 1.6848375}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/CarryOver/Buildings/House_Thatch_A_FrontLeft.png
+    Sha256: 3be82cc86277a327adbcb5456415f9251b14c8923ea2a7d278fe76f583feb006
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.12777404
+      y: 0.096408315
+      width: 0.7417619
+      height: 0.80340266
+    PivotHint: {x: 0.383322, y: 0.096408}
+    FootX: 0.37855068
+    Direction: 
+    PitchDownDegrees: 50
+    Role: house
+    VariantGroup: House_Thatch_A
+    Provenance: 
+    MeanColor: {r: 0.7547179, g: 0.61983454, b: 0.42998743, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: FrontLeft
+    EntranceLocation: front_gable
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 23.783348
+    EntranceDirection: {x: -0.9150769, y: -0.40327936}
+    BaseRegistered: 1
+    ReusedFrom: 
+  - Id: House_Shingle_A_P35
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 0da7a30445956db438dbe30a24b3efe8, type: 3}
+    Weight: 1
+    WorldHeight: 4.5
+    Pivot: {x: 0.5043712, y: 0.24669187}
+    Footprint: {x: 3.5581253, y: 2.16593}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/CarryOver/Buildings/House_Shingle_A_FrontLeft.png
+    Sha256: ef03e3454105204010962161c48b554287dafc1ab357248d3614bb1465b279e1
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.13920645
+      y: 0.0926276
+      width: 0.72494954
+      height: 0.76654065
+    PivotHint: {x: 0.415602, y: 0.092628}
+    FootX: 0.4070259
+    Direction: 
+    PitchDownDegrees: 50
+    Role: house
+    VariantGroup: House_Shingle_A
+    Provenance: 
+    MeanColor: {r: 0.6415233, g: 0.4992321, b: 0.36117372, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: FrontLeft
+    EntranceLocation: front_gable
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 26.475883
+    EntranceDirection: {x: -0.8951221, y: -0.44582105}
+    BaseRegistered: 1
+    ReusedFrom: 
+  - Id: Hero_MapInk_Front_P35
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: c817a4ef1c341034fbfb467f42588271, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.482201, y: 0.14527905}
+    Footprint: {x: 1.341976, y: 0.93192774}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/CarryOver/Hero/Hero_Front.png
+    Sha256: d84521c8c65c218408618d39be03db7875557a6f7af61acd3dc8ac2868208257
+    Width: 1236
+    Height: 1273
+    SolidRect:
+      serializedVersion: 2
+      x: 0.23786408
+      y: 0.1335428
+      width: 0.53640777
+      height: 0.78240377
+    PivotHint: {x: 0.482201, y: 0.133543}
+    FootX: 0.48314428
+    Direction: Front
+    PitchDownDegrees: 35
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.6314834, g: 0.4328859, b: 0.3302166, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: Assets/_Project/Art/MapLabStage04/MapLabArtSet_Stage04.asset
+  - Id: Hero_MapInk_Front_Right_P35
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: a44ae0241d18473489060971eab2ba5f, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.507923, y: 0.13323529}
+    Footprint: {x: 1.0764254, y: 0.74751765}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1.0400342
+    PivotEdited: 0
+    SourcePath: Assets/CarryOver/Hero/Hero_Front_Right.png
+    Sha256: 1ca5e6f7c4bd38d472bca44e0beffdd4bd4af527a97f9c5215b04eceade87f0d
+    Width: 1199
+    Height: 1312
+    SolidRect:
+      serializedVersion: 2
+      x: 0.26605505
+      y: 0.12195122
+      width: 0.43953294
+      height: 0.7522866
+    PivotHint: {x: 0.507923, y: 0.121951}
+    FootX: 0.43876392
+    Direction: Front_Right
+    PitchDownDegrees: 35
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.6224794, g: 0.4161707, b: 0.31587094, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: Assets/_Project/Art/MapLabStage04/MapLabArtSet_Stage04.asset
+  - Id: Hero_MapInk_Back_Right_P35
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 27ae053682e60144db2382b24ede768c, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.481234, y: 0.12858628}
+    Footprint: {x: 1.0359198, y: 0.7193887}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 0.9804334
+    PivotEdited: 0
+    SourcePath: Assets/CarryOver/Hero/Hero_Back_Right.png
+    Sha256: f1d18b3d2d2b1ae5cecf5269773efecb812565c7859daef4bfefd6c49ff146cf
+    Width: 1199
+    Height: 1312
+    SolidRect:
+      serializedVersion: 2
+      x: 0.25688073
+      y: 0.116615854
+      width: 0.44870725
+      height: 0.7980183
+    PivotHint: {x: 0.481234, y: 0.116616}
+    FootX: 0.53315413
+    Direction: Back_Right
+    PitchDownDegrees: 35
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.63521504, g: 0.42713937, b: 0.3386299, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: Assets/_Project/Art/MapLabStage04/MapLabArtSet_Stage04.asset
+  - Id: Hero_MapInk_Back_P35
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 8c1b38ad7042e9e4b8fa183093a0b8fd, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.489633, y: 0.11645164}
+    Footprint: {x: 1.1910899, y: 0.8271457}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 0.979176
+    PivotEdited: 0
+    SourcePath: Assets/CarryOver/Hero/Hero_Back.png
+    Sha256: ecc1d81abb4650f4b598f1a2c7ef766323cac5fabd5dd29863b5d67e3045f5d3
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.24481659
+      y: 0.10446571
+      width: 0.47208932
+      height: 0.79904306
+    PivotHint: {x: 0.489633, y: 0.104466}
+    FootX: 0.4896936
+    Direction: Back
+    PitchDownDegrees: 35
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.63653183, g: 0.43387663, b: 0.33916113, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: Assets/_Project/Art/MapLabStage04/MapLabArtSet_Stage04.asset
+  - Id: Hero_MapInk_Back_Left_P35
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: 4cf798e3bcd3e0847983b64bb11f7f3f, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.497081, y: 0.13279341}
+    Footprint: {x: 1.0288552, y: 0.7144827}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1.0113436
+    PivotEdited: 0
+    SourcePath: Assets/CarryOver/Hero/Hero_Back_Left.png
+    Sha256: 3d4f645a0343ae09d574ea9fe45236877d0d83170f108634f643fb735bf16dba
+    Width: 1199
+    Height: 1312
+    SolidRect:
+      serializedVersion: 2
+      x: 0.26939115
+      y: 0.12118903
+      width: 0.43202668
+      height: 0.77362806
+    PivotHint: {x: 0.497081, y: 0.121189}
+    FootX: 0.46808323
+    Direction: Back_Left
+    PitchDownDegrees: 35
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.63832074, g: 0.42516327, b: 0.32880497, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: Assets/_Project/Art/MapLabStage04/MapLabArtSet_Stage04.asset
+  - Id: Hero_MapInk_Front_Left_P35
+    Category: 5
+    Kind: 0
+    ManifestKind: 
+    Texture: {fileID: 2800000, guid: dc8b330f88c1eba43899fd29e305e116, type: 3}
+    Weight: 1
+    WorldHeight: 2.8
+    Pivot: {x: 0.463333, y: 0.15622185}
+    Footprint: {x: 1.260554, y: 0.8753846}
+    MaxSlope: 35
+    Orientation: 0
+    ScaleRange: {x: 1, y: 1}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1.1
+    PivotEdited: 0
+    SourcePath: Assets/CarryOver/Hero/Hero_Front_Left.png
+    Sha256: 109ac55064ff4fbd26701eb79f75a4be8a098a936900fff463c77d563200dc5d
+    Width: 1200
+    Height: 1310
+    SolidRect:
+      serializedVersion: 2
+      x: 0.27416667
+      y: 0.14580153
+      width: 0.47416666
+      height: 0.6946565
+    PivotHint: {x: 0.463333, y: 0.145802}
+    FootX: 0.5252187
+    Direction: Front_Left
+    PitchDownDegrees: 35
+    Role: map_hero_marker
+    VariantGroup: Hero_MapInk
+    Provenance: 
+    MeanColor: {r: 0.63007766, g: 0.43657333, b: 0.33549115, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: Assets/_Project/Art/MapLabStage04/MapLabArtSet_Stage04.asset

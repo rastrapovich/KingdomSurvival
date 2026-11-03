@@ -43,14 +43,16 @@ namespace KingdomSurvival.MapLab.Tests
         [Test]
         public void DifferentSeeds_ChangeDetails_ButKeepTheComposition()
         {
+            MapLabSettings sb = Settings(MapLabPresetKind.RiverValley, 305);
             MapLabData a = MapLabGenerator.Generate(Settings(MapLabPresetKind.RiverValley, 304));
-            MapLabData b = MapLabGenerator.Generate(Settings(MapLabPresetKind.RiverValley, 305));
+            MapLabData b = MapLabGenerator.Generate(sb);
             CollectionAssert.AreNotEqual(a.Heights, b.Heights);
             Assert.AreEqual(1, a.Rivers.Count);
             Assert.AreEqual(1, b.Rivers.Count);
             Assert.GreaterOrEqual(a.Bridges.Count, 1);
             Assert.GreaterOrEqual(b.Bridges.Count, 1);
-            Assert.GreaterOrEqual(b.CountObjects(MapLabObjectKind.House), 12);
+            // Этап 05: деревня — 5–9 дворов (бриф); ранние языки — 12–25 домов пресета.
+            Assert.GreaterOrEqual(b.CountObjects(MapLabObjectKind.House), sb.IsStage05 ? sb.Stage05.YardsMin : 12);
         }
 
         // Отдельные потоки: число кустов не сдвигает рельеф, деревья и дома.

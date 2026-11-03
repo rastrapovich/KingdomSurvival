@@ -25,6 +25,7 @@ Shader "Kingdom Survival/MapLab/Solid"
         _RockScale ("Rock scale", Float) = 14
         _RockStrength ("Rock strength", Range(0, 1)) = 0
         _Stage04 ("Этап 04: дерево и камень в общем рисунке", Float) = 0
+        _Stage05 ("Этап 05: камень уступа без полос, широкий травяной наплыв", Float) = 0
         _WoodColor ("Этап 04: древесина", Color) = (0.62, 0.5, 0.36, 1)
         _StoneColor ("Этап 04: камень уступов", Color) = (0.6, 0.58, 0.52, 1)
     }
@@ -85,6 +86,7 @@ Shader "Kingdom Survival/MapLab/Solid"
                 float _RockScale;
                 float _RockStrength;
                 float _Stage04;
+                float _Stage05;
                 float4 _WoodColor;
                 float4 _StoneColor;
             CBUFFER_END
@@ -99,6 +101,21 @@ Shader "Kingdom Survival/MapLab/Solid"
                 o.size = input.size;
                 o.meta = input.meta;
                 return o;
+            }
+
+            float Hash05(float2 p)
+            {
+                p = frac(p * float2(123.34, 456.21));
+                p += dot(p, p + 45.32);
+                return frac(p.x * p.y);
+            }
+
+            // Гладкий шум для неровного края травяного наплыва (этап 05).
+            float Smooth05(float2 p)
+            {
+                float2 i = floor(p), f = frac(p);
+                f = f * f * (3.0 - 2.0 * f);
+                return lerp(lerp(Hash05(i), Hash05(i + float2(1, 0)), f.x), lerp(Hash05(i + float2(0, 1)), Hash05(i + float2(1, 1)), f.x), f.y);
             }
 
             float Lines(float x, float period, float width)
@@ -134,17 +151,27 @@ Shader "Kingdom Survival/MapLab/Solid"
                     // Крупные неравные плоскости тёплого серо-оливкового камня, слабые
                     // вертикальные штрихи, редкие трещины пером, травяные наплывы
                     // сверху и осыпь у основания; горизонтальные полки — как земля.
+                    bool s05 = _Stage05 > 0.5;
                     float plane = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, i.positionWS.xz / 13.0 + float2(0.3, 0.1)).g;
                     c = _StoneColor.rgb * i.meta.y * (0.88 + plane * 0.24);
-                    c *= 1.0 + (SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, f / float2(2.4, 9.0)).b - 0.5) * 0.12;
+                    // Этап 05: без вертикальных полос «пластика» — только крупная вариация плоскости.
+                    c *= 1.0 + (SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, f / float2(2.4, 9.0)).b - 0.5) * (s05 ? 0.04 : 0.12);
                     float3 ground = SAMPLE_TEXTURE2D(_PaintTex, sampler_PaintTex, i.positionWS.xz / _MapSize).rgb;
-                    if (abs(nRaw.y) > 0.6)
+                    if (abs(nRaw.y) > (s05 ? 0.93 : 0.6))
                         c = ground * 0.9;
                     else if (i.size.y > 0)
                     {
                         float top = i.size.y - f.y;
                         float shelf = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, i.positionWS.xz / 5.0 + float2(0.7, 0.2)).g;
                         float overhang = (1.0 - smoothstep(0.12 + shelf * 0.55, 0.2 + shelf * 0.55, top)) * smoothstep(0.42, 0.5, shelf);
+                        if (s05)
+                        {
+                            // Широкий неровный травяной край по верху (мировой шум, не зубцы).
+                            float2 wp = i.positionWS.xz;
+                            float wide = Smooth05(wp / 4.5) * 0.65 + Smooth05(wp / 1.7 + 3.1) * 0.35;
+                            float depth = lerp(0.1, 1.15, smoothstep(0.3, 0.8, wide));
+                            overhang = 1.0 - smoothstep(depth * 0.85, depth, top);
+                        }
                         c = lerp(c, ground * 0.92, overhang);
                         float scree = 1.0 - smoothstep(0.25 + plane * 0.45, 0.4 + plane * 0.45, f.y);
                         c = lerp(c, c * float3(1.03, 0.98, 0.92) * 0.9, scree * 0.6);
@@ -190,6 +217,9 @@ Shader "Kingdom Survival/MapLab/Solid"
                 // тень камня и дерева теплее (без лиловых провалов).
                 float wall = 1.0 - saturate(abs(n.y) * 1.3);
                 float3 shadowTint = (wood || stone) ? lerp(_ShadowTint.rgb, float3(0.66, 0.62, 0.58), 0.55) : _ShadowTint.rgb;
+                // Этап 05: тень камня уступа — тёплая серо-охристая, без лиловых провалов.
+                if (stone && _Stage05 > 0.5)
+                    shadowTint = float3(0.7, 0.64, 0.55);
                 c = MapLabLight(c, n, L, saturate(_LightStrength * (1.0 + wall * 0.15) * ((wood || stone) ? 0.8 : 1.0)), _ShadowSoftness * (1.0 - wall * 0.2), _ToneBands, shadowTint, _LightTint.rgb);
 
                 // Линия по рёбрам грани: толщина около пикселя при любом приближении.
@@ -197,6 +227,8 @@ Shader "Kingdom Survival/MapLab/Solid"
                 float e;
                 if (size.y < 0)
                     e = f.y;
+                else if (stone && _Stage05 > 0.5)
+                    e = size.y - f.y;   // этап 05: перо только по внешнему верхнему контуру грани
                 else
                     e = min(min(f.x, abs(size.x) - f.x), min(f.y, size.y - f.y));
                 float px = max(fwidth(e), 1e-4);

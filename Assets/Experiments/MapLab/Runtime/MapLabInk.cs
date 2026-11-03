@@ -226,17 +226,77 @@ namespace KingdomSurvival.MapLab
         // Лента пера по контурам: середина в вершине, сторона — в uv1, в uv0 —
         // (сторона −1..1, непрозрачность). Разрывы и ослабление на освещённой
         // стороне — стабильные, от мировых координат и seed.
-        public static Mesh BuildRoadInk(MapLabData data, MapLabSettings settings, MapLabPaintFields fields, out Stats stats)
+        // Этап 05: единый профиль пера — тёплая тёмно-коричневая тушь, толщина
+        // и её пределы в пикселях подняты вместе (рост толщины не съедается
+        // верхним пределом), плотность пигмента, короткие разрывы, зерно.
+        public static MapLabInkStyle Style(MapLabSettings settings)
         {
-            MapLabInkStyle ink = settings.Stage03.InkStyle;
-            float[] f = RoadField(data, fields, ink.Weights, out int n, out float[] weights, MapLabRoadJunction.From(settings));
-            List<Contour> contours = Trace(f, weights, n, GridStep);
-            return BuildRibbon(data, settings, contours, f, n, "MapLab Road Ink", out stats);
+            if (!settings.IsStage05)
+                return settings.Stage03.InkStyle;
+            MapLabStage05Settings s5 = settings.Stage05;
+            MapLabInkStyle s3 = settings.Stage03.InkStyle;
+            return new MapLabInkStyle
+            {
+                Color = s5.InkColor,
+                Width = s5.InkWidth,
+                MinPixels = s5.InkMinPixels,
+                MaxPixels = Mathf.Max(s5.InkMinPixels + 0.5f, s5.InkMaxPixels),
+                Opacity = s5.InkDensity,
+                Grain = s5.InkGrain,
+                BreakLength = s5.InkBreakLength,
+                BreakFrequency = s5.InkBreakShare,
+                LitSideFade = 0.25f,
+                Weights = new Vector4(1f, 0.72f, s3.Weights.z, s3.Weights.w),
+            };
         }
 
-        public static Mesh BuildRibbon(MapLabData data, MapLabSettings settings, List<Contour> contours, float[] field, int n, string name, out Stats stats)
+        public static Mesh BuildRoadInk(MapLabData data, MapLabSettings settings, MapLabPaintFields fields, out Stats stats)
         {
-            MapLabInkStyle ink = settings.Stage03.InkStyle;
+            MapLabInkStyle ink = Style(settings);
+            float[] f = RoadField(data, fields, ink.Weights, out int n, out float[] weights, MapLabRoadJunction.From(settings));
+            List<Contour> contours = Trace(f, weights, n, GridStep);
+            return BuildRibbon(data, settings, contours, f, n, "MapLab Road Ink", out stats, ink, GridStep);
+        }
+
+        // Этап 05: перо берега по той же сглаженной границе, что береговая полоса
+        // и край воды (MapLabShore). Выбранные участки (мировой шум), концы
+        // участков сходят на нет; лента — синяя к воде, тёплая к суше (шейдер).
+        public static Mesh BuildShoreInk(MapLabData data, MapLabSettings settings, MapLabShore shore, out Stats stats)
+        {
+            stats = default;
+            if (shore == null)
+                return null;
+            float[] weights = new float[shore.Above.Length];
+            for (int i = 0; i < weights.Length; i++)
+                weights[i] = 1f;
+            List<Contour> contours = Trace(shore.Above, weights, shore.N, MapLabShore.Step);
+            MapLabNoise pick = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "ink05-shore", MapLabData.AlgorithmVersion));
+            float share = Mathf.Clamp01(settings.Stage05.ShoreInkShare);
+            List<Contour> kept = new List<Contour>();
+            foreach (Contour c in contours)
+            {
+                // Короткие замкнутые кольца (лужицы у кромки) — без пера.
+                float length = 0f;
+                for (int i = 1; i < c.Points.Count; i++)
+                    length += Vector2.Distance(c.Points[i - 1], c.Points[i]);
+                if (length < 3f)
+                    continue;
+                for (int i = 0; i < c.Points.Count; i++)
+                {
+                    Vector2 p = c.Points[i];
+                    float v = pick.Fbm(p.x / 13f, p.y / 13f, 2) * 0.5f + 0.5f;
+                    c.Weights[i] = MapLabGeometry.SmoothStep(1f - share - 0.06f, 1f - share + 0.06f, v);
+                }
+                kept.Add(c);
+            }
+            MapLabInkStyle style = Style(settings);
+            style.Weights = Vector4.one;
+            return BuildRibbon(data, settings, kept, shore.Above, shore.N, "MapLab Shore Ink", out stats, style, MapLabShore.Step, -0.02f);
+        }
+
+        public static Mesh BuildRibbon(MapLabData data, MapLabSettings settings, List<Contour> contours, float[] field, int n, string name, out Stats stats, MapLabInkStyle style = null, float step = GridStep, float lift = 0.03f)
+        {
+            MapLabInkStyle ink = style ?? settings.Stage03.InkStyle;
             MapLabNoise breaks = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "ink-breaks", MapLabData.AlgorithmVersion));
             Vector3 light3 = settings.LightDirection;
             Vector2 light = new Vector2(light3.x, light3.z);
@@ -261,7 +321,7 @@ namespace KingdomSurvival.MapLab
                     tangent = tangent.sqrMagnitude > 1e-8f ? tangent.normalized : Vector2.right;
                     Vector2 side = new Vector2(-tangent.y, tangent.x);
                     // Наружу — по росту поля (от полотна к траве).
-                    Vector2 outward = Gradient(field, n, p[i]);
+                    Vector2 outward = Gradient(field, n, p[i], step);
                     if (Vector2.Dot(outward, side) < 0f)
                         side = -side;
                     float alpha = c.Weights[i];
@@ -271,7 +331,7 @@ namespace KingdomSurvival.MapLab
                     // Концы разомкнутой линии (край карты, мост) — сходят на нет.
                     if (!c.Closed)
                         alpha *= Mathf.Clamp01(Mathf.Min(i, count - 1 - i) / 3f);
-                    float h = data.SampleHeight(p[i].x, p[i].y) + 0.03f;
+                    float h = Mathf.Max(data.SampleHeight(p[i].x, p[i].y), lift < 0f ? SampleLevelOrGround(data, p[i]) : float.MinValue) + Mathf.Abs(lift);
                     Vector3 pos = new Vector3(p[i].x, h, p[i].y);
                     positions.Add(pos);
                     positions.Add(pos);
@@ -307,9 +367,15 @@ namespace KingdomSurvival.MapLab
             return mesh;
         }
 
-        private static Vector2 Gradient(float[] f, int n, Vector2 p)
+        private static float SampleLevelOrGround(MapLabData data, Vector2 p)
         {
-            float gx = p.x / GridStep, gz = p.y / GridStep;
+            float level = data.SampleWaterLevel(p.x, p.y);
+            return float.IsNaN(level) ? data.SampleHeight(p.x, p.y) : level;
+        }
+
+        private static Vector2 Gradient(float[] f, int n, Vector2 p, float step)
+        {
+            float gx = p.x / step, gz = p.y / step;
             int x = Mathf.Clamp(Mathf.RoundToInt(gx), 1, n - 2), z = Mathf.Clamp(Mathf.RoundToInt(gz), 1, n - 2);
             Vector2 g = new Vector2(f[z * n + x + 1] - f[z * n + x - 1], f[(z + 1) * n + x] - f[(z - 1) * n + x]);
             return g.sqrMagnitude > 1e-8f ? g.normalized : Vector2.zero;

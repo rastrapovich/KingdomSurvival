@@ -1,0 +1,897 @@
+fileFormatVersion: 2
+guid: 0c7a98096d5fdd24c99a1798c2faadb3
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3784240627928076735
+    second: Wash_Dry_Ochre_C_0
+  - first:
+      213: 1572966082809549074
+    second: Wash_Dry_Ochre_C_1
+  - first:
+      213: 7331065912268487372
+    second: Wash_Dry_Ochre_C_2
+  - first:
+      213: -1772593192568603188
+    second: Wash_Dry_Ochre_C_3
+  - first:
+      213: -751166093299264452
+    second: Wash_Dry_Ochre_C_4
+  - first:
+      213: 2485029004543154486
+    second: Wash_Dry_Ochre_C_5
+  - first:
+      213: -6901316648600678107
+    second: Wash_Dry_Ochre_C_6
+  - first:
+      213: 7353512707667675852
+    second: Wash_Dry_Ochre_C_7
+  - first:
+      213: 4546016364486777579
+    second: Wash_Dry_Ochre_C_8
+  - first:
+      213: -410326083011045753
+    second: Wash_Dry_Ochre_C_9
+  - first:
+      213: 8659488437739163409
+    second: Wash_Dry_Ochre_C_10
+  - first:
+      213: -2621224677150349697
+    second: Wash_Dry_Ochre_C_11
+  - first:
+      213: 1196958557957872679
+    second: Wash_Dry_Ochre_C_12
+  - first:
+      213: 1239824628137607707
+    second: Wash_Dry_Ochre_C_13
+  - first:
+      213: 2711871001409635360
+    second: Wash_Dry_Ochre_C_14
+  - first:
+      213: -21684891301477970
+    second: Wash_Dry_Ochre_C_15
+  - first:
+      213: 1969492587047248000
+    second: Wash_Dry_Ochre_C_16
+  - first:
+      213: 4264908908443296308
+    second: Wash_Dry_Ochre_C_17
+  - first:
+      213: 6120817400840975815
+    second: Wash_Dry_Ochre_C_18
+  - first:
+      213: 7360041795767578696
+    second: Wash_Dry_Ochre_C_19
+  - first:
+      213: 1749721678194811018
+    second: Wash_Dry_Ochre_C_20
+  - first:
+      213: 5996210587569175116
+    second: Wash_Dry_Ochre_C_21
+  - first:
+      213: -2281994176055189732
+    second: Wash_Dry_Ochre_C_22
+  - first:
+      213: -1221869858782703190
+    second: Wash_Dry_Ochre_C_23
+  - first:
+      213: 4709964085051387033
+    second: Wash_Dry_Ochre_C_24
+  - first:
+      213: 4241887901387466871
+    second: Wash_Dry_Ochre_C_25
+  - first:
+      213: 4967051701558444465
+    second: Wash_Dry_Ochre_C_26
+  - first:
+      213: 4744196686571727708
+    second: Wash_Dry_Ochre_C_27
+  - first:
+      213: 2364921381696977070
+    second: Wash_Dry_Ochre_C_28
+  - first:
+      213: -3982703482933053193
+    second: Wash_Dry_Ochre_C_29
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.05
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 1
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 512
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 918
+        width: 12
+        height: 106
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb111442dc2548430800000000000000
+      internalID: 3784240627928076735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_1
+      rect:
+        serializedVersion: 2
+        x: 254
+        y: 1014
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 211d991815c44d510800000000000000
+      internalID: 1572966082809549074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_2
+      rect:
+        serializedVersion: 2
+        x: 868
+        y: 977
+        width: 91
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ccafcb50b9d2db560800000000000000
+      internalID: 7331065912268487372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_3
+      rect:
+        serializedVersion: 2
+        x: 1055
+        y: 988
+        width: 30
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ccd3ca902eb7667e0800000000000000
+      internalID: -1772593192568603188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1513
+        height: 1005
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3454910b625395f0800000000000000
+      internalID: -751166093299264452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_5
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 975
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6395650a6b89c7220800000000000000
+      internalID: 2485029004543154486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_6
+      rect:
+        serializedVersion: 2
+        x: 744
+        y: 967
+        width: 25
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 521daa5a2199930a0800000000000000
+      internalID: -6901316648600678107
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_7
+      rect:
+        serializedVersion: 2
+        x: 1086
+        y: 977
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cca4ad7d8dcec0660800000000000000
+      internalID: 7353512707667675852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_8
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 966
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bead8543cc1b61f30800000000000000
+      internalID: 4546016364486777579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_9
+      rect:
+        serializedVersion: 2
+        x: 950
+        y: 903
+        width: 57
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7869c0cf99a3e4af0800000000000000
+      internalID: -410326083011045753
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_10
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 919
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11f8b0caadeac2870800000000000000
+      internalID: 8659488437739163409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_11
+      rect:
+        serializedVersion: 2
+        x: 760
+        y: 946
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7627f14b0a8f9bd0800000000000000
+      internalID: -2621224677150349697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_12
+      rect:
+        serializedVersion: 2
+        x: 1012
+        y: 925
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72c51f977737c9010800000000000000
+      internalID: 1196958557957872679
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_13
+      rect:
+        serializedVersion: 2
+        x: 1014
+        y: 943
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b124cef2eedb43110800000000000000
+      internalID: 1239824628137607707
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_14
+      rect:
+        serializedVersion: 2
+        x: 1470
+        y: 915
+        width: 19
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02444b3ce4082a520800000000000000
+      internalID: 2711871001409635360
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_15
+      rect:
+        serializedVersion: 2
+        x: 1512
+        y: 897
+        width: 16
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea18bfcc4b5f2bff0800000000000000
+      internalID: -21684891301477970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_16
+      rect:
+        serializedVersion: 2
+        x: 1487
+        y: 839
+        width: 34
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08067b6b21b055b10800000000000000
+      internalID: 1969492587047248000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_17
+      rect:
+        serializedVersion: 2
+        x: 1480
+        y: 801
+        width: 25
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43269274e00003b30800000000000000
+      internalID: 4264908908443296308
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_18
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 769
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c5f7202ff281f450800000000000000
+      internalID: 6120817400840975815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_19
+      rect:
+        serializedVersion: 2
+        x: 1518
+        y: 743
+        width: 18
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 84031c0a40f142660800000000000000
+      internalID: 7360041795767578696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_20
+      rect:
+        serializedVersion: 2
+        x: 1456
+        y: 614
+        width: 15
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a802a9c8892484810800000000000000
+      internalID: 1749721678194811018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_21
+      rect:
+        serializedVersion: 2
+        x: 704
+        y: 100
+        width: 19
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4a3f7692c1d63350800000000000000
+      internalID: 5996210587569175116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_22
+      rect:
+        serializedVersion: 2
+        x: 718
+        y: 85
+        width: 29
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c1f58bc236ab450e0800000000000000
+      internalID: -2281994176055189732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_23
+      rect:
+        serializedVersion: 2
+        x: 742
+        y: 101
+        width: 13
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa1108156db0b0fe0800000000000000
+      internalID: -1221869858782703190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_24
+      rect:
+        serializedVersion: 2
+        x: 424
+        y: 85
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99ce55281672d5140800000000000000
+      internalID: 4709964085051387033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_25
+      rect:
+        serializedVersion: 2
+        x: 406
+        y: 73
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7782a3362963eda30800000000000000
+      internalID: 4241887901387466871
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_26
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 53
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b1046cb4338ee440800000000000000
+      internalID: 4967051701558444465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_27
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 59
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5b61b720c5c6d140800000000000000
+      internalID: 4744196686571727708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_28
+      rect:
+        serializedVersion: 2
+        x: 1404
+        y: 55
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea836cd7773e1d020800000000000000
+      internalID: 2364921381696977070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_Dry_Ochre_C_29
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 23
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f8701698489ab8c0800000000000000
+      internalID: -3982703482933053193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Wash_Dry_Ochre_C_0: 3784240627928076735
+      Wash_Dry_Ochre_C_1: 1572966082809549074
+      Wash_Dry_Ochre_C_10: 8659488437739163409
+      Wash_Dry_Ochre_C_11: -2621224677150349697
+      Wash_Dry_Ochre_C_12: 1196958557957872679
+      Wash_Dry_Ochre_C_13: 1239824628137607707
+      Wash_Dry_Ochre_C_14: 2711871001409635360
+      Wash_Dry_Ochre_C_15: -21684891301477970
+      Wash_Dry_Ochre_C_16: 1969492587047248000
+      Wash_Dry_Ochre_C_17: 4264908908443296308
+      Wash_Dry_Ochre_C_18: 6120817400840975815
+      Wash_Dry_Ochre_C_19: 7360041795767578696
+      Wash_Dry_Ochre_C_2: 7331065912268487372
+      Wash_Dry_Ochre_C_20: 1749721678194811018
+      Wash_Dry_Ochre_C_21: 5996210587569175116
+      Wash_Dry_Ochre_C_22: -2281994176055189732
+      Wash_Dry_Ochre_C_23: -1221869858782703190
+      Wash_Dry_Ochre_C_24: 4709964085051387033
+      Wash_Dry_Ochre_C_25: 4241887901387466871
+      Wash_Dry_Ochre_C_26: 4967051701558444465
+      Wash_Dry_Ochre_C_27: 4744196686571727708
+      Wash_Dry_Ochre_C_28: 2364921381696977070
+      Wash_Dry_Ochre_C_29: -3982703482933053193
+      Wash_Dry_Ochre_C_3: -1772593192568603188
+      Wash_Dry_Ochre_C_4: -751166093299264452
+      Wash_Dry_Ochre_C_5: 2485029004543154486
+      Wash_Dry_Ochre_C_6: -6901316648600678107
+      Wash_Dry_Ochre_C_7: 7353512707667675852
+      Wash_Dry_Ochre_C_8: 4546016364486777579
+      Wash_Dry_Ochre_C_9: -410326083011045753
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

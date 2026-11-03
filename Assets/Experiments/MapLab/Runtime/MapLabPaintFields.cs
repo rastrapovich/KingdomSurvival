@@ -27,6 +27,9 @@ namespace KingdomSurvival.MapLab
             public float MainRoad;
         }
 
+        // Этап 05: общая сглаженная граница берега (канал Above берётся из неё).
+        public readonly MapLabShore Shore;
+
         private readonly float[] values;
         private readonly int n;
         private readonly float step;
@@ -52,6 +55,9 @@ namespace KingdomSurvival.MapLab
             float macroScale = Mathf.Max(5f, style.MacroScale);
             bool showForest = settings.Diagnostics.ShowForest;
             Vector3 light = settings.LightDirection;
+            if (settings.IsStage05)
+                Shore = new MapLabShore(data, settings.Stage05.ShoreSmoothing);
+            MapLabShore shore = Shore;
             Parallel.For(0, n, z =>
             {
                 for (int x = 0; x < n; x++)
@@ -86,8 +92,15 @@ namespace KingdomSurvival.MapLab
                     values[o + 6] = breakup.Fbm(w.x / 5f, w.y / 5f, 2) * 0.5f + 0.5f;
                     values[o + 7] = data.SampleMask(data.Rock, w.x, w.y);
                     values[o + 8] = rockStreak.Fbm(w.x / 2.2f, w.y / 9f, 3) * 0.5f + 0.5f;
-                    float level = data.SampleWaterLevel(w.x, w.y);
-                    values[o + 9] = float.IsNaN(level) ? 100f : h - level;
+                    if (shore != null)
+                    {
+                        values[o + 9] = shore.Sample(w);
+                    }
+                    else
+                    {
+                        float level = data.SampleWaterLevel(w.x, w.y);
+                        values[o + 9] = float.IsNaN(level) ? 100f : h - level;
+                    }
                     values[o + 10] = data.WaterDistance != null ? Mathf.Min(1000f, data.Bilinear(data.WaterDistance, w.x, w.y)) : 1000f;
                     values[o + 11] = roadWobble.Fbm(w.x / 17f, w.y / 17f, 2);
                     values[o + 12] = mottle.Fbm(w.x / 1.6f, w.y / 1.6f, 2);

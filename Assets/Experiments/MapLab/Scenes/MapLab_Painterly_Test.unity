@@ -180,8 +180,15 @@ MonoBehaviour:
   LinesShader: {fileID: 4800000, guid: c9e51576d4c33f645bb1b7d1208f19b0, type: 3}
   ArtCardShader: {fileID: 4800000, guid: 383626419a283bb4993b7f7b8fcf34e2, type: 3}
   ContactShader: {fileID: 4800000, guid: 91caacd372de3834d890904c17c35901, type: 3}
+  InkShader: {fileID: 4800000, guid: 593a9de48c8db1a9f1d7739d7e25779b, type: 3}
   ArtSet: {fileID: 11400000, guid: 1e0c221c19d1f374faab702db07d55a3, type: 2}
   MarkerSet: {fileID: 11400000, guid: f134eb708cef33d45b030267ade4c401, type: 2}
+  ArtSet03: {fileID: 11400000, guid: 0daa4bf527a097c498b9688b5a668135, type: 2}
+  MarkerSet04: {fileID: 11400000, guid: c28401c0d6c058c4da9b5f16b96b861e, type: 2}
+  GrassShader: {fileID: 4800000, guid: 4478e33c2243160d060e035c2852debb, type: 3}
+  ArtSet05: {fileID: 11400000, guid: 165475db8d2fcc74e85fb3681b415ff7, type: 2}
+  MarkerSet05: {fileID: 11400000, guid: 7401bfb87608ac542981a69c11fe530f, type: 2}
+  ModuleShader: {fileID: 4800000, guid: 58ccb5e87235b9546b40f9b1ae54ed18, type: 3}
   root: {fileID: 0}
 --- !u!4 &1850171890
 Transform:

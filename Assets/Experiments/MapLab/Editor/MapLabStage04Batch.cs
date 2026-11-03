@@ -78,7 +78,7 @@ namespace KingdomSurvival.MapLab.Editor
                     view.ApplyMaterialSettings();
                     view.ApplyVisibility();
                 }
-                float maxZoom = rig.ZoomLimits.y;
+                float maxZoom = rig.MaxZoom;
                 Spots spots = default;
 
                 // До и после: один seed, те же места, масштабы и размер кадра.

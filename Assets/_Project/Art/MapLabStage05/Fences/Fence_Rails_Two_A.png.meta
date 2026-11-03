@@ -1,0 +1,637 @@
+fileFormatVersion: 2
+guid: 5b06e0f2a70036b46847ddfcf0beaa67
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8101188215199192200
+    second: Fence_Rails_Two_A_0
+  - first:
+      213: 5387231071309630949
+    second: Fence_Rails_Two_A_1
+  - first:
+      213: 7850088813349565257
+    second: Fence_Rails_Two_A_2
+  - first:
+      213: 4706425033728226396
+    second: Fence_Rails_Two_A_3
+  - first:
+      213: 545216941556379064
+    second: Fence_Rails_Two_A_4
+  - first:
+      213: -7942781920608790155
+    second: Fence_Rails_Two_A_5
+  - first:
+      213: 8107291922346979324
+    second: Fence_Rails_Two_A_6
+  - first:
+      213: 4169351512954701739
+    second: Fence_Rails_Two_A_7
+  - first:
+      213: -8573013734572918457
+    second: Fence_Rails_Two_A_8
+  - first:
+      213: 4665509639925640356
+    second: Fence_Rails_Two_A_9
+  - first:
+      213: -7761883147543875726
+    second: Fence_Rails_Two_A_10
+  - first:
+      213: -4157538877679853966
+    second: Fence_Rails_Two_A_11
+  - first:
+      213: -5830489513541637341
+    second: Fence_Rails_Two_A_12
+  - first:
+      213: -4212982949679426442
+    second: Fence_Rails_Two_A_13
+  - first:
+      213: 2939118351322499509
+    second: Fence_Rails_Two_A_14
+  - first:
+      213: 6982140174933487267
+    second: Fence_Rails_Two_A_15
+  - first:
+      213: -2532167216870655230
+    second: Fence_Rails_Two_A_16
+  - first:
+      213: 5829695639623458020
+    second: Fence_Rails_Two_A_17
+  - first:
+      213: 7004357605349999204
+    second: Fence_Rails_Two_A_18
+  - first:
+      213: 2925920872124705564
+    second: Fence_Rails_Two_A_19
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 8
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_0
+      rect:
+        serializedVersion: 2
+        x: 20
+        y: 329
+        width: 2125
+        height: 386
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87ba87e7d3cc29f80800000000000000
+      internalID: -8101188215199192200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_1
+      rect:
+        serializedVersion: 2
+        x: 1342
+        y: 621
+        width: 27
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ed8b58dd1a43ca40800000000000000
+      internalID: 5387231071309630949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_2
+      rect:
+        serializedVersion: 2
+        x: 1988
+        y: 687
+        width: 6
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 943f7f62f2e11fc60800000000000000
+      internalID: 7850088813349565257
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_3
+      rect:
+        serializedVersion: 2
+        x: 1993
+        y: 679
+        width: 21
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c547069e1a4905140800000000000000
+      internalID: 4706425033728226396
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_4
+      rect:
+        serializedVersion: 2
+        x: 2061
+        y: 690
+        width: 14
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8bd2efe6beff09700800000000000000
+      internalID: 545216941556379064
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_5
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 632
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 579d7b50de195c190800000000000000
+      internalID: -7942781920608790155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_6
+      rect:
+        serializedVersion: 2
+        x: 796
+        y: 638
+        width: 8
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cffa2e19c03e28070800000000000000
+      internalID: 8107291922346979324
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_7
+      rect:
+        serializedVersion: 2
+        x: 796
+        y: 634
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba707616c138cd930800000000000000
+      internalID: 4169351512954701739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_8
+      rect:
+        serializedVersion: 2
+        x: 290
+        y: 619
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7497c302e69860980800000000000000
+      internalID: -8573013734572918457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_9
+      rect:
+        serializedVersion: 2
+        x: 453
+        y: 606
+        width: 15
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4acadef6c483fb040800000000000000
+      internalID: 4665509639925640356
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_10
+      rect:
+        serializedVersion: 2
+        x: 1343
+        y: 610
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27f6e8ac660484490800000000000000
+      internalID: -7761883147543875726
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_11
+      rect:
+        serializedVersion: 2
+        x: 1357
+        y: 612
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27e14081b647d46c0800000000000000
+      internalID: -4157538877679853966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_12
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 596
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32be5bebda0f51fa0800000000000000
+      internalID: -5830489513541637341
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_13
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 602
+        width: 6
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 674949f145a7885c0800000000000000
+      internalID: -4212982949679426442
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_14
+      rect:
+        serializedVersion: 2
+        x: 647
+        y: 592
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b9c8638198d9c820800000000000000
+      internalID: 2939118351322499509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_15
+      rect:
+        serializedVersion: 2
+        x: 989
+        y: 586
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3aee4e20f7b85e060800000000000000
+      internalID: 6982140174933487267
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_16
+      rect:
+        serializedVersion: 2
+        x: 1335
+        y: 588
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20bf88e055febdcd0800000000000000
+      internalID: -2532167216870655230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_17
+      rect:
+        serializedVersion: 2
+        x: 1341
+        y: 589
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ec56641c4d37e050800000000000000
+      internalID: 5829695639623458020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_18
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 0
+        width: 2134
+        height: 321
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46241b2a12a743160800000000000000
+      internalID: 7004357605349999204
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fence_Rails_Two_A_19
+      rect:
+        serializedVersion: 2
+        x: 1520
+        y: 99
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c1be4efe785fa9820800000000000000
+      internalID: 2925920872124705564
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Fence_Rails_Two_A_0: -8101188215199192200
+      Fence_Rails_Two_A_1: 5387231071309630949
+      Fence_Rails_Two_A_10: -7761883147543875726
+      Fence_Rails_Two_A_11: -4157538877679853966
+      Fence_Rails_Two_A_12: -5830489513541637341
+      Fence_Rails_Two_A_13: -4212982949679426442
+      Fence_Rails_Two_A_14: 2939118351322499509
+      Fence_Rails_Two_A_15: 6982140174933487267
+      Fence_Rails_Two_A_16: -2532167216870655230
+      Fence_Rails_Two_A_17: 5829695639623458020
+      Fence_Rails_Two_A_18: 7004357605349999204
+      Fence_Rails_Two_A_19: 2925920872124705564
+      Fence_Rails_Two_A_2: 7850088813349565257
+      Fence_Rails_Two_A_3: 4706425033728226396
+      Fence_Rails_Two_A_4: 545216941556379064
+      Fence_Rails_Two_A_5: -7942781920608790155
+      Fence_Rails_Two_A_6: 8107291922346979324
+      Fence_Rails_Two_A_7: 4169351512954701739
+      Fence_Rails_Two_A_8: -8573013734572918457
+      Fence_Rails_Two_A_9: 4665509639925640356
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

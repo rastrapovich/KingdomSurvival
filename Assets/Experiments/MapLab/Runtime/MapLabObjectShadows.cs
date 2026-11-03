@@ -103,8 +103,74 @@ namespace KingdomSurvival.MapLab
                 }
                 result.Shapes++;
             }
+            if (settings.IsStage05 && settings.Stage05.ShadowEdgeLoss > 0f)
+                LiveEdge(result.Cast, res, texel, data.Seed, settings.Stage05);
             result.Milliseconds = (float)watch.Elapsed.TotalMilliseconds;
             return result;
+        }
+
+        // Этап 05: живой внешний край. Единый градиент от опоры сохраняется (поле
+        // контакта не трогаем); у внешнего края падающей тени в отдельных зонах —
+        // крупнее пиксельного шума и стабильных в мире (шум от seed и мировых
+        // координат) — плотность плавно уходит к краю, в остальных край остаётся
+        // чётким. Близость к краю — по размытой копии маски (без жёстких углов).
+        public static void LiveEdge(float[] cast, int res, float texel, int seed, MapLabStage05Settings s5)
+        {
+            int radius = Mathf.Clamp(Mathf.RoundToInt(0.9f / texel), 1, 12);
+            float[] blur = BoxBlur(cast, res, radius);
+            blur = BoxBlur(blur, res, radius);
+            MapLabNoise zones = new MapLabNoise(MapLabRandom.StreamSeed(seed, "shadow05-edge", MapLabData.AlgorithmVersion));
+            float scale = Mathf.Max(1f, s5.ShadowEdgeScale);
+            float loss = Mathf.Clamp01(s5.ShadowEdgeLoss);
+            for (int z = 0; z < res; z++)
+            {
+                for (int x = 0; x < res; x++)
+                {
+                    int i = z * res + x;
+                    float c = cast[i];
+                    if (c <= 0f || blur[i] > 0.97f)
+                        continue;
+                    float wx = (x + 0.5f) * texel, wz = (z + 0.5f) * texel;
+                    float zone = zones.Fbm(wx / scale, wz / scale, 2) * 0.5f + 0.5f;
+                    // Доля зон с потерей плотности ~ loss; переход между зонами плавный.
+                    float soft = MapLabGeometry.SmoothStep(1f - loss - 0.08f, 1f - loss + 0.08f, zone);
+                    if (soft <= 0f)
+                        continue;
+                    float inner = MapLabGeometry.SmoothStep(0.3f, 0.95f, blur[i]);
+                    cast[i] = c * Mathf.Lerp(1f, inner, soft);
+                }
+            }
+        }
+
+        private static float[] BoxBlur(float[] src, int res, int r)
+        {
+            float[] tmp = new float[src.Length];
+            float[] dst = new float[src.Length];
+            float inv = 1f / (r * 2 + 1);
+            for (int z = 0; z < res; z++)
+            {
+                float sum = 0f;
+                int row = z * res;
+                for (int x = -r; x <= r; x++)
+                    sum += src[row + Mathf.Clamp(x, 0, res - 1)];
+                for (int x = 0; x < res; x++)
+                {
+                    tmp[row + x] = sum * inv;
+                    sum += src[row + Mathf.Min(res - 1, x + r + 1)] - src[row + Mathf.Max(0, x - r)];
+                }
+            }
+            for (int x = 0; x < res; x++)
+            {
+                float sum = 0f;
+                for (int z = -r; z <= r; z++)
+                    sum += tmp[Mathf.Clamp(z, 0, res - 1) * res + x];
+                for (int z = 0; z < res; z++)
+                {
+                    dst[z * res + x] = sum * inv;
+                    sum += tmp[Mathf.Min(res - 1, z + r + 1) * res + x] - tmp[Mathf.Max(0, z - r) * res + x];
+                }
+            }
+            return dst;
         }
 
         // Точка, где луч от центра кроны против света встречает рельеф.

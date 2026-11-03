@@ -1,0 +1,767 @@
+fileFormatVersion: 2
+guid: 028bf45802b895a4cb75f16e1e1f75e4
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1769015628489117766
+    second: Wash_GrayGreen_Bloom_D_0
+  - first:
+      213: -3937595962436825614
+    second: Wash_GrayGreen_Bloom_D_1
+  - first:
+      213: -287032362470765183
+    second: Wash_GrayGreen_Bloom_D_2
+  - first:
+      213: -2258312513682644148
+    second: Wash_GrayGreen_Bloom_D_3
+  - first:
+      213: 5579859512279266777
+    second: Wash_GrayGreen_Bloom_D_4
+  - first:
+      213: 3178697780711726650
+    second: Wash_GrayGreen_Bloom_D_5
+  - first:
+      213: -4968059596812183781
+    second: Wash_GrayGreen_Bloom_D_6
+  - first:
+      213: -5857607388939302997
+    second: Wash_GrayGreen_Bloom_D_7
+  - first:
+      213: -1604815805222428666
+    second: Wash_GrayGreen_Bloom_D_8
+  - first:
+      213: 2142066883473661124
+    second: Wash_GrayGreen_Bloom_D_9
+  - first:
+      213: -4059428204215680258
+    second: Wash_GrayGreen_Bloom_D_10
+  - first:
+      213: -4797898539250582948
+    second: Wash_GrayGreen_Bloom_D_11
+  - first:
+      213: -1652529903634151190
+    second: Wash_GrayGreen_Bloom_D_12
+  - first:
+      213: 5299586291660508568
+    second: Wash_GrayGreen_Bloom_D_13
+  - first:
+      213: 1676413138149113715
+    second: Wash_GrayGreen_Bloom_D_14
+  - first:
+      213: -7081472296434103298
+    second: Wash_GrayGreen_Bloom_D_15
+  - first:
+      213: -683020214926111756
+    second: Wash_GrayGreen_Bloom_D_16
+  - first:
+      213: 2228291237380883608
+    second: Wash_GrayGreen_Bloom_D_17
+  - first:
+      213: 2982591796084535731
+    second: Wash_GrayGreen_Bloom_D_18
+  - first:
+      213: -6505034876632012645
+    second: Wash_GrayGreen_Bloom_D_19
+  - first:
+      213: 8942500877468897475
+    second: Wash_GrayGreen_Bloom_D_20
+  - first:
+      213: -7835984802392708981
+    second: Wash_GrayGreen_Bloom_D_21
+  - first:
+      213: -7721347284407856052
+    second: Wash_GrayGreen_Bloom_D_22
+  - first:
+      213: -5954735479388201675
+    second: Wash_GrayGreen_Bloom_D_23
+  - first:
+      213: -5861130742002940264
+    second: Wash_GrayGreen_Bloom_D_24
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.05
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 1
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 512
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 845
+        width: 81
+        height: 84
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: abfaac598a13377e0800000000000000
+      internalID: -1769015628489117766
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_1
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 919
+        width: 139
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2fdc0fd9559da59c0800000000000000
+      internalID: -3937595962436825614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_2
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 881
+        width: 337
+        height: 125
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18d83eb4691440cf0800000000000000
+      internalID: -287032362470765183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_3
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 887
+        width: 177
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c43602edbbcd8a0e0800000000000000
+      internalID: -2258312513682644148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_4
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 934
+        width: 125
+        height: 74
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d57dfdb9a4af6d40800000000000000
+      internalID: 5579859512279266777
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_5
+      rect:
+        serializedVersion: 2
+        x: 1088
+        y: 927
+        width: 101
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3e15a34ac00d1c20800000000000000
+      internalID: 3178697780711726650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_6
+      rect:
+        serializedVersion: 2
+        x: 1224
+        y: 47
+        width: 303
+        height: 969
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b171a0d5e18ed0bb0800000000000000
+      internalID: -4968059596812183781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_7
+      rect:
+        serializedVersion: 2
+        x: 174
+        y: 749
+        width: 59
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba7c19c5d1995bea0800000000000000
+      internalID: -5857607388939302997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_8
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 839
+        width: 17
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 600e8cf178c8ab9e0800000000000000
+      internalID: -1604815805222428666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_9
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 807
+        width: 19
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4cc539a3b762abd10800000000000000
+      internalID: 2142066883473661124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_10
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 0
+        width: 1249
+        height: 832
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef2c5885e830aa7c0800000000000000
+      internalID: -4059428204215680258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_11
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 807
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5a7a9be2b07a6db0800000000000000
+      internalID: -4797898539250582948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_12
+      rect:
+        serializedVersion: 2
+        x: 78
+        y: 799
+        width: 11
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae80d21eec80119e0800000000000000
+      internalID: -1652529903634151190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_13
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 783
+        width: 5
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89d44f267a9eb8940800000000000000
+      internalID: 5299586291660508568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_14
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 591
+        width: 101
+        height: 183
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37ffc2cfdd0d34710800000000000000
+      internalID: 1676413138149113715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_15
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 695
+        width: 33
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: efb8644377e89bd90800000000000000
+      internalID: -7081472296434103298
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_16
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 741
+        width: 17
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fb0beabbbc6586f0800000000000000
+      internalID: -683020214926111756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_17
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 695
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 894043c031b7cee10800000000000000
+      internalID: 2228291237380883608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_18
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 707
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b1fc93af6b446920800000000000000
+      internalID: 2982591796084535731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_19
+      rect:
+        serializedVersion: 2
+        x: 1496
+        y: 743
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9862deae3979b5a0800000000000000
+      internalID: -6505034876632012645
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 407
+        width: 131
+        height: 161
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c0172d2b252a1c70800000000000000
+      internalID: 8942500877468897475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_21
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 294
+        width: 99
+        height: 82
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b88e50cc65df04390800000000000000
+      internalID: -7835984802392708981
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_22
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 97
+        width: 81
+        height: 175
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c445175ed8348d490800000000000000
+      internalID: -7721347284407856052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_23
+      rect:
+        serializedVersion: 2
+        x: 350
+        y: 15
+        width: 13
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 53d96ab81a78c5da0800000000000000
+      internalID: -5954735479388201675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wash_GrayGreen_Bloom_D_24
+      rect:
+        serializedVersion: 2
+        x: 506
+        y: 0
+        width: 31
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8960bccc4a419aea0800000000000000
+      internalID: -5861130742002940264
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Wash_GrayGreen_Bloom_D_0: -1769015628489117766
+      Wash_GrayGreen_Bloom_D_1: -3937595962436825614
+      Wash_GrayGreen_Bloom_D_10: -4059428204215680258
+      Wash_GrayGreen_Bloom_D_11: -4797898539250582948
+      Wash_GrayGreen_Bloom_D_12: -1652529903634151190
+      Wash_GrayGreen_Bloom_D_13: 5299586291660508568
+      Wash_GrayGreen_Bloom_D_14: 1676413138149113715
+      Wash_GrayGreen_Bloom_D_15: -7081472296434103298
+      Wash_GrayGreen_Bloom_D_16: -683020214926111756
+      Wash_GrayGreen_Bloom_D_17: 2228291237380883608
+      Wash_GrayGreen_Bloom_D_18: 2982591796084535731
+      Wash_GrayGreen_Bloom_D_19: -6505034876632012645
+      Wash_GrayGreen_Bloom_D_2: -287032362470765183
+      Wash_GrayGreen_Bloom_D_20: 8942500877468897475
+      Wash_GrayGreen_Bloom_D_21: -7835984802392708981
+      Wash_GrayGreen_Bloom_D_22: -7721347284407856052
+      Wash_GrayGreen_Bloom_D_23: -5954735479388201675
+      Wash_GrayGreen_Bloom_D_24: -5861130742002940264
+      Wash_GrayGreen_Bloom_D_3: -2258312513682644148
+      Wash_GrayGreen_Bloom_D_4: 5579859512279266777
+      Wash_GrayGreen_Bloom_D_5: 3178697780711726650
+      Wash_GrayGreen_Bloom_D_6: -4968059596812183781
+      Wash_GrayGreen_Bloom_D_7: -5857607388939302997
+      Wash_GrayGreen_Bloom_D_8: -1604815805222428666
+      Wash_GrayGreen_Bloom_D_9: 2142066883473661124
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

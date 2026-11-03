@@ -15,6 +15,9 @@ Shader "Kingdom Survival/MapLab/Ink"
         _Opacity ("Непрозрачность", Range(0, 1)) = 0.85
         _Grain ("Рваность края", Range(0, 1)) = 0.35
         _DepthPush ("Сдвиг к камере, ед.", Float) = 0.25
+        _Drift ("Этап 05: изменение толщины вдоль линии (доля, 1/длина волны)", Vector) = (0, 0.14, 0, 0)
+        _Color2 ("Этап 05: второй цвет (сторона −1, вода)", Color) = (0.2, 0.27, 0.36, 1)
+        _Split ("Этап 05: двухцветная лента", Float) = 0
     }
 
     SubShader
@@ -55,6 +58,9 @@ Shader "Kingdom Survival/MapLab/Ink"
                 float _Opacity;
                 float _Grain;
                 float _DepthPush;
+                float4 _Drift;
+                float4 _Color2;
+                float _Split;
             CBUFFER_END
 
             // Экспорт с суперсэмплингом рисует в больший кадр: пределы в пикселях
@@ -86,6 +92,8 @@ Shader "Kingdom Survival/MapLab/Ink"
                 float pxPerUnit = max(1e-3, length(d));
                 float scale = _MapLabPixelScale > 0.0 ? _MapLabPixelScale : 1.0;
                 float widthPx = clamp(_Width * pxPerUnit, _MinPx * scale, _MaxPx * scale);
+                // Этап 05: плавный дрейф толщины вдоль линии (мир, стабилен на чанках и зуме).
+                widthPx *= 1.0 + _Drift.x * (ValueNoise(p.xz * _Drift.y) * 2.0 - 1.0);
                 float halfWidth = 0.5 * widthPx / pxPerUnit;
                 float3 toCamera = normalize(UNITY_MATRIX_V[2].xyz);
                 p += side * input.uv.x * halfWidth + toCamera * _DepthPush;
@@ -101,8 +109,11 @@ Shader "Kingdom Survival/MapLab/Ink"
                 float aa = max(1e-3, fwidth(i.uv.x)) * 1.2;
                 float cover = saturate((1.0 - rough) / aa);
                 float a = cover * saturate(i.uv.y) * _Opacity;
+                // Плотность пигмента: слабое неравномерное оседание вдоль линии.
+                a *= 1.0 - _Drift.x * 0.35 * ValueNoise(i.world * _Drift.y * 2.7 + 17.0);
                 clip(a - 0.004);
-                return float4(_Color.rgb, a);
+                float3 color = _Split > 0.5 ? lerp(_Color2.rgb, _Color.rgb, saturate(i.uv.x * 0.5 + 0.5)) : _Color.rgb;
+                return float4(color, a);
             }
             ENDHLSL
         }

@@ -209,13 +209,13 @@ namespace KingdomSurvival.MapLab.Tests
             try
             {
                 Assert.IsTrue(view.Generate(null), view.LastError);
-                rig.Zoom = rig.ZoomLimits.y;
+                rig.Zoom = rig.MaxZoom;
                 Assert.AreEqual(35f, rig.Pitch, 0.01f, "На наибольшем фактическом приближении — 35°");
                 rig.Zoom = 1f;
                 Assert.AreEqual(60f, rig.Pitch, 0.01f);
                 // Наклон монотонен на всём диапазоне рига.
                 float previous = 90f;
-                for (float z = 1f; z <= rig.ZoomLimits.y; z *= 1.1f)
+                for (float z = 1f; z <= rig.MaxZoom; z *= 1.1f)
                 {
                     rig.Zoom = z;
                     Assert.LessOrEqual(rig.Pitch, previous + 1e-4f);

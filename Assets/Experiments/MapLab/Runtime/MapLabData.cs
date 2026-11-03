@@ -38,6 +38,9 @@ namespace KingdomSurvival.MapLab
         House = 6,
         Barn = 7,
         Haystack = 8,
+        // Этап 05 (дописаны в конец).
+        Grass = 9,
+        Prop = 10,
     }
 
     // Ломаная в плоскости XZ (x — вправо по кадру, y — вглубь кадра = мировая Z).
@@ -46,6 +49,8 @@ namespace KingdomSurvival.MapLab
         public readonly List<Vector2> Points = new List<Vector2>();
         public float Width;
         public MapLabRoadKind Kind;
+        // Этап 05: вставка полотна у колодца (расставляется заново при каждой расстановке).
+        public bool Widening;
 
         public float Length
         {
@@ -121,6 +126,49 @@ namespace KingdomSurvival.MapLab
         public float Tone;     // 0..1, смесь двух тонов палитры
         public float Brightness;
         public Vector2 Size;   // ширина × глубина для построек
+        // Этап 05: выбранный ракурс рисунка (0 FrontLeft, 1 FrontRight, 2 BackLeft,
+        // 3 BackRight; −1 — нет), направление входа и номер двора.
+        public int View;
+        public Vector2 Entrance;
+        public int Yard;
+    }
+
+    // Этап 05: ограда как граф. Узел — один столб, ребро — одно заполнение
+    // (жерди, плетень) или ворота (явный проём между двумя узлами).
+    public struct MapLabFenceEdge
+    {
+        public int A, B;
+        public bool Gate;
+        public int Style;   // 0 — две жерди, 1 — три жерди, 2 — плетень
+        public int Yard;
+    }
+
+    public sealed class MapLabFenceGraph
+    {
+        public readonly List<Vector2> Nodes = new List<Vector2>();
+        public readonly List<MapLabFenceEdge> Edges = new List<MapLabFenceEdge>();
+        // Сколько исходных отрезков общей границы дворов отброшено как дубли.
+        public int SharedRemoved;
+        public int Clipped;
+        public int Merged;
+
+        public int Degree(int node)
+        {
+            int d = 0;
+            for (int i = 0; i < Edges.Count; i++)
+                if (Edges[i].A == node || Edges[i].B == node)
+                    d++;
+            return d;
+        }
+    }
+
+    // Этап 05: реквизит двора и деревни (колодец, корыто, дровяник, поленница, сено).
+    public struct MapLabProp
+    {
+        public string Role;
+        public Vector3 Position;
+        public float Scale;
+        public int Yard;
     }
 
     public struct MapLabYardRect
@@ -223,6 +271,10 @@ namespace KingdomSurvival.MapLab
         public readonly List<MapLabPolyline> YardPaths = new List<MapLabPolyline>();
         // Прямоугольники дворов (дом + двор): центр, ось вдоль конька, полуразмеры. Деревья сюда не садятся.
         public readonly List<MapLabYardRect> YardRects = new List<MapLabYardRect>();
+        // Этап 05: граф оград, реквизит, площадка у колодца (x, z, радиус).
+        public MapLabFenceGraph FenceGraph;
+        public readonly List<MapLabProp> Props = new List<MapLabProp>();
+        public Vector3 Plaza;
 
         public MapLabStats Stats;
 

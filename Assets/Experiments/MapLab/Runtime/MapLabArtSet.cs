@@ -73,6 +73,26 @@ namespace KingdomSurvival.MapLab
         [Tooltip("Пользователь правил опору в редакторе калибровки.")]
         public bool PivotEdited;
 
+        [Header("Коррекция автора (окно «Генератор карты» → Ассеты; исходный PNG не меняется)")]
+        [Tooltip("Участвует в будущей генерации; выключенный не выбирается, файл и уже сохранённые объекты не трогаются.")]
+        public bool Enabled = true;
+        [Tooltip("Равномерный масштаб рисунка (1 — как калибровано). Основание и проходимость не меняются.")]
+        [Range(0.25f, 4f)] public float SizeScale = 1f;
+        [Tooltip("Яркость, 1 — без изменений.")]
+        [Range(0.3f, 2f)] public float Brightness = 1f;
+        [Tooltip("Поворот оттенка, градусов; 0 — без изменений.")]
+        [Range(-180f, 180f)] public float HueShift = 0f;
+        [Tooltip("Насыщенность, 1 — без изменений.")]
+        [Range(0f, 2f)] public float Saturation = 1f;
+
+        // Вес выбора с учётом «Использовать в генерации».
+        public float EffectiveWeight => Enabled ? Weight : 0f;
+
+        // Коррекция цвета для шейдеров: x — яркость, y — тон (град.), z — насыщенность.
+        public Vector4 ColorAdjust => new Vector4(Brightness, HueShift, Saturation, 0f);
+
+        public bool HasColorAdjust => Mathf.Abs(Brightness - 1f) > 1e-4f || Mathf.Abs(HueShift) > 1e-3f || Mathf.Abs(Saturation - 1f) > 1e-4f;
+
         [Header("Источник (обновляет импорт)")]
         public string SourcePath;
         public string Sha256;
@@ -135,7 +155,7 @@ namespace KingdomSurvival.MapLab
         public float Aspect => Height > 0 ? Width / (float)Height : 1f;
 
         // Высота всей карточки (холста) в мире.
-        public float CardHeight => WorldHeight * HeightCorrection / Mathf.Max(0.05f, SolidRect.height);
+        public float CardHeight => WorldHeight * SizeScale * HeightCorrection / Mathf.Max(0.05f, SolidRect.height);
     }
 
     // Подключённый художественный набор (этап 02 или 03). В git — этот ассет и
@@ -184,7 +204,7 @@ namespace KingdomSurvival.MapLab
             for (int i = 0; i < Entries.Count; i++)
             {
                 MapLabArtEntry e = Entries[i];
-                if (e != null && e.HasTexture && e.Category == category && e.Kind == kind && e.Weight > 0f)
+                if (e != null && e.HasTexture && e.Category == category && e.Kind == kind && e.EffectiveWeight > 0f)
                     result.Add(e);
             }
         }
@@ -213,7 +233,7 @@ namespace KingdomSurvival.MapLab
                     MapLabArtEntry e = Entries[i];
                     if (e == null)
                         continue;
-                    h = Mix(h, e.Id + e.Sha256 + e.Pivot + e.WorldHeight + e.Cutoff + e.HeightCorrection + e.Weight + (e.HasTexture ? "1" : "0"));
+                    h = Mix(h, e.Id + e.Sha256 + e.Pivot + e.WorldHeight + e.SizeScale + e.Cutoff + e.HeightCorrection + e.EffectiveWeight + (e.HasTexture ? "1" : "0"));
                 }
                 return $"{PackageId}#{ImportVersion}:{h:x16}";
             }

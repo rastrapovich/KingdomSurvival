@@ -9,6 +9,7 @@ Shader "Kingdom Survival/MapLab/Cliff"
 {
     Properties
     {
+        _ColorAdjust ("Коррекция автора: яркость, тон°, насыщенность", Vector) = (1, 0, 1, 0)
         _MainTex ("Стена (RGBA)", 2D) = "white" {}
         _ShadeTex ("Shade (R свет, G затенение)", 2D) = "white" {}
         _Cutoff ("Alpha cutoff", Range(0.05, 0.95)) = 0.5
@@ -78,6 +79,7 @@ Shader "Kingdom Survival/MapLab/Cliff"
                 float _FootFadeV;
                 float4 _InkColor;
                 float4 _FootInk;
+                float4 _ColorAdjust;
             CBUFFER_END
 
             float _MapLabPixelScale;
@@ -125,6 +127,7 @@ Shader "Kingdom Survival/MapLab/Cliff"
                 clip(tex.a - 0.04);
                 float a = saturate((tex.a - 0.04) / 0.96);
                 float3 c = tex.rgb * i.tone;
+                c = MapLabColorAdjust(c, _ColorAdjust);
                 if (_BaseV > 0.0)
                 {
                     // Полоса травы рисунка ниже подошвы быстро уходит в землю:

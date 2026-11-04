@@ -114,6 +114,17 @@ namespace KingdomSurvival.MapLab
         public MapLabArtBuilder.Plan ArtPlan => artPlan;
         public int ArtMaterialCount => artMaterials.Count;
 
+        // Сколько экземпляров каждого рисунка стоит на текущей карте (каталог «Ассеты»).
+        private readonly Dictionary<MapLabArtEntry, int> usage = new Dictionary<MapLabArtEntry, int>();
+        public IReadOnlyDictionary<MapLabArtEntry, int> Usage => usage;
+
+        private void CountUsage(MapLabArtEntry entry, int count)
+        {
+            if (entry == null || count <= 0)
+                return;
+            usage[entry] = usage.TryGetValue(entry, out int n) ? n + count : count;
+        }
+
         // Центр демонстрационного участка: поселение пресета (или центр карты).
         public Vector2 DemoFocus
         {
@@ -863,6 +874,7 @@ namespace KingdomSurvival.MapLab
             // Рисованные скалы ревизии 06 вместо граней; без набора — грани этапа 05.
             DrawnCliffs06 = false;
             MapLabCliffs06.ScreeSpots.Clear();
+            usage.Clear();
             if (Settings.IsStage05 && Settings.Stage05.DrawnCliffs && CliffShader != null)
             {
                 MapLabCliffs06.Kit kit = MapLabCliffs06.KitOf(ResolvedArtSet06);
@@ -872,6 +884,8 @@ namespace KingdomSurvival.MapLab
                     MapLabCliffs06.Result cliffs = MapLabCliffs06.Build(data, Settings, kit);
                     List<MapLabArtEntry> keys = new List<MapLabArtEntry>(cliffs.Meshes.Keys);
                     keys.Sort((a, b) => string.CompareOrdinal(a.Id, b.Id));
+                    foreach (MapLabArtEntry e in keys)
+                        CountUsage(e, 1);
                     foreach (MapLabArtEntry e in keys)
                         AddRenderer(group, "Cliff " + e.Id, cliffs.Meshes[e].ToMesh("MapLab Cliff " + e.Id), CliffMaterial(e));
                     DrawnCliffs06 = true;
@@ -894,6 +908,7 @@ namespace KingdomSurvival.MapLab
         private void ConfigureCliffMaterial(Material m, MapLabArtEntry entry)
         {
             m.SetTexture("_MainTex", entry.Texture);
+            m.SetVector("_ColorAdjust", entry.ColorAdjust);
             m.SetTexture("_ShadeTex", shadeTexture != null ? shadeTexture : Texture2D.whiteTexture);
             m.SetFloat("_MapSize", data != null ? data.Size : Settings.General.MapSize);
             m.SetFloat("_GroundShade", Settings.Diagnostics.ShowReliefLight ? 0.45f : 0f);
@@ -920,6 +935,13 @@ namespace KingdomSurvival.MapLab
         // наклона переключала их без перестройки.
         private void BuildObjects()
         {
+            // Скалы считает BuildCliffs (он идёт раньше и не повторяется при пересборке объектов).
+            List<MapLabArtEntry> stale = new List<MapLabArtEntry>();
+            foreach (MapLabArtEntry e in usage.Keys)
+                if (e.Category != MapLabArtCategory.CliffModule)
+                    stale.Add(e);
+            foreach (MapLabArtEntry e in stale)
+                usage.Remove(e);
             artPlan = new MapLabArtBuilder.Plan();
             MapLabArtBuilder.Plan housePlan = new MapLabArtBuilder.Plan();
             MapLabArtBuilder.Plan housePlan35 = new MapLabArtBuilder.Plan();
@@ -1119,6 +1141,7 @@ namespace KingdomSurvival.MapLab
                     continue;
                 group = group != null ? group : Group(name);
                 Material material = ArtMaterial(entry);
+                CountUsage(entry, plan.Cards[entry].Count);
                 List<Mesh> meshes = MapLabArtBuilder.BuildMeshes(data, entry, plan.Cards[entry], 64f);
                 for (int i = 0; i < meshes.Count; i++)
                     AddRenderer(group, meshes[i].name, meshes[i], material);
@@ -1143,6 +1166,7 @@ namespace KingdomSurvival.MapLab
             MapLabPalette palette = Palette;
             MapLabArtSettings art = Settings.Art;
             m.SetTexture("_MainTex", entry.Texture);
+            m.SetVector("_ColorAdjust", entry.ColorAdjust);
             m.SetFloat("_Cutoff", entry.Cutoff);
             m.SetFloat("_CardLean", art.CardLean);
             Color tone;
@@ -1227,6 +1251,7 @@ namespace KingdomSurvival.MapLab
         {
             MapLabStage05Settings s5 = Settings.Stage05;
             m.SetTexture("_MainTex", entry.Texture);
+            m.SetVector("_ColorAdjust", entry.ColorAdjust);
             m.SetFloat("_Cutoff", entry.Cutoff);
             m.SetTexture("_ShadeTex", shadeTexture != null ? shadeTexture : Texture2D.whiteTexture);
             m.SetFloat("_MapSize", data != null ? data.Size : Settings.General.MapSize);

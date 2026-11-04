@@ -88,7 +88,7 @@ namespace KingdomSurvival.MapLab
                 return kit;
             foreach (MapLabArtEntry e in set.Entries)
             {
-                if (e == null || !e.HasTexture || e.Category != MapLabArtCategory.CliffModule || e.Weight <= 0f)
+                if (e == null || !e.HasTexture || e.Category != MapLabArtCategory.CliffModule || e.EffectiveWeight <= 0f)
                     continue;
                 switch (e.Role)
                 {

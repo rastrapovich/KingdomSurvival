@@ -188,7 +188,7 @@ namespace KingdomSurvival.MapLab
         private static float SpeciesWeight(MapLabArtEntry entry, float forest, float grove)
         {
             string id = entry.Id ?? "";
-            float w = entry.Weight;
+            float w = entry.EffectiveWeight;
             if (id.Contains("Birch"))
                 // Берёзы — рощицами и на опушке, мало в глубине.
                 return w * Mathf.Lerp(1.4f, 0.35f, forest) * Mathf.Lerp(0.15f, 2.6f, Mathf.SmoothStep(0.45f, 0.75f, grove));
@@ -245,7 +245,7 @@ namespace KingdomSurvival.MapLab
             plan.Replaced.Add(MapLabObjectKind.Boulder);
             List<float> weights = new List<float>();
             foreach (MapLabArtEntry e in rocks)
-                weights.Add(e.Weight);
+                weights.Add(e.EffectiveWeight);
             for (int i = 0; i < data.Objects.Count; i++)
             {
                 MapLabPlacement o = data.Objects[i];

@@ -552,6 +552,8 @@ namespace KingdomSurvival.MapLab
         public MapLabStage04Settings Stage04 = new MapLabStage04Settings();
         public MapLabStage05Settings Stage05 = new MapLabStage05Settings();
         public MapLabDiagnosticsSettings Diagnostics = new MapLabDiagnosticsSettings();
+        // Профиль автора окна «Генератор карты»: макропараметры над рабочими полями.
+        public MapLabAuthorProfile Author = new MapLabAuthorProfile();
 
         // Конвейер этапа 03 (тайлы, перо, акценты, тени) — и у этапов 04 и 05;
         // проход согласования этапа 04 — и у этапа 05.

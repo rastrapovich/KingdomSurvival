@@ -48,7 +48,7 @@ namespace KingdomSurvival.MapLab
         {
             List<MapLabArtEntry> list = new List<MapLabArtEntry>();
             foreach (MapLabArtEntry e in set.Entries)
-                if (e != null && e.HasTexture && e.Weight > 0f && System.Array.IndexOf(roles, e.Role) >= 0)
+                if (e != null && e.HasTexture && e.EffectiveWeight > 0f && System.Array.IndexOf(roles, e.Role) >= 0)
                     list.Add(e);
             list.Sort((a, b) => string.CompareOrdinal(a.Id, b.Id));
             return list;
@@ -60,7 +60,7 @@ namespace KingdomSurvival.MapLab
                 return null;
             List<float> w = new List<float>(list.Count);
             foreach (MapLabArtEntry e in list)
-                w.Add(e.Weight);
+                w.Add(e.EffectiveWeight);
             return Choose(list, w, roll);
         }
 

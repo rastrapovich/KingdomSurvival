@@ -88,7 +88,7 @@ namespace KingdomSurvival.MapLab
                 for (int k = 0; k < pool.Count; k++)
                 {
                     float g = grove.Fbm(p.x / 30f + k * 17.3f, p.y / 30f - k * 9.1f, 2) * 0.5f + 0.5f;
-                    weights.Add(pool[k].Weight * (0.3f + 1.4f * MapLabGeometry.SmoothStep(0.4f, 0.72f, g)));
+                    weights.Add(pool[k].EffectiveWeight * (0.3f + 1.4f * MapLabGeometry.SmoothStep(0.4f, 0.72f, g)));
                 }
                 // Спокойный массив: малый разброс яркости, связанный с местом.
                 float place = tone.Fbm(p.x / 22f, p.y / 22f, 2);

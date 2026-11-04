@@ -1,6 +1,6 @@
 # Kingdom Survival — карта репозитория
 
-Сюжетная основа 04.11.2026 — [канон v1.63](../KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_63.md) §6, [NARRATIVE.md](NARRATIVE.md) §26.4 и [LORE.md](LORE.md) §17.2. Дом — [архивное направление под вопросом](Archive/HOME_DESIGN_ON_HOLD_2026-11-04.md); его старый лор и прежняя обязательная тема отменены.
+Сюжетная основа 04.11.2026 — [актуальный канон v1.64](../KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_64.md) §6, [NARRATIVE.md](NARRATIVE.md) §26.4 и [LORE.md](LORE.md) §17.2. Дом — [архивное направление под вопросом](Archive/HOME_DESIGN_ON_HOLD_2026-11-04.md); его старый лор и прежняя обязательная тема отменены.
 
 Проверено по локальному checkout 02.11.2026. Это справочник путей, а не новый канон. Рабочие правила — [AGENTS.md](../AGENTS.md). Пути в таблицах ниже указаны от корня репозитория; Markdown-ссылки разрешаются из ProjectDocs. При изменении структуры обновляй карту.
 
@@ -49,6 +49,7 @@
 
 | Тема | Источники |
 |---|---|
+| Проверка игрового опыта: механики, карта, способности, UI, эксперименты | [GAME_DESIGN_REVIEW_GUIDE.md](GAME_DESIGN_REVIEW_GUIDE.md), §1–2 и выбранные GD01–GD12; обязательная сверка Codex и Claude до значимой работы и при проверке результата |
 | Механики, формат и ограничения игры | Текущий корневой канон; [план](PROTOTYPE_DEVELOPMENT_PLAN.md); свежие относящиеся записи [журнала](DEVELOPMENT_STATUS.md) |
 | Факты мира / сюжет / существа | [LORE.md](LORE.md) / [NARRATIVE.md](NARRATIVE.md) / [BESTIARY.md](BESTIARY.md), [боевые паспорта](BESTIARY_COMBAT_PASSPORTS.md) |
 | Квест, встреча, значимая правка диалога | Правила в конце AGENTS; [правила создания квестов](REACTOR_QUEST_DESIGN_GUIDE.md); [гайд мастерской](QUEST_WORKSHOP_GUIDE.md), локальный `QuestWorkshop/KingdomSurvival_Quest_Guide_RU.md`; подходящие `*_ADAPTATION.md` |

@@ -54,11 +54,15 @@ namespace KingdomSurvival.MapLab
         [Tooltip("R03: доля края полей с пером (по краю жёлтой заливки; остальное — потерянные края).")]
         [Range(0f, 1f)] public float FieldEdgeInkShare = 0.72f;
         [Tooltip("R03: редкие штрихи туши внутри полей вдоль борозд.")]
-        [Range(0f, 2f)] public float FieldInnerInk = 1f;
+        [Range(0f, 2f)] public float FieldInnerInk = 1.5f;
+        [Tooltip("Прерывистые следы туши на границах полос разного цвета внутри поля (доля длины).")]
+        [Range(0f, 1f)] public float FieldStripInkShare = 0.45f;
         [Tooltip("Доля кромки берега с пером.")]
         [Range(0f, 1f)] public float ShoreInkShare = 0.55f;
         [Tooltip("Доля внешних контуров уступа с пером.")]
         [Range(0f, 1f)] public float CliffInkShare = 0.6f;
+        [Tooltip("Рисованные скалы: доля длины подошвы стены с линией туши (стык камня и земли).")]
+        [Range(0f, 1f)] public float CliffFootInkShare = 0.72f;
 
         [Header("Мазки")]
         [Tooltip("Мазки собираются в группы разного размера с просветами (без «забора»).")]
@@ -86,11 +90,11 @@ namespace KingdomSurvival.MapLab
         [Tooltip("Плавное исчезновение мелких спрайтов вдали: пикселей на единицу мира, ниже которых — полностью скрыты, и выше которых — полностью видны.")]
         public Vector2 DetailFadePixels = new Vector2(5f, 11f);
 
-        [Header("Мазки на спрайтах (эксперимент)")]
-        [Tooltip("Те же живописные мазки, что на земле, — на деревьях, кустах, камнях, постройках и реквизите; по форме объекта. Выключено — рисунки как есть.")]
-        public bool SpriteStrokes;
+        [Header("Мазки на спрайтах")]
+        [Tooltip("Те же живописные мазки, что на земле, — на деревьях, кустах, камнях, постройках и реквизите; по форме объекта. Выключено — рисунки как есть (для сравнения).")]
+        public bool SpriteStrokes = true;
         [Tooltip("Заметность мазков на спрайтах — как «сила мазков» покраски луга (умеренно: форма важнее).")]
-        [Range(0f, 1f)] public float SpriteStrokeStrength = 0.7f;
+        [Range(0f, 1f)] public float SpriteStrokeStrength = 0.322f;
         [Tooltip("Размер мазка относительно кисти луга (PainterlyStyle → BrushScale): 1 — тот же мазок, как на земле (на кроне 4 ед. помещается лишь 2–3 таких); по умолчанию мельче, чтобы форма читалась мазками.")]
         [Range(0.1f, 1.5f)] public float SpriteStrokeLength = 0.6f;
 

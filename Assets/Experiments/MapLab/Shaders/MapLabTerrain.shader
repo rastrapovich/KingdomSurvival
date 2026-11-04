@@ -5,6 +5,7 @@ Shader "Kingdom Survival/MapLab/Terrain"
 {
     Properties
     {
+        _DrawnCliffs ("Ревизия 06: стены обрывов — рисунки (склон за ними — луг)", Float) = 0
         _PaintTex ("Paint (RGB краска, A линия)", 2D) = "gray" {}
         _ShadeTex ("Shade (R свет, G затенение)", 2D) = "white" {}
         _MaskA ("Masks A (лес, поле, дорога, уступ)", 2D) = "black" {}
@@ -97,6 +98,7 @@ Shader "Kingdom Survival/MapLab/Terrain"
                 float _ToneBands;
                 float _CastShadow;
                 float _AO;
+                float _DrawnCliffs;
                 float _Outline;
                 float _Micro;
                 float _Paper;
@@ -186,6 +188,9 @@ Shader "Kingdom Survival/MapLab/Terrain"
                 if (_ShowLight > 0.5)
                 {
                     float3 shapeNormal = normalize(float3(n.x * _Exaggeration, n.y, n.z * _Exaggeration));
+                    // Ревизия 06: крутой склон за рисованной стеной и над её кромкой —
+                    // свет ровного луга (свет стены уже нарисован), без серой полосы.
+                    shapeNormal = normalize(lerp(shapeNormal, float3(0, 1, 0), _DrawnCliffs * smoothstep(0.02, 0.3, maskA.a)));
                     c = MapLabLight(c, shapeNormal, L, _LightStrength, _ShadowSoftness, _ToneBands, _ShadowTint.rgb, _LightTint.rgb);
                     c = MapLabShadow(c, (1.0 - shade.r) * _CastShadow * 0.9, _ShadowTint.rgb);
                     c *= lerp(1.0, shade.g, _AO);
@@ -210,7 +215,7 @@ Shader "Kingdom Survival/MapLab/Terrain"
                 if (_GroundStrength > 0.001)
                 {
                     float water = maskB.r;
-                    float rockW = saturate(max(maskB.a, maskA.a * 0.8));
+                    float rockW = saturate(max(maskB.a, maskA.a * 0.8)) * (1.0 - _DrawnCliffs * smoothstep(0.02, 0.3, maskA.a));
                     float earthW = saturate(maskA.b + maskB.b * 0.35 + maskA.g * 0.45 + maskB.g * 0.4) * (1.0 - rockW);
                     float grassW = saturate(1.0 - earthW - rockW);
                     float sum = max(1e-3, grassW + earthW + rockW);

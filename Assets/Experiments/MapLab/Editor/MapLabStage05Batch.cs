@@ -246,7 +246,7 @@ namespace KingdomSurvival.MapLab.Editor
                     View(2f, spots.Village);
                     Shot($"stage05/sprite_strokes/{tag}/village_z2");
                 }
-                settings.Stage05.SpriteStrokes = false;
+                settings.Stage05.SpriteStrokes = true;
                 view.ApplyMaterialSettings();
                 // Свободные окончания пера (MAP_STYLE_GUIDE.md §2.5): до и после на
                 // одних кадрах; замер сборки пера и объёма геометрии на том же seed.

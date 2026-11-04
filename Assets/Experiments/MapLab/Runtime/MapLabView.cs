@@ -564,6 +564,37 @@ namespace KingdomSurvival.MapLab
             Color32[] pixels = new Color32[r * r];
             for (int i = 0; i < pixels.Length; i++)
                 pixels[i] = new Color32(B(data.ShadeLight[i]), B(data.ShadeOcclusion[i]), 0, 255);
+            // Ревизия 06: у нарисованных обрывов свет уже в рисунке — тень крутого
+            // склона за стеной и над кромкой приведена к ровному лугу (без серой
+            // «подложки» между стеной и полем).
+            if (WillDrawCliffs06 && data.Cliff != null)
+            {
+                double light = 0, occlusion = 0;
+                int count = 0;
+                float[] mask = new float[r * r];
+                for (int i = 0; i < mask.Length; i++)
+                {
+                    float x = (i % r + 0.5f) / r * data.Size, z = (i / r + 0.5f) / r * data.Size;
+                    mask[i] = data.SampleMask(data.Cliff, x, z);
+                    if (mask[i] < 0.01f)
+                    {
+                        light += data.ShadeLight[i];
+                        occlusion += data.ShadeOcclusion[i];
+                        count++;
+                    }
+                }
+                if (count > 0)
+                {
+                    float flatLight = (float)(light / count), flatOcclusion = (float)(occlusion / count);
+                    for (int i = 0; i < pixels.Length; i++)
+                    {
+                        float t = MapLabGeometry.SmoothStep(0.02f, 0.3f, mask[i]);
+                        if (t <= 0f)
+                            continue;
+                        pixels[i] = new Color32(B(Mathf.Lerp(data.ShadeLight[i], flatLight, t)), B(Mathf.Lerp(data.ShadeOcclusion[i], flatOcclusion, t)), 0, 255);
+                    }
+                }
+            }
             shadeTexture.SetPixels32(pixels);
             shadeTexture.Apply(true, false);
             if (maskATexture != null)
@@ -616,6 +647,7 @@ namespace KingdomSurvival.MapLab
                 StrokeContribution = Settings.Diagnostics.Mode == MapLabDiagnosticMode.StrokeContribution,
                 RoadInkInPaint = !Settings.Stage03.Ink,
                 Washes = Settings.IsStage05 && Settings.Diagnostics.ShowPaint ? WashLayer() : null,
+                DrawnCliffs = WillDrawCliffs06,
             };
             paintContribution = options.StrokeContribution;
             MapLabTiledPainter.Result result = MapLabTiledPainter.Paint(data, Settings, Palette, tileWorld, options);
@@ -822,6 +854,9 @@ namespace KingdomSurvival.MapLab
             AddRenderer(group, "Rivers", MapLabMeshes.BuildRivers(data), waterMaterial);
         }
 
+        // Будут ли стены обрывов рисунками ревизии 06 (до сборки — для покраски и тени).
+        private bool WillDrawCliffs06 => Settings.IsStage05 && Settings.Stage05.DrawnCliffs && CliffShader != null && MapLabCliffs06.KitOf(ResolvedArtSet06).HasFaces;
+
         private void BuildCliffs()
         {
             GameObject group = Group("Cliffs");
@@ -864,6 +899,12 @@ namespace KingdomSurvival.MapLab
             m.SetFloat("_GroundShade", Settings.Diagnostics.ShowReliefLight ? 0.45f : 0f);
             m.SetVector("_LightDir", Settings.LightDirection);
             m.SetFloat("_Saturation", Settings.PainterlyStyle.Saturation);
+            // Подошва стены: тушь по линии подошвы рисунка и растворение полосы под ней.
+            bool foot = entry.BasePx > 0f && entry.Height > 0f && entry.BasePx > entry.RockTopPx;
+            m.SetFloat("_BaseV", foot ? 1f - entry.BasePx / entry.Height : 0f);
+            m.SetFloat("_FootFadeV", foot ? 36f / entry.Height : 0.035f);
+            m.SetColor("_InkColor", Settings.Stage05.InkColor);
+            m.SetVector("_FootInk", new Vector4(Settings.Stage05.InkDensity, 1.25f, Settings.Stage05.CliffFootInkShare, foot ? 6f / entry.Height : 0f));
         }
 
         private static readonly string[] ObjectGroups = { "Vegetation", "Structures", "Houses", "Boulders", "ArtVegetation", "ArtHouses", "ArtHouses50", "ArtHouses35", "ArtBoulders", "ArtCliffDecor", "ArtHouses05", "ArtDecor05", "Modules05" };
@@ -1383,6 +1424,7 @@ namespace KingdomSurvival.MapLab
             t.SetFloat("_ToneBands", style.ToneBands);
             t.SetFloat("_CastShadow", style.CastShadows);
             t.SetFloat("_AO", style.AmbientOcclusion);
+            t.SetFloat("_DrawnCliffs", WillDrawCliffs06 ? 1f : 0f);
             t.SetFloat("_Outline", outline);
             t.SetFloat("_Micro", micro);
             t.SetFloat("_Paper", paper);

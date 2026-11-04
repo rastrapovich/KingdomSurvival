@@ -143,6 +143,104 @@ Shader "Kingdom Survival/MapLab/Water"
                 return s;
             }
 
+            // Этап 05: след кисти по воде — отрезок [s0, s1] вдоль, полуширина halfW;
+            // lens — сужение к концам (0 — ровный, 1 — линза/точка). Край — в пикселях.
+            float WaterSeg(float x, float y, float s0, float s1, float halfW, float2 aa, float lens)
+            {
+                if (s1 <= s0)
+                    return 0;
+                float t = saturate((x - s0) / (s1 - s0)) * 2.0 - 1.0;
+                float hw = halfW * lerp(1.0, sqrt(saturate(1.0 - t * t)), lens);
+                float a = saturate(min(x - s0, s1 - x) / aa.x + 0.5);
+                float b = saturate((hw - abs(y)) / aa.y + 0.5);
+                return a * b;
+            }
+
+            // Этап 05: штрихи воды тем же языком, что перо (MAP_STYLE_GUIDE §2.5):
+            // основная линия очень разной длины → просвет → короткий штрих → редкие
+            // уменьшающиеся точки или сокращённый вариант; часть ячеек — только точки.
+            float StrokeField05(float2 q, float rowSpacing, float cellLength, float chance, out float inkMask)
+            {
+                float row = floor(q.y / rowSpacing);
+                float rowShift = Hash21(float2(row, 7.1)) * cellLength;
+                float u = (q.x + rowShift) / cellLength;
+                float cell = floor(u);
+                float h = Hash21(float2(cell, row));
+                float h2 = Hash21(float2(cell + 31.7, row - 3.3));
+                float h3 = Hash21(float2(cell - 12.9, row + 5.1));
+                float h4 = Hash21(float2(cell + 4.4, row + 17.3));
+                float h5 = Hash21(float2(cell - 7.7, row - 11.9));
+                float h6 = Hash21(float2(cell + 23.1, row + 2.6));
+                float group = Noise21(float2(q.x / (cellLength * 3.1), row * 0.37));
+                float present = step(h, chance * lerp(0.35, 1.6, group));
+                float x = frac(u) * cellLength;
+                float y = (frac(q.y / rowSpacing) - 0.5) * rowSpacing + (h5 - 0.5) * rowSpacing * 0.3;
+                float2 aa = max(fwidth(q), 1e-3) * float2(1.2, 1.0);
+                float halfW = lerp(0.04, 0.085, h2);
+                float limit = cellLength * 0.96;
+                float s = 0;
+                float px;
+                if (h3 < 0.2)
+                {
+                    // Только точки: 1–3 неровных следа, к концу мельче.
+                    px = cellLength * lerp(0.1, 0.55, h4);
+                    float dw = halfW * lerp(0.95, 1.25, h6);
+                    for (int k = 0; k < 3; k++)
+                    {
+                        float hk = Hash21(float2(cell + k * 3.7, row - k * 1.3));
+                        if (k > 0 && hk < 0.45)
+                            break;
+                        float len = dw * lerp(1.8, 3.2, hk);
+                        if (px + len > limit)
+                            break;
+                        s = max(s, WaterSeg(x, y + (hk - 0.5) * halfW, px, px + len, dw, aa, 1.0));
+                        px += len + lerp(0.12, 0.32, Hash21(float2(row + k, cell * 0.7)));
+                        dw *= lerp(0.65, 0.9, hk);
+                    }
+                    inkMask = 0;
+                    return present * s;
+                }
+                // Основная линия: от коротких до длинных (70/25/5 по весу).
+                float lengthT = h4 < 0.55 ? lerp(0.06, 0.22, h4 / 0.55) : (h4 < 0.92 ? lerp(0.22, 0.5, (h4 - 0.55) / 0.37) : lerp(0.55, 0.78, (h4 - 0.92) / 0.08));
+                float start = cellLength * lerp(0.02, 0.96 - lengthT - 0.1, h5);
+                float stop = start + cellLength * lengthT;
+                s = WaterSeg(x, y, start, stop, halfW, aa, 0.45);
+                px = stop;
+                // Завершение: полная цепочка, только точка, только штрих или потерянный конец.
+                if (h6 < 0.75)
+                {
+                    float dashW = halfW * lerp(0.7, 0.9, h2);
+                    if (h6 < 0.55)
+                    {
+                        px += lerp(0.16, 0.32, h3);
+                        float dash = lerp(0.14, 0.36, h5);
+                        if (px + dash < limit)
+                            s = max(s, WaterSeg(x, y, px, px + dash, dashW, aa, 1.0));
+                        px += dash;
+                    }
+                    float dw = halfW * lerp(0.9, 1.15, h4);
+                    int dots = h6 < 0.3 ? 2 : 1;
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (k >= dots)
+                            break;
+                        float hk = Hash21(float2(cell - k * 5.3, row + k * 2.9));
+                        px += lerp(0.12, 0.28, hk) * (1.0 + k * 0.35);
+                        float len = dw * lerp(1.7, 3.0, hk);
+                        if (px + len > limit)
+                            break;
+                        s = max(s, WaterSeg(x, y + (hk - 0.5) * halfW * 0.8, px, px + len, dw, aa, 1.0));
+                        px += len;
+                        dw *= lerp(0.6, 0.85, hk);
+                    }
+                }
+                // Редкие длинные тонкие линии синей туши.
+                float fu = abs(frac(u) - 0.5);
+                float fv = abs(frac(q.y / rowSpacing) - 0.5) * rowSpacing;
+                inkMask = step(0.965, Hash21(float2(cell * 0.5, row + 91.0))) * saturate((0.46 - fu) * cellLength / max(1e-3, aa.x)) * saturate((0.03 - fv) / max(1e-3, aa.y));
+                return present * s;
+            }
+
             float4 Frag(Varyings i) : SV_Target
             {
                 float2 world = i.positionWS.xz;
@@ -170,14 +268,14 @@ Shader "Kingdom Survival/MapLab/Water"
                     if (river > 0.5)
                     {
                         float2 q = float2(i.channel.x, i.channel.y);
-                        s05 = StrokeField(q, 0.95, 3.2, 0.42, ink05) * _Strokes05.x;
+                        s05 = StrokeField05(q, 0.95, 3.4, 0.56, ink05) * _Strokes05.x;
                     }
                     else
                     {
                         // Озеро: общее медленное направление, реже и спокойнее; середина пустая.
                         float2 dir = normalize(float2(0.94, 0.34));
                         float2 q = float2(dot(world, dir), dot(world, float2(-dir.y, dir.x)));
-                        s05 = StrokeField(q, 1.3, 4.2, 0.22, ink05) * _Strokes05.y * lerp(1.0, 0.35, deep05);
+                        s05 = StrokeField05(q, 1.3, 4.4, 0.24, ink05) * _Strokes05.y * lerp(1.0, 0.35, deep05);
                         ink05 *= 0.6;
                     }
                     if (mode != 0)

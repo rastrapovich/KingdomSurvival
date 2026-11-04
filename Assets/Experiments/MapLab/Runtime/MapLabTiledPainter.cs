@@ -62,6 +62,9 @@ namespace KingdomSurvival.MapLab
             public bool RoadInkInPaint;
             // Этап 05: акварельные пятна (Wash PNG), уже размещённые в мире.
             public MapLabWash.Layer Washes;
+            // Ревизия 06: стены обрывов — рисунки; земля у обрыва — обычный луг
+            // (без камня и штриховки покраски: светлой подложки над кромкой и под подошвой).
+            public bool DrawnCliffs;
         }
 
         public static Result Paint(MapLabData data, MapLabSettings settings, MapLabPalette palette, float tileWorld, Options options)
@@ -225,6 +228,7 @@ namespace KingdomSurvival.MapLab
             private readonly float edgeAa;
             private readonly bool stage05;
             private readonly MapLabWash.Layer washes;
+            private readonly bool drawnCliffs;
             private readonly MapLabNoise groups, ochre;
             public long StrokeCount;
             public long StampCount;
@@ -267,6 +271,7 @@ namespace KingdomSurvival.MapLab
                 stage05 = settings.IsStage05;
                 edgeAa = stage05 ? Mathf.Clamp(settings.Stage05.StrokeEdge, 0.2f, 3f) : Mathf.Clamp(settings.Stage03.StrokeEdge, 0.3f, 3f);
                 washes = options.Washes;
+                drawnCliffs = options.DrawnCliffs;
                 groups = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "paint05-groups", MapLabData.AlgorithmVersion));
                 ochre = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "paint05-shore-ochre", MapLabData.AlgorithmVersion));
                 yardMin = new Vector2(float.MaxValue, float.MaxValue);
@@ -429,7 +434,10 @@ namespace KingdomSurvival.MapLab
                         if (yard > 0.5f) k = KeyYard;
                     }
 
-                    if (s.Rock > 0.02f)
+                    float rock = s.Rock;
+                    if (drawnCliffs && rock > 0.02f)
+                        rock *= 1f - MapLabGeometry.SmoothStep(0.02f, 0.25f, data.SampleMask(data.Cliff, w.x, w.y));
+                    if (rock > 0.02f)
                     {
                         Color rc = Color.Lerp(pal.RockShadow, pal.RockLight, MapLabGeometry.SmoothStep(0.25f, 0.75f, s.RockStreak));
                         // Этап 05: камень на земле — тёплый серо-охристый, как рисованные
@@ -440,7 +448,7 @@ namespace KingdomSurvival.MapLab
                             rc = Color.Lerp(rc, warm * Mathf.Lerp(0.82f, 1.05f, s.RockStreak), 0.75f);
                             rc.a = 1f;
                         }
-                        float t = MapLabGeometry.SmoothStep(0.15f, 0.6f, s.Rock);
+                        float t = MapLabGeometry.SmoothStep(0.15f, 0.6f, rock);
                         c = Color.Lerp(c, rc, t);
                         if (t > 0.5f) k = KeyRock;
                     }
@@ -678,6 +686,8 @@ namespace KingdomSurvival.MapLab
                             continue;
                         int k = key[ci];
                         if (k == KeyRoad || k == KeyShore || k == KeyYard || k >= KeyFieldBase)
+                            continue;
+                        if (drawnCliffs && data.SampleMask(data.Cliff, p.x, p.y) > 0.05f)
                             continue;
                         float slope = data.SampleSlope(p.x, p.y);
                         float facing = Vector3.Dot(data.SampleNormal(p.x, p.y), light);

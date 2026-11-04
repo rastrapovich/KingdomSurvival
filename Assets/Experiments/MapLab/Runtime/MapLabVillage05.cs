@@ -281,6 +281,22 @@ namespace KingdomSurvival.MapLab
             toDoor.Points.Add(Vector2.Lerp(gate, door, 0.55f) + axisU * rng.Signed() * 0.3f);
             toDoor.Points.Add(door);
             data.YardPaths.Add(toDoor);
+            // Тропинка ворота → ближайшая дорога: доходит до полотна и чуть заходит
+            // в него (объединённое поле кромки сливает их без шва).
+            if (NearestRoad(data, gate, out Vector2 onRoad, out float roadHalf) && (onRoad - gate).magnitude < 30f)
+            {
+                Vector2 toRoad = onRoad - gate;
+                float len = toRoad.magnitude;
+                if (len > roadHalf + 0.3f)
+                {
+                    Vector2 dir = toRoad / len;
+                    MapLabPolyline toStreet = new MapLabPolyline { Width = 0.9f, Kind = MapLabRoadKind.Path };
+                    toStreet.Points.Add(gate - backV * 0.4f);
+                    toStreet.Points.Add(Vector2.Lerp(gate, onRoad, 0.5f) + new Vector2(-dir.y, dir.x) * ((Mathf.FloorToInt(gate.x * 7f + gate.y * 3f) & 1) == 0 ? 1f : -1f) * Mathf.Min(0.5f, len * 0.08f));
+                    toStreet.Points.Add(onRoad - dir * Mathf.Max(0f, roadHalf - 0.5f));
+                    data.YardPaths.Add(toStreet);
+                }
+            }
             // Сарай — в глубине, у одного из задних углов; вход — к дому.
             float side = rng.Chance(0.5f) ? 1f : -1f;
             if (barnViews.Count > 0 && rng.Chance(spacious ? 0.9f : 0.3f))
@@ -528,6 +544,30 @@ namespace KingdomSurvival.MapLab
                     return true;
             }
             return false;
+        }
+
+        // Ближайшая точка осевой линии дорог и троп (без вставок у колодца) и полуширина полотна.
+        private static bool NearestRoad(MapLabData data, Vector2 p, out Vector2 point, out float halfWidth)
+        {
+            point = p;
+            halfWidth = 0f;
+            float best = float.MaxValue;
+            foreach (MapLabPolyline road in data.Roads)
+            {
+                if (road.Widening)
+                    continue;
+                for (int i = 0; i + 1 < road.Points.Count; i++)
+                {
+                    float d = MapLabGeometry.DistanceToSegment(p, road.Points[i], road.Points[i + 1], out float t);
+                    if (d < best)
+                    {
+                        best = d;
+                        point = Vector2.Lerp(road.Points[i], road.Points[i + 1], t);
+                        halfWidth = road.Width * 0.5f;
+                    }
+                }
+            }
+            return best < float.MaxValue;
         }
     }
 }

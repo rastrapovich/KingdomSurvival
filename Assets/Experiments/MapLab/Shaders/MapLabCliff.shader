@@ -19,6 +19,10 @@ Shader "Kingdom Survival/MapLab/Cliff"
         _Saturation ("Saturation", Float) = 1
         _DepthPush ("Сдвиг кромки и подошвы к камере", Float) = 0.08
         [Enum(Off, 0, On, 1)] _AlphaToMask ("AlphaToMask", Float) = 0
+        _BaseV ("Подошва рисунка, v (0 — нет)", Float) = 0
+        _FootFadeV ("Растворение полосы ниже подошвы, v", Float) = 0.035
+        _InkColor ("Тушь подошвы", Color) = (0.28, 0.2, 0.12, 1)
+        _FootInk ("Тушь подошвы: x непрозрачность, y полутолщина пикс., z доля, w волна v", Vector) = (0.85, 0.75, 0.72, 0.006)
     }
 
     SubShader
@@ -54,6 +58,7 @@ Shader "Kingdom Survival/MapLab/Cliff"
                 float tone : TEXCOORD2;
                 float shade : TEXCOORD3;
                 float fade : TEXCOORD4;
+                float2 world : TEXCOORD5;
             };
 
             TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
@@ -69,7 +74,25 @@ Shader "Kingdom Survival/MapLab/Cliff"
                 float _Saturation;
                 float _DepthPush;
                 float _AlphaToMask;
+                float _BaseV;
+                float _FootFadeV;
+                float4 _InkColor;
+                float4 _FootInk;
             CBUFFER_END
+
+            float _MapLabPixelScale;
+
+            float CliffHash(float2 p)
+            {
+                return frac(sin(dot(p, float2(127.1, 311.7))) * 43758.5453);
+            }
+
+            float CliffNoise(float2 p)
+            {
+                float2 i = floor(p), f = frac(p);
+                f = f * f * (3.0 - 2.0 * f);
+                return lerp(lerp(CliffHash(i), CliffHash(i + float2(1, 0)), f.x), lerp(CliffHash(i + float2(0, 1)), CliffHash(i + float2(1, 1)), f.x), f.y);
+            }
 
             Varyings Vert(Attributes input)
             {
@@ -88,6 +111,7 @@ Shader "Kingdom Survival/MapLab/Cliff"
                 float4 s = SAMPLE_TEXTURE2D_LOD(_ShadeTex, sampler_ShadeTex, world.xz / max(1.0, _MapSize), 0);
                 o.shade = saturate((1.0 - s.r) * 0.8 + (1.0 - s.g) * 0.25);
                 o.fade = input.color.a;
+                o.world = world.xz;
                 return o;
             }
 
@@ -101,6 +125,26 @@ Shader "Kingdom Survival/MapLab/Cliff"
                 clip(tex.a - 0.04);
                 float a = saturate((tex.a - 0.04) / 0.96);
                 float3 c = tex.rgb * i.tone;
+                if (_BaseV > 0.0)
+                {
+                    // Полоса травы рисунка ниже подошвы быстро уходит в землю:
+                    // под стеной — обычный луг покраски, без светлой ленты.
+                    float below = _BaseV - i.uv.y;
+                    a *= 1.0 - smoothstep(_FootFadeV * 0.15, _FootFadeV, below);
+                    // Тушь по подошве: чуть неровная, выбранными участками, толщина — в пикселях.
+                    float wobble = (CliffNoise(i.world * 0.9) - 0.5) * 2.0 * _FootInk.w;
+                    float dv = i.uv.y - _BaseV + wobble;
+                    float px = max(fwidth(i.uv.y), 1e-5);
+                    float scale = _MapLabPixelScale > 0.0 ? _MapLabPixelScale : 1.0;
+                    float halfPx = _FootInk.y * scale * lerp(0.8, 1.25, CliffNoise(i.world * 0.35 + 7.0));
+                    float cover = saturate((halfPx * px - abs(dv)) / px + 0.5);
+                    float pick = CliffNoise(i.world * 0.16 + 3.1) * 0.65 + CliffNoise(i.world * 0.55 + 11.0) * 0.35;
+                    float keep = smoothstep(1.0 - _FootInk.z - 0.05, 1.0 - _FootInk.z + 0.05, pick);
+                    float ink = cover * keep * _FootInk.x * i.fade;
+                    c = lerp(c, _InkColor.rgb, ink);
+                    a = max(a, ink);
+                }
+                clip(a - 0.02);
                 c = MapLabShadow(c, i.shade * _GroundShade, _ShadowTint.rgb);
                 c = MapLabSaturate(c, _Saturation);
                 return float4(c, a);

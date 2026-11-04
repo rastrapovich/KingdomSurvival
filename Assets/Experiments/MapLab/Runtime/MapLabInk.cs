@@ -311,12 +311,33 @@ namespace KingdomSurvival.MapLab
         // перегородки нет), часть участков — потерянные края. Плюс редкие короткие
         // штрихи внутри полей вдоль борозд: группы и большие пустые места.
         public const float FieldStep = 0.25f;
-        public static int LastFieldInner;
+        public static int LastFieldInner, LastFieldStrips;
+
+        private static float MaxWeight(Contour c)
+        {
+            float m = 0f;
+            foreach (float v in c.Weights)
+                m = Mathf.Max(m, v);
+            return m;
+        }
+
+        private static int ToneClass(float t) => t < 0.36f ? 0 : t < 0.64f ? 1 : t < 0.86f ? 2 : 3;
+
+        // Билинейная выборка поля на сетке step (n × n), за пределами — край.
+        private static float SampleGrid(float[] f, int n, float step, Vector2 p)
+        {
+            float gx = Mathf.Clamp(p.x / step, 0f, n - 1.001f), gz = Mathf.Clamp(p.y / step, 0f, n - 1.001f);
+            int x = (int)gx, z = (int)gz;
+            float fx = gx - x, fz = gz - z;
+            float a = f[z * n + x], b = f[z * n + x + 1], c = f[(z + 1) * n + x], d = f[(z + 1) * n + x + 1];
+            return Mathf.Lerp(Mathf.Lerp(a, b, fx), Mathf.Lerp(c, d, fx), fz);
+        }
 
         public static Mesh BuildFieldInk(MapLabData data, MapLabSettings settings, MapLabPaintFields fields, out Stats stats)
         {
             stats = default;
             LastFieldInner = 0;
+            LastFieldStrips = 0;
             if (data.Fields == null || data.Fields.Count == 0 || fields == null)
                 return null;
             MapLabStage05Settings s5 = settings.Stage05;
@@ -324,6 +345,16 @@ namespace KingdomSurvival.MapLab
             float[] g = new float[n * n], w = new float[n * n];
             MapLabNoise pick = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "ink05-fields", MapLabData.AlgorithmVersion));
             float share = Mathf.Clamp01(s5.FieldEdgeInkShare);
+            // Полотно дорог и троп — та же функция кромки, что у заливки и пера
+            // дороги: поле без полотна, межа упирается в кромку и дальше не идёт.
+            MapLabInkStyle roadInk = Style(settings);
+            float[] road = RoadField(data, fields, roadInk.Weights, out int rn, out _, MapLabRoadJunction.From(settings));
+            float RoadAt(Vector2 q) => SampleGrid(road, rn, GridStep, q);
+            // Прерывистые границы полос разного цвета внутри поля (знак — по
+            // чётности полосы, ноль — граница полос).
+            float[] sg = new float[n * n], sw = new float[n * n];
+            MapLabNoise dashes = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "ink05-strips", MapLabData.AlgorithmVersion));
+            float stripShare = Mathf.Clamp01(s5.FieldStripInkShare);
             System.Threading.Tasks.Parallel.For(0, n, z =>
             {
                 for (int x = 0; x < n; x++)
@@ -334,22 +365,43 @@ namespace KingdomSurvival.MapLab
                     if (s.FieldMask < 0.12f || !data.Fields.Evaluate(p, out MapLabFields.Sample fs))
                     {
                         g[i] = 9f;
+                        sg[i] = 9f;
                         continue;
                     }
-                    g[i] = -MapLabPaintFields.FieldEdge(s, fs.BorderDistance);
-                    float road = data.RoadDistance != null ? data.Bilinear(data.RoadDistance, p.x, p.y) : 99f;
+                    float edge = MapLabPaintFields.FieldEdge(s, fs.BorderDistance);
+                    float rd = RoadAt(p);
+                    g[i] = Mathf.Max(-edge, -rd);
                     float v = pick.Fbm(p.x / 14f, p.y / 14f, 2) * 0.5f + 0.5f;
-                    w[i] = MapLabGeometry.SmoothStep(0.35f, 0.95f, road) * MapLabGeometry.SmoothStep(1f - share - 0.05f, 1f - share + 0.05f, v);
+                    // Вдоль самой кромки полотна линию ведёт перо дороги — здесь веса нет.
+                    w[i] = MapLabGeometry.SmoothStep(0.04f, 0.18f, rd) * MapLabGeometry.SmoothStep(1f - share - 0.05f, 1f - share + 0.05f, v);
+                    int parity = ((fs.Strip % 2) + 2) % 2;
+                    bool lower = fs.Across < fs.StripWidth * 0.5f;
+                    sg[i] = (parity == 0 ? 1f : -1f) * Mathf.Min(fs.Across, fs.StripWidth - fs.Across);
+                    float t0 = data.Fields.StripTone(fs.Block, fs.Strip), t1 = data.Fields.StripTone(fs.Block, fs.Strip + (lower ? -1 : 1));
+                    float differ = ToneClass(t0) != ToneClass(t1) ? 1f : MapLabGeometry.SmoothStep(0.18f, 0.3f, Mathf.Abs(t0 - t1));
+                    float dash = dashes.Fbm(p.x / 4.5f, p.y / 4.5f, 2) * 0.5f + 0.5f;
+                    sw[i] = 0.8f * differ * MapLabGeometry.SmoothStep(1.2f, 1.8f, edge) * MapLabGeometry.SmoothStep(0.6f, 1f, rd)
+                        * MapLabGeometry.SmoothStep(1f - stripShare - 0.04f, 1f - stripShare + 0.04f, dash);
                 }
             });
             List<Contour> contours = Trace(g, w, n, FieldStep);
             contours.RemoveAll(c => c.Points.Count < 6);
-            // У дороги межа гаснет — это примыкание, а не свободный конец.
+            // У дороги межа упирается в кромку — это примыкание, а не свободный конец.
             foreach (Contour c in contours)
             {
                 c.Hold = new List<bool>(c.Points.Count);
                 foreach (Vector2 q in c.Points)
-                    c.Hold.Add(data.RoadDistance != null && data.Bilinear(data.RoadDistance, q.x, q.y) < 1f);
+                    c.Hold.Add(RoadAt(q) < 0.3f);
+            }
+            // Границы полос разного цвета — прерывистые следы (свободные концы — с завершением).
+            if (stripShare > 0f)
+            {
+                List<Contour> strips = Trace(sg, sw, n, FieldStep);
+                strips.RemoveAll(c => c.Points.Count < 5 || MaxWeight(c) < 0.3f);
+                foreach (Contour c in strips)
+                    c.EndingChance = 0.6f;
+                LastFieldStrips = strips.Count;
+                contours.AddRange(strips);
             }
             // Внутренние штрихи: размер 70/25/5 по весу, группы по шуму, не у края.
             if (s5.FieldInnerInk > 0f)

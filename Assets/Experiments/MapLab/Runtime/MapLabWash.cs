@@ -27,6 +27,8 @@ namespace KingdomSurvival.MapLab
             public Vector2 HalfSize;
             public float Cos, Sin;
             public float Opacity;
+            public Vector2 Flip = Vector2.one; // зеркало рисунка по осям (±1)
+            public Vector3 Tint = Vector3.one; // сдвиг оттенка этого пятна
         }
 
         // Сетка корзин для быстрого поиска пятен у текселя.
@@ -85,6 +87,10 @@ namespace KingdomSurvival.MapLab
 
         // Размещение: дрожащая сетка в мире, по одному кандидату на ячейку с
         // вероятностью; только на лугу (не дорога, вода, поле, двор, круча).
+        // Пятна сильно разные: размер 70/25/5 (мелкие, средние, редкие крупные)
+        // с разбросом внутри класса, лёгкая — не растянутая — разница сторон,
+        // зеркало, свой оттенок и сила; соседние пятна не повторяют один
+        // рисунок; местами — наложение второго пятна другого рисунка и размера.
         public static Layer Place(MapLabData data, MapLabSettings settings, List<Source> sources)
         {
             Layer layer = new Layer();
@@ -100,26 +106,102 @@ namespace KingdomSurvival.MapLab
                 {
                     float chance = rng.Value();
                     Vector2 p = new Vector2((cx + rng.Value()) * cell, (cz + rng.Value()) * cell);
-                    float scale = s5.WashScale * rng.Range(0.7f, 1.35f);
+                    float sizeRoll = rng.Value(), sizeJ = rng.Value();
                     float angle = rng.Range(0f, Mathf.PI * 2f);
                     int pick = rng.Range(0, sources.Count);
                     float opacity = rng.Value();
+                    float aspectJ = rng.Range(0.82f, 1.22f);
+                    Vector2 flip = new Vector2(rng.Value() < 0.5f ? -1f : 1f, rng.Value() < 0.5f ? -1f : 1f);
+                    Vector3 tint = Tint(rng);
+                    float overlap = rng.Value(), overlapJ = rng.Value(), overlapA = rng.Range(0f, Mathf.PI * 2f), overlapD = rng.Range(0.3f, 0.65f);
+                    int overlapPick = rng.Range(1, Mathf.Max(2, sources.Count));
+                    Vector3 overlapTint = Tint(rng);
                     if (chance > 0.56f || !Meadow(data, p))
                         continue;
-                    Source src = sources[pick];
-                    float aspect = src.Width / (float)Mathf.Max(1, src.Height);
-                    layer.Patches.Add(new Patch
+                    float scale = s5.WashScale * SizeClass(sizeRoll, sizeJ);
+                    pick = Distinct(layer, sources, pick, p, scale);
+                    Patch main = Make(sources[pick], p, scale, aspectJ, angle, flip, tint, opacity);
+                    layer.Patches.Add(main);
+                    // Наложение: второе пятно другого рисунка, мельче или крупнее, со сдвигом.
+                    if (overlap < 0.28f && sources.Count > 1)
                     {
-                        Source = src,
-                        Center = p,
-                        HalfSize = new Vector2(scale * 0.5f, scale * 0.5f / Mathf.Max(0.3f, aspect)),
-                        Cos = Mathf.Cos(angle),
-                        Sin = Mathf.Sin(angle),
-                        Opacity = Mathf.Lerp(src.Opacity.x, src.Opacity.y, opacity),
-                    });
+                        float scale2 = scale * Mathf.Lerp(0.45f, 0.85f, overlapJ);
+                        Vector2 q = p + new Vector2(Mathf.Cos(overlapA), Mathf.Sin(overlapA)) * scale * overlapD;
+                        if (Meadow(data, q))
+                        {
+                            int pick2 = Distinct(layer, sources, (pick + overlapPick) % sources.Count, q, scale2, sources[pick]);
+                            layer.Patches.Add(Make(sources[pick2], q, scale2, 1f / aspectJ, angle + 1.3f, new Vector2(-flip.x, flip.y), overlapTint, 1f - opacity));
+                        }
+                    }
                 }
             }
             return Finish(layer, data);
+        }
+
+        // Размер 70/25/5: мелкие 0.45–0.8, средние 0.85–1.35, крупные 1.5–2.3 от WashScale.
+        private static float SizeClass(float roll, float j)
+        {
+            if (roll < 0.7f)
+                return Mathf.Lerp(0.45f, 0.8f, j);
+            if (roll < 0.95f)
+                return Mathf.Lerp(0.85f, 1.35f, j);
+            return Mathf.Lerp(1.5f, 2.3f, j);
+        }
+
+        // Оттенок пятна: теплее/суше или холоднее/сочнее, чуть темнее или светлее.
+        private static Vector3 Tint(MapLabRandom rng)
+        {
+            float warm = rng.Range(-1f, 1f), value = rng.Range(-1f, 1f);
+            return new Vector3(1f + warm * 0.12f, 1f + warm * 0.03f, 1f - warm * 0.14f) * (1f + value * 0.08f);
+        }
+
+        // Рисунок, чей ближайший двойник дальше всех (в долях суммы размеров):
+        // соседние пятна не повторяют один рисунок; except — рисунок, который
+        // нельзя брать (основное пятно при наложении).
+        private static int Distinct(Layer layer, List<Source> sources, int pick, Vector2 p, float scale, Source except = null)
+        {
+            if (sources.Count < 2)
+                return pick;
+            int best = pick;
+            float bestGap = float.MinValue;
+            for (int attempt = 0; attempt < sources.Count; attempt++)
+            {
+                int k = (pick + attempt) % sources.Count;
+                if (sources[k] == except)
+                    continue;
+                float gap = float.MaxValue;
+                foreach (Patch o in layer.Patches)
+                {
+                    if (o.Source != sources[k])
+                        continue;
+                    float reach = scale * 0.5f + Mathf.Max(o.HalfSize.x, o.HalfSize.y);
+                    gap = Mathf.Min(gap, (o.Center - p).magnitude / Mathf.Max(1e-3f, reach));
+                }
+                if (gap > 1.6f)
+                    return k;
+                if (gap > bestGap)
+                {
+                    bestGap = gap;
+                    best = k;
+                }
+            }
+            return best;
+        }
+
+        private static Patch Make(Source src, Vector2 p, float scale, float aspectJ, float angle, Vector2 flip, Vector3 tint, float opacity)
+        {
+            float aspect = src.Width / (float)Mathf.Max(1, src.Height);
+            return new Patch
+            {
+                Source = src,
+                Center = p,
+                HalfSize = new Vector2(scale * 0.5f * aspectJ, scale * 0.5f / Mathf.Max(0.3f, aspect) / aspectJ),
+                Cos = Mathf.Cos(angle),
+                Sin = Mathf.Sin(angle),
+                Opacity = Mathf.Lerp(src.Opacity.x, src.Opacity.y, opacity),
+                Flip = flip,
+                Tint = tint,
+            };
         }
 
         private static bool Meadow(MapLabData data, Vector2 p)
@@ -181,9 +263,11 @@ namespace KingdomSurvival.MapLab
                 float v = (-d.x * p.Sin + d.y * p.Cos) / p.HalfSize.y;
                 if (u <= -1f || u >= 1f || v <= -1f || v >= 1f)
                     continue;
+                u *= p.Flip.x;
+                v *= p.Flip.y;
                 float value = Bilinear(p.Source, (u * 0.5f + 0.5f) * (p.Source.Width - 1), (v * 0.5f + 0.5f) * (p.Source.Height - 1)) * p.Opacity;
                 total += value;
-                hue += p.Source.Chroma * value;
+                hue += Vector3.Scale(p.Source.Chroma, p.Tint) * value;
             }
             if (total <= 0f)
                 return 0f;

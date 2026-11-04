@@ -67,19 +67,24 @@ namespace KingdomSurvival.MapLab
                 }
                 else if (gradient)
                 {
-                    Vector3 crown = c.Base + Vector3.up * c.CenterHeight;
+                    // Этап 05: тень не отрывается от ствола — пятно кроны ближе к опоре
+                    // (точка кроны ниже), от опоры к нему — сплошная расширяющаяся
+                    // форма по рельефу (Hit — пересечение луча с землёй).
+                    bool attached = settings.IsStage05;
+                    Vector3 crown = c.Base + Vector3.up * c.CenterHeight * (attached ? 0.62f : 1f);
                     Vector2 hit = Hit(data, crown, L);
                     Vector2 foot = new Vector2(c.Base.x, c.Base.z);
                     // Стабильные крупные выступы контура: фаза — от места опоры.
                     float phase = MapLabRandom.Hash01(Mathf.RoundToInt(foot.x * 16f), Mathf.RoundToInt(foot.y * 16f), lobeSeed) * 6.283f;
                     Ellipse(result.Cast, res, texel, hit, lightDir, c.Radius * stretch, c.Radius, lobes, phase);
-                    for (int k = 1; k <= 3; k++)
+                    int neck = attached ? 6 : 3;
+                    for (int k = 1; k <= neck; k++)
                     {
-                        float t = k / 4f;
-                        float r = Mathf.Lerp(c.ContactRadius * 1.1f, c.Radius * 0.85f, t);
+                        float t = k / (neck + 1f);
+                        float r = attached ? Mathf.Lerp(c.ContactRadius * 1.7f, c.Radius * 0.95f, Mathf.Sqrt(t)) : Mathf.Lerp(c.ContactRadius * 1.1f, c.Radius * 0.85f, t);
                         Ellipse(result.Cast, res, texel, Vector2.Lerp(foot, hit, t), lightDir, r * Mathf.Lerp(1f, stretch, t), r, lobes * 0.5f, phase + k);
                     }
-                    Ellipse(result.Cast, res, texel, foot, lightDir, c.ContactRadius * 1.2f, c.ContactRadius * 1.05f);
+                    Ellipse(result.Cast, res, texel, foot, lightDir, c.ContactRadius * (attached ? 1.7f : 1.2f), c.ContactRadius * (attached ? 1.4f : 1.05f));
                     // Градиент: максимум у ствола, вытянут по свету к пятну кроны.
                     float reach = Mathf.Max(c.ContactRadius, c.Radius * s4.ContactReach);
                     Falloff(result.Contact, res, texel, Vector2.Lerp(foot, hit, 0.18f), lightDir, reach * 1.25f, reach * 0.8f);

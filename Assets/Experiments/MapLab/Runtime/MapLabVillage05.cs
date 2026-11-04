@@ -128,6 +128,19 @@ namespace KingdomSurvival.MapLab
             data.Props.Add(new MapLabProp { Role = "village_well", Position = Ground(data, wellPoint), Scale = 1f, Yard = 0 });
 
             int target = rng.Range(Mathf.Min(s5.YardsMin, s5.YardsMax), Mathf.Max(s5.YardsMin, s5.YardsMax) + 1);
+            // R03: ограда — не атрибут каждого дома. Небольшой бюджет на деревню
+            // (около одной на пять дворов, 1–3) и выбор на уровне плана: какие по
+            // счёту дворы станут просторными огороженными хозяйствами.
+            int budget = settings.Settlement.Fences ? Mathf.Clamp(Mathf.RoundToInt(target * s5.FencedYardShare), 1, 3) : 0;
+            List<int> order = new List<int>();
+            for (int i = 0; i < target; i++)
+                order.Add(i);
+            for (int i = order.Count - 1; i > 0; i--)
+            {
+                int j = rng.Range(0, i + 1);
+                int tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+            }
+            HashSet<int> spacious = new HashSet<int>(order.GetRange(0, Mathf.Min(budget, order.Count)));
             List<MapLabYardRect> yards = new List<MapLabYardRect>();
             List<(Vector2 a, Vector2 b, float gate, bool fenced)> outlines = new List<(Vector2, Vector2, float, bool)>();
             List<MapLabPlacement> placed = new List<MapLabPlacement>();
@@ -159,7 +172,7 @@ namespace KingdomSurvival.MapLab
                     int side = k == 0 ? first : -first;
                     if (rng.Chance(0.25f))
                         continue;
-                    TryYard05(data, settings, ref rng, spot.road, spot.p, spot.t, normal * side, houseViews, barnViews, yards, outlines, placed);
+                    TryYard05(data, settings, ref rng, spot.road, spot.p, spot.t, normal * side, houseViews, barnViews, yards, outlines, placed, spacious.Contains(yards.Count));
                 }
             }
             data.YardRects.AddRange(yards);
@@ -169,7 +182,7 @@ namespace KingdomSurvival.MapLab
         private static Vector3 Ground(MapLabData data, Vector2 p) => new Vector3(p.x, data.SampleHeight(p.x, p.y), p.y);
 
         private static void TryYard05(MapLabData data, MapLabSettings settings, ref MapLabRandom rng, MapLabPolyline road, Vector2 roadPoint, Vector2 axisU, Vector2 backV,
-            List<MapLabHouseView>[] houseViews, List<MapLabHouseView> barnViews, List<MapLabYardRect> yards, List<(Vector2 a, Vector2 b, float gate, bool fenced)> outlines, List<MapLabPlacement> placed)
+            List<MapLabHouseView>[] houseViews, List<MapLabHouseView> barnViews, List<MapLabYardRect> yards, List<(Vector2 a, Vector2 b, float gate, bool fenced)> outlines, List<MapLabPlacement> placed, bool spacious)
         {
             MapLabStage05Settings s5 = settings.Stage05;
             float scale = settings.Settlement.BuildingScale;
@@ -198,6 +211,13 @@ namespace KingdomSurvival.MapLab
             float front = road.Width * 0.5f + rng.Range(1.3f, 2.2f);
             float width = hu * 2f + rng.Range(3.2f, 5.2f) * scale;
             float depth = hv * 2f + rng.Range(6f, 9f) * scale;
+            // Просторное хозяйство: длинные связные прогоны ограды вокруг двора с
+            // амбаром, огородом и сеном (а не тесная клетка вокруг избы).
+            if (spacious)
+            {
+                width += rng.Range(5f, 8f) * scale;
+                depth += rng.Range(4f, 7f) * scale;
+            }
             Vector2 frontCenter = roadPoint + backV * front + axisU * rng.Signed() * 0.8f;
             Vector2 center = frontCenter + backV * depth * 0.5f;
             MapLabYardRect rect = new MapLabYardRect { Center = center, AxisU = axisU, Half = new Vector2(width * 0.5f, depth * 0.5f) };
@@ -247,7 +267,7 @@ namespace KingdomSurvival.MapLab
             // Ворота — на передней стороне, где подход от двери выходит к дороге.
             Vector2 door = houseCenter + view.Entrance * (foot.x * 0.5f + 0.4f);
             float gateU = Mathf.Clamp(Vector2.Dot(door - frontCenter, axisU), -width * 0.5f + s5.GateWidth * 0.5f + 0.7f, width * 0.5f - s5.GateWidth * 0.5f - 0.7f);
-            bool fenced = settings.Settlement.Fences && rng.Chance(0.85f);
+            bool fenced = settings.Settlement.Fences && spacious;
             outlines.Add((P(-width * 0.5f, 0f), P(width * 0.5f, 0f), gateU + width * 0.5f, fenced));
             outlines.Add((P(width * 0.5f, 0f), P(width * 0.5f, depth), -1f, fenced));
             outlines.Add((P(width * 0.5f, depth), P(-width * 0.5f, depth), -1f, fenced));
@@ -263,7 +283,7 @@ namespace KingdomSurvival.MapLab
             data.YardPaths.Add(toDoor);
             // Сарай — в глубине, у одного из задних углов; вход — к дому.
             float side = rng.Chance(0.5f) ? 1f : -1f;
-            if (barnViews.Count > 0 && rng.Chance(0.55f))
+            if (barnViews.Count > 0 && rng.Chance(spacious ? 0.9f : 0.3f))
             {
                 Vector2 toHouse = -backV;
                 MapLabHouseView barnView = barnViews[0];
@@ -306,7 +326,7 @@ namespace KingdomSurvival.MapLab
                 AddProp(data, placed, "village_woodshed", P(-side * (width * 0.5f - 1.6f), depth * rng.Range(0.55f, 0.8f)), yardId, 1.3f);
             if (rng.Chance(0.4f))
                 AddProp(data, placed, "woodpile", houseCenter - view.Entrance * (foot.x * 0.5f + 0.7f) + backV * 0.4f, yardId, 0.6f);
-            if (rng.Chance(0.35f))
+            if (rng.Chance(spacious ? 0.75f : 0.2f))
                 AddProp(data, placed, rng.Chance(0.5f) ? "haystack" : "hay_sheaf", P(rng.Range(-0.35f, 0.35f) * width, depth - 1.3f), yardId, 1f);
         }
 

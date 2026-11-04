@@ -179,6 +179,13 @@ namespace KingdomSurvival.MapLab.Tests
                 MapLabFenceGraph g = d.FenceGraph;
                 Assert.IsNotNull(g, "Нет графа оград");
                 Assert.Greater(g.Edges.Count, 10);
+                // R03: ограда — не у каждого дома: 1–3 просторных участка на деревню.
+                HashSet<int> fencedYards = new HashSet<int>();
+                foreach (MapLabFenceEdge e in g.Edges)
+                    fencedYards.Add(e.Yard);
+                int houses = d.Objects.FindAll(o => o.Kind == MapLabObjectKind.House && o.Yard > 0).Count;
+                Assert.That(fencedYards.Count, Is.InRange(1, 3), "Число огороженных территорий вне бюджета");
+                Assert.Less(fencedYards.Count * 2, houses + 1, "Большинство изб должно оставаться без ограды");
                 HashSet<long> keys = new HashSet<long>();
                 foreach (MapLabFenceEdge e in g.Edges)
                 {

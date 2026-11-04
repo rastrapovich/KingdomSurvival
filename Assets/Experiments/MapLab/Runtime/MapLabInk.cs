@@ -294,6 +294,98 @@ namespace KingdomSurvival.MapLab
             return BuildRibbon(data, settings, kept, shore.Above, shore.N, "MapLab Shore Ink", out stats, style, MapLabShore.Step, -0.02f);
         }
 
+        // R03: перо полей — тот же профиль и та же лента, что у дороги, ровно по
+        // краю жёлтой заливки (общая функция MapLabPaintFields.FieldEdge: внешний
+        // край — сглаженная маска, внутренний — край межи у каждого поля; ось
+        // межи границей не служит). У дорог линия гаснет (ложной поперечной
+        // перегородки нет), часть участков — потерянные края. Плюс редкие короткие
+        // штрихи внутри полей вдоль борозд: группы и большие пустые места.
+        public const float FieldStep = 0.25f;
+        public static int LastFieldInner;
+
+        public static Mesh BuildFieldInk(MapLabData data, MapLabSettings settings, MapLabPaintFields fields, out Stats stats)
+        {
+            stats = default;
+            LastFieldInner = 0;
+            if (data.Fields == null || data.Fields.Count == 0 || fields == null)
+                return null;
+            MapLabStage05Settings s5 = settings.Stage05;
+            int n = Mathf.CeilToInt(data.Size / FieldStep) + 1;
+            float[] g = new float[n * n], w = new float[n * n];
+            MapLabNoise pick = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "ink05-fields", MapLabData.AlgorithmVersion));
+            float share = Mathf.Clamp01(s5.FieldEdgeInkShare);
+            System.Threading.Tasks.Parallel.For(0, n, z =>
+            {
+                for (int x = 0; x < n; x++)
+                {
+                    int i = z * n + x;
+                    Vector2 p = new Vector2(Mathf.Min(x * FieldStep, data.Size), Mathf.Min(z * FieldStep, data.Size));
+                    fields.Get(p, out MapLabPaintFields.Sample s);
+                    if (s.FieldMask < 0.12f || !data.Fields.Evaluate(p, out MapLabFields.Sample fs))
+                    {
+                        g[i] = 9f;
+                        continue;
+                    }
+                    g[i] = -MapLabPaintFields.FieldEdge(s, fs.BorderDistance);
+                    float road = data.RoadDistance != null ? data.Bilinear(data.RoadDistance, p.x, p.y) : 99f;
+                    float v = pick.Fbm(p.x / 14f, p.y / 14f, 2) * 0.5f + 0.5f;
+                    w[i] = MapLabGeometry.SmoothStep(0.35f, 0.95f, road) * MapLabGeometry.SmoothStep(1f - share - 0.05f, 1f - share + 0.05f, v);
+                }
+            });
+            List<Contour> contours = Trace(g, w, n, FieldStep);
+            contours.RemoveAll(c => c.Points.Count < 6);
+            // Внутренние штрихи: размер 70/25/5 по весу, группы по шуму, не у края.
+            if (s5.FieldInnerInk > 0f)
+            {
+                MapLabRandom rng = MapLabRandom.ForStream(data.Seed, "ink05-furrows", MapLabData.AlgorithmVersion);
+                MapLabNoise groups = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "ink05-furrow-groups", MapLabData.AlgorithmVersion));
+                List<Vector2> centers = new List<Vector2>();
+                int attempts = Mathf.RoundToInt(data.Size * data.Size / 12f * s5.FieldInnerInk);
+                float Edge(Vector2 q)
+                {
+                    fields.Get(q, out MapLabPaintFields.Sample s);
+                    return s.FieldMask > 0.12f && data.Fields.Evaluate(q, out MapLabFields.Sample f) ? MapLabPaintFields.FieldEdge(s, f.BorderDistance) : -9f;
+                }
+                for (int k = 0; k < attempts; k++)
+                {
+                    Vector2 p = new Vector2(rng.Value(), rng.Value()) * data.Size;
+                    float sizeRoll = rng.Value();
+                    float lengthJ = rng.Range(0.8f, 1.2f);
+                    float weight = rng.Range(0.55f, 0.85f);
+                    if (groups.Fbm(p.x / 21f, p.y / 21f, 2) * 0.5f + 0.5f < 0.6f || Edge(p) < 1.4f || !data.Fields.Evaluate(p, out MapLabFields.Sample fs))
+                        continue;
+                    bool near = false;
+                    foreach (Vector2 c in centers)
+                        if ((c - p).sqrMagnitude < 1.4f * 1.4f) { near = true; break; }
+                    if (near)
+                        continue;
+                    float angle = data.Fields.Block(fs.Block).Angle;
+                    Vector2 dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                    float length = (sizeRoll < 0.7f ? 1.6f : sizeRoll < 0.95f ? 3f : 5.2f) * lengthJ;
+                    Vector2 a = p - dir * length * 0.5f, b = p + dir * length * 0.5f;
+                    if (Edge(a) < 0.5f || Edge(b) < 0.5f)
+                    {
+                        a = p - dir * length * 0.25f;
+                        b = p + dir * length * 0.25f;
+                        if (Edge(a) < 0.5f || Edge(b) < 0.5f)
+                            continue;
+                    }
+                    Contour stroke = new Contour();
+                    for (int j = 0; j <= 8; j++)
+                    {
+                        stroke.Points.Add(Vector2.Lerp(a, b, j / 8f));
+                        stroke.Weights.Add(weight);
+                    }
+                    contours.Add(stroke);
+                    centers.Add(p);
+                    LastFieldInner++;
+                }
+            }
+            MapLabInkStyle style = Style(settings);
+            style.Weights = Vector4.one;
+            return BuildRibbon(data, settings, contours, g, n, "MapLab Field Ink", out stats, style, FieldStep);
+        }
+
         public static Mesh BuildRibbon(MapLabData data, MapLabSettings settings, List<Contour> contours, float[] field, int n, string name, out Stats stats, MapLabInkStyle style = null, float step = GridStep, float lift = 0.03f)
         {
             MapLabInkStyle ink = style ?? settings.Stage03.InkStyle;

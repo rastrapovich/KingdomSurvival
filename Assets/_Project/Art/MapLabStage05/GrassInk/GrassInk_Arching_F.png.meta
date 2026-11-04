@@ -1,0 +1,585 @@
+fileFormatVersion: 2
+guid: 283d3d49532a45a449b57ac78d4f209b
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7928271105672238270
+    second: GrassInk_Arching_F_0
+  - first:
+      213: 7992426566117329154
+    second: GrassInk_Arching_F_1
+  - first:
+      213: -7163809950021583454
+    second: GrassInk_Arching_F_2
+  - first:
+      213: 7163178348558804318
+    second: GrassInk_Arching_F_3
+  - first:
+      213: 6791247886379399702
+    second: GrassInk_Arching_F_4
+  - first:
+      213: 6153568010210109885
+    second: GrassInk_Arching_F_5
+  - first:
+      213: -287751699822047908
+    second: GrassInk_Arching_F_6
+  - first:
+      213: 6002609551482113542
+    second: GrassInk_Arching_F_7
+  - first:
+      213: -3895093113640622051
+    second: GrassInk_Arching_F_8
+  - first:
+      213: -1402581448754114643
+    second: GrassInk_Arching_F_9
+  - first:
+      213: 3657179013782946857
+    second: GrassInk_Arching_F_10
+  - first:
+      213: 3019751431695754767
+    second: GrassInk_Arching_F_11
+  - first:
+      213: -5333424286945887509
+    second: GrassInk_Arching_F_12
+  - first:
+      213: 2223314299747820428
+    second: GrassInk_Arching_F_13
+  - first:
+      213: -5496361295913958522
+    second: GrassInk_Arching_F_14
+  - first:
+      213: -6669136700765058551
+    second: GrassInk_Arching_F_15
+  - first:
+      213: -3071844113787718397
+    second: GrassInk_Arching_F_16
+  - first:
+      213: 1563236240076314023
+    second: GrassInk_Arching_F_17
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_0
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 0
+        width: 1315
+        height: 1107
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24ba9676f6f19f190800000000000000
+      internalID: -7928271105672238270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_1
+      rect:
+        serializedVersion: 2
+        x: 297
+        y: 1063
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20981debd9dcaee60800000000000000
+      internalID: 7992426566117329154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_2
+      rect:
+        serializedVersion: 2
+        x: 345
+        y: 1063
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2adfd825ec8059c90800000000000000
+      internalID: -7163809950021583454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_3
+      rect:
+        serializedVersion: 2
+        x: 275
+        y: 1047
+        width: 15
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e55ed9081c8b86360800000000000000
+      internalID: 7163178348558804318
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_4
+      rect:
+        serializedVersion: 2
+        x: 289
+        y: 1050
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61a344998fb5f3e50800000000000000
+      internalID: 6791247886379399702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_5
+      rect:
+        serializedVersion: 2
+        x: 339
+        y: 1043
+        width: 18
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db9e7c5908dd56550800000000000000
+      internalID: 6153568010210109885
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_6
+      rect:
+        serializedVersion: 2
+        x: 343
+        y: 1037
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5d87948a53b10cf0800000000000000
+      internalID: -287751699822047908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_7
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 1036
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60e4579759d8d4350800000000000000
+      internalID: 6002609551482113542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_8
+      rect:
+        serializedVersion: 2
+        x: 441
+        y: 999
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1861624379d1f9c0800000000000000
+      internalID: -3895093113640622051
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_9
+      rect:
+        serializedVersion: 2
+        x: 1045
+        y: 662
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: daf45728a97098ce0800000000000000
+      internalID: -1402581448754114643
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_10
+      rect:
+        serializedVersion: 2
+        x: 1032
+        y: 652
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 924cb8cbfe8e0c230800000000000000
+      internalID: 3657179013782946857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_11
+      rect:
+        serializedVersion: 2
+        x: 1065
+        y: 628
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f06e3348def48e920800000000000000
+      internalID: 3019751431695754767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_12
+      rect:
+        serializedVersion: 2
+        x: 693
+        y: 549
+        width: 25
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bea36246ededbf5b0800000000000000
+      internalID: -5333424286945887509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_13
+      rect:
+        serializedVersion: 2
+        x: 707
+        y: 176
+        width: 344
+        height: 426
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c83e384739ccade10800000000000000
+      internalID: 2223314299747820428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_14
+      rect:
+        serializedVersion: 2
+        x: 1100
+        y: 571
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 683c7d7b58009b3b0800000000000000
+      internalID: -5496361295913958522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_15
+      rect:
+        serializedVersion: 2
+        x: 1057
+        y: 485
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90ac06851877273a0800000000000000
+      internalID: -6669136700765058551
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_16
+      rect:
+        serializedVersion: 2
+        x: 824
+        y: 166
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 305fe48cd0e9e55d0800000000000000
+      internalID: -3071844113787718397
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassInk_Arching_F_17
+      rect:
+        serializedVersion: 2
+        x: 596
+        y: 112
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a514c5f31bb1b510800000000000000
+      internalID: 1563236240076314023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      GrassInk_Arching_F_0: -7928271105672238270
+      GrassInk_Arching_F_1: 7992426566117329154
+      GrassInk_Arching_F_10: 3657179013782946857
+      GrassInk_Arching_F_11: 3019751431695754767
+      GrassInk_Arching_F_12: -5333424286945887509
+      GrassInk_Arching_F_13: 2223314299747820428
+      GrassInk_Arching_F_14: -5496361295913958522
+      GrassInk_Arching_F_15: -6669136700765058551
+      GrassInk_Arching_F_16: -3071844113787718397
+      GrassInk_Arching_F_17: 1563236240076314023
+      GrassInk_Arching_F_2: -7163809950021583454
+      GrassInk_Arching_F_3: 7163178348558804318
+      GrassInk_Arching_F_4: 6791247886379399702
+      GrassInk_Arching_F_5: 6153568010210109885
+      GrassInk_Arching_F_6: -287751699822047908
+      GrassInk_Arching_F_7: 6002609551482113542
+      GrassInk_Arching_F_8: -3895093113640622051
+      GrassInk_Arching_F_9: -1402581448754114643
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

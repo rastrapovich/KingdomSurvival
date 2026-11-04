@@ -228,6 +228,26 @@ namespace KingdomSurvival.MapLab.Editor
                 view.Settings = settings;
                 UnityEngine.Object.DestroyImmediate(hill);
                 view.Generate(null);
+                // Эксперимент: мазки на спрайтах — до и после на одних кадрах.
+                foreach (bool strokes in new[] { false, true })
+                {
+                    settings.Stage05.SpriteStrokes = strokes;
+                    view.ApplyMaterialSettings();
+                    string tag = strokes ? "on" : "off";
+                    View(3f, spots.Tree);
+                    Shot($"stage05/sprite_strokes/{tag}/tree_z3");
+                    View(3f, spots.Village);
+                    Shot($"stage05/sprite_strokes/{tag}/village_z3");
+                    if (spots.HasRiver)
+                    {
+                        View(3f, spots.River);
+                        Shot($"stage05/sprite_strokes/{tag}/river_rocks_z3");
+                    }
+                    View(2f, spots.Village);
+                    Shot($"stage05/sprite_strokes/{tag}/village_z2");
+                }
+                settings.Stage05.SpriteStrokes = false;
+                view.ApplyMaterialSettings();
                 // Слои: без пятен, без спрайтов, без пера берега.
                 if (spots.HasRiver)
                 {

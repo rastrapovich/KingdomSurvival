@@ -34,6 +34,10 @@ Shader "Kingdom Survival/MapLab/Art Card"
         _DiagMode ("Диагностика: 12 группы, 13 акценты", Float) = 0
         _DetailFade ("Этап 05: исчезновение мелких спрайтов, пикс./ед. (скрыт, виден)", Vector) = (0, 0, 0, 0)
         [Enum(Off, 0, On, 1)] _AlphaToMask ("Этап 05: AlphaToMask", Float) = 0
+        _BlendAlpha ("R03: вывод мягкой альфы (смешивание тонких штрихов)", Float) = 0
+        _SpriteStrokes ("Мазки на спрайтах: x сила, y режим (1 крона, 3 камень, 4 дерево/постройка), z кисть (BrushScale), ед.", Vector) = (0, 0, 1.6, 0)
+        _StrokeDry ("Мазки: сухой оттенок", Color) = (0.77, 0.68, 0.38, 1)
+        _StrokeLush ("Мазки: сочный оттенок", Color) = (0.45, 0.48, 0.25, 1)
         [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("ZTest", Float) = 4
         [Enum(Off, 0, On, 1)] _ZWrite ("ZWrite", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Src blend", Float) = 1
@@ -76,6 +80,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float4 extra : TEXCOORD3;
                 float2 rhythm : TEXCOORD4;
                 float fade : TEXCOORD5;
+                float3 cardPos : TEXCOORD6;   // мир в плоскости карточки (x вправо, y вверх), z — seed экземпляра
             };
 
             TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
@@ -104,7 +109,158 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float _DiagMode;
                 float4 _DetailFade;
                 float _AlphaToMask;
+                float _BlendAlpha;
+                float4 _SpriteStrokes;
+                float4 _StrokeDry;
+                float4 _StrokeLush;
             CBUFFER_END
+
+            float StrokeHash(float2 p)
+            {
+                p = frac(p * float2(123.34, 456.21));
+                p += dot(p, p + 45.32);
+                return frac(p.x * p.y);
+            }
+
+            float StrokeNoise(float2 p)
+            {
+                float2 i = floor(p), f = frac(p);
+                f = f * f * (3.0 - 2.0 * f);
+                return lerp(lerp(StrokeHash(i), StrokeHash(i + float2(1, 0)), f.x), lerp(StrokeHash(i + float2(0, 1)), StrokeHash(i + float2(1, 1)), f.x), f.y);
+            }
+
+            // Те же мазки, что кладёт покраска на луга и поля (MapLabTiledPainter):
+            // след кисти со скруглённой головой и сужением к хвосту, плотной
+            // серединой, узким чётким краем и продольными «щетинками» (треугольная
+            // волна поперёк следа — три-четыре линии). Длина — та же кисть
+            // (BrushScale), раскладка — дрожащая сетка в мире плоскости карточки,
+            // группы с пустотами. Цвет мазка — рисунок в его центре со сдвигом
+            // оттенка (сухой/сочный для растений) и разбросом тона. Направление
+            // задаётся один раз на мазок и подчиняется форме: крона — дугами по
+            // массе и вдоль силуэта, ствол — вдоль, камень и дерево — по плоскостям.
+            float StrokeWave(float x)
+            {
+                float t = frac(x * 0.15915494);
+                return abs(t * 4.0 - 2.0) - 1.0;
+            }
+
+            float2 StrokeDirection(float2 uvc, int mode, float crownMinV)
+            {
+                const float3 w = float3(0.299, 0.587, 0.114);
+                float2 d = float2(0.035, 0.035);
+                float aR = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, uvc + float2(d.x, 0), 4).a;
+                float aL = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, uvc - float2(d.x, 0), 4).a;
+                float aU = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, uvc + float2(0, d.y), 4).a;
+                float aD = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, uvc - float2(0, d.y), 4).a;
+                float2 g = float2(aR - aL, aU - aD);
+                float2 contour = normalize(float2(-g.y, g.x) + 1e-4);
+                if (mode == 1 && uvc.y < crownMinV)
+                    return float2(0, 1);
+                if (mode == 1)
+                {
+                    float2 radial = uvc - float2(0.5, max(crownMinV, 0.35) + 0.25);
+                    float2 swirl = normalize(float2(-radial.y, radial.x) + 1e-4);
+                    return normalize(lerp(swirl, contour, saturate(length(g) * 5.0)) + 1e-4);
+                }
+                float lR = dot(SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, uvc + float2(d.x, 0), 3).rgb, w);
+                float lL = dot(SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, uvc - float2(d.x, 0), 3).rgb, w);
+                float lU = dot(SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, uvc + float2(0, d.y), 3).rgb, w);
+                float lD = dot(SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, uvc - float2(0, d.y), 3).rgb, w);
+                float2 lg = float2(lR - lL, lU - lD);
+                float2 planes = normalize(float2(-lg.y, lg.x) + 1e-4);
+                float2 fallback = mode == 4 ? float2(1, 0) : contour;
+                return normalize(lerp(fallback, planes, saturate(length(lg) * 8.0)) + 1e-4);
+            }
+
+            float3 SpriteStrokes(float3 c, float2 uv, float3 cardPos, float crownMinV, float2 uvWidth)
+            {
+                int mode = (int)round(_SpriteStrokes.y);
+                if (_SpriteStrokes.x <= 0.001 || mode == 0)
+                    return c;
+                float interior = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, uv, 3).a;
+                float keep = smoothstep(0.5, 0.8, interior);
+                if (keep <= 0.001)
+                    return c;
+                // Связь мира карточки с UV (ортография: постоянна по карточке).
+                float2 p = cardPos.xy;
+                float2 px = ddx(p), py = ddy(p), ux = ddx(uv), uy = ddy(uv);
+                float det = px.x * py.y - px.y * py.x;
+                if (abs(det) < 1e-10)
+                    return c;
+                float2x2 invP = float2x2(py.y, -py.x, -px.y, px.x) / det;
+                float2 pxw2 = float2(length(px), length(py));
+                float pixel = max(max(pxw2.x, pxw2.y), 1e-4);
+                float brush = max(0.2, _SpriteStrokes.z);
+                float cellSize = brush * 0.62;
+                float2 cell0 = floor(p / cellSize);
+                float strength = saturate(_SpriteStrokes.x);
+                float split = 0.55;
+                float edge = max(pixel * 0.9, cellSize * 0.012);
+                float3 c0 = c;
+                for (int j = -1; j <= 1; j++)
+                {
+                    for (int i = -1; i <= 1; i++)
+                    {
+                        float2 cell = cell0 + float2(i, j);
+                        float2 hseed = cell + cardPos.z * 13.7;
+                        float roll = StrokeHash(hseed);
+                        // Группы и тихие места (как у луга этапа 05).
+                        float2 center = (cell + 0.5 + (float2(StrokeHash(hseed + 3.1), StrokeHash(hseed + 7.7)) - 0.5) * 0.5) * cellSize;
+                        float group = lerp(0.75, 1.0, smoothstep(0.3, 0.62, StrokeNoise(center * 0.42 / brush + cardPos.z * 5.0)));
+                        if (roll > 0.92 * group)
+                            continue;
+                        // UV центра мазка — для направления и цвета, взятого из рисунка.
+                        float2 dp = center - p;
+                        float2 coeff = mul(invP, dp);
+                        float2 uvc = uv + ux * coeff.x + uy * coeff.y;
+                        if (SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, uvc, 3).a < 0.5)
+                            continue;
+                        float2 dir = StrokeDirection(uvc, mode, crownMinV);
+                        float angleJ = (StrokeHash(hseed + 11.3) - 0.5) * 0.4;
+                        float ca = cos(angleJ), sa = sin(angleJ);
+                        dir = float2(dir.x * ca - dir.y * sa, dir.x * sa + dir.y * ca);
+                        // 70/25/5 по весу и разброс длины, как у следов луга.
+                        float sizeRoll = StrokeHash(hseed + 17.9);
+                        float lengthJ = lerp(0.7, 1.3, StrokeHash(hseed + 5.3)) * (sizeRoll < 0.7 ? 1.0 : (sizeRoll < 0.95 ? 1.2 : 1.4));
+                        float half = brush * 0.5 * lengthJ;
+                        float halfW = half * 0.3;
+                        float2 rel = p - center;
+                        float along = dot(rel, dir);
+                        float across = dot(rel, float2(-dir.y, dir.x));
+                        float t = clamp(along / max(half, 1e-3), -1.0, 1.0);
+                        float wv = halfW * (1.0 - 0.45 * smoothstep(-0.2, 1.0, t));
+                        if (t < -0.7)
+                            wv *= sqrt(max(0.0, 1.0 - pow((t + 0.7) / 0.3, 2.0)));
+                        float cover = saturate((wv - abs(across)) / edge + 0.5);
+                        float ends = saturate((half - abs(along)) / edge + 0.5);
+                        float alphaJ = lerp(0.6, 1.0, StrokeHash(hseed + 23.1));
+                        float a = alphaJ * lerp(0.35, 0.9, strength) * cover * ends * keep;
+                        if (a <= 0.002)
+                            continue;
+                        // Основа — сам пиксель рисунка (с тонировкой карточки): мазок сдвигает
+                        // оттенок и тон, детали и тушь рисунка остаются под ним.
+                        float3 baseColor = c0;
+                        float hueJ = StrokeHash(hseed + 29.3) * 2.0 - 1.0;
+                        float valueJ = StrokeHash(hseed + 31.7) * 2.0 - 1.0;
+                        float3 shift;
+                        if (mode == 1)
+                        {
+                            const float3 wl = float3(0.299, 0.587, 0.114);
+                            float3 tone = hueJ > 0 ? _StrokeDry.rgb : _StrokeLush.rgb;
+                            shift = tone * (dot(baseColor, wl) / max(1e-3, dot(tone, wl)));
+                        }
+                        else
+                            shift = baseColor * (hueJ > 0 ? float3(1.14, 1.06, 0.9) : float3(0.88, 0.94, 1.02));
+                        float3 col = lerp(baseColor, shift, abs(hueJ) * 0.75) * (1.0 + valueJ * 0.3 * strength);
+                        // Щетинки: продольные полосы поперёк следа.
+                        float bristle = 1.0 + 0.14 * StrokeWave(across / max(halfW, 1e-3) * 7.9 + StrokeHash(hseed + 37.1) * 6.283);
+                        // На общем виде мазок меньше пары пикселей — плавно гаснет без мерцания.
+                        a *= saturate(halfW / pixel - 0.6);
+                        c = lerp(c, col * bristle, a);
+                    }
+                }
+                return c;
+            }
 
             float _MapLabPixelScale;
 
@@ -138,6 +294,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 o.color = input.color;
                 o.extra = input.extra;
                 o.rhythm = input.rhythm;
+                o.cardPos = float3(input.offset.x, input.offset.y, frac(dot(basePoint.xz, float2(0.0137, 0.0193)) * 97.0));
                 float4 s = SAMPLE_TEXTURE2D_LOD(_ShadeTex, sampler_ShadeTex, basePoint.xz / max(1.0, _MapSize), 0);
                 o.shade = saturate((1.0 - s.r) * 0.9 + (1.0 - s.g) * 0.35);
                 // Этап 05: плотность пикселей итогового кадра на единицу мира (орто).
@@ -170,7 +327,13 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 // Мелкий спрайт вдали плавно истаивает (силуэт уменьшается к нулю).
                 tex.a *= i.fade;
                 float outAlpha = 1;
-                if (_AlphaToMask > 0.5)
+                if (_BlendAlpha > 0.5)
+                {
+                    // Тонкий штрих: мягкая альфа рисунка, без порога-ступеньки.
+                    clip(tex.a - _Cutoff);
+                    outAlpha = saturate(tex.a);
+                }
+                else if (_AlphaToMask > 0.5)
                 {
                     outAlpha = saturate((tex.a - _Cutoff) / max(fwidth(tex.a), 1e-4) + 0.5);
                     clip(outAlpha - 0.002);
@@ -188,6 +351,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 // Этап 04: тёплая или холодная масса, светлее выбранный гребень.
                 c *= lerp(float3(1, 1, 1), float3(1.05, 1.0, 0.86), saturate(i.rhythm.x)) * lerp(float3(1, 1, 1), float3(0.93, 0.99, 1.07), saturate(-i.rhythm.x));
                 c *= 1.0 + i.rhythm.y * 0.08;
+                c = SpriteStrokes(c, i.uv, i.cardPos, i.color.a, abs(ddx(i.uv)) + abs(ddy(i.uv)));
                 c = MapLabShadow(c, i.shade * i.color.b * _GroundShade, _ShadowTint.rgb);
 
                 // Этап 03: акцент массы крон — линия по верхней/освещённой кромке

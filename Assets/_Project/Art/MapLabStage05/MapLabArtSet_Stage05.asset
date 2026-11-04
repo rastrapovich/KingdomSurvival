@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabArtSet
   SchemaVersion: 1
   PackageRevision: 5
-  PackageId: KS_MapLab_Stage05_Ink_Watercolor_ArtR02_2026-11-03
-  ImportVersion: 1
-  ImportedAt: 2026-11-03 20:56:28
-  ManifestSha256: 81c139770916bb1e56780ee5bf9e78725f743df93305b21876085a51fd464167
+  PackageId: KS_MapLab_Stage05_Ink_Watercolor_ArtR03_2026-11-04
+  ImportVersion: 2
+  ImportedAt: 2026-11-04 01:52:01
+  ManifestSha256: 29ec972722ca842b24e030e0b7a2ec98619b6cecdb74c21b527faa5697163814
   Entries:
   - Id: Map05_Grass_Sparse_C
     Category: 0
@@ -69,6 +69,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Grass_Fan_B
     Category: 0
     Kind: 9
@@ -119,6 +125,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Grass_Tuft_A
     Category: 0
     Kind: 9
@@ -169,6 +181,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Grass_Bent_D
     Category: 0
     Kind: 9
@@ -219,6 +237,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Reed_Low_C
     Category: 0
     Kind: 4
@@ -269,6 +293,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Rock_Round_A
     Category: 2
     Kind: 5
@@ -319,6 +349,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Reed_Panicle_B
     Category: 0
     Kind: 4
@@ -369,6 +405,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Reed_Cattail_A
     Category: 0
     Kind: 4
@@ -419,6 +461,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Haystack_Dome_A
     Category: 7
     Kind: 8
@@ -469,6 +517,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Rock_Pebbles_C
     Category: 2
     Kind: 5
@@ -519,6 +573,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Rock_Angular_B
     Category: 2
     Kind: 5
@@ -569,6 +629,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Rock_Outcrop_D
     Category: 2
     Kind: 5
@@ -619,6 +685,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Hay_Sheaf_C
     Category: 7
     Kind: 8
@@ -669,6 +741,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Hayrick_Long_B
     Category: 7
     Kind: 8
@@ -719,6 +797,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Wash_Olive_Cloud_A
     Category: 8
     Kind: 10
@@ -769,6 +853,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Wash_Moss_Rim_B
     Category: 8
     Kind: 10
@@ -819,6 +909,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Fence_Rails_Two_A
     Category: 9
     Kind: 10
@@ -869,6 +965,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Wash_Dry_Ochre_C
     Category: 8
     Kind: 10
@@ -919,6 +1021,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Wash_GrayGreen_Bloom_D
     Category: 8
     Kind: 10
@@ -969,6 +1077,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Fence_Rails_Three_B
     Category: 9
     Kind: 10
@@ -1019,6 +1133,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Fence_Gate_Panel_A
     Category: 9
     Kind: 10
@@ -1069,6 +1189,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Fence_Post_Corner_B
     Category: 9
     Kind: 10
@@ -1119,6 +1245,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Fence_Wattle_Panel_A
     Category: 9
     Kind: 10
@@ -1169,6 +1301,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Fence_Post_End_A
     Category: 9
     Kind: 10
@@ -1219,6 +1357,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_House_Shingle_A_FrontRight
     Category: 1
     Kind: 6
@@ -1269,6 +1413,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0.9120616, y: -0.41005337}
     BaseRegistered: 1
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_House_Shingle_A_BackRight
     Category: 1
     Kind: 6
@@ -1319,6 +1469,12 @@ MonoBehaviour:
     EntranceDirection: {x: -0.88299817, y: 0.46937644}
     BaseRegistered: 1
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_House_Thatch_A_FrontRight
     Category: 1
     Kind: 6
@@ -1369,6 +1525,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0.9097715, y: -0.4151094}
     BaseRegistered: 1
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_House_Thatch_A_BackRight
     Category: 1
     Kind: 6
@@ -1419,6 +1581,12 @@ MonoBehaviour:
     EntranceDirection: {x: -0.9195545, y: 0.3929625}
     BaseRegistered: 1
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Barn_A_FrontLeft
     Category: 1
     Kind: 7
@@ -1469,6 +1637,12 @@ MonoBehaviour:
     EntranceDirection: {x: -0.96446514, y: -0.26421034}
     BaseRegistered: 1
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_House_Thatch_A_BackLeft
     Category: 1
     Kind: 6
@@ -1519,6 +1693,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0.9149356, y: 0.40359995}
     BaseRegistered: 1
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_House_Shingle_A_BackLeft
     Category: 1
     Kind: 6
@@ -1569,6 +1749,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0.89523894, y: 0.44558632}
     BaseRegistered: 1
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Barn_A_FrontRight
     Category: 1
     Kind: 7
@@ -1619,6 +1805,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0.9649261, y: -0.26252154}
     BaseRegistered: 1
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Trough_Wood_A
     Category: 7
     Kind: 10
@@ -1669,6 +1861,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Well_Roofed_A
     Category: 7
     Kind: 10
@@ -1719,6 +1917,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Woodshed_Open_A
     Category: 7
     Kind: 10
@@ -1769,6 +1973,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Woodpile_A
     Category: 7
     Kind: 10
@@ -1819,6 +2029,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Bridge_Rail_Infill_B
     Category: 10
     Kind: 10
@@ -1869,6 +2085,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Bridge_Deck_Planks_A
     Category: 10
     Kind: 10
@@ -1919,6 +2141,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Bridge_Rail_Infill_A
     Category: 10
     Kind: 10
@@ -1969,6 +2197,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Bridge_Deck_Planks_B
     Category: 10
     Kind: 10
@@ -2019,6 +2253,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Bridge_StoneAbutment_A
     Category: 10
     Kind: 10
@@ -2069,6 +2309,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Bridge_Post_A
     Category: 10
     Kind: 10
@@ -2119,6 +2365,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Bridge_EndRamp_Planks_A
     Category: 10
     Kind: 10
@@ -2169,6 +2421,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Map05_Bridge_Trestle_Frame_A
     Category: 10
     Kind: 10
@@ -2219,6 +2477,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: House_Thatch_A_P35
     Category: 1
     Kind: 6
@@ -2269,6 +2533,12 @@ MonoBehaviour:
     EntranceDirection: {x: -0.9150769, y: -0.40327936}
     BaseRegistered: 1
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: House_Shingle_A_P35
     Category: 1
     Kind: 6
@@ -2319,6 +2589,12 @@ MonoBehaviour:
     EntranceDirection: {x: -0.8951221, y: -0.44582105}
     BaseRegistered: 1
     ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Hero_MapInk_Front_P35
     Category: 5
     Kind: 0
@@ -2369,6 +2645,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: Assets/_Project/Art/MapLabStage04/MapLabArtSet_Stage04.asset
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Hero_MapInk_Front_Right_P35
     Category: 5
     Kind: 0
@@ -2419,6 +2701,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: Assets/_Project/Art/MapLabStage04/MapLabArtSet_Stage04.asset
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Hero_MapInk_Back_Right_P35
     Category: 5
     Kind: 0
@@ -2469,6 +2757,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: Assets/_Project/Art/MapLabStage04/MapLabArtSet_Stage04.asset
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Hero_MapInk_Back_P35
     Category: 5
     Kind: 0
@@ -2519,6 +2813,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: Assets/_Project/Art/MapLabStage04/MapLabArtSet_Stage04.asset
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Hero_MapInk_Back_Left_P35
     Category: 5
     Kind: 0
@@ -2569,6 +2869,12 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: Assets/_Project/Art/MapLabStage04/MapLabArtSet_Stage04.asset
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
   - Id: Hero_MapInk_Front_Left_P35
     Category: 5
     Kind: 0
@@ -2619,3 +2925,345 @@ MonoBehaviour:
     EntranceDirection: {x: 0, y: 0}
     BaseRegistered: 0
     ReusedFrom: Assets/_Project/Art/MapLabStage04/MapLabArtSet_Stage04.asset
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Map05_GrassInk_Arching_F
+    Category: 0
+    Kind: 9
+    ManifestKind: Grass
+    Texture: {fileID: 2800000, guid: 283d3d49532a45a449b57ac78d4f209b, type: 3}
+    Weight: 1
+    WorldHeight: 0.25
+    Pivot: {x: 0.494905, y: 0.152838}
+    Footprint: {x: 0.17817026, y: 0.12372935}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/GrassInk/GrassInk_Arching_F.png
+    Sha256: bcf430e84723e2b00480833f3f284787f1fbad72f3a3a8ffb612df74326462ee
+    Width: 1374
+    Height: 1145
+    SolidRect:
+      serializedVersion: 2
+      x: 0.17103347
+      y: 0.15633188
+      width: 0.5669578
+      height: 0.68733627
+    PivotHint: {x: 0.494905, y: 0.152838}
+    FootX: 0.50576895
+    Direction: 
+    PitchDownDegrees: 50
+    Role: grass_ink_tuft
+    VariantGroup: GrassInk
+    Provenance: 
+    MeanColor: {r: 0.40056762, g: 0.37056115, b: 0.22231132, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Map05_GrassInk_Crooked_D
+    Category: 0
+    Kind: 9
+    ManifestKind: Grass
+    Texture: {fileID: 2800000, guid: 70c785965b41dfe4a9b86e6dcfcbddee, type: 3}
+    Weight: 1
+    WorldHeight: 0.25
+    Pivot: {x: 0.466146, y: 0.460938}
+    Footprint: {x: 0.45540002, y: 0.31625}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/GrassInk/GrassInk_Crooked_D.png
+    Sha256: 4b5f6612bd60ae3bca3770936f7a8b8c744af7fcb35067627b773c7207da16c2
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.40625
+      y: 0.46484375
+      width: 0.16471355
+      height: 0.09765625
+    PivotHint: {x: 0.466146, y: 0.460938}
+    FootX: 0.4757931
+    Direction: 
+    PitchDownDegrees: 50
+    Role: grass_ink_tuft
+    VariantGroup: GrassInk
+    Provenance: 
+    MeanColor: {r: 0.30250338, g: 0.27784744, b: 0.14196004, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Map05_GrassInk_Lean_Right_B
+    Category: 0
+    Kind: 9
+    ManifestKind: Grass
+    Texture: {fileID: 2800000, guid: b41ae7d9d4886b742bdacc2b811d2eaf, type: 3}
+    Weight: 1
+    WorldHeight: 0.25
+    Pivot: {x: 0.484375, y: 0.4375}
+    Footprint: {x: 0.2517568, y: 0.17483109}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/GrassInk/GrassInk_Lean_Right_B.png
+    Sha256: 4a7e4ced4d8d376c1018f8bcf1dc3829c63c53b4f43094aa6ccec77820cef451
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.421875
+      y: 0.4375
+      width: 0.13476562
+      height: 0.14453125
+    PivotHint: {x: 0.484375, y: 0.4375}
+    FootX: 0.49420455
+    Direction: 
+    PitchDownDegrees: 50
+    Role: grass_ink_tuft
+    VariantGroup: GrassInk
+    Provenance: 
+    MeanColor: {r: 0.27346158, g: 0.25927216, b: 0.14878151, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Map05_GrassInk_Low_Wide_C
+    Category: 0
+    Kind: 9
+    ManifestKind: Grass
+    Texture: {fileID: 2800000, guid: fb6a579c5d50ed440a23a641b38911b2, type: 3}
+    Weight: 1
+    WorldHeight: 0.25
+    Pivot: {x: 0.522548, y: 0.421646}
+    Footprint: {x: 0.30656254, y: 0.21289064}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/GrassInk/GrassInk_Low_Wide_C.png
+    Sha256: 3fe2641a81084b852bc394958217b4e1995cbf67d43f61923282e1e2db0e4870
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.43799323
+      y: 0.421646
+      width: 0.122886136
+      height: 0.14430664
+    PivotHint: {x: 0.522548, y: 0.421646}
+    FootX: 0.51143783
+    Direction: 
+    PitchDownDegrees: 50
+    Role: grass_ink_tuft
+    VariantGroup: GrassInk
+    Provenance: 
+    MeanColor: {r: 0.33142552, g: 0.32233727, b: 0.18218257, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Map05_GrassInk_Sparse_E
+    Category: 0
+    Kind: 9
+    ManifestKind: Grass
+    Texture: {fileID: 2800000, guid: 5b7c10b5b1fb38c4ab63502219deebe4, type: 3}
+    Weight: 1
+    WorldHeight: 0.25
+    Pivot: {x: 0.500728, y: 0.165066}
+    Footprint: {x: 0.12537435, y: 0.08706551}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/GrassInk/GrassInk_Sparse_E.png
+    Sha256: 00c9087281d32e543dba375cfd9eb7bffb2e6c90f4c444cfbeed335b386bca08
+    Width: 1374
+    Height: 1145
+    SolidRect:
+      serializedVersion: 2
+      x: 0.20669578
+      y: 0.16855896
+      width: 0.37918487
+      height: 0.65327513
+    PivotHint: {x: 0.500728, y: 0.165066}
+    FootX: 0.509083
+    Direction: 
+    PitchDownDegrees: 50
+    Role: grass_ink_tuft
+    VariantGroup: GrassInk
+    Provenance: 
+    MeanColor: {r: 0.37908942, g: 0.35355183, b: 0.22678943, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Map05_GrassInk_Upright_A
+    Category: 0
+    Kind: 9
+    ManifestKind: Grass
+    Texture: {fileID: 2800000, guid: 8a5afa9ca1c11374ebe4c6a8b4887576, type: 3}
+    Weight: 1
+    WorldHeight: 0.25
+    Pivot: {x: 0.466521, y: 0.142358}
+    Footprint: {x: 0.11304349, y: 0.07850242}
+    MaxSlope: 22
+    Orientation: 0
+    ScaleRange: {x: 0.85, y: 1.12}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    SourcePath: Assets/GrassInk/GrassInk_Upright_A.png
+    Sha256: 985eadcd63d344ab5e1c01c640c36fadd85ab6337787845dfd680f174ab18c15
+    Width: 1374
+    Height: 1145
+    SolidRect:
+      serializedVersion: 2
+      x: 0.28893742
+      y: 0.14410481
+      width: 0.37845707
+      height: 0.7231441
+    PivotHint: {x: 0.466521, y: 0.142358}
+    FootX: 0.45482248
+    Direction: 
+    PitchDownDegrees: 50
+    Role: grass_ink_tuft
+    VariantGroup: GrassInk
+    Provenance: 
+    MeanColor: {r: 0.39639297, g: 0.37205616, b: 0.23262572, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: 
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0

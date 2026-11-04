@@ -1042,6 +1042,11 @@ namespace KingdomSurvival.MapLab.Editor
                 case MapLabArtCategory.Rock:
                     if (item.Kind == "Grass" || item.Kind == "Reed" || item.Kind == "Boulder")
                         importer.maxTextureSize = 1024;
+                    // R03: контурная трава — тонкие штрихи с мягкой альфой. Без
+                    // сохранения покрытия под порог (оно утолщает и рвёт линию в
+                    // мипах): средняя альфа мипа плавно ослабляет штрих вдали.
+                    if (item.Role == "grass_ink_tuft")
+                        importer.mipMapsPreserveCoverage = false;
                     break;
             }
             importer.SaveAndReimport();

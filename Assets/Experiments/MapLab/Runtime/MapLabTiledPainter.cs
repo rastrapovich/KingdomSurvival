@@ -383,10 +383,22 @@ namespace KingdomSurvival.MapLab
                         fc *= 1f - 0.09f * (1f - MapLabGeometry.SmoothStep(0.25f, 0.6f, furrow));
                         fc.a = 1f;
                         float t = edge * border;
+                        if (stage05)
+                        {
+                            // R03: чёткий край жёлтой заливки по общей сглаженной границе
+                            // (та же функция, что у пера полей); межа — луг между полями,
+                            // без тушевой оси: перо — отдельной лентой по краю (MapLabInk).
+                            t = MapLabGeometry.SmoothStep(-texel * 0.8f, texel * 0.8f, MapLabPaintFields.FieldEdge(s, fs.BorderDistance));
+                            if (s.FieldMask > 0.5f && t < 0.5f)
+                            {
+                                Color balk05 = Color.Lerp(Color.Lerp(pal.GrassA, pal.GrassLush, 0.5f), pal.ForestFloor, 0.1f);
+                                c = Color.Lerp(c, balk05, 0.3f * grassy * (1f - t));
+                            }
+                        }
                         c = Color.Lerp(c, fc, t);
                         if (t > 0.5f)
                             k = KeyFieldBase + ((fs.Block * 37 + fs.Strip) & 0xFFFF);
-                        if (edge > 0.5f)
+                        if (edge > 0.5f && !stage05)
                         {
                             // Межа — тонкая линия тем же пером, местами прервана. Этап 04:
                             // только выбранные участки — у дороги, на склоне и длинные
@@ -395,21 +407,13 @@ namespace KingdomSurvival.MapLab
                             float select = 1f;
                             if (stage04 && line > 0f)
                             {
-                                float share = stage05 ? settings.Stage05.FieldInkShare : settings.Stage04.FieldInkShare;
+                                float share = settings.Stage04.FieldInkShare;
                                 float nearRoad = 1f - MapLabGeometry.SmoothStep(1.2f, 2.6f, roadDistance[i]);
                                 float slope = MapLabGeometry.SmoothStep(5f, 10f, data.SampleSlope(w.x, w.y)) * 0.8f;
                                 float chosen = MapLabGeometry.SmoothStep(1.5f - share * 1.9f, 1.58f - share * 1.9f, widthVar);
                                 select = Mathf.Max(nearRoad, Mathf.Max(slope, chosen));
                             }
-                            // Этап 05: видимая тушь меж (не только зелёная полоса межи) —
-                            // плотнее и чуть шире на выбранных длинных участках.
-                            if (stage05)
-                            {
-                                float line05 = 1f - MapLabGeometry.SmoothStep(0.07f, 0.2f, fs.BorderDistance);
-                                ink[i] = Mathf.Max(ink[i], 0.95f * line05 * select * Breakup(s.Breakup, 0.3f));
-                            }
-                            else
-                                ink[i] = Mathf.Max(ink[i], 0.55f * inkWeights.z * line * select * Breakup(s.Breakup, 0.4f));
+                            ink[i] = Mathf.Max(ink[i], 0.55f * inkWeights.z * line * select * Breakup(s.Breakup, 0.4f));
                             Color balk = Color.Lerp(Color.Lerp(pal.GrassA, pal.GrassLush, 0.5f), pal.ForestFloor, 0.1f);
                             c = Color.Lerp(c, balk, (1f - border) * edge * 0.45f * grassy);
                         }

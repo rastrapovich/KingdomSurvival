@@ -45,6 +45,10 @@ namespace KingdomSurvival.MapLab
         [Range(0f, 1f)] public float InkGrain = 0.4f;
         [Tooltip("Доля длинных меж с пером (у дорог, на изломах склона, длинные отрезки).")]
         [Range(0f, 1f)] public float FieldInkShare = 0.45f;
+        [Tooltip("R03: доля края полей с пером (по краю жёлтой заливки; остальное — потерянные края).")]
+        [Range(0f, 1f)] public float FieldEdgeInkShare = 0.72f;
+        [Tooltip("R03: редкие штрихи туши внутри полей вдоль борозд.")]
+        [Range(0f, 2f)] public float FieldInnerInk = 1f;
         [Tooltip("Доля кромки берега с пером.")]
         [Range(0f, 1f)] public float ShoreInkShare = 0.55f;
         [Tooltip("Доля внешних контуров уступа с пером.")]
@@ -71,8 +75,18 @@ namespace KingdomSurvival.MapLab
         [Range(0f, 2f)] public float ReedDensity = 1f;
         [Range(0f, 2f)] public float RockDensity = 1f;
         [Range(0f, 2f)] public float HayDensity = 1f;
+        [Tooltip("R03: контурная трава GrassInk — редко у троп, корней, камней и на тихом лугу.")]
+        [Range(0f, 2f)] public float InkGrassDensity = 1f;
         [Tooltip("Плавное исчезновение мелких спрайтов вдали: пикселей на единицу мира, ниже которых — полностью скрыты, и выше которых — полностью видны.")]
         public Vector2 DetailFadePixels = new Vector2(5f, 11f);
+
+        [Header("Мазки на спрайтах (эксперимент)")]
+        [Tooltip("Те же живописные мазки, что на земле, — на деревьях, кустах, камнях, постройках и реквизите; по форме объекта. Выключено — рисунки как есть.")]
+        public bool SpriteStrokes;
+        [Tooltip("Заметность мазков на спрайтах — как «сила мазков» покраски луга (умеренно: форма важнее).")]
+        [Range(0f, 1f)] public float SpriteStrokeStrength = 0.7f;
+        [Tooltip("Размер мазка относительно кисти луга (PainterlyStyle → BrushScale): 1 — тот же мазок, как на земле (на кроне 4 ед. помещается лишь 2–3 таких); по умолчанию мельче, чтобы форма читалась мазками.")]
+        [Range(0.1f, 1.5f)] public float SpriteStrokeLength = 0.6f;
 
         [Header("Тень")]
         [Tooltip("Цвет тени — приглушённый оливково-серый (умножение).")]
@@ -126,6 +140,8 @@ namespace KingdomSurvival.MapLab
         [Range(3, 12)] public int YardsMax = 9;
         [Tooltip("Расширение дороги у колодца, ед.")]
         [Range(0f, 8f)] public float WellWidening = 2.4f;
+        [Tooltip("R03: доля дворов с просторной оградой (бюджет на деревню, 1–3 участка); остальные избы открыты.")]
+        [Range(0f, 0.5f)] public float FencedYardShare = 0.2f;
 
         // Набор этапа 05 для регистрации ракурсов построек при генерации
         // (назначает MapLabView перед генерацией; не сериализуется).

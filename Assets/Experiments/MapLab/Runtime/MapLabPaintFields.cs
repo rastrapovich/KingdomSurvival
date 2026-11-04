@@ -86,7 +86,8 @@ namespace KingdomSurvival.MapLab
                     float cell = data.Cell * 0.75f;
                     float soft = (data.SampleMask(data.Field, w.x - cell, w.y - cell) + data.SampleMask(data.Field, w.x + cell, w.y - cell)
                                   + data.SampleMask(data.Field, w.x - cell, w.y + cell) + data.SampleMask(data.Field, w.x + cell, w.y + cell)) * 0.25f;
-                    values[o + 3] = soft + mottle.Fbm(w.x / 9f, w.y / 9f, 2) * 0.12f;
+                    // R03: без мелкого шума кромки (частые волны) — край поля даёт сглаженная маска ниже.
+                    values[o + 3] = shore != null ? soft : soft + mottle.Fbm(w.x / 9f, w.y / 9f, 2) * 0.12f;
                     values[o + 4] = Mathf.Lerp(0.3f, 1.5f, MapLabGeometry.SmoothStep(0.25f, 0.75f, fieldNoise.Fbm(w.x / 27f + 3.1f, w.y / 27f, 2) * 0.5f + 0.5f));
                     values[o + 5] = fieldNoise.Fbm(w.x / 14f, w.y / 14f, 2) * 0.06f;
                     values[o + 6] = breakup.Fbm(w.x / 5f, w.y / 5f, 2) * 0.5f + 0.5f;
@@ -112,8 +113,64 @@ namespace KingdomSurvival.MapLab
                 }
             });
             FillMainRoad(data, settings);
+            if (settings.IsStage05)
+                SmoothFieldMask();
             Milliseconds = (float)watch.Elapsed.TotalMilliseconds;
         }
+
+        // R03: одна плавная граница поля. Маска полей идёт с сетки рельефа (1 ед.):
+        // по диагонали её край — ступеньки «гармошки». Три прохода раздельного
+        // box-фильтра радиусом 0.75 ед. (≈ гаусс σ ≈ 0.75 ед.) дают спокойные
+        // дуги: изолиния 0.5 гладкой функции не самопересекается, прямые края
+        // не смещаются, острые углы скругляются в пределах радиуса. Заливка,
+        // маска мазков и перо полей читают этот же канал.
+        private void SmoothFieldMask()
+        {
+            const int channel = 3, radius = 3;
+            float[] a = new float[n * n], b = new float[n * n];
+            for (int i = 0; i < a.Length; i++)
+                a[i] = values[i * Channels + channel];
+            float inv = 1f / (radius * 2 + 1);
+            for (int pass = 0; pass < 3; pass++)
+            {
+                for (int z = 0; z < n; z++)
+                {
+                    float sum = 0f;
+                    for (int x = -radius; x <= radius; x++)
+                        sum += a[z * n + Mathf.Clamp(x, 0, n - 1)];
+                    for (int x = 0; x < n; x++)
+                    {
+                        b[z * n + x] = sum * inv;
+                        sum += a[z * n + Mathf.Min(n - 1, x + radius + 1)] - a[z * n + Mathf.Max(0, x - radius)];
+                    }
+                }
+                for (int x = 0; x < n; x++)
+                {
+                    float sum = 0f;
+                    for (int z = -radius; z <= radius; z++)
+                        sum += b[Mathf.Clamp(z, 0, n - 1) * n + x];
+                    for (int z = 0; z < n; z++)
+                    {
+                        a[z * n + x] = sum * inv;
+                        sum += b[Mathf.Min(n - 1, z + radius + 1) * n + x] - b[Mathf.Max(0, z - radius) * n + x];
+                    }
+                }
+            }
+            for (int i = 0; i < a.Length; i++)
+                values[i * Channels + channel] = a[i];
+        }
+
+        // R03: знаковое расстояние до края жёлтой заливки поля (ед.; > 0 — внутри
+        // поля): внешний край — плавная маска, внутренний — край межи у каждого
+        // поля (межа — полоса луга между полями, её ось границей не служит).
+        public static float FieldEdge(in Sample s, float borderDistance)
+        {
+            float outer = (s.FieldMask - 0.5f) * 2.6f;
+            float inner = borderDistance - BalkHalf(s);
+            return Mathf.Min(outer, inner);
+        }
+
+        public static float BalkHalf(in Sample s) => 0.45f * Mathf.Clamp(s.WidthVar, 0.3f, 1.5f) + 0.12f;
 
         // Расстояние до кромки главных дорог на той же сетке, до длины перехода
         // узла: одно поле для заливки и пера — переход совпадает и не обрывается.

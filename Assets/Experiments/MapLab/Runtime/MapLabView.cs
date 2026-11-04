@@ -72,6 +72,7 @@ namespace KingdomSurvival.MapLab
         private List<MapLabWash.Source> washSources;
         public MapLabModules05.Stats ModuleStats { get; private set; }
         public MapLabInk.Stats ShoreInkStats { get; private set; }
+        public MapLabInk.Stats FieldInkStats { get; private set; }
         public int WashPatches => washLayer != null ? washLayer.Patches.Count : 0;
         public bool BridgesProcedural05 { get; private set; }
         private readonly Dictionary<MapLabArtEntry, Material> cliffMaterials = new Dictionary<MapLabArtEntry, Material>();
@@ -723,6 +724,12 @@ namespace KingdomSurvival.MapLab
             Mesh mesh = MapLabInk.BuildRoadInk(data, Settings, paintFields, out MapLabInk.Stats stats);
             InkStats = stats;
             AddRenderer(Group("Ink"), "Road Ink", mesh, inkMaterial);
+            if (Settings.IsStage05)
+            {
+                Mesh fieldInk = MapLabInk.BuildFieldInk(data, Settings, paintFields, out MapLabInk.Stats fieldStats);
+                FieldInkStats = fieldStats;
+                AddRenderer(Group("Ink"), "Field Ink", fieldInk, inkMaterial);
+            }
             if (Settings.IsStage05 && shoreInkMaterial != null && paintFields.Shore != null)
             {
                 Mesh shore = MapLabInk.BuildShoreInk(data, Settings, paintFields.Shore, out MapLabInk.Stats shoreStats);
@@ -1120,6 +1127,36 @@ namespace KingdomSurvival.MapLab
             MapLabStage05Settings s5 = Settings.Stage05;
             bool stage05 = Settings.IsStage05;
             m.SetFloat("_AlphaToMask", stage05 && s5.AlphaToCoverage ? 1f : 0f);
+            // Эксперимент: мазки на спрайтах окружения (галочка Stage05 → Sprite Strokes).
+            int strokeMode = 0;
+            if (stage05 && s5.SpriteStrokes && !MapLabArtBuilder.IsDetail05(entry))
+            {
+                switch (entry.Category)
+                {
+                    case MapLabArtCategory.Vegetation: strokeMode = 1; break;
+                    case MapLabArtCategory.Rock:
+                    case MapLabArtCategory.CliffModule: strokeMode = 3; break;
+                    case MapLabArtCategory.Building:
+                    case MapLabArtCategory.Prop: strokeMode = 4; break;
+                }
+            }
+            // Та же кисть, что у мазков луга и полей (BrushScale), и те же оттенки сдвига.
+            m.SetVector("_SpriteStrokes", new Vector4(strokeMode > 0 ? s5.SpriteStrokeStrength : 0f, strokeMode, Mathf.Max(0.3f, Settings.PainterlyStyle.BrushScale) * s5.SpriteStrokeLength, 0f));
+            m.SetColor("_StrokeDry", palette.GrassDry);
+            m.SetColor("_StrokeLush", palette.GrassLush);
+            // R03: контурная трава — смешивание мягкой альфы, без записи глубины,
+            // после обычных карточек (тонкие штрихи не рвутся порогом).
+            bool inkGrass = stage05 && entry.Role == "grass_ink_tuft";
+            m.SetFloat("_BlendAlpha", inkGrass ? 1f : 0f);
+            m.SetFloat("_SrcBlend", inkGrass ? (float)BlendMode.SrcAlpha : (float)BlendMode.One);
+            m.SetFloat("_DstBlend", inkGrass ? (float)BlendMode.OneMinusSrcAlpha : (float)BlendMode.Zero);
+            m.SetFloat("_ZWrite", inkGrass ? 0f : 1f);
+            if (inkGrass)
+            {
+                m.SetFloat("_Cutoff", 0.02f);
+                m.SetFloat("_AlphaToMask", 0f);
+                m.renderQueue = (int)RenderQueue.AlphaTest + 30;
+            }
             m.SetVector("_DetailFade", stage05 && MapLabArtBuilder.IsDetail05(entry) ? new Vector4(s5.DetailFadePixels.x, Mathf.Max(s5.DetailFadePixels.x + 0.5f, s5.DetailFadePixels.y), 0f, 0f) : Vector4.zero);
             if (stage05)
                 m.SetColor("_AccentInk", s5.InkColor);

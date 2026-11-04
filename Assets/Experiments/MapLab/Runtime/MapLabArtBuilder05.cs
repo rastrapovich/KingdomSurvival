@@ -7,7 +7,7 @@ namespace KingdomSurvival.MapLab
     {
         public sealed class Decor05Stats
         {
-            public int Grass, Reeds, Rocks, Outcrops, Hay, Props, Houses, Barns;
+            public int Grass, Reeds, Rocks, Outcrops, Hay, Props, Houses, Barns, InkGrass;
             public readonly List<string> MissingRoles = new List<string>();
         }
 
@@ -202,6 +202,61 @@ namespace KingdomSurvival.MapLab
             else if (grass.Count == 0)
                 LastDecor05.MissingRoles.Add("grass_tuft");
 
+            // --- R03: контурная трава (GrassInk) — редко у троп, корней, камней и
+            // местами на тихом лугу; разные варианты, масштаб и пустоты.
+            List<MapLabArtEntry> inkGrass = ByRole(set, "grass_ink_tuft");
+            if (inkGrass.Count > 0 && s5.InkGrassDensity > 0f)
+            {
+                float id = s5.InkGrassDensity;
+                MapLabNoise patches = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "decor05-inkgrass", MapLabData.AlgorithmVersion));
+                void Ink(Vector2 q)
+                {
+                    if (!Free(q, 0.15f) || data.IsUnderWater(q.x, q.y, 0.1f) || data.SampleMask(data.Forest, q.x, q.y) > 0.45f || data.SampleMask(data.Field, q.x, q.y) > 0.4f)
+                        return;
+                    MapLabArtEntry e = Pick(inkGrass, rng.Value());
+                    float scale = rng.Range(0.6f, 1.4f);
+                    plan.Add(e, Make(e, new Vector3(q.x, data.SampleHeight(q.x, q.y) - 0.01f, q.y), scale, 1f, 0f, 0.6f, -1));
+                    LastDecor05.InkGrass++;
+                }
+                foreach (MapLabPlacement o in data.Objects)
+                {
+                    bool root = o.Kind == MapLabObjectKind.Deciduous || o.Kind == MapLabObjectKind.Conifer || o.Kind == MapLabObjectKind.Boulder;
+                    if (!root || rng.Value() > 0.22f * id)
+                        continue;
+                    Vector2 p = new Vector2(o.Position.x, o.Position.z);
+                    if (data.SampleMask(data.Forest, p.x, p.y) > 0.3f)
+                        continue;
+                    float a = rng.Range(0f, Mathf.PI * 2f);
+                    Ink(p + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * rng.Range(0.4f, 1.3f));
+                }
+                List<MapLabPolyline> edges = new List<MapLabPolyline>(data.YardPaths);
+                edges.AddRange(data.Roads);
+                foreach (MapLabPolyline road in edges)
+                {
+                    if (road.Widening)
+                        continue;
+                    List<Vector2> pts = MapLabGeometry.Resample(road.Points, 3f);
+                    for (int i = 1; i < pts.Count; i++)
+                    {
+                        if (rng.Value() > 0.08f * id)
+                            continue;
+                        Vector2 dir = (pts[i] - pts[i - 1]).normalized;
+                        Ink(pts[i] + MapLabGeometry.LeftNormal(dir) * (rng.Chance(0.5f) ? 1f : -1f) * (road.Width * 0.5f + rng.Range(0.3f, 0.8f)));
+                    }
+                }
+                // Тихий луг: небольшие группы в редких местах, между ними пусто.
+                int meadow = Mathf.RoundToInt(data.Size * data.Size / 160f * id);
+                for (int k = 0; k < meadow; k++)
+                {
+                    Vector2 q = new Vector2(rng.Value(), rng.Value()) * data.Size;
+                    if (patches.Fbm(q.x / 19f, q.y / 19f, 2) * 0.5f + 0.5f < 0.66f)
+                        continue;
+                    int n = rng.Range(1, 3);
+                    for (int j = 0; j < n; j++)
+                        Ink(q + rng.InsideUnitCircle() * 0.9f);
+                }
+            }
+
             // --- Тростник ---
             if (reeds.Count > 0 && s5.ReedDensity > 0f && shore != null)
             {
@@ -330,7 +385,7 @@ namespace KingdomSurvival.MapLab
         // Мелкие спрайты, которые плавно гаснут вдали (без появления рывком).
         public static bool IsDetail05(MapLabArtEntry e)
         {
-            return e != null && (e.Role == "grass_tuft" || e.Role == "reed_clump" || e.Role == "pebble_cluster" || e.Role == "hay_sheaf");
+            return e != null && (e.Role == "grass_tuft" || e.Role == "grass_ink_tuft" || e.Role == "reed_clump" || e.Role == "pebble_cluster" || e.Role == "hay_sheaf");
         }
     }
 }

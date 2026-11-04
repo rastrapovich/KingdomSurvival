@@ -448,6 +448,7 @@ namespace KingdomSurvival.MapLab.Editor
                     Vector3 right = cam != null ? Vector3.ProjectOnPlane(cam.transform.right, Vector3.up).normalized : Vector3.right;
                     Vector3 forward = cam != null ? Vector3.ProjectOnPlane(cam.transform.up, Vector3.up).normalized : Vector3.forward;
                     rig.Target -= (right * e.delta.x - forward * e.delta.y) * unitsPerPixel;
+                    rig.ClampTarget();
                     rig.Apply();
                     previewDirty = true;
                     e.Use();

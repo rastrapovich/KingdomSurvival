@@ -74,18 +74,24 @@ namespace KingdomSurvival.MapLab
         public static MapLabComposition Build(MapLabSettings settings, int seed)
         {
             MapLabRandom rng = MapLabRandom.ForStream(seed, "composition", MapLabData.AlgorithmVersion);
+            // 12У-C: схема вписана в игровую область; точки за её краем (дороги и
+            // реки уходят за предел) продолжаются через окружение до края карты.
             float s = settings.General.MapSize;
+            float frame = settings.FrameWidth;
+            float total = s + 2f * frame;
             MapLabComposition c = new MapLabComposition();
             float jitter = 0.025f;
 
             Vector2 P(float u, float v)
             {
-                return new Vector2((u + rng.Signed() * jitter) * s, (v + rng.Signed() * jitter) * s);
+                return new Vector2(frame + (u + rng.Signed() * jitter) * s, frame + (v + rng.Signed() * jitter) * s);
             }
+
+            float Edge(float u) => u <= 0f ? u * total : u >= 1f ? total + (u - 1f) * total : frame + u * s;
 
             Vector2 Fixed(float u, float v)
             {
-                return new Vector2(u * s, v * s);
+                return new Vector2(Edge(u), Edge(v));
             }
 
             switch (settings.General.Preset)

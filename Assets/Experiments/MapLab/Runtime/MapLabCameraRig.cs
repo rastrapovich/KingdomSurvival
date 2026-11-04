@@ -108,7 +108,8 @@ namespace KingdomSurvival.MapLab
             float size = data != null ? data.Size : (view != null && view.Settings != null ? view.Settings.General.MapSize : 256f);
             float min = data != null ? data.MinHeight : 0f;
             float max = data != null ? data.MaxHeight + 6f : 20f;
-            Target = new Vector3(size * 0.5f, (min + max) * 0.5f, size * 0.5f);
+            Rect content = ContentRect(data, size);
+            Target = new Vector3(content.center.x, (min + max) * 0.5f, content.center.y);
             Measure(Target, out Vector2 center, out Vector2 extent);
             Quaternion rotation = Rotation();
             Target += rotation * Vector3.right * center.x + rotation * Vector3.up * center.y;
@@ -137,9 +138,11 @@ namespace KingdomSurvival.MapLab
             Vector3 right = rotation * Vector3.right;
             Vector3 up = rotation * Vector3.up;
             float minX = float.MaxValue, maxX = float.MinValue, minY = float.MaxValue, maxY = float.MinValue;
+            // 12У-C: «вся карта» — игровая область и половина окружения, не край данных.
+            Rect area = ContentRect(data, size);
             for (int i = 0; i < 8; i++)
             {
-                Vector3 corner = new Vector3((i & 1) == 0 ? 0f : size, (i & 2) == 0 ? min : max, (i & 4) == 0 ? 0f : size) - origin;
+                Vector3 corner = new Vector3((i & 1) == 0 ? area.xMin : area.xMax, (i & 2) == 0 ? min : max, (i & 4) == 0 ? area.yMin : area.yMax) - origin;
                 float x = Vector3.Dot(corner, right);
                 float y = Vector3.Dot(corner, up);
                 minX = Mathf.Min(minX, x); maxX = Mathf.Max(maxX, x);
@@ -267,13 +270,47 @@ namespace KingdomSurvival.MapLab
             return point;
         }
 
-        private void ClampTarget()
+        private static Rect ContentRect(MapLabData data, float size)
+        {
+            if (data == null || data.PlayRect.width <= 0f)
+                return new Rect(0f, 0f, size, size);
+            float frame = data.PlayRect.xMin;
+            Rect r = data.PlayRect;
+            float grow = frame * 0.5f;
+            return new Rect(r.xMin - grow, r.yMin - grow, r.width + grow * 2f, r.height + grow * 2f);
+        }
+
+        // 12У-C: центр кадра ограничивается так, чтобы весь отпечаток кадра на
+        // земле (ширина кадра и глубина по наклону, с запасом на высокие
+        // объекты) оставался внутри данных карты. Если кадр шире карты (обзор) —
+        // центр по этой оси посередине. Без окружения — прежние доли.
+        public void ClampTarget()
         {
             if (view == null || view.Data == null)
                 return;
-            float size = view.Data.Size;
-            Target.x = Mathf.Clamp(Target.x, -size * 0.1f, size * 1.1f);
-            Target.z = Mathf.Clamp(Target.z, -size * 0.3f, size * 1.1f);
+            MapLabData data = view.Data;
+            float size = data.Size;
+            if (data.PlayRect.width <= 0f || data.PlayRect.xMin <= 0f)
+            {
+                Target.x = Mathf.Clamp(Target.x, -size * 0.1f, size * 1.1f);
+                Target.z = Mathf.Clamp(Target.z, -size * 0.3f, size * 1.1f);
+                return;
+            }
+            Camera c = Camera;
+            // Размер кадра — от текущего приближения и соотношения сторон (не от
+            // прошлого применения камеры).
+            if (fitAspect > 0f && Mathf.Abs(c.aspect - fitAspect) > 1e-3f)
+                RecomputeFitSize();
+            float half = fitSize / Mathf.Max(0.05f, zoom);
+            float halfWidth = half * Mathf.Max(0.1f, c.aspect);
+            float halfDepth = half / Mathf.Max(0.2f, Mathf.Sin(Mathf.Clamp(Pitch, 5f, 90f) * Mathf.Deg2Rad));
+            Quaternion rotation = Rotation();
+            Vector3 right = rotation * Vector3.right;
+            Vector3 forward = Vector3.ProjectOnPlane(rotation * Vector3.forward, Vector3.up).normalized;
+            float ex = Mathf.Abs(right.x) * halfWidth + Mathf.Abs(forward.x) * halfDepth + 2f;
+            float ez = Mathf.Abs(right.z) * halfWidth + Mathf.Abs(forward.z) * halfDepth + 2f;
+            Target.x = ex * 2f >= size ? size * 0.5f : Mathf.Clamp(Target.x, ex, size - ex);
+            Target.z = ez * 2f >= size ? size * 0.5f : Mathf.Clamp(Target.z, ez, size - ez);
         }
 
         private void Update()

@@ -113,6 +113,19 @@ namespace KingdomSurvival.MapLab
         public float PaintTexelsPerUnit => Settings != null && Settings.IsStage03 && LastTiledPaint != null ? LastTiledPaint.TexelsPerUnit : (data != null && Settings != null ? Settings.PaintResolution / data.Size : 0f);
         public MapLabArtBuilder.Plan ArtPlan => artPlan;
         public int ArtMaterialCount => artMaterials.Count;
+        // Этап 12У-C: число тайлов покраски и из них подробных (без подгрузки — все).
+        // Этап 12У-C: время подшагов сборки (замер масштаба), мс.
+        public readonly List<KeyValuePair<string, float>> Phases = new List<KeyValuePair<string, float>>();
+        private readonly Stopwatch phaseWatch = new Stopwatch();
+
+        private void Phase(string name)
+        {
+            Phases.Add(new KeyValuePair<string, float>(name, (float)phaseWatch.Elapsed.TotalMilliseconds));
+            phaseWatch.Restart();
+        }
+
+        public int PaintTileCount => paintTiles.Count;
+        public int DetailTileCount => paintTiles.Count;
 
         // Сколько экземпляров каждого рисунка стоит на текущей карте (каталог «Ассеты»).
         private readonly Dictionary<MapLabArtEntry, int> usage = new Dictionary<MapLabArtEntry, int>();
@@ -411,21 +424,29 @@ namespace KingdomSurvival.MapLab
         private void BuildEverything(MapLabGenerator.Progress progress)
         {
             Stopwatch watch = Stopwatch.StartNew();
+            Phases.Clear();
+            phaseWatch.Restart();
             EnsureRoot();
             CreateSharedResources();
             MapLabGenerator.Report(progress, "Покраска поверхности", 0.94f);
             UploadDataTextures();
             UploadShade();
+            Phase("текстуры данных");
             Repaint();
+            Phase("покраска");
             MapLabGenerator.Report(progress, "Меши", 0.97f);
             BuildTerrain();
+            Phase("рельеф");
             BuildWater();
             BuildCliffs();
+            Phase("вода и скалы");
             BuildObjects();
             BuildInk();
+            Phase("перо");
             BuildGrass();
             BuildWireframe();
             ApplyMaterialSettings();
+            Phase("трава и материалы");
             if (CameraRig != null)
                 CameraRig.Bind(this, true);
             ApplyVisibility();
@@ -471,6 +492,17 @@ namespace KingdomSurvival.MapLab
             }
             DestroySafe(group);
             groups.Remove(name);
+        }
+
+        // 12У-C: перо — участками 64 ед. (ближний кадр не рисует всю карту).
+        private void AddInk(string name, Mesh mesh, Material material)
+        {
+            if (mesh == null)
+                return;
+            GameObject group = Group("Ink");
+            foreach (Mesh part in MapLabMeshes.SplitByChunks(mesh, 64f, mesh.name))
+                AddRenderer(group, name, part, material);
+            DestroySafe(mesh);
         }
 
         private MeshRenderer AddRenderer(GameObject parent, string name, Mesh mesh, Material material)
@@ -766,18 +798,18 @@ namespace KingdomSurvival.MapLab
                 return;
             Mesh mesh = MapLabInk.BuildRoadInk(data, Settings, paintFields, out MapLabInk.Stats stats);
             InkStats = stats;
-            AddRenderer(Group("Ink"), "Road Ink", mesh, inkMaterial);
+            AddInk("Road Ink", mesh, inkMaterial);
             if (Settings.IsStage05)
             {
                 Mesh fieldInk = MapLabInk.BuildFieldInk(data, Settings, paintFields, out MapLabInk.Stats fieldStats);
                 FieldInkStats = fieldStats;
-                AddRenderer(Group("Ink"), "Field Ink", fieldInk, inkMaterial);
+                AddInk("Field Ink", fieldInk, inkMaterial);
             }
             if (Settings.IsStage05 && shoreInkMaterial != null && paintFields.Shore != null)
             {
                 Mesh shore = MapLabInk.BuildShoreInk(data, Settings, paintFields.Shore, out MapLabInk.Stats shoreStats);
                 ShoreInkStats = shoreStats;
-                AddRenderer(Group("Ink"), "Shore Ink", shore, shoreInkMaterial);
+                AddInk("Shore Ink", shore, shoreInkMaterial);
             }
         }
 
@@ -942,6 +974,7 @@ namespace KingdomSurvival.MapLab
                     stale.Add(e);
             foreach (MapLabArtEntry e in stale)
                 usage.Remove(e);
+            phaseWatch.Restart();
             artPlan = new MapLabArtBuilder.Plan();
             MapLabArtBuilder.Plan housePlan = new MapLabArtBuilder.Plan();
             MapLabArtBuilder.Plan housePlan35 = new MapLabArtBuilder.Plan();
@@ -954,7 +987,9 @@ namespace KingdomSurvival.MapLab
             {
                 // Этап 05: деревья — набор этапа 03; дома, трава, камни, сено, реквизит — этап 05.
                 MapLabArtBuilder.PlanHouses05(data, Settings, set05, housePlan);
+                Phase("план домов");
                 MapLabArtBuilder.PlanDecor05(data, Settings, set05, paintFields != null ? paintFields.Shore : new MapLabShore(data, Settings.Stage05.ShoreSmoothing), decorPlan);
+                Phase("план мелочи");
                 if (DrawnCliffs06)
                     MapLabArtBuilder.PlanCliffScree06(data, Settings, MapLabCliffs06.KitOf(ResolvedArtSet06), decorPlan);
                 foreach (MapLabObjectKind kind in decorPlan.Replaced)
@@ -962,7 +997,9 @@ namespace KingdomSurvival.MapLab
             }
             if (set != null)
             {
+                Phase("осыпи");
                 MapLabArtBuilder.PlanVegetation(data, Settings, set, artPlan);
+                Phase("план растительности");
                 if (!stage05)
                 {
                     MapLabArtBuilder.PlanBoulders(data, Settings, set, artPlan);
@@ -983,6 +1020,7 @@ namespace KingdomSurvival.MapLab
             }
             artHouses03 = stage03 && !stage05 && housePlan.Count > 0;
             GameObject vegetation = Group("Vegetation");
+            Phase("прочие планы");
             List<Mesh> cards = MapLabMeshes.BuildVegetationCards(data, 64f, artPlan.Replaced);
             for (int i = 0; i < cards.Count; i++)
                 AddRenderer(vegetation, cards[i].name, cards[i], cardMaterial);
@@ -991,6 +1029,7 @@ namespace KingdomSurvival.MapLab
                 noHouses.Add(MapLabObjectKind.Haystack);
             // Этап 05: мосты и ограды — модули; без подключённых модулей — прежний
             // процедурный мост с явной отметкой (не молчаливая подмена).
+            Phase("процедурные карточки");
             ModuleStats = null;
             BridgesProcedural05 = false;
             if (set05 != null && ModuleShader != null)
@@ -1003,11 +1042,14 @@ namespace KingdomSurvival.MapLab
                 foreach (MapLabArtEntry e in keys)
                     AddRenderer(moduleGroup, "Module " + e.Id, modules.Meshes[e].ToMesh("MapLab Module " + e.Id), ModuleMaterial(e));
             }
+            Phase("модули");
             BridgesProcedural05 = stage05 && (ModuleStats == null || ModuleStats.DeckPanels == 0) && data.Bridges.Count > 0;
             AddRenderer(Group("Structures"), "Structures", MapLabMeshes.BuildStructures(data, Settings, noHouses, stage05 && !BridgesProcedural05), solidMaterial);
             AddRenderer(Group("Houses"), "Houses", MapLabMeshes.BuildHouses(data), solidMaterial);
             AddRenderer(Group("Boulders"), "Boulders", MapLabMeshes.BuildBoulders(data, artPlan.Replaced), solidMaterial);
+            Phase("постройки и валуны");
             BuildArtGroup("ArtVegetation", artPlan, e => e.Category == MapLabArtCategory.Vegetation);
+            Phase("меши растительности");
             BuildArtGroup("ArtBoulders", artPlan, e => e.Category == MapLabArtCategory.Rock);
             BuildArtGroup("ArtCliffDecor", artPlan, e => e.Category == MapLabArtCategory.Cliff);
             if (stage05)
@@ -1031,7 +1073,9 @@ namespace KingdomSurvival.MapLab
                     artPlan.Add(pair.Key, inst);
             foreach (MapLabObjectKind kind in housePlan.Replaced)
                 artPlan.Replaced.Add(kind);
+            Phase("меши домов и мелочи");
             BuildObjectShadows();
+            Phase("тени объектов");
         }
 
         // Этап 03: маска стилизованных теней по фактическим объектам (размеры

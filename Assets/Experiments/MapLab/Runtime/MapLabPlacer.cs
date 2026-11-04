@@ -308,6 +308,21 @@ namespace KingdomSurvival.MapLab
 
         // ---------- Лес ----------
 
+        // 12У-C: лес окружения — широкие массы неровной глубины: за игровой
+        // областью плотно, внутрь заходит на разную глубину; в углах глубже
+        // (расстояние сразу до двух сторон); местами луговые языки у кромки.
+        // Исключения (дороги, вода, уступы, поля) применяются после — коридоры
+        // путей и рек проходят сквозь лес.
+        public static float FrameForest(Vector2 p, Rect play, float frame, MapLabNoise depth, MapLabNoise tongue)
+        {
+            float dx = Mathf.Max(play.xMin - p.x, p.x - play.xMax), dz = Mathf.Max(play.yMin - p.y, p.y - play.yMax);
+            float signed = dx > 0f || dz > 0f ? new Vector2(Mathf.Max(0f, dx), Mathf.Max(0f, dz)).magnitude : Mathf.Max(dx, dz);
+            float wobble = depth.Fbm(p.x / 70f, p.y / 70f, 2) * frame * 0.45f;
+            float f = MapLabGeometry.SmoothStep(-frame * 0.35f, frame * 0.2f, signed + wobble);
+            float t = MapLabGeometry.SmoothStep(0.58f, 0.72f, tongue.Fbm(p.x / 34f, p.y / 34f, 2) * 0.5f + 0.5f);
+            return f * (1f - t * (1f - MapLabGeometry.SmoothStep(-frame * 0.1f, frame * 0.5f, signed)));
+        }
+
         // Маска лесного массива: связный силуэт с выступами, заливами, полянами
         // и оторванными рощами; ядро плотнее опушки.
         private static void BuildForestMask(MapLabData data, MapLabSettings settings)
@@ -317,6 +332,11 @@ namespace KingdomSurvival.MapLab
             MapLabNoise mass = new MapLabNoise(Stream(data, "forest-mass"));
             MapLabNoise edge = new MapLabNoise(Stream(data, "forest-edge"));
             MapLabNoise glade = new MapLabNoise(Stream(data, "forest-glade"));
+            // 12У-C: природное окружение за игровой областью — свой поток.
+            MapLabNoise frameDepth = new MapLabNoise(Stream(data, "frame-forest"));
+            MapLabNoise frameTongue = new MapLabNoise(Stream(data, "frame-tongue"));
+            Rect play = data.PlayRect;
+            float frame = play.width > 0f ? play.xMin : 0f;
             int n = data.Resolution;
             float threshold = Mathf.Lerp(0.98f, 0.28f, v.ForestDensity);
             float warp = 0.4f + 1.4f * v.EdgeRoughness;
@@ -341,6 +361,8 @@ namespace KingdomSurvival.MapLab
                     float forest = MapLabGeometry.SmoothStep(threshold - 0.06f, threshold + 0.06f, f) * MapLabGeometry.SmoothStep(0f, 0.08f, v.ForestDensity);
                     float g = glade.Fbm(p.x / 28f, p.y / 28f, 2);
                     forest *= 1f - MapLabGeometry.SmoothStep(0.32f, 0.5f, g) * 0.95f;
+                    if (frame > 0f)
+                        forest = Mathf.Max(forest, FrameForest(p, play, frame, frameDepth, frameTongue) * MapLabGeometry.SmoothStep(0f, 0.08f, v.ForestDensity));
                     // Исключения: дворы, поля, дорога, вода, стенки уступов, крутизна.
                     forest *= 1f - data.Settlement[i];
                     if (c != null && c.HasSettlement)

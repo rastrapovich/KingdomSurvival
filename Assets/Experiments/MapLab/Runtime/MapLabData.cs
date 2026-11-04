@@ -225,6 +225,8 @@ namespace KingdomSurvival.MapLab
         public MapLabPresetKind Preset;
         public int Resolution;
         public float Size;
+        // 12У-C: игровая область внутри карты; за ней — природное окружение.
+        public Rect PlayRect;
         public float Cell;
         public float MinHeight;
         public float MaxHeight;

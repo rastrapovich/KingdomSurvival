@@ -85,6 +85,9 @@ namespace KingdomSurvival.MapLab
             MapLabNoise gaps = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "decor05-reed-gaps", MapLabData.AlgorithmVersion));
             MapLabRandom rng = MapLabRandom.ForStream(data.Seed, "decor05", MapLabData.AlgorithmVersion);
             List<Vector2> taken = new List<Vector2>();
+            // Проверка «внутри постройки» смотрит только дома и сараи — отбираем их один раз
+            // (раньше каждая травинка перебирала все объекты карты: квадратичный рост).
+            List<MapLabPlacement> buildings = data.Objects.FindAll(o => o.Kind == MapLabObjectKind.House || o.Kind == MapLabObjectKind.Barn);
 
             bool Quiet(Vector2 p) => quiet.Fbm(p.x / 28f, p.y / 28f, 2) * 0.5f + 0.5f < 0.42f;
             bool NearBridge(Vector2 p)
@@ -96,7 +99,7 @@ namespace KingdomSurvival.MapLab
             }
             bool Free(Vector2 p, float r)
             {
-                if (!data.Contains(p.x, p.y) || MapLabPlacer.InsideBuilding(data.Objects, p, 0.3f))
+                if (!data.Contains(p.x, p.y) || MapLabPlacer.InsideBuilding(buildings, p, 0.3f))
                     return false;
                 if (data.RoadDistance != null && data.Bilinear(data.RoadDistance, p.x, p.y) < 0.15f)
                     return false;

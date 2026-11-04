@@ -67,12 +67,15 @@ namespace KingdomSurvival.MapLab.Tests
                     Assert.IsTrue(scene.View.Generate(null), scene.View.LastError);
                     MapLabCameraRig rig = scene.Rig;
                     Assert.AreEqual(8f, rig.ZoomLimits.y, "Сохранённый предел рига — прежний 8");
-                    Assert.AreEqual(3f, rig.MaxZoom, 1e-4f, "Фактический предел этапа 05 — 3");
-                    rig.Zoom = 8f;
-                    Assert.AreEqual(3f, rig.Zoom, 1e-4f, "Zoom 8 не ограничен");
+                    // 12У-C: Zoom считается от «всей карты», предел растёт со стороной
+                    // мира — ближний кадр охватывает столько же мира, сколько у 256.
+                    float Expected(float m) => Mathf.Clamp(m, 2f, 4f) * Mathf.Max(1f, s.WorldSide / 256f);
+                    Assert.AreEqual(Expected(3f), rig.MaxZoom, 1e-4f, "Фактический предел этапа 05 — 3 × сторона/256");
+                    rig.Zoom = 99f;
+                    Assert.AreEqual(Expected(3f), rig.Zoom, 1e-4f, "Zoom сверх предела не ограничен");
                     Assert.AreEqual(35f, rig.Pitch, 0.01f, "На фактическом пределе — 35°");
-                    rig.ZoomAround(8f, new Vector2(0.5f, 0.5f), false);
-                    Assert.AreEqual(3f, rig.Zoom, 1e-4f, "Приближение к курсору выходит за предел");
+                    rig.ZoomAround(99f, new Vector2(0.5f, 0.5f), false);
+                    Assert.AreEqual(Expected(3f), rig.Zoom, 1e-4f, "Приближение к курсору выходит за предел");
                     rig.Zoom = 1f;
                     Assert.AreEqual(60f, rig.Pitch, 0.01f, "Общий вид — 60°");
                     float previous = 90f;
@@ -87,12 +90,12 @@ namespace KingdomSurvival.MapLab.Tests
                     foreach (float max in new[] { 2f, 4f })
                     {
                         s.Stage05.ZoomMax = max;
-                        rig.Zoom = 8f;
-                        Assert.AreEqual(max, rig.Zoom, 1e-4f);
+                        rig.Zoom = 99f;
+                        Assert.AreEqual(Expected(max), rig.Zoom, 1e-4f);
                         Assert.AreEqual(35f, rig.Pitch, 0.01f);
                     }
                     s.Stage05.ZoomMax = 9f;
-                    Assert.AreEqual(4f, rig.MaxZoom, 1e-4f, "Вне диапазона 2–4");
+                    Assert.AreEqual(Expected(4f), rig.MaxZoom, 1e-4f, "Вне диапазона 2–4");
                     // На этапе 04 предел прежний.
                     s.Stage03.Look = MapLabLook.Stage04;
                     Assert.AreEqual(8f, rig.MaxZoom, 1e-4f);

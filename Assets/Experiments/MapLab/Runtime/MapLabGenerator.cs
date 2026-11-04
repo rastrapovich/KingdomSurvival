@@ -25,10 +25,12 @@ namespace KingdomSurvival.MapLab
             if (settings == null)
                 throw new ArgumentNullException(nameof(settings));
             Stopwatch total = Stopwatch.StartNew();
-            MapLabData data = new MapLabData(settings.Resolution, settings.General.MapSize)
+            float frame = settings.FrameWidth;
+            MapLabData data = new MapLabData(settings.Resolution, settings.WorldSide)
             {
                 Seed = settings.General.Seed,
                 Preset = settings.General.Preset,
+                PlayRect = new Rect(frame, frame, settings.General.MapSize, settings.General.MapSize),
             };
             data.Composition = MapLabComposition.Build(settings, data.Seed);
             Builder builder = new Builder(settings, data, progress);
@@ -950,6 +952,9 @@ namespace KingdomSurvival.MapLab
             {
                 MapLabRoadSettings roads = settings.RoadsAndFields;
                 if (!data.Fields.Evaluate(p, out MapLabFields.Sample sample) || !data.FieldBlocks[sample.Block].Cultivated)
+                    return false;
+                // 12У-C: поля — только в игровой области, с отступом от её края.
+                if (data.PlayRect.width > 0f && (p.x < data.PlayRect.xMin + 6f || p.x > data.PlayRect.xMax - 6f || p.y < data.PlayRect.yMin + 6f || p.y > data.PlayRect.yMax - 6f))
                     return false;
                 float d = Vector2.Distance(p, composition.SettlementCenter);
                 // Внутренняя и внешняя граница пашни — неровные, не круг.

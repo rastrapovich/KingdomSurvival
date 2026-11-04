@@ -563,10 +563,34 @@ namespace KingdomSurvival.MapLab
 
         // Фактический предел приближения: на этапе 05 — ZoomMax (2–4), прежний
         // предел рига (8) ограничивается им; на ранних этапах — предел рига.
+        // 12У-C: Zoom считается от «всей карты», поэтому предел растёт со
+        // стороной мира — ближний кадр охватывает столько же мира, сколько у 256.
         public float MaxZoom(float rigLimit)
         {
-            return IsStage05 ? Mathf.Min(rigLimit, Mathf.Clamp(Stage05.ZoomMax, 2f, 4f)) : rigLimit;
+            if (!IsStage05)
+                return rigLimit;
+            float scale = Mathf.Max(1f, WorldSide / 256f);
+            return Mathf.Min(rigLimit * scale, Mathf.Clamp(Stage05.ZoomMax, 2f, 4f) * scale);
         }
+
+        // 12У-C: ширина природного окружения за игровой областью, ед.: авто —
+        // от ближнего кадра (полуширина кадра 16:9 или полуглубина на земле при
+        // наклоне предела, что больше) плюс запас на высокие объекты.
+        public float AutoFrameWidth
+        {
+            get
+            {
+                float half = 0.5f * 256f / (16f / 9f) * 0.985f / Mathf.Clamp(Stage05.ZoomMax, 2f, 4f);
+                float halfWidth = half * 16f / 9f;
+                float halfDepth = half / Mathf.Sin(Mathf.Max(20f, Stage05.PitchRange.y) * Mathf.Deg2Rad);
+                return Mathf.Max(halfWidth, halfDepth) + 12f;
+            }
+        }
+
+        public float FrameWidth => IsStage05 && Stage05.WideFrame ? Mathf.Max(AutoFrameWidth, Stage05.FrameWidth) : 0f;
+
+        // Сторона данных карты: игровая область (General.MapSize) и окружение с двух сторон.
+        public float WorldSide => General.MapSize + 2f * FrameWidth;
 
         // Наклон для приближения: этап 05 — от 60° к 35° ровно на фактическом пределе.
         public float PitchFor(float zoom, float rigLimit)

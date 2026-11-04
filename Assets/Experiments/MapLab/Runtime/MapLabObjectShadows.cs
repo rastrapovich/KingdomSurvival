@@ -12,6 +12,21 @@ namespace KingdomSurvival.MapLab
     // Тень дома — заметание основания вдоль света на высоту кровли.
     public static class MapLabObjectShadows
     {
+        // Полоса строк текущего потока (растеризация теней по полосам).
+        // Для проверок: тот же рисунок последовательно, без полос.
+        public static bool Sequential;
+
+        [System.ThreadStatic] private static bool bandOn;
+        [System.ThreadStatic] private static int bandLo, bandHi;
+
+        private static void Band(ref int z0, ref int z1)
+        {
+            if (!bandOn)
+                return;
+            z0 = Mathf.Max(z0, bandLo);
+            z1 = Mathf.Min(z1, bandHi);
+        }
+
         public sealed class Result
         {
             public bool Gradient;
@@ -52,12 +67,46 @@ namespace KingdomSurvival.MapLab
             float lobes = gradient ? s4.CrownLobes : 0f;
             uint lobeSeed = (uint)MapLabRandom.StreamSeed(data.Seed, "shadow-lobes", MapLabData.AlgorithmVersion);
             result.Gradient = gradient;
-            foreach (Caster c in casters)
+            // Тени собираются максимумом — порядок не важен: попадание луча в
+            // рельеф считается один раз для каждой формы, затем полосы строк
+            // рисуются параллельно, каждая — только пересекающие её формы.
+            int count = casters.Count;
+            Vector2[] hits = new Vector2[count];
+            int[] zLo = new int[count], zHi = new int[count];
+            bool attachedShadows = settings.IsStage05;
+            float contactReach = gradient ? s4.ContactReach : 0.5f;
+            System.Threading.Tasks.Parallel.For(0, count, k =>
+            {
+                Caster c = casters[k];
+                Vector2 foot = new Vector2(c.Base.x, c.Base.z);
+                float reach;
+                if (c.Building)
+                {
+                    hits[k] = Hit(data, c.Base + Vector3.up * c.Height, L);
+                    reach = Mathf.Max(c.Size.x, c.Size.y) * 0.75f + 1.2f * contactReach + 0.6f;
+                }
+                else
+                {
+                    float h = gradient && attachedShadows ? 0.62f : 1f;
+                    hits[k] = Hit(data, c.Base + Vector3.up * c.CenterHeight * h, L);
+                    reach = Mathf.Max(c.Radius * stretch * (1f + lobes * 0.2f), Mathf.Max(c.ContactRadius * 2f, c.Radius * contactReach * 1.3f)) + 0.5f;
+                }
+                float a = Mathf.Min(foot.y, hits[k].y) - reach - texel * 3f, b = Mathf.Max(foot.y, hits[k].y) + reach + texel * 3f;
+                zLo[k] = Mathf.Clamp(Mathf.FloorToInt(a / texel), 0, res - 1);
+                zHi[k] = Mathf.Clamp(Mathf.CeilToInt(b / texel), 0, res - 1);
+            });
+            const int BandRows = 64;
+            int bands = (res + BandRows - 1) / BandRows;
+            List<int>[] buckets = new List<int>[bands];
+            for (int k = 0; k < count; k++)
+                for (int band = zLo[k] / BandRows; band <= zHi[k] / BandRows; band++)
+                    (buckets[band] ?? (buckets[band] = new List<int>())).Add(k);
+            void Draw(Caster c, Vector2 hit)
             {
                 if (c.Building)
                 {
                     // Сдвиг тени кровли — до пересечения с рельефом под ней.
-                    Vector2 shift = Hit(data, c.Base + Vector3.up * c.Height, L) - new Vector2(c.Base.x, c.Base.z);
+                    Vector2 shift = hit - new Vector2(c.Base.x, c.Base.z);
                     List<Vector2> hull = BuildingHull(c, shift);
                     Polygon(result.Cast, res, texel, hull);
                     if (gradient)
@@ -71,8 +120,6 @@ namespace KingdomSurvival.MapLab
                     // (точка кроны ниже), от опоры к нему — сплошная расширяющаяся
                     // форма по рельефу (Hit — пересечение луча с землёй).
                     bool attached = settings.IsStage05;
-                    Vector3 crown = c.Base + Vector3.up * c.CenterHeight * (attached ? 0.62f : 1f);
-                    Vector2 hit = Hit(data, crown, L);
                     Vector2 foot = new Vector2(c.Base.x, c.Base.z);
                     // Стабильные крупные выступы контура: фаза — от места опоры.
                     float phase = MapLabRandom.Hash01(Mathf.RoundToInt(foot.x * 16f), Mathf.RoundToInt(foot.y * 16f), lobeSeed) * 6.283f;
@@ -91,8 +138,6 @@ namespace KingdomSurvival.MapLab
                 }
                 else
                 {
-                    Vector3 crown = c.Base + Vector3.up * c.CenterHeight;
-                    Vector2 hit = Hit(data, crown, L);
                     // Одна собранная форма: пятно кроны и «шейка» от ствола к нему,
                     // контактная тень лежит внутри неё, а не вторым кругом.
                     Vector2 foot = new Vector2(c.Base.x, c.Base.z);
@@ -106,8 +151,24 @@ namespace KingdomSurvival.MapLab
                     Ellipse(result.Cast, res, texel, foot, lightDir, c.ContactRadius * 1.2f, c.ContactRadius * 1.05f);
                     Ellipse(result.Contact, res, texel, foot, lightDir, c.ContactRadius * 0.9f, c.ContactRadius * 0.75f);
                 }
-                result.Shapes++;
             }
+            if (Sequential)
+            {
+                for (int k = 0; k < count; k++)
+                    Draw(casters[k], hits[k]);
+            }
+            else System.Threading.Tasks.Parallel.For(0, bands, band =>
+            {
+                if (buckets[band] == null)
+                    return;
+                bandOn = true;
+                bandLo = band * BandRows;
+                bandHi = Mathf.Min(res - 1, bandLo + BandRows - 1);
+                foreach (int k in buckets[band])
+                    Draw(casters[k], hits[k]);
+                bandOn = false;
+            });
+            result.Shapes = count;
             if (settings.IsStage05 && settings.Stage05.ShadowEdgeLoss > 0f)
                 LiveEdge(result.Cast, res, texel, data.Seed, settings.Stage05);
             result.Milliseconds = (float)watch.Elapsed.TotalMilliseconds;
@@ -280,6 +341,7 @@ namespace KingdomSurvival.MapLab
             }
             int x0 = Mathf.Clamp(Mathf.FloorToInt((min.x - reach) / texel), 0, res - 1), x1 = Mathf.Clamp(Mathf.CeilToInt((max.x + reach) / texel), 0, res - 1);
             int z0 = Mathf.Clamp(Mathf.FloorToInt((min.y - reach) / texel), 0, res - 1), z1 = Mathf.Clamp(Mathf.CeilToInt((max.y + reach) / texel), 0, res - 1);
+            Band(ref z0, ref z1);
             float area = 0f;
             for (int i = 0; i < poly.Count; i++)
                 area += Cross(Vector2.zero, poly[i], poly[(i + 1) % poly.Count]);
@@ -341,6 +403,7 @@ namespace KingdomSurvival.MapLab
             }
             int x0 = Mathf.Clamp(Mathf.FloorToInt(min.x / texel) - 2, 0, res - 1), x1 = Mathf.Clamp(Mathf.CeilToInt(max.x / texel) + 2, 0, res - 1);
             int z0 = Mathf.Clamp(Mathf.FloorToInt(min.y / texel) - 2, 0, res - 1), z1 = Mathf.Clamp(Mathf.CeilToInt(max.y / texel) + 2, 0, res - 1);
+            Band(ref z0, ref z1);
             // Обход против часовой стрелки: внутри — все ребра слева.
             float area = 0f;
             for (int i = 0; i < poly.Count; i++)
@@ -371,6 +434,7 @@ namespace KingdomSurvival.MapLab
             x1 = Mathf.Clamp(Mathf.CeilToInt((center.x + reach) / texel), 0, res - 1);
             z0 = Mathf.Clamp(Mathf.FloorToInt((center.y - reach) / texel), 0, res - 1);
             z1 = Mathf.Clamp(Mathf.CeilToInt((center.y + reach) / texel), 0, res - 1);
+            Band(ref z0, ref z1);
         }
     }
 }

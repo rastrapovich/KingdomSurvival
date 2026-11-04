@@ -114,6 +114,73 @@ namespace KingdomSurvival.MapLab
 
     public static class MapLabMeshes
     {
+        // 12У-C: разрезать сетку на участки мира (по центру треугольника) — у
+        // каждого участка свои границы, и ближний кадр рисует только видимое.
+        // Треугольник целиком уходит в один участок: швов и дыр нет. Каналы
+        // UV0–UV2 копируются как есть.
+        public static List<Mesh> SplitByChunks(Mesh source, float chunk, string name)
+        {
+            List<Mesh> result = new List<Mesh>();
+            if (source == null)
+                return result;
+            Vector3[] v = source.vertices;
+            int[] t = source.triangles;
+            List<Vector2> u0 = new List<Vector2>(), u1 = new List<Vector2>();
+            List<Vector4> u2 = new List<Vector4>();
+            source.GetUVs(0, u0);
+            source.GetUVs(1, u1);
+            source.GetUVs(2, u2);
+            Dictionary<long, List<int>> groups = new Dictionary<long, List<int>>();
+            for (int i = 0; i < t.Length; i += 3)
+            {
+                Vector3 c = (v[t[i]] + v[t[i + 1]] + v[t[i + 2]]) / 3f;
+                long key = ((long)Mathf.FloorToInt(c.x / chunk) << 32) ^ (uint)Mathf.FloorToInt(c.z / chunk);
+                if (!groups.TryGetValue(key, out List<int> list))
+                    groups[key] = list = new List<int>();
+                list.Add(i);
+            }
+            List<long> keys = new List<long>(groups.Keys);
+            keys.Sort();
+            foreach (long key in keys)
+            {
+                Dictionary<int, int> remap = new Dictionary<int, int>();
+                List<Vector3> pos = new List<Vector3>();
+                List<Vector2> a0 = new List<Vector2>(), a1 = new List<Vector2>();
+                List<Vector4> a2 = new List<Vector4>();
+                List<int> tri = new List<int>();
+                foreach (int i in groups[key])
+                {
+                    for (int k = 0; k < 3; k++)
+                    {
+                        int src = t[i + k];
+                        if (!remap.TryGetValue(src, out int dst))
+                        {
+                            dst = pos.Count;
+                            remap[src] = dst;
+                            pos.Add(v[src]);
+                            if (u0.Count > src) a0.Add(u0[src]);
+                            if (u1.Count > src) a1.Add(u1[src]);
+                            if (u2.Count > src) a2.Add(u2[src]);
+                        }
+                        tri.Add(dst);
+                    }
+                }
+                Mesh m = new Mesh { name = name + " " + result.Count, hideFlags = HideFlags.DontSave };
+                if (pos.Count > 65000)
+                    m.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+                m.SetVertices(pos);
+                if (a0.Count == pos.Count) m.SetUVs(0, a0);
+                if (a1.Count == pos.Count) m.SetUVs(1, a1);
+                if (a2.Count == pos.Count) m.SetUVs(2, a2);
+                m.SetTriangles(tri, 0, true);
+                Bounds b = m.bounds;
+                b.Expand(2f);
+                m.bounds = b;
+                result.Add(m);
+            }
+            return result;
+        }
+
         // ---------- Рельеф ----------
 
         public static List<Mesh> BuildTerrainChunks(MapLabData data, int chunkVertices)

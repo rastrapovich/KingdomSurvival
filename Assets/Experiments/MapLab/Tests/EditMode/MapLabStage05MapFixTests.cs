@@ -204,5 +204,77 @@ namespace KingdomSurvival.MapLab.Tests
                 Object.DestroyImmediate(s);
             }
         }
+
+        [Test]
+        public void PaintStreaming_DetailTileEqualsFullPaint()
+        {
+            MapLabSettings s = Settings();
+            MapLabPalette palette = MapLabPalette.CreateFallback();
+            try
+            {
+                s.General.MapSize = 96f;
+                s.Stage05.WideFrame = false;
+                s.Stage03.PaintTexelsPerUnit = 6f;
+                MapLabData d = MapLabGenerator.Generate(s, null);
+                MapLabTiledPainter.Options options = new MapLabTiledPainter.Options();
+                MapLabTiledPainter.Result full = MapLabTiledPainter.Paint(d, s, palette, 32f, options);
+                MapLabTiledPainter.Session session = MapLabTiledPainter.Prepare(d, s, palette, 32f, options, full.Fields);
+                foreach (int index in new[] { 0, full.Tiles.Count / 2, full.Tiles.Count - 1 })
+                {
+                    MapLabTiledPainter.Tile reference = full.Tiles[index];
+                    MapLabTiledPainter.Tile tile = MapLabTiledPainter.MakeTile(session, reference.X, reference.Z, s.Stage03.PaintTexelsPerUnit);
+                    Color32[] pixels = MapLabTiledPainter.PaintTile(session, tile);
+                    Assert.AreEqual(reference.Rect, tile.Rect, "привязка тайла отличается");
+                    Assert.AreEqual(reference.Pixels.Length, pixels.Length);
+                    for (int i = 0; i < pixels.Length; i++)
+                        Assert.AreEqual(reference.Pixels[i], pixels[i], "подгруженный тайл отличается от полной покраски");
+                }
+                // Облегчённый обзор — та же разметка тайлов, другая плотность.
+                MapLabTiledPainter.Result low = MapLabTiledPainter.PaintAll(session, 2f);
+                Assert.AreEqual(full.Tiles.Count, low.Tiles.Count);
+                Assert.Less(low.Tiles[0].Core, full.Tiles[0].Core);
+            }
+            finally
+            {
+                Object.DestroyImmediate(palette);
+                Object.DestroyImmediate(s);
+            }
+        }
+
+        [Test]
+        public void PaintFields_Blocks_EvictedAndRecomputed_SameValues()
+        {
+            MapLabSettings s = Settings();
+            MapLabPalette palette = MapLabPalette.CreateFallback();
+            int keep = MapLabPaintFields.BudgetMb;
+            try
+            {
+                s.General.MapSize = 160f;
+                MapLabData d = MapLabGenerator.Generate(s, null);
+                MapLabPaintFields eager = new MapLabPaintFields(d, s, palette);
+                MapLabPaintFields.BudgetMb = 1;
+                MapLabPaintFields lazy = new MapLabPaintFields(d, s, palette);
+                Assert.Less(lazy.ResidentBlocks, lazy.TotalBlocks, "блоки не ленивые");
+                System.Random rng = new System.Random(3);
+                for (int k = 0; k < 200; k++)
+                {
+                    Vector2 p = new Vector2((float)rng.NextDouble() * d.Size, (float)rng.NextDouble() * d.Size);
+                    eager.Get(p, out MapLabPaintFields.Sample a);
+                    lazy.Get(p, out MapLabPaintFields.Sample b);
+                    Assert.AreEqual(a.R, b.R);
+                    Assert.AreEqual(a.FieldMask, b.FieldMask, "сглаженная маска поля зависит от блока");
+                    Assert.AreEqual(a.Above, b.Above);
+                    Assert.AreEqual(a.MainRoad, b.MainRoad);
+                    Assert.AreEqual(a.Blot, b.Blot);
+                }
+                Assert.LessOrEqual(lazy.ResidentBlocks, 16, "бюджет блоков не соблюдён");
+            }
+            finally
+            {
+                MapLabPaintFields.BudgetMb = keep;
+                Object.DestroyImmediate(palette);
+                Object.DestroyImmediate(s);
+            }
+        }
     }
 }

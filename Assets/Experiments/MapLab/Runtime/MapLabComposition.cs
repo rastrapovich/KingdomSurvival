@@ -45,6 +45,17 @@ namespace KingdomSurvival.MapLab
             public MapLabRoadKind Kind = MapLabRoadKind.Road;
         }
 
+        // 12У-E: поселение плана — центр, радиус застройки, охват полей, размер
+        // (1 — малое, 2 — среднее, 3 — крупное) и устойчивый ID из плана.
+        public sealed class Settlement
+        {
+            public Vector2 Center;
+            public float Radius;
+            public float FieldRadius;
+            public int Size = 2;
+            public string Id = string.Empty;
+        }
+
         public sealed class Zone
         {
             public Vector2 Center;
@@ -63,6 +74,8 @@ namespace KingdomSurvival.MapLab
         public readonly List<Vector2> ValleyLine = new List<Vector2>();
         public float ValleyHalfWidth;
         public float ValleyDepth;
+        // Все поселения; первое совпадает с SettlementCenter (прежние пресеты — одно).
+        public readonly List<Settlement> Settlements = new List<Settlement>();
         public Vector2 SettlementCenter;
         public float SettlementRadius;
         public bool HasSettlement;
@@ -71,8 +84,55 @@ namespace KingdomSurvival.MapLab
         public float MapEdgeForest; // сила рамки леса у краёв карты
         public Vector2 FlatStrokeDirection = new Vector2(1f, 0.3f);
 
+        // 12У-D/F: композиция из плана региона игры (мост MapLabBridge).
+        // Игровая область плана (может быть прямоугольной) и сетки клеток плана:
+        // лес и поля — 0..1 на регулярной сетке PlanRect × PlanCols × PlanRows.
+        public bool FromPlan;
+        public Rect PlayRect;
+        public float[] PlanForest, PlanField;
+        public int PlanCols, PlanRows;
+        public Rect PlanRect;
+        // Приметные места плана: позиция и вид (рисуются знаком мест, этап D).
+        public readonly List<(Vector2 Position, string Kind, string Id)> Landmarks = new List<(Vector2, string, string)>();
+
+        // Билинейная выборка сетки плана (вне сетки — 0).
+        public float SamplePlan(float[] grid, Vector2 p)
+        {
+            if (grid == null || PlanCols < 2 || PlanRows < 2)
+                return 0f;
+            float gx = (p.x - PlanRect.xMin) / PlanRect.width * (PlanCols - 1);
+            float gz = (p.y - PlanRect.yMin) / PlanRect.height * (PlanRows - 1);
+            if (gx < 0f || gz < 0f || gx > PlanCols - 1 || gz > PlanRows - 1)
+                return 0f;
+            int x0 = Mathf.Min((int)gx, PlanCols - 2), z0 = Mathf.Min((int)gz, PlanRows - 2);
+            float fx = gx - x0, fz = gz - z0;
+            float a = grid[z0 * PlanCols + x0], b = grid[z0 * PlanCols + x0 + 1], c = grid[(z0 + 1) * PlanCols + x0], d = grid[(z0 + 1) * PlanCols + x0 + 1];
+            return Mathf.Lerp(Mathf.Lerp(a, b, fx), Mathf.Lerp(c, d, fx), fz);
+        }
+
+        // Ближайшее поселение (по расстоянию до края застройки) и расстояние до центра.
+        public Settlement Nearest(Vector2 p, out float distance)
+        {
+            Settlement best = null;
+            distance = float.MaxValue;
+            float bestEdge = float.MaxValue;
+            foreach (Settlement s in Settlements)
+            {
+                float d = Vector2.Distance(p, s.Center);
+                if (d - s.Radius < bestEdge)
+                {
+                    bestEdge = d - s.Radius;
+                    best = s;
+                    distance = d;
+                }
+            }
+            return best;
+        }
+
         public static MapLabComposition Build(MapLabSettings settings, int seed)
         {
+            if (settings.RegionPlan != null)
+                return settings.RegionPlan;
             MapLabRandom rng = MapLabRandom.ForStream(seed, "composition", MapLabData.AlgorithmVersion);
             // 12У-C: схема вписана в игровую область; точки за её краем (дороги и
             // реки уходят за предел) продолжаются через окружение до края карты.
@@ -292,6 +352,8 @@ namespace KingdomSurvival.MapLab
                     break;
                 }
             }
+            if (c.HasSettlement && c.Settlements.Count == 0)
+                c.Settlements.Add(new Settlement { Center = c.SettlementCenter, Radius = c.SettlementRadius, FieldRadius = settings.RoadsAndFields.FieldRadius, Size = 2, Id = "settlement-0" });
             return c;
         }
     }

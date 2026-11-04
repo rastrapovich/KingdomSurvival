@@ -67,73 +67,118 @@ namespace KingdomSurvival.MapLab
             public bool DrawnCliffs;
         }
 
+        // 12У-C: сессия покраски — общие поля, дороги и параметры; тайлы можно
+        // красить по одному и с разной плотностью (облегчённый обзор всей карты
+        // и подробные тайлы у камеры по требованию). Один и тот же тайл одной
+        // плотности даёт одинаковые пиксели в любом порядке.
+        public sealed class Session
+        {
+            public MapLabData Data;
+            public MapLabSettings Settings;
+            public MapLabPalette Palette;
+            public Options Options;
+            public MapLabPaintFields Fields;
+            public List<MapLabPolyline> Roads;
+            public float TileWorld;
+            public int TilesPerSide;
+            public float MarginUnits;
+            internal readonly System.Collections.Concurrent.ConcurrentDictionary<int, System.Collections.Concurrent.ConcurrentBag<Buffers>> Pools =
+                new System.Collections.Concurrent.ConcurrentDictionary<int, System.Collections.Concurrent.ConcurrentBag<Buffers>>();
+        }
+
+        public static Session Prepare(MapLabData data, MapLabSettings settings, MapLabPalette palette, float tileWorld, Options options, MapLabPaintFields fields = null)
+        {
+            Session session = new Session
+            {
+                Data = data,
+                Settings = settings,
+                Palette = palette,
+                Options = options,
+                Fields = fields ?? new MapLabPaintFields(data, settings, palette),
+                TileWorld = tileWorld,
+                TilesPerSide = Mathf.Max(1, Mathf.CeilToInt(data.Size / tileWorld - 1e-4f)),
+            };
+            session.Roads = new List<MapLabPolyline>(data.Roads);
+            session.Roads.AddRange(data.YardPaths);
+            float brush = Mathf.Max(0.3f, settings.PainterlyStyle.BrushScale);
+            // Запас тайла под мазки соседей: самый длинный след (тонкая линия) с краем.
+            session.MarginUnits = brush * 2.4f * 1.4f * 0.5f + 0.6f;
+            return session;
+        }
+
+        public static Tile MakeTile(Session session, int x, int z, float texelsPerUnit)
+        {
+            int core = Mathf.Max(16, Mathf.RoundToInt(session.TileWorld * Mathf.Clamp(texelsPerUnit, 1f, 32f)));
+            float texel = session.TileWorld / core;
+            Tile t = new Tile { X = x, Z = z, Origin = new Vector2(x * session.TileWorld, z * session.TileWorld), Core = core, Size = core + Gutter * 2 };
+            float span = t.Size * texel;
+            t.Rect = new Vector4(t.Origin.x - Gutter * texel, t.Origin.y - Gutter * texel, 1f / span, 1f / span);
+            return t;
+        }
+
+        // Покраска одного тайла (потокобезопасно; буферы — из пула сессии).
+        public static Color32[] PaintTile(Session session, Tile t, Result stats = null)
+        {
+            float texel = session.TileWorld / t.Core;
+            int marginPx = Mathf.CeilToInt(session.MarginUnits / texel) + 2;
+            int bufferWidth = t.Core + Gutter * 2 + marginPx * 2;
+            System.Collections.Concurrent.ConcurrentBag<Buffers> pool = session.Pools.GetOrAdd(bufferWidth, _ => new System.Collections.Concurrent.ConcurrentBag<Buffers>());
+            if (!pool.TryTake(out Buffers buffers))
+                buffers = new Buffers(bufferWidth * bufferWidth, session.Options.StrokeContribution);
+            System.Diagnostics.Stopwatch phase = System.Diagnostics.Stopwatch.StartNew();
+            Context ctx = new Context(session.Data, session.Settings, session.Palette, session.Fields, session.Roads, t, texel, marginPx, session.Options, buffers);
+            ctx.RasterizeRoads();
+            long roadsTicks = phase.ElapsedTicks;
+            ctx.BaseLayer();
+            long baseTicks = phase.ElapsedTicks;
+            if (session.Settings.Diagnostics.ShowStrokes)
+                ctx.Strokes();
+            long strokeTicks = phase.ElapsedTicks;
+            Color32[] pixels = ctx.Pack();
+            long packTicks = phase.ElapsedTicks;
+            if (stats != null)
+            {
+                lock (stats)
+                {
+                    double ms = 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+                    stats.RoadsThreadMs += (float)(roadsTicks * ms);
+                    stats.BaseThreadMs += (float)((baseTicks - roadsTicks) * ms);
+                    stats.StrokesThreadMs += (float)((strokeTicks - baseTicks) * ms);
+                    stats.PackThreadMs += (float)((packTicks - strokeTicks) * ms);
+                    stats.Strokes += ctx.StrokeCount;
+                    stats.StampedTexels += ctx.StampCount;
+                    stats.Texels += (long)ctx.Width * ctx.Width;
+                }
+            }
+            pool.Add(buffers);
+            return pixels;
+        }
+
         public static Result Paint(MapLabData data, MapLabSettings settings, MapLabPalette palette, float tileWorld, Options options)
         {
             System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
-            MapLabStage03Settings s3 = settings.Stage03;
-            Result result = new Result();
-            result.Fields = new MapLabPaintFields(data, settings, palette);
-            result.FieldsMs = result.Fields.Milliseconds;
-            int tiles = Mathf.Max(1, Mathf.CeilToInt(data.Size / tileWorld - 1e-4f));
-            int core = Mathf.Max(64, Mathf.RoundToInt(tileWorld * Mathf.Clamp(s3.PaintTexelsPerUnit, 2f, 32f)));
+            Session session = Prepare(data, settings, palette, tileWorld, options);
+            return PaintAll(session, settings.Stage03.PaintTexelsPerUnit, watch);
+        }
+
+        // Все тайлы сессии одной плотностью (полная покраска или облегчённый обзор).
+        public static Result PaintAll(Session session, float texelsPerUnit, System.Diagnostics.Stopwatch watch = null)
+        {
+            watch = watch ?? System.Diagnostics.Stopwatch.StartNew();
+            Result result = new Result { Fields = session.Fields, FieldsMs = session.Fields.Milliseconds };
+            int tiles = session.TilesPerSide;
             result.TilesPerSide = tiles;
-            result.TileWorld = tileWorld;
-            result.TexelsPerUnit = core / tileWorld;
-            float texel = tileWorld / core;
-            float brush = Mathf.Max(0.3f, settings.PainterlyStyle.BrushScale);
-            // Запас тайла под мазки соседей: самый длинный след (тонкая линия) с краем.
-            float margin = brush * 2.4f * 1.4f * 0.5f + 0.6f;
-            result.MarginUnits = margin;
-            int marginPx = Mathf.CeilToInt(margin / texel) + 2;
+            result.TileWorld = session.TileWorld;
+            result.MarginUnits = session.MarginUnits;
             for (int z = 0; z < tiles; z++)
-            for (int x = 0; x < tiles; x++)
-            {
-                Tile t = new Tile { X = x, Z = z, Origin = new Vector2(x * tileWorld, z * tileWorld), Core = core, Size = core + Gutter * 2 };
-                float span = t.Size * texel;
-                t.Rect = new Vector4(t.Origin.x - Gutter * texel, t.Origin.y - Gutter * texel, 1f / span, 1f / span);
-                result.Tiles.Add(t);
-            }
-            List<MapLabPolyline> roads = new List<MapLabPolyline>(data.Roads);
-            roads.AddRange(data.YardPaths);
-            long strokes = 0, stamped = 0, texels = 0;
+                for (int x = 0; x < tiles; x++)
+                    result.Tiles.Add(MakeTile(session, x, z, texelsPerUnit));
+            result.TexelsPerUnit = result.Tiles[0].Core / session.TileWorld;
             // Буферы тайла переиспользуются потоками: пик памяти — число потоков,
             // а не число тайлов.
             ParallelOptions parallel = new ParallelOptions { MaxDegreeOfParallelism = Mathf.Clamp(System.Environment.ProcessorCount, 1, 16) };
-            System.Collections.Concurrent.ConcurrentBag<Buffers> pool = new System.Collections.Concurrent.ConcurrentBag<Buffers>();
-            int bufferWidth = core + Gutter * 2 + marginPx * 2;
-            Parallel.For(0, result.Tiles.Count, parallel, i =>
-            {
-                Tile t = result.Tiles[i];
-                System.Diagnostics.Stopwatch phase = System.Diagnostics.Stopwatch.StartNew();
-                if (!pool.TryTake(out Buffers buffers))
-                    buffers = new Buffers(bufferWidth * bufferWidth, options.StrokeContribution);
-                Context ctx = new Context(data, settings, palette, result.Fields, roads, t, texel, marginPx, options, buffers);
-                ctx.RasterizeRoads();
-                long roadsTicks = phase.ElapsedTicks;
-                ctx.BaseLayer();
-                long baseTicks = phase.ElapsedTicks;
-                if (settings.Diagnostics.ShowStrokes)
-                    ctx.Strokes();
-                long strokeTicks = phase.ElapsedTicks;
-                t.Pixels = ctx.Pack();
-                long packTicks = phase.ElapsedTicks;
-                lock (result)
-                {
-                    double ms = 1000.0 / System.Diagnostics.Stopwatch.Frequency;
-                    result.RoadsThreadMs += (float)(roadsTicks * ms);
-                    result.BaseThreadMs += (float)((baseTicks - roadsTicks) * ms);
-                    result.StrokesThreadMs += (float)((strokeTicks - baseTicks) * ms);
-                    result.PackThreadMs += (float)((packTicks - strokeTicks) * ms);
-                }
-                Interlocked.Add(ref strokes, ctx.StrokeCount);
-                Interlocked.Add(ref stamped, ctx.StampCount);
-                Interlocked.Add(ref texels, (long)ctx.Width * ctx.Width);
-                pool.Add(buffers);
-            });
-            result.Strokes = strokes;
-            result.StampedTexels = stamped;
-            result.Texels = texels;
-            BuildOverview(data, result);
+            Parallel.For(0, result.Tiles.Count, parallel, i => result.Tiles[i].Pixels = PaintTile(session, result.Tiles[i], result));
+            BuildOverview(session.Data, result);
             result.Milliseconds = (float)watch.Elapsed.TotalMilliseconds;
             return result;
         }
@@ -175,7 +220,7 @@ namespace KingdomSurvival.MapLab
             public float Bristle, Phase;
         }
 
-        private sealed class Buffers
+        internal sealed class Buffers
         {
             public readonly float[] R, G, B, Ink, R0, G0, B0, RoadDistance;
             public readonly int[] Key;

@@ -1,0 +1,23 @@
+{
+  "name": "KingdomSurvival.MapLabBridge.EditModeTests",
+  "rootNamespace": "KingdomSurvival.MapLabBridge",
+  "references": [
+    "KingdomSurvival.MapLabBridge",
+    "KingdomSurvival.Core",
+    "KingdomSurvival.MapLab"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

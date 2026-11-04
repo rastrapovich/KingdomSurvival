@@ -82,8 +82,12 @@ namespace KingdomSurvival.MapLab.Editor
                     s.General.MapSize = side;
                     s.General.Quality = MapLabQuality.Samples257;
                     s.Stage03.PaintTexelsPerUnit = 16f;
-                    double fieldsMb = MapLabStreaming.EstimateFieldsMb(side);
-                    double paintMb = MapLabStreaming.EstimatePaintMb(side, s.Stage03.PaintTexelsPerUnit);
+                    float worldSide = s.WorldSide;
+                    bool streams = s.Stage05.PaintStreaming == MapLabPaintStreaming.On || (s.Stage05.PaintStreaming == MapLabPaintStreaming.Auto && worldSide > 600f);
+                    double fieldsMb = MapLabStreaming.EstimateFieldsMb(worldSide);
+                    double paintMb = streams
+                        ? MapLabStreaming.EstimatePaintMb(worldSide, s.Stage05.OverviewTexels) + s.Stage05.DetailTileBudget * MapLabStreaming.EstimatePaintMb(64f, s.Stage03.PaintTexelsPerUnit)
+                        : MapLabStreaming.EstimatePaintMb(worldSide, s.Stage03.PaintTexelsPerUnit);
                     string estimate = string.Format(CultureInfo.InvariantCulture, "оценка: поля покраски {0:0} МБ, тайлы {1:0} МБ", fieldsMb, paintMb);
                     if (fieldsMb + paintMb > budgetMb)
                     {
@@ -106,13 +110,15 @@ namespace KingdomSurvival.MapLab.Editor
                     {
                         view.CameraRig.Fit();
                         view.CameraRig.Zoom = view.CameraRig.MaxZoom;
-                        view.CameraRig.Target = new Vector3(side * 0.5f, 0f, side * 0.5f);
+                        view.CameraRig.Camera.aspect = 1920f / 1080f;
+                        view.CameraRig.Target = new Vector3(view.Data.Size * 0.5f, 0f, view.Data.Size * 0.5f);
                         view.CameraRig.Apply();
                         view.OnCameraChanged();
+                        view.PumpStreaming(true);
                         frame = MapLabStage03Batch.MeasureFrame(view.CameraRig, 1920, 1080);
                     }
                     report.AppendLine(string.Format(CultureInfo.InvariantCulture,
-                        "{0:0}²: {1}; генерация {2:0} мс (рельеф {3:0}, покраска {4:0}, объекты {5:0}); управляемая память {6:0} МБ (+{7:0}), Unity {8:0} МБ (+{9:0}); тайлов покраски {10}, подробных {11}; кадр 1920×1080 на ближнем Zoom {12:0.0} мс; {13}",
+                        (view.StreamingActive ? "[подгрузка] " : "") + "{0:0}²: {1}; генерация {2:0} мс (рельеф {3:0}, покраска {4:0}, объекты {5:0}); управляемая память {6:0} МБ (+{7:0}), Unity {8:0} МБ (+{9:0}); тайлов покраски {10}, подробных {11}; кадр 1920×1080 на ближнем Zoom {12:0.0} мс; {13}",
                         side, ok ? "готово" : "ошибка", ms, st.TerrainMs, st.PaintMs, st.ObjectsMs,
                         managed / 1048576.0, (managed - managedBefore) / 1048576.0, after / 1048576.0, (after - before) / 1048576.0,
                         view.PaintTileCount, view.DetailTileCount, frame, estimate));
@@ -125,6 +131,7 @@ namespace KingdomSurvival.MapLab.Editor
                         {
                             string file = Path.Combine(output, $"{side:0}", name + ".png");
                             Directory.CreateDirectory(Path.GetDirectoryName(file));
+                            view.PumpStreaming(true);
                             File.WriteAllBytes(file, MapLabExport.RenderPng(rig, 1920, 1080, 2));
                         }
                         rig.Camera.aspect = 1920f / 1080f;

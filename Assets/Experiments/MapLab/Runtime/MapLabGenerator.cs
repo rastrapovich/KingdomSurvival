@@ -33,6 +33,8 @@ namespace KingdomSurvival.MapLab
                 PlayRect = new Rect(frame, frame, settings.General.MapSize, settings.General.MapSize),
             };
             data.Composition = MapLabComposition.Build(settings, data.Seed);
+            if (data.Composition.PlayRect.width > 0f)
+                data.PlayRect = data.Composition.PlayRect;
             Builder builder = new Builder(settings, data, progress);
             builder.Run();
             Stopwatch objects = Stopwatch.StartNew();
@@ -844,18 +846,18 @@ namespace KingdomSurvival.MapLab
                         float road = roadDistance[i];
                         data.Road[i] = road == float.MaxValue ? 0f : 1f - MapLabGeometry.SmoothStep(-0.4f, 0.4f, road);
                         float settlement = 0f;
-                        if (composition.HasSettlement)
+                        foreach (MapLabComposition.Settlement st in composition.Settlements)
                         {
-                            float d = Vector2.Distance(p, composition.SettlementCenter);
-                            settlement = 1f - MapLabGeometry.SmoothStep(composition.SettlementRadius * 0.75f, composition.SettlementRadius * 1.1f, d);
+                            float d = Vector2.Distance(p, st.Center);
+                            settlement = Mathf.Max(settlement, 1f - MapLabGeometry.SmoothStep(st.Radius * 0.75f, st.Radius * 1.1f, d));
                         }
                         data.Settlement[i] = settlement;
                     }
                 }
                 data.RoadDistance = roadDistance;
                 data.CliffSigned = cliffSigned;
-                if (composition.HasSettlement)
-                    data.SettlementSites.Add(new Vector3(composition.SettlementCenter.x, composition.SettlementCenter.y, composition.SettlementRadius));
+                foreach (MapLabComposition.Settlement st in composition.Settlements)
+                    data.SettlementSites.Add(new Vector3(st.Center.x, st.Center.y, st.Radius));
             }
 
             // Береговая полоса: расстояние до воды по сетке (двухпроходная фаска).
@@ -899,15 +901,20 @@ namespace KingdomSurvival.MapLab
             private void BuildFields()
             {
                 MapLabRoadSettings roads = settings.RoadsAndFields;
-                if (!composition.HasSettlement || roads.FieldDensity <= 0.001f)
+                if (composition.Settlements.Count == 0 || roads.FieldDensity <= 0.001f)
                 {
                     data.Fields = new MapLabFields(data.FieldBlocks, roads.FieldStripWidth, Seed);
                     return;
                 }
                 MapLabRandom rng = MapLabRandom.ForStream(Seed, "fields", MapLabData.AlgorithmVersion);
-                Vector2 center = composition.SettlementCenter;
-                float outer = roads.FieldRadius;
                 float spacing = 30f;
+                // 12У-E: участки вокруг каждого поселения; первое — как прежде (тот же
+                // расход случайности), у следующих — без повторных участков в общей зоне.
+                foreach (MapLabComposition.Settlement st in composition.Settlements)
+                {
+                Vector2 center = st.Center;
+                float outer = st.FieldRadius > 0f ? st.FieldRadius : roads.FieldRadius;
+                int before = data.FieldBlocks.Count;
                 for (float gz = center.y - outer; gz <= center.y + outer; gz += spacing)
                 {
                     for (float gx = center.x - outer; gx <= center.x + outer; gx += spacing)
@@ -915,6 +922,11 @@ namespace KingdomSurvival.MapLab
                         Vector2 site = new Vector2(gx + rng.Signed() * spacing * 0.38f, gz + rng.Signed() * spacing * 0.38f);
                         float d = Vector2.Distance(site, center);
                         if (d > outer * 1.1f || !data.Contains(site.x, site.y))
+                            continue;
+                        bool taken = false;
+                        for (int k = 0; k < before && !taken; k++)
+                            taken = (data.FieldBlocks[k].Site - site).sqrMagnitude < spacing * spacing * 0.36f;
+                        if (taken)
                             continue;
                         MapLabFieldBlock block = new MapLabFieldBlock
                         {
@@ -933,9 +945,10 @@ namespace KingdomSurvival.MapLab
                         if (rng.Chance(0.35f))
                             angle += Mathf.PI * 0.5f;
                         block.Angle = angle + rng.Signed() * 0.2f;
-                        block.Cultivated = d > composition.SettlementRadius * 0.7f && rng.Chance(0.45f + 0.5f * roads.FieldDensity);
+                        block.Cultivated = d > st.Radius * 0.7f && rng.Chance(0.45f + 0.5f * roads.FieldDensity);
                         data.FieldBlocks.Add(block);
                     }
+                }
                 }
                 data.Fields = new MapLabFields(data.FieldBlocks, roads.FieldStripWidth, Seed);
                 MapLabNoise fieldEdge = Noise("field-edge");
@@ -956,10 +969,21 @@ namespace KingdomSurvival.MapLab
                 // 12У-C: поля — только в игровой области, с отступом от её края.
                 if (data.PlayRect.width > 0f && (p.x < data.PlayRect.xMin + 6f || p.x > data.PlayRect.xMax - 6f || p.y < data.PlayRect.yMin + 6f || p.y > data.PlayRect.yMax - 6f))
                     return false;
-                float d = Vector2.Distance(p, composition.SettlementCenter);
+                // 12У-D/F: клетки полей плана разрешены и у самой деревни; остальные
+                // поля — группы MapLab вокруг деревень плана (§9.14: много небольших полей).
+                bool planField = composition.PlanField != null && composition.SamplePlan(composition.PlanField, p) > 0.5f;
+                // Лес плана главнее полей: там игра ждёт леса.
+                if (!planField && composition.PlanForest != null && composition.SamplePlan(composition.PlanForest, p) > 0.35f)
+                    return false;
+                MapLabComposition.Settlement near = composition.Nearest(p, out float d);
+                if (near == null)
+                    return false;
                 // Внутренняя и внешняя граница пашни — неровные, не круг.
                 float wobble = 1f + 0.3f * edge.Fbm(p.x / 22f, p.y / 22f, 2);
-                if (d < composition.SettlementRadius * 0.8f * wobble || d > roads.FieldRadius * (0.85f + 0.3f * wobble))
+                float fieldRadius = near.FieldRadius > 0f ? near.FieldRadius : roads.FieldRadius;
+                // Поля плана лежат вплотную к деревне: от дворов их отделяет маска застройки.
+                float inner = planField ? 0.3f : 0.8f;
+                if (d < near.Radius * inner * wobble || d > fieldRadius * (0.85f + 0.3f * wobble))
                     return false;
                 if (data.SlopeDegrees[index] > roads.FieldMaxSlope)
                     return false;

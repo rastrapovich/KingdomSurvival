@@ -348,6 +348,9 @@ namespace KingdomSurvival.MapLab
                     Vector2 p = data.GridToWorld(x, z);
                     float f = mass.Warped(p.x / 85f, p.y / 85f, 4, warp) * 0.5f + 0.5f;
                     f += edge.Fbm(p.x / 16f, p.y / 16f, 2) * 0.12f * v.EdgeRoughness;
+                    // 12У-D/F: лес плана — там, где у игры клетки «Лес» (кромка — шумом).
+                    if (c != null && c.PlanForest != null)
+                        f = c.SamplePlan(c.PlanForest, p) * 0.9f + edge.Fbm(p.x / 16f, p.y / 16f, 2) * 0.16f + (threshold - 0.45f);
                     if (c != null)
                     {
                         for (int k = 0; k < c.ForestZones.Count; k++)
@@ -365,10 +368,10 @@ namespace KingdomSurvival.MapLab
                         forest = Mathf.Max(forest, FrameForest(p, play, frame, frameDepth, frameTongue) * MapLabGeometry.SmoothStep(0f, 0.08f, v.ForestDensity));
                     // Исключения: дворы, поля, дорога, вода, стенки уступов, крутизна.
                     forest *= 1f - data.Settlement[i];
-                    if (c != null && c.HasSettlement)
+                    if (c != null)
                     {
-                        float dc = Vector2.Distance(p, c.SettlementCenter);
-                        forest *= MapLabGeometry.SmoothStep(c.SettlementRadius * 1.0f, c.SettlementRadius * 1.9f, dc);
+                        foreach (MapLabComposition.Settlement st in c.Settlements)
+                            forest *= MapLabGeometry.SmoothStep(st.Radius * 1.0f, st.Radius * 1.9f, Vector2.Distance(p, st.Center));
                     }
                     forest *= 1f - Mathf.Clamp01(data.Field[i] * 1.5f);
                     float road = data.RoadDistance != null ? data.RoadDistance[i] : float.MaxValue;
@@ -745,13 +748,14 @@ namespace KingdomSurvival.MapLab
 
         private static void PlaceHaystacks(MapLabData data, MapLabSettings settings)
         {
-            if (data.Fields == null || data.Fields.Count == 0 || data.Composition == null || !data.Composition.HasSettlement)
+            if (data.Fields == null || data.Fields.Count == 0 || data.Composition == null || data.Composition.Settlements.Count == 0)
                 return;
             MapLabRandom rng = new MapLabRandom(Stream(data, "haystacks"));
             int target = rng.Range(3, 9);
             for (int attempt = 0; attempt < 400 && target > 0; attempt++)
             {
-                Vector2 p = data.Composition.SettlementCenter + rng.InsideUnitCircle() * settings.RoadsAndFields.FieldRadius * 0.75f;
+                MapLabComposition.Settlement st = data.Composition.Settlements.Count > 1 ? data.Composition.Settlements[rng.Range(0, data.Composition.Settlements.Count)] : data.Composition.Settlements[0];
+                Vector2 p = st.Center + rng.InsideUnitCircle() * (st.FieldRadius > 0f ? st.FieldRadius : settings.RoadsAndFields.FieldRadius) * 0.75f;
                 if (!data.Contains(p.x, p.y) || data.SampleMask(data.Field, p.x, p.y) < 0.95f)
                     continue;
                 if (!data.Fields.Evaluate(p, out MapLabFields.Sample sample) || sample.BorderDistance < 3f)

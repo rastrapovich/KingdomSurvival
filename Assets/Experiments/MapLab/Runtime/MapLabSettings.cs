@@ -555,6 +555,10 @@ namespace KingdomSurvival.MapLab
         // Профиль автора окна «Генератор карты»: макропараметры над рабочими полями.
         public MapLabAuthorProfile Author = new MapLabAuthorProfile();
 
+        // 12У-D/F: композиция из плана региона игры вместо пресета (не сохраняется
+        // в профиле: план приходит из партии или из окна генератора).
+        [System.NonSerialized] public MapLabComposition RegionPlan;
+
         // Конвейер этапа 03 (тайлы, перо, акценты, тени) — и у этапов 04 и 05;
         // проход согласования этапа 04 — и у этапа 05.
         public bool IsStage03 => Stage03.Look >= MapLabLook.Stage03;

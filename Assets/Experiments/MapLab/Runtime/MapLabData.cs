@@ -277,6 +277,8 @@ namespace KingdomSurvival.MapLab
         public MapLabFenceGraph FenceGraph;
         public readonly List<MapLabProp> Props = new List<MapLabProp>();
         public Vector3 Plaza;
+        // 12У-E: площадки всех деревень (первая совпадает с Plaza).
+        public readonly List<Vector3> Plazas = new List<Vector3>();
 
         public MapLabStats Stats;
 

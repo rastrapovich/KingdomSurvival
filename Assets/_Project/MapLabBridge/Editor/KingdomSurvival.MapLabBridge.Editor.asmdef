@@ -1,0 +1,22 @@
+{
+  "name": "KingdomSurvival.MapLabBridge.Editor",
+  "rootNamespace": "KingdomSurvival.MapLabBridge",
+  "references": [
+    "KingdomSurvival.MapLabBridge",
+    "KingdomSurvival.Core",
+    "KingdomSurvival.MapLab",
+    "KingdomSurvival.MapLab.Editor",
+    "KingdomSurvival.WorldMapVisual"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

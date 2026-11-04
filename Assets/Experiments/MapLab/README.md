@@ -533,3 +533,7 @@ Mip на крупном плане — 0 (идёт увеличение), поэ
 # 12У-C, часть 1: масштаб, окраины, камера (04.11.2026)
 
 Замер: `-executeMethod KingdomSurvival.MapLab.Editor.MapLabScaleBatch.Measure -mapLabOut <папка> [-mapLabSizes 256,512,1024,2048] [-mapLabBudgetMb 6000] [-mapLabShots 1]` — оценка памяти до запуска, время подшагов, память, рендереры в кадре, кадры сторон и углов. Окружение: `Stage05 → Wide Frame` (вкл.), `Frame Width` (0 — авто от ближнего кадра); `MapLabData.PlayRect` — игровая область; `MapLabSettings.WorldSide` — сторона данных. Предел приближения Stage05 = ZoomMax × сторона / 256. Перо — участками 64 ед. (`MapLabMeshes.SplitByChunks`). Тени объектов — параллельно по полосам (`MapLabObjectShadows.Sequential` — последовательный режим для проверок).
+
+# 12У-C, часть 2, и основа D/E (04.11.2026)
+
+Подгрузка покраски — `MapLabView.Streaming.cs` (`Stage05 → Paint Streaming / Overview Texels / Detail Tile Budget / Detail Tiles Per Frame`), блочные поля — `MapLabPaintFields` (`BudgetMb`, 0 — четверть ОЗУ). Несколько деревень — `MapLabComposition.Settlements`. План региона игры → MapLab — сборка `Assets/_Project/MapLabBridge` (`MapLabRegionPlan.Apply(plan, settings)` → `settings.RegionPlan`), показ — `MapLabPlanBatch.Render`. Подробности — `ProjectDocs/DEVELOPMENT_STATUS.md` и `ProjectDocs/MAPLAB_MIGRATION_AUDIT.md` §§7–8.

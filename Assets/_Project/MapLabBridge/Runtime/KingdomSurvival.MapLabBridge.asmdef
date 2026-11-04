@@ -1,0 +1,17 @@
+{
+  "name": "KingdomSurvival.MapLabBridge",
+  "rootNamespace": "KingdomSurvival.MapLabBridge",
+  "references": [
+    "KingdomSurvival.Core",
+    "KingdomSurvival.MapLab"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

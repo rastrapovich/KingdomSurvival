@@ -10,7 +10,7 @@ namespace KingdomSurvival.MapLab
     // свои временные ресурсы; чужие Terrain, камеры и материалы не трогает.
     [ExecuteAlways]
     [DisallowMultipleComponent]
-    public sealed class MapLabView : MonoBehaviour
+    public sealed partial class MapLabView : MonoBehaviour
     {
         public const string RootName = "GeneratedMapRoot";
 
@@ -121,11 +121,13 @@ namespace KingdomSurvival.MapLab
         private void Phase(string name)
         {
             Phases.Add(new KeyValuePair<string, float>(name, (float)phaseWatch.Elapsed.TotalMilliseconds));
+            if (Application.isBatchMode)
+                UnityEngine.Debug.Log($"MapLab · подшаг «{name}»: {phaseWatch.Elapsed.TotalMilliseconds:0} мс");
             phaseWatch.Restart();
         }
 
         public int PaintTileCount => paintTiles.Count;
-        public int DetailTileCount => paintTiles.Count;
+        public int DetailTileCount => StreamingActive ? detailUsed.Count : paintTiles.Count;
 
         // Сколько экземпляров каждого рисунка стоит на текущей карте (каталог «Ассеты»).
         private readonly Dictionary<MapLabArtEntry, int> usage = new Dictionary<MapLabArtEntry, int>();
@@ -360,6 +362,7 @@ namespace KingdomSurvival.MapLab
 
         public void Clear()
         {
+            DestroyStreaming();
             if (root != null)
                 DestroySafe(root);
             root = null;
@@ -450,6 +453,7 @@ namespace KingdomSurvival.MapLab
             if (CameraRig != null)
                 CameraRig.Bind(this, true);
             ApplyVisibility();
+            PumpStreaming(false);
             MapLabMarker marker = Marker;
             if (marker != null)
                 marker.OnMapBuilt(this);
@@ -693,7 +697,19 @@ namespace KingdomSurvival.MapLab
                 DrawnCliffs = WillDrawCliffs06,
             };
             paintContribution = options.StrokeContribution;
+            if (WantsStreaming())
+            {
+                RepaintStreaming(options);
+                return;
+            }
+            DestroyStreaming();
             MapLabTiledPainter.Result result = MapLabTiledPainter.Paint(data, Settings, Palette, tileWorld, options);
+            UploadTiles(result);
+        }
+
+        // Текстуры тайлов, обзор, поля и статистика покраски из результата.
+        private void UploadTiles(MapLabTiledPainter.Result result)
+        {
             DestroyTiles();
             if (paintTexture != null)
             {
@@ -704,15 +720,7 @@ namespace KingdomSurvival.MapLab
             tilesPerSide = result.TilesPerSide;
             foreach (MapLabTiledPainter.Tile tile in result.Tiles)
             {
-                Texture2D t = Own(new Texture2D(tile.Size, tile.Size, TextureFormat.RGBA32, true, false)
-                {
-                    name = $"MapLab Paint {tile.X},{tile.Z}",
-                    wrapMode = TextureWrapMode.Clamp,
-                    filterMode = FilterMode.Trilinear,
-                    anisoLevel = Settings.IsStage05 ? Mathf.Clamp(Settings.Stage05.GroundAniso, 1, 16) : 8,
-                });
-                t.SetPixels32(tile.Pixels);
-                t.Apply(true, true);
+                Texture2D t = MakeTileTexture(tile);
                 tile.Pixels = null;
                 paintTiles.Add(t);
                 paintRects.Add(tile.Rect);
@@ -1431,6 +1439,7 @@ namespace KingdomSurvival.MapLab
             MapLabMarker marker = Marker;
             if (marker != null)
                 marker.Refresh();
+            PumpStreaming(false);
         }
 
         private void BuildWireframe()

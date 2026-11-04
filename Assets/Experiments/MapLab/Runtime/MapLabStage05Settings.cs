@@ -159,6 +159,16 @@ namespace KingdomSurvival.MapLab
         [Tooltip("Ширина окружения, ед. 0 — авто от ближнего кадра камеры (полуохват кадра + запас на высокие объекты); меньше авто не принимается.")]
         [Min(0f)] public float FrameWidth;
 
+        [Header("Подгрузка покраски (12У-C)")]
+        [Tooltip("Авто — для карт больше 600 ед.: вся карта облегчённым обзором, подробные тайлы — у камеры по требованию.")]
+        public MapLabPaintStreaming PaintStreaming = MapLabPaintStreaming.Auto;
+        [Tooltip("Плотность облегчённого обзора, текселей на единицу.")]
+        [Range(1f, 8f)] public float OverviewTexels = 2f;
+        [Tooltip("Сколько подробных тайлов держать одновременно (кроме нужных кадру).")]
+        [Range(8, 256)] public int DetailTileBudget = 64;
+        [Tooltip("Сколько готовых подробных тайлов применять за кадр.")]
+        [Range(1, 8)] public int DetailTilesPerFrame = 2;
+
         // Набор этапа 05 для регистрации ракурсов построек при генерации
         // (назначает MapLabView перед генерацией; не сериализуется).
         [NonSerialized] public MapLabArtSet Art;

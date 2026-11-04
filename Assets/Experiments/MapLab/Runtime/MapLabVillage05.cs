@@ -79,10 +79,18 @@ namespace KingdomSurvival.MapLab
         // каждого дома. У подхода к мосту — свободно. Ограды — граф.
         private static void PlaceVillage05(MapLabData data, MapLabSettings settings)
         {
-            MapLabComposition c = data.Composition;
+            data.FenceGraph = new MapLabFenceGraph();
+            List<MapLabComposition.Settlement> list = data.Composition.Settlements;
+            for (int i = 0; i < list.Count; i++)
+                PlaceVillage05At(data, settings, list[i], i);
+        }
+
+        // 12У-E: одна деревня плана. Первая — прежний поток случайности (карты с
+        // одной деревней не меняются), следующие — свой поток по номеру.
+        private static void PlaceVillage05At(MapLabData data, MapLabSettings settings, MapLabComposition.Settlement st, int index)
+        {
             MapLabStage05Settings s5 = settings.Stage05;
             MapLabSettlementSettings s = settings.Settlement;
-            data.FenceGraph = new MapLabFenceGraph();
             MapLabPolyline main = null;
             float best = float.MaxValue;
             int bestIndex = 0;
@@ -90,7 +98,7 @@ namespace KingdomSurvival.MapLab
             {
                 if (road.Kind != MapLabRoadKind.Road || road.Points.Count < 3)
                     continue;
-                float d = MapLabGeometry.Nearest(road.Points, c.SettlementCenter, out int segment, out _, out _, out _);
+                float d = MapLabGeometry.Nearest(road.Points, st.Center, out int segment, out _, out _, out _);
                 if (d < best)
                 {
                     best = d;
@@ -100,7 +108,7 @@ namespace KingdomSurvival.MapLab
             }
             if (main == null)
                 return;
-            MapLabRandom rng = MapLabRandom.ForStream(data.Seed, "village05", MapLabData.AlgorithmVersion);
+            MapLabRandom rng = MapLabRandom.ForStream(data.Seed, index == 0 ? "village05" : "village05-" + index, MapLabData.AlgorithmVersion);
             float scale = s.BuildingScale;
             List<MapLabHouseView>[] houseViews =
             {
@@ -124,10 +132,14 @@ namespace KingdomSurvival.MapLab
                 data.Roads.Add(widening);
             }
             Vector2 wellPoint = plaza + plazaNormal * plazaSide * (main.Width * 0.5f + s5.WellWidening * 0.7f);
-            data.Plaza = new Vector3(plaza.x, plaza.y, s5.WellWidening + main.Width * 0.5f);
+            Vector3 plazaInfo = new Vector3(plaza.x, plaza.y, s5.WellWidening + main.Width * 0.5f);
+            if (index == 0)
+                data.Plaza = plazaInfo;
+            data.Plazas.Add(plazaInfo);
             data.Props.Add(new MapLabProp { Role = "village_well", Position = Ground(data, wellPoint), Scale = 1f, Yard = 0 });
 
-            int target = rng.Range(Mathf.Min(s5.YardsMin, s5.YardsMax), Mathf.Max(s5.YardsMin, s5.YardsMax) + 1);
+            Vector2Int range = YardRange(s5, st.Size);
+            int target = rng.Range(range.x, range.y + 1);
             // R03: ограда — не атрибут каждого дома. Небольшой бюджет на деревню
             // (около одной на пять дворов, 1–3) и выбор на уровне плана: какие по
             // счёту дворы станут просторными огороженными хозяйствами.
@@ -154,8 +166,8 @@ namespace KingdomSurvival.MapLab
                 List<Vector2> pts = MapLabGeometry.Resample(road.Points, 2.5f);
                 for (int i = 1; i < pts.Count - 1; i++)
                 {
-                    float dc = Vector2.Distance(pts[i], c.SettlementCenter);
-                    if (dc > c.SettlementRadius * 1.15f || Vector2.Distance(pts[i], plaza) < s5.WellWidening + 7f)
+                    float dc = Vector2.Distance(pts[i], st.Center);
+                    if (dc > st.Radius * 1.15f || Vector2.Distance(pts[i], plaza) < s5.WellWidening + 7f)
                         continue;
                     spots.Add((pts[i], (pts[i + 1] - pts[i - 1]).normalized, road, Vector2.Distance(pts[i], plaza) + rng.Range(0f, 6f)));
                 }
@@ -177,6 +189,18 @@ namespace KingdomSurvival.MapLab
             }
             data.YardRects.AddRange(yards);
             BuildFenceGraph(data, settings, outlines, placed);
+        }
+
+        // Дворов по размеру поселения: среднее — диапазон профиля, малое — 3–6,
+        // крупное — верх диапазона (больше 12 — следующая поставка этапа E).
+        private static Vector2Int YardRange(MapLabStage05Settings s5, int size)
+        {
+            int lo = Mathf.Min(s5.YardsMin, s5.YardsMax), hi = Mathf.Max(s5.YardsMin, s5.YardsMax);
+            if (size <= 1)
+                return new Vector2Int(3, Mathf.Clamp(Mathf.Min(hi, 6), 3, 6));
+            if (size >= 3)
+                return new Vector2Int(Mathf.Max(lo, Mathf.Min(hi, 10)), Mathf.Max(hi, 12));
+            return new Vector2Int(lo, hi);
         }
 
         private static Vector3 Ground(MapLabData data, Vector2 p) => new Vector3(p.x, data.SampleHeight(p.x, p.y), p.y);

@@ -41,6 +41,10 @@ Shader "Kingdom Survival/MapLab/Ink"
                 float3 positionOS : POSITION;
                 float2 uv : TEXCOORD0;     // x — сторона −1..1, y — непрозрачность вершины
                 float2 side : TEXCOORD1;   // направление поперёк линии (мир XZ)
+                // Этап 05, свободные окончания: x — множитель толщины, y — координата
+                // вдоль элемента −1..1 (скруглённый след), z — точка: длина к толщине
+                // (смещение вдоль линии в шейдере), w — масштаб завершения, ед. (0 — основная линия).
+                float4 extra : TEXCOORD2;
             };
 
             struct Varyings
@@ -48,6 +52,7 @@ Shader "Kingdom Survival/MapLab/Ink"
                 float4 positionCS : SV_POSITION;
                 float2 uv : TEXCOORD0;
                 float2 world : TEXCOORD1;
+                float2 shape : TEXCOORD2;  // x — вдоль элемента, y — 1 у элемента завершения
             };
 
             CBUFFER_START(UnityPerMaterial)
@@ -94,19 +99,29 @@ Shader "Kingdom Survival/MapLab/Ink"
                 float widthPx = clamp(_Width * pxPerUnit, _MinPx * scale, _MaxPx * scale);
                 // Этап 05: плавный дрейф толщины вдоль линии (мир, стабилен на чанках и зуме).
                 widthPx *= 1.0 + _Drift.x * (ValueNoise(p.xz * _Drift.y) * 2.0 - 1.0);
+                widthPx *= input.extra.x > 0.0 ? input.extra.x : 1.0;
                 float halfWidth = 0.5 * widthPx / pxPerUnit;
                 float3 toCamera = normalize(UNITY_MATRIX_V[2].xyz);
                 p += side * input.uv.x * halfWidth + toCamera * _DepthPush;
+                // Точка завершения: длина — от её толщины на экране (не россыпь бусин в мире).
+                if (input.extra.z > 0.0)
+                    p += float3(side.z, 0, -side.x) * input.extra.y * halfWidth * input.extra.z;
                 o.positionCS = TransformWorldToHClip(p);
                 o.uv = input.uv;
+                // Завершение мельче пары пикселей (общий вид) плавно гаснет, без мерцания.
+                if (input.extra.w > 0.0)
+                    o.uv.y *= saturate((input.extra.w * pxPerUnit / scale - 0.8) / 0.7);
+                o.shape = float2(input.extra.y, input.extra.w > 0.0 ? 1.0 : 0.0);
                 o.world = p.xz;
                 return o;
             }
 
             float4 Frag(Varyings i) : SV_Target
             {
-                float rough = abs(i.uv.x) + (ValueNoise(i.world * 9.0) - 0.5) * _Grain * 0.7 + (ValueNoise(i.world * 31.0) - 0.5) * _Grain * 0.35;
-                float aa = max(1e-3, fwidth(i.uv.x)) * 1.2;
+                // Элементы завершения — скруглённые следы кисти (эллипс по ширине и длине).
+                float geo = i.shape.y > 0.5 ? length(float2(i.uv.x, i.shape.x)) : abs(i.uv.x);
+                float rough = geo + (ValueNoise(i.world * 9.0) - 0.5) * _Grain * 0.7 + (ValueNoise(i.world * 31.0) - 0.5) * _Grain * 0.35;
+                float aa = max(1e-3, fwidth(geo)) * 1.2;
                 float cover = saturate((1.0 - rough) / aa);
                 float a = cover * saturate(i.uv.y) * _Opacity;
                 // Плотность пигмента: слабое неравномерное оседание вдоль линии.

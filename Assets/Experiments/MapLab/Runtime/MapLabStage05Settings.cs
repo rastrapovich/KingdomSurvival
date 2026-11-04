@@ -43,6 +43,12 @@ namespace KingdomSurvival.MapLab
         [Range(0f, 0.5f)] public float InkBreakShare = 0.1f;
         [Tooltip("Зерно края.")]
         [Range(0f, 1f)] public float InkGrain = 0.4f;
+        [Tooltip("Свободные окончания пера (MAP_STYLE_GUIDE.md §2.5): у видимого конца следа — просвет, короткий штрих по ходу кривой и редкие уменьшающиеся точки или сокращённый вариант. Не на замкнутых швах, краю карты и развилках; география не меняется.")]
+        public bool InkEndings = true;
+        [Tooltip("Масштаб завершения относительно толщины пера (InkWidth).")]
+        [Range(0.3f, 2.5f)] public float InkEndingScale = 1f;
+        [Tooltip("Вариативность: 0 — почти всегда полная цепочка средних размеров, 1 — полный разброс вариантов, длин, толщины и пигмента.")]
+        [Range(0f, 1f)] public float InkEndingVariety = 0.6f;
         [Tooltip("Доля длинных меж с пером (у дорог, на изломах склона, длинные отрезки).")]
         [Range(0f, 1f)] public float FieldInkShare = 0.45f;
         [Tooltip("R03: доля края полей с пером (по краю жёлтой заливки; остальное — потерянные края).")]

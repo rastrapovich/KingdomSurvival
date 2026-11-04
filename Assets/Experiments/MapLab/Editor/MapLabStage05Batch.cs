@@ -248,6 +248,71 @@ namespace KingdomSurvival.MapLab.Editor
                 }
                 settings.Stage05.SpriteStrokes = false;
                 view.ApplyMaterialSettings();
+                // Свободные окончания пера (MAP_STYLE_GUIDE.md §2.5): до и после на
+                // одних кадрах; замер сборки пера и объёма геометрии на том же seed.
+                if (Want("stage05/ink_endings"))
+                {
+                    MapLabSettings lake = UnityEngine.Object.Instantiate(MapLabAssets.EnsurePreset(MapLabPresetKind.ForestLake));
+                    lake.Stage03.Look = MapLabLook.Stage05;
+                    lake.Camera.PitchByZoom = true;
+                    foreach (bool on in new[] { false, true })
+                    {
+                        string tag = on ? "on" : "off";
+                        settings.Stage05.InkEndings = on;
+                        view.RebuildInk();
+                        Stopwatch inkWatch = Stopwatch.StartNew();
+                        for (int k = 0; k < 3; k++)
+                            view.RebuildInk();
+                        double inkMs = inkWatch.Elapsed.TotalMilliseconds / 3.0;
+                        MapLabInk.Stats r = view.InkStats, f = view.FieldInkStats, sh = view.ShoreInkStats;
+                        report.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                            "Окончания пера {0}: сборка пера {1:0} мс (среднее 3); вершин дороги {2}, полей {3}, берега {4}; свободных концов дороги {5}/полей {6}/берега {7}, с завершением {8}/{9}/{10}; элементов {11}/{12}/{13}",
+                            on ? "вкл." : "выкл.", inkMs, r.Vertices, f.Vertices, sh.Vertices, r.FreeEnds, f.FreeEnds, sh.FreeEnds, r.Endings, f.Endings, sh.Endings, r.EndingElements, f.EndingElements, sh.EndingElements));
+                        View(2f, spots.Village);
+                        MapLabStage03Batch.MeasureFrame(rig, size.x, size.y);
+                        report.AppendLine(string.Format(CultureInfo.InvariantCulture, "Окончания пера {0}: кадр деревни Zoom 2 — {1:0.00} мс (20 рендеров {2}×{3}, без MSAA, не FPS игры); память сеток пера ≈ {4:0} КБ", on ? "вкл." : "выкл.", MapLabStage03Batch.MeasureFrame(rig, size.x, size.y), size.x, size.y, (r.Vertices + f.Vertices + sh.Vertices) * 40 / 1024.0));
+                        foreach (float z in new[] { 3f, 2f, 1.3f })
+                        {
+                            View(z, spots.Junction);
+                            Shot($"stage05/ink_endings/{tag}/junction_z{z:0.#}");
+                        }
+                        View(3f, spots.Village);
+                        Shot($"stage05/ink_endings/{tag}/village_fields_z3");
+                        View(2f, spots.Village);
+                        Shot($"stage05/ink_endings/{tag}/village_fields_z2");
+                        if (spots.HasRiver)
+                        {
+                            View(3f, spots.River);
+                            Shot($"stage05/ink_endings/{tag}/river_z3");
+                            View(2f, spots.River);
+                            Shot($"stage05/ink_endings/{tag}/river_z2");
+                        }
+                    }
+                    // Замкнутое озеро — отдельная карта (лесное озеро).
+                    MapLabSettings main5 = settings;
+                    view.Settings = lake;
+                    foreach (bool on in new[] { false, true })
+                    {
+                        lake.Stage05.InkEndings = on;
+                        view.Generate(null);
+                        MapLabData ld = view.Data;
+                        if (ld.Lakes.Count == 0)
+                            break;
+                        MapLabLake l = ld.Lakes[0];
+                        Vector4 lobe = l.Lobes.Count > 0 ? l.Lobes[0] : new Vector4(l.Center.x, l.Center.y, 8f, 8f);
+                        report.AppendLine($"Озеро, окончания {(on ? "вкл." : "выкл.")}: свободных концов берега {view.ShoreInkStats.FreeEnds}, с завершением {view.ShoreInkStats.Endings}, элементов {view.ShoreInkStats.EndingElements}, вершин {view.ShoreInkStats.Vertices}");
+                        settings = lake;
+                        View(3f, new Vector2(lobe.x + lobe.z, lobe.y));
+                        Shot($"stage05/ink_endings/{(on ? "on" : "off")}/lake_z3");
+                        View(2f, new Vector2(lobe.x + lobe.z * 0.6f, lobe.y));
+                        Shot($"stage05/ink_endings/{(on ? "on" : "off")}/lake_z2");
+                        settings = main5;
+                    }
+                    view.Settings = settings;
+                    UnityEngine.Object.DestroyImmediate(lake);
+                    settings.Stage05.InkEndings = true;
+                    view.Generate(null);
+                }
                 // Слои: без пятен, без спрайтов, без пера берега.
                 if (spots.HasRiver)
                 {

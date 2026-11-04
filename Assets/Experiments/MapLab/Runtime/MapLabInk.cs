@@ -20,6 +20,9 @@ namespace KingdomSurvival.MapLab
             public int Polylines;
             public int Vertices;
             public float Length;
+            public int FreeEnds;        // подлинные свободные концы видимых следов
+            public int Endings;         // из них с завершением (§2.5)
+            public int EndingElements;  // штрихов и точек завершений
         }
 
         public sealed class Contour
@@ -27,6 +30,13 @@ namespace KingdomSurvival.MapLab
             public readonly List<Vector2> Points = new List<Vector2>();
             public readonly List<float> Weights = new List<float>();
             public bool Closed;
+            // Концы массива — художественные концы штриха (борозды), а не край карты.
+            public bool FreeEnds;
+            // Доля подходящих концов с завершением (малые акценты — реже).
+            public float EndingChance = 0.85f;
+            // Вершины, занятые чужой формой (межа у полотна дороги) — примыкание,
+            // не свободный конец (null — нет).
+            public List<bool> Hold;
         }
 
         // Поле кромки на сетке GridStep: значение < 0 — на полотне.
@@ -334,6 +344,13 @@ namespace KingdomSurvival.MapLab
             });
             List<Contour> contours = Trace(g, w, n, FieldStep);
             contours.RemoveAll(c => c.Points.Count < 6);
+            // У дороги межа гаснет — это примыкание, а не свободный конец.
+            foreach (Contour c in contours)
+            {
+                c.Hold = new List<bool>(c.Points.Count);
+                foreach (Vector2 q in c.Points)
+                    c.Hold.Add(data.RoadDistance != null && data.Bilinear(data.RoadDistance, q.x, q.y) < 1f);
+            }
             // Внутренние штрихи: размер 70/25/5 по весу, группы по шуму, не у края.
             if (s5.FieldInnerInk > 0f)
             {
@@ -370,7 +387,7 @@ namespace KingdomSurvival.MapLab
                         if (Edge(a) < 0.5f || Edge(b) < 0.5f)
                             continue;
                     }
-                    Contour stroke = new Contour();
+                    Contour stroke = new Contour { FreeEnds = true, EndingChance = 0.4f };
                     for (int j = 0; j <= 8; j++)
                     {
                         stroke.Points.Add(Vector2.Lerp(a, b, j / 8f));
@@ -394,17 +411,55 @@ namespace KingdomSurvival.MapLab
             Vector2 light = new Vector2(light3.x, light3.z);
             light = light.sqrMagnitude > 1e-6f ? light.normalized : Vector2.right;
             float threshold = 0.5f + (ink.BreakFrequency - 0.5f) * 0.55f;
+            // Этап 05: свободные окончания (MAP_STYLE_GUIDE.md §2.5) — свой поток
+            // случайности, география и прочие потоки не тратятся.
+            MapLabStage05Settings s5 = settings.Stage05;
+            bool endings = settings.IsStage05 && s5.InkEndings;
+            ulong endingSeed = MapLabRandom.StreamSeed(data.Seed, "ink-endings", MapLabData.AlgorithmVersion);
+            MapLabInkEndings.Options endingOptions = new MapLabInkEndings.Options
+            {
+                Unit = Mathf.Max(0.02f, ink.Width) * Mathf.Max(0.1f, s5.InkEndingScale),
+                Variety = s5.InkEndingVariety,
+                Seed = (uint)(endingSeed ^ (endingSeed >> 32)),
+            };
             List<Vector3> positions = new List<Vector3>();
             List<Vector2> uv0 = new List<Vector2>(), uv1 = new List<Vector2>();
+            List<Vector4> uv2 = new List<Vector4>();
             List<int> indices = new List<int>();
+            List<Vector2> pts = new List<Vector2>(), sides = new List<Vector2>();
+            List<float> alphas = new List<float>(), arc = new List<float>();
+            List<bool> hold = new List<bool>();
             stats = default;
+
+            float Height(Vector2 q) => Mathf.Max(data.SampleHeight(q.x, q.y), lift < 0f ? SampleLevelOrGround(data, q) : float.MinValue) + Mathf.Abs(lift);
+            void Vertex(Vector2 q, Vector2 side, float alpha, float across, Vector4 extra)
+            {
+                positions.Add(new Vector3(q.x, Height(q), q.y));
+                uv0.Add(new Vector2(across, alpha));
+                uv1.Add(side);
+                uv2.Add(extra);
+            }
+            Vector2 SideAt(float sv)
+            {
+                int j = MapLabInkEndings.Segment(arc, sv);
+                float len = arc[j + 1] - arc[j];
+                float t = len > 1e-6f ? Mathf.Clamp01((sv - arc[j]) / len) : 0f;
+                Vector2 sd = Vector2.Lerp(sides[j], sides[j + 1], t);
+                return sd.sqrMagnitude > 1e-8f ? sd.normalized : sides[j];
+            }
+
             foreach (Contour c in contours)
             {
                 List<Vector2> p = c.Points;
                 int count = p.Count;
                 if (c.Closed && count > 3)
                     count--;
-                int start = positions.Count;
+                if (count < 2)
+                    continue;
+                pts.Clear();
+                sides.Clear();
+                alphas.Clear();
+                hold.Clear();
                 for (int i = 0; i < count; i++)
                 {
                     Vector2 prev = p[c.Closed ? (i - 1 + count) % count : Mathf.Max(0, i - 1)];
@@ -420,26 +475,134 @@ namespace KingdomSurvival.MapLab
                     float b = breaks.Fbm(p[i].x / Mathf.Max(0.5f, ink.BreakLength), p[i].y / Mathf.Max(0.5f, ink.BreakLength), 2) * 0.5f + 0.5f;
                     alpha *= MapLabGeometry.SmoothStep(threshold - 0.05f, threshold + 0.05f, b);
                     alpha *= 1f - ink.LitSideFade * Mathf.Max(0f, Vector2.Dot(side, light));
-                    // Концы разомкнутой линии (край карты, мост) — сходят на нет.
-                    if (!c.Closed)
-                        alpha *= Mathf.Clamp01(Mathf.Min(i, count - 1 - i) / 3f);
-                    float h = Mathf.Max(data.SampleHeight(p[i].x, p[i].y), lift < 0f ? SampleLevelOrGround(data, p[i]) : float.MinValue) + Mathf.Abs(lift);
-                    Vector3 pos = new Vector3(p[i].x, h, p[i].y);
-                    positions.Add(pos);
-                    positions.Add(pos);
-                    uv0.Add(new Vector2(-1f, alpha));
-                    uv0.Add(new Vector2(1f, alpha));
-                    uv1.Add(side);
-                    uv1.Add(side);
+                    pts.Add(p[i]);
+                    sides.Add(side);
+                    alphas.Add(alpha);
+                    hold.Add(c.Hold != null && i < c.Hold.Count && c.Hold[i]);
                     if (i > 0)
                         stats.Length += Vector2.Distance(p[i], p[i - 1]);
                 }
-                int segments = c.Closed ? count : count - 1;
+
+                // Замкнутый контур с просветом — массив с самого бледного места:
+                // шов массива ложится в просвет, нулевой индекс концом не считается.
+                bool closed = c.Closed;
+                bool rotated = false;
+                if (endings && closed)
+                {
+                    int least = 0;
+                    for (int i = 1; i < count; i++)
+                        if (alphas[i] < alphas[least])
+                            least = i;
+                    if (alphas[least] < MapLabInkEndings.Visible)
+                    {
+                        Rotate(pts, least);
+                        Rotate(sides, least);
+                        Rotate(alphas, least);
+                        Rotate(hold, least);
+                        pts.Add(pts[0]);
+                        sides.Add(sides[0]);
+                        alphas.Add(alphas[0]);
+                        hold.Add(hold[0]);
+                        closed = false;
+                        rotated = true;
+                    }
+                }
+                int m = pts.Count;
+                arc.Clear();
+                arc.Add(0f);
+                for (int i = 1; i < m; i++)
+                    arc.Add(arc[i - 1] + Vector2.Distance(pts[i - 1], pts[i]));
+
+                MapLabInkEndings.Plan plan = null;
+                if (endings && !closed)
+                {
+                    plan = MapLabInkEndings.Build(pts, arc, alphas, c.FreeEnds && !rotated, c.EndingChance, endingOptions, c.Hold != null ? hold : null);
+                    stats.Endings += plan.Decorated;
+                    stats.FreeEnds += plan.Considered;
+                }
+
+                // Основная лента; у обрыва завершения — пара вершин почти в одной
+                // точке: кисть отрывается ясно, без размазанного затухания.
+                int start = positions.Count;
+                int cutIndex = 0;
+                const float eps = 0.004f;
+                for (int i = 0; i < m; i++)
+                {
+                    while (plan != null && cutIndex < plan.Cuts.Count && plan.Cuts[cutIndex].S <= arc[i] && i > 0)
+                    {
+                        MapLabInkEndings.Cut cut = plan.Cuts[cutIndex++];
+                        float before = cut.Dir > 0 ? cut.Alpha : 0f, after = cut.Dir > 0 ? 0f : cut.Alpha;
+                        foreach ((float sv, float a) in new[] { (cut.S - eps, before), (cut.S + eps, after) })
+                        {
+                            Vector2 q = MapLabInkEndings.PointAt(pts, arc, sv);
+                            Vector2 sd = SideAt(sv);
+                            Vector4 extra = new Vector4(0.72f, 0f, 0f, 0f);
+                            Vertex(q, sd, a, -1f, extra);
+                            Vertex(q, sd, a, 1f, extra);
+                        }
+                    }
+                    float alpha = alphas[i];
+                    // Концы разомкнутой линии (край карты, мост) — сходят на нет.
+                    if (!closed && !rotated)
+                        alpha *= Mathf.Clamp01(Mathf.Min(i, m - 1 - i) / 3f);
+                    float width = 1f;
+                    if (plan != null)
+                    {
+                        alpha *= plan.Mask(arc[i]);
+                        width = plan.Taper(arc[i]);
+                    }
+                    Vector4 main = new Vector4(width, 0f, 0f, 0f);
+                    Vertex(pts[i], sides[i], alpha, -1f, main);
+                    Vertex(pts[i], sides[i], alpha, 1f, main);
+                }
+                int emitted = (positions.Count - start) / 2;
+                int segments = closed ? emitted : emitted - 1;
                 for (int i = 0; i < segments; i++)
                 {
-                    int a = start + i * 2, bIndex = start + ((i + 1) % count) * 2;
+                    int a = start + i * 2, bIndex = start + ((i + 1) % emitted) * 2;
                     indices.Add(a); indices.Add(a + 1); indices.Add(bIndex + 1);
                     indices.Add(a); indices.Add(bIndex + 1); indices.Add(bIndex);
+                }
+
+                // Элементы завершения — по той же кривой, в той же сетке и материале.
+                if (plan != null)
+                {
+                    float unit = endingOptions.Unit;
+                    foreach (MapLabInkEndings.Element e in plan.Elements)
+                    {
+                        int first = positions.Count;
+                        if (e.Kind == MapLabInkEndings.Kind.Dot)
+                        {
+                            float sv = (e.S0 + e.S1) * 0.5f;
+                            Vector2 sd = SideAt(sv);
+                            Vector2 q = MapLabInkEndings.PointAt(pts, arc, sv) + sd * (e.Offset * unit);
+                            for (int k = 0; k < 4; k++)
+                                Vertex(q, sd, e.Alpha, (k & 1) == 0 ? -1f : 1f, new Vector4(e.Width, k < 2 ? -1f : 1f, e.Elong, unit));
+                            indices.Add(first); indices.Add(first + 1); indices.Add(first + 3);
+                            indices.Add(first); indices.Add(first + 3); indices.Add(first + 2);
+                        }
+                        else
+                        {
+                            int pieces = Mathf.Max(2, Mathf.CeilToInt((e.S1 - e.S0) / 0.08f));
+                            for (int k = 0; k <= pieces; k++)
+                            {
+                                float t = k / (float)pieces;
+                                float sv = Mathf.Lerp(e.S0, e.S1, t);
+                                Vector2 q = MapLabInkEndings.PointAt(pts, arc, sv);
+                                Vector2 sd = SideAt(sv);
+                                Vector4 extra = new Vector4(e.Width, t * 2f - 1f, 0f, unit);
+                                Vertex(q, sd, e.Alpha, -1f, extra);
+                                Vertex(q, sd, e.Alpha, 1f, extra);
+                            }
+                            for (int k = 0; k < pieces; k++)
+                            {
+                                int a = first + k * 2, bIndex = a + 2;
+                                indices.Add(a); indices.Add(a + 1); indices.Add(bIndex + 1);
+                                indices.Add(a); indices.Add(bIndex + 1); indices.Add(bIndex);
+                            }
+                        }
+                        stats.EndingElements++;
+                    }
                 }
                 stats.Polylines++;
             }
@@ -452,11 +615,21 @@ namespace KingdomSurvival.MapLab
             mesh.SetVertices(positions);
             mesh.SetUVs(0, uv0);
             mesh.SetUVs(1, uv1);
+            mesh.SetUVs(2, uv2);
             mesh.SetTriangles(indices, 0, true);
             Bounds bounds = mesh.bounds;
             bounds.Expand(2f);
             mesh.bounds = bounds;
             return mesh;
+        }
+
+        private static void Rotate<T>(List<T> list, int first)
+        {
+            if (first <= 0)
+                return;
+            List<T> head = list.GetRange(0, first);
+            list.RemoveRange(0, first);
+            list.AddRange(head);
         }
 
         private static float SampleLevelOrGround(MapLabData data, Vector2 p)

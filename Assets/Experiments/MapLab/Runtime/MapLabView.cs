@@ -791,6 +791,16 @@ namespace KingdomSurvival.MapLab
             AddRenderer(Group("Grass"), "Grass Tufts", MapLabGrass.Build(data, paintFields, tufts), grassMaterial);
         }
 
+        // Только перо (окончания линий и прочие настройки пера), без перекраски.
+        public void RebuildInk()
+        {
+            if (data == null || !Validate())
+                return;
+            BuildInk();
+            ApplyMaterialSettings();
+            ApplyVisibility();
+        }
+
         // Этап 03: перекрасить и пересобрать перо и тени (переключатели окна).
         public bool RebuildStage03Layers()
         {

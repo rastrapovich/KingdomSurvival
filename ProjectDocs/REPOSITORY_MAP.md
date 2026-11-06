@@ -1,6 +1,6 @@
 # Kingdom Survival — карта репозитория
 
-Сюжетная основа 04.11.2026 — [актуальный канон v1.64](../KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_64.md) §6, [NARRATIVE.md](NARRATIVE.md) §26.4 и [LORE.md](LORE.md) §17.2. Дом — [архивное направление под вопросом](Archive/HOME_DESIGN_ON_HOLD_2026-11-04.md); его старый лор и прежняя обязательная тема отменены.
+Сюжетная основа 04.11.2026 — [актуальный канон v1.65](../KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_65.md) §6, [NARRATIVE.md](NARRATIVE.md) §26.4 и [LORE.md](LORE.md) §17.2. Дом — [архивное направление под вопросом](Archive/HOME_DESIGN_ON_HOLD_2026-11-04.md); его старый лор и прежняя обязательная тема отменены.
 
 Проверено по локальному checkout 02.11.2026. Это справочник путей, а не новый канон. Рабочие правила — [AGENTS.md](../AGENTS.md). Пути в таблицах ниже указаны от корня репозитория; Markdown-ссылки разрешаются из ProjectDocs. При изменении структуры обновляй карту.
 
@@ -29,6 +29,7 @@
 | Трекер разработки | [DevelopmentTracker/Editor/](../Assets/_Project/DevelopmentTracker/Editor/); фактический журнал — [DEVELOPMENT_STATUS.md](DEVELOPMENT_STATUS.md) |
 | Эксперимент MapLab | [Assets/Experiments/MapLab/README.md](../Assets/Experiments/MapLab/README.md): `Runtime/`, `Editor/`, `Shaders/`, `Tests/EditMode/`; сцена `Scenes/MapLab_Painterly_Test.unity`, выгрузки — `MapLabExports/` (не в Git) |
 | Карта, окружение и стилизация 3D-анимационных рендеров | [MAP_STYLE_GUIDE.md](MAP_STYLE_GUIDE.md): тушь/акварель, формы 70/25/5; §1.1 — точное сохранение всех пропорций, поз, силуэтов и альфа-каналов; конвейер — [ART_PIPELINE_GUIDE.md](ART_PIPELINE_GUIDE.md) |
+| Берестяной маскот, его мимика, позы и костюмы | [BIRCH_MASCOT_REFERENCE_RU.md](BIRCH_MASCOT_REFERENCE_RU.md) — выбранная база 00 и ссылка на иллюстрированный паспорт с шестью PNG; смотреть изображения перед продолжением |
 | Концепты персонажей/существ, портреты и отдельные изображения | [ART_STYLE_GUIDE.md](ART_STYLE_GUIDE.md) и [иллюстрированная книга](KingdomSurvival_Art_Style_Canon_v1_1.html); старые растения в книге — исторические примеры |
 | Blender: KS Ground Renderer | [Tools/Blender/ks_ground_renderer/README_RU.md](../Tools/Blender/ks_ground_renderer/README_RU.md); исходники рядом, проверки — `Tools/Blender/tests/` |
 

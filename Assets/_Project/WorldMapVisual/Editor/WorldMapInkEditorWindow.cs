@@ -42,7 +42,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         private WorldMapInkStyle Ink => generator.Art.Ink;
         private WorldMapStrokeStyle Stroke => Ink.Get(Selected);
 
-        [MenuItem("Kingdom Survival/Редактор туши")]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void Open()
         {
             WorldMapInkEditorWindow window = GetWindow<WorldMapInkEditorWindow>();

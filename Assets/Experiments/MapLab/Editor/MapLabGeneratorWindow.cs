@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace KingdomSurvival.MapLab.Editor
@@ -61,12 +62,61 @@ namespace KingdomSurvival.MapLab.Editor
             public readonly List<(MapLabArtSet Set, MapLabArtEntry Entry)> Views = new List<(MapLabArtSet, MapLabArtEntry)>();
         }
 
+        // Единственный пункт меню генератора карты. Всё служебное — пакеты
+        // арта, калибровка, подробное окно MapLab, правила генератора игры,
+        // подготовка рисунка для игры — в кнопке «Сервис» этого окна.
         [MenuItem("Kingdom Survival/Генератор карты", priority = 300)]
         public static void Open()
         {
+            // Сцена генератора открывается сама (с вопросом о несохранённой сцене).
+            if (MapLabAssets.FindView() == null && System.IO.File.Exists(MapLabAssets.ScenePath) && EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                EditorSceneManager.OpenScene(MapLabAssets.ScenePath, OpenSceneMode.Single);
             MapLabGeneratorWindow window = GetWindow<MapLabGeneratorWindow>("Генератор карты");
             window.minSize = new Vector2(760f, 460f);
             window.Show();
+        }
+
+        // Окна других сборок (генератор игры, подготовка рисунка для игры) —
+        // по имени типа: прямой ссылки между сборками нет.
+        private static void RunExternal(string typeName, string assembly, string method)
+        {
+            Type type = Type.GetType(typeName + ", " + assembly);
+            System.Reflection.MethodInfo info = type?.GetMethod(method, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            if (info == null)
+            {
+                EditorUtility.DisplayDialog("Генератор карты", "Не найдено: " + typeName + "." + method, "OK");
+                return;
+            }
+            info.Invoke(null, null);
+        }
+
+        private void ShowServiceMenu(Rect at)
+        {
+            GenericMenu menu = new GenericMenu();
+            menu.AddItem(new GUIContent("Подключить арт/Этап 02 (основа)…"), false, () => MapLabArtImport.ImportMenu());
+            menu.AddItem(new GUIContent("Подключить арт/Этап 03 (деревья)…"), false, () => MapLabArtImport.ImportStage03Menu());
+            menu.AddItem(new GUIContent("Подключить арт/Этап 04 (герой)…"), false, () => MapLabArtImport.ImportStage04Menu());
+            menu.AddItem(new GUIContent("Подключить арт/Этап 05 (дома, трава, мосты)…"), false, () => MapLabArtImport.ImportStage05Menu());
+            menu.AddItem(new GUIContent("Подключить арт/Скалы 06…"), false, () => MapLabArtImport.ImportCliffs06Menu());
+            menu.AddItem(new GUIContent("Подключить арт/Выбранные места и фракции…"), false, () => MapLabPoiImport.ImportMenu());
+            menu.AddItem(new GUIContent("Переподключить последние пакеты/Этап 02"), false, () => MapLabArtImport.ReimportMenu());
+            menu.AddItem(new GUIContent("Переподключить последние пакеты/Этап 03"), false, () => MapLabArtImport.ReimportStage03Menu());
+            menu.AddItem(new GUIContent("Переподключить последние пакеты/Этап 04"), false, () => MapLabArtImport.ReimportStage04Menu());
+            menu.AddItem(new GUIContent("Переподключить последние пакеты/Этап 05"), false, () => MapLabArtImport.ReimportStage05Menu());
+            menu.AddItem(new GUIContent("Переподключить последние пакеты/Скалы 06"), false, () => MapLabArtImport.ReimportCliffs06Menu());
+            menu.AddSeparator("");
+            menu.AddItem(new GUIContent("Калибровка арта (опоры, высоты)"), false, () => MapLabArtCalibrationWindow.Open());
+            menu.AddItem(new GUIContent("Подробные настройки MapLab (все поля профиля)"), false, () => MapLabWindow.Open());
+            menu.AddSeparator("");
+            menu.AddItem(new GUIContent("Правила генератора игры (места, детали, фракции)"), false,
+                () => RunExternal("KingdomSurvival.WorldMapVisual.Editor.WorldMapGeneratorWindow", "KingdomSurvival.WorldMapVisual.Editor", "Open"));
+            menu.AddItem(new GUIContent("Тушь прежнего рисунка карты"), false,
+                () => RunExternal("KingdomSurvival.WorldMapVisual.Editor.WorldMapInkEditorWindow", "KingdomSurvival.WorldMapVisual.Editor", "Open"));
+            menu.AddItem(new GUIContent("Подготовить рисунок карты для игры"), false,
+                () => RunExternal("KingdomSurvival.MapLabBridge.Editor.MapLabGameSetup", "KingdomSurvival.MapLabBridge.Editor", "PrepareMenu"));
+            menu.AddSeparator("");
+            menu.AddItem(new GUIContent("Пересоздать сцену генератора"), false, () => Guard(() => { MapLabAssets.CreateTestSceneMenu(); view = MapLabAssets.FindView(); }));
+            menu.DropDown(at);
         }
 
         private void OnEnable()
@@ -103,8 +153,11 @@ namespace KingdomSurvival.MapLab.Editor
             if (view == null)
             {
                 EditorGUILayout.Space(8);
-                EditorGUILayout.HelpBox("В открытой сцене нет карты MapLab. Создайте рабочую сцену генератора.", MessageType.Info);
-                if (GUILayout.Button("Создать сцену генератора", GUILayout.Height(28)))
+                bool exists = System.IO.File.Exists(MapLabAssets.ScenePath);
+                EditorGUILayout.HelpBox(exists ? "Генератор работает в своей сцене. Откройте её (текущая сцена закроется, несохранённое будет предложено сохранить)." : "Сцены генератора ещё нет — создайте её.", MessageType.Info);
+                if (exists && GUILayout.Button("Открыть сцену генератора", GUILayout.Height(28)) && EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                    Guard(() => { EditorSceneManager.OpenScene(MapLabAssets.ScenePath, OpenSceneMode.Single); view = MapLabAssets.FindView(); });
+                if (GUILayout.Button(exists ? "Пересоздать сцену генератора" : "Создать сцену генератора", GUILayout.Height(24)))
                     Guard(() => { MapLabAssets.CreateTestSceneMenu(); view = MapLabAssets.FindView(); });
                 return;
             }
@@ -180,6 +233,10 @@ namespace KingdomSurvival.MapLab.Editor
                 bool dirty = view.Settings != null && EditorUtility.IsDirty(view.Settings);
                 GUILayout.Label(dirty ? "● есть несохранённые изменения" : "сохранено", dirty ? EditorStyles.boldLabel : EditorStyles.miniLabel);
                 GUILayout.FlexibleSpace();
+                GUIContent service = new GUIContent("Сервис ▾", "Подключить пакеты арта, калибровка, подробные настройки, правила генератора игры, подготовка рисунка для игры.");
+                Rect serviceRect = GUILayoutUtility.GetRect(service, EditorStyles.toolbarDropDown);
+                if (EditorGUI.DropdownButton(serviceRect, service, FocusType.Passive, EditorStyles.toolbarDropDown))
+                    ShowServiceMenu(serviceRect);
                 using (new EditorGUI.DisabledScope(view.Settings == null))
                 {
                     if (GUILayout.Button("Сохранить", EditorStyles.toolbarButton))

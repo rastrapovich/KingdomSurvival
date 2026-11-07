@@ -89,7 +89,7 @@ namespace KingdomSurvival.MapLab.Editor
             ReuseSetPath = Stage04SetPath, RegisterBuildings = true,
         };
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Подключить пакет этапа 05…", priority = 416)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void ImportStage05Menu()
         {
             string start = EditorPrefs.GetString(Stage05.LastFolderKey, "");
@@ -99,7 +99,7 @@ namespace KingdomSurvival.MapLab.Editor
             ImportInteractive(folder, Stage05);
         }
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Переподключить пакет этапа 05", priority = 417)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void ReimportStage05Menu()
         {
             string folder = EditorPrefs.GetString(Stage05.LastFolderKey, "");
@@ -129,7 +129,7 @@ namespace KingdomSurvival.MapLab.Editor
             LastFolderKey = "KingdomSurvival.MapLab.Cliffs06Package", MinRevision = 6, MaxRevision = 99,
         };
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Подключить пакет скал 06…", priority = 418)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void ImportCliffs06Menu()
         {
             string start = EditorPrefs.GetString(Cliffs06.LastFolderKey, "");
@@ -139,7 +139,7 @@ namespace KingdomSurvival.MapLab.Editor
             ImportInteractive(folder, Cliffs06);
         }
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Переподключить пакет скал 06", priority = 419)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void ReimportCliffs06Menu()
         {
             string folder = EditorPrefs.GetString(Cliffs06.LastFolderKey, "");
@@ -158,7 +158,7 @@ namespace KingdomSurvival.MapLab.Editor
         // Ревизия 06 пишет bbox как [x, y, ширина, высота] (coordinate_system).
         private static bool bboxIsSize;
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Подключить пакет этапа 04 (герой)…", priority = 414)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void ImportStage04Menu()
         {
             string start = EditorPrefs.GetString(Stage04.LastFolderKey, "");
@@ -168,7 +168,7 @@ namespace KingdomSurvival.MapLab.Editor
             ImportInteractive(folder, Stage04);
         }
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Переподключить пакет этапа 04", priority = 415)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void ReimportStage04Menu()
         {
             string folder = EditorPrefs.GetString(Stage04.LastFolderKey, "");
@@ -248,7 +248,7 @@ namespace KingdomSurvival.MapLab.Editor
             public bool HasPitch;
         }
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Подключить пакет этапа 02…", priority = 410)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void ImportMenu()
         {
             string start = EditorPrefs.GetString(LastFolderKey, "");
@@ -258,7 +258,7 @@ namespace KingdomSurvival.MapLab.Editor
             ImportInteractive(folder);
         }
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Переподключить пакет этапа 02", priority = 411)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void ReimportMenu()
         {
             string folder = EditorPrefs.GetString(LastFolderKey, "");
@@ -270,7 +270,7 @@ namespace KingdomSurvival.MapLab.Editor
             ImportInteractive(folder);
         }
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Подключить пакет этапа 03…", priority = 412)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void ImportStage03Menu()
         {
             string start = EditorPrefs.GetString(Stage03.LastFolderKey, "");
@@ -280,7 +280,7 @@ namespace KingdomSurvival.MapLab.Editor
             ImportInteractive(folder, Stage03);
         }
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Переподключить пакет этапа 03", priority = 413)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void ReimportStage03Menu()
         {
             string folder = EditorPrefs.GetString(Stage03.LastFolderKey, "");

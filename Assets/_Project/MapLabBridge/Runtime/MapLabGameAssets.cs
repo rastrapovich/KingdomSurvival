@@ -5,7 +5,7 @@ namespace KingdomSurvival.MapLabBridge
 {
     // 12У-F: всё, что нужно MapLab в игре (и в сборке без AssetDatabase):
     // профиль рисунка, наборы арта, шейдеры. Лежит в Resources, создаётся и
-    // обновляется пунктом меню «Kingdom Survival → MapLab (эксперимент) →
+    // обновляется в окне «Kingdom Survival → Генератор карты» → «Сервис» →
     // Подготовить рисунок MapLab для игры».
     [CreateAssetMenu(menuName = "Kingdom Survival/MapLab/Game Assets", fileName = "MapLabGameAssets")]
     public sealed class MapLabGameAssets : ScriptableObject

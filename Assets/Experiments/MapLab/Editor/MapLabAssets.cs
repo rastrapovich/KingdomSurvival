@@ -67,7 +67,7 @@ namespace KingdomSurvival.MapLab.Editor
             return AssetDatabase.LoadAssetAtPath<Shader>(ShaderFolder + "/" + file);
         }
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Создать тестовую сцену", priority = 401)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void CreateTestSceneMenu()
         {
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())

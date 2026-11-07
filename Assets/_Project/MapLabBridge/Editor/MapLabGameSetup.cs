@@ -22,7 +22,7 @@ namespace KingdomSurvival.MapLabBridge.Editor
         public const string AssetPath = Folder + "/" + MapLabGameAssets.ResourcesPath + ".asset";
         public const string ProfilePath = Folder + "/MapLabGameProfile.asset";
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Подготовить рисунок MapLab для игры", priority = 430)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void PrepareMenu()
         {
             MapLabGameAssets assets = Prepare();

@@ -105,7 +105,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             set => EditorPrefs.SetString(PrefsKey + "Preset", value ?? "");
         }
 
-        [MenuItem("Kingdom Survival/Генератор карты (прежний)")]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void Open()
         {
             WorldMapGeneratorWindow window = GetWindow<WorldMapGeneratorWindow>();

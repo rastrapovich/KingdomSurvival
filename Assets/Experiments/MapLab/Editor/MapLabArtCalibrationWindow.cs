@@ -19,7 +19,7 @@ namespace KingdomSurvival.MapLab.Editor
         private string clipKey;
         private Vector2 scroll;
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Калибровка арта", priority = 412)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void Open()
         {
             MapLabArtCalibrationWindow window = GetWindow<MapLabArtCalibrationWindow>("MapLab · арт");
@@ -40,7 +40,7 @@ namespace KingdomSurvival.MapLab.Editor
             set = (MapLabArtSet)EditorGUILayout.ObjectField("Набор арта", set, typeof(MapLabArtSet), false);
             if (set == null || set.Entries.Count == 0)
             {
-                EditorGUILayout.HelpBox("Набор не подключён. Kingdom Survival → MapLab (эксперимент) → Подключить пакет этапа 02…", MessageType.Info);
+                EditorGUILayout.HelpBox("Набор не подключён. Kingdom Survival → Генератор карты → Сервис → Подключить арт → Этап 02…", MessageType.Info);
                 return;
             }
             string[] names = new string[set.Entries.Count];

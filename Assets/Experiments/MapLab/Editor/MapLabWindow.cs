@@ -38,7 +38,7 @@ namespace KingdomSurvival.MapLab.Editor
         private string status = "";
         private bool sceneClick;
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Окно MapLab", priority = 400)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void Open()
         {
             MapLabWindow window = GetWindow<MapLabWindow>("MapLab");

@@ -39,7 +39,7 @@ namespace KingdomSurvival.MapLab.Editor
 
         public static MapLabArtSet LoadSet() => AssetDatabase.LoadAssetAtPath<MapLabArtSet>(SetPath);
 
-        [MenuItem("Kingdom Survival/MapLab (эксперимент)/Подключить выбранные места и фракции…", priority = 418)]
+        // Вызывается из окна «Генератор карты» → «Сервис» (отдельного пункта меню нет).
         public static void ImportMenu()
         {
             string poi = EditorUtility.OpenFolderPanel("Распакованный пакет выбранных мест (с ASSET_MANIFEST.json)", EditorPrefs.GetString(Profile.LastFolderKey, ""), "");

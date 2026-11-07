@@ -26,6 +26,9 @@ namespace KingdomSurvival.MapLabBridge
         public sealed class Result
         {
             public readonly List<(Texture2D Texture, Rect Percent)> Tiles = new List<(Texture2D, Rect)>();
+            // 12У-G: здания услуг на снимке — поселение (ID места, «village-N»),
+            // роль и прямоугольник рисунка в процентах полотна.
+            public readonly List<(string SettlementId, string Role, Rect Percent)> Buildings = new List<(string, string, Rect)>();
             public float HeightScale = 1f;
             public float Pitch = 50f;
             public int PixelWidth, PixelHeight;
@@ -47,30 +50,72 @@ namespace KingdomSurvival.MapLabBridge
         private static GeneratedWorldMap cachedMap;
         private static Result cached;
 
+        // В пакетном режиме (автотесты) игра рисует карту прежним способом:
+        // снимок MapLab — минута работы на партию. Пакетные команды снимка
+        // вызывают Bake напрямую.
         public static bool Enabled
         {
             get
             {
                 MapLabGameAssets assets = MapLabGameAssets.Load();
-                return assets != null && assets.UseInGame && assets.Profile != null;
+                return assets != null && assets.UseInGame && assets.Profile != null && !Application.isBatchMode;
             }
         }
 
         // Рисунок для карты партии (из памяти, с диска или новый снимок).
-        public static Result Get(GeneratedWorldMap plan)
+        // services — услуги поселений (ID места → роли по порядку): их
+        // здания рисуются отдельными рисунками и возвращаются как цели клика.
+        public static Result Get(GeneratedWorldMap plan, IDictionary<string, List<string>> services = null)
         {
             if (plan == null || !plan.IsValid || !Enabled)
                 return null;
-            if (ReferenceEquals(plan, cachedMap) && cached != null)
+            string servicesKey = ServicesKey(services);
+            if (ReferenceEquals(plan, cachedMap) && cached != null && cachedServices == servicesKey)
                 return cached;
             Clear();
             MapLabGameAssets assets = MapLabGameAssets.Load();
-            Result result = TryLoadDisk(plan, assets) ?? Bake(plan, assets);
+            Result result = TryLoadDisk(plan, assets, servicesKey) ?? Bake(plan, assets, services);
             if (result != null && string.IsNullOrEmpty(result.Error) && !result.FromDiskCache)
-                SaveDisk(plan, assets, result);
+                SaveDisk(plan, assets, result, servicesKey);
             cachedMap = plan;
             cached = result;
+            cachedServices = servicesKey;
             return result;
+        }
+
+        private static string cachedServices;
+
+        // Кадр фигуры группы для ракурса (набор выбранных мест и фракций).
+        public static Texture2D FigureTexture(string figureSet, int direction)
+        {
+            MapLabGameAssets assets = MapLabGameAssets.Load();
+            if (assets == null || assets.ArtSetPoi == null || string.IsNullOrEmpty(figureSet))
+                return null;
+            MapLabArtEntry entry = assets.ArtSetPoi.Find(figureSet + "_" + WorldMapActorMotion.Directions[((direction % 6) + 6) % 6]);
+            return entry != null && entry.HasTexture ? entry.Texture : null;
+        }
+
+        // Рисунок здания услуги (для подсветки на экране карты).
+        public static Texture2D ServiceTexture(string role)
+        {
+            MapLabGameAssets assets = MapLabGameAssets.Load();
+            string id = MapLabPlacer.ServiceArt(role);
+            if (assets == null || assets.ArtSetPoi == null || id == null)
+                return null;
+            MapLabArtEntry entry = assets.ArtSetPoi.Find(id);
+            return entry != null ? entry.Texture : null;
+        }
+
+        public static string ServicesKey(IDictionary<string, List<string>> services)
+        {
+            if (services == null || services.Count == 0)
+                return string.Empty;
+            List<string> keys = new List<string>(services.Keys);
+            keys.Sort(StringComparer.Ordinal);
+            System.Text.StringBuilder b = new System.Text.StringBuilder();
+            foreach (string k in keys)
+                b.Append(k).Append('=').Append(string.Join(",", services[k])).Append(';');
+            return b.ToString();
         }
 
         public static void Clear()
@@ -91,7 +136,7 @@ namespace KingdomSurvival.MapLabBridge
 
         private static string CacheFolder => Path.Combine(Application.persistentDataPath, "MapLabMapCache");
 
-        public static Result Bake(GeneratedWorldMap plan, MapLabGameAssets assets)
+        public static Result Bake(GeneratedWorldMap plan, MapLabGameAssets assets, IDictionary<string, List<string>> services = null)
         {
             Result result = new Result();
             Stopwatch watch = Stopwatch.StartNew();
@@ -101,7 +146,11 @@ namespace KingdomSurvival.MapLabBridge
             {
                 settings = Object.Instantiate(assets.Profile);
                 settings.name = "MapLab Game Profile";
-                MapLabRegionPlan.Apply(plan, settings);
+                MapLabComposition composition = MapLabRegionPlan.Apply(plan, settings);
+                if (services != null)
+                    foreach (MapLabComposition.Settlement st in composition.Settlements)
+                        if (services.TryGetValue(st.Id, out List<string> roles) && roles != null)
+                            st.Services.AddRange(roles);
                 // Снимок для игры: сетка 257 и покраска чуть плотнее снимка —
                 // подробнее экран всё равно не покажет, а генерация в разы короче.
                 settings.General.Quality = MapLabQuality.Samples257;
@@ -154,6 +203,17 @@ namespace KingdomSurvival.MapLabBridge
                     for (int j = 0; j < 16; j++)
                         mean += data.SampleHeight(play.xMin + (i + 0.5f) / 16f * play.width, play.yMin + (j + 0.5f) / 16f * play.height);
                 mean /= 256f;
+                // Здания услуг: проекция опоры и карточки полной высоты (как в
+                // шейдере карточки) — прямоугольник рисунка на снимке.
+                float cos = Mathf.Cos(pitch * Mathf.Deg2Rad);
+                foreach (MapLabServiceBuilding b in data.ServiceBuildings)
+                {
+                    float v = (b.Base.y - mean) * cos + (b.Base.z - play.yMax) * sin;
+                    float bx = (b.Base.x - play.xMin) * texels, by = -v * texels;
+                    float left = bx - b.Pivot.x * b.Width * texels;
+                    float top = by - (1f - b.Pivot.y) * b.Height * texels;
+                    result.Buildings.Add((b.SettlementId, b.Role, new Rect(left * 100f / width, top * 100f / height, b.Width * texels * 100f / width, b.Height * texels * 100f / height)));
+                }
                 cam.backgroundColor = view.Palette.Paper;
                 float distance = data.Size * 2f + 200f;
                 cam.nearClipPlane = Mathf.Max(0.3f, distance - data.Size * 1.6f - 60f);
@@ -242,11 +302,19 @@ namespace KingdomSurvival.MapLabBridge
 
         // ---------- кэш на диске ----------
 
-        private static Result TryLoadDisk(GeneratedWorldMap plan, MapLabGameAssets assets)
+        private static string Folder(GeneratedWorldMap plan, MapLabGameAssets assets, string servicesKey)
+        {
+            uint hash = 2166136261;
+            foreach (char c in servicesKey ?? string.Empty)
+                hash = (hash ^ c) * 16777619;
+            return Path.Combine(CacheFolder, CacheKey(plan, assets) + $"_v{hash:x8}");
+        }
+
+        private static Result TryLoadDisk(GeneratedWorldMap plan, MapLabGameAssets assets, string servicesKey)
         {
             try
             {
-                string folder = Path.Combine(CacheFolder, CacheKey(plan, assets));
+                string folder = Folder(plan, assets, servicesKey);
                 string index = Path.Combine(folder, "index.txt");
                 if (!File.Exists(index))
                     return null;
@@ -260,6 +328,11 @@ namespace KingdomSurvival.MapLabBridge
                 for (int i = 1; i < lines.Length; i++)
                 {
                     string[] p = lines[i].Split(' ');
+                    if (p.Length == 7 && p[0] == "B")
+                    {
+                        result.Buildings.Add((p[1], p[2], new Rect(F(p[3]), F(p[4]), F(p[5]), F(p[6]))));
+                        continue;
+                    }
                     if (p.Length < 5)
                         continue;
                     Texture2D texture = new Texture2D(2, 2, TextureFormat.RGBA32, false, false) { wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.DontSave };
@@ -282,11 +355,11 @@ namespace KingdomSurvival.MapLabBridge
 
         private static float F(string s) => float.Parse(s, System.Globalization.CultureInfo.InvariantCulture);
 
-        private static void SaveDisk(GeneratedWorldMap plan, MapLabGameAssets assets, Result result)
+        private static void SaveDisk(GeneratedWorldMap plan, MapLabGameAssets assets, Result result, string servicesKey)
         {
             try
             {
-                string folder = Path.Combine(CacheFolder, CacheKey(plan, assets));
+                string folder = Folder(plan, assets, servicesKey);
                 Directory.CreateDirectory(folder);
                 List<string> lines = new List<string> { $"{result.PixelWidth} {result.PixelHeight} {result.Pitch.ToString(System.Globalization.CultureInfo.InvariantCulture)}" };
                 for (int i = 0; i < result.Tiles.Count; i++)
@@ -297,6 +370,9 @@ namespace KingdomSurvival.MapLabBridge
                     lines.Add(string.Join(" ", name, r.x.ToString("R", System.Globalization.CultureInfo.InvariantCulture), r.y.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
                         r.width.ToString("R", System.Globalization.CultureInfo.InvariantCulture), r.height.ToString("R", System.Globalization.CultureInfo.InvariantCulture)));
                 }
+                foreach ((string id, string role, Rect r) in result.Buildings)
+                    lines.Add(string.Join(" ", "B", id, role, r.x.ToString("R", System.Globalization.CultureInfo.InvariantCulture), r.y.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
+                        r.width.ToString("R", System.Globalization.CultureInfo.InvariantCulture), r.height.ToString("R", System.Globalization.CultureInfo.InvariantCulture)));
                 File.WriteAllLines(Path.Combine(folder, "index.txt"), lines);
             }
             catch (Exception exception)

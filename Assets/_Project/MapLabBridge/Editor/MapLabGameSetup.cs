@@ -91,7 +91,12 @@ namespace KingdomSurvival.MapLabBridge.Editor
                 {
                     int seed = int.Parse(token.Trim(), CultureInfo.InvariantCulture);
                     GeneratedWorldMap plan = WorldMapGenerator.Generate(settings, seed);
-                    MapLabGameMap.Result result = MapLabGameMap.Bake(plan, assets);
+                    // Проверка зданий услуг: у каждой деревни — корчма, лавка и столб.
+                    System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<string>> services = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<string>>();
+                    for (int v = 1; v < plan.Villages.Count; v++)
+                        services["village-" + v] = new System.Collections.Generic.List<string> { "tavern", "merchant", "board", "healer", "elder" };
+                    MapLabGameMap.Result result = MapLabGameMap.Bake(plan, assets, services);
+                    report.AppendLine($"      зданий услуг на снимке: {result.Buildings.Count}");
                     report.AppendLine($"seed {seed} ({plan.HexesAcross} клеток, {plan.Passport.KindTitle}): {(string.IsNullOrEmpty(result.Error) ? "готово" : result.Error)}, снимок {result.PixelWidth}×{result.PixelHeight}, плиток {result.Tiles.Count}, сжатие глубины {result.HeightScale:0.###}, {result.BakeMs / 1000.0:0.0} с");
                     if (result.Tiles.Count > 0)
                     {
@@ -102,6 +107,20 @@ namespace KingdomSurvival.MapLabBridge.Editor
                             int x = Mathf.RoundToInt(r.x / 100f * result.PixelWidth);
                             int top = Mathf.RoundToInt(r.y / 100f * result.PixelHeight);
                             whole.SetPixels32(x, result.PixelHeight - top - t.height, t.width, t.height, t.GetPixels32());
+                        }
+                        // Рамки зданий услуг — проверка совпадения с рисунком.
+                        foreach ((string _, string role, Rect r) in result.Buildings)
+                        {
+                            int x0 = Mathf.RoundToInt(r.xMin / 100f * result.PixelWidth), x1 = Mathf.RoundToInt(r.xMax / 100f * result.PixelWidth);
+                            int y0 = Mathf.RoundToInt(r.yMin / 100f * result.PixelHeight), y1 = Mathf.RoundToInt(r.yMax / 100f * result.PixelHeight);
+                            for (int x = Mathf.Max(0, x0); x <= Mathf.Min(result.PixelWidth - 1, x1); x++)
+                                foreach (int y in new[] { y0, y1 })
+                                    if (y >= 0 && y < result.PixelHeight)
+                                        whole.SetPixel(x, result.PixelHeight - 1 - y, Color.red);
+                            for (int y = Mathf.Max(0, y0); y <= Mathf.Min(result.PixelHeight - 1, y1); y++)
+                                foreach (int x in new[] { x0, x1 })
+                                    if (x >= 0 && x < result.PixelWidth)
+                                        whole.SetPixel(x, result.PixelHeight - 1 - y, Color.red);
                         }
                         whole.Apply();
                         File.WriteAllBytes(Path.Combine(output, $"game_map_seed{seed}.png"), whole.EncodeToPNG());

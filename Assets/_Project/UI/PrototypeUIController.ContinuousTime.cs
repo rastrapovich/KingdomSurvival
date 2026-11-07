@@ -173,6 +173,8 @@ public partial class PrototypeUIController
         TickLocalExploration(Time.unscaledDeltaTime);
         // 12Т: экран поселения — пока командир внутри и поверх ничего нет.
         TickSettlementScreen();
+        TickWorldMapBuildings();
+        TickWorldMapGroups();
         TickWorldMapSearchAreas();
         TickWorldMapFog();
         TickRewardToasts();

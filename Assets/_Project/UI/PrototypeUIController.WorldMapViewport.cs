@@ -83,7 +83,7 @@ public partial class PrototypeUIController
             worldMapCanvasHeight = gameState.GeneratedMap.CanvasHeight;
             // 12У-F: рисунок MapLab снят под наклоном — глубина сжата на
             // sin(наклона); проценты значков и рисунка совпадают.
-            worldMapMapLab = KingdomSurvival.MapLabBridge.MapLabGameMap.Get(gameState.GeneratedMap);
+            worldMapMapLab = KingdomSurvival.MapLabBridge.MapLabGameMap.Get(gameState.GeneratedMap, MapLabSettlementServices());
             if (worldMapMapLab != null && string.IsNullOrEmpty(worldMapMapLab.Error) && worldMapMapLab.Tiles.Count > 0)
                 worldMapCanvasHeight *= worldMapMapLab.HeightScale;
             else

@@ -1008,7 +1008,7 @@ namespace KingdomSurvival.MapLab
             if (set05 != null)
             {
                 // Этап 05: деревья — набор этапа 03; дома, трава, камни, сено, реквизит — этап 05.
-                MapLabArtBuilder.PlanHouses05(data, Settings, set05, housePlan);
+                MapLabArtBuilder.PlanHouses05(data, Settings, set05, housePlan, ResolvedArtSetPoi);
                 Phase("план домов");
                 MapLabArtBuilder.PlanDecor05(data, Settings, set05, paintFields != null ? paintFields.Shore : new MapLabShore(data, Settings.Stage05.ShoreSmoothing), decorPlan);
                 Phase("план мелочи");

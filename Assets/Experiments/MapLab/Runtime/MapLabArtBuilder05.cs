@@ -15,9 +15,10 @@ namespace KingdomSurvival.MapLab
 
         // Этап 05: дома и сараи — один выбранный при расстановке ракурс (группа +
         // ViewTag), при любом приближении; рисунок по наклону не переключается.
-        public static void PlanHouses05(MapLabData data, MapLabSettings settings, MapLabArtSet set, Plan plan)
+        public static void PlanHouses05(MapLabData data, MapLabSettings settings, MapLabArtSet set, Plan plan, MapLabArtSet services = null)
         {
             LastDecor05 = new Decor05Stats();
+            data.ServiceBuildings.Clear();
             if (set == null)
                 return;
             bool anyHouse = false, anyBarn = false;
@@ -26,6 +27,25 @@ namespace KingdomSurvival.MapLab
                 MapLabPlacement o = data.Objects[i];
                 if ((o.Kind != MapLabObjectKind.House && o.Kind != MapLabObjectKind.Barn) || o.Yard <= 0 || o.View < 0 || o.View > 3)
                     continue;
+                // 12У-G: здание услуги — свой рисунок вместо обычной избы.
+                if (!string.IsNullOrEmpty(o.ArtId) && services != null)
+                {
+                    MapLabArtEntry art = services.Find(o.ArtId);
+                    if (art != null && art.HasTexture)
+                    {
+                        float s = settings.Settlement.BuildingScale;
+                        MapLabArtInstance instance = Make(art, o.Position, s, o.Brightness, 0f, 0.5f, i);
+                        plan.Add(art, instance);
+                        anyHouse = true;
+                        LastDecor05.Houses++;
+                        data.ServiceBuildings.Add(new MapLabServiceBuilding
+                        {
+                            SettlementId = o.SettlementId, Role = o.Role, ArtId = o.ArtId,
+                            Base = o.Position, Height = instance.Height, Width = instance.Width, Pivot = instance.Pivot,
+                        });
+                        continue;
+                    }
+                }
                 string group = HouseGroup(settings, o);
                 string tag = MapLabHouseViews.Tags[o.View];
                 MapLabArtEntry entry = null;

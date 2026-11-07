@@ -140,7 +140,10 @@ public partial class PrototypeUIController
                 HideSettlementScreenVisual();
         }
 
-        if (!IsSettlementScreenOpen && !string.IsNullOrEmpty(inside) && CanAutoOpenSettlement())
+        // 12У-G: на карте MapLab поселение показано зданиями — общий экран сам
+        // не открывается (кроме возвращения после разговора на ту же страницу).
+        bool returning = settlementSuspendedLocationId == inside;
+        if (!IsSettlementScreenOpen && !string.IsNullOrEmpty(inside) && CanAutoOpenSettlement() && (returning || !SettlementMapMode(inside)))
         {
             bool restoring = settlementSuspendedLocationId == inside;
             SettlementMode mode = restoring ? settlementSuspendedMode : SettlementMode.Main;
@@ -288,6 +291,14 @@ public partial class PrototypeUIController
             return;
         }
         string locationId = settlementLocationId;
+        // 12У-G: из окна услуги — обратно на карту поселения (отряд внутри);
+        // уйти из поселения — кнопка «Уйти» на карте.
+        if (SettlementMapMode(locationId))
+        {
+            CloseSettlementScreen();
+            Autosave();
+            return;
+        }
         bool hadCamp = SettlementCampService.HasCamp(gameState);
         SettlementCampService.ReturnToCamp(gameState);
         CloseSettlementScreen();

@@ -235,6 +235,7 @@ namespace KingdomSurvival.MapLab
             List<MapLabYardRect> yards = new List<MapLabYardRect>();
             List<(Vector2 a, Vector2 b, float gate, bool fenced)> outlines = new List<(Vector2, Vector2, float, bool)>();
             List<MapLabPlacement> placed = new List<MapLabPlacement>();
+            int objectsBefore = data.Objects.Count;
             // Кандидаты — точки всех дорог поселения (не только главной) через
             // 2.5 ед., ближние к площадке — раньше; пересечения отсекает TryYard05.
             List<(Vector2 p, Vector2 t, MapLabPolyline road, float d)> spots = new List<(Vector2, Vector2, MapLabPolyline, float)>();
@@ -276,6 +277,7 @@ namespace KingdomSurvival.MapLab
                 }
             }
             data.YardRects.AddRange(yards);
+            AssignServiceBuildings(data, st, plaza, objectsBefore);
             BuildFenceGraph(data, settings, outlines, placed);
         }
 
@@ -324,6 +326,51 @@ namespace KingdomSurvival.MapLab
         }
 
         private static Vector3 Ground(MapLabData data, Vector2 p) => new Vector3(p.x, data.SampleHeight(p.x, p.y), p.y);
+
+        // 12У-G: рисунки отдельных зданий услуг (набор выбранных мест, ракурс FrontRight).
+        public static string ServiceArt(string role)
+        {
+            switch (role)
+            {
+                case "tavern": return "Tavern_A_FrontRight";
+                case "merchant": return "MerchantShop_A_FrontRight";
+                case "board": return "NoticePost_A_FrontRight";
+                case "healer": return "HealerHouse_A_FrontRight";
+                case "elder": return "ElderHouse_A_FrontRight";
+                case "smithy": return "Smithy_A_FrontRight";
+                default: return null;
+            }
+        }
+
+        // Ближайшие к площади дома деревни становятся зданиями её услуг
+        // (по порядку списка). Домов меньше, чем услуг, — остальные услуги
+        // остаются в общем экране поселения.
+        private static void AssignServiceBuildings(MapLabData data, MapLabComposition.Settlement st, Vector2 plaza, int objectsBefore)
+        {
+            if (st.Services.Count == 0)
+                return;
+            List<int> houses = new List<int>();
+            for (int i = objectsBefore; i < data.Objects.Count; i++)
+                if (data.Objects[i].Kind == MapLabObjectKind.House)
+                    houses.Add(i);
+            houses.Sort((a, b) =>
+            {
+                float da = Vector2.Distance(new Vector2(data.Objects[a].Position.x, data.Objects[a].Position.z), plaza);
+                float db = Vector2.Distance(new Vector2(data.Objects[b].Position.x, data.Objects[b].Position.z), plaza);
+                return da != db ? da.CompareTo(db) : a.CompareTo(b);
+            });
+            for (int k = 0; k < st.Services.Count && k < houses.Count; k++)
+            {
+                string art = ServiceArt(st.Services[k]);
+                if (art == null)
+                    continue;
+                MapLabPlacement o = data.Objects[houses[k]];
+                o.ArtId = art;
+                o.SettlementId = st.Id;
+                o.Role = st.Services[k];
+                data.Objects[houses[k]] = o;
+            }
+        }
 
         private static void TryYard05(MapLabData data, MapLabSettings settings, ref MapLabRandom rng, MapLabPolyline road, Vector2 roadPoint, Vector2 axisU, Vector2 backV,
             List<MapLabHouseView>[] houseViews, List<MapLabHouseView> barnViews, List<MapLabYardRect> yards, List<(Vector2 a, Vector2 b, float gate, bool fenced)> outlines, List<MapLabPlacement> placed, bool spacious)

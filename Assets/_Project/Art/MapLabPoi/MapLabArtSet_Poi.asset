@@ -15,9 +15,9 @@ MonoBehaviour:
   SchemaVersion: 1
   PackageRevision: 7
   PackageId: ks-maplab-selected-poi-and-factions
-  ImportVersion: 1
-  ImportedAt: 2026-11-07 17:57:09
-  ManifestSha256: a4167f9e410a0135851bed4e949a15bee9ff2d27d50816523305b3ff13dbb1fa
+  ImportVersion: 2
+  ImportedAt: 2026-11-07 19:11:57
+  ManifestSha256: 70873c1ce5a5e68dd5e3bda43ee96cf4ea9f4ae0d1fe401be5df0635b097a86e
   Entries:
   - Id: Bathhouse_A_FrontRight
     Category: 1
@@ -6585,6 +6585,982 @@ MonoBehaviour:
     VariantGroup: 
     Provenance: faction:draft_grey_company
     MeanColor: {r: 0.59477276, g: 0.4297921, b: 0.3249906, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_RiverUnion_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: ff56fcdb868396a4ab5ffe97db70d4a5, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.47767, y: 0.103604466}
+    Footprint: {x: 0.9855881, y: 0.68443614}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_RiverUnion_Front.png
+    Sha256: e234bbf26faa765b423a46df6e753b67a64ca8804b141830ed03d6d960681736
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.23365231
+      y: 0.06937799
+      width: 0.48803827
+      height: 0.85566187
+    PivotHint: {x: 0.47767, y: 0.06938}
+    FootX: 0.49104857
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_river_union
+    MeanColor: {r: 0.64256084, g: 0.45271853, b: 0.33603898, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_RiverUnion_Front_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 7a8241c78a26e914f8d1cbf470aa0631, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.48604, y: 0.08009569}
+    Footprint: {x: 0.8022326, y: 0.55710596}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_RiverUnion_Front_Right.png
+    Sha256: 2ae67a92c5830ac4066b06588fb76f36b312f2488939992486e5a60f26cabf73
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.27113238
+      y: 0.043062203
+      width: 0.42982456
+      height: 0.92583734
+    PivotHint: {x: 0.48604, y: 0.04306}
+    FootX: 0.4206527
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_river_union
+    MeanColor: {r: 0.66983116, g: 0.4829935, b: 0.3662314, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_RiverUnion_Back_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 6229701946252444699d7dd3cf5ef6e8, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.51435, y: 0.102264754}
+    Footprint: {x: 0.9303386, y: 0.64606845}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_RiverUnion_Back_Right.png
+    Sha256: ddacf06eae98755808dc5029e6372f1798eb009e7dc8545d3fe09e5809a1e6df
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.28229666
+      y: 0.067783095
+      width: 0.46411484
+      height: 0.8620415
+    PivotHint: {x: 0.51435, y: 0.06778}
+    FootX: 0.5212033
+    Direction: BackRight
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_river_union
+    MeanColor: {r: 0.60936207, g: 0.43843645, b: 0.33832714, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_RiverUnion_Back
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: bd52c1297e6d30745b6a7d29e71de5fd, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.50239, y: 0.103604466}
+    Footprint: {x: 0.95821065, y: 0.66542405}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_RiverUnion_Back.png
+    Sha256: 910dfffa0ab1463d85b65b5f9dfb6c2463de0697d591d32c2964e61a27fdc928
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.26555023
+      y: 0.06937799
+      width: 0.47448167
+      height: 0.85566187
+    PivotHint: {x: 0.50239, y: 0.06938}
+    FootX: 0.48749048
+    Direction: Back
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_river_union
+    MeanColor: {r: 0.6416819, g: 0.46287096, b: 0.35809192, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_RiverUnion_Back_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 7d939d8aec03eaf4ea874f56465f81d9, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49641, y: 0.10437001}
+    Footprint: {x: 0.9026866, y: 0.6268657}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_RiverUnion_Back_Left.png
+    Sha256: e90e29a04f201da2493918f80280b58ceb6950e25e670b90148d7b8791dba5cf
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.27272728
+      y: 0.07017544
+      width: 0.44657096
+      height: 0.8548644
+    PivotHint: {x: 0.49641, y: 0.07018}
+    FootX: 0.4036935
+    Direction: BackLeft
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_river_union
+    MeanColor: {r: 0.6568615, g: 0.46852133, b: 0.35555506, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_RiverUnion_Front_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 7324097a0e6b0fc428b6356437979281, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.47767, y: 0.089633174}
+    Footprint: {x: 0.90447575, y: 0.62810814}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_RiverUnion_Front_Left.png
+    Sha256: 679b72409be51a858a0570343c893f237224444eb17a820633d972a6750951bf
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.24561404
+      y: 0.054226477
+      width: 0.4633174
+      height: 0.8851675
+    PivotHint: {x: 0.47767, y: 0.05423}
+    FootX: 0.5246458
+    Direction: FrontLeft
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_river_union
+    MeanColor: {r: 0.6660696, g: 0.47622472, b: 0.3563063, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_Watch_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: b1bd60b25e53dc049935e0c104ce3fac, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49203, y: 0.103476875}
+    Footprint: {x: 0.9589706, y: 0.6659518}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_Watch_Front.png
+    Sha256: ad85d4c67a6bcb89e6cd35dfb591714a1c7304a5390139891d04e14aeb17ccac
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.24481659
+      y: 0.067783095
+      width: 0.4952153
+      height: 0.8923445
+    PivotHint: {x: 0.49203, y: 0.06778}
+    FootX: 0.47216684
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_watch_court_branch
+    MeanColor: {r: 0.64838976, g: 0.47348577, b: 0.30057228, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_Watch_Front_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 5394d5384838234449a3a73daa2d2b47, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.48844, y: 0.08867624}
+    Footprint: {x: 0.85427535, y: 0.59324676}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_Watch_Front_Right.png
+    Sha256: fae3c3380ba9732ec7431f046efdc1cb58ae181fc82f13145b984dba1bf5b9d0
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.26076555
+      y: 0.051834133
+      width: 0.4553429
+      height: 0.92105263
+    PivotHint: {x: 0.48844, y: 0.05104}
+    FootX: 0.43601403
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_watch_court_branch
+    MeanColor: {r: 0.6716561, g: 0.49010026, b: 0.31858873, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_Watch_Back_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: bcee930ddc5da564aaf86b99af49ff2b, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.50997, y: 0.09234449}
+    Footprint: {x: 0.99303424, y: 0.6896071}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_Watch_Back_Right.png
+    Sha256: d75f33d0cb24e8067ced93a9ac229ea16b4dd2afba8a721a186aba33e04bad1c
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.24720894
+      y: 0.05582137
+      width: 0.5247209
+      height: 0.9130781
+    PivotHint: {x: 0.50997, y: 0.05582}
+    FootX: 0.53585434
+    Direction: BackRight
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_watch_court_branch
+    MeanColor: {r: 0.59104025, g: 0.44627875, b: 0.29666448, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_Watch_Back
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: f291318d8f2bcbf4ba512903eabb616d, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.5, y: 0.10287081}
+    Footprint: {x: 0.9246721, y: 0.6421334}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_Watch_Back.png
+    Sha256: 7f357d2cb9fa525ee17f29866a9ea950635f764b7cf8bfacfdef11e98d1b3693
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2599681
+      y: 0.066985644
+      width: 0.4800638
+      height: 0.8971292
+    PivotHint: {x: 0.5, y: 0.06699}
+    FootX: 0.51090556
+    Direction: Back
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_watch_court_branch
+    MeanColor: {r: 0.60969555, g: 0.46857893, b: 0.31110165, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_Watch_Back_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 74bcac54cbf62ae4b87f5e981bd68b2a, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.48963, y: 0.091770336}
+    Footprint: {x: 0.7755001, y: 0.53854173}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_Watch_Back_Left.png
+    Sha256: e849829d531bb84c620207909a8fbedccca51743980c899a3e2341d403bfa6be
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2830941
+      y: 0.055023924
+      width: 0.4122807
+      height: 0.9186603
+    PivotHint: {x: 0.48963, y: 0.05502}
+    FootX: 0.3868885
+    Direction: BackLeft
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_watch_court_branch
+    MeanColor: {r: 0.59874773, g: 0.45876607, b: 0.30821764, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_Watch_Front_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 0a50df6f36e65894c884f1cd5cb4d037, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.5008, y: 0.0783732}
+    Footprint: {x: 0.8947005, y: 0.6213198}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_Watch_Front_Left.png
+    Sha256: b564f026c91b710af28ab21d949cd4a84ca4324e872dd83f77a848cffbdcc1a4
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2567783
+      y: 0.040669855
+      width: 0.48803827
+      height: 0.94258374
+    PivotHint: {x: 0.5008, y: 0.03987}
+    FootX: 0.5292036
+    Direction: FrontLeft
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_watch_court_branch
+    MeanColor: {r: 0.639948, g: 0.4783706, b: 0.32019055, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_GreyCompany_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 04d51ddc21b35844f84e03b6e5079dc4, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49322, y: 0.12692185}
+    Footprint: {x: 1.0033549, y: 0.69677424}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_GreyCompany_Front.png
+    Sha256: 285aea6f3904451ddc3c707e06a5ece03f59f6b099b1dab3a5259b777a0cf9ac
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.24880382
+      y: 0.09330144
+      width: 0.48803827
+      height: 0.84051037
+    PivotHint: {x: 0.49322, y: 0.0933}
+    FootX: 0.48959267
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_grey_company
+    MeanColor: {r: 0.5781797, g: 0.42252147, b: 0.30979484, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_GreyCompany_Front_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 06e2790d2ce95e546ae150a3abed98ea, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49482, y: 0.093460925}
+    Footprint: {x: 0.9382806, y: 0.65158373}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_GreyCompany_Front_Right.png
+    Sha256: 02c7012fef83f7e24c70f460d49c36d45015e6b40ac7e268a00afbd93c065af9
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2551834
+      y: 0.058213715
+      width: 0.4784689
+      height: 0.8811802
+    PivotHint: {x: 0.49482, y: 0.05821}
+    FootX: 0.40430942
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_grey_company
+    MeanColor: {r: 0.60323673, g: 0.43774384, b: 0.32750198, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_GreyCompany_Back_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 1b1bb9d3d9cf2fd4f883a9030b08f233, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.48445, y: 0.123763956}
+    Footprint: {x: 0.8091299, y: 0.5618957}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_GreyCompany_Back_Right.png
+    Sha256: 64ec1f0a163558ffe119ce07e0fc747af7a36cf1bc4560cd7ad660b6e1dc4152
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.28787878
+      y: 0.09011164
+      width: 0.3939394
+      height: 0.8413078
+    PivotHint: {x: 0.48445, y: 0.08931}
+    FootX: 0.5272914
+    Direction: BackRight
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_grey_company
+    MeanColor: {r: 0.5943206, g: 0.44004375, b: 0.33696613, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_GreyCompany_Front_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 01d1cf3ce8f45224ea9bf446792a0877, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.4988, y: 0.102807015}
+    Footprint: {x: 0.88131154, y: 0.61202186}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_GreyCompany_Front_Left.png
+    Sha256: e2804211d86f04cfa5df7898d452cd63f0214de12f2a78beeae084374efb3acc
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2751196
+      y: 0.067783095
+      width: 0.44657096
+      height: 0.8755981
+    PivotHint: {x: 0.4988, y: 0.06778}
+    FootX: 0.51698595
+    Direction: FrontLeft
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_grey_company
+    MeanColor: {r: 0.59407276, g: 0.4359061, b: 0.32230917, a: 1}
     TileEdgeDifference: 0
     Notes: 
     AuthoringPlane: billboard_6_view

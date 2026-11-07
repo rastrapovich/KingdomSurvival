@@ -131,6 +131,24 @@ namespace KingdomSurvival.MapLab
         public int View;
         public Vector2 Entrance;
         public int Yard;
+        // 12У-G: отдельное здание услуги — свой рисунок (ID набора выбранных
+        // мест), поселение и роль (tavern, merchant, board, healer, elder).
+        public string ArtId;
+        public string SettlementId;
+        public string Role;
+    }
+
+    // 12У-G: здание услуги на рисунке — опора, высота и ширина карточки,
+    // опора рисунка; по ним снимок карты находит точное место здания на экране.
+    public struct MapLabServiceBuilding
+    {
+        public string SettlementId;
+        public string Role;
+        public string ArtId;
+        public Vector3 Base;
+        public float Height;
+        public float Width;
+        public Vector2 Pivot;
     }
 
     // Этап 05: ограда как граф. Узел — один столб, ребро — одно заполнение
@@ -276,6 +294,7 @@ namespace KingdomSurvival.MapLab
         // Этап 05: граф оград, реквизит, площадка у колодца (x, z, радиус).
         public MapLabFenceGraph FenceGraph;
         public readonly List<MapLabProp> Props = new List<MapLabProp>();
+        public readonly List<MapLabServiceBuilding> ServiceBuildings = new List<MapLabServiceBuilding>();
         public Vector3 Plaza;
         // 12У-E: площадки всех деревень (первая совпадает с Plaza).
         public readonly List<Vector3> Plazas = new List<Vector3>();

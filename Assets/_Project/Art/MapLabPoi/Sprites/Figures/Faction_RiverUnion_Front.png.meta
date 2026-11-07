@@ -1,0 +1,455 @@
+fileFormatVersion: 2
+guid: ff56fcdb868396a4ab5ffe97db70d4a5
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6159258590404185509
+    second: Faction_RiverUnion_Front_0
+  - first:
+      213: -3483634595720849502
+    second: Faction_RiverUnion_Front_1
+  - first:
+      213: 627301437080763120
+    second: Faction_RiverUnion_Front_2
+  - first:
+      213: -286911789432189760
+    second: Faction_RiverUnion_Front_3
+  - first:
+      213: -8449090575773796854
+    second: Faction_RiverUnion_Front_4
+  - first:
+      213: -8741402602316851429
+    second: Faction_RiverUnion_Front_5
+  - first:
+      213: -2218844858121797525
+    second: Faction_RiverUnion_Front_6
+  - first:
+      213: 2989784337175341372
+    second: Faction_RiverUnion_Front_7
+  - first:
+      213: -1684173610704179640
+    second: Faction_RiverUnion_Front_8
+  - first:
+      213: -6253657442145205567
+    second: Faction_RiverUnion_Front_9
+  - first:
+      213: 1370209643642021753
+    second: Faction_RiverUnion_Front_10
+  - first:
+      213: 8704155264827840111
+    second: Faction_RiverUnion_Front_11
+  - first:
+      213: -6553346947557585543
+    second: Faction_RiverUnion_Front_12
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Faction_RiverUnion_Front_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1004
+        width: 234
+        height: 250
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b527f27f1fae58aa0800000000000000
+      internalID: -6159258590404185509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_RiverUnion_Front_1
+      rect:
+        serializedVersion: 2
+        x: 473
+        y: 1237
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a71cc2dac4a7afc0800000000000000
+      internalID: -3483634595720849502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_RiverUnion_Front_2
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 0
+        width: 1217
+        height: 1227
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0fa7a4c555f94b800800000000000000
+      internalID: 627301437080763120
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_RiverUnion_Front_3
+      rect:
+        serializedVersion: 2
+        x: 884
+        y: 1165
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ccc5056f3fa40cf0800000000000000
+      internalID: -286911789432189760
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_RiverUnion_Front_4
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 955
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a06f6e3f2ecceba80800000000000000
+      internalID: -8449090575773796854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_RiverUnion_Front_5
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 875
+        width: 46
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b179a3aa5ac40b680800000000000000
+      internalID: -8741402602316851429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_RiverUnion_Front_6
+      rect:
+        serializedVersion: 2
+        x: 1099
+        y: 811
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b60c2f38b541531e0800000000000000
+      internalID: -2218844858121797525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_RiverUnion_Front_7
+      rect:
+        serializedVersion: 2
+        x: 1131
+        y: 802
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c39ec5c9309dd7920800000000000000
+      internalID: 2989784337175341372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_RiverUnion_Front_8
+      rect:
+        serializedVersion: 2
+        x: 1135
+        y: 457
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 84ee3e1360d90a8e0800000000000000
+      internalID: -1684173610704179640
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_RiverUnion_Front_9
+      rect:
+        serializedVersion: 2
+        x: 1141
+        y: 409
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c205fd80bb8639a0800000000000000
+      internalID: -6253657442145205567
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_RiverUnion_Front_10
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 341
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 977e8154966f30310800000000000000
+      internalID: 1370209643642021753
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_RiverUnion_Front_11
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 310
+        width: 5
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f66d8e5c81f5bc870800000000000000
+      internalID: 8704155264827840111
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_RiverUnion_Front_12
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 200
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97d80fc1ca5dd05a0800000000000000
+      internalID: -6553346947557585543
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Faction_RiverUnion_Front_0: -6159258590404185509
+      Faction_RiverUnion_Front_1: -3483634595720849502
+      Faction_RiverUnion_Front_10: 1370209643642021753
+      Faction_RiverUnion_Front_11: 8704155264827840111
+      Faction_RiverUnion_Front_12: -6553346947557585543
+      Faction_RiverUnion_Front_2: 627301437080763120
+      Faction_RiverUnion_Front_3: -286911789432189760
+      Faction_RiverUnion_Front_4: -8449090575773796854
+      Faction_RiverUnion_Front_5: -8741402602316851429
+      Faction_RiverUnion_Front_6: -2218844858121797525
+      Faction_RiverUnion_Front_7: 2989784337175341372
+      Faction_RiverUnion_Front_8: -1684173610704179640
+      Faction_RiverUnion_Front_9: -6253657442145205567
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -57,6 +57,9 @@ namespace KingdomSurvival.MapLab
             // 12У-D: планировочное семейство из плана (along-road, crossing,
             // craft, scattered); пусто — прежняя сборка.
             public string Family = string.Empty;
+            // 12У-G: услуги поселения по порядку (tavern, merchant, board,
+            // healer, elder) — ближайшие к площади дворы получают их здания.
+            public readonly List<string> Services = new List<string>();
         }
 
         public sealed class Zone

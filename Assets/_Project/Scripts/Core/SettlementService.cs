@@ -20,6 +20,7 @@ public static class SettlementService
         data.Instances ??= new List<SettlementInstanceData>();
         data.Errands ??= new List<ErrandStateData>();
         data.IssuedUniqueItemIds ??= new List<string>();
+        data.StoryBindings ??= new List<StoryRoleBindingData>();
         data.LodgingServedIds ??= new List<string>();
         data.LodgingLocationId ??= string.Empty;
         data.LodgingName ??= string.Empty;

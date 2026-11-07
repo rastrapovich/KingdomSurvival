@@ -1,0 +1,611 @@
+fileFormatVersion: 2
+guid: dc342f99b36ced349815c187b1b4f169
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3334086578528825723
+    second: Patrol_Front_Right_0
+  - first:
+      213: 2724806861183503334
+    second: Patrol_Front_Right_1
+  - first:
+      213: 212083512663847524
+    second: Patrol_Front_Right_2
+  - first:
+      213: 7541983568071727485
+    second: Patrol_Front_Right_3
+  - first:
+      213: 5040357528512062031
+    second: Patrol_Front_Right_4
+  - first:
+      213: -7036247577478851712
+    second: Patrol_Front_Right_5
+  - first:
+      213: 2616628833977027666
+    second: Patrol_Front_Right_6
+  - first:
+      213: -1235191124217656260
+    second: Patrol_Front_Right_7
+  - first:
+      213: 4618861500869988008
+    second: Patrol_Front_Right_8
+  - first:
+      213: 6785907077898248199
+    second: Patrol_Front_Right_9
+  - first:
+      213: -5011006107206309410
+    second: Patrol_Front_Right_10
+  - first:
+      213: -3377160794499627115
+    second: Patrol_Front_Right_11
+  - first:
+      213: -2002757921504385584
+    second: Patrol_Front_Right_12
+  - first:
+      213: -749401776108616998
+    second: Patrol_Front_Right_13
+  - first:
+      213: -7301226516251437042
+    second: Patrol_Front_Right_14
+  - first:
+      213: 6942416912095925416
+    second: Patrol_Front_Right_15
+  - first:
+      213: -2193707556894004532
+    second: Patrol_Front_Right_16
+  - first:
+      213: 2238932774376585598
+    second: Patrol_Front_Right_17
+  - first:
+      213: 7466676657932333269
+    second: Patrol_Front_Right_18
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Patrol_Front_Right_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 124
+        width: 335
+        height: 1094
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58e446cebe1fab1d0800000000000000
+      internalID: -3334086578528825723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_1
+      rect:
+        serializedVersion: 2
+        x: 275
+        y: 17
+        width: 956
+        height: 1194
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ebc362576570d520800000000000000
+      internalID: 2724806861183503334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_2
+      rect:
+        serializedVersion: 2
+        x: 534
+        y: 1187
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 462bb03c4d871f200800000000000000
+      internalID: 212083512663847524
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_3
+      rect:
+        serializedVersion: 2
+        x: 595
+        y: 1193
+        width: 126
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d799fb498128aa860800000000000000
+      internalID: 7541983568071727485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_4
+      rect:
+        serializedVersion: 2
+        x: 653
+        y: 1177
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f426deb9772f2f540800000000000000
+      internalID: 5040357528512062031
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_5
+      rect:
+        serializedVersion: 2
+        x: 281
+        y: 1078
+        width: 28
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0839ba0ab1a3a5e90800000000000000
+      internalID: -7036247577478851712
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_6
+      rect:
+        serializedVersion: 2
+        x: 922
+        y: 931
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25cce3e9f02205420800000000000000
+      internalID: 2616628833977027666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_7
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 937
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3c8a438738bbdee0800000000000000
+      internalID: -1235191124217656260
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_8
+      rect:
+        serializedVersion: 2
+        x: 920
+        y: 913
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ae4512301e791040800000000000000
+      internalID: 4618861500869988008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_9
+      rect:
+        serializedVersion: 2
+        x: 920
+        y: 891
+        width: 10
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7002fe8b8826c2e50800000000000000
+      internalID: 6785907077898248199
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_10
+      rect:
+        serializedVersion: 2
+        x: 922
+        y: 905
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed9a7a4be74557ab0800000000000000
+      internalID: -5011006107206309410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_11
+      rect:
+        serializedVersion: 2
+        x: 914
+        y: 881
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 597497e762ae121d0800000000000000
+      internalID: -3377160794499627115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_12
+      rect:
+        serializedVersion: 2
+        x: 1011
+        y: 784
+        width: 13
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d5a1ad0846c434e0800000000000000
+      internalID: -2002757921504385584
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_13
+      rect:
+        serializedVersion: 2
+        x: 922
+        y: 401
+        width: 12
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad2cffc1e079995f0800000000000000
+      internalID: -749401776108616998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_14
+      rect:
+        serializedVersion: 2
+        x: 954
+        y: 296
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e089b22ca25dcaa90800000000000000
+      internalID: -7301226516251437042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_15
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 280
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a45428266b685060800000000000000
+      internalID: 6942416912095925416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_16
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 216
+        width: 9
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cca2e3a89926e81e0800000000000000
+      internalID: -2193707556894004532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_17
+      rect:
+        serializedVersion: 2
+        x: 327
+        y: 231
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7932b4fe79421f10800000000000000
+      internalID: 2238932774376585598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Patrol_Front_Right_18
+      rect:
+        serializedVersion: 2
+        x: 332
+        y: 229
+        width: 21
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d0f1c83cd6fe9760800000000000000
+      internalID: 7466676657932333269
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Patrol_Front_Right_0: -3334086578528825723
+      Patrol_Front_Right_1: 2724806861183503334
+      Patrol_Front_Right_10: -5011006107206309410
+      Patrol_Front_Right_11: -3377160794499627115
+      Patrol_Front_Right_12: -2002757921504385584
+      Patrol_Front_Right_13: -749401776108616998
+      Patrol_Front_Right_14: -7301226516251437042
+      Patrol_Front_Right_15: 6942416912095925416
+      Patrol_Front_Right_16: -2193707556894004532
+      Patrol_Front_Right_17: 2238932774376585598
+      Patrol_Front_Right_18: 7466676657932333269
+      Patrol_Front_Right_2: 212083512663847524
+      Patrol_Front_Right_3: 7541983568071727485
+      Patrol_Front_Right_4: 5040357528512062031
+      Patrol_Front_Right_5: -7036247577478851712
+      Patrol_Front_Right_6: 2616628833977027666
+      Patrol_Front_Right_7: -1235191124217656260
+      Patrol_Front_Right_8: 4618861500869988008
+      Patrol_Front_Right_9: 6785907077898248199
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -39,11 +39,45 @@ namespace KingdomSurvival.FreePlay
             state?.Narrative != null &&
             (state.Narrative.HasKnowledge(ItemCatalog.OldBedCacheKnowledge) || Has(state, ItemCatalog.OldBedCacheStageFlag));
 
+        // 12У-D, бриф распределения историй: роль «тайник» закрепляется за
+        // местом карты один раз на партию — у реки (старое русло), на
+        // проверенном пути от торгового села, в стороне от деревень. Пока
+        // привязки нет (авторский мир, старое сохранение) — прежний способ.
+        public static readonly StoryRoleSpec CacheRole = new StoryRoleSpec
+        {
+            StoryId = "freeplay.cache",
+            RoleId = "cache",
+            MinHexesFromVillages = 2,
+            MinTravelHours = 2.0,
+            MaxTravelHours = 14.0,
+            TargetTravelHours = 6.0,
+            PreferRiverbank = true,
+            Terrains = new List<WorldMapGameplayTerrainType>
+            {
+                WorldMapGameplayTerrainType.OpenGround, WorldMapGameplayTerrainType.Forest,
+                WorldMapGameplayTerrainType.Field, WorldMapGameplayTerrainType.Swamp, WorldMapGameplayTerrainType.Trail
+            }
+        };
+
+        // Привязать роль сразу, как только известно торговое село: место не
+        // зависит от того, когда игрок услышит о тайнике.
+        public static StoryRoleBindingData BindCache(GameState state)
+        {
+            StoryRoleBindingData existing = WorldMapStoryBinder.Find(state, CacheRole.StoryId, CacheRole.RoleId);
+            if (existing != null || state == null || !state.HasGeneratedMap)
+                return existing;
+            LocationData post = FindTradingPost(state);
+            if (post == null)
+                return null;
+            return WorldMapStoryBinder.Bind(state, CacheRole, post.MapXPercent, post.MapYPercent);
+        }
+
         public static List<string> Refresh(GameState state)
         {
             List<string> reports = new List<string>();
             if (state?.Narrative == null)
                 return reports;
+            BindCache(state);
 
             // Узнали о тайнике — место появляется в мире (скрытым) один раз.
             if (Knows(state))
@@ -134,13 +168,20 @@ namespace KingdomSurvival.FreePlay
             LocationData post = FindTradingPost(state);
             float fromX = post != null ? post.MapXPercent : WorldMapNavigation.CapitalXPercent;
             float fromY = post != null ? post.MapYPercent : WorldMapNavigation.CapitalYPercent;
+            StoryRoleBindingData binding = BindCache(state);
 
             // Направление — устойчиво по seed партии, четыре попытки.
             uint hash = SettlementService.StableHash(state.WorldSeed + ":" + LocationId);
             float[,] directions = { { 7f, 1.5f }, { -7f, 1.5f }, { 1.5f, 7f }, { 1.5f, -7f } };
             float finalX = fromX;
             float finalY = fromY;
-            for (int attempt = 0; attempt < 4; attempt++)
+            bool bound = binding != null && binding.Bound;
+            if (bound)
+            {
+                finalX = binding.XPercent;
+                finalY = binding.YPercent;
+            }
+            for (int attempt = 0; !bound && attempt < 4; attempt++)
             {
                 int d = (int)((hash + attempt) % 4);
                 float candidateX = Clamp(fromX + directions[d, 0]);

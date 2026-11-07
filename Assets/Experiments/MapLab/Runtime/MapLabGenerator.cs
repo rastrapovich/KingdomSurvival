@@ -908,6 +908,13 @@ namespace KingdomSurvival.MapLab
                 }
                 MapLabRandom rng = MapLabRandom.ForStream(Seed, "fields", MapLabData.AlgorithmVersion);
                 float spacing = 30f;
+                // 12У-E (мастер-бриф §9.14–9.25): у деревень плана — группы
+                // направленных полос от выездов и дорог с луговыми промежутками.
+                if (composition.FromPlan)
+                {
+                    BuildFieldGroups(rng);
+                    return;
+                }
                 // 12У-E: участки вокруг каждого поселения; первое — как прежде (тот же
                 // расход случайности), у следующих — без повторных участков в общей зоне.
                 foreach (MapLabComposition.Settlement st in composition.Settlements)
@@ -961,6 +968,128 @@ namespace KingdomSurvival.MapLab
                 }
             }
 
+            // Группы полей (§9.17–9.19): якоря — точки дорог на выезде из деревни
+            // (ленты вдоль дороги или полосы поперёк, «от задних дворов») и
+            // свободные стороны; группа — вытянутое пятно из узких участков
+            // общего направления (разной длины и ширины); вокруг — луговые
+            // участки, которые обрывают группу и оставляют просветы.
+            private void BuildFieldGroups(MapLabRandom rng)
+            {
+                MapLabRoadSettings roads = settings.RoadsAndFields;
+                List<(Vector2 Center, Vector2 Axis, Vector2 Half)> groups = new List<(Vector2, Vector2, Vector2)>();
+                foreach (MapLabComposition.Settlement st in composition.Settlements)
+                {
+                    int size = Mathf.Clamp(st.Size, 1, 3);
+                    int min = size == 1 ? 2 : size == 2 ? 3 : 4, max = size == 1 ? 4 : size == 2 ? 5 : 7;
+                    int want = Mathf.RoundToInt(Mathf.Lerp(min, max, roads.FieldDensity * rng.Range(0.7f, 1.1f)));
+                    float ring = st.Radius * rng.Range(1.0f, 1.25f);
+                    List<(Vector2 P, Vector2 T)> anchors = new List<(Vector2, Vector2)>();
+                    foreach (MapLabPolyline road in data.Roads)
+                    {
+                        if (road.Points.Count < 2 || road.Widening)
+                            continue;
+                        List<Vector2> pts = MapLabGeometry.Resample(road.Points, 4f);
+                        for (int i = 1; i < pts.Count - 1; i++)
+                        {
+                            float d = Vector2.Distance(pts[i], st.Center);
+                            if (d > ring && d < ring + 6f)
+                                anchors.Add((pts[i], (pts[i + 1] - pts[i - 1]).normalized));
+                        }
+                    }
+                    // Свободные стороны: «задние дворы» — радиально от центра.
+                    for (int k = 0; k < 6; k++)
+                    {
+                        float a = rng.Range(0f, Mathf.PI * 2f);
+                        Vector2 dir = new Vector2(Mathf.Cos(a), Mathf.Sin(a));
+                        anchors.Add((st.Center + dir * ring, new Vector2(-dir.y, dir.x)));
+                    }
+                    List<Vector2> usedDirections = new List<Vector2>();
+                    int placed = 0;
+                    for (int attempt = 0; attempt < anchors.Count * 2 && placed < want; attempt++)
+                    {
+                        (Vector2 p, Vector2 t) = anchors[rng.Range(0, anchors.Count)];
+                        Vector2 radial = (p - st.Center).normalized;
+                        bool spread = false;
+                        foreach (Vector2 u in usedDirections)
+                            spread |= Vector2.Dot(u, radial) > 0.64f;
+                        if (spread)
+                            continue;
+                        // Лента вдоль дороги или полосы поперёк (от дворов).
+                        bool along = rng.Chance(0.5f);
+                        Vector2 axis = along ? t : radial;
+                        float length = rng.Range(26f, 58f) * Mathf.Lerp(0.8f, 1.15f, size / 3f);
+                        float width = rng.Range(14f, 28f);
+                        Vector2 side = Vector2.Dot(new Vector2(-t.y, t.x), radial) >= 0f ? new Vector2(-t.y, t.x) : new Vector2(t.y, -t.x);
+                        Vector2 center = along ? p + side * (width * 0.5f + 4f) : p + radial * (length * 0.5f + 2f);
+                        if (!data.Contains(center.x, center.y) || composition.SamplePlan(composition.PlanForest, center) > 0.5f)
+                            continue;
+                        Vector2 half = along ? new Vector2(length * 0.5f, width * 0.5f) : new Vector2(width * 0.5f, length * 0.5f);
+                        Vector2 groupAxis = along ? axis : new Vector2(-radial.y, radial.x);
+                        groups.Add((center, groupAxis, half));
+                        usedDirections.Add(radial);
+                        placed++;
+                        // Участки группы: узкие полосы поперёк оси группы, разной ширины;
+                        // борозды — вдоль полос (общее направление группы).
+                        Vector2 u1 = groupAxis, v1 = new Vector2(-u1.y, u1.x);
+                        float furrow = Mathf.Atan2(v1.y, v1.x) + rng.Signed() * 0.08f;
+                        float x = -half.x;
+                        while (x < half.x)
+                        {
+                            float strip = rng.Range(6f, 12f);
+                            float rows = Mathf.Max(1f, Mathf.Round(half.y * 2f / rng.Range(16f, 26f)));
+                            for (int r = 0; r < rows; r++)
+                            {
+                                float y = -half.y + (r + 0.5f) * half.y * 2f / rows;
+                                Vector2 site = center + u1 * (x + strip * 0.5f) + v1 * (y + rng.Signed() * 1.5f);
+                                if (!data.Contains(site.x, site.y))
+                                    continue;
+                                data.FieldBlocks.Add(new MapLabFieldBlock
+                                {
+                                    Site = site,
+                                    ToneSeed = (int)rng.NextUInt(),
+                                    Angle = furrow + rng.Signed() * 0.05f,
+                                    // Редкий участок в группе — зелень (пар, луг).
+                                    Cultivated = rng.Chance(0.88f),
+                                });
+                            }
+                            x += strip;
+                        }
+                    }
+                }
+                // Луговые участки вокруг групп обрывают ячейки и оставляют просветы.
+                foreach (MapLabComposition.Settlement st in composition.Settlements)
+                {
+                    float outer = (st.FieldRadius > 0f ? st.FieldRadius : roads.FieldRadius) * 1.5f;
+                    for (float gz = st.Center.y - outer; gz <= st.Center.y + outer; gz += 18f)
+                    {
+                        for (float gx = st.Center.x - outer; gx <= st.Center.x + outer; gx += 18f)
+                        {
+                            Vector2 site = new Vector2(gx + rng.Signed() * 5f, gz + rng.Signed() * 5f);
+                            if (!data.Contains(site.x, site.y))
+                                continue;
+                            bool inside = false;
+                            foreach ((Vector2 c, Vector2 axis, Vector2 h) in groups)
+                            {
+                                Vector2 q = site - c;
+                                float a = Vector2.Dot(q, axis), b = Vector2.Dot(q, new Vector2(-axis.y, axis.x));
+                                inside |= Mathf.Abs(a) < h.x + 7f && Mathf.Abs(b) < h.y + 7f;
+                            }
+                            if (!inside)
+                                data.FieldBlocks.Add(new MapLabFieldBlock { Site = site, ToneSeed = (int)rng.NextUInt(), Angle = 0f, Cultivated = false });
+                        }
+                    }
+                }
+                data.Fields = new MapLabFields(data.FieldBlocks, roads.FieldStripWidth, Seed);
+                MapLabNoise fieldEdge = Noise("field-edge");
+                for (int z = 0; z < n; z++)
+                for (int x = 0; x < n; x++)
+                {
+                    Vector2 p = World(x, z);
+                    int i = data.Index(x, z);
+                    data.Field[i] = FieldAllowed(p, i, fieldEdge) ? 1f : 0f;
+                }
+            }
+
             private bool FieldAllowed(Vector2 p, int index, MapLabNoise edge)
             {
                 MapLabRoadSettings roads = settings.RoadsAndFields;
@@ -982,8 +1111,10 @@ namespace KingdomSurvival.MapLab
                 float wobble = 1f + 0.3f * edge.Fbm(p.x / 22f, p.y / 22f, 2);
                 float fieldRadius = near.FieldRadius > 0f ? near.FieldRadius : roads.FieldRadius;
                 // Поля плана лежат вплотную к деревне: от дворов их отделяет маска застройки.
-                float inner = planField ? 0.3f : 0.8f;
-                if (d < near.Radius * inner * wobble || d > fieldRadius * (0.85f + 0.3f * wobble))
+                // 12У-E: группы полос — от края дворов до дальнего края группы.
+                float inner = composition.FromPlan ? 0.75f : planField ? 0.3f : 0.8f;
+                float outerBound = composition.FromPlan ? fieldRadius * 1.6f : fieldRadius * (0.85f + 0.3f * wobble);
+                if (d < near.Radius * inner * wobble || d > outerBound)
                     return false;
                 if (data.SlopeDegrees[index] > roads.FieldMaxSlope)
                     return false;

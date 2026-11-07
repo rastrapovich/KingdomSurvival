@@ -81,6 +81,13 @@ public partial class PrototypeUIController
             // Канон v1.58 §9.9: полотно сгенерированной карты партии.
             worldMapCanvasWidth = gameState.GeneratedMap.CanvasWidth;
             worldMapCanvasHeight = gameState.GeneratedMap.CanvasHeight;
+            // 12У-F: рисунок MapLab снят под наклоном — глубина сжата на
+            // sin(наклона); проценты значков и рисунка совпадают.
+            worldMapMapLab = KingdomSurvival.MapLabBridge.MapLabGameMap.Get(gameState.GeneratedMap);
+            if (worldMapMapLab != null && string.IsNullOrEmpty(worldMapMapLab.Error) && worldMapMapLab.Tiles.Count > 0)
+                worldMapCanvasHeight *= worldMapMapLab.HeightScale;
+            else
+                worldMapMapLab = null;
         }
         else
         {
@@ -199,6 +206,10 @@ public partial class PrototypeUIController
         worldMapMaxZoom = Mathf.Max(
             worldMapMinZoom,
             targetVisibleCellPx / baseCellSizePx);
+        // 12У-F: рисунок MapLab — снимок конечной плотности: ближе, чем два
+        // экранных пикселя на тексель, он расплывается.
+        if (worldMapMapLab != null && worldMapCanvasWidth > 0f)
+            worldMapMaxZoom = Mathf.Max(worldMapMinZoom, Mathf.Min(worldMapMaxZoom, worldMapMapLab.PixelWidth / worldMapCanvasWidth * 2f));
     }
 
     // WM-14: центрируем по РЕАЛЬНОМУ размеру канваса (canvasWidth/Height), а

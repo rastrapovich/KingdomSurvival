@@ -1,0 +1,3991 @@
+fileFormatVersion: 2
+guid: 0243c90ae3f0fb6489ef7ad7ebb5ca7b
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4761667104137917780
+    second: Caravan_Front_Left_0
+  - first:
+      213: 8249407854792475206
+    second: Caravan_Front_Left_1
+  - first:
+      213: 1282669953079570186
+    second: Caravan_Front_Left_2
+  - first:
+      213: 6332527879894013044
+    second: Caravan_Front_Left_3
+  - first:
+      213: -2215406581702310018
+    second: Caravan_Front_Left_4
+  - first:
+      213: 3587210499141639565
+    second: Caravan_Front_Left_5
+  - first:
+      213: -8403952422087745821
+    second: Caravan_Front_Left_6
+  - first:
+      213: 8132923465627538243
+    second: Caravan_Front_Left_7
+  - first:
+      213: -1127910154387143373
+    second: Caravan_Front_Left_8
+  - first:
+      213: -8059761276578029165
+    second: Caravan_Front_Left_9
+  - first:
+      213: -8347185260196400148
+    second: Caravan_Front_Left_10
+  - first:
+      213: 7288572095458176805
+    second: Caravan_Front_Left_11
+  - first:
+      213: 8449115238592777686
+    second: Caravan_Front_Left_12
+  - first:
+      213: 3770694531828699516
+    second: Caravan_Front_Left_13
+  - first:
+      213: 3107590649534077120
+    second: Caravan_Front_Left_14
+  - first:
+      213: 7935794468359987324
+    second: Caravan_Front_Left_15
+  - first:
+      213: 493810206378657879
+    second: Caravan_Front_Left_16
+  - first:
+      213: 5167976709357695930
+    second: Caravan_Front_Left_17
+  - first:
+      213: 7546638467551511950
+    second: Caravan_Front_Left_18
+  - first:
+      213: -2566657168374914947
+    second: Caravan_Front_Left_19
+  - first:
+      213: -4339155601665065728
+    second: Caravan_Front_Left_20
+  - first:
+      213: 524703621107576480
+    second: Caravan_Front_Left_21
+  - first:
+      213: 4192321419772201412
+    second: Caravan_Front_Left_22
+  - first:
+      213: -2580919732565825608
+    second: Caravan_Front_Left_23
+  - first:
+      213: -4673647622841349827
+    second: Caravan_Front_Left_24
+  - first:
+      213: 5268980785926116872
+    second: Caravan_Front_Left_25
+  - first:
+      213: -633908012701631023
+    second: Caravan_Front_Left_26
+  - first:
+      213: 6477043534989884569
+    second: Caravan_Front_Left_27
+  - first:
+      213: 5339438779209779438
+    second: Caravan_Front_Left_28
+  - first:
+      213: -1242239491801597592
+    second: Caravan_Front_Left_29
+  - first:
+      213: -4701434812110334092
+    second: Caravan_Front_Left_30
+  - first:
+      213: -6581400209290223867
+    second: Caravan_Front_Left_31
+  - first:
+      213: 1458943576383634217
+    second: Caravan_Front_Left_32
+  - first:
+      213: 8294632311030440219
+    second: Caravan_Front_Left_33
+  - first:
+      213: 5556798646320569975
+    second: Caravan_Front_Left_34
+  - first:
+      213: -2076617058846109211
+    second: Caravan_Front_Left_35
+  - first:
+      213: 8859758890129851603
+    second: Caravan_Front_Left_36
+  - first:
+      213: 8351932958966441903
+    second: Caravan_Front_Left_37
+  - first:
+      213: -4894770680600826527
+    second: Caravan_Front_Left_38
+  - first:
+      213: -372275105933105941
+    second: Caravan_Front_Left_39
+  - first:
+      213: 1441182301044986080
+    second: Caravan_Front_Left_40
+  - first:
+      213: -8803623426154651841
+    second: Caravan_Front_Left_41
+  - first:
+      213: -6503836419696867758
+    second: Caravan_Front_Left_42
+  - first:
+      213: 1304138251419406933
+    second: Caravan_Front_Left_43
+  - first:
+      213: -6864036398520133632
+    second: Caravan_Front_Left_44
+  - first:
+      213: 3308472339342066096
+    second: Caravan_Front_Left_45
+  - first:
+      213: -3410660124098897219
+    second: Caravan_Front_Left_46
+  - first:
+      213: -7157142712880374517
+    second: Caravan_Front_Left_47
+  - first:
+      213: 4810515402000959453
+    second: Caravan_Front_Left_48
+  - first:
+      213: -8616969543470489526
+    second: Caravan_Front_Left_49
+  - first:
+      213: -5269900205330818181
+    second: Caravan_Front_Left_50
+  - first:
+      213: -4313659024905750495
+    second: Caravan_Front_Left_51
+  - first:
+      213: 4984680523000230439
+    second: Caravan_Front_Left_52
+  - first:
+      213: -3363715757439235708
+    second: Caravan_Front_Left_53
+  - first:
+      213: 5020014074052377627
+    second: Caravan_Front_Left_54
+  - first:
+      213: -6196397763112314906
+    second: Caravan_Front_Left_55
+  - first:
+      213: 4537510715972265270
+    second: Caravan_Front_Left_56
+  - first:
+      213: 6763254876562902296
+    second: Caravan_Front_Left_57
+  - first:
+      213: -1731525345577243271
+    second: Caravan_Front_Left_58
+  - first:
+      213: 2550710981485194972
+    second: Caravan_Front_Left_59
+  - first:
+      213: -8840960874471076302
+    second: Caravan_Front_Left_60
+  - first:
+      213: -5752517426443923111
+    second: Caravan_Front_Left_61
+  - first:
+      213: 1907693195000884802
+    second: Caravan_Front_Left_62
+  - first:
+      213: 5929762676318027084
+    second: Caravan_Front_Left_63
+  - first:
+      213: 5187618465082199437
+    second: Caravan_Front_Left_64
+  - first:
+      213: -6348084697010471071
+    second: Caravan_Front_Left_65
+  - first:
+      213: -6871342987495032243
+    second: Caravan_Front_Left_66
+  - first:
+      213: 818332263375218197
+    second: Caravan_Front_Left_67
+  - first:
+      213: -5031881322786892036
+    second: Caravan_Front_Left_68
+  - first:
+      213: 1875152568830043893
+    second: Caravan_Front_Left_69
+  - first:
+      213: 1526933544721241706
+    second: Caravan_Front_Left_70
+  - first:
+      213: -8756278789924481323
+    second: Caravan_Front_Left_71
+  - first:
+      213: -7553187418360914258
+    second: Caravan_Front_Left_72
+  - first:
+      213: -1969757841317125004
+    second: Caravan_Front_Left_73
+  - first:
+      213: 8377057226368882699
+    second: Caravan_Front_Left_74
+  - first:
+      213: 6247488722473777010
+    second: Caravan_Front_Left_75
+  - first:
+      213: 1384839469403973130
+    second: Caravan_Front_Left_76
+  - first:
+      213: -259608004407605301
+    second: Caravan_Front_Left_77
+  - first:
+      213: 7028564523490812033
+    second: Caravan_Front_Left_78
+  - first:
+      213: 3537715095842464481
+    second: Caravan_Front_Left_79
+  - first:
+      213: 6392330705489710018
+    second: Caravan_Front_Left_80
+  - first:
+      213: 9017223720855177763
+    second: Caravan_Front_Left_81
+  - first:
+      213: 2382026895963699712
+    second: Caravan_Front_Left_82
+  - first:
+      213: 64926048420170561
+    second: Caravan_Front_Left_83
+  - first:
+      213: 1656417243398069643
+    second: Caravan_Front_Left_84
+  - first:
+      213: -8805706046568301033
+    second: Caravan_Front_Left_85
+  - first:
+      213: 227900709432133857
+    second: Caravan_Front_Left_86
+  - first:
+      213: 3537485347746802705
+    second: Caravan_Front_Left_87
+  - first:
+      213: -5355257482030105361
+    second: Caravan_Front_Left_88
+  - first:
+      213: 2911231257777261951
+    second: Caravan_Front_Left_89
+  - first:
+      213: 1168451072453430867
+    second: Caravan_Front_Left_90
+  - first:
+      213: 5475725927654196482
+    second: Caravan_Front_Left_91
+  - first:
+      213: -7047249672980840032
+    second: Caravan_Front_Left_92
+  - first:
+      213: 319204211691238999
+    second: Caravan_Front_Left_93
+  - first:
+      213: -6330013062887702482
+    second: Caravan_Front_Left_94
+  - first:
+      213: -8024431412510237086
+    second: Caravan_Front_Left_95
+  - first:
+      213: -7017198151508792881
+    second: Caravan_Front_Left_96
+  - first:
+      213: 1951569895181632536
+    second: Caravan_Front_Left_97
+  - first:
+      213: -6122216296276216836
+    second: Caravan_Front_Left_98
+  - first:
+      213: 2285122599221888964
+    second: Caravan_Front_Left_99
+  - first:
+      213: 6030746530552261876
+    second: Caravan_Front_Left_100
+  - first:
+      213: 3151893465076640432
+    second: Caravan_Front_Left_101
+  - first:
+      213: -8388366627309955130
+    second: Caravan_Front_Left_102
+  - first:
+      213: -4400743077201121937
+    second: Caravan_Front_Left_103
+  - first:
+      213: -6044573049430454018
+    second: Caravan_Front_Left_104
+  - first:
+      213: -402336328733645702
+    second: Caravan_Front_Left_105
+  - first:
+      213: 4327897309529091741
+    second: Caravan_Front_Left_106
+  - first:
+      213: -7311829458918880048
+    second: Caravan_Front_Left_107
+  - first:
+      213: 8249199461807335965
+    second: Caravan_Front_Left_108
+  - first:
+      213: -2610672924562798946
+    second: Caravan_Front_Left_109
+  - first:
+      213: 6789355482990525228
+    second: Caravan_Front_Left_110
+  - first:
+      213: -415482007512431187
+    second: Caravan_Front_Left_111
+  - first:
+      213: 5684003945234402813
+    second: Caravan_Front_Left_112
+  - first:
+      213: 7604438109788896218
+    second: Caravan_Front_Left_113
+  - first:
+      213: 5928639610687323731
+    second: Caravan_Front_Left_114
+  - first:
+      213: 4363439204272171626
+    second: Caravan_Front_Left_115
+  - first:
+      213: 610475270779065818
+    second: Caravan_Front_Left_116
+  - first:
+      213: -2595276003271120056
+    second: Caravan_Front_Left_117
+  - first:
+      213: 7216848898943998503
+    second: Caravan_Front_Left_118
+  - first:
+      213: -6760926856288845544
+    second: Caravan_Front_Left_119
+  - first:
+      213: 8905600593104680035
+    second: Caravan_Front_Left_120
+  - first:
+      213: 2089871179609376294
+    second: Caravan_Front_Left_121
+  - first:
+      213: -6493605761614523828
+    second: Caravan_Front_Left_122
+  - first:
+      213: -8286252381445104268
+    second: Caravan_Front_Left_123
+  - first:
+      213: 7551500043160597411
+    second: Caravan_Front_Left_124
+  - first:
+      213: 7056449735782972945
+    second: Caravan_Front_Left_125
+  - first:
+      213: 6603329967761921597
+    second: Caravan_Front_Left_126
+  - first:
+      213: -4973635825928219921
+    second: Caravan_Front_Left_127
+  - first:
+      213: -2366550466062795254
+    second: Caravan_Front_Left_128
+  - first:
+      213: 3772466629581793813
+    second: Caravan_Front_Left_129
+  - first:
+      213: 1364722888004440690
+    second: Caravan_Front_Left_130
+  - first:
+      213: -237394336767993548
+    second: Caravan_Front_Left_131
+  - first:
+      213: 7209854585280423544
+    second: Caravan_Front_Left_132
+  - first:
+      213: -5341748853021065894
+    second: Caravan_Front_Left_133
+  - first:
+      213: -7015094459413580345
+    second: Caravan_Front_Left_134
+  - first:
+      213: 3852758637588321902
+    second: Caravan_Front_Left_135
+  - first:
+      213: 209342152381925688
+    second: Caravan_Front_Left_136
+  - first:
+      213: 4199810476307035379
+    second: Caravan_Front_Left_137
+  - first:
+      213: -3585428344267027105
+    second: Caravan_Front_Left_138
+  - first:
+      213: 4867402472917188864
+    second: Caravan_Front_Left_139
+  - first:
+      213: -4774033092691595391
+    second: Caravan_Front_Left_140
+  - first:
+      213: 3048727342907223795
+    second: Caravan_Front_Left_141
+  - first:
+      213: 3028890824232938092
+    second: Caravan_Front_Left_142
+  - first:
+      213: -769055249770383348
+    second: Caravan_Front_Left_143
+  - first:
+      213: -3515897491254687200
+    second: Caravan_Front_Left_144
+  - first:
+      213: 3372066028650991042
+    second: Caravan_Front_Left_145
+  - first:
+      213: 7177858571783514446
+    second: Caravan_Front_Left_146
+  - first:
+      213: 1892160630770961599
+    second: Caravan_Front_Left_147
+  - first:
+      213: -1283207342678560126
+    second: Caravan_Front_Left_148
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Caravan_Front_Left_0
+      rect:
+        serializedVersion: 2
+        x: 848
+        y: 1110
+        width: 65
+        height: 136
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: caa42374ff82bedb0800000000000000
+      internalID: -4761667104137917780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_1
+      rect:
+        serializedVersion: 2
+        x: 963
+        y: 1243
+        width: 15
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64209389cb8cb7270800000000000000
+      internalID: 8249407854792475206
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 811
+        width: 114
+        height: 418
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0fef55c685fcc110800000000000000
+      internalID: 1282669953079570186
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_3
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 1028
+        width: 160
+        height: 178
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 474175b3e88a1e750800000000000000
+      internalID: 6332527879894013044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_4
+      rect:
+        serializedVersion: 2
+        x: 295
+        y: 1111
+        width: 46
+        height: 125
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e774290a37b4141e0800000000000000
+      internalID: -2215406581702310018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_5
+      rect:
+        serializedVersion: 2
+        x: 319
+        y: 1189
+        width: 26
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8d93ef61f458c130800000000000000
+      internalID: 3587210499141639565
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_6
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 1156
+        width: 116
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ee1d245cc92f5b80800000000000000
+      internalID: -8403952422087745821
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_7
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 1148
+        width: 34
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3431b2a4dc2fdd070800000000000000
+      internalID: 8132923465627538243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_8
+      rect:
+        serializedVersion: 2
+        x: 770
+        y: 1181
+        width: 83
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 335c235c0bbd850f0800000000000000
+      internalID: -1127910154387143373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_9
+      rect:
+        serializedVersion: 2
+        x: 914
+        y: 1173
+        width: 38
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3912e1742d9f52090800000000000000
+      internalID: -8059761276578029165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_10
+      rect:
+        serializedVersion: 2
+        x: 989
+        y: 1205
+        width: 19
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce3fd9b2b37d82c80800000000000000
+      internalID: -8347185260196400148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_11
+      rect:
+        serializedVersion: 2
+        x: 1029
+        y: 1016
+        width: 212
+        height: 202
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52feb9d44b5362560800000000000000
+      internalID: 7288572095458176805
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_12
+      rect:
+        serializedVersion: 2
+        x: 557
+        y: 1078
+        width: 153
+        height: 114
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6dd89ae4b89414570800000000000000
+      internalID: 8449115238592777686
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_13
+      rect:
+        serializedVersion: 2
+        x: 731
+        y: 1169
+        width: 14
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c71582ed2b2345430800000000000000
+      internalID: 3770694531828699516
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_14
+      rect:
+        serializedVersion: 2
+        x: 741
+        y: 1136
+        width: 42
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c8ddc42b31602b20800000000000000
+      internalID: 3107590649534077120
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_15
+      rect:
+        serializedVersion: 2
+        x: 744
+        y: 1187
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c706b19f50b912e60800000000000000
+      internalID: 7935794468359987324
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_16
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 1160
+        width: 17
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75889a134cd5ad600800000000000000
+      internalID: 493810206378657879
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_17
+      rect:
+        serializedVersion: 2
+        x: 937
+        y: 1175
+        width: 11
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab3f1c0af6758b740800000000000000
+      internalID: 5167976709357695930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_18
+      rect:
+        serializedVersion: 2
+        x: 961
+        y: 1080
+        width: 77
+        height: 106
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e85c4b2d3bb0bb860800000000000000
+      internalID: 7546638467551511950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_19
+      rect:
+        serializedVersion: 2
+        x: 1032
+        y: 1156
+        width: 16
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d70adc277e6616cd0800000000000000
+      internalID: -2566657168374914947
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_20
+      rect:
+        serializedVersion: 2
+        x: 786
+        y: 1152
+        width: 11
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00d7b9958f838c3c0800000000000000
+      internalID: -4339155601665065728
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_21
+      rect:
+        serializedVersion: 2
+        x: 956
+        y: 1154
+        width: 12
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ae6a74d92f184700800000000000000
+      internalID: 524703621107576480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_22
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 1116
+        width: 46
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c988c19e1e1e2a30800000000000000
+      internalID: 4192321419772201412
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_23
+      rect:
+        serializedVersion: 2
+        x: 938
+        y: 1134
+        width: 14
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b72e927d2bbe2cd0800000000000000
+      internalID: -2580919732565825608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_24
+      rect:
+        serializedVersion: 2
+        x: 954
+        y: 1140
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d394133cf3ed32fb0800000000000000
+      internalID: -4673647622841349827
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_25
+      rect:
+        serializedVersion: 2
+        x: 1041
+        y: 1124
+        width: 11
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8061c79cb1e2f1940800000000000000
+      internalID: 5268980785926116872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_26
+      rect:
+        serializedVersion: 2
+        x: 1051
+        y: 1126
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1dd35a26508e337f0800000000000000
+      internalID: -633908012701631023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_27
+      rect:
+        serializedVersion: 2
+        x: 538
+        y: 1116
+        width: 18
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99cffc937c413e950800000000000000
+      internalID: 6477043534989884569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_28
+      rect:
+        serializedVersion: 2
+        x: 914
+        y: 1104
+        width: 20
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee88eb6b74f791a40800000000000000
+      internalID: 5339438779209779438
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_29
+      rect:
+        serializedVersion: 2
+        x: 930
+        y: 1114
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 869343d83cda2cee0800000000000000
+      internalID: -1242239491801597592
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_30
+      rect:
+        serializedVersion: 2
+        x: 1009
+        y: 1020
+        width: 83
+        height: 104
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 477128992f521ceb0800000000000000
+      internalID: -4701434812110334092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_31
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1229
+        height: 1108
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50f1390216b2aa4a0800000000000000
+      internalID: -6581400209290223867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_32
+      rect:
+        serializedVersion: 2
+        x: 944
+        y: 1086
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 92b3fa1f3753f3410800000000000000
+      internalID: 1458943576383634217
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_33
+      rect:
+        serializedVersion: 2
+        x: 951
+        y: 1088
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b116279d3247c1370800000000000000
+      internalID: 8294632311030440219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_34
+      rect:
+        serializedVersion: 2
+        x: 1087
+        y: 1058
+        width: 33
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 77e1f4a7de6bd1d40800000000000000
+      internalID: 5556798646320569975
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_35
+      rect:
+        serializedVersion: 2
+        x: 1147
+        y: 1083
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e116f099cf5e23e0800000000000000
+      internalID: -2076617058846109211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_36
+      rect:
+        serializedVersion: 2
+        x: 319
+        y: 1068
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d48cc105cf24fa70800000000000000
+      internalID: 8859758890129851603
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_37
+      rect:
+        serializedVersion: 2
+        x: 643
+        y: 1070
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fa7621796c608e370800000000000000
+      internalID: 8351932958966441903
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_38
+      rect:
+        serializedVersion: 2
+        x: 963
+        y: 1056
+        width: 19
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 16d6ac5eff7421cb0800000000000000
+      internalID: -4894770680600826527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_39
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 1052
+        width: 14
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be4e22873c965daf0800000000000000
+      internalID: -372275105933105941
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_40
+      rect:
+        serializedVersion: 2
+        x: 1131
+        y: 1011
+        width: 12
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e0dd56caab100410800000000000000
+      internalID: 1441182301044986080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_41
+      rect:
+        serializedVersion: 2
+        x: 1139
+        y: 1018
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3f9eb3332f33d580800000000000000
+      internalID: -8803623426154651841
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_42
+      rect:
+        serializedVersion: 2
+        x: 1246
+        y: 1025
+        width: 8
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25648be2c3bbdb5a0800000000000000
+      internalID: -6503836419696867758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_43
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 996
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5525add74da391210800000000000000
+      internalID: 1304138251419406933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_44
+      rect:
+        serializedVersion: 2
+        x: 155
+        y: 1003
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0081bd4434b0eb0a0800000000000000
+      internalID: -6864036398520133632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_45
+      rect:
+        serializedVersion: 2
+        x: 1083
+        y: 955
+        width: 37
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b180b7401e0aed20800000000000000
+      internalID: 3308472339342066096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_46
+      rect:
+        serializedVersion: 2
+        x: 1133
+        y: 970
+        width: 96
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dbade7500b6eaa0d0800000000000000
+      internalID: -3410660124098897219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_47
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 943
+        width: 17
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0d5dff6f98bcac90800000000000000
+      internalID: -7157142712880374517
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_48
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 943
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd700da554262c240800000000000000
+      internalID: 4810515402000959453
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_49
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 945
+        width: 21
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a40e419dadf5a6880800000000000000
+      internalID: -8616969543470489526
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_50
+      rect:
+        serializedVersion: 2
+        x: 161
+        y: 944
+        width: 27
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7b9f733fad8dd6b0800000000000000
+      internalID: -5269900205330818181
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_51
+      rect:
+        serializedVersion: 2
+        x: 161
+        y: 931
+        width: 15
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 128b55ab8fdc224c0800000000000000
+      internalID: -4313659024905750495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_52
+      rect:
+        serializedVersion: 2
+        x: 175
+        y: 921
+        width: 11
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 722bc3496842d2540800000000000000
+      internalID: 4984680523000230439
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_53
+      rect:
+        serializedVersion: 2
+        x: 185
+        y: 929
+        width: 19
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4894370275ea151d0800000000000000
+      internalID: -3363715757439235708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_54
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 885
+        width: 36
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1c7a53043caaa540800000000000000
+      internalID: 5020014074052377627
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_55
+      rect:
+        serializedVersion: 2
+        x: 1109
+        y: 746
+        width: 122
+        height: 183
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e75aaa7019f10aa0800000000000000
+      internalID: -6196397763112314906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_56
+      rect:
+        serializedVersion: 2
+        x: 1109
+        y: 895
+        width: 17
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6352e0694f978fe30800000000000000
+      internalID: 4537510715972265270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_57
+      rect:
+        serializedVersion: 2
+        x: 1184
+        y: 891
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81dc5fa1a78ebdd50800000000000000
+      internalID: 6763254876562902296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_58
+      rect:
+        serializedVersion: 2
+        x: 1222
+        y: 901
+        width: 27
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97d68494fd268f7e0800000000000000
+      internalID: -1731525345577243271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_59
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 887
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cdeec189f12f56320800000000000000
+      internalID: 2550710981485194972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_60
+      rect:
+        serializedVersion: 2
+        x: 1133
+        y: 894
+        width: 10
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23e46041de89e4580800000000000000
+      internalID: -8840960874471076302
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_61
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 847
+        width: 24
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 951d098f0e3fa20b0800000000000000
+      internalID: -5752517426443923111
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_62
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 827
+        width: 28
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24e257c7adc797a10800000000000000
+      internalID: 1907693195000884802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_63
+      rect:
+        serializedVersion: 2
+        x: 1083
+        y: 819
+        width: 11
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4d3e44acbfba4250800000000000000
+      internalID: 5929762676318027084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_64
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 812
+        width: 11
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8d4b71428f1ef740800000000000000
+      internalID: 5187618465082199437
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_65
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 809
+        width: 8
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 16ff8960a9217e7a0800000000000000
+      internalID: -6348084697010471071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_66
+      rect:
+        serializedVersion: 2
+        x: 109
+        y: 811
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4abc7475f514a0a0800000000000000
+      internalID: -6871342987495032243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_67
+      rect:
+        serializedVersion: 2
+        x: 115
+        y: 813
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 516a8ba9bdc4b5b00800000000000000
+      internalID: 818332263375218197
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_68
+      rect:
+        serializedVersion: 2
+        x: 1133
+        y: 810
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf65d53d89a2b2ab0800000000000000
+      internalID: -5031881322786892036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_69
+      rect:
+        serializedVersion: 2
+        x: 1147
+        y: 803
+        width: 18
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f6a6cc8351e50a10800000000000000
+      internalID: 1875152568830043893
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_70
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 763
+        width: 44
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a66dcb808f1c03510800000000000000
+      internalID: 1526933544721241706
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_71
+      rect:
+        serializedVersion: 2
+        x: 183
+        y: 765
+        width: 7
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d6934455d27b7680800000000000000
+      internalID: -8756278789924481323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_72
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 593
+        width: 79
+        height: 156
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eaed5aebf00bd2790800000000000000
+      internalID: -7553187418360914258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_73
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 682
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 474a0c6fda30aa4e0800000000000000
+      internalID: -1969757841317125004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_74
+      rect:
+        serializedVersion: 2
+        x: 78
+        y: 600
+        width: 34
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0816d0f929414470800000000000000
+      internalID: 8377057226368882699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_75
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 624
+        width: 30
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 277fe4974e983b650800000000000000
+      internalID: 6247488722473777010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_76
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 673
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a06a3c40920f73310800000000000000
+      internalID: 1384839469403973130
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_77
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 608
+        width: 6
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc7cf6c35efa56cf0800000000000000
+      internalID: -259608004407605301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_78
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 666
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1802597f13a7a8160800000000000000
+      internalID: 7028564523490812033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_79
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 700
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e22a34d22d781130800000000000000
+      internalID: 3537715095842464481
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_80
+      rect:
+        serializedVersion: 2
+        x: 143
+        y: 594
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2cb498b98ee16b850800000000000000
+      internalID: 6392330705489710018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_81
+      rect:
+        serializedVersion: 2
+        x: 175
+        y: 666
+        width: 17
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32a8cc5e23d932d70800000000000000
+      internalID: 9017223720855177763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_82
+      rect:
+        serializedVersion: 2
+        x: 1103
+        y: 631
+        width: 30
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00ab75367d8ae0120800000000000000
+      internalID: 2382026895963699712
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_83
+      rect:
+        serializedVersion: 2
+        x: 1113
+        y: 600
+        width: 22
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14b01c4a5e9a6e000800000000000000
+      internalID: 64926048420170561
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_84
+      rect:
+        serializedVersion: 2
+        x: 1113
+        y: 570
+        width: 15
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8dd290f4b6ccf610800000000000000
+      internalID: 1656417243398069643
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_85
+      rect:
+        serializedVersion: 2
+        x: 1123
+        y: 652
+        width: 62
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71e79c95109dbc580800000000000000
+      internalID: -8805706046568301033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_86
+      rect:
+        serializedVersion: 2
+        x: 1125
+        y: 722
+        width: 16
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e803cddc7aa92300800000000000000
+      internalID: 227900709432133857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_87
+      rect:
+        serializedVersion: 2
+        x: 1131
+        y: 622
+        width: 26
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11ce89e6e2ca71130800000000000000
+      internalID: 3537485347746802705
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_88
+      rect:
+        serializedVersion: 2
+        x: 1156
+        y: 705
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fecb7d681bd4ea5b0800000000000000
+      internalID: -5355257482030105361
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_89
+      rect:
+        serializedVersion: 2
+        x: 1198
+        y: 537
+        width: 56
+        height: 151
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7dc3d29765c66820800000000000000
+      internalID: 2911231257777261951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_90
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 578
+        width: 14
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35ec2074f0c273010800000000000000
+      internalID: 1168451072453430867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_91
+      rect:
+        serializedVersion: 2
+        x: 1226
+        y: 570
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 205893538bfadfb40800000000000000
+      internalID: 5475725927654196482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_92
+      rect:
+        serializedVersion: 2
+        x: 1244
+        y: 574
+        width: 10
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a14d76a2c3233e90800000000000000
+      internalID: -7047249672980840032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_93
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 413
+        width: 94
+        height: 152
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7563aa01a8a0e6400800000000000000
+      internalID: 319204211691238999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_94
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 521
+        width: 19
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e200ffa38a64728a0800000000000000
+      internalID: -6330013062887702482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_95
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 562
+        width: 20
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26e57d4452e73a090800000000000000
+      internalID: -8024431412510237086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_96
+      rect:
+        serializedVersion: 2
+        x: 1059
+        y: 487
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc96accb577ed9e90800000000000000
+      internalID: -7017198151508792881
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_97
+      rect:
+        serializedVersion: 2
+        x: 1115
+        y: 552
+        width: 15
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 814c5a4da7e551b10800000000000000
+      internalID: 1951569895181632536
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_98
+      rect:
+        serializedVersion: 2
+        x: 1131
+        y: 556
+        width: 14
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf3395627b4890ba0800000000000000
+      internalID: -6122216296276216836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_99
+      rect:
+        serializedVersion: 2
+        x: 1236
+        y: 554
+        width: 11
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c786da95e266bf10800000000000000
+      internalID: 2285122599221888964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_100
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 515
+        width: 10
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fcacfb640481b350800000000000000
+      internalID: 6030746530552261876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_101
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 503
+        width: 11
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0baa4c33866cdbb20800000000000000
+      internalID: 3151893465076640432
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_102
+      rect:
+        serializedVersion: 2
+        x: 1109
+        y: 506
+        width: 15
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c7d275fef8869b80800000000000000
+      internalID: -8388366627309955130
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_103
+      rect:
+        serializedVersion: 2
+        x: 1123
+        y: 509
+        width: 46
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6deaa7cc7b6de2c0800000000000000
+      internalID: -4400743077201121937
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_104
+      rect:
+        serializedVersion: 2
+        x: 1123
+        y: 505
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef05cc946dc5d1ca0800000000000000
+      internalID: -6044573049430454018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_105
+      rect:
+        serializedVersion: 2
+        x: 161
+        y: 393
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a74a89d9d3d9a6af0800000000000000
+      internalID: -402336328733645702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_106
+      rect:
+        serializedVersion: 2
+        x: 167
+        y: 393
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9ea9de3ca7cf0c30800000000000000
+      internalID: 4327897309529091741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_107
+      rect:
+        serializedVersion: 2
+        x: 1085
+        y: 407
+        width: 11
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0dc47eac8d9278a90800000000000000
+      internalID: -7311829458918880048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_108
+      rect:
+        serializedVersion: 2
+        x: 1091
+        y: 387
+        width: 20
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1aae52543b0b7270800000000000000
+      internalID: 8249199461807335965
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_109
+      rect:
+        serializedVersion: 2
+        x: 1117
+        y: 465
+        width: 36
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9644ba9ec605cbd0800000000000000
+      internalID: -2610672924562798946
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_110
+      rect:
+        serializedVersion: 2
+        x: 1117
+        y: 402
+        width: 34
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2b308917d2a83e50800000000000000
+      internalID: 6789355482990525228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_111
+      rect:
+        serializedVersion: 2
+        x: 1139
+        y: 455
+        width: 16
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da5c7a3c059eb3af0800000000000000
+      internalID: -415482007512431187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_112
+      rect:
+        serializedVersion: 2
+        x: 1155
+        y: 440
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dfd8d991973a1ee40800000000000000
+      internalID: 5684003945234402813
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_113
+      rect:
+        serializedVersion: 2
+        x: 1157
+        y: 385
+        width: 62
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: adbf86abb24688960800000000000000
+      internalID: 7604438109788896218
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_114
+      rect:
+        serializedVersion: 2
+        x: 163
+        y: 365
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35ef35c8052c64250800000000000000
+      internalID: 5928639610687323731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_115
+      rect:
+        serializedVersion: 2
+        x: 1137
+        y: 174
+        width: 104
+        height: 206
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6ae7a976dc0e8c30800000000000000
+      internalID: 4363439204272171626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_116
+      rect:
+        serializedVersion: 2
+        x: 201
+        y: 311
+        width: 19
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad552fa3608d87800800000000000000
+      internalID: 610475270779065818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_117
+      rect:
+        serializedVersion: 2
+        x: 1125
+        y: 328
+        width: 14
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 84bede2b93abbfbd0800000000000000
+      internalID: -2595276003271120056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_118
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 306
+        width: 32
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72ad93b46d5672460800000000000000
+      internalID: 7216848898943998503
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_119
+      rect:
+        serializedVersion: 2
+        x: 1123
+        y: 304
+        width: 14
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 811418a58dc5c22a0800000000000000
+      internalID: -6760926856288845544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_120
+      rect:
+        serializedVersion: 2
+        x: 1155
+        y: 312
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36433873e8c079b70800000000000000
+      internalID: 8905600593104680035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_121
+      rect:
+        serializedVersion: 2
+        x: 1160
+        y: 304
+        width: 11
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62681f6e3c6b00d10800000000000000
+      internalID: 2089871179609376294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_122
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 242
+        width: 56
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c425983e6f312e5a0800000000000000
+      internalID: -6493605761614523828
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_123
+      rect:
+        serializedVersion: 2
+        x: 1093
+        y: 274
+        width: 35
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47ddabc8c51510d80800000000000000
+      internalID: -8286252381445104268
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_124
+      rect:
+        serializedVersion: 2
+        x: 1131
+        y: 272
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a33fe997415cc860800000000000000
+      internalID: 7551500043160597411
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_125
+      rect:
+        serializedVersion: 2
+        x: 1139
+        y: 255
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11e3eb4e5ab8de160800000000000000
+      internalID: 7056449735782972945
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_126
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 248
+        width: 7
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d361427ae9db3ab50800000000000000
+      internalID: 6603329967761921597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_127
+      rect:
+        serializedVersion: 2
+        x: 1133
+        y: 256
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe2546951981afab0800000000000000
+      internalID: -4973635825928219921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_128
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 184
+        width: 31
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0eba4fb3e2582fd0800000000000000
+      internalID: -2366550466062795254
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_129
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 192
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51aec37896e7a5430800000000000000
+      internalID: 3772466629581793813
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_130
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 192
+        width: 6
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 272995c6c3870f210800000000000000
+      internalID: 1364722888004440690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_131
+      rect:
+        serializedVersion: 2
+        x: 1163
+        y: 198
+        width: 14
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4391145cb1b94bcf0800000000000000
+      internalID: -237394336767993548
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_132
+      rect:
+        serializedVersion: 2
+        x: 671
+        y: 37
+        width: 166
+        height: 131
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8766cddbb8c8e0460800000000000000
+      internalID: 7209854585280423544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_133
+      rect:
+        serializedVersion: 2
+        x: 1131
+        y: 167
+        width: 12
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5d345058bb4ed5b0800000000000000
+      internalID: -5341748853021065894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_134
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 79
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c5b7d8b1c065ae90800000000000000
+      internalID: -7015094459413580345
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_135
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 97
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6615ce619fb77530800000000000000
+      internalID: 3852758637588321902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_136
+      rect:
+        serializedVersion: 2
+        x: 496
+        y: 79
+        width: 18
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8398d35149bb7e200800000000000000
+      internalID: 209342152381925688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_137
+      rect:
+        serializedVersion: 2
+        x: 510
+        y: 91
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f4be3c6069b84a30800000000000000
+      internalID: 4199810476307035379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_138
+      rect:
+        serializedVersion: 2
+        x: 536
+        y: 79
+        width: 16
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5dc854daeffd3ec0800000000000000
+      internalID: -3585428344267027105
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_139
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 37
+        width: 31
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0014611b2cc7c8340800000000000000
+      internalID: 4867402472917188864
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_140
+      rect:
+        serializedVersion: 2
+        x: 667
+        y: 63
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18f6824323a3fbdb0800000000000000
+      internalID: -4774033092691595391
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_141
+      rect:
+        serializedVersion: 2
+        x: 938
+        y: 59
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3fe61039d514f4a20800000000000000
+      internalID: 3048727342907223795
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_142
+      rect:
+        serializedVersion: 2
+        x: 945
+        y: 55
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6a28d92828c80a20800000000000000
+      internalID: 3028890824232938092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_143
+      rect:
+        serializedVersion: 2
+        x: 159
+        y: 37
+        width: 9
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0879c03354c355f0800000000000000
+      internalID: -769055249770383348
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_144
+      rect:
+        serializedVersion: 2
+        x: 506
+        y: 49
+        width: 10
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02ac3171cd5053fc0800000000000000
+      internalID: -3515897491254687200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_145
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 31
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2cd87e4ef2cfbce20800000000000000
+      internalID: 3372066028650991042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_146
+      rect:
+        serializedVersion: 2
+        x: 826
+        y: 26
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4926235750ec9360800000000000000
+      internalID: 7177858571783514446
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_147
+      rect:
+        serializedVersion: 2
+        x: 834
+        y: 15
+        width: 39
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fbc051f811e424a10800000000000000
+      internalID: 1892160630770961599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Caravan_Front_Left_148
+      rect:
+        serializedVersion: 2
+        x: 613
+        y: 0
+        width: 39
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 282b87678b1213ee0800000000000000
+      internalID: -1283207342678560126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Caravan_Front_Left_0: -4761667104137917780
+      Caravan_Front_Left_1: 8249407854792475206
+      Caravan_Front_Left_10: -8347185260196400148
+      Caravan_Front_Left_100: 6030746530552261876
+      Caravan_Front_Left_101: 3151893465076640432
+      Caravan_Front_Left_102: -8388366627309955130
+      Caravan_Front_Left_103: -4400743077201121937
+      Caravan_Front_Left_104: -6044573049430454018
+      Caravan_Front_Left_105: -402336328733645702
+      Caravan_Front_Left_106: 4327897309529091741
+      Caravan_Front_Left_107: -7311829458918880048
+      Caravan_Front_Left_108: 8249199461807335965
+      Caravan_Front_Left_109: -2610672924562798946
+      Caravan_Front_Left_11: 7288572095458176805
+      Caravan_Front_Left_110: 6789355482990525228
+      Caravan_Front_Left_111: -415482007512431187
+      Caravan_Front_Left_112: 5684003945234402813
+      Caravan_Front_Left_113: 7604438109788896218
+      Caravan_Front_Left_114: 5928639610687323731
+      Caravan_Front_Left_115: 4363439204272171626
+      Caravan_Front_Left_116: 610475270779065818
+      Caravan_Front_Left_117: -2595276003271120056
+      Caravan_Front_Left_118: 7216848898943998503
+      Caravan_Front_Left_119: -6760926856288845544
+      Caravan_Front_Left_12: 8449115238592777686
+      Caravan_Front_Left_120: 8905600593104680035
+      Caravan_Front_Left_121: 2089871179609376294
+      Caravan_Front_Left_122: -6493605761614523828
+      Caravan_Front_Left_123: -8286252381445104268
+      Caravan_Front_Left_124: 7551500043160597411
+      Caravan_Front_Left_125: 7056449735782972945
+      Caravan_Front_Left_126: 6603329967761921597
+      Caravan_Front_Left_127: -4973635825928219921
+      Caravan_Front_Left_128: -2366550466062795254
+      Caravan_Front_Left_129: 3772466629581793813
+      Caravan_Front_Left_13: 3770694531828699516
+      Caravan_Front_Left_130: 1364722888004440690
+      Caravan_Front_Left_131: -237394336767993548
+      Caravan_Front_Left_132: 7209854585280423544
+      Caravan_Front_Left_133: -5341748853021065894
+      Caravan_Front_Left_134: -7015094459413580345
+      Caravan_Front_Left_135: 3852758637588321902
+      Caravan_Front_Left_136: 209342152381925688
+      Caravan_Front_Left_137: 4199810476307035379
+      Caravan_Front_Left_138: -3585428344267027105
+      Caravan_Front_Left_139: 4867402472917188864
+      Caravan_Front_Left_14: 3107590649534077120
+      Caravan_Front_Left_140: -4774033092691595391
+      Caravan_Front_Left_141: 3048727342907223795
+      Caravan_Front_Left_142: 3028890824232938092
+      Caravan_Front_Left_143: -769055249770383348
+      Caravan_Front_Left_144: -3515897491254687200
+      Caravan_Front_Left_145: 3372066028650991042
+      Caravan_Front_Left_146: 7177858571783514446
+      Caravan_Front_Left_147: 1892160630770961599
+      Caravan_Front_Left_148: -1283207342678560126
+      Caravan_Front_Left_15: 7935794468359987324
+      Caravan_Front_Left_16: 493810206378657879
+      Caravan_Front_Left_17: 5167976709357695930
+      Caravan_Front_Left_18: 7546638467551511950
+      Caravan_Front_Left_19: -2566657168374914947
+      Caravan_Front_Left_2: 1282669953079570186
+      Caravan_Front_Left_20: -4339155601665065728
+      Caravan_Front_Left_21: 524703621107576480
+      Caravan_Front_Left_22: 4192321419772201412
+      Caravan_Front_Left_23: -2580919732565825608
+      Caravan_Front_Left_24: -4673647622841349827
+      Caravan_Front_Left_25: 5268980785926116872
+      Caravan_Front_Left_26: -633908012701631023
+      Caravan_Front_Left_27: 6477043534989884569
+      Caravan_Front_Left_28: 5339438779209779438
+      Caravan_Front_Left_29: -1242239491801597592
+      Caravan_Front_Left_3: 6332527879894013044
+      Caravan_Front_Left_30: -4701434812110334092
+      Caravan_Front_Left_31: -6581400209290223867
+      Caravan_Front_Left_32: 1458943576383634217
+      Caravan_Front_Left_33: 8294632311030440219
+      Caravan_Front_Left_34: 5556798646320569975
+      Caravan_Front_Left_35: -2076617058846109211
+      Caravan_Front_Left_36: 8859758890129851603
+      Caravan_Front_Left_37: 8351932958966441903
+      Caravan_Front_Left_38: -4894770680600826527
+      Caravan_Front_Left_39: -372275105933105941
+      Caravan_Front_Left_4: -2215406581702310018
+      Caravan_Front_Left_40: 1441182301044986080
+      Caravan_Front_Left_41: -8803623426154651841
+      Caravan_Front_Left_42: -6503836419696867758
+      Caravan_Front_Left_43: 1304138251419406933
+      Caravan_Front_Left_44: -6864036398520133632
+      Caravan_Front_Left_45: 3308472339342066096
+      Caravan_Front_Left_46: -3410660124098897219
+      Caravan_Front_Left_47: -7157142712880374517
+      Caravan_Front_Left_48: 4810515402000959453
+      Caravan_Front_Left_49: -8616969543470489526
+      Caravan_Front_Left_5: 3587210499141639565
+      Caravan_Front_Left_50: -5269900205330818181
+      Caravan_Front_Left_51: -4313659024905750495
+      Caravan_Front_Left_52: 4984680523000230439
+      Caravan_Front_Left_53: -3363715757439235708
+      Caravan_Front_Left_54: 5020014074052377627
+      Caravan_Front_Left_55: -6196397763112314906
+      Caravan_Front_Left_56: 4537510715972265270
+      Caravan_Front_Left_57: 6763254876562902296
+      Caravan_Front_Left_58: -1731525345577243271
+      Caravan_Front_Left_59: 2550710981485194972
+      Caravan_Front_Left_6: -8403952422087745821
+      Caravan_Front_Left_60: -8840960874471076302
+      Caravan_Front_Left_61: -5752517426443923111
+      Caravan_Front_Left_62: 1907693195000884802
+      Caravan_Front_Left_63: 5929762676318027084
+      Caravan_Front_Left_64: 5187618465082199437
+      Caravan_Front_Left_65: -6348084697010471071
+      Caravan_Front_Left_66: -6871342987495032243
+      Caravan_Front_Left_67: 818332263375218197
+      Caravan_Front_Left_68: -5031881322786892036
+      Caravan_Front_Left_69: 1875152568830043893
+      Caravan_Front_Left_7: 8132923465627538243
+      Caravan_Front_Left_70: 1526933544721241706
+      Caravan_Front_Left_71: -8756278789924481323
+      Caravan_Front_Left_72: -7553187418360914258
+      Caravan_Front_Left_73: -1969757841317125004
+      Caravan_Front_Left_74: 8377057226368882699
+      Caravan_Front_Left_75: 6247488722473777010
+      Caravan_Front_Left_76: 1384839469403973130
+      Caravan_Front_Left_77: -259608004407605301
+      Caravan_Front_Left_78: 7028564523490812033
+      Caravan_Front_Left_79: 3537715095842464481
+      Caravan_Front_Left_8: -1127910154387143373
+      Caravan_Front_Left_80: 6392330705489710018
+      Caravan_Front_Left_81: 9017223720855177763
+      Caravan_Front_Left_82: 2382026895963699712
+      Caravan_Front_Left_83: 64926048420170561
+      Caravan_Front_Left_84: 1656417243398069643
+      Caravan_Front_Left_85: -8805706046568301033
+      Caravan_Front_Left_86: 227900709432133857
+      Caravan_Front_Left_87: 3537485347746802705
+      Caravan_Front_Left_88: -5355257482030105361
+      Caravan_Front_Left_89: 2911231257777261951
+      Caravan_Front_Left_9: -8059761276578029165
+      Caravan_Front_Left_90: 1168451072453430867
+      Caravan_Front_Left_91: 5475725927654196482
+      Caravan_Front_Left_92: -7047249672980840032
+      Caravan_Front_Left_93: 319204211691238999
+      Caravan_Front_Left_94: -6330013062887702482
+      Caravan_Front_Left_95: -8024431412510237086
+      Caravan_Front_Left_96: -7017198151508792881
+      Caravan_Front_Left_97: 1951569895181632536
+      Caravan_Front_Left_98: -6122216296276216836
+      Caravan_Front_Left_99: 2285122599221888964
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

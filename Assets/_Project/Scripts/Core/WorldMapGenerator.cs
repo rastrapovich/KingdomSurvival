@@ -13,7 +13,7 @@ using System.Collections.Generic;
 // деревнями + петли + выходы к краю, поиск пути с ценой местности; мост или
 // брод там, где дорога пересекает реку) и тропы к местам → поля вокруг
 // деревень → слоты появления мест.
-public static class WorldMapGenerator
+public static partial class WorldMapGenerator
 {
     private const byte OpenGround = (byte)WorldMapGameplayTerrainType.OpenGround;
     private const byte Road = (byte)WorldMapGameplayTerrainType.Road;
@@ -33,7 +33,10 @@ public static class WorldMapGenerator
     {
         WorldMapGenerationSettings safe = (settings ?? WorldMapGenerationSettings.CreateDefault()).Clone();
         safe.Sanitize();
-        Builder builder = new Builder(safe, seed);
+        // 12У-D: тип региона — поправки настроек с разбросом по seed.
+        WorldMapRegionKind kind = WorldMapRegionKinds.Resolve(safe.RegionKind, seed);
+        WorldMapRegionKinds.Apply(safe, kind, seed);
+        Builder builder = new Builder(safe, seed) { RegionKind = kind };
         return builder.Run(upTo);
     }
 
@@ -50,7 +53,7 @@ public static class WorldMapGenerator
         }
     }
 
-    private sealed class Builder
+    private sealed partial class Builder
     {
         private readonly WorldMapGenerationSettings settings;
         private readonly int seed;
@@ -134,7 +137,12 @@ public static class WorldMapGenerator
             if (upTo > WorldMapGenerationStage.Roads)
                 BuildFields();
             if (upTo > WorldMapGenerationStage.Fields)
+            {
                 BuildSpawnSlots();
+                BuildFeatures();
+                BuildFactions();
+                BuildStructure();
+            }
 
             result.CompletedStage = upTo;
             result.TerrainCells = new WorldMapTerrainLayer(grid, (byte[])terrain.Clone()).Encode();
@@ -555,7 +563,10 @@ public static class WorldMapGenerator
                 if (rule == null || !rule.Enabled || rule.Count <= 0 || rule.Placement == WorldMapLandmarkPlacement.Crossroads)
                     continue;
 
-                for (int n = 0; n < rule.Count; n++)
+                WarnUnknownNear(rule);
+                int want = EffectiveCount(rule, random);
+                int placedForRule = 0;
+                for (int n = 0; n < want; n++)
                 {
                     List<int> candidates = new List<int>();
                     for (int i = 0; i < count; i++)
@@ -566,6 +577,8 @@ public static class WorldMapGenerator
                         if (rule.Terrains.Count > 0 && !rule.Terrains.Contains((WorldMapGameplayTerrainType)t))
                             continue;
                         if (rule.NearWater && waterDistance[i] > 2)
+                            continue;
+                        if (!MatchesNear(rule, i))
                             continue;
                         int villageDistance = NearestDistance(i, villageCells);
                         if (rule.NearVillage ? villageDistance > 4 || villageDistance < 1 : villageDistance < rule.MinDistanceHexes)
@@ -582,7 +595,13 @@ public static class WorldMapGenerator
                     taken.Add(cell);
                     grid.CellCenter(grid.CellAt(cell), out double x, out double y);
                     result.Landmarks.Add(Site(rule, cell, random));
+                    placedForRule++;
                 }
+
+                // H06: место с содержанием обязано стоять на карте — ограниченное
+                // число попыток с ослаблением только мягких условий.
+                if (placedForRule == 0 && want > 0 && !string.IsNullOrWhiteSpace(rule.LocationId))
+                    RepairRequiredLandmark(rule, random, taken, villageCells);
             }
         }
 
@@ -600,6 +619,7 @@ public static class WorldMapGenerator
                 DrawMark = rule.DrawMark,
                 LocationId = rule.LocationId ?? string.Empty,
                 Hidden = rule.Hidden,
+                Visual = rule.Hidden ? string.Empty : rule.Visual ?? string.Empty,
                 Description = rule.Description ?? string.Empty,
                 Threat = string.IsNullOrWhiteSpace(rule.Threat) ? "неизвестна" : rule.Threat,
                 ExplorationHours = Math.Max(0.0, rule.ExplorationHours),
@@ -713,14 +733,17 @@ public static class WorldMapGenerator
                         if (edges.Contains((a, b)) || edges.Contains((b, a)))
                             continue;
                         int distance = Distance(villages[a].Cell, villages[b].Cell);
-                        if (distance <= settings.VillageMinDistanceHexes * 2.4f)
+                        if (distance <= settings.VillageMinDistanceHexes * 2.4f * WorldMapRegionKinds.Around(settings.RouteConnectivity, 0.8f, 1.3f))
                             extra.Add((a, b, distance));
                     }
                 }
                 extra.Sort((x, y) => x.D.CompareTo(y.D));
-                int loops = (int)Math.Round(n * settings.ExtraRoadLoops);
+                int loops = (int)Math.Round(n * settings.ExtraRoadLoops * WorldMapRegionKinds.Around(settings.RouteConnectivity, 0f, 2.4f));
                 for (int i = 0; i < loops && i < extra.Count; i++)
+                {
                     edges.Add((extra[i].A, extra[i].B));
+                    result.Report.Loops++;
+                }
             }
 
             foreach ((int a, int b) in edges)
@@ -743,6 +766,8 @@ public static class WorldMapGenerator
                     int from = NearestVillageToSide(side);
                     List<int> path = FindPath(villages[from].Cell, targets, false);
                     ApplyPath(path, false, bridgeCells);
+                    if (path.Count > 1)
+                        result.Report.EdgeExits++;
                 }
             }
 
@@ -764,8 +789,19 @@ public static class WorldMapGenerator
                     List<int> path = FindPath(landmark.Cell, roadCells, true);
                     path.Reverse();
                     ApplyPath(path, true, bridgeCells);
+                    if (path.Count > 1)
+                    {
+                        result.Report.Branches++;
+                        landmarkAttach[landmark] = path[0];
+                    }
                 }
             }
+
+            // 12У-D: причины деревень, хозяйственные тропы (ответвления с
+            // результатом) и обходы через места (петли) по связанности.
+            AssignSettlementReasons(bridgeCells);
+            BuildWorkTrails(bridgeCells);
+            BuildLandmarkLoops(bridgeCells);
 
             foreach (int cell in bridgeCells)
             {

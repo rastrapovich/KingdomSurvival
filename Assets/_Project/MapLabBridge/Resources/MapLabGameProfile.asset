@@ -1,0 +1,341 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea69c171722d0e445b906a1d076c5cb6, type: 3}
+  m_Name: MapLabGameProfile
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabSettings
+  General:
+    Preset: 2
+    Seed: 304
+    MapSize: 256
+    Quality: 257
+    PaintResolution: 2048
+  Relief:
+    Source: 0
+    HeightRange: 13
+    HillWidth: 110
+    HillHeight: 1
+    MediumForms: 0.45
+    FineNoise: 0.04
+    Smoothing: 2
+    ExternalHeightmap: {fileID: 0}
+    ExternalScale: 1
+    ExternalOffset: 0
+    ExternalInvert: 0
+    ExternalRemap:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  Water:
+    LevelOffset: 0
+    LakeScale: 1
+    RiverWidth: 11
+    RiverDepth: 1.2
+    BankWidth: 5
+  RoadsAndFields:
+    RoadWidth: 3.2
+    PathWidth: 1.6
+    FieldDensity: 0.75
+    FieldStripWidth: 9
+    FieldMaxSlope: 11
+    FieldRadius: 95
+  Cliffs:
+    CliffHeight: 8
+    CliffSharpness: 1.6
+    ColumnWidth: 2.4
+    Jaggedness: 0.45
+  Vegetation:
+    ForestDensity: 0.45
+    TreeSize: 4.6
+    SizeVariation: 0.22
+    ConiferShare: 0.18
+    EdgeRoughness: 0.6
+    SingleTrees: 0.4
+    Bushes: 0.4
+  Settlement:
+    HousesMin: 12
+    HousesMax: 25
+    BuildingScale: 1
+    Radius: 36
+    Fences: 1
+    AlignToDrawnView: 1
+    DrawnRidgeYaw: {x: 23, y: -27, z: 32}
+    UseVariantYaw: 1
+    DrawnRidgeYawVariants: {x: 11, y: -12, z: 12, w: 12}
+    DrawnBarnYaw: 14
+  PainterlyStyle:
+    Palette: {fileID: 11400000, guid: 58b7c4bd9890a8046a91309c1d90a33f, type: 2}
+    MacroScale: 60
+    BrushScale: 1.6
+    BrushStrength: 0.55
+    StrokeDensity: 0.7
+    Hatching: 0.35
+    LightStrength: 0.75
+    ReliefExaggeration: 3
+    ShadowSoftness: 0.55
+    ToneBands: 0
+    CastShadows: 0.55
+    AmbientOcclusion: 0.5
+    Outline: 0.55
+    MicroTexture: 0.35
+    PaperGrain: 0.25
+    Saturation: 1
+  Camera:
+    CameraPitchDownDegrees: 60
+    Zoom: 1
+    AzimuthDegrees: 0
+    FillFrame: 1
+    Mode: 2
+    PitchByZoom: 1
+    PitchByZoomRange: {x: 60, y: 35}
+    ZoomSmoothing: 12
+  Art:
+    Vegetation: 1
+    Buildings: 2
+    Boulders: 1
+    CliffDecor: 1
+    GroundTextures: 1
+    GroundStrength: 0.5
+    GrassScale: 26
+    EarthScale: 18
+    RockScale: 14
+    RockColorStrength: 0.35
+    PaletteTint: 0.2
+    GroundShade: 0.6
+    CardLean: 0.3
+    AlphaView: 0
+    ShowMarker: 1
+    MarkerGhost: 0
+    HouseGroupsByVariant:
+    - House_Thatch_A
+    - House_Thatch_B
+    - House_Shingle_A
+    - House_Shingle_A
+    BarnGroup: Barn_A
+  Stage03:
+    Look: 3
+    PaintTexelsPerUnit: 16
+    Ink: 1
+    ForestAccents: 1
+    ObjectShadows: 1
+    InkStyle:
+      Color: {r: 0.33, g: 0.25, b: 0.16, a: 1}
+      Width: 0.085
+      MinPixels: 1.1
+      MaxPixels: 4.5
+      Opacity: 0.85
+      Grain: 0.35
+      BreakLength: 6
+      BreakFrequency: 0.16
+      LitSideFade: 0.45
+      Weights: {x: 1, y: 0.6, z: 0.55, w: 0.7}
+    StrokeCell: 4
+    StrokesPerUnit: 0.9
+    StrokeEdge: 0.9
+    StrokeColorSplit: 0.55
+    ForestGroupSize: 15
+    AccentShare: 0.4
+    AccentMinChain: 3
+    AccentHighlight: 2.6
+    AccentHighlightStrength: 0.55
+    CrownToneRange: 0.05
+    ShadowStrength: 0.4
+    ContactStrength: 0.25
+    ShadowTones: 2
+    ShadowColor: {r: 0.56, g: 0.6, b: 0.62, a: 1}
+    ShadowTexelsPerUnit: 4
+    HouseViewSwitch: 42.5
+    HouseViewHysteresis: 2
+  Stage04:
+    ContactDensity: 0.45
+    ContactReach: 0.9
+    CrownLobes: 0.4
+    Grain: 0.35
+    Blots: 0.45
+    BlotScale: 26
+    BlotShare: 0.22
+    JunctionLength: 7
+    JunctionMouth: 0.55
+    FieldInkShare: 0.3
+    Grass: 0.5
+    ForestRhythm: 0.5
+    WoodColor: {r: 0.62, g: 0.5, b: 0.36, a: 1}
+    RockColor: {r: 0.6, g: 0.58, b: 0.52, a: 1}
+    HeroViewSwitch: 42.5
+    HeroViewHysteresis: 2
+  Stage05:
+    ZoomMax: 3
+    PitchRange: {x: 60, y: 35}
+    AlphaToCoverage: 1
+    GroundAniso: 8
+    ExportSupersample: 2
+    ExportMsaa: 4
+    InkColor: {r: 0.28, g: 0.2, b: 0.12, a: 1}
+    WaterInkColor: {r: 0.2, g: 0.27, b: 0.36, a: 1}
+    InkWidth: 0.13
+    InkMinPixels: 1.6
+    InkMaxPixels: 6
+    InkDensity: 0.88
+    InkThicknessDrift: 0.45
+    InkDriftLength: 7
+    InkBreakLength: 9
+    InkBreakShare: 0.1
+    InkGrain: 0.4
+    InkEndings: 1
+    InkEndingScale: 1
+    InkEndingVariety: 0.6
+    FieldInkShare: 0.45
+    FieldEdgeInkShare: 0.72
+    FieldInnerInk: 1
+    FieldStripInkShare: 0.45
+    ShoreInkShare: 0.55
+    CliffInkShare: 0.6
+    CliffFootInkShare: 0.72
+    StrokeGrouping: 0.65
+    StrokeDensity: 1.45
+    StrokeEdge: 0.45
+    WashStrength: 0.08
+    WashScale: 22
+    WashDensity: 9
+    GrassDensity: 1
+    ReedDensity: 1
+    RockDensity: 1
+    HayDensity: 1
+    InkGrassDensity: 1
+    DetailFadePixels: {x: 5, y: 11}
+    SpriteStrokes: 1
+    SpriteStrokeStrength: 0.322
+    SpriteStrokeLength: 0.6
+    ShadowColor: {r: 0.6, g: 0.63, b: 0.56, a: 1}
+    ShadowEdgeLoss: 0.5
+    ShadowEdgeScale: 4.5
+    CliffPlaneWidth: {x: 1.6, y: 5.2}
+    CliffSetback: 0.7
+    CliffLedgeShare: 0.35
+    CliffScreeShare: 0.25
+    CliffColor: {r: 0.63, g: 0.58, b: 0.49, a: 1}
+    DrawnCliffs: 1
+    WaterBase: {r: 0.4, g: 0.48, b: 0.53, a: 1}
+    RiverStrokes: 0.42
+    LakeStrokes: 0.22
+    ShoreSmoothing: 3
+    ShoreOchreShare: 0.35
+    FenceSpan: 2.6
+    FenceMinSpan: 1.1
+    GateWidth: 1.8
+    DeckPanelLength: 1.7
+    TrestleSpacing: 4
+    WoodColor: {r: 0.66, g: 0.54, b: 0.39, a: 1}
+    YardsMin: 5
+    YardsMax: 9
+    WellWidening: 2.4
+    FencedYardShare: 0.2
+    WideFrame: 1
+    FrameWidth: 0
+    PaintStreaming: 0
+    OverviewTexels: 2
+    DetailTileBudget: 64
+    DetailTilesPerFrame: 2
+  Diagnostics:
+    Mode: 0
+    ShowWater: 1
+    ShowForest: 1
+    ShowBuildings: 1
+    ShowCliffs: 1
+    ShowStrokes: 1
+    ShowOutline: 1
+    ShowPaper: 1
+    ShowPaint: 1
+    ShowReliefLight: 1
+  Author:
+    Captured: 0
+    UseGamePlan: 1
+    PlanRegion: 0
+    WorldSize: 1
+    Relief: 0.5
+    Water: 0.5
+    Forest: 0.5
+    Settlement: 0.5
+    Discoveries: 1
+    Connectivity: 0.5
+    Quality: 1
+    StrokeStrength: 0.5
+    StrokeSize: 0.5
+    InkWeight: 0.5
+    ShadowStrength: 0.5
+    Details: 0.5
+    RiverWidthSet: 0
+    RiverWidth: 11
+    RoadWidthSet: 0
+    RoadWidth: 3.2
+    TreeSizeSet: 0
+    TreeSize: 4.6
+    ConiferShareSet: 0
+    ConiferShare: 0.18
+    VillageSize: 0
+    FencedShareSet: 0
+    FencedShare: 0.2
+    FieldDensitySet: 0
+    FieldDensity: 0.7
+    CliffHeightSet: 0
+    CliffHeight: 6
+    BaseHeightRange: 12
+    BaseHillHeight: 1
+    BaseCliffHeight: 6
+    BaseLakeScale: 1
+    BaseRiverWidth: 11
+    BaseLevelOffset: 0
+    BaseForestDensity: 0.45
+    BaseFieldDensity: 0.7
+    BaseFieldRadius: 95
+    BaseYardsMin: 5
+    BaseYardsMax: 9
+    BaseFencedShare: 0.2
+    BaseRoadWidth: 3.2
+    BasePathWidth: 1.6
+    BaseTreeSize: 4.6
+    BaseConiferShare: 0.18
+    BaseBrushStrength: 0.55
+    BaseBrushScale: 1.6
+    BaseInkDensity: 0.88
+    BaseInkWidth: 0.13
+    BaseShadowStrength: 0.4
+    BaseContactStrength: 0.25
+    BaseGrass: 1
+    BaseReed: 1
+    BaseRock: 1
+    BaseHay: 1
+    BaseInkGrass: 1
+  Advanced:
+    CardLean: 0.25
+    ChunkVertices: 129
+    LightDirection: {x: -0.62, y: 0.72, z: 0.06}
+    FlatStrokeAngle: 20

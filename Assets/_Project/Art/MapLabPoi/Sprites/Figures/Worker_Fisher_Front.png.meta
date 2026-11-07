@@ -1,0 +1,1157 @@
+fileFormatVersion: 2
+guid: 2e2443be0e297c842b23ceeb74bac08c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2538615848623749386
+    second: Worker_Fisher_Front_0
+  - first:
+      213: 5681190633480450295
+    second: Worker_Fisher_Front_1
+  - first:
+      213: 440573233882871454
+    second: Worker_Fisher_Front_2
+  - first:
+      213: 3550558978714191050
+    second: Worker_Fisher_Front_3
+  - first:
+      213: 9145164724242456259
+    second: Worker_Fisher_Front_4
+  - first:
+      213: -3932026938107535268
+    second: Worker_Fisher_Front_5
+  - first:
+      213: -711055374026074699
+    second: Worker_Fisher_Front_6
+  - first:
+      213: -8647120258448748140
+    second: Worker_Fisher_Front_7
+  - first:
+      213: -2179670317131807676
+    second: Worker_Fisher_Front_8
+  - first:
+      213: 8184859150957774090
+    second: Worker_Fisher_Front_9
+  - first:
+      213: -1304617665366870936
+    second: Worker_Fisher_Front_10
+  - first:
+      213: -2811482091263308018
+    second: Worker_Fisher_Front_11
+  - first:
+      213: 4358197672534615645
+    second: Worker_Fisher_Front_12
+  - first:
+      213: -4007540063480569486
+    second: Worker_Fisher_Front_13
+  - first:
+      213: 8832817658958328720
+    second: Worker_Fisher_Front_14
+  - first:
+      213: -1956895889241091627
+    second: Worker_Fisher_Front_15
+  - first:
+      213: -6007523277433648117
+    second: Worker_Fisher_Front_16
+  - first:
+      213: 2776130701750718366
+    second: Worker_Fisher_Front_17
+  - first:
+      213: 5774677675215431049
+    second: Worker_Fisher_Front_18
+  - first:
+      213: -4884067035713160394
+    second: Worker_Fisher_Front_19
+  - first:
+      213: 2607019888479278267
+    second: Worker_Fisher_Front_20
+  - first:
+      213: -5174260142835628825
+    second: Worker_Fisher_Front_21
+  - first:
+      213: 5338475922004627325
+    second: Worker_Fisher_Front_22
+  - first:
+      213: -1710909329510925291
+    second: Worker_Fisher_Front_23
+  - first:
+      213: -2430786261514265742
+    second: Worker_Fisher_Front_24
+  - first:
+      213: -5769702401285975116
+    second: Worker_Fisher_Front_25
+  - first:
+      213: 6129481932876473970
+    second: Worker_Fisher_Front_26
+  - first:
+      213: 8454294777037572850
+    second: Worker_Fisher_Front_27
+  - first:
+      213: 4827191473129708372
+    second: Worker_Fisher_Front_28
+  - first:
+      213: 8023893769619506815
+    second: Worker_Fisher_Front_29
+  - first:
+      213: 4163667351714220719
+    second: Worker_Fisher_Front_30
+  - first:
+      213: -1008751250665664551
+    second: Worker_Fisher_Front_31
+  - first:
+      213: -9050972169794677245
+    second: Worker_Fisher_Front_32
+  - first:
+      213: 6622376785384802434
+    second: Worker_Fisher_Front_33
+  - first:
+      213: 4375455675438655074
+    second: Worker_Fisher_Front_34
+  - first:
+      213: 6452915637117655410
+    second: Worker_Fisher_Front_35
+  - first:
+      213: 7889179532439957310
+    second: Worker_Fisher_Front_36
+  - first:
+      213: -2119677933453242862
+    second: Worker_Fisher_Front_37
+  - first:
+      213: -3173531376165250865
+    second: Worker_Fisher_Front_38
+  - first:
+      213: 5792890398491965456
+    second: Worker_Fisher_Front_39
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1245
+        height: 1235
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0935660aa9fa3320800000000000000
+      internalID: 2538615848623749386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_1
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 955
+        width: 90
+        height: 227
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f0f0e9e7c4a7de40800000000000000
+      internalID: 5681190633480450295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_2
+      rect:
+        serializedVersion: 2
+        x: 834
+        y: 1142
+        width: 35
+        height: 103
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e96322f950b3d1600800000000000000
+      internalID: 440573233882871454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_3
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 1030
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac44558549e164130800000000000000
+      internalID: 3550558978714191050
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_4
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 1030
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ce97e01dd62aee70800000000000000
+      internalID: 9145164724242456259
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_5
+      rect:
+        serializedVersion: 2
+        x: 66
+        y: 1032
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5065d22552ae69c0800000000000000
+      internalID: -3932026938107535268
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_6
+      rect:
+        serializedVersion: 2
+        x: 1101
+        y: 971
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b51b8797e2d126f0800000000000000
+      internalID: -711055374026074699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_7
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 873
+        width: 43
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 491141970f14ff780800000000000000
+      internalID: -8647120258448748140
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_8
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 714
+        width: 9
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 44445eb156140c1e0800000000000000
+      internalID: -2179670317131807676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_9
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 642
+        width: 8
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0581755806769170800000000000000
+      internalID: 8184859150957774090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_10
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 620
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 864bb10452115ede0800000000000000
+      internalID: -1304617665366870936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_11
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 592
+        width: 32
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0fc0e11feb9bf8d0800000000000000
+      internalID: -2811482091263308018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_12
+      rect:
+        serializedVersion: 2
+        x: 1151
+        y: 592
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d562c5441bd6b7c30800000000000000
+      internalID: 4358197672534615645
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_13
+      rect:
+        serializedVersion: 2
+        x: 1037
+        y: 550
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 271281d8b8b5268c0800000000000000
+      internalID: -4007540063480569486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_14
+      rect:
+        serializedVersion: 2
+        x: 1043
+        y: 536
+        width: 19
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0933200dcd8749a70800000000000000
+      internalID: 8832817658958328720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_15
+      rect:
+        serializedVersion: 2
+        x: 1027
+        y: 483
+        width: 11
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d1dc5b8e85b7d4e0800000000000000
+      internalID: -1956895889241091627
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_16
+      rect:
+        serializedVersion: 2
+        x: 1033
+        y: 502
+        width: 7
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0c4dac886df0aca0800000000000000
+      internalID: -6007523277433648117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_17
+      rect:
+        serializedVersion: 2
+        x: 1037
+        y: 497
+        width: 23
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9f48e72a2cc68620800000000000000
+      internalID: 2776130701750718366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_18
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 472
+        width: 15
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 985289300c6c32050800000000000000
+      internalID: 5774677675215431049
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_19
+      rect:
+        serializedVersion: 2
+        x: 1037
+        y: 489
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 63b3f1d68ee483cb0800000000000000
+      internalID: -4884067035713160394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_20
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 457
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb49f27a6cefd2420800000000000000
+      internalID: 2607019888479278267
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_21
+      rect:
+        serializedVersion: 2
+        x: 161
+        y: 456
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e402d280d55138b0800000000000000
+      internalID: -5174260142835628825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_22
+      rect:
+        serializedVersion: 2
+        x: 1009
+        y: 440
+        width: 29
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7fcf0d0193161a40800000000000000
+      internalID: 5338475922004627325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_23
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 417
+        width: 14
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51c79939701a148e0800000000000000
+      internalID: -1710909329510925291
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_24
+      rect:
+        serializedVersion: 2
+        x: 159
+        y: 431
+        width: 7
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27bda8526cc144ed0800000000000000
+      internalID: -2430786261514265742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_25
+      rect:
+        serializedVersion: 2
+        x: 1035
+        y: 433
+        width: 9
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b391a73c36edefa0800000000000000
+      internalID: -5769702401285975116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_26
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 401
+        width: 8
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 276e642b75b401550800000000000000
+      internalID: 6129481932876473970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_27
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 373
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2fac3c39e40b35570800000000000000
+      internalID: 8454294777037572850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_28
+      rect:
+        serializedVersion: 2
+        x: 1050
+        y: 351
+        width: 6
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 45bd0bab111adf240800000000000000
+      internalID: 4827191473129708372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_29
+      rect:
+        serializedVersion: 2
+        x: 1165
+        y: 288
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7604adfed89a5f60800000000000000
+      internalID: 8023893769619506815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_30
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 98
+        width: 14
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: faa41d5756158c930800000000000000
+      internalID: 4163667351714220719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_31
+      rect:
+        serializedVersion: 2
+        x: 1139
+        y: 70
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9df875505123002f0800000000000000
+      internalID: -1008751250665664551
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_32
+      rect:
+        serializedVersion: 2
+        x: 1147
+        y: 70
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 306117304cc746280800000000000000
+      internalID: -9050972169794677245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_33
+      rect:
+        serializedVersion: 2
+        x: 295
+        y: 18
+        width: 16
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28887a5799867eb50800000000000000
+      internalID: 6622376785384802434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_34
+      rect:
+        serializedVersion: 2
+        x: 454
+        y: 21
+        width: 43
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 266ecf031cdb8bc30800000000000000
+      internalID: 4375455675438655074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_35
+      rect:
+        serializedVersion: 2
+        x: 551
+        y: 28
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27916fb359c5d8950800000000000000
+      internalID: 6452915637117655410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_36
+      rect:
+        serializedVersion: 2
+        x: 559
+        y: 29
+        width: 25
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3fad507cfefb7d60800000000000000
+      internalID: 7889179532439957310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_37
+      rect:
+        serializedVersion: 2
+        x: 727
+        y: 21
+        width: 10
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21e094a66246592e0800000000000000
+      internalID: -2119677933453242862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_38
+      rect:
+        serializedVersion: 2
+        x: 776
+        y: 29
+        width: 34
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc81d18070a55f3d0800000000000000
+      internalID: -3173531376165250865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Fisher_Front_39
+      rect:
+        serializedVersion: 2
+        x: 1212
+        y: 31
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01872e8102b746050800000000000000
+      internalID: 5792890398491965456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Worker_Fisher_Front_0: 2538615848623749386
+      Worker_Fisher_Front_1: 5681190633480450295
+      Worker_Fisher_Front_10: -1304617665366870936
+      Worker_Fisher_Front_11: -2811482091263308018
+      Worker_Fisher_Front_12: 4358197672534615645
+      Worker_Fisher_Front_13: -4007540063480569486
+      Worker_Fisher_Front_14: 8832817658958328720
+      Worker_Fisher_Front_15: -1956895889241091627
+      Worker_Fisher_Front_16: -6007523277433648117
+      Worker_Fisher_Front_17: 2776130701750718366
+      Worker_Fisher_Front_18: 5774677675215431049
+      Worker_Fisher_Front_19: -4884067035713160394
+      Worker_Fisher_Front_2: 440573233882871454
+      Worker_Fisher_Front_20: 2607019888479278267
+      Worker_Fisher_Front_21: -5174260142835628825
+      Worker_Fisher_Front_22: 5338475922004627325
+      Worker_Fisher_Front_23: -1710909329510925291
+      Worker_Fisher_Front_24: -2430786261514265742
+      Worker_Fisher_Front_25: -5769702401285975116
+      Worker_Fisher_Front_26: 6129481932876473970
+      Worker_Fisher_Front_27: 8454294777037572850
+      Worker_Fisher_Front_28: 4827191473129708372
+      Worker_Fisher_Front_29: 8023893769619506815
+      Worker_Fisher_Front_3: 3550558978714191050
+      Worker_Fisher_Front_30: 4163667351714220719
+      Worker_Fisher_Front_31: -1008751250665664551
+      Worker_Fisher_Front_32: -9050972169794677245
+      Worker_Fisher_Front_33: 6622376785384802434
+      Worker_Fisher_Front_34: 4375455675438655074
+      Worker_Fisher_Front_35: 6452915637117655410
+      Worker_Fisher_Front_36: 7889179532439957310
+      Worker_Fisher_Front_37: -2119677933453242862
+      Worker_Fisher_Front_38: -3173531376165250865
+      Worker_Fisher_Front_39: 5792890398491965456
+      Worker_Fisher_Front_4: 9145164724242456259
+      Worker_Fisher_Front_5: -3932026938107535268
+      Worker_Fisher_Front_6: -711055374026074699
+      Worker_Fisher_Front_7: -8647120258448748140
+      Worker_Fisher_Front_8: -2179670317131807676
+      Worker_Fisher_Front_9: 8184859150957774090
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

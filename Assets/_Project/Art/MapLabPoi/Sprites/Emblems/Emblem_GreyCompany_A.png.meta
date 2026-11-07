@@ -1,0 +1,1651 @@
+fileFormatVersion: 2
+guid: 7d5e17d33e079c94abf11baf761a83b0
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5661955626175844321
+    second: Emblem_GreyCompany_A_0
+  - first:
+      213: -4943028880571582292
+    second: Emblem_GreyCompany_A_1
+  - first:
+      213: 1927039945577883615
+    second: Emblem_GreyCompany_A_2
+  - first:
+      213: 1144313207906750500
+    second: Emblem_GreyCompany_A_3
+  - first:
+      213: -1443028457162500773
+    second: Emblem_GreyCompany_A_4
+  - first:
+      213: -4413413191531036112
+    second: Emblem_GreyCompany_A_5
+  - first:
+      213: 1874916845872146926
+    second: Emblem_GreyCompany_A_6
+  - first:
+      213: 1720348569432309980
+    second: Emblem_GreyCompany_A_7
+  - first:
+      213: -5430223763724179823
+    second: Emblem_GreyCompany_A_8
+  - first:
+      213: -423283086551407444
+    second: Emblem_GreyCompany_A_9
+  - first:
+      213: 3244777429626008308
+    second: Emblem_GreyCompany_A_10
+  - first:
+      213: -4327389898993896750
+    second: Emblem_GreyCompany_A_11
+  - first:
+      213: -8025504977646942527
+    second: Emblem_GreyCompany_A_12
+  - first:
+      213: -4488963499478206814
+    second: Emblem_GreyCompany_A_13
+  - first:
+      213: -3421633172379411182
+    second: Emblem_GreyCompany_A_14
+  - first:
+      213: 3958039162840175086
+    second: Emblem_GreyCompany_A_15
+  - first:
+      213: -7673284539523784729
+    second: Emblem_GreyCompany_A_16
+  - first:
+      213: 1446924909215906166
+    second: Emblem_GreyCompany_A_17
+  - first:
+      213: 6978318036040069732
+    second: Emblem_GreyCompany_A_18
+  - first:
+      213: -8105090377532996781
+    second: Emblem_GreyCompany_A_19
+  - first:
+      213: -3512387929860926360
+    second: Emblem_GreyCompany_A_20
+  - first:
+      213: 6266723393789677037
+    second: Emblem_GreyCompany_A_21
+  - first:
+      213: 6913289624614938695
+    second: Emblem_GreyCompany_A_22
+  - first:
+      213: -6390113323280163679
+    second: Emblem_GreyCompany_A_23
+  - first:
+      213: -8872344216204327687
+    second: Emblem_GreyCompany_A_24
+  - first:
+      213: -164157468114327048
+    second: Emblem_GreyCompany_A_25
+  - first:
+      213: 3959894687670548614
+    second: Emblem_GreyCompany_A_26
+  - first:
+      213: 7516083766144126977
+    second: Emblem_GreyCompany_A_27
+  - first:
+      213: -7183828671363434751
+    second: Emblem_GreyCompany_A_28
+  - first:
+      213: -2616478502115461806
+    second: Emblem_GreyCompany_A_29
+  - first:
+      213: 6371935454383989462
+    second: Emblem_GreyCompany_A_30
+  - first:
+      213: 7873720970155539032
+    second: Emblem_GreyCompany_A_31
+  - first:
+      213: -1437674962646268669
+    second: Emblem_GreyCompany_A_32
+  - first:
+      213: 3135941153345384548
+    second: Emblem_GreyCompany_A_33
+  - first:
+      213: -5657045872678824348
+    second: Emblem_GreyCompany_A_34
+  - first:
+      213: -2962880446478224361
+    second: Emblem_GreyCompany_A_35
+  - first:
+      213: 8975807343059704402
+    second: Emblem_GreyCompany_A_36
+  - first:
+      213: -420507398806021993
+    second: Emblem_GreyCompany_A_37
+  - first:
+      213: 4572479282367653944
+    second: Emblem_GreyCompany_A_38
+  - first:
+      213: -7388144717475398215
+    second: Emblem_GreyCompany_A_39
+  - first:
+      213: -7613654596615485913
+    second: Emblem_GreyCompany_A_40
+  - first:
+      213: -8018792416901336857
+    second: Emblem_GreyCompany_A_41
+  - first:
+      213: 598938136865431143
+    second: Emblem_GreyCompany_A_42
+  - first:
+      213: 7195189053103419176
+    second: Emblem_GreyCompany_A_43
+  - first:
+      213: 7329994073121394150
+    second: Emblem_GreyCompany_A_44
+  - first:
+      213: 7222270664256836942
+    second: Emblem_GreyCompany_A_45
+  - first:
+      213: 5185800463183012211
+    second: Emblem_GreyCompany_A_46
+  - first:
+      213: -8842069161194182917
+    second: Emblem_GreyCompany_A_47
+  - first:
+      213: 8723237602643772443
+    second: Emblem_GreyCompany_A_48
+  - first:
+      213: -398321381252356301
+    second: Emblem_GreyCompany_A_49
+  - first:
+      213: 6100180886895041410
+    second: Emblem_GreyCompany_A_50
+  - first:
+      213: 2219780463126748185
+    second: Emblem_GreyCompany_A_51
+  - first:
+      213: 3311850878032520373
+    second: Emblem_GreyCompany_A_52
+  - first:
+      213: 6764141246035838951
+    second: Emblem_GreyCompany_A_53
+  - first:
+      213: 8010124988378351628
+    second: Emblem_GreyCompany_A_54
+  - first:
+      213: 5274471099438905071
+    second: Emblem_GreyCompany_A_55
+  - first:
+      213: 8756417110618313736
+    second: Emblem_GreyCompany_A_56
+  - first:
+      213: 2795077145915881948
+    second: Emblem_GreyCompany_A_57
+  - first:
+      213: -5593408084454155655
+    second: Emblem_GreyCompany_A_58
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1110
+        width: 106
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ef4c38c4ae439e40800000000000000
+      internalID: 5661955626175844321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 1034
+        width: 11
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca8b8032c65d66bb0800000000000000
+      internalID: -4943028880571582292
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_2
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 1058
+        width: 174
+        height: 76
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd76820ee983eba10800000000000000
+      internalID: 1927039945577883615
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_3
+      rect:
+        serializedVersion: 2
+        x: 313
+        y: 1063
+        width: 28
+        height: 79
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 420d11dbcca61ef00800000000000000
+      internalID: 1144313207906750500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_4
+      rect:
+        serializedVersion: 2
+        x: 374
+        y: 1124
+        width: 73
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b559c02834559fbe0800000000000000
+      internalID: -1443028457162500773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_5
+      rect:
+        serializedVersion: 2
+        x: 500
+        y: 1052
+        width: 150
+        height: 184
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03205c7e51860c2c0800000000000000
+      internalID: -4413413191531036112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_6
+      rect:
+        serializedVersion: 2
+        x: 667
+        y: 1118
+        width: 86
+        height: 108
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee9ea9500fa050a10800000000000000
+      internalID: 1874916845872146926
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_7
+      rect:
+        serializedVersion: 2
+        x: 679
+        y: 1091
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd04ddab8e7efd710800000000000000
+      internalID: 1720348569432309980
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_8
+      rect:
+        serializedVersion: 2
+        x: 707
+        y: 1053
+        width: 21
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 196e558e148f3a4b0800000000000000
+      internalID: -5430223763724179823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_9
+      rect:
+        serializedVersion: 2
+        x: 717
+        y: 988
+        width: 132
+        height: 78
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca42ca28642302af0800000000000000
+      internalID: -423283086551407444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_10
+      rect:
+        serializedVersion: 2
+        x: 804
+        y: 1058
+        width: 17
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f2301471e3c70d20800000000000000
+      internalID: 3244777429626008308
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_11
+      rect:
+        serializedVersion: 2
+        x: 874
+        y: 883
+        width: 341
+        height: 331
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d2fad970d502f3c0800000000000000
+      internalID: -4327389898993896750
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_12
+      rect:
+        serializedVersion: 2
+        x: 944
+        y: 1152
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c689386ebdaf9090800000000000000
+      internalID: -8025504977646942527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_13
+      rect:
+        serializedVersion: 2
+        x: 133
+        y: 605
+        width: 565
+        height: 446
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a638e31b7ff3b1c0800000000000000
+      internalID: -4488963499478206814
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_14
+      rect:
+        serializedVersion: 2
+        x: 948
+        y: 1038
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21dd1a022cae380d0800000000000000
+      internalID: -3421633172379411182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_15
+      rect:
+        serializedVersion: 2
+        x: 727
+        y: 1012
+        width: 22
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee15c24e5a7cde630800000000000000
+      internalID: 3958039162840175086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_16
+      rect:
+        serializedVersion: 2
+        x: 981
+        y: 982
+        width: 9
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ef1039bd54038590800000000000000
+      internalID: -7673284539523784729
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_17
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 626
+        width: 110
+        height: 318
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6797a7ee982841410800000000000000
+      internalID: 1446924909215906166
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_18
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 897
+        width: 25
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 462bed3f747f7d060800000000000000
+      internalID: 6978318036040069732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_19
+      rect:
+        serializedVersion: 2
+        x: 695
+        y: 931
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35385b68e3fe48f80800000000000000
+      internalID: -8105090377532996781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_20
+      rect:
+        serializedVersion: 2
+        x: 741
+        y: 932
+        width: 18
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 864154789cd714fc0800000000000000
+      internalID: -3512387929860926360
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_21
+      rect:
+        serializedVersion: 2
+        x: 743
+        y: 903
+        width: 74
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dedc67069bfd7f650800000000000000
+      internalID: 6266723393789677037
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_22
+      rect:
+        serializedVersion: 2
+        x: 1033
+        y: 938
+        width: 11
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74821901940f0ff50800000000000000
+      internalID: 6913289624614938695
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_23
+      rect:
+        serializedVersion: 2
+        x: 1043
+        y: 926
+        width: 15
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ac156be9c1c157a0800000000000000
+      internalID: -6390113323280163679
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_24
+      rect:
+        serializedVersion: 2
+        x: 653
+        y: 574
+        width: 417
+        height: 312
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f4462c61f91fd480800000000000000
+      internalID: -8872344216204327687
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_25
+      rect:
+        serializedVersion: 2
+        x: 1049
+        y: 869
+        width: 43
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f961d907abc8bdf0800000000000000
+      internalID: -164157468114327048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_26
+      rect:
+        serializedVersion: 2
+        x: 1085
+        y: 855
+        width: 17
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6883f8eec3f54f630800000000000000
+      internalID: 3959894687670548614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_27
+      rect:
+        serializedVersion: 2
+        x: 1065
+        y: 817
+        width: 19
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 100d9170d5e7e4860800000000000000
+      internalID: 7516083766144126977
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_28
+      rect:
+        serializedVersion: 2
+        x: 1083
+        y: 785
+        width: 15
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 107bd1c82e9ed4c90800000000000000
+      internalID: -7183828671363434751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_29
+      rect:
+        serializedVersion: 2
+        x: 1101
+        y: 827
+        width: 58
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25536fe3aa660bbd0800000000000000
+      internalID: -2616478502115461806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_30
+      rect:
+        serializedVersion: 2
+        x: 1139
+        y: 799
+        width: 24
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d2664a2989ad6850800000000000000
+      internalID: 6371935454383989462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_31
+      rect:
+        serializedVersion: 2
+        x: 1154
+        y: 806
+        width: 25
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85a3aae6183154d60800000000000000
+      internalID: 7873720970155539032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_32
+      rect:
+        serializedVersion: 2
+        x: 1162
+        y: 780
+        width: 21
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3050ff41d3a5c0ce0800000000000000
+      internalID: -1437674962646268669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_33
+      rect:
+        serializedVersion: 2
+        x: 1145
+        y: 718
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4603ea13dd9158b20800000000000000
+      internalID: 3135941153345384548
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_34
+      rect:
+        serializedVersion: 2
+        x: 1147
+        y: 706
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46693e840c22e71b0800000000000000
+      internalID: -5657045872678824348
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_35
+      rect:
+        serializedVersion: 2
+        x: 1152
+        y: 708
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 714f6b39eebb1e6d0800000000000000
+      internalID: -2962880446478224361
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_36
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1177
+        height: 631
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25a9a6ff839709c70800000000000000
+      internalID: 8975807343059704402
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_37
+      rect:
+        serializedVersion: 2
+        x: 143
+        y: 628
+        width: 11
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7985ebcafbe0a2af0800000000000000
+      internalID: -420507398806021993
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_38
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 584
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8386b586ea5b47f30800000000000000
+      internalID: 4572479282367653944
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_39
+      rect:
+        serializedVersion: 2
+        x: 1139
+        y: 529
+        width: 30
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9bd33b50689087990800000000000000
+      internalID: -7388144717475398215
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_40
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 254
+        width: 71
+        height: 263
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 726c636bb7dd65690800000000000000
+      internalID: -7613654596615485913
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_41
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 461
+        width: 30
+        height: 87
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e0fffe38c687b090800000000000000
+      internalID: -8018792416901336857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_42
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 469
+        width: 17
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76e5c4aef0bdf4800800000000000000
+      internalID: 598938136865431143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_43
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 511
+        width: 23
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82f220272527ad360800000000000000
+      internalID: 7195189053103419176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_44
+      rect:
+        serializedVersion: 2
+        x: 1021
+        y: 407
+        width: 132
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ed8e1606ce59b560800000000000000
+      internalID: 7329994073121394150
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_45
+      rect:
+        serializedVersion: 2
+        x: 1157
+        y: 475
+        width: 36
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e45d0c667e8aa3460800000000000000
+      internalID: 7222270664256836942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_46
+      rect:
+        serializedVersion: 2
+        x: 1184
+        y: 405
+        width: 41
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3716414bb0aa7f740800000000000000
+      internalID: 5185800463183012211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_47
+      rect:
+        serializedVersion: 2
+        x: 1083
+        y: 306
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf6a597f1f8aa4580800000000000000
+      internalID: -8842069161194182917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_48
+      rect:
+        serializedVersion: 2
+        x: 1079
+        y: 232
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1489e4c16a2f0970800000000000000
+      internalID: 8723237602643772443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_49
+      rect:
+        serializedVersion: 2
+        x: 1101
+        y: 231
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 337a20c60d0e87af0800000000000000
+      internalID: -398321381252356301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_50
+      rect:
+        serializedVersion: 2
+        x: 1127
+        y: 238
+        width: 16
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28b910d423238a450800000000000000
+      internalID: 6100180886895041410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_51
+      rect:
+        serializedVersion: 2
+        x: 1155
+        y: 194
+        width: 86
+        height: 107
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91c9500029e3ece10800000000000000
+      internalID: 2219780463126748185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_52
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 103
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b4a13e93de06fd20800000000000000
+      internalID: 3311850878032520373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_53
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 95
+        width: 7
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e7c88410ae0fdd50800000000000000
+      internalID: 6764141246035838951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_54
+      rect:
+        serializedVersion: 2
+        x: 1093
+        y: 101
+        width: 11
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0885cacc3ea92f60800000000000000
+      internalID: 8010124988378351628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_55
+      rect:
+        serializedVersion: 2
+        x: 1113
+        y: 85
+        width: 20
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe6be14058fa23940800000000000000
+      internalID: 5274471099438905071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_56
+      rect:
+        serializedVersion: 2
+        x: 1129
+        y: 107
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8049e87f7fa058970800000000000000
+      internalID: 8756417110618313736
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_57
+      rect:
+        serializedVersion: 2
+        x: 510
+        y: 79
+        width: 22
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd9f022fadb1ac620800000000000000
+      internalID: 2795077145915881948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_GreyCompany_A_58
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 71
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97adf4a7bf83062b0800000000000000
+      internalID: -5593408084454155655
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Emblem_GreyCompany_A_0: 5661955626175844321
+      Emblem_GreyCompany_A_1: -4943028880571582292
+      Emblem_GreyCompany_A_10: 3244777429626008308
+      Emblem_GreyCompany_A_11: -4327389898993896750
+      Emblem_GreyCompany_A_12: -8025504977646942527
+      Emblem_GreyCompany_A_13: -4488963499478206814
+      Emblem_GreyCompany_A_14: -3421633172379411182
+      Emblem_GreyCompany_A_15: 3958039162840175086
+      Emblem_GreyCompany_A_16: -7673284539523784729
+      Emblem_GreyCompany_A_17: 1446924909215906166
+      Emblem_GreyCompany_A_18: 6978318036040069732
+      Emblem_GreyCompany_A_19: -8105090377532996781
+      Emblem_GreyCompany_A_2: 1927039945577883615
+      Emblem_GreyCompany_A_20: -3512387929860926360
+      Emblem_GreyCompany_A_21: 6266723393789677037
+      Emblem_GreyCompany_A_22: 6913289624614938695
+      Emblem_GreyCompany_A_23: -6390113323280163679
+      Emblem_GreyCompany_A_24: -8872344216204327687
+      Emblem_GreyCompany_A_25: -164157468114327048
+      Emblem_GreyCompany_A_26: 3959894687670548614
+      Emblem_GreyCompany_A_27: 7516083766144126977
+      Emblem_GreyCompany_A_28: -7183828671363434751
+      Emblem_GreyCompany_A_29: -2616478502115461806
+      Emblem_GreyCompany_A_3: 1144313207906750500
+      Emblem_GreyCompany_A_30: 6371935454383989462
+      Emblem_GreyCompany_A_31: 7873720970155539032
+      Emblem_GreyCompany_A_32: -1437674962646268669
+      Emblem_GreyCompany_A_33: 3135941153345384548
+      Emblem_GreyCompany_A_34: -5657045872678824348
+      Emblem_GreyCompany_A_35: -2962880446478224361
+      Emblem_GreyCompany_A_36: 8975807343059704402
+      Emblem_GreyCompany_A_37: -420507398806021993
+      Emblem_GreyCompany_A_38: 4572479282367653944
+      Emblem_GreyCompany_A_39: -7388144717475398215
+      Emblem_GreyCompany_A_4: -1443028457162500773
+      Emblem_GreyCompany_A_40: -7613654596615485913
+      Emblem_GreyCompany_A_41: -8018792416901336857
+      Emblem_GreyCompany_A_42: 598938136865431143
+      Emblem_GreyCompany_A_43: 7195189053103419176
+      Emblem_GreyCompany_A_44: 7329994073121394150
+      Emblem_GreyCompany_A_45: 7222270664256836942
+      Emblem_GreyCompany_A_46: 5185800463183012211
+      Emblem_GreyCompany_A_47: -8842069161194182917
+      Emblem_GreyCompany_A_48: 8723237602643772443
+      Emblem_GreyCompany_A_49: -398321381252356301
+      Emblem_GreyCompany_A_5: -4413413191531036112
+      Emblem_GreyCompany_A_50: 6100180886895041410
+      Emblem_GreyCompany_A_51: 2219780463126748185
+      Emblem_GreyCompany_A_52: 3311850878032520373
+      Emblem_GreyCompany_A_53: 6764141246035838951
+      Emblem_GreyCompany_A_54: 8010124988378351628
+      Emblem_GreyCompany_A_55: 5274471099438905071
+      Emblem_GreyCompany_A_56: 8756417110618313736
+      Emblem_GreyCompany_A_57: 2795077145915881948
+      Emblem_GreyCompany_A_58: -5593408084454155655
+      Emblem_GreyCompany_A_6: 1874916845872146926
+      Emblem_GreyCompany_A_7: 1720348569432309980
+      Emblem_GreyCompany_A_8: -5430223763724179823
+      Emblem_GreyCompany_A_9: -423283086551407444
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

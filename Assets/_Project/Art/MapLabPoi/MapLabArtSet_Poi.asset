@@ -1,0 +1,6609 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2c60839abb5890419d130d947cec017, type: 3}
+  m_Name: MapLabArtSet_Poi
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabArtSet
+  SchemaVersion: 1
+  PackageRevision: 7
+  PackageId: ks-maplab-selected-poi-and-factions
+  ImportVersion: 1
+  ImportedAt: 2026-11-07 17:57:09
+  ManifestSha256: a4167f9e410a0135851bed4e949a15bee9ff2d27d50816523305b3ff13dbb1fa
+  Entries:
+  - Id: Bathhouse_A_FrontRight
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 8790dd474e3ac1246b7ef74986d95cca, type: 3}
+    Weight: 1
+    WorldHeight: 7.5
+    Pivot: {x: 0.49664, y: 0.06144}
+    Footprint: {x: 6.655414, y: 4.621815}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Buildings/Bathhouse_A_FrontRight.png
+    Sha256: efaf640420cd59208285f34f7a521f622e4a42688ac73b3f057691b5a2991112
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.106254205
+      y: 0.06143667
+      width: 0.78076667
+      height: 0.89035916
+    PivotHint: {x: 0.49664, y: 0.06144}
+    FootX: 0.58585554
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: bathhouse
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.80255157, g: 0.6450991, b: 0.45531595, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Burnt_House_A_FrontRight
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 14a2707ff3c35ac48967e24f615a015a, type: 3}
+    Weight: 1
+    WorldHeight: 7.5
+    Pivot: {x: 0.49832, y: 0.0794}
+    Footprint: {x: 7.1033144, y: 4.932857}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Buildings/Burnt_House_A_FrontRight.png
+    Sha256: cd95cc013ce42c6f0baa9374ba773f3e0b141f4e49f35e469c5cdfac8a16cf35
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.11096167
+      y: 0.079395086
+      width: 0.7740417
+      height: 0.82703215
+    PivotHint: {x: 0.49832, y: 0.0794}
+    FootX: 0.5917981
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: burnt_house
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6676296, g: 0.52524966, b: 0.39821297, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: ElderHouse_A_FrontRight
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 74da63fd34ed94f41bd7758db6a1a31a, type: 3}
+    Weight: 1
+    WorldHeight: 7.5
+    Pivot: {x: 0.47852, y: 0.04199}
+    Footprint: {x: 7.209636, y: 5.0066915}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Buildings/ElderHouse_A_FrontRight.png
+    Sha256: 01b6b22d0aa4ec80f8c8f204a9b91a86ad18ac175c4cfa47795e728b8253a209
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.072916664
+      y: 0.041992188
+      width: 0.81184894
+      height: 0.9121094
+    PivotHint: {x: 0.47852, y: 0.04199}
+    FootX: 0.6166356
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: ElderHouse
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.70191693, g: 0.5376979, b: 0.40102202, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Granary_A_FrontRight
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: d17812cd1956a734b8cf3b6522ebd805, type: 3}
+    Weight: 1
+    WorldHeight: 7.5
+    Pivot: {x: 0.48933, y: 0.04587}
+    Footprint: {x: 5.0967393, y: 3.539402}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Buildings/Granary_A_FrontRight.png
+    Sha256: 0be697becd82ba2fa7cc4986559b6d6a8ce50af26c677e0e8b386ec674d78d28
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.09222561
+      y: 0.04587156
+      width: 0.79420733
+      height: 0.9207673
+    PivotHint: {x: 0.48933, y: 0.04587}
+    FootX: 0.52923214
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: granary
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7774422, g: 0.620641, b: 0.4519977, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: HealerHouse_A_FrontRight
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: bd4692ec2ddb012408989ae7c90401b2, type: 3}
+    Weight: 1
+    WorldHeight: 7.5
+    Pivot: {x: 0.49089, y: 0.05762}
+    Footprint: {x: 6.5451026, y: 4.54521}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Buildings/HealerHouse_A_FrontRight.png
+    Sha256: ef23ccdc4ef7034332595710d6f460027977bcce117f745d0cee794d3f0135c5
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.12434896
+      y: 0.05859375
+      width: 0.73307294
+      height: 0.90722656
+    PivotHint: {x: 0.49089, y: 0.05762}
+    FootX: 0.564822
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: HealerHouse
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7965049, g: 0.61639786, b: 0.41971803, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: MerchantShop_A_FrontRight
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 44975f59d530fab4c8a93453100013ce, type: 3}
+    Weight: 1
+    WorldHeight: 7.5
+    Pivot: {x: 0.48698, y: 0.03516}
+    Footprint: {x: 6.6249743, y: 4.6006765}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Buildings/MerchantShop_A_FrontRight.png
+    Sha256: a0626594b76aebf798a11aeb1f65a37bbb75abfb3e9a790de037aceb85620287
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.103515625
+      y: 0.03515625
+      width: 0.7675781
+      height: 0.93847656
+    PivotHint: {x: 0.48698, y: 0.03516}
+    FootX: 0.55776924
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: MerchantShop
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7426061, g: 0.56918114, b: 0.40767318, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: NoticePost_A_FrontRight
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 456149b88f29af544ab39d8463b47f3e, type: 3}
+    Weight: 1
+    WorldHeight: 7.5
+    Pivot: {x: 0.49349, y: 0.01562}
+    Footprint: {x: 4.7379937, y: 3.2902734}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Buildings/NoticePost_A_FrontRight.png
+    Sha256: 54ceb049c14629e071a375dbd394684c2d2558d6a668aa02b81b2a38f446e801
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.21158855
+      y: 0.015625
+      width: 0.56380206
+      height: 0.9638672
+    PivotHint: {x: 0.49349, y: 0.01562}
+    FootX: 0.47000155
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: NoticePost
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7553598, g: 0.5832818, b: 0.41268063, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Road_Shelter_A
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 90424e278b8d13245a6ffcf9c7705a3c, type: 3}
+    Weight: 1
+    WorldHeight: 7.5
+    Pivot: {x: 0.49328, y: 0.06522}
+    Footprint: {x: 6.1015286, y: 4.2371726}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Buildings/Road_Shelter_A.png
+    Sha256: 01bf69ee772c7f534e48ef0122b9372fb416afaf2ba2753f996b61c42652ab9c
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.1452589
+      y: 0.06616257
+      width: 0.6960323
+      height: 0.8657845
+    PivotHint: {x: 0.49328, y: 0.06522}
+    FootX: 0.5808436
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: road_shelter
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7787151, g: 0.6246562, b: 0.46067238, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Ruler_House_A_FrontRight
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 8e75a1086d523974db5b7c639845d5ef, type: 3}
+    Weight: 1
+    WorldHeight: 7.5
+    Pivot: {x: 0.49664, y: 0.04348}
+    Footprint: {x: 7.5366907, y: 5.233813}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Buildings/Ruler_House_A_FrontRight.png
+    Sha256: c5c0e2c2f164d34e2ec44d03d0bef9f50b473da3336b526f47341c123397c1cf
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.039677203
+      y: 0.04347826
+      width: 0.9132481
+      height: 0.91965973
+    PivotHint: {x: 0.49664, y: 0.04348}
+    FootX: 0.6545973
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: ruler_house
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7965963, g: 0.6093978, b: 0.4132781, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Smithy_A_FrontRight
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: c29d2c048a0f2524dae56976058a1425, type: 3}
+    Weight: 1
+    WorldHeight: 7.5
+    Pivot: {x: 0.49414, y: 0.03223}
+    Footprint: {x: 6.5144687, y: 4.5239363}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Buildings/Smithy_A_FrontRight.png
+    Sha256: 17f4869406d628a64a000dfcf5a7474e11cc6448a8ecefbfad332438c04e52c4
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.125
+      y: 0.033203125
+      width: 0.73828125
+      height: 0.91796875
+    PivotHint: {x: 0.49414, y: 0.03223}
+    FootX: 0.5666732
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: Smithy
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6873723, g: 0.5406107, b: 0.41194144, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Tavern_A_FrontRight
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 4f231cd7634bac140a9649b41608f7bb, type: 3}
+    Weight: 1
+    WorldHeight: 7.5
+    Pivot: {x: 0.49023, y: 0.04395}
+    Footprint: {x: 8.434174, y: 5.8570647}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Buildings/Tavern_A_FrontRight.png
+    Sha256: 64469995665ab6194378950c603b8c405811de8b6eb8d6bcb67e1847c2b2837c
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.043945312
+      width: 0.92838544
+      height: 0.89160156
+    PivotHint: {x: 0.49023, y: 0.04395}
+    FootX: 0.6982407
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: Tavern
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.70613503, g: 0.5444044, b: 0.40842208, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Watch_Tower_A
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 81acea6cb6f2a884fac9007675bfb325, type: 3}
+    Weight: 1
+    WorldHeight: 7.5
+    Pivot: {x: 0.4878, y: 0.04671}
+    Footprint: {x: 3.6770232, y: 2.5534883}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Buildings/Watch_Tower_A.png
+    Sha256: 07daebf86cc7780343d856b88e1caf19bc8e3e062c2e56c3f8bc9ac36f922059
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.20884146
+      y: 0.047539618
+      width: 0.55792683
+      height: 0.89658046
+    PivotHint: {x: 0.4878, y: 0.04671}
+    FootX: 0.5348681
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: watch_tower
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.75701666, g: 0.5736062, b: 0.39326927, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Watermill_A_FrontLeft
+    Category: 1
+    Kind: 6
+    ManifestKind: House
+    Texture: {fileID: 2800000, guid: 0c5df8b0d2fa16546ac84390c74a2584, type: 3}
+    Weight: 1
+    WorldHeight: 7.5
+    Pivot: {x: 0.49294, y: 0.04537}
+    Footprint: {x: 6.3628783, y: 4.4186654}
+    MaxSlope: 12
+    Orientation: 0
+    ScaleRange: {x: 0.96, y: 1.04}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Buildings/Watermill_A_FrontLeft.png
+    Sha256: d523f035d86da9cad9cf69590089a83e548c094c98362fb2ed8b4fa78ad61a98
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.11297915
+      y: 0.04536862
+      width: 0.7599193
+      height: 0.9064272
+    PivotHint: {x: 0.49294, y: 0.04537}
+    FootX: 0.53239745
+    Direction: FrontLeft
+    PitchDownDegrees: 50
+    Role: watermill
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7690514, g: 0.61757237, b: 0.45532998, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Bandit_Back
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 3142becf44444a64d94079ec7f483f81, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49043, y: 0.13802233}
+    Footprint: {x: 1.0129075, y: 0.703408}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Bandit_Back.png
+    Sha256: 6d023fbd1fe602f882bc92764cd324644fd6888827a57b8ae274280e335af637
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.25039873
+      y: 0.10526316
+      width: 0.4800638
+      height: 0.81897926
+    PivotHint: {x: 0.49043, y: 0.10447}
+    FootX: 0.48802575
+    Direction: Back
+    PitchDownDegrees: 50
+    Role: bandit
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.58897376, g: 0.44357666, b: 0.30056697, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Bandit_Back_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 15f2ebc0260c38a47b0f19a1af302323, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49681, y: 0.12826157}
+    Footprint: {x: 0.84961426, y: 0.59000987}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Bandit_Back_Left.png
+    Sha256: 5b51cf52875143dd16228f622e3a8b6e6b1beccb77a5dc44a9c49073a0afb72a
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2966507
+      y: 0.09569378
+      width: 0.40031898
+      height: 0.81419456
+    PivotHint: {x: 0.49681, y: 0.09569}
+    FootX: 0.42086548
+    Direction: BackLeft
+    PitchDownDegrees: 50
+    Role: bandit
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.59219724, g: 0.43902865, b: 0.29789847, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Bandit_Back_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 7ad6817c0cb78dd4883e2d9bc7caf2e7, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.47847, y: 0.13314195}
+    Footprint: {x: 0.8302501, y: 0.5765625}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Bandit_Back_Right.png
+    Sha256: ef08ff0ec71d7c4ab38e65aeab596cefd400232171cbb7496d18e6e97f7202af
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.28229666
+      y: 0.10047847
+      width: 0.3923445
+      height: 0.8165869
+    PivotHint: {x: 0.47847, y: 0.09968}
+    FootX: 0.40484744
+    Direction: BackRight
+    PitchDownDegrees: 50
+    Role: bandit
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.5935343, g: 0.44568133, b: 0.30367666, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Bandit_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 9f0e4b7af5100a64c8e41e3a0c8c6868, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.48804, y: 0.14035088}
+    Footprint: {x: 1.0182557, y: 0.707122}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Bandit_Front.png
+    Sha256: 03dfda73c6b19b31f9e5030b6c7c6af1817183723a3aa5b64430a7b2c27ba9ae
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.24720894
+      y: 0.1076555
+      width: 0.4816587
+      height: 0.81738436
+    PivotHint: {x: 0.48804, y: 0.10766}
+    FootX: 0.48889598
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: bandit
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.55521613, g: 0.41234362, b: 0.27205026, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Bandit_Front_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 2d732a8cb4bb8d14592b66e4bc5dfd7b, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49123, y: 0.13196172}
+    Footprint: {x: 0.86483324, y: 0.6005786}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Bandit_Front_Left.png
+    Sha256: 585c9ea0e9aa00d8204a0f848b2e3322952488bc0a92487957ea75ff20ec5a13
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.28389156
+      y: 0.09888357
+      width: 0.4138756
+      height: 0.82695377
+    PivotHint: {x: 0.49123, y: 0.09809}
+    FootX: 0.509273
+    Direction: FrontLeft
+    PitchDownDegrees: 50
+    Role: bandit
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.5904651, g: 0.43532777, b: 0.3002975, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Bandit_Front_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: c28c127c1c244f747bed9f1469f8ebe6, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.48126, y: 0.12258373}
+    Footprint: {x: 0.9128746, y: 0.63394064}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Bandit_Front_Right.png
+    Sha256: 3c9c431bed2aa8cbcc25e6924d013ab8a742fa6459a524897adb43349fef6965
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.261563
+      y: 0.08931419
+      width: 0.43939394
+      height: 0.8317384
+    PivotHint: {x: 0.48126, y: 0.08852}
+    FootX: 0.4197175
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: bandit
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.57553786, g: 0.43136802, b: 0.29994306, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Caravan_Back
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 79f410940f2283140b27e49bec82e8ce, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49522, y: 0.14727272}
+    Footprint: {x: 1.217613, y: 0.84556454}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Caravan_Back.png
+    Sha256: ca7c976d04d01ed568b8b6b4ef44bf70d0d2355fa939f1f172b433730df62567
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2169059
+      y: 0.115629986
+      width: 0.55741626
+      height: 0.79106855
+    PivotHint: {x: 0.49522, y: 0.11563}
+    FootX: 0.42888474
+    Direction: Back
+    PitchDownDegrees: 50
+    Role: caravan
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6567457, g: 0.47385153, b: 0.33636943, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Caravan_Back_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: dc5838ab55acb8f4482be98a42779fbe, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49561, y: 0.18864433}
+    Footprint: {x: 2.1136806, y: 1.4678336}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Caravan_Back_Left.png
+    Sha256: 30da26d6870d6aad89353288b027e5a388e08ad18cf140e53a242bd0f433f13b
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.050239235
+      y: 0.15948963
+      width: 0.891547
+      height: 0.72886765
+    PivotHint: {x: 0.49561, y: 0.15949}
+    FootX: 0.53723365
+    Direction: BackLeft
+    PitchDownDegrees: 50
+    Role: caravan
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6659617, g: 0.47404552, b: 0.3345182, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Caravan_Back_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: c59136b73a56b3340bf3b5318f775816, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49402, y: 0.10073365}
+    Footprint: {x: 1.9508573, y: 1.354762}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Caravan_Back_Right.png
+    Sha256: 2f869fbe79497812a027f9177df22c7da03f23e4539e1d21c7a63337ebb0ebc8
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.040669855
+      y: 0.068580545
+      width: 0.90749604
+      height: 0.80382776
+    PivotHint: {x: 0.49402, y: 0.06858}
+    FootX: 0.43918532
+    Direction: BackRight
+    PitchDownDegrees: 50
+    Role: caravan
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6732563, g: 0.4799979, b: 0.34662583, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Caravan_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: dd847dca1fb2ec045a3d02b894a3b009, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.5008, y: 0.13929825}
+    Footprint: {x: 1.3244333, y: 0.9197453}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Caravan_Front.png
+    Sha256: d0397b20cc7c7339a35775d3589d50039def6c892ee4ee433e722a7f75279660
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.21291865
+      y: 0.1092504
+      width: 0.57575756
+      height: 0.75119615
+    PivotHint: {x: 0.5008, y: 0.10845}
+    FootX: 0.53168744
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: caravan
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.64321315, g: 0.46406272, b: 0.32429928, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Caravan_Front_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 0243c90ae3f0fb6489ef7ad7ebb5ca7b, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.51435, y: 0.116044655}
+    Footprint: {x: 1.5539439, y: 1.0791277}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Caravan_Front_Left.png
+    Sha256: 8063e4d19aee98d3ba0691d3d32af45f2b6ec36c8397461c3cfa9660ab1bd001
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.16905901
+      y: 0.085326955
+      width: 0.6905901
+      height: 0.7679426
+    PivotHint: {x: 0.51435, y: 0.08453}
+    FootX: 0.46262205
+    Direction: FrontLeft
+    PitchDownDegrees: 50
+    Role: caravan
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.64287645, g: 0.46472415, b: 0.33217004, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Caravan_Front_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 4f22580044a37114d87cfed28e235c87, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49402, y: 0.11821372}
+    Footprint: {x: 1.6146324, y: 1.1212724}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Caravan_Front_Right.png
+    Sha256: c0b132979a3da15e155f00755d45b24aebbb7db8029faf7a7e8d55da407346f1
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.119617224
+      y: 0.086124405
+      width: 0.7496013
+      height: 0.80223286
+    PivotHint: {x: 0.49402, y: 0.08533}
+    FootX: 0.55671453
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: caravan
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6937921, g: 0.49269423, b: 0.34448114, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Patrol_Back
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 5462758f5e838c240aa6825dc3c31ffa, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.48046, y: 0.13773525}
+    Footprint: {x: 1.0405345, y: 0.72259337}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Patrol_Back.png
+    Sha256: 1c5314ed968a06f3d758a0838d952bceceb3aef1ba844f78e42e553860699023
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.23604466
+      y: 0.10526316
+      width: 0.48883572
+      height: 0.8118022
+    PivotHint: {x: 0.48046, y: 0.10526}
+    FootX: 0.50381416
+    Direction: Back
+    PitchDownDegrees: 50
+    Role: patrol
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.72614276, g: 0.5570798, b: 0.38237426, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Patrol_Back_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: ae9577e9e38b4b2418dcbcc88fb28a4a, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.47847, y: 0.14360447}
+    Footprint: {x: 0.9153185, y: 0.6356378}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Patrol_Back_Left.png
+    Sha256: f1b001a8e499b01bc773b225372567ef7be94c592e40f9e776aa3cc618c2b694
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.261563
+      y: 0.1108453
+      width: 0.4338118
+      height: 0.81897926
+    PivotHint: {x: 0.47847, y: 0.11085}
+    FootX: 0.3995206
+    Direction: BackLeft
+    PitchDownDegrees: 50
+    Role: patrol
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7183583, g: 0.55972666, b: 0.39952463, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Patrol_Back_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: b1624ffa63425a7469adeabdf1c43a50, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.5008, y: 0.13543859}
+    Footprint: {x: 1.0307072, y: 0.7157689}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Patrol_Back_Right.png
+    Sha256: 1d91f4c12195086fb2a7fbc2bd90cd7faf1efe0e3f54f84a1836bb4406a4293b
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2583732
+      y: 0.102870815
+      width: 0.48564592
+      height: 0.81419456
+    PivotHint: {x: 0.5008, y: 0.10287}
+    FootX: 0.36318716
+    Direction: BackRight
+    PitchDownDegrees: 50
+    Role: patrol
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.72458637, g: 0.5598026, b: 0.39859748, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Patrol_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 80bb64ec5e8e67b459e943b1539860b9, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.5, y: 0.14}
+    Footprint: {x: 1.0872427, y: 0.7550296}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Patrol_Front.png
+    Sha256: dcd322a843d56222eec33ffcd3adfee5ef3955a2029ffefc32a7b77db1bc94cd
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.24561404
+      y: 0.1076555
+      width: 0.50877196
+      height: 0.80861247
+    PivotHint: {x: 0.5, y: 0.10766}
+    FootX: 0.47347006
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: patrol
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.66626763, g: 0.5175215, b: 0.36775175, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Patrol_Front_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 92154e8a13d3159459ff8fcb14df0f97, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.48445, y: 0.10465709}
+    Footprint: {x: 0.8202532, y: 0.56962025}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Patrol_Front_Left.png
+    Sha256: 32049142f4c7295557d0bba2513100dbaeeca11213413d99b089b68883e0ceda
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2751196
+      y: 0.06937799
+      width: 0.41866028
+      height: 0.8819777
+    PivotHint: {x: 0.48445, y: 0.06938}
+    FootX: 0.5039712
+    Direction: FrontLeft
+    PitchDownDegrees: 50
+    Role: patrol
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.68247414, g: 0.5406367, b: 0.40883735, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Patrol_Front_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: dc342f99b36ced349815c187b1b4f169, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49641, y: 0.10755981}
+    Footprint: {x: 0.91235834, y: 0.6335822}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Patrol_Front_Right.png
+    Sha256: d27f3bdbbfc5c909b35fb357a0250dc87b8db888935d397947e1be00cdb526bf
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.27033493
+      y: 0.073365234
+      width: 0.45135567
+      height: 0.8548644
+    PivotHint: {x: 0.49641, y: 0.07337}
+    FootX: 0.42372018
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: patrol
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6807911, g: 0.5241651, b: 0.36910188, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Wandering_Master_Back
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 7affbdfc6609fd145922cbf3649b1432, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.48285, y: 0.15039872}
+    Footprint: {x: 1.0560001, y: 0.73333335}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Wandering_Master_Back.png
+    Sha256: 1b01ba4dd01690805b31c3abb6ae82b02014916f51e98d38f60a43f2cf7c4a2f
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2416268
+      y: 0.11881977
+      width: 0.48245615
+      height: 0.7894737
+    PivotHint: {x: 0.48285, y: 0.11882}
+    FootX: 0.48536223
+    Direction: Back
+    PitchDownDegrees: 50
+    Role: wandering_master
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6713854, g: 0.4841835, b: 0.3166883, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Wandering_Master_Back_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: ef03204c58f9d82408b08d0ebd5739d9, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49522, y: 0.13393939}
+    Footprint: {x: 0.9011892, y: 0.6258258}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Wandering_Master_Back_Left.png
+    Sha256: 8858d1c7b9e8d29d7153b2acee19bc2856635e5d4ff75dd4772c14532987cb9f
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.28787878
+      y: 0.102073364
+      width: 0.41547048
+      height: 0.7966507
+    PivotHint: {x: 0.49522, y: 0.10207}
+    FootX: 0.4329669
+    Direction: BackLeft
+    PitchDownDegrees: 50
+    Role: wandering_master
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6861745, g: 0.49865198, b: 0.3382161, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Wandering_Master_Back_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 49f50022597291749996b5820d141a66, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49601, y: 0.13645932}
+    Footprint: {x: 1.0268077, y: 0.71306086}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Wandering_Master_Back_Right.png
+    Sha256: 22a0e2d4233b7b38b6b7379715383ee20c2e31c8b1ac2630f038f7af781a5c31
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2583732
+      y: 0.10446571
+      width: 0.4752791
+      height: 0.7998405
+    PivotHint: {x: 0.49601, y: 0.10367}
+    FootX: 0.39440727
+    Direction: BackRight
+    PitchDownDegrees: 50
+    Role: wandering_master
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6639827, g: 0.48186174, b: 0.32226723, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Wandering_Master_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 0fcc36d700ff5f7408ae7754830b8f62, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.51475, y: 0.14481659}
+    Footprint: {x: 1.1781819, y: 0.8181818}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Wandering_Master_Front.png
+    Sha256: 741688a219077fafe5ee75cb559b3f74998dfbf8668964109b71bae0b090d813
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.24561404
+      y: 0.11323764
+      width: 0.5382775
+      height: 0.7894737
+    PivotHint: {x: 0.51475, y: 0.11324}
+    FootX: 0.4725904
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: wandering_master
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.66977286, g: 0.48428118, b: 0.31765574, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Wandering_Master_Front_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 5ca500ba1b6ef9347bfceb0fddbe57ba, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.52193, y: 0.12360447}
+    Footprint: {x: 1.1177212, y: 0.7761952}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Wandering_Master_Front_Left.png
+    Sha256: 237a8738ce0e4f92f88f48126de4e949ab4911320d75548cb5f46752994319ae
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.25757575
+      y: 0.09090909
+      width: 0.52870816
+      height: 0.81738436
+    PivotHint: {x: 0.52193, y: 0.09091}
+    FootX: 0.516797
+    Direction: FrontLeft
+    PitchDownDegrees: 50
+    Role: wandering_master
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.68440986, g: 0.49855646, b: 0.3355969, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Wandering_Master_Front_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 113ea73254eac594fa12834afe32ee26, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.46093, y: 0.12028708}
+    Footprint: {x: 1.0087053, y: 0.70048976}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Wandering_Master_Front_Right.png
+    Sha256: 8d0d05df536a7da83a643697347693bb61f56200a2cc7c9c60b8e33a263f627d
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.22328548
+      y: 0.0877193
+      width: 0.4752791
+      height: 0.81419456
+    PivotHint: {x: 0.46093, y: 0.08692}
+    FootX: 0.3747649
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: wandering_master
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6782607, g: 0.49430072, b: 0.33323953, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Worker_Fisher_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 2e2443be0e297c842b23ceeb74bac08c, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.48166, y: 0.11952153}
+    Footprint: {x: 0.95192176, y: 0.66105676}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Worker_Fisher_Front.png
+    Sha256: 675fb6c736d458b6079f1415218779cd986125a8828f81ac4de0f4da68a34531
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.25757575
+      y: 0.08692185
+      width: 0.4489633
+      height: 0.814992
+    PivotHint: {x: 0.48166, y: 0.08612}
+    FootX: 0.4897946
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: worker_fisher
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6184982, g: 0.4968786, b: 0.38744628, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Worker_Gatherer_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 71f23c0b3d4e4d14b9ddfc184c7822af, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.5008, y: 0.111610845}
+    Footprint: {x: 0.95542437, y: 0.6634891}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Worker_Gatherer_Front.png
+    Sha256: e73185e30509afd404dc041e85213ccf684622618897b40744c859f92b0ca606
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.26953748
+      y: 0.07814992
+      width: 0.46251994
+      height: 0.8365231
+    PivotHint: {x: 0.5008, y: 0.07815}
+    FootX: 0.48621526
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: worker_gatherer
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7015139, g: 0.51177084, b: 0.33896488, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Worker_Hunter_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 26a13d12134b4074ba6f6e05d0029fa0, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.4988, y: 0.14207336}
+    Footprint: {x: 1.0034105, y: 0.6968128}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Worker_Hunter_Front.png
+    Sha256: a46b3a3bee7057b1e0a15b392d0507a2a180a1b9588068df68be1e15ec2ff9bd
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.26634768
+      y: 0.11004785
+      width: 0.4649123
+      height: 0.80063796
+    PivotHint: {x: 0.4988, y: 0.10925}
+    FootX: 0.48285183
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: worker_hunter
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6084752, g: 0.4783489, b: 0.3225856, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Worker_Lumberjack_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 3fe4192ca1392474ebe5f2f72c34b262, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.47727, y: 0.12354067}
+    Footprint: {x: 0.9999766, y: 0.69442815}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Worker_Lumberjack_Front.png
+    Sha256: 03bc07afaf868feca52d357bd8087ee410f8c864f6e920ebb492bfd201c80319
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2416268
+      y: 0.09090909
+      width: 0.47208932
+      height: 0.81578946
+    PivotHint: {x: 0.47727, y: 0.09091}
+    FootX: 0.4932838
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: worker_lumberjack
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6872109, g: 0.5178827, b: 0.35690582, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Worker_Shepherd_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 0491c8cd8e2e274428f0048543aaadde, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.5004, y: 0.14437002}
+    Footprint: {x: 1.1136395, y: 0.7733607}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Worker_Shepherd_Front.png
+    Sha256: a3709a167b3ba503b4062127686dc6f6a34a1dc23ea60e269153d9d88a073ca3
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.24960127
+      y: 0.11323764
+      width: 0.5015949
+      height: 0.7783094
+    PivotHint: {x: 0.5004, y: 0.11324}
+    FootX: 0.480802
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: worker_shepherd
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.68471503, g: 0.5273747, b: 0.37373272, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Worker_Wounded_Worker_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: c0f3978186bc1394baf9cc70f1d5870e, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.50399, y: 0.090430625}
+    Footprint: {x: 1.4280124, y: 0.9916752}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Worker_Wounded_Worker_Front.png
+    Sha256: ba520360e2d1bc451440b790692bb394373fdbfdd9fd4ae1131a0bd3d5227c1c
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.17942584
+      y: 0.059011165
+      width: 0.64912283
+      height: 0.78548646
+    PivotHint: {x: 0.50399, y: 0.05901}
+    FootX: 0.36404598
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: worker_wounded_worker
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6346377, g: 0.45658854, b: 0.31270283, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Event_Encounter_Sign_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Marker
+    Texture: {fileID: 2800000, guid: 9fc535d874eaa4e49bef69e6ba226882, type: 3}
+    Weight: 1
+    WorldHeight: 3
+    Pivot: {x: 0.48521, y: 0.084877126}
+    Footprint: {x: 1.2470102, y: 0.8659793}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Markers/Event_Encounter_Sign_A.png
+    Sha256: 83c4c869dfea130188a729fc38d2114a2c5c819825d7d4916d97a3d2db4979f4
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.29657027
+      y: 0.048204158
+      width: 0.37659717
+      height: 0.9168242
+    PivotHint: {x: 0.48521, y: 0.0482}
+    FootX: 0.3875384
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: encounter_marker
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.8080706, g: 0.66336447, b: 0.49539024, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Portal_Dormant_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Marker
+    Texture: {fileID: 2800000, guid: 2e2f6f9ff9a29d24f9b14184d1897255, type: 3}
+    Weight: 1
+    WorldHeight: 3
+    Pivot: {x: 0.49365, y: 0.14606771}
+    Footprint: {x: 0.21960288, y: 0.152502}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Markers/Portal_Dormant_A.png
+    Sha256: 9f971db2fefdd866844d02f79fe70181dd5f31f34d98bd100d1eb2ff81e3b745
+    Width: 1024
+    Height: 1536
+    SolidRect:
+      serializedVersion: 2
+      x: 0.43164062
+      y: 0.11328125
+      width: 0.125
+      height: 0.81966144
+    PivotHint: {x: 0.49365, y: 0.11263}
+    FootX: 0.48668218
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: portal_dormant
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6603115, g: 0.56960386, b: 0.48174703, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Portal_Open_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Marker
+    Texture: {fileID: 2800000, guid: 1e096ea9b10c2af468c56501709b8854, type: 3}
+    Weight: 1
+    WorldHeight: 3
+    Pivot: {x: 0.47998, y: 0.14541666}
+    Footprint: {x: 0.41003972, y: 0.2847498}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Markers/Portal_Open_A.png
+    Sha256: 61729778847426661c496b725b63b053aeb8c9ed51095047d484bf1658ff0684
+    Width: 1024
+    Height: 1536
+    SolidRect:
+      serializedVersion: 2
+      x: 0.36328125
+      y: 0.11263021
+      width: 0.23339844
+      height: 0.81966144
+    PivotHint: {x: 0.47998, y: 0.11263}
+    FootX: 0.48764023
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: portal_open
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.37194073, g: 0.386677, b: 0.40679935, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Beaver_Dam_Module_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Module
+    Texture: {fileID: 2800000, guid: 2342962c76433c64c926c21d5bfc6685, type: 3}
+    Weight: 1
+    WorldHeight: 2.5
+    Pivot: {x: 0.50092, y: 0.16961326}
+    Footprint: {x: 7.103077, y: 4.932692}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Modules/Beaver_Dam_Module_A.png
+    Sha256: 2575c469bc45b027fca4ad6d80600e5dad4321dc184f8e75423a26feee5d4084
+    Width: 2172
+    Height: 724
+    SolidRect:
+      serializedVersion: 2
+      x: 0.028545119
+      y: 0.14088398
+      width: 0.9447514
+      height: 0.71823204
+    PivotHint: {x: 0.50092, y: 0.14088}
+    FootX: 0.48172778
+    Direction: horizontaltop
+    PitchDownDegrees: 50
+    Role: beaver_dam
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7107177, g: 0.5026751, b: 0.33187616, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: horizontal_top
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Palisade_Gate_Module_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Module
+    Texture: {fileID: 2800000, guid: 0c6dc07946b4c994da91864d448c70f8, type: 3}
+    Weight: 1
+    WorldHeight: 2.5
+    Pivot: {x: 0.49944, y: 0.16816233}
+    Footprint: {x: 4.7103343, y: 3.2710652}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Modules/Palisade_Gate_Module_A.png
+    Sha256: 9909a9bfef808199c17fe2c56b62bc5175a863efadf51e7c79c31f4e1c7f25c1
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.035512965
+      y: 0.13979706
+      width: 0.92784667
+      height: 0.7091319
+    PivotHint: {x: 0.49944, y: 0.1398}
+    FootX: 0.49033055
+    Direction: verticalfront
+    PitchDownDegrees: 50
+    Role: gate
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7803417, g: 0.60591894, b: 0.4048562, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Archery_Target_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 69d40a776b68a964e85a38f7049a33aa, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49966, y: 0.07531191}
+    Footprint: {x: 0.96496385, y: 0.67011374}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Archery_Target_A.png
+    Sha256: dcae0aec4b2f7f672fe6e3d477aab8815aa9790e8564162bdc41c46c0e79036d
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.25756556
+      y: 0.038752362
+      width: 0.48419636
+      height: 0.91398865
+    PivotHint: {x: 0.49966, y: 0.03875}
+    FootX: 0.57457316
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: archery_target
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.81465054, g: 0.5945034, b: 0.39080498, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Boundary_Post_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 2a2c532052929f6439be7cec5fb19cab, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49428, y: 0.08979206}
+    Footprint: {x: 0.51567155, y: 0.35810524}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Boundary_Post_A.png
+    Sha256: 96c3b0f4e89703f46bbd597fcedd1221c969a92d11459bc05c2c8a6faf71570f
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.36718225
+      y: 0.053875238
+      width: 0.25420308
+      height: 0.8979206
+    PivotHint: {x: 0.49428, y: 0.05388}
+    FootX: 0.5057378
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: boundary_post
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7907072, g: 0.6311169, b: 0.4371642, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Broken_Boat_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 428e0f7d5c199b846b3302415e3f3ea3, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49284, y: 0.18597656}
+    Footprint: {x: 2.4181924, y: 1.6793002}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Broken_Boat_A.png
+    Sha256: 9c5718caec73bd8d9ab2e3e29c2a9a7c88fe6745e321d360aad93c39d0ff68a7
+    Width: 1536
+    Height: 1024
+    SolidRect:
+      serializedVersion: 2
+      x: 0.076171875
+      y: 0.15917969
+      width: 0.8333333
+      height: 0.6699219
+    PivotHint: {x: 0.49284, y: 0.15918}
+    FootX: 0.6489743
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: broken_boat
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.77369297, g: 0.59984684, b: 0.43407091, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Broken_Cart_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 193b57110c419c34d922dd2e454f8990, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49227, y: 0.11678638}
+    Footprint: {x: 1.6724999, y: 1.1614583}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Broken_Cart_A.png
+    Sha256: cdc535d7216c6338f86b7800e53103afa0fb9d6b7c9ce81a31560388d946b32c
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.117686614
+      y: 0.08412098
+      width: 0.74983186
+      height: 0.81663513
+    PivotHint: {x: 0.49227, y: 0.08412}
+    FootX: 0.66769713
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: broken_cart
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.76985323, g: 0.58714426, b: 0.3942929, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Camp_Tent_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 7837f067d6f0e52439df80c9c95ff9b1, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.48958, y: 0.11595464}
+    Footprint: {x: 1.6984574, y: 1.1794842}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Camp_Tent_A.png
+    Sha256: 53f250cc44586881ac71cde3a9fac5be250e95b288248749d0db683b3b7e5625
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.09616678
+      y: 0.08223063
+      width: 0.7861466
+      height: 0.8431002
+    PivotHint: {x: 0.48958, y: 0.08223}
+    FootX: 0.5389617
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: camp_tent
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.85395014, g: 0.71196866, b: 0.53151524, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Carpenter_Bench_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 78dd6959ed8c4dd449b62609c79c9822, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49966, y: 0.11750472}
+    Footprint: {x: 1.8172005, y: 1.2619448}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Carpenter_Bench_A.png
+    Sha256: 3f33e12a575d517faa387286aaf7433f0729dc413a648d1358f9e5e6dc8a3d8a
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.106926695
+      y: 0.08601134
+      width: 0.7854741
+      height: 0.7873346
+    PivotHint: {x: 0.49966, y: 0.08601}
+    FootX: 0.60916483
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: carpenter_bench
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.81309503, g: 0.6311902, b: 0.43497914, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cave_Entrance_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 2969f21a635545d4aac8615dfa0d8feb, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49966, y: 0.12964083}
+    Footprint: {x: 1.708719, y: 1.1866103}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Cave_Entrance_A.png
+    Sha256: 121d6fefa063e415378db5e80a6cb465eadf4d71cf51952e6ce5f573cbb8edbb
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.13180901
+      y: 0.09829868
+      width: 0.73503697
+      height: 0.7835539
+    PivotHint: {x: 0.49966, y: 0.0983}
+    FootX: 0.41557232
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: cave_entrance
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.69723856, g: 0.6006127, b: 0.5082314, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cellar_Entrance_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 8c162d2186c70b84eba7d55b00f58b89, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.5, y: 0.07901701}
+    Footprint: {x: 1.540034, y: 1.069468}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Cellar_Entrance_A.png
+    Sha256: e7551da5f74e44dbf3e470e8705013987729fa6e8917b6dbc8cd0a412f6c96c0
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.12441157
+      y: 0.04347826
+      width: 0.7511769
+      height: 0.8884688
+    PivotHint: {x: 0.5, y: 0.04348}
+    FootX: 0.5277842
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: cellar_entrance
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7694397, g: 0.6117538, b: 0.43822992, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Charcoal_Mound_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 0a5465d74b18d7a4e8e9e3125035aac1, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49933, y: 0.14275992}
+    Footprint: {x: 1.7920207, y: 1.2444588}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Charcoal_Mound_A.png
+    Sha256: f94f36c3fe0b5ef147de9a0eee92cc69ed0168b8c0e8de06b216ffd4edee2bc2
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.13853396
+      y: 0.11342155
+      width: 0.72158706
+      height: 0.73345935
+    PivotHint: {x: 0.49933, y: 0.11248}
+    FootX: 0.4755793
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: charcoal_mound
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7475896, g: 0.5948762, b: 0.41844228, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Cold_Campfire_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 6d3e060aa61230a419822b67afd8bc35, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.50202, y: 0.20249526}
+    Footprint: {x: 1.7067766, y: 1.1852615}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Cold_Campfire_A.png
+    Sha256: 6af8deaf4ad459c9f45fc3606e84d6fe9e4cccc3b2d7ef18b32fd39629d4bfab
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.22259583
+      y: 0.17863894
+      width: 0.5588433
+      height: 0.5964083
+    PivotHint: {x: 0.50202, y: 0.17864}
+    FootX: 0.56897837
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: cold_campfire
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.58781326, g: 0.47697723, b: 0.40079033, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Fallen_Tree_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 53c362a8dd65b514ebc519ceb08a3733, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.5, y: 0.1512514}
+    Footprint: {x: 2.9843671, y: 2.072477}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Fallen_Tree_A.png
+    Sha256: 347d3bea8bc6427f93c3f55cf29cee1a6403842693a670125f05ab3a1b4aa80d
+    Width: 1774
+    Height: 887
+    SolidRect:
+      serializedVersion: 2
+      x: 0.07553551
+      y: 0.12175874
+      width: 0.848929
+      height: 0.7373168
+    PivotHint: {x: 0.5, y: 0.12176}
+    FootX: 0.76065975
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: fallen_tree
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.72413343, g: 0.52068824, b: 0.35918924, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Fish_Drying_Rack_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 7ec9b00bf1a2d6f40abb46c89363c687, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49731, y: 0.098034024}
+    Footprint: {x: 1.3185881, y: 0.9156862}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Fish_Drying_Rack_A.png
+    Sha256: 57c9b7ecfb5c836d9bde4aa2acbdb304969c97b207835f3a8e5b607f07d82a5a
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.18359113
+      y: 0.06332703
+      width: 0.6281103
+      height: 0.8676749
+    PivotHint: {x: 0.49731, y: 0.06333}
+    FootX: 0.6857733
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: fish_drying_rack
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.8024966, g: 0.62385535, b: 0.44271234, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Fishing_Dock_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 822ceb83b6ded7b408c46262d4f78318, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.4963, y: 0.10650284}
+    Footprint: {x: 1.7279999, y: 1.1999999}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Fishing_Dock_A.png
+    Sha256: a50411310aee6f0d39db218232c4e84a6498b088bc16c8548ef216632d611bd2
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.10759919
+      y: 0.07372401
+      width: 0.7774042
+      height: 0.8194707
+    PivotHint: {x: 0.4963, y: 0.07372}
+    FootX: 0.57297
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: dock
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7817914, g: 0.61539704, b: 0.44185516, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Fishing_Nets_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: b1a461f94e8524b49adab708a4685123, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49697, y: 0.18824197}
+    Footprint: {x: 2.2026668, y: 1.5296297}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Fishing_Nets_A.png
+    Sha256: df39897b428132ce9fc8137554741ad97083f0b07c6ebd3cd842013ea4742d5f
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.08069939
+      y: 0.16068053
+      width: 0.83322126
+      height: 0.6890359
+    PivotHint: {x: 0.49697, y: 0.15974}
+    FootX: 0.45773715
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: fishing_nets
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.72602206, g: 0.5753322, b: 0.41097927, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Flax_Bundles_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 9a07e3180befeda4589aa643f2150f90, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.5, y: 0.11973535}
+    Footprint: {x: 1.0986851, y: 0.76297575}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Flax_Bundles_A.png
+    Sha256: 7ea7bab993c38e24e81d0814782800ba116c9866a35127e629f4bb72c9289a27
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2528581
+      y: 0.08695652
+      width: 0.4942838
+      height: 0.8194707
+    PivotHint: {x: 0.5, y: 0.08696}
+    FootX: 0.4059353
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: flax_bundle
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7612794, g: 0.60783297, b: 0.3590928, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Forked_Boulder_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: bc6a77c9846a4ec43b10b6738acd3ab6, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49731, y: 0.11795841}
+    Footprint: {x: 1.646069, y: 1.1431035}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Forked_Boulder_A.png
+    Sha256: 2b92f939460110bdeefb7c82cab625109655337cc2dc8e4a69e6329a9d95b245
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.12575656
+      y: 0.08506616
+      width: 0.7431069
+      height: 0.8223062
+    PivotHint: {x: 0.49731, y: 0.08507}
+    FootX: 0.5110759
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: forked_boulder
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7334087, g: 0.65020245, b: 0.5730548, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Grave_Marker_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 7543b5c8c0c11944dbbdd3d68e3443c0, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.48958, y: 0.14850661}
+    Footprint: {x: 0.7873044, y: 0.54673916}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Grave_Marker_A.png
+    Sha256: e2dfbb6f435291e2a4f239dbc1a75b068209f93a16f7446f136f8fbd4ec8e8b5
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.3201076
+      y: 0.11720227
+      width: 0.33826497
+      height: 0.7826087
+    PivotHint: {x: 0.48958, y: 0.11626}
+    FootX: 0.4659551
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: grave_marker
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7878851, g: 0.6266395, b: 0.43748093, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Hidden_Cache_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 0faa060413e0e4546ba58f574df975ed, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.48924, y: 0.11546314}
+    Footprint: {x: 1.7934378, y: 1.2454429}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Hidden_Cache_A.png
+    Sha256: 85c539f88734d506002cf03c3a06c2b8f89eb7d5a7f5933917b8354f555c5b06
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.12710154
+      y: 0.08601134
+      width: 0.72494954
+      height: 0.7362949
+    PivotHint: {x: 0.48924, y: 0.08601}
+    FootX: 0.58411425
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: hidden_cache
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.78738064, g: 0.6099608, b: 0.44649965, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Hide_Drying_Rack_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 3e301d3fc14aec0448ff6c769e4d99c9, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49227, y: 0.059092626}
+    Footprint: {x: 1.253781, y: 0.87068117}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Hide_Drying_Rack_A.png
+    Sha256: 85f0c2347afdf4eb882cc43d67a3c2ca41b9dd9b0f7a8cc1ba4fc858a80bd789
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.16274378
+      y: 0.02079395
+      width: 0.65904504
+      height: 0.9574669
+    PivotHint: {x: 0.49227, y: 0.01985}
+    FootX: 0.65806067
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: tannery_rack
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.77040195, g: 0.58765876, b: 0.40864643, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Log_Beehive_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 1c7f17476545c1e498b52bb2ab86afa2, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49619, y: 0.1388824}
+    Footprint: {x: 0.95282245, y: 0.66168225}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Log_Beehive_A.png
+    Sha256: ed882dd35d8de140487ef544b1e70f539d9498531d8c309a7b339f47e27b6ee3
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.22637194
+      y: 0.10675563
+      width: 0.53963417
+      height: 0.8031693
+    PivotHint: {x: 0.49619, y: 0.10676}
+    FootX: 0.47771552
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: log_beehive
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7935922, g: 0.60057026, b: 0.4001061, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Marked_Stone_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 6f902adcf4a531b46bb6313f3d84c787, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49126, y: 0.109603025}
+    Footprint: {x: 1.1979711, y: 0.8319243}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Marked_Stone_A.png
+    Sha256: b5286279fc8abc2e1f1628393753c1f0cd9a7f1b25b5e0b8d4cc9aa2d0ecc718
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2118359
+      y: 0.07561437
+      width: 0.5588433
+      height: 0.8497164
+    PivotHint: {x: 0.49126, y: 0.07561}
+    FootX: 0.4930665
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: marked_stone
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.750549, g: 0.6638184, b: 0.5695313, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Market_Stall_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 6cc055f3ebc8319478e7f0175e32deb5, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.48857, y: 0.08226843}
+    Footprint: {x: 1.2374008, y: 0.85930604}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Market_Stall_A.png
+    Sha256: 08ed30ecaa14a9407aaa62cda22fbc2f838d86e742513537b458cbb6544b954d
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.18291862
+      y: 0.0463138
+      width: 0.61062545
+      height: 0.89886576
+    PivotHint: {x: 0.48857, y: 0.04631}
+    FootX: 0.59242713
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: market_stall
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.84127575, g: 0.6815644, b: 0.49683768, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Mine_Entrance_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: af7d0f008dcc4cf43a437cfb9a11f69f, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49193, y: 0.1773157}
+    Footprint: {x: 1.6392648, y: 1.1383783}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Mine_Entrance_A.png
+    Sha256: 8b52c871ce197b96c84ed6807bc08da70817149da97b2dcb2c0c61254eb03b62
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.17753866
+      y: 0.14933838
+      width: 0.62945527
+      height: 0.6994329
+    PivotHint: {x: 0.49193, y: 0.14934}
+    FootX: 0.63806605
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: mine_entrance
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7240155, g: 0.5645026, b: 0.41197547, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Old_Shrine_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 7f9999b7327724545b8fa88c313b3e19, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.4768, y: 0.13587901}
+    Footprint: {x: 0.9458958, y: 0.65687203}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Old_Shrine_A.png
+    Sha256: 6c6a38a8c041bd630e0f30960c74d2a33cb8c34b5514813bda1e299c085012e7
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2696705
+      y: 0.10396975
+      width: 0.4142569
+      height: 0.7977316
+    PivotHint: {x: 0.4768, y: 0.10397}
+    FootX: 0.4400432
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: old_shrine
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.78615457, g: 0.62075436, b: 0.43119368, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Pottery_Kiln_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: e1facd872915f8649a792f408bb03f2a, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.5, y: 0.11897921}
+    Footprint: {x: 1.3480184, y: 0.93612385}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Pottery_Kiln_A.png
+    Sha256: 402aa8fa6cf32cbee2097734d02a9340b842226022c77e21632238f0e068fc24
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.19502354
+      y: 0.08601134
+      width: 0.6099529
+      height: 0.8241966
+    PivotHint: {x: 0.5, y: 0.08601}
+    FootX: 0.37668926
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: pottery_kiln
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.77657205, g: 0.5989429, b: 0.44892257, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Ruined_Wall_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 3801eec4f74212047a3df95ca014f3fa, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49328, y: 0.18139887}
+    Footprint: {x: 1.8821576, y: 1.3070538}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Ruined_Wall_A.png
+    Sha256: 84c6b4d124257a4f388e73af79b6acbf62ccdb38c48bbf2b0e6280816577287d
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.14055145
+      y: 0.15406427
+      width: 0.7061197
+      height: 0.68336487
+    PivotHint: {x: 0.49328, y: 0.15406}
+    FootX: 0.6251382
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: ruined_wall
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.75284785, g: 0.6519517, b: 0.5473441, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Salt_Pan_Kiln_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: f550eea3ea995c5418350c96d296bfbb, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.48554, y: 0.09644613}
+    Footprint: {x: 1.2523912, y: 0.8697161}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Salt_Pan_Kiln_A.png
+    Sha256: 5a2a54e9f83d083d8aeda172a1b1d97b310b9a5ffed2283189d7c2b0913fe05e
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.17619368
+      y: 0.060491495
+      width: 0.61802286
+      height: 0.89886576
+    PivotHint: {x: 0.48554, y: 0.06049}
+    FootX: 0.47417417
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: salt_pan
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.80116093, g: 0.653659, b: 0.49697807, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Tar_Kiln_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 97ab9390cf3a09a44963b66fccc273a4, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.48857, y: 0.10196598}
+    Footprint: {x: 1.5575782, y: 1.0816514}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Tar_Kiln_A.png
+    Sha256: e4671f2ba94cd3c046c56f6c779cd0e1486beaed96ad71140c2591b1644bc2d2
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.13584398
+      y: 0.06899811
+      width: 0.70477474
+      height: 0.8241966
+    PivotHint: {x: 0.48857, y: 0.069}
+    FootX: 0.6564943
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: tar_kiln
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7506214, g: 0.5672921, b: 0.40585855, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Tree_Stump_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 431e0f94d47f76543a24f003b1078ea9, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.48823, y: 0.13848771}
+    Footprint: {x: 1.6132251, y: 1.1202952}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Tree_Stump_A.png
+    Sha256: 093b2fa829ef3606346cdd526b44700dccf1bcac21d3f748d8014eb32f7d3364
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.14794889
+      y: 0.107750475
+      width: 0.6805649
+      height: 0.768431
+    PivotHint: {x: 0.48823, y: 0.10775}
+    FootX: 0.66251683
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: stump
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.7566396, g: 0.5781223, b: 0.41712323, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Weaving_Loom_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 01a74f0209d7593458cfe2522a9bac86, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.49314, y: 0.07693077}
+    Footprint: {x: 0.9770953, y: 0.6785384}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Weaving_Loom_A.png
+    Sha256: 85a1d94abd709ad599e1e23c0c52227dfab5f38cf6522cf5816153b112f3cbe7
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.18292683
+      y: 0.04086739
+      width: 0.621189
+      height: 0.9015846
+    PivotHint: {x: 0.49314, y: 0.04087}
+    FootX: 0.6395546
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: weaving_loom
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.80194277, g: 0.63677955, b: 0.45750526, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Wooden_Toy_Boat_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Prop
+    Texture: {fileID: 2800000, guid: 169291e3a040e204583bb27bc12d7207, type: 3}
+    Weight: 1
+    WorldHeight: 1.8
+    Pivot: {x: 0.4842, y: 0.11512288}
+    Footprint: {x: 1.3032403, y: 0.9050279}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Props/Wooden_Toy_Boat_A.png
+    Sha256: 64ed2ef8f7715e02a14388be42c582136a5156c86d57af45ca68a0cc5d589e66
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.18157364
+      y: 0.08128545
+      width: 0.6052455
+      height: 0.8459357
+    PivotHint: {x: 0.4842, y: 0.08129}
+    FootX: 0.5542275
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: toy_boat
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.81547755, g: 0.63766515, b: 0.4386648, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Berry_Bush_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Plant
+    Texture: {fileID: 2800000, guid: abdeec8f5ca04f14eb9c9660f747af9a, type: 3}
+    Weight: 1
+    WorldHeight: 1.2
+    Pivot: {x: 0.49899, y: 0.14241965}
+    Footprint: {x: 0.9614823, y: 0.667696}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Vegetation/Berry_Bush_A.png
+    Sha256: 8b684c7c4a31befd23f0f093db7ee812a1307f9cb81d8fe3ec7db1c97b50d373
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.18359113
+      y: 0.11058601
+      width: 0.6301278
+      height: 0.7958412
+    PivotHint: {x: 0.49899, y: 0.11059}
+    FootX: 0.43122733
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: berry_bush
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.64418685, g: 0.56862074, b: 0.32351294, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Fruit_Tree_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Plant
+    Texture: {fileID: 2800000, guid: b063177a97302c04392bc67eeeeae53f, type: 3}
+    Weight: 1
+    WorldHeight: 6
+    Pivot: {x: 0.50269, y: 0.08344045}
+    Footprint: {x: 4.7894673, y: 3.3260188}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Vegetation/Fruit_Tree_A.png
+    Sha256: 07d821e2d1e53c4c8405eb73fbc394a71ac9bf37ba9263c08a80f5ee8edda2ae
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.14593141
+      y: 0.04725898
+      width: 0.7135171
+      height: 0.90453684
+    PivotHint: {x: 0.50269, y: 0.04726}
+    FootX: 0.37359434
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: fruit_tree
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.65224284, g: 0.54335064, b: 0.3175736, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Herb_Clump_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Plant
+    Texture: {fileID: 2800000, guid: 659e75434546a824d9b9358fbf6e0c9c, type: 3}
+    Weight: 1
+    WorldHeight: 1.2
+    Pivot: {x: 0.50034, y: 0.15943289}
+    Footprint: {x: 1.1106963, y: 0.7713168}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Vegetation/Herb_Clump_A.png
+    Sha256: 5f84a31b0b865046708fdcc22232626b4d10d0b77cb344a4610f19280bcef0ff
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.16879624
+      y: 0.13043478
+      width: 0.66308004
+      height: 0.72495276
+    PivotHint: {x: 0.50034, y: 0.13043}
+    FootX: 0.46582955
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: herb_clump
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.6749289, g: 0.62087744, b: 0.40249228, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Mushroom_Clump_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Plant
+    Texture: {fileID: 2800000, guid: 92b863954d559ea4c9b69a04cc18ce45, type: 3}
+    Weight: 1
+    WorldHeight: 1.2
+    Pivot: {x: 0.47714, y: 0.09376181}
+    Footprint: {x: 0.8649291, y: 0.6006452}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Vegetation/Mushroom_Clump_A.png
+    Sha256: 490382f2d80b7ce6dfbb3ab4de76259f16357d59cc6850c0fcc1a01a78e52ec2
+    Width: 1487
+    Height: 1058
+    SolidRect:
+      serializedVersion: 2
+      x: 0.16408877
+      y: 0.058601134
+      width: 0.6260928
+      height: 0.879017
+    PivotHint: {x: 0.47714, y: 0.0586}
+    FootX: 0.47789732
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: mushroom_clump
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.8178211, g: 0.62111, b: 0.3930577, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Offering_Tree_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Plant
+    Texture: {fileID: 2800000, guid: 77a3ecec34118de4c98366b183dc3b4e, type: 3}
+    Weight: 1
+    WorldHeight: 6
+    Pivot: {x: 0.49543, y: 0.07689741}
+    Footprint: {x: 4.4020996, y: 3.0570135}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Vegetation/Offering_Tree_A.png
+    Sha256: f24bdf0a2d1874889e8bd40afd1f580e3a1a93896c80fe853e4d6d117f7ccf09
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.06631097
+      y: 0.040033363
+      width: 0.8582317
+      height: 0.92160136
+    PivotHint: {x: 0.49543, y: 0.04003}
+    FootX: 0.4506564
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: offering_tree
+    VariantGroup: 
+    Provenance: selected-poi
+    MeanColor: {r: 0.63254637, g: 0.5392181, b: 0.3211569, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Emblem_Court_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Emblem
+    Texture: {fileID: 2800000, guid: 7bf45ae0b353a484eb4ff96d9f64793c, type: 3}
+    Weight: 1
+    WorldHeight: 1.2
+    Pivot: {x: 0.49761, y: 0.14653908}
+    Footprint: {x: 0.96833915, y: 0.6724577}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Emblems/Emblem_Court_A.png
+    Sha256: 61b45d512845004d0479c54188af05815aec4a64215a025cec898540961256d0
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.07575758
+      y: 0.11642743
+      width: 0.8437002
+      height: 0.75279105
+    PivotHint: {x: 0.49761, y: 0.11643}
+    FootX: 0.5049024
+    Direction: 
+    PitchDownDegrees: 50
+    Role: emblem
+    VariantGroup: 
+    Provenance: faction:draft_court_lands
+    MeanColor: {r: 0.78219885, g: 0.63897514, b: 0.45598868, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: ui_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Banner_Court_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Banner
+    Texture: {fileID: 2800000, guid: e8a58b3d53e6b104cab3bf2e6ede2d5f, type: 3}
+    Weight: 1
+    WorldHeight: 3.2
+    Pivot: {x: 0.5, y: 0.10341463}
+    Footprint: {x: 2.0296652, y: 1.4094898}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Banners/Banner_Court_Front.png
+    Sha256: 38b044098d07be09d415fa202b2d625d45dd57f9ef0852b06e35964fdf5b4888
+    Width: 1199
+    Height: 1312
+    SolidRect:
+      serializedVersion: 2
+      x: 0.089241035
+      y: 0.06935976
+      width: 0.8206839
+      height: 0.85137194
+    PivotHint: {x: 0.5, y: 0.06936}
+    FootX: 0.5134624
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: banner
+    VariantGroup: 
+    Provenance: faction:draft_court_lands
+    MeanColor: {r: 0.55572677, g: 0.53636366, b: 0.5114895, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_Court_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: eda6ca2211cf16f4dba4a9794c7f3730, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.5004, y: 0.13948964}
+    Footprint: {x: 1.096258, y: 0.7612903}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_Court_Front.png
+    Sha256: 63c33c94451649ac210f111395d6da1bbb6a44dd6eea827ecd8ed82a224b26da
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2416268
+      y: 0.10685805
+      width: 0.51754385
+      height: 0.81578946
+    PivotHint: {x: 0.5004, y: 0.10686}
+    FootX: 0.4718013
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_court_lands
+    MeanColor: {r: 0.6362489, g: 0.52707434, b: 0.430238, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_Court_Front_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: c056bb198a281644d919206e9e381ac7, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.5004, y: 0.11511962}
+    Footprint: {x: 0.9022584, y: 0.6265683}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_Court_Front_Right.png
+    Sha256: 410c13da4d21554c1da5fc10756c9a858b364a79a59f711273f8a9f9822b7954
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2751196
+      y: 0.08054227
+      width: 0.45135567
+      height: 0.8644338
+    PivotHint: {x: 0.5004, y: 0.08054}
+    FootX: 0.40734556
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_court_lands
+    MeanColor: {r: 0.66425335, g: 0.54523134, b: 0.4438735, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_Court_Back_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 8fbc50d6e2df7244dabed6a38d9d3d22, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.50239, y: 0.117926635}
+    Footprint: {x: 1.1090889, y: 0.7702006}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_Court_Back_Right.png
+    Sha256: 20f9f7ad3fbb002fe6de1149cf7b8d842df9eced92e4f9da599d3d06fad8821a
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.23444976
+      y: 0.084529504
+      width: 0.53588516
+      height: 0.8349282
+    PivotHint: {x: 0.50239, y: 0.08453}
+    FootX: 0.52219874
+    Direction: BackRight
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_court_lands
+    MeanColor: {r: 0.60730374, g: 0.50681835, b: 0.4271903, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_Court_Back
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 7b07dac9f773d7f4fa4146161688b76c, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.48086, y: 0.13872409}
+    Footprint: {x: 1.0766251, y: 0.7476563}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_Court_Back.png
+    Sha256: 8cf6ddc3343b119d378014c675d88b2b3064fcba97270720e9ff85258fb2257b
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.22647528
+      y: 0.10606061
+      width: 0.50877196
+      height: 0.8165869
+    PivotHint: {x: 0.48086, y: 0.10606}
+    FootX: 0.5089214
+    Direction: Back
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_court_lands
+    MeanColor: {r: 0.6410146, g: 0.53945196, b: 0.45588976, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_Court_Back_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 11cd380c049ffcf4d8143ce57f904e6e, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.47289, y: 0.11917066}
+    Footprint: {x: 0.888108, y: 0.61674166}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_Court_Back_Left.png
+    Sha256: c2a63c6b3bfc0d5e96a1a9a11fb56a875048e74f60d002f47b91735873d31626
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.24481659
+      y: 0.08373206
+      width: 0.4553429
+      height: 0.88596493
+    PivotHint: {x: 0.47289, y: 0.08373}
+    FootX: 0.42740968
+    Direction: BackLeft
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_court_lands
+    MeanColor: {r: 0.66066283, g: 0.5403239, b: 0.4489731, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_Court_Front_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 2216c879a0f0edc4bb1c80a404602448, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.5012, y: 0.095948964}
+    Footprint: {x: 0.90279794, y: 0.626943}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_Court_Front_Left.png
+    Sha256: f3a5b531103f2e1176226c58c22e0402688d9d490597cdb7605483e43b22ca0b
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2599681
+      y: 0.059011165
+      width: 0.48245615
+      height: 0.923445
+    PivotHint: {x: 0.5012, y: 0.05821}
+    FootX: 0.5258633
+    Direction: FrontLeft
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_court_lands
+    MeanColor: {r: 0.646357, g: 0.53415304, b: 0.44251454, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Emblem_RiverUnion_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Emblem
+    Texture: {fileID: 2800000, guid: 1dc944f67ddc1b143b83199e459ed39c, type: 3}
+    Weight: 1
+    WorldHeight: 1.2
+    Pivot: {x: 0.50518, y: 0.28858057}
+    Footprint: {x: 2.0391867, y: 1.4161018}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Emblems/Emblem_RiverUnion_A.png
+    Sha256: cbe01b133b2bbaac269dd0311bbde9e89ec000e498a700c39f8b0dac48b2c333
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.060606062
+      y: 0.27352473
+      width: 0.8883573
+      height: 0.37639552
+    PivotHint: {x: 0.50518, y: 0.27273}
+    FootX: 0.4753931
+    Direction: 
+    PitchDownDegrees: 50
+    Role: emblem
+    VariantGroup: 
+    Provenance: faction:draft_river_union
+    MeanColor: {r: 0.83256716, g: 0.7121125, b: 0.53476465, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: ui_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Banner_RiverUnion_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Banner
+    Texture: {fileID: 2800000, guid: bc4550258d7ab3b4399e1009aa8b80ad, type: 3}
+    Weight: 1
+    WorldHeight: 3.2
+    Pivot: {x: 0.5, y: 0.113127604}
+    Footprint: {x: 2.6951554, y: 1.8716357}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Banners/Banner_RiverUnion_Front.png
+    Sha256: c3f19b57a597e12ccd5ddad434a24eb339c5311a9feba7e93f64c8199f3fc579
+    Width: 1312
+    Height: 1199
+    SolidRect:
+      serializedVersion: 2
+      x: 0.06935976
+      y: 0.08090075
+      width: 0.8612805
+      height: 0.8056714
+    PivotHint: {x: 0.5, y: 0.0809}
+    FootX: 0.49160612
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: banner
+    VariantGroup: 
+    Provenance: faction:draft_river_union
+    MeanColor: {r: 0.7475741, g: 0.45616513, b: 0.33888718, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Emblem_Watch_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Emblem
+    Texture: {fileID: 2800000, guid: b0c667c89fc5f0f4cb1d0761af66ebc7, type: 3}
+    Weight: 1
+    WorldHeight: 1.2
+    Pivot: {x: 0.49801, y: 0.124720894}
+    Footprint: {x: 0.7938536, y: 0.5512872}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Emblems/Emblem_Watch_A.png
+    Sha256: 114c435ff9377b9f816d22388e8d5fb5dfe3e3423d55579f942a3acaa430f743
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.1275917
+      y: 0.09250399
+      width: 0.7400319
+      height: 0.80542266
+    PivotHint: {x: 0.49801, y: 0.0925}
+    FootX: 0.49920824
+    Direction: 
+    PitchDownDegrees: 50
+    Role: emblem
+    VariantGroup: 
+    Provenance: faction:draft_watch_court_branch
+    MeanColor: {r: 0.70269513, g: 0.5330158, b: 0.35479692, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: ui_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Banner_Watch_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Banner
+    Texture: {fileID: 2800000, guid: 0f6f9922b4152f8488e5ae25ce59dc46, type: 3}
+    Weight: 1
+    WorldHeight: 3.2
+    Pivot: {x: 0.5, y: 0.17125}
+    Footprint: {x: 1.9817332, y: 1.3762035}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Banners/Banner_Watch_Front.png
+    Sha256: 7e16b943e0e1b697f7e30e959ba04a073d82e69289f4ebf082de3a89d42d30b2
+    Width: 1024
+    Height: 1536
+    SolidRect:
+      serializedVersion: 2
+      x: 0.037109375
+      y: 0.14257812
+      width: 0.9248047
+      height: 0.7167969
+    PivotHint: {x: 0.5, y: 0.14258}
+    FootX: 0.49725738
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: banner
+    VariantGroup: 
+    Provenance: faction:draft_watch_court_branch
+    MeanColor: {r: 0.7323391, g: 0.5645089, b: 0.36585325, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Emblem_FreeCircle_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Emblem
+    Texture: {fileID: 2800000, guid: ae4f29b946759b54d90027b60ec81875, type: 3}
+    Weight: 1
+    WorldHeight: 1.2
+    Pivot: {x: 0.5, y: 0.07425837}
+    Footprint: {x: 0.8425532, y: 0.5851064}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Emblems/Emblem_FreeCircle_A.png
+    Sha256: 06d9fd012668182d5721ebcdc684987fb0da56fe8eb1868872e4bb22911b7f9e
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.06140351
+      y: 0.03827751
+      width: 0.877193
+      height: 0.8995215
+    PivotHint: {x: 0.5, y: 0.03828}
+    FootX: 0.48049152
+    Direction: 
+    PitchDownDegrees: 50
+    Role: emblem
+    VariantGroup: 
+    Provenance: faction:draft_free_circle
+    MeanColor: {r: 0.8240843, g: 0.70189965, b: 0.52861124, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: ui_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Banner_FreeCircle_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Banner
+    Texture: {fileID: 2800000, guid: 4efee2118e5b6f1498e47884ca3b4769, type: 3}
+    Weight: 1
+    WorldHeight: 3.2
+    Pivot: {x: 0.5, y: 0.07911555}
+    Footprint: {x: 1.8664615, y: 1.2961538}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Banners/Banner_FreeCircle_Front.png
+    Sha256: eb06f4baf3fa186f51b2e64d1548e4621e0cb7746f122879b8dbbc81071f7a0c
+    Width: 1122
+    Height: 1402
+    SolidRect:
+      serializedVersion: 2
+      x: 0.04901961
+      y: 0.04350927
+      width: 0.9010695
+      height: 0.8901569
+    PivotHint: {x: 0.5, y: 0.04351}
+    FootX: 0.4919858
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: banner
+    VariantGroup: 
+    Provenance: faction:draft_free_circle
+    MeanColor: {r: 0.6354057, g: 0.56639874, b: 0.36688948, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_FreeCircle_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 91a23f3f3c7f26b4e9eb6a71c154bb82, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49641, y: 0.09888357}
+    Footprint: {x: 0.89373773, y: 0.6206512}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_FreeCircle_Front.png
+    Sha256: 821c66b8b0a7647f0c5b4af91bb8328903ff4c4a07143c7c7e279fa53863f3ec
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.27432218
+      y: 0.0645933
+      width: 0.4433812
+      height: 0.85725677
+    PivotHint: {x: 0.49641, y: 0.06459}
+    FootX: 0.47254318
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_free_circle
+    MeanColor: {r: 0.62820387, g: 0.4726409, b: 0.30203092, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_FreeCircle_Front_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 2e522cdc54bc90f4fb1e1c190b082a46, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.50598, y: 0.094545454}
+    Footprint: {x: 0.8219505, y: 0.57079893}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_FreeCircle_Front_Right.png
+    Sha256: 90ce1d036b05a21c8c5ac8d3dcc63502e2fe85c6fb7bf794f20330099a72a4e5
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2998405
+      y: 0.059808612
+      width: 0.41307816
+      height: 0.8684211
+    PivotHint: {x: 0.50598, y: 0.05981}
+    FootX: 0.42920128
+    Direction: FrontRight
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_free_circle
+    MeanColor: {r: 0.6340286, g: 0.48058227, b: 0.32001585, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_FreeCircle_Back_Right
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 0dceb4a432938f944968f7505e944d98, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.4996, y: 0.10242425}
+    Footprint: {x: 0.9071593, y: 0.62997174}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_FreeCircle_Back_Right.png
+    Sha256: 36ea4b9ea3c5063746809b1318c430c4129f8813e4a4d50e5e4d4793a6f46581
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.27751195
+      y: 0.068580545
+      width: 0.44417864
+      height: 0.8460925
+    PivotHint: {x: 0.4996, y: 0.06858}
+    FootX: 0.41456676
+    Direction: BackRight
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_free_circle
+    MeanColor: {r: 0.62516356, g: 0.48181587, b: 0.31931612, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_FreeCircle_Back
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 630b2d9460c890844b0941c2a3b2db30, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49043, y: 0.09741627}
+    Footprint: {x: 0.8503875, y: 0.59054685}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_FreeCircle_Back.png
+    Sha256: d72911e3797e9dc7f351db69b0e3d8b4df7c9f746cc69c864a683293b8a0e3ed
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.27910686
+      y: 0.06299841
+      width: 0.423445
+      height: 0.8604466
+    PivotHint: {x: 0.49043, y: 0.063}
+    FootX: 0.50387
+    Direction: Back
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_free_circle
+    MeanColor: {r: 0.6845715, g: 0.52953285, b: 0.35943413, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_FreeCircle_Back_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 97fff40cafe9c184fb3f959d6256b1cd, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.48246, y: 0.09665072}
+    Footprint: {x: 0.76000005, y: 0.5277778}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_FreeCircle_Back_Left.png
+    Sha256: 2f5b07068a9b67d18ad1941a772bae6aa4c883f16a0f3e7a4fb171f22c398f8d
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.29266348
+      y: 0.062200956
+      width: 0.37878788
+      height: 0.861244
+    PivotHint: {x: 0.48246, y: 0.0614}
+    FootX: 0.41233215
+    Direction: BackLeft
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_free_circle
+    MeanColor: {r: 0.6667633, g: 0.50936025, b: 0.33796045, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_FreeCircle_Front_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: a43680fe8098f64499b6adc423ca93c6, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.48525, y: 0.096618816}
+    Footprint: {x: 0.8327712, y: 0.5783133}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_FreeCircle_Front_Left.png
+    Sha256: 1d2c1baae655c39f98cda365f5adbf9b40e3659691b287e8bbdf22fb3e94a3b0
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2783094
+      y: 0.062200956
+      width: 0.41467306
+      height: 0.8604466
+    PivotHint: {x: 0.48525, y: 0.0614}
+    FootX: 0.51230156
+    Direction: FrontLeft
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_free_circle
+    MeanColor: {r: 0.6611077, g: 0.4995049, b: 0.33406872, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Emblem_GreyCompany_A
+    Category: 7
+    Kind: 10
+    ManifestKind: Emblem
+    Texture: {fileID: 2800000, guid: 7d5e17d33e079c94abf11baf761a83b0, type: 3}
+    Weight: 1
+    WorldHeight: 1.2
+    Pivot: {x: 0.49681, y: 0.14905901}
+    Footprint: {x: 0.90061873, y: 0.62542963}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Emblems/Emblem_GreyCompany_A.png
+    Sha256: d4c1967d0546de64681fb353ccb72713bbc471f7bc0f5335d3a436fed2adb434
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.13397129
+      y: 0.121212125
+      width: 0.72567785
+      height: 0.69617224
+    PivotHint: {x: 0.49681, y: 0.12121}
+    FootX: 0.49314123
+    Direction: 
+    PitchDownDegrees: 50
+    Role: emblem
+    VariantGroup: 
+    Provenance: faction:draft_grey_company
+    MeanColor: {r: 0.8088411, g: 0.6857546, b: 0.51386684, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: ui_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Banner_GreyCompany_Front
+    Category: 7
+    Kind: 10
+    ManifestKind: Banner
+    Texture: {fileID: 2800000, guid: 2040bdd9aed591a4da6c82ce8faf9e53, type: 3}
+    Weight: 1
+    WorldHeight: 3.2
+    Pivot: {x: 0.49956, y: 0.12229986}
+    Footprint: {x: 2.01103, y: 1.3965485}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Banners/Banner_GreyCompany_Front.png
+    Sha256: c5b3b00e8404312fb5d3c206caef9135a01b0102ea61902fab4698040aa1479f
+    Width: 1145
+    Height: 1374
+    SolidRect:
+      serializedVersion: 2
+      x: 0.08034935
+      y: 0.09024745
+      width: 0.8393013
+      height: 0.80131006
+    PivotHint: {x: 0.49956, y: 0.08952}
+    FootX: 0.43979496
+    Direction: Front
+    PitchDownDegrees: 50
+    Role: banner
+    VariantGroup: 
+    Provenance: faction:draft_grey_company
+    MeanColor: {r: 0.6168466, g: 0.49923936, b: 0.38880053, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: vertical_front
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_GreyCompany_Back
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 1db7c85728a7ebd489e260ee281f81da, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.4988, y: 0.12398724}
+    Footprint: {x: 0.973017, y: 0.6757062}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_GreyCompany_Back.png
+    Sha256: 1d5ba2a5f0e8f03a312276fb47e41dc8ffe16d79b7c8db1101865a6074d5f7bc
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.2599681
+      y: 0.09011164
+      width: 0.476874
+      height: 0.84689
+    PivotHint: {x: 0.4988, y: 0.09011}
+    FootX: 0.48605147
+    Direction: Back
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_grey_company
+    MeanColor: {r: 0.5607992, g: 0.41435507, b: 0.31607705, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0
+  - Id: Faction_GreyCompany_Back_Left
+    Category: 7
+    Kind: 10
+    ManifestKind: Figure
+    Texture: {fileID: 2800000, guid: 3ebd5e364c3a24b468fcf9689ef430c5, type: 3}
+    Weight: 1
+    WorldHeight: 2.4
+    Pivot: {x: 0.49761, y: 0.10972887}
+    Footprint: {x: 0.7917972, y: 0.54985917}
+    MaxSlope: 16
+    Orientation: 0
+    ScaleRange: {x: 0.92, y: 1.08}
+    Light: 0
+    Cutoff: 0.5
+    HeightCorrection: 1
+    PivotEdited: 0
+    Enabled: 1
+    SizeScale: 1
+    Brightness: 1
+    HueShift: 0
+    Saturation: 1
+    SourcePath: Sprites/Figures/Faction_GreyCompany_Back_Left.png
+    Sha256: 294b88c0db377f26d7373722380cde8af646a61edf285a5f57371022e4f588e4
+    Width: 1254
+    Height: 1254
+    SolidRect:
+      serializedVersion: 2
+      x: 0.3030303
+      y: 0.07575758
+      width: 0.3891547
+      height: 0.8492823
+    PivotHint: {x: 0.49761, y: 0.07576}
+    FootX: 0.4328093
+    Direction: BackLeft
+    PitchDownDegrees: 50
+    Role: figure
+    VariantGroup: 
+    Provenance: faction:draft_grey_company
+    MeanColor: {r: 0.59477276, g: 0.4297921, b: 0.3249906, a: 1}
+    TileEdgeDifference: 0
+    Notes: 
+    AuthoringPlane: billboard_6_view
+    ViewTag: 
+    EntranceLocation: 
+    ModuleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    OpacityRange: {x: 0.04, y: 0.12}
+    DrawnYaw: 0
+    EntranceDirection: {x: 0, y: 0}
+    BaseRegistered: 0
+    ReusedFrom: 
+    HeightClass: 
+    Side: 
+    RockTopPx: -1
+    BasePx: -1
+    PxPerUnit: 100
+    WorldWidthHint: 0

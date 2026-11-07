@@ -82,7 +82,7 @@ namespace KingdomSurvival.WorldMapVisual
         // 12С-4: каталог мест по лору. Ассет, собранный раньше, получает
         // недостающие правила по умолчанию и описания у прежних правил;
         // правки автора (числа, выключенные правила) не трогаются.
-        public const int CurrentLandmarkCatalogVersion = 2;
+        public const int CurrentLandmarkCatalogVersion = 3;
         [SerializeField] private int landmarkCatalogVersion;
 
         public bool UpgradeLandmarkCatalog()
@@ -98,6 +98,12 @@ namespace KingdomSurvival.WorldMapVisual
                     settings.Landmarks.Add(fallback);
                     continue;
                 }
+                // 12У-E: рисунок и условия соседства добавляются, если автор их
+                // не задавал (правки автора не перезаписываются).
+                if (string.IsNullOrEmpty(existing.Visual))
+                    existing.Visual = fallback.Visual;
+                if ((existing.Near == null || existing.Near.Count == 0) && fallback.Near.Count > 0)
+                    existing.Near = new List<string>(fallback.Near);
                 if (!string.IsNullOrEmpty(existing.Description))
                     continue;
                 existing.Description = fallback.Description;

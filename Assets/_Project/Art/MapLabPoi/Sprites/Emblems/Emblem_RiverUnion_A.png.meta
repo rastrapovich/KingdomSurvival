@@ -1,0 +1,455 @@
+fileFormatVersion: 2
+guid: 1dc944f67ddc1b143b83199e459ed39c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3131023204481726232
+    second: Emblem_RiverUnion_A_0
+  - first:
+      213: 8097475238138581574
+    second: Emblem_RiverUnion_A_1
+  - first:
+      213: 5763273355774097650
+    second: Emblem_RiverUnion_A_2
+  - first:
+      213: 4386045248366158231
+    second: Emblem_RiverUnion_A_3
+  - first:
+      213: 4108617907806567860
+    second: Emblem_RiverUnion_A_4
+  - first:
+      213: 2465136314924865562
+    second: Emblem_RiverUnion_A_5
+  - first:
+      213: 5474508186142257018
+    second: Emblem_RiverUnion_A_6
+  - first:
+      213: 213895849790859510
+    second: Emblem_RiverUnion_A_7
+  - first:
+      213: -3929102825372989378
+    second: Emblem_RiverUnion_A_8
+  - first:
+      213: 7990355357569585528
+    second: Emblem_RiverUnion_A_9
+  - first:
+      213: -6934604648964280202
+    second: Emblem_RiverUnion_A_10
+  - first:
+      213: 7541844941672073169
+    second: Emblem_RiverUnion_A_11
+  - first:
+      213: 4205973550753560655
+    second: Emblem_RiverUnion_A_12
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Emblem_RiverUnion_A_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 369
+        width: 1203
+        height: 879
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81773aef301a37b20800000000000000
+      internalID: 3131023204481726232
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_RiverUnion_A_1
+      rect:
+        serializedVersion: 2
+        x: 569
+        y: 873
+        width: 19
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64295caa3d2006070800000000000000
+      internalID: 8097475238138581574
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_RiverUnion_A_2
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 843
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f8736af4924bff40800000000000000
+      internalID: 5763273355774097650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_RiverUnion_A_3
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 835
+        width: 10
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 791a7a54aec5edc30800000000000000
+      internalID: 4386045248366158231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_RiverUnion_A_4
+      rect:
+        serializedVersion: 2
+        x: 713
+        y: 825
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4bd7e90083eb40930800000000000000
+      internalID: 4108617907806567860
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_RiverUnion_A_5
+      rect:
+        serializedVersion: 2
+        x: 1179
+        y: 714
+        width: 16
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a181306ea6ce53220800000000000000
+      internalID: 2465136314924865562
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_RiverUnion_A_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 56
+        width: 1177
+        height: 493
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7f2afaa03c59fb40800000000000000
+      internalID: 5474508186142257018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_RiverUnion_A_7
+      rect:
+        serializedVersion: 2
+        x: 1149
+        y: 519
+        width: 30
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f8e6b16429e7f200800000000000000
+      internalID: 213895849790859510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_RiverUnion_A_8
+      rect:
+        serializedVersion: 2
+        x: 1131
+        y: 376
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e38c8af2cc50979c0800000000000000
+      internalID: -3929102825372989378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_RiverUnion_A_9
+      rect:
+        serializedVersion: 2
+        x: 1163
+        y: 312
+        width: 14
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 871131decd173ee60800000000000000
+      internalID: 7990355357569585528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_RiverUnion_A_10
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 194
+        width: 15
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 67036b810d553cf90800000000000000
+      internalID: -6934604648964280202
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_RiverUnion_A_11
+      rect:
+        serializedVersion: 2
+        x: 427
+        y: 195
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1d7c07b14040aa860800000000000000
+      internalID: 7541844941672073169
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_RiverUnion_A_12
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 152
+        width: 12
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f48ba5309ae9e5a30800000000000000
+      internalID: 4205973550753560655
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Emblem_RiverUnion_A_0: 3131023204481726232
+      Emblem_RiverUnion_A_1: 8097475238138581574
+      Emblem_RiverUnion_A_10: -6934604648964280202
+      Emblem_RiverUnion_A_11: 7541844941672073169
+      Emblem_RiverUnion_A_12: 4205973550753560655
+      Emblem_RiverUnion_A_2: 5763273355774097650
+      Emblem_RiverUnion_A_3: 4386045248366158231
+      Emblem_RiverUnion_A_4: 4108617907806567860
+      Emblem_RiverUnion_A_5: 2465136314924865562
+      Emblem_RiverUnion_A_6: 5474508186142257018
+      Emblem_RiverUnion_A_7: 213895849790859510
+      Emblem_RiverUnion_A_8: -3929102825372989378
+      Emblem_RiverUnion_A_9: 7990355357569585528
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

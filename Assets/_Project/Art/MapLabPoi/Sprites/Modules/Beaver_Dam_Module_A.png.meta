@@ -1,0 +1,663 @@
+fileFormatVersion: 2
+guid: 2342962c76433c64c926c21d5bfc6685
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5165392716340440535
+    second: Beaver_Dam_Module_A_0
+  - first:
+      213: 2512362256615048255
+    second: Beaver_Dam_Module_A_1
+  - first:
+      213: -1818579476659214101
+    second: Beaver_Dam_Module_A_2
+  - first:
+      213: 1882618766515120752
+    second: Beaver_Dam_Module_A_3
+  - first:
+      213: -8097676187566880640
+    second: Beaver_Dam_Module_A_4
+  - first:
+      213: -6300462837838549341
+    second: Beaver_Dam_Module_A_5
+  - first:
+      213: -9017566381135735563
+    second: Beaver_Dam_Module_A_6
+  - first:
+      213: 6028006349499227930
+    second: Beaver_Dam_Module_A_7
+  - first:
+      213: 5783038981062752576
+    second: Beaver_Dam_Module_A_8
+  - first:
+      213: 7770610226618339351
+    second: Beaver_Dam_Module_A_9
+  - first:
+      213: -3138327317890984182
+    second: Beaver_Dam_Module_A_10
+  - first:
+      213: 3536950654921757850
+    second: Beaver_Dam_Module_A_11
+  - first:
+      213: -5749984792241412214
+    second: Beaver_Dam_Module_A_12
+  - first:
+      213: 1098408088825065928
+    second: Beaver_Dam_Module_A_13
+  - first:
+      213: 2666006693355170576
+    second: Beaver_Dam_Module_A_14
+  - first:
+      213: 214021874490582563
+    second: Beaver_Dam_Module_A_15
+  - first:
+      213: 4908750187920912858
+    second: Beaver_Dam_Module_A_16
+  - first:
+      213: -6069629213983857675
+    second: Beaver_Dam_Module_A_17
+  - first:
+      213: 3837318868416424265
+    second: Beaver_Dam_Module_A_18
+  - first:
+      213: -8333204069567953287
+    second: Beaver_Dam_Module_A_19
+  - first:
+      213: 2790234008326268610
+    second: Beaver_Dam_Module_A_20
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 2149
+        height: 691
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 922532121b6d058b0800000000000000
+      internalID: -5165392716340440535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_1
+      rect:
+        serializedVersion: 2
+        x: 366
+        y: 684
+        width: 72
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3483ac4924bdd220800000000000000
+      internalID: 2512362256615048255
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_2
+      rect:
+        serializedVersion: 2
+        x: 1078
+        y: 640
+        width: 49
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be869e9e99b13c6e0800000000000000
+      internalID: -1818579476659214101
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_3
+      rect:
+        serializedVersion: 2
+        x: 1199
+        y: 683
+        width: 57
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07a2e992bc7602a10800000000000000
+      internalID: 1882618766515120752
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_4
+      rect:
+        serializedVersion: 2
+        x: 2034
+        y: 628
+        width: 10
+        height: 77
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 088cfe529664f9f80800000000000000
+      internalID: -8097676187566880640
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_5
+      rect:
+        serializedVersion: 2
+        x: 563
+        y: 643
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ae65162e624098a0800000000000000
+      internalID: -6300462837838549341
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_6
+      rect:
+        serializedVersion: 2
+        x: 1181
+        y: 650
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f456e9472b2bd280800000000000000
+      internalID: -9017566381135735563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_7
+      rect:
+        serializedVersion: 2
+        x: 1906
+        y: 643
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1f53bd46d7c7a350800000000000000
+      internalID: 6028006349499227930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_8
+      rect:
+        serializedVersion: 2
+        x: 641
+        y: 86
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0497b7c305b714050800000000000000
+      internalID: 5783038981062752576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_9
+      rect:
+        serializedVersion: 2
+        x: 645
+        y: 83
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7109a95a4d0c6db60800000000000000
+      internalID: 7770610226618339351
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_10
+      rect:
+        serializedVersion: 2
+        x: 1898
+        y: 79
+        width: 18
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0714349eeb6274d0800000000000000
+      internalID: -3138327317890984182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_11
+      rect:
+        serializedVersion: 2
+        x: 161
+        y: 61
+        width: 15
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a9452be81e5c51130800000000000000
+      internalID: 3536950654921757850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_12
+      rect:
+        serializedVersion: 2
+        x: 193
+        y: 29
+        width: 33
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a876d82db43f330b0800000000000000
+      internalID: -5749984792241412214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_13
+      rect:
+        serializedVersion: 2
+        x: 1914
+        y: 65
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c175d056545e3f00800000000000000
+      internalID: 1098408088825065928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_14
+      rect:
+        serializedVersion: 2
+        x: 2001
+        y: 62
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01baf3666fe8ff420800000000000000
+      internalID: 2666006693355170576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_15
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 49
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 326ac2bc2cb58f200800000000000000
+      internalID: 214021874490582563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_16
+      rect:
+        serializedVersion: 2
+        x: 159
+        y: 49
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad1782ac9426f1440800000000000000
+      internalID: 4908750187920912858
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_17
+      rect:
+        serializedVersion: 2
+        x: 523
+        y: 55
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f3a82e536854cba0800000000000000
+      internalID: -6069629213983857675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_18
+      rect:
+        serializedVersion: 2
+        x: 133
+        y: 18
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9496dd90e25e04530800000000000000
+      internalID: 3837318868416424265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_19
+      rect:
+        serializedVersion: 2
+        x: 231
+        y: 29
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9760098cc038a5c80800000000000000
+      internalID: -8333204069567953287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Beaver_Dam_Module_A_20
+      rect:
+        serializedVersion: 2
+        x: 1963
+        y: 23
+        width: 17
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c6608a1c07e8b620800000000000000
+      internalID: 2790234008326268610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Beaver_Dam_Module_A_0: -5165392716340440535
+      Beaver_Dam_Module_A_1: 2512362256615048255
+      Beaver_Dam_Module_A_10: -3138327317890984182
+      Beaver_Dam_Module_A_11: 3536950654921757850
+      Beaver_Dam_Module_A_12: -5749984792241412214
+      Beaver_Dam_Module_A_13: 1098408088825065928
+      Beaver_Dam_Module_A_14: 2666006693355170576
+      Beaver_Dam_Module_A_15: 214021874490582563
+      Beaver_Dam_Module_A_16: 4908750187920912858
+      Beaver_Dam_Module_A_17: -6069629213983857675
+      Beaver_Dam_Module_A_18: 3837318868416424265
+      Beaver_Dam_Module_A_19: -8333204069567953287
+      Beaver_Dam_Module_A_2: -1818579476659214101
+      Beaver_Dam_Module_A_20: 2790234008326268610
+      Beaver_Dam_Module_A_3: 1882618766515120752
+      Beaver_Dam_Module_A_4: -8097676187566880640
+      Beaver_Dam_Module_A_5: -6300462837838549341
+      Beaver_Dam_Module_A_6: -9017566381135735563
+      Beaver_Dam_Module_A_7: 6028006349499227930
+      Beaver_Dam_Module_A_8: 5783038981062752576
+      Beaver_Dam_Module_A_9: 7770610226618339351
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

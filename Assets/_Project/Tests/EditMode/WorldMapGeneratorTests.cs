@@ -716,7 +716,11 @@ public class WorldMapGeneratorTests
     [Test]
     public void EdgeBlends_OverlapNeighbours_WithoutGaps()
     {
-        GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12);
+        // Проверка рисовальщика на прежней смешанной карте seed 12 (тип региона
+        // по seed меняет саму карту, а не поведение заливок).
+        WorldMapGenerationSettings settings = WorldMapGenerationSettings.CreateDefault();
+        settings.RegionKind = WorldMapRegionKind.Mixed;
+        GeneratedWorldMap map = WorldMapGenerator.Generate(settings, 12);
         foreach (WorldMapEdgeBlend blend in new[] { WorldMapEdgeBlend.Tongues, WorldMapEdgeBlend.Spots, WorldMapEdgeBlend.Streaks, WorldMapEdgeBlend.Wash })
         {
             WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();

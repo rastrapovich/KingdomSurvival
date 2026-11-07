@@ -1,0 +1,689 @@
+fileFormatVersion: 2
+guid: e8a58b3d53e6b104cab3bf2e6ede2d5f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2882622460084868061
+    second: Banner_Court_Front_0
+  - first:
+      213: -5468391243670204400
+    second: Banner_Court_Front_1
+  - first:
+      213: 4739436123585388642
+    second: Banner_Court_Front_2
+  - first:
+      213: 3308685792503115131
+    second: Banner_Court_Front_3
+  - first:
+      213: 6040477372266565140
+    second: Banner_Court_Front_4
+  - first:
+      213: 2561001075278392882
+    second: Banner_Court_Front_5
+  - first:
+      213: 476897995811698635
+    second: Banner_Court_Front_6
+  - first:
+      213: 5590919410170259707
+    second: Banner_Court_Front_7
+  - first:
+      213: -881755113134961222
+    second: Banner_Court_Front_8
+  - first:
+      213: -965043335079434625
+    second: Banner_Court_Front_9
+  - first:
+      213: 4880581026515624419
+    second: Banner_Court_Front_10
+  - first:
+      213: 4879333363523260164
+    second: Banner_Court_Front_11
+  - first:
+      213: 6843665561234318268
+    second: Banner_Court_Front_12
+  - first:
+      213: 4818022911718992757
+    second: Banner_Court_Front_13
+  - first:
+      213: 528929788159976493
+    second: Banner_Court_Front_14
+  - first:
+      213: -2984162296447862363
+    second: Banner_Court_Front_15
+  - first:
+      213: 6414264855557859617
+    second: Banner_Court_Front_16
+  - first:
+      213: -2591791292918416957
+    second: Banner_Court_Front_17
+  - first:
+      213: 5835121796233065895
+    second: Banner_Court_Front_18
+  - first:
+      213: 8321638558607869242
+    second: Banner_Court_Front_19
+  - first:
+      213: 3972590589415374052
+    second: Banner_Court_Front_20
+  - first:
+      213: -6432381290105092259
+    second: Banner_Court_Front_21
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Banner_Court_Front_0
+      rect:
+        serializedVersion: 2
+        x: 184
+        y: 1279
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd3dbeacad1210820800000000000000
+      internalID: 2882622460084868061
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_1
+      rect:
+        serializedVersion: 2
+        x: 322
+        y: 1249
+        width: 17
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0105e2cf22f5c14b0800000000000000
+      internalID: -5468391243670204400
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_2
+      rect:
+        serializedVersion: 2
+        x: 537
+        y: 1247
+        width: 45
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26026f53b0cd5c140800000000000000
+      internalID: 4739436123585388642
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_3
+      rect:
+        serializedVersion: 2
+        x: 761
+        y: 1263
+        width: 18
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7da787b230daed20800000000000000
+      internalID: 3308685792503115131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1197
+        height: 1278
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41ecbbf8a2614d350800000000000000
+      internalID: 6040477372266565140
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_5
+      rect:
+        serializedVersion: 2
+        x: 405
+        y: 1261
+        width: 17
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23eac51c8e08a8320800000000000000
+      internalID: 2561001075278392882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_6
+      rect:
+        serializedVersion: 2
+        x: 591
+        y: 1262
+        width: 12
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc7b37253384e9600800000000000000
+      internalID: 476897995811698635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_7
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 1255
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf8e803e49fe69d40800000000000000
+      internalID: 5590919410170259707
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_8
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 1253
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: abdc4b6756063c3f0800000000000000
+      internalID: -881755113134961222
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_9
+      rect:
+        serializedVersion: 2
+        x: 679
+        y: 1253
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f766bb3233a7b92f0800000000000000
+      internalID: -965043335079434625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_10
+      rect:
+        serializedVersion: 2
+        x: 689
+        y: 1255
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e1a9fec59e4bb340800000000000000
+      internalID: 4880581026515624419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_11
+      rect:
+        serializedVersion: 2
+        x: 695
+        y: 1249
+        width: 13
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40f0481a7dfd6b340800000000000000
+      internalID: 4879333363523260164
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_12
+      rect:
+        serializedVersion: 2
+        x: 535
+        y: 1224
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb322f2919599fe50800000000000000
+      internalID: 6843665561234318268
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_13
+      rect:
+        serializedVersion: 2
+        x: 552
+        y: 1233
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57b24bcaf4e0dd240800000000000000
+      internalID: 4818022911718992757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_14
+      rect:
+        serializedVersion: 2
+        x: 559
+        y: 1234
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d24e56607d2275700800000000000000
+      internalID: 528929788159976493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_15
+      rect:
+        serializedVersion: 2
+        x: 79
+        y: 1038
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a97c10c3302696d0800000000000000
+      internalID: -2984162296447862363
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_16
+      rect:
+        serializedVersion: 2
+        x: 79
+        y: 1011
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1296cc2e6eb040950800000000000000
+      internalID: 6414264855557859617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_17
+      rect:
+        serializedVersion: 2
+        x: 1144
+        y: 941
+        width: 34
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c9b5ad0d8b180cd0800000000000000
+      internalID: -2591791292918416957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 493
+        width: 7
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a57c9d9b548af050800000000000000
+      internalID: 5835121796233065895
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_19
+      rect:
+        serializedVersion: 2
+        x: 1142
+        y: 119
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a35040bdd266c7370800000000000000
+      internalID: 8321638558607869242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_20
+      rect:
+        serializedVersion: 2
+        x: 1148
+        y: 119
+        width: 11
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ecb928e71a712730800000000000000
+      internalID: 3972590589415374052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Banner_Court_Front_21
+      rect:
+        serializedVersion: 2
+        x: 1158
+        y: 118
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d57ca6ffb479bb6a0800000000000000
+      internalID: -6432381290105092259
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Banner_Court_Front_0: 2882622460084868061
+      Banner_Court_Front_1: -5468391243670204400
+      Banner_Court_Front_10: 4880581026515624419
+      Banner_Court_Front_11: 4879333363523260164
+      Banner_Court_Front_12: 6843665561234318268
+      Banner_Court_Front_13: 4818022911718992757
+      Banner_Court_Front_14: 528929788159976493
+      Banner_Court_Front_15: -2984162296447862363
+      Banner_Court_Front_16: 6414264855557859617
+      Banner_Court_Front_17: -2591791292918416957
+      Banner_Court_Front_18: 5835121796233065895
+      Banner_Court_Front_19: 8321638558607869242
+      Banner_Court_Front_2: 4739436123585388642
+      Banner_Court_Front_20: 3972590589415374052
+      Banner_Court_Front_21: -6432381290105092259
+      Banner_Court_Front_3: 3308685792503115131
+      Banner_Court_Front_4: 6040477372266565140
+      Banner_Court_Front_5: 2561001075278392882
+      Banner_Court_Front_6: 476897995811698635
+      Banner_Court_Front_7: 5590919410170259707
+      Banner_Court_Front_8: -881755113134961222
+      Banner_Court_Front_9: -965043335079434625
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

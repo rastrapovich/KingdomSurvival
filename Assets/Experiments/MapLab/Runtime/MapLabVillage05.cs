@@ -109,6 +109,40 @@ namespace KingdomSurvival.MapLab
             if (main == null)
                 return;
             MapLabRandom rng = MapLabRandom.ForStream(data.Seed, index == 0 ? "village05" : "village05-" + index, MapLabData.AlgorithmVersion);
+            string family = st.Family ?? string.Empty;
+            // 12У-E: поселение у переправы — площадь там, где подходы сходятся
+            // к мосту (не на самом подходе: 12 ед. у моста свободны).
+            if (family == "crossing" && data.Bridges.Count > 0)
+            {
+                Vector2 end = Vector2.zero;
+                float endDistance = float.MaxValue;
+                foreach (MapLabBridge b in data.Bridges)
+                {
+                    foreach (Vector2 e in new[] { b.EndA, b.EndB })
+                    {
+                        float d = Vector2.Distance(e, st.Center);
+                        if (d < endDistance)
+                        {
+                            endDistance = d;
+                            end = e;
+                        }
+                    }
+                }
+                if (endDistance < st.Radius * 1.6f)
+                {
+                    Vector2 want = end + (st.Center - end).normalized * 16f;
+                    float near = float.MaxValue;
+                    for (int i = 1; i < main.Points.Count - 1; i++)
+                    {
+                        float d = Vector2.Distance(main.Points[i], want);
+                        if (d < near)
+                        {
+                            near = d;
+                            bestIndex = i;
+                        }
+                    }
+                }
+            }
             float scale = s.BuildingScale;
             List<MapLabHouseView>[] houseViews =
             {
@@ -138,7 +172,52 @@ namespace KingdomSurvival.MapLab
             data.Plazas.Add(plazaInfo);
             data.Props.Add(new MapLabProp { Role = "village_well", Position = Ground(data, wellPoint), Scale = 1f, Yard = 0 });
 
-            Vector2Int range = YardRange(s5, st.Size);
+            // 12У-E (мастер-бриф §9.2–9.4): размер меняет структуру, а не только
+            // число домов; семейство — уличный скелет.
+            //   вдоль дороги — главная улица; крупная — ещё два переулка;
+            //   у переправы — дворы ближе к подходам; крупная — один переулок;
+            //   промысловая слобода — переулок от площади к промыслу;
+            //   рассеянные дворы — 2–3 малые группы на коротких проездах.
+            List<Vector2> groups = new List<Vector2>();
+            int lanes = 0;
+            float laneWidth = Mathf.Max(1.4f, main.Width * 0.62f);
+            if (family == "craft")
+            {
+                if (AddLane(data, ref rng, plaza + plazaNormal * plazaSide * main.Width * 0.5f, plazaNormal * plazaSide, st.Radius * 0.9f, laneWidth) != null)
+                    lanes++;
+            }
+            else if (family == "scattered")
+            {
+                int count = rng.Range(2, 4);
+                float start = rng.Range(0f, 360f);
+                for (int g = 0; g < count; g++)
+                {
+                    float angle = (start + g * 360f / count + rng.Range(-25f, 25f)) * Mathf.Deg2Rad;
+                    Vector2 dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                    if (Mathf.Abs(Vector2.Dot(dir, plazaTangent)) > 0.85f)
+                        dir = (dir + plazaNormal * Mathf.Sign(Vector2.Dot(dir, plazaNormal) + 0.01f)).normalized;
+                    MapLabPolyline lane = AddLane(data, ref rng, plaza + dir * main.Width * 0.5f, dir, st.Radius * rng.Range(0.7f, 1.05f), laneWidth * 0.85f);
+                    if (lane != null)
+                    {
+                        lanes++;
+                        groups.Add(lane.Points[lane.Points.Count - 1]);
+                    }
+                }
+            }
+            else if (st.Size >= 3)
+            {
+                int want = family == "crossing" ? 1 : 2;
+                for (int l = 0; l < want; l++)
+                {
+                    int sign = l == 0 ? 1 : -1;
+                    int at = Mathf.Clamp(bestIndex + sign * Mathf.Max(3, (int)(st.Radius * 0.35f / 2.5f)), 1, main.Points.Count - 2);
+                    Vector2 tangent = (main.Points[at + 1] - main.Points[at - 1]).normalized;
+                    Vector2 side = MapLabGeometry.LeftNormal(tangent) * (l == 0 ? plazaSide : -plazaSide);
+                    if (AddLane(data, ref rng, main.Points[at] + side * main.Width * 0.5f, side, st.Radius * 0.75f, laneWidth) != null)
+                        lanes++;
+                }
+            }
+            Vector2Int range = YardRange(s5, st.Size, lanes);
             int target = rng.Range(range.x, range.y + 1);
             // R03: ограда — не атрибут каждого дома. Небольшой бюджет на деревню
             // (около одной на пять дворов, 1–3) и выбор на уровне плана: какие по
@@ -167,8 +246,17 @@ namespace KingdomSurvival.MapLab
                 for (int i = 1; i < pts.Count - 1; i++)
                 {
                     float dc = Vector2.Distance(pts[i], st.Center);
-                    if (dc > st.Radius * 1.15f || Vector2.Distance(pts[i], plaza) < s5.WellWidening + 7f)
+                    if (dc > st.Radius * (groups.Count > 0 ? 1.3f : 1.15f) || Vector2.Distance(pts[i], plaza) < s5.WellWidening + 7f)
                         continue;
+                    // Рассеянные дворы — только у своих групп; между ними остаётся природа.
+                    if (groups.Count > 0)
+                    {
+                        bool inGroup = false;
+                        foreach (Vector2 g in groups)
+                            inGroup |= Vector2.Distance(pts[i], g) < 13f;
+                        if (!inGroup)
+                            continue;
+                    }
                     spots.Add((pts[i], (pts[i + 1] - pts[i - 1]).normalized, road, Vector2.Distance(pts[i], plaza) + rng.Range(0f, 6f)));
                 }
             }
@@ -192,15 +280,47 @@ namespace KingdomSurvival.MapLab
         }
 
         // Дворов по размеру поселения: среднее — диапазон профиля, малое — 3–6,
-        // крупное — верх диапазона (больше 12 — следующая поставка этапа E).
-        private static Vector2Int YardRange(MapLabStage05Settings s5, int size)
+        // крупное — 10–12 на одной улице и 12–18, когда есть переулки.
+        private static Vector2Int YardRange(MapLabStage05Settings s5, int size, int lanes = 0)
         {
             int lo = Mathf.Min(s5.YardsMin, s5.YardsMax), hi = Mathf.Max(s5.YardsMin, s5.YardsMax);
             if (size <= 1)
                 return new Vector2Int(3, Mathf.Clamp(Mathf.Min(hi, 6), 3, 6));
             if (size >= 3)
-                return new Vector2Int(Mathf.Max(lo, Mathf.Min(hi, 10)), Mathf.Max(hi, 12));
+                return lanes > 0 ? new Vector2Int(12, Mathf.Max(hi, 18)) : new Vector2Int(Mathf.Max(lo, Mathf.Min(hi, 10)), Mathf.Max(hi, 12));
             return new Vector2Int(lo, hi);
+        }
+
+        // Переулок: короткая улица от главной дороги, слегка изогнутая; идёт,
+        // пока земля пригодна (не вода, не круча, не у моста). Короче 10 ед. —
+        // не строится.
+        private static MapLabPolyline AddLane(MapLabData data, ref MapLabRandom rng, Vector2 start, Vector2 dir, float length, float width)
+        {
+            MapLabPolyline lane = new MapLabPolyline { Kind = MapLabRoadKind.Road, Width = width };
+            Vector2 p = start;
+            Vector2 d = dir.normalized;
+            lane.Points.Add(p - d * 1.5f);
+            float walked = 0f;
+            while (walked < length)
+            {
+                float turn = rng.Range(-8f, 8f) * Mathf.Deg2Rad;
+                d = new Vector2(d.x * Mathf.Cos(turn) - d.y * Mathf.Sin(turn), d.x * Mathf.Sin(turn) + d.y * Mathf.Cos(turn)).normalized;
+                Vector2 q = p + d * 3f;
+                if (!BuildableSpot(data, q, width * 0.6f, 15f))
+                    break;
+                bool nearBridge = false;
+                foreach (MapLabBridge b in data.Bridges)
+                    nearBridge |= Vector2.Distance(q, b.EndA) < 12f || Vector2.Distance(q, b.EndB) < 12f;
+                if (nearBridge)
+                    break;
+                p = q;
+                lane.Points.Add(p);
+                walked += 3f;
+            }
+            if (walked < 10f)
+                return null;
+            data.Roads.Add(lane);
+            return lane;
         }
 
         private static Vector3 Ground(MapLabData data, Vector2 p) => new Vector3(p.x, data.SampleHeight(p.x, p.y), p.y);

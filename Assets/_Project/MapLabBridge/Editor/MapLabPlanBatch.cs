@@ -19,6 +19,9 @@ namespace KingdomSurvival.MapLabBridge.Editor
     // MapLab по этому плану, кадры общего вида и деревень, отчёт.
     //   -executeMethod KingdomSurvival.MapLabBridge.Editor.MapLabPlanBatch.Render
     //     -mapLabOut <папка> [-mapLabSeeds 11,12] [-mapLabHexes 60]
+    //     [-mapLabRegion bySeed|river|lake|hill|settled|mixed] [-mapLabDiscoveries 0..2]
+    //     [-mapLabConnectivity 0..1] [-mapLabPlanOnly] — только план, схема и проверки
+    //     (быстрый прогон набора seed без рисунка MapLab).
     public static class MapLabPlanBatch
     {
         private static int Count(GeneratedWorldMap plan, WorldMapGameplayTerrainType type)
@@ -45,6 +48,25 @@ namespace KingdomSurvival.MapLabBridge.Editor
                 WorldMapGeneratorAsset generator = AssetDatabase.LoadAssetAtPath<WorldMapGeneratorAsset>(WorldMapGeneratorAsset.AssetPath);
                 WorldMapGenerationSettings planSettings = generator != null ? generator.Settings.Clone() : WorldMapGenerationSettings.CreateDefault();
                 planSettings.HexesAcross = hexes;
+                string regionArg = MapLabStage03Batch.Argument("-mapLabRegion", "");
+                switch (regionArg)
+                {
+                    case "river": planSettings.RegionKind = WorldMapRegionKind.RiverValley; break;
+                    case "lake": planSettings.RegionKind = WorldMapRegionKind.ForestLake; break;
+                    case "hill": planSettings.RegionKind = WorldMapRegionKind.HillAndLedge; break;
+                    case "settled": planSettings.RegionKind = WorldMapRegionKind.SettledLand; break;
+                    case "mixed": planSettings.RegionKind = WorldMapRegionKind.Mixed; break;
+                    case "bySeed": planSettings.RegionKind = WorldMapRegionKind.BySeed; break;
+                }
+                string discoveries = MapLabStage03Batch.Argument("-mapLabDiscoveries", "");
+                if (discoveries.Length > 0)
+                    planSettings.Discoveries = (WorldMapDiscoveryRate)int.Parse(discoveries, CultureInfo.InvariantCulture);
+                string connectivity = MapLabStage03Batch.Argument("-mapLabConnectivity", "");
+                if (connectivity.Length > 0)
+                    planSettings.RouteConnectivity = float.Parse(connectivity, CultureInfo.InvariantCulture);
+                bool planOnly = Environment.GetCommandLineArgs().Contains("-mapLabPlanOnly");
+                System.Collections.Generic.List<GeneratedWorldMap> plans = new System.Collections.Generic.List<GeneratedWorldMap>();
+                int failed = 0;
                 MapLabAssets.EnsureAllPresets();
                 EditorSceneManager.OpenScene(MapLabAssets.ScenePath, OpenSceneMode.Single);
                 MapLabView view = MapLabAssets.FindView();
@@ -55,6 +77,7 @@ namespace KingdomSurvival.MapLabBridge.Editor
                 view.ArtSet05 = MapLabArtImport.LoadStage05Set();
                 view.MarkerSet05 = MapLabArtImport.LoadStage05Markers();
                 view.ArtSet06 = MapLabArtImport.LoadCliffs06Set();
+                view.ArtSetPoi = MapLabPoiImport.LoadSet();
                 view.CliffShader = MapLabAssets.LoadShader("MapLabCliff.shader");
                 view.InkShader = MapLabAssets.LoadShader("MapLabInk.shader");
                 view.GrassShader = MapLabAssets.LoadShader("MapLabGrass.shader");
@@ -66,6 +89,20 @@ namespace KingdomSurvival.MapLabBridge.Editor
                     Stopwatch watch = Stopwatch.StartNew();
                     GeneratedWorldMap plan = WorldMapGenerator.Generate(planSettings, seed);
                     double planMs = watch.Elapsed.TotalMilliseconds;
+                    plans.Add(plan);
+                    if (plan.Report.ErrorCount > 0)
+                        failed++;
+                    Directory.CreateDirectory(Path.Combine(output, $"seed{seed}"));
+                    Texture2D diagram = MapLabPlanDiagram.Render(plan, 1200);
+                    File.WriteAllBytes(Path.Combine(output, $"seed{seed}", "plan_diagram.png"), diagram.EncodeToPNG());
+                    UnityEngine.Object.DestroyImmediate(diagram);
+                    report.AppendLine($"seed {seed}: тип «{plan.Passport.KindTitle}», план {planMs:0} мс; ошибок {plan.Report.ErrorCount}, предупреждений {plan.Report.WarningCount}");
+                    foreach (string line in MapLabPlanHook.Report(plan).Passport)
+                        report.AppendLine("      " + line);
+                    foreach (GeneratedRegionIssue issue in plan.Report.Issues)
+                        report.AppendLine($"      {(issue.Error ? "ОШИБКА" : "внимание")} {issue.Code}: {issue.Message}");
+                    if (planOnly)
+                        continue;
                     MapLabSettings s = UnityEngine.Object.Instantiate(MapLabAssets.EnsurePreset(MapLabPresetKind.RiverValley));
                     s.Stage03.Look = MapLabLook.Stage05;
                     MapLabComposition c = MapLabRegionPlan.Apply(plan, s);
@@ -128,6 +165,8 @@ namespace KingdomSurvival.MapLabBridge.Editor
                     view.Clear();
                     UnityEngine.Object.DestroyImmediate(s);
                 }
+                if (plans.Count > 0)
+                    report.AppendLine(string.Format(CultureInfo.InvariantCulture, "Набор: seed {0}, различных структур (отпечатков) {1:P0}, с ошибками {2}.", plans.Count, WorldMapRegionValidator.Diversity(plans), failed));
             }
             catch (Exception exception)
             {

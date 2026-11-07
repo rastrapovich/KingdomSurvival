@@ -27,7 +27,7 @@ namespace KingdomSurvival.MapLab.Editor
         private static readonly string[] SizeNames = { "Малый · 192", "Средний · 256", "Большой · 384", "Очень большой · 512 (проверочный)" };
         private static readonly string[] QualityNames = { "Быстро", "Стандарт", "Высокое" };
         private static readonly string[] DiscoveryNames = { "Редко", "Обычно", "Насыщенно" };
-        private static readonly string[] VillageNames = { "Авто (от освоенности)", "Малая · 3–6 дворов", "Средняя · 7–12", "Крупная · до 12 (больше — этап E)" };
+        private static readonly string[] VillageNames = { "Авто (от освоенности)", "Малая · 3–6 дворов", "Средняя · 7–12", "Крупная · 12–18, с переулками" };
 
         private Tab tab;
         private MapLabView view;
@@ -40,6 +40,8 @@ namespace KingdomSurvival.MapLab.Editor
         private RenderTexture preview;
         private bool previewDirty = true;
         private string status = "";
+        private MapLabPlanReport planReport;
+        private Vector2 diagramScroll;
         private bool objectsPending;
 
         // Ассеты
@@ -247,8 +249,25 @@ namespace KingdomSurvival.MapLab.Editor
             EditorGUILayout.LabelField("Основные настройки", EditorStyles.boldLabel);
             bool structure = false, look = false;
 
+            bool planMode = a.UseGamePlan && MapLabPlanSource.Available;
             EditorGUI.BeginChangeCheck();
-            int region = EditorGUILayout.Popup(new GUIContent("Тип региона", "Композиционное семейство: холм и уступ, лесное озеро, речная долина."), (int)s.General.Preset, RegionNames);
+            bool usePlan = EditorGUILayout.ToggleLeft(new GUIContent("Регион из генератора игры", "Структуру строит генератор свободной игры (районы, деревни, места, маршруты, проверки); MapLab рисует тот же план. Выключено — три пресета MapLab для предпросмотра рисунка."), a.UseGamePlan);
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(s, "Генератор карты: источник региона");
+                a.UseGamePlan = usePlan;
+                structure = true;
+                planMode = a.UseGamePlan && MapLabPlanSource.Available;
+            }
+            if (a.UseGamePlan && !MapLabPlanSource.Available)
+                EditorGUILayout.HelpBox("Мост MapLabBridge не загружен — используются пресеты MapLab.", MessageType.Warning);
+            EditorGUI.BeginChangeCheck();
+            int planRegion = a.PlanRegion;
+            int region = (int)s.General.Preset;
+            if (planMode)
+                planRegion = EditorGUILayout.Popup(new GUIContent("Тип региона", "По seed — тип выбирается по seed. Поправки рельефа, воды, леса и освоенности с разбросом: один тип даёт разные схемы."), a.PlanRegion, MapLabPlanSource.RegionNames);
+            else
+                region = EditorGUILayout.Popup(new GUIContent("Тип региона", "Композиционное семейство: холм и уступ, лесное озеро, речная долина."), (int)s.General.Preset, RegionNames);
             using (new EditorGUILayout.HorizontalScope())
             {
                 int seed = EditorGUILayout.IntField(new GUIContent("Seed", "Ключ воспроизведения; меняется только явно."), s.General.Seed);
@@ -260,6 +279,7 @@ namespace KingdomSurvival.MapLab.Editor
                 {
                     Undo.RecordObject(s, "Генератор карты: основные");
                     s.General.Preset = (MapLabPresetKind)region;
+                    a.PlanRegion = planRegion;
                     s.General.Seed = seed;
                     structure = true;
                 }
@@ -272,10 +292,10 @@ namespace KingdomSurvival.MapLab.Editor
             a.Water = Slider("Количество воды", "Мало ← → много: охват озёр, уровень и ширина реки.", a.Water);
             a.Forest = Slider("Лесистость", "Открытая земля ← → преимущественно лес; подходы и просветы сохраняются.", a.Forest);
             a.Settlement = Slider("Освоенность", "Дикая ← → обжитая земля: поля, их охват и размер деревни.", a.Settlement);
-            using (new EditorGUI.DisabledScope(true))
+            using (new EditorGUI.DisabledScope(!planMode))
             {
-                a.Discoveries = (MapLabDiscoveryRate)EditorGUILayout.Popup(new GUIContent("Насыщенность открытиями", "Бюджет содержательных мест — появится с этапом D (структура и исследование)."), (int)a.Discoveries, DiscoveryNames);
-                a.Connectivity = Slider("Связанность маршрутов", "Ответвления ← → обходы и петли — этап D.", a.Connectivity);
+                a.Discoveries = (MapLabDiscoveryRate)EditorGUILayout.Popup(new GUIContent("Насыщенность открытиями", "Бюджет мест относительно площади: редко ×0,6, обычно ×1, насыщенно ×1,5. Места с содержанием ставятся всегда. Только в режиме плана игры."), (int)a.Discoveries, DiscoveryNames);
+                a.Connectivity = Slider("Связанность маршрутов", "Влево — больше хозяйственных троп-ответвлений; вправо — больше петель между деревнями и обходов через места. Только в режиме плана игры.", a.Connectivity);
             }
             a.Quality = (MapLabDisplayQuality)EditorGUILayout.Popup(new GUIContent("Качество отображения", "Плотность рисунка и сетки; игровую структуру не меняет."), (int)a.Quality, QualityNames);
             if (EditorGUI.EndChangeCheck())
@@ -386,6 +406,8 @@ namespace KingdomSurvival.MapLab.Editor
 
         private static string MapKey(MapLabSettings s)
         {
+            if (s.Author.UseGamePlan && MapLabPlanSource.Available)
+                return $"plan:{MapLabPlanSource.RegionNames[Mathf.Clamp(s.Author.PlanRegion, 0, MapLabPlanSource.RegionNames.Length - 1)]}:{s.General.Seed}:{s.Author.WorldSize}:o{(int)s.Author.Discoveries}:c{s.Author.Connectivity:0.##}:a{MapLabData.AlgorithmVersion}";
             return $"{s.General.Preset}:{s.General.Seed}:{s.General.MapSize:0}:a{MapLabData.AlgorithmVersion}";
         }
 
@@ -397,6 +419,17 @@ namespace KingdomSurvival.MapLab.Editor
                 MapLabAuthor.ApplyStructure(s);
                 MapLabAuthor.ApplyLook(s);
                 DateTime start = DateTime.Now;
+                if (s.Author.UseGamePlan && MapLabPlanSource.Available)
+                {
+                    if (planReport?.Diagram != null)
+                        DestroyImmediate(planReport.Diagram);
+                    planReport = MapLabPlanSource.Build(s);
+                }
+                else
+                {
+                    s.RegionPlan = null;
+                    planReport = null;
+                }
                 bool ok = view.Generate((stage, fraction) => EditorUtility.DisplayCancelableProgressBar("Генератор карты", stage, fraction));
                 if (!ok)
                     throw new Exception("генерация не выполнена (проверьте профиль и шейдеры)");
@@ -825,6 +858,21 @@ namespace KingdomSurvival.MapLab.Editor
             EditorGUILayout.HelpBox(errors > 0 ? $"Есть ошибки: {errors}" : warnings > 0 ? $"Есть предупреждения: {warnings}" : "Карта готова", total);
             foreach ((MessageType type, string text) in items)
                 EditorGUILayout.HelpBox(text, type);
+            if (planReport != null)
+            {
+                EditorGUILayout.Space(6);
+                EditorGUILayout.LabelField("Паспорт региона", EditorStyles.boldLabel);
+                foreach (string line in planReport.Passport)
+                    EditorGUILayout.LabelField(line, EditorStyles.wordWrappedMiniLabel);
+                if (planReport.Diagram != null)
+                {
+                    EditorGUILayout.LabelField("Схема: районы, пути, деревни (цвет — семейство), места (цвет — число оснований обнаружить: красный 0–1, жёлтый 2, зелёный 3+), площадки, нарушения.", EditorStyles.wordWrappedMiniLabel);
+                    float w = Mathf.Max(100f, leftWidth - 24f);
+                    float h = w * planReport.Diagram.height / Mathf.Max(1f, planReport.Diagram.width);
+                    Rect r = GUILayoutUtility.GetRect(w, h, GUILayout.ExpandWidth(false));
+                    GUI.DrawTexture(r, planReport.Diagram, ScaleMode.ScaleToFit);
+                }
+            }
             EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Подробности", EditorStyles.boldLabel);
             MapLabStats st = view.LastStats;
@@ -850,6 +898,9 @@ namespace KingdomSurvival.MapLab.Editor
                 items.Add((MessageType.Warning, "Карта не построена — «Сгенерировать предпросмотр»."));
             if (!MapLabAuthor.Verified(s.Author.WorldSize))
                 items.Add((MessageType.Warning, "Размер «Очень большой» — проверочный: для игры не подтверждён (этап C)."));
+            if (planReport != null)
+                foreach ((bool error, string text) in planReport.Issues)
+                    items.Add((error ? MessageType.Error : MessageType.Warning, "План: " + text));
             if (!s.IsStage05)
                 items.Add((MessageType.Warning, "Профиль не на виде Stage05: рабочий генератор рассчитан на принятый вид этапа 05."));
             foreach (MapLabArtSet set in ActiveSets())

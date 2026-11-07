@@ -1,0 +1,767 @@
+fileFormatVersion: 2
+guid: 71f23c0b3d4e4d14b9ddfc184c7822af
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7318352380095170762
+    second: Worker_Gatherer_Front_0
+  - first:
+      213: 3211308427497446449
+    second: Worker_Gatherer_Front_1
+  - first:
+      213: -4976841310896982836
+    second: Worker_Gatherer_Front_2
+  - first:
+      213: -9168664760380623499
+    second: Worker_Gatherer_Front_3
+  - first:
+      213: -881053415405205318
+    second: Worker_Gatherer_Front_4
+  - first:
+      213: -1254793987994197974
+    second: Worker_Gatherer_Front_5
+  - first:
+      213: -6386910599829660769
+    second: Worker_Gatherer_Front_6
+  - first:
+      213: 6658513932686635595
+    second: Worker_Gatherer_Front_7
+  - first:
+      213: 3904813183100711380
+    second: Worker_Gatherer_Front_8
+  - first:
+      213: 6674593195443204501
+    second: Worker_Gatherer_Front_9
+  - first:
+      213: -2371375372533265660
+    second: Worker_Gatherer_Front_10
+  - first:
+      213: 7953962548520905608
+    second: Worker_Gatherer_Front_11
+  - first:
+      213: 6181526408025421082
+    second: Worker_Gatherer_Front_12
+  - first:
+      213: 5769673117362238035
+    second: Worker_Gatherer_Front_13
+  - first:
+      213: -4625206818136183509
+    second: Worker_Gatherer_Front_14
+  - first:
+      213: -4664693257167948153
+    second: Worker_Gatherer_Front_15
+  - first:
+      213: -3177786033867101971
+    second: Worker_Gatherer_Front_16
+  - first:
+      213: 1782679993551545126
+    second: Worker_Gatherer_Front_17
+  - first:
+      213: -2264452376757504602
+    second: Worker_Gatherer_Front_18
+  - first:
+      213: -1035215247495773472
+    second: Worker_Gatherer_Front_19
+  - first:
+      213: 2185442247084035071
+    second: Worker_Gatherer_Front_20
+  - first:
+      213: 2135836009243370295
+    second: Worker_Gatherer_Front_21
+  - first:
+      213: -748539450209588354
+    second: Worker_Gatherer_Front_22
+  - first:
+      213: 1381301401798252407
+    second: Worker_Gatherer_Front_23
+  - first:
+      213: -8377186334038071300
+    second: Worker_Gatherer_Front_24
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_0
+      rect:
+        serializedVersion: 2
+        x: 193
+        y: 0
+        width: 1032
+        height: 1237
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 637fa4bd84dff6a90800000000000000
+      internalID: -7318352380095170762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_1
+      rect:
+        serializedVersion: 2
+        x: 756
+        y: 1205
+        width: 31
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13c1435200cd09c20800000000000000
+      internalID: 3211308427497446449
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_2
+      rect:
+        serializedVersion: 2
+        x: 788
+        y: 1187
+        width: 23
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc4fe783235beeab0800000000000000
+      internalID: -4976841310896982836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 294
+        width: 258
+        height: 892
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 575fed46afb52c080800000000000000
+      internalID: -9168664760380623499
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_4
+      rect:
+        serializedVersion: 2
+        x: 319
+        y: 521
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab8c0a2369ed5c3f0800000000000000
+      internalID: -881053415405205318
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_5
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 829
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a206f4f1483169ee0800000000000000
+      internalID: -1254793987994197974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_6
+      rect:
+        serializedVersion: 2
+        x: 930
+        y: 744
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9bd9f416a22d57a0800000000000000
+      internalID: -6386910599829660769
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_7
+      rect:
+        serializedVersion: 2
+        x: 932
+        y: 738
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b42b6c9b42bc76c50800000000000000
+      internalID: 6658513932686635595
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_8
+      rect:
+        serializedVersion: 2
+        x: 952
+        y: 945
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d1faf4c6eea03630800000000000000
+      internalID: 3904813183100711380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_9
+      rect:
+        serializedVersion: 2
+        x: 965
+        y: 608
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 591b1a2d52be0ac50800000000000000
+      internalID: 6674593195443204501
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_10
+      rect:
+        serializedVersion: 2
+        x: 971
+        y: 818
+        width: 9
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40b8b0ba9ae271fd0800000000000000
+      internalID: -2371375372533265660
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_11
+      rect:
+        serializedVersion: 2
+        x: 1051
+        y: 454
+        width: 11
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 88b6955cbc6226e60800000000000000
+      internalID: 7953962548520905608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_12
+      rect:
+        serializedVersion: 2
+        x: 1064
+        y: 401
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a153d08548139c550800000000000000
+      internalID: 6181526408025421082
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_13
+      rect:
+        serializedVersion: 2
+        x: 1093
+        y: 696
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3523f76912ff11050800000000000000
+      internalID: 5769673117362238035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_14
+      rect:
+        serializedVersion: 2
+        x: 1133
+        y: 650
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2d274087e6ffcfb0800000000000000
+      internalID: -4625206818136183509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_15
+      rect:
+        serializedVersion: 2
+        x: 1139
+        y: 479
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 786385c723ea34fb0800000000000000
+      internalID: -4664693257167948153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_16
+      rect:
+        serializedVersion: 2
+        x: 1139
+        y: 393
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de86727507c36e3d0800000000000000
+      internalID: -3177786033867101971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_17
+      rect:
+        serializedVersion: 2
+        x: 1141
+        y: 409
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 623e5d3520a5db810800000000000000
+      internalID: 1782679993551545126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_18
+      rect:
+        serializedVersion: 2
+        x: 1157
+        y: 364
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a574989f8c0390e0800000000000000
+      internalID: -2264452376757504602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_19
+      rect:
+        serializedVersion: 2
+        x: 1163
+        y: 361
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e242fa973d22a1f0800000000000000
+      internalID: -1035215247495773472
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 148
+        width: 114
+        height: 106
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ffb439e0520445e10800000000000000
+      internalID: 2185442247084035071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_21
+      rect:
+        serializedVersion: 2
+        x: 1133
+        y: 224
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7336075c88304ad10800000000000000
+      internalID: 2135836009243370295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_22
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 192
+        width: 8
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7b24e10657ac95f0800000000000000
+      internalID: -748539450209588354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_23
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 109
+        width: 42
+        height: 102
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7771fe57e4e5b2310800000000000000
+      internalID: 1381301401798252407
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Gatherer_Front_24
+      rect:
+        serializedVersion: 2
+        x: 329
+        y: 54
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf76766d9614ebb80800000000000000
+      internalID: -8377186334038071300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Worker_Gatherer_Front_0: -7318352380095170762
+      Worker_Gatherer_Front_1: 3211308427497446449
+      Worker_Gatherer_Front_10: -2371375372533265660
+      Worker_Gatherer_Front_11: 7953962548520905608
+      Worker_Gatherer_Front_12: 6181526408025421082
+      Worker_Gatherer_Front_13: 5769673117362238035
+      Worker_Gatherer_Front_14: -4625206818136183509
+      Worker_Gatherer_Front_15: -4664693257167948153
+      Worker_Gatherer_Front_16: -3177786033867101971
+      Worker_Gatherer_Front_17: 1782679993551545126
+      Worker_Gatherer_Front_18: -2264452376757504602
+      Worker_Gatherer_Front_19: -1035215247495773472
+      Worker_Gatherer_Front_2: -4976841310896982836
+      Worker_Gatherer_Front_20: 2185442247084035071
+      Worker_Gatherer_Front_21: 2135836009243370295
+      Worker_Gatherer_Front_22: -748539450209588354
+      Worker_Gatherer_Front_23: 1381301401798252407
+      Worker_Gatherer_Front_24: -8377186334038071300
+      Worker_Gatherer_Front_3: -9168664760380623499
+      Worker_Gatherer_Front_4: -881053415405205318
+      Worker_Gatherer_Front_5: -1254793987994197974
+      Worker_Gatherer_Front_6: -6386910599829660769
+      Worker_Gatherer_Front_7: 6658513932686635595
+      Worker_Gatherer_Front_8: 3904813183100711380
+      Worker_Gatherer_Front_9: 6674593195443204501
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

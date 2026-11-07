@@ -160,4 +160,51 @@ public sealed class FreePlayCacheStoryTests
         }
         return view != null ? view.AvailableChoices.Select(c => c.ChoiceId).ToList() : new List<string>();
     }
+
+    // 12У-D, бриф распределения историй: на сгенерированной карте тайник
+    // закрепляется за местом у реки на проверенном пути от торгового села,
+    // один раз на партию; загрузка и повторное обновление не перевыбирают.
+    [Test]
+    public void GeneratedMap_BindsCacheToRiverbank_OncePerGame()
+    {
+        GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 41);
+        try
+        {
+            WorldMapNavigation.ConfigureFromDefinition(map.ToDefinitionData());
+            GameState state = new CampaignSetup { WorldSeed = 41 }.CreateCampaign(null, null, map);
+            state.Narrative ??= new NarrativeStateData();
+            LocationData post = FreePlayCacheStory.FindTradingPost(state);
+            Assert.IsNotNull(post, "Обязательное торговое село назначено деревне карты.");
+
+            FreePlayContent.RefreshWithReports(state);
+            StoryRoleBindingData binding = WorldMapStoryBinder.Find(state, "freeplay.cache", "cache");
+            Assert.IsNotNull(binding, "Роль закреплена до того, как игрок узнал о тайнике.");
+            Assert.IsTrue(binding.Bound, binding.Reason);
+            Assert.That(binding.TravelHours, Is.InRange(FreePlayCacheStory.CacheRole.MinTravelHours, FreePlayCacheStory.CacheRole.MaxTravelHours));
+            WorldMapHexGrid grid = map.CreateGrid();
+            WorldMapHexCell cell = grid.CellAt(binding.Cell);
+            Assert.IsTrue(map.RiverCells.Any(r => grid.CellAt(r).DistanceTo(cell) <= 2), "Старое русло — у реки: " + binding.Reason);
+            Assert.IsTrue(map.Villages.All(v => grid.CellAt(v.Cell).DistanceTo(cell) >= 2), "Не в деревне.");
+
+            state.Narrative.AddKnowledge(ItemCatalog.OldBedCacheKnowledge);
+            FreePlayContent.RefreshWithReports(state);
+            LocationData cache = state.FindLocation(FreePlayCacheStory.LocationId);
+            Assert.AreEqual(binding.XPercent, cache.MapXPercent, 0.001f);
+            Assert.AreEqual(binding.YPercent, cache.MapYPercent, 0.001f);
+
+            GameState loaded = CampaignSaveService.RestoreCampaign(JsonUtility.FromJson<CampaignSaveData>(
+                JsonUtility.ToJson(CampaignSaveService.ExportCampaign(state))));
+            FreePlayContent.RefreshWithReports(loaded);
+            StoryRoleBindingData again = WorldMapStoryBinder.Find(loaded, "freeplay.cache", "cache");
+            Assert.AreEqual(binding.Cell, again.Cell, "Загрузка не перевыбирает место.");
+            Assert.AreEqual(1, loaded.Settlements.StoryBindings.Count(b => b.StoryId == "freeplay.cache"));
+
+            StoryRoleBindingData fresh = WorldMapStoryBinder.Choose(map, 41, FreePlayCacheStory.CacheRole, post.MapXPercent, post.MapYPercent);
+            Assert.AreEqual(binding.Cell, fresh.Cell, "Тот же ключ партии — то же место.");
+        }
+        finally
+        {
+            WorldMapNavigation.ConfigureDefaultTerrain();
+        }
+    }
 }

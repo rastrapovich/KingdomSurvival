@@ -372,6 +372,8 @@ namespace KingdomSurvival.MapLab
                     {
                         foreach (MapLabComposition.Settlement st in c.Settlements)
                             forest *= MapLabGeometry.SmoothStep(st.Radius * 1.0f, st.Radius * 1.9f, Vector2.Distance(p, st.Center));
+                        foreach (MapLabComposition.Zone zone in c.Reserved)
+                            forest *= MapLabGeometry.SmoothStep(zone.Radius * 0.8f, zone.Radius * 1.7f, Vector2.Distance(p, zone.Center));
                     }
                     forest *= 1f - Mathf.Clamp01(data.Field[i] * 1.5f);
                     float road = data.RoadDistance != null ? data.RoadDistance[i] : float.MaxValue;

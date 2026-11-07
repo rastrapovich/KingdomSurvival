@@ -1,0 +1,429 @@
+fileFormatVersion: 2
+guid: 78dd6959ed8c4dd449b62609c79c9822
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5628237384084937750
+    second: Carpenter_Bench_A_0
+  - first:
+      213: 5033013358113000495
+    second: Carpenter_Bench_A_1
+  - first:
+      213: -3987924211793790819
+    second: Carpenter_Bench_A_2
+  - first:
+      213: -3311261421850065290
+    second: Carpenter_Bench_A_3
+  - first:
+      213: 7873992919216629816
+    second: Carpenter_Bench_A_4
+  - first:
+      213: -6535224251924321393
+    second: Carpenter_Bench_A_5
+  - first:
+      213: 2480600855470465457
+    second: Carpenter_Bench_A_6
+  - first:
+      213: 2007246684561513256
+    second: Carpenter_Bench_A_7
+  - first:
+      213: -169793778227657807
+    second: Carpenter_Bench_A_8
+  - first:
+      213: -8969120664535238113
+    second: Carpenter_Bench_A_9
+  - first:
+      213: -485376598206064866
+    second: Carpenter_Bench_A_10
+  - first:
+      213: -4004709935361162934
+    second: Carpenter_Bench_A_11
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Carpenter_Bench_A_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 25
+        width: 1468
+        height: 999
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61cd4f5c4148b1e40800000000000000
+      internalID: 5628237384084937750
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Carpenter_Bench_A_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 962
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2c0f10bbfad8d540800000000000000
+      internalID: 5033013358113000495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Carpenter_Bench_A_2
+      rect:
+        serializedVersion: 2
+        x: 362
+        y: 953
+        width: 19
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d98f9dcee0c08a8c0800000000000000
+      internalID: -3987924211793790819
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Carpenter_Bench_A_3
+      rect:
+        serializedVersion: 2
+        x: 382
+        y: 955
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6760c28d7490c02d0800000000000000
+      internalID: -3311261421850065290
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Carpenter_Bench_A_4
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 955
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83829d187da064d60800000000000000
+      internalID: 7873992919216629816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Carpenter_Bench_A_5
+      rect:
+        serializedVersion: 2
+        x: 1343
+        y: 853
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8b68800b283e45a0800000000000000
+      internalID: -6535224251924321393
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Carpenter_Bench_A_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 736
+        width: 56
+        height: 80
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b1e8d3d55ddc6220800000000000000
+      internalID: 2480600855470465457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Carpenter_Bench_A_7
+      rect:
+        serializedVersion: 2
+        x: 1333
+        y: 802
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82b9ed9893c2bdb10800000000000000
+      internalID: 2007246684561513256
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Carpenter_Bench_A_8
+      rect:
+        serializedVersion: 2
+        x: 1339
+        y: 798
+        width: 6
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b34ba35575c4adf0800000000000000
+      internalID: -169793778227657807
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Carpenter_Bench_A_9
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 628
+        width: 23
+        height: 77
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1af2caa648478380800000000000000
+      internalID: -8969120664535238113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Carpenter_Bench_A_10
+      rect:
+        serializedVersion: 2
+        x: 1469
+        y: 568
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e17d3a93e889349f0800000000000000
+      internalID: -485376598206064866
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Carpenter_Bench_A_11
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 448
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a41025a18896c68c0800000000000000
+      internalID: -4004709935361162934
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Carpenter_Bench_A_0: 5628237384084937750
+      Carpenter_Bench_A_1: 5033013358113000495
+      Carpenter_Bench_A_10: -485376598206064866
+      Carpenter_Bench_A_11: -4004709935361162934
+      Carpenter_Bench_A_2: -3987924211793790819
+      Carpenter_Bench_A_3: -3311261421850065290
+      Carpenter_Bench_A_4: 7873992919216629816
+      Carpenter_Bench_A_5: -6535224251924321393
+      Carpenter_Bench_A_6: 2480600855470465457
+      Carpenter_Bench_A_7: 2007246684561513256
+      Carpenter_Bench_A_8: -169793778227657807
+      Carpenter_Bench_A_9: -8969120664535238113
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

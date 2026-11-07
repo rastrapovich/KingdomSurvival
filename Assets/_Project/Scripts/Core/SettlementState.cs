@@ -77,6 +77,10 @@ public sealed class SettlementsStateData
     // Бриф правок пп. 16, 21: за каким поселением и заказчиком закреплено
     // каждое поручение (ErrandClaims).
     public List<ErrandClaimData> ErrandClaims = new List<ErrandClaimData>();
+    // 12У-D: роли историй, закреплённые за местами карты этой партии
+    // (WorldMapStoryBinder). Пусто у старых сохранений — истории тогда
+    // размещаются прежним способом.
+    public List<StoryRoleBindingData> StoryBindings = new List<StoryRoleBindingData>();
     // Бриф правок (19 пунктов) п. 10: кандидаты корчем и договоры найма.
     public List<HireTavernData> HireTaverns = new List<HireTavernData>();
     public List<HireContractData> HireContracts = new List<HireContractData>();

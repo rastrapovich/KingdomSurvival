@@ -1,0 +1,533 @@
+fileFormatVersion: 2
+guid: 97fff40cafe9c184fb3f959d6256b1cd
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5245798831022733638
+    second: Faction_FreeCircle_Back_Left_0
+  - first:
+      213: -9066857517450334049
+    second: Faction_FreeCircle_Back_Left_1
+  - first:
+      213: -7368720530589546016
+    second: Faction_FreeCircle_Back_Left_2
+  - first:
+      213: 5312548035639397160
+    second: Faction_FreeCircle_Back_Left_3
+  - first:
+      213: -4847549466736374718
+    second: Faction_FreeCircle_Back_Left_4
+  - first:
+      213: -6006389086828224087
+    second: Faction_FreeCircle_Back_Left_5
+  - first:
+      213: 4719660839091466713
+    second: Faction_FreeCircle_Back_Left_6
+  - first:
+      213: 1796477759135475297
+    second: Faction_FreeCircle_Back_Left_7
+  - first:
+      213: 3749227851586144535
+    second: Faction_FreeCircle_Back_Left_8
+  - first:
+      213: -2978614163951073445
+    second: Faction_FreeCircle_Back_Left_9
+  - first:
+      213: -1422160277230747096
+    second: Faction_FreeCircle_Back_Left_10
+  - first:
+      213: -985606054417245916
+    second: Faction_FreeCircle_Back_Left_11
+  - first:
+      213: 7969439393662212494
+    second: Faction_FreeCircle_Back_Left_12
+  - first:
+      213: 1511882486874988839
+    second: Faction_FreeCircle_Back_Left_13
+  - first:
+      213: 1952710048327011256
+    second: Faction_FreeCircle_Back_Left_14
+  - first:
+      213: 5506910318574050918
+    second: Faction_FreeCircle_Back_Left_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 31
+        width: 881
+        height: 1201
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab60bb1b1cd2337b0800000000000000
+      internalID: -5245798831022733638
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_1
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 783
+        width: 333
+        height: 453
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f90fa4b402d0c2280800000000000000
+      internalID: -9066857517450334049
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_2
+      rect:
+        serializedVersion: 2
+        x: 920
+        y: 1229
+        width: 12
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e90515f7bb0db990800000000000000
+      internalID: -7368720530589546016
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_3
+      rect:
+        serializedVersion: 2
+        x: 932
+        y: 1004
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82b4c749a46f9b940800000000000000
+      internalID: 5312548035639397160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_4
+      rect:
+        serializedVersion: 2
+        x: 946
+        y: 771
+        width: 14
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24c4b04817b0abcb0800000000000000
+      internalID: -4847549466736374718
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_5
+      rect:
+        serializedVersion: 2
+        x: 932
+        y: 723
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a122d0e2f405aca0800000000000000
+      internalID: -6006389086828224087
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_6
+      rect:
+        serializedVersion: 2
+        x: 948
+        y: 626
+        width: 12
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d17e5ef68a9f7140800000000000000
+      internalID: 4719660839091466713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_7
+      rect:
+        serializedVersion: 2
+        x: 971
+        y: 443
+        width: 248
+        height: 309
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 166e828f00f5ee810800000000000000
+      internalID: 1796477759135475297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_8
+      rect:
+        serializedVersion: 2
+        x: 952
+        y: 387
+        width: 36
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7190bc3eddee70430800000000000000
+      internalID: 3749227851586144535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_9
+      rect:
+        serializedVersion: 2
+        x: 1131
+        y: 417
+        width: 18
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b57cfb20336d9a6d0800000000000000
+      internalID: -2978614163951073445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_10
+      rect:
+        serializedVersion: 2
+        x: 1035
+        y: 393
+        width: 11
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8228df543c8734ce0800000000000000
+      internalID: -1422160277230747096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_11
+      rect:
+        serializedVersion: 2
+        x: 938
+        y: 23
+        width: 293
+        height: 368
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4295cf5f38c6252f0800000000000000
+      internalID: -985606054417245916
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_12
+      rect:
+        serializedVersion: 2
+        x: 997
+        y: 372
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e899d3697e2299e60800000000000000
+      internalID: 7969439393662212494
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_13
+      rect:
+        serializedVersion: 2
+        x: 265
+        y: 224
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 721615c8c194bf410800000000000000
+      internalID: 1511882486874988839
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_14
+      rect:
+        serializedVersion: 2
+        x: 916
+        y: 168
+        width: 14
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8bb0edb617b691b10800000000000000
+      internalID: 1952710048327011256
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Faction_FreeCircle_Back_Left_15
+      rect:
+        serializedVersion: 2
+        x: 295
+        y: 117
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66e1a8402c97c6c40800000000000000
+      internalID: 5506910318574050918
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Faction_FreeCircle_Back_Left_0: -5245798831022733638
+      Faction_FreeCircle_Back_Left_1: -9066857517450334049
+      Faction_FreeCircle_Back_Left_10: -1422160277230747096
+      Faction_FreeCircle_Back_Left_11: -985606054417245916
+      Faction_FreeCircle_Back_Left_12: 7969439393662212494
+      Faction_FreeCircle_Back_Left_13: 1511882486874988839
+      Faction_FreeCircle_Back_Left_14: 1952710048327011256
+      Faction_FreeCircle_Back_Left_15: 5506910318574050918
+      Faction_FreeCircle_Back_Left_2: -7368720530589546016
+      Faction_FreeCircle_Back_Left_3: 5312548035639397160
+      Faction_FreeCircle_Back_Left_4: -4847549466736374718
+      Faction_FreeCircle_Back_Left_5: -6006389086828224087
+      Faction_FreeCircle_Back_Left_6: 4719660839091466713
+      Faction_FreeCircle_Back_Left_7: 1796477759135475297
+      Faction_FreeCircle_Back_Left_8: 3749227851586144535
+      Faction_FreeCircle_Back_Left_9: -2978614163951073445
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

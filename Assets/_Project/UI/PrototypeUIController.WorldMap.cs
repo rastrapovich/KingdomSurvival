@@ -339,10 +339,20 @@ public partial class PrototypeUIController
         TickWorldMapFog(true);
     }
 
+    // 12У-F: рисунок MapLab карты партии (плитки снимка); null — прежний рисунок.
+    private KingdomSurvival.MapLabBridge.MapLabGameMap.Result worldMapMapLab;
+
     private void ApplyWorldMapBackground()
     {
         if (worldMapBackground == null)
             return;
+
+        if (gameState != null && gameState.HasGeneratedMap && worldMapMapLab != null)
+        {
+            worldMapBackground.style.backgroundColor = new Color(0.86f, 0.82f, 0.72f);
+            worldMapBackground.style.backgroundImage = new StyleBackground(StyleKeyword.None);
+            return;
+        }
 
         // Канон v1.58 §9.9: у сгенерированной карты свой рисунок.
         if (gameState != null && gameState.HasGeneratedMap)
@@ -383,11 +393,36 @@ public partial class PrototypeUIController
     // заново создавало их — UI Toolkit заново строил сетки всех слоёв
     // (≈190 мс и ≈50 МБ мусора за кадр). Теперь — только при смене рисунка.
     private WorldMapLayers worldMapShownLayers;
+    private KingdomSurvival.MapLabBridge.MapLabGameMap.Result worldMapShownMapLab;
 
     private void ApplyWorldMapArtLayers()
     {
         if (worldMapArtLayers == null)
             return;
+
+        // 12У-F: плитки снимка MapLab — в процентах полотна, без перехвата курсора.
+        if (gameState != null && gameState.HasGeneratedMap && worldMapMapLab != null)
+        {
+            if (ReferenceEquals(worldMapShownMapLab, worldMapMapLab) && worldMapArtLayers.childCount > 0)
+                return;
+            worldMapArtLayers.Clear();
+            worldMapShownLayers = null;
+            worldMapShownMapLab = worldMapMapLab;
+            foreach ((Texture2D texture, Rect rect) in worldMapMapLab.Tiles)
+            {
+                VisualElement tile = new VisualElement { name = "maplab-tile", pickingMode = PickingMode.Ignore };
+                tile.style.position = Position.Absolute;
+                tile.style.left = Length.Percent(rect.x);
+                tile.style.top = Length.Percent(rect.y);
+                tile.style.width = Length.Percent(rect.width);
+                tile.style.height = Length.Percent(rect.height);
+                tile.style.backgroundImage = new StyleBackground(Background.FromTexture2D(texture));
+                tile.style.unityBackgroundScaleMode = ScaleMode.StretchToFill;
+                worldMapArtLayers.Add(tile);
+            }
+            return;
+        }
+        worldMapShownMapLab = null;
 
         // Канон v1.58 §9.9.1: у сгенерированной карты свои рисунки
         // художника и текстуры — слоями поверх рисунка карты, в их разрешении.

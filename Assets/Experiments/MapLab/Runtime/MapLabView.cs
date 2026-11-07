@@ -44,6 +44,8 @@ namespace KingdomSurvival.MapLab
 
         [Header("Этап 05: трава, камни, сено, декали, модули оград и мостов, дома в четырёх ракурсах; герой P35")]
         public MapLabArtSet ArtSet05;
+        // 12У-E: набор выбранных мест и фракций (MapLabPoiImport).
+        public MapLabArtSet ArtSetPoi;
         public MapLabMarkerSet MarkerSet05;
         public Shader ModuleShader;
 
@@ -187,6 +189,18 @@ namespace KingdomSurvival.MapLab
                 if (Settings != null && Settings.IsStage04 && MarkerSet04 != null && MarkerSet04.ArtSet != null)
                     return MarkerSet04;
                 return MarkerSet;
+            }
+        }
+
+        public MapLabArtSet ResolvedArtSetPoi
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (ArtSetPoi == null)
+                    ArtSetPoi = UnityEditor.AssetDatabase.LoadAssetAtPath<MapLabArtSet>("Assets/_Project/Art/MapLabPoi/MapLabArtSet_Poi.asset");
+#endif
+                return ArtSetPoi;
             }
         }
 
@@ -1000,6 +1014,7 @@ namespace KingdomSurvival.MapLab
                 Phase("план мелочи");
                 if (DrawnCliffs06)
                     MapLabArtBuilder.PlanCliffScree06(data, Settings, MapLabCliffs06.KitOf(ResolvedArtSet06), decorPlan);
+                MapLabArtBuilder.PlanFeatures(data, ResolvedArtSetPoi, decorPlan);
                 foreach (MapLabObjectKind kind in decorPlan.Replaced)
                     artPlan.Replaced.Add(kind);
             }

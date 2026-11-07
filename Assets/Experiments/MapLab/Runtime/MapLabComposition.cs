@@ -54,6 +54,9 @@ namespace KingdomSurvival.MapLab
             public float FieldRadius;
             public int Size = 2;
             public string Id = string.Empty;
+            // 12У-D: планировочное семейство из плана (along-road, crossing,
+            // craft, scattered); пусто — прежняя сборка.
+            public string Family = string.Empty;
         }
 
         public sealed class Zone
@@ -70,6 +73,12 @@ namespace KingdomSurvival.MapLab
         public readonly List<Road> Roads = new List<Road>();
         public readonly List<Zone> ForestZones = new List<Zone>();
         public readonly List<Zone> Flats = new List<Zone>();
+        // 12У-D: площадки мест и хозяйственных точек плана — свободны от леса
+        // (подход и просвет сохраняются до декоративной расстановки).
+        public readonly List<Zone> Reserved = new List<Zone>();
+        // 12У-E: видимые объекты плана (детали мест, видимые места): позиция
+        // и ID рисунка в наборе выбранных мест. Скрытые места сюда не попадают.
+        public readonly List<(Vector2 Position, string Visual, string Kind)> Features = new List<(Vector2, string, string)>();
         // Долины: линия, полуширина, глубина (доля диапазона).
         public readonly List<Vector2> ValleyLine = new List<Vector2>();
         public float ValleyHalfWidth;

@@ -21,6 +21,10 @@ namespace KingdomSurvival.MapLab
         public bool Captured;
 
         [Header("Основные (структура мира)")]
+        [Tooltip("12У-D: регион строит генератор игры (план), MapLab его рисует. Выключено — пресеты MapLab для предпросмотра.")]
+        public bool UseGamePlan = true;
+        [Tooltip("Тип региона плана: 0 по seed, 1 речная долина, 2 лесное озеро, 3 холм и уступ, 4 обжитая земля.")]
+        public int PlanRegion;
         public MapLabWorldSize WorldSize = MapLabWorldSize.Medium;
         [Range(0f, 1f)] public float Relief = 0.5f;
         [Range(0f, 1f)] public float Water = 0.5f;
@@ -196,11 +200,11 @@ namespace KingdomSurvival.MapLab
             {
                 case MapLabVillageSize.Small: return new Vector2Int(3, 6);
                 case MapLabVillageSize.Medium: return new Vector2Int(7, 12);
-                case MapLabVillageSize.Large: return new Vector2Int(12, 12);
+                case MapLabVillageSize.Large: return new Vector2Int(12, 18);
             }
             float f = Factor(a.Settlement, 0.6f, 1.4f);
             int min = Mathf.Clamp(Mathf.RoundToInt(a.BaseYardsMin * f), 3, 12);
-            int max = Mathf.Clamp(Mathf.RoundToInt(a.BaseYardsMax * f), min, 12);
+            int max = Mathf.Clamp(Mathf.RoundToInt(a.BaseYardsMax * f), min, 18);
             return new Vector2Int(min, max);
         }
 

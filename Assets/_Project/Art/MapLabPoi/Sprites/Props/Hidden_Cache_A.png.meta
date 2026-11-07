@@ -1,0 +1,507 @@
+fileFormatVersion: 2
+guid: 0faa060413e0e4546ba58f574df975ed
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2171990885634218129
+    second: Hidden_Cache_A_0
+  - first:
+      213: -1937606533384287306
+    second: Hidden_Cache_A_1
+  - first:
+      213: -6640090595134482863
+    second: Hidden_Cache_A_2
+  - first:
+      213: -3420259468562288919
+    second: Hidden_Cache_A_3
+  - first:
+      213: -9913076162546973
+    second: Hidden_Cache_A_4
+  - first:
+      213: 3732469501841167814
+    second: Hidden_Cache_A_5
+  - first:
+      213: -664203343633597515
+    second: Hidden_Cache_A_6
+  - first:
+      213: -6771219961911245774
+    second: Hidden_Cache_A_7
+  - first:
+      213: 7572436079537669761
+    second: Hidden_Cache_A_8
+  - first:
+      213: 8168265103639640271
+    second: Hidden_Cache_A_9
+  - first:
+      213: -1151197111734660957
+    second: Hidden_Cache_A_10
+  - first:
+      213: 5184966538399090034
+    second: Hidden_Cache_A_11
+  - first:
+      213: -3850272200270973691
+    second: Hidden_Cache_A_12
+  - first:
+      213: -8565818250806847310
+    second: Hidden_Cache_A_13
+  - first:
+      213: 1984398030168617852
+    second: Hidden_Cache_A_14
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Hidden_Cache_A_0
+      rect:
+        serializedVersion: 2
+        x: 572
+        y: 1041
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1981d99e336742e10800000000000000
+      internalID: 2171990885634218129
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hidden_Cache_A_1
+      rect:
+        serializedVersion: 2
+        x: 597
+        y: 1019
+        width: 14
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6bb472faf1d3c15e0800000000000000
+      internalID: -1937606533384287306
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hidden_Cache_A_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 29
+        width: 1401
+        height: 1011
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 156d890d8c8a9d3a0800000000000000
+      internalID: -6640090595134482863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hidden_Cache_A_3
+      rect:
+        serializedVersion: 2
+        x: 547
+        y: 1026
+        width: 10
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9eeada8722cc880d0800000000000000
+      internalID: -3420259468562288919
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hidden_Cache_A_4
+      rect:
+        serializedVersion: 2
+        x: 620
+        y: 1028
+        width: 9
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e233b81c18ccdff0800000000000000
+      internalID: -9913076162546973
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hidden_Cache_A_5
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 882
+        width: 13
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c5d8388c356cc330800000000000000
+      internalID: 3732469501841167814
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hidden_Cache_A_6
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 840
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5bbb71cf39648c6f0800000000000000
+      internalID: -664203343633597515
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hidden_Cache_A_7
+      rect:
+        serializedVersion: 2
+        x: 1275
+        y: 789
+        width: 11
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2340f32f15bc702a0800000000000000
+      internalID: -6771219961911245774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hidden_Cache_A_8
+      rect:
+        serializedVersion: 2
+        x: 1283
+        y: 788
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 186c13d6e72b61960800000000000000
+      internalID: 7572436079537669761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hidden_Cache_A_9
+      rect:
+        serializedVersion: 2
+        x: 1297
+        y: 512
+        width: 169
+        height: 296
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc8f8ad95d18b5170800000000000000
+      internalID: 8168265103639640271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hidden_Cache_A_10
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 408
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a0999083502600f0800000000000000
+      internalID: -1151197111734660957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hidden_Cache_A_11
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 400
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27580957893b4f740800000000000000
+      internalID: 5184966538399090034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hidden_Cache_A_12
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 406
+        width: 6
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 505794e55d5119ac0800000000000000
+      internalID: -3850272200270973691
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hidden_Cache_A_13
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 191
+        width: 9
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b8991e3fa9102980800000000000000
+      internalID: -8565818250806847310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hidden_Cache_A_14
+      rect:
+        serializedVersion: 2
+        x: 115
+        y: 187
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c737f21ae7ff98b10800000000000000
+      internalID: 1984398030168617852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Hidden_Cache_A_0: 2171990885634218129
+      Hidden_Cache_A_1: -1937606533384287306
+      Hidden_Cache_A_10: -1151197111734660957
+      Hidden_Cache_A_11: 5184966538399090034
+      Hidden_Cache_A_12: -3850272200270973691
+      Hidden_Cache_A_13: -8565818250806847310
+      Hidden_Cache_A_14: 1984398030168617852
+      Hidden_Cache_A_2: -6640090595134482863
+      Hidden_Cache_A_3: -3420259468562288919
+      Hidden_Cache_A_4: -9913076162546973
+      Hidden_Cache_A_5: 3732469501841167814
+      Hidden_Cache_A_6: -664203343633597515
+      Hidden_Cache_A_7: -6771219961911245774
+      Hidden_Cache_A_8: 7572436079537669761
+      Hidden_Cache_A_9: 8168265103639640271
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

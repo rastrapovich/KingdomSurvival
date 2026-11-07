@@ -370,6 +370,34 @@ namespace KingdomSurvival.MapLab
             }
         }
 
+        // 12У-E: видимые объекты плана — рисунок по ID из набора выбранных мест.
+        // Нет набора или записи — объект пропускается, ID записывается в отчёт.
+        public static readonly List<string> MissingFeatureArt = new List<string>();
+        public static int LastFeatures;
+
+        public static void PlanFeatures(MapLabData data, MapLabArtSet set, Plan plan)
+        {
+            MissingFeatureArt.Clear();
+            LastFeatures = 0;
+            MapLabComposition c = data.Composition;
+            if (c == null || c.Features.Count == 0)
+                return;
+            MapLabRandom rng = MapLabRandom.ForStream(data.Seed, "features", MapLabData.AlgorithmVersion);
+            foreach ((Vector2 p, string visual, string kind) in c.Features)
+            {
+                MapLabArtEntry e = set != null ? set.Find(visual) : null;
+                if (e == null || !e.HasTexture || !e.Enabled)
+                {
+                    if (!MissingFeatureArt.Contains(visual))
+                        MissingFeatureArt.Add(visual);
+                    continue;
+                }
+                Vector3 at = new Vector3(p.x, data.SampleHeight(p.x, p.y), p.y);
+                plan.Add(e, Make(e, at - Vector3.up * 0.03f, Mathf.Lerp(e.ScaleRange.x, e.ScaleRange.y, rng.Value()), rng.Range(0.96f, 1.03f), 0f, 0.85f, -1));
+                LastFeatures++;
+            }
+        }
+
         // Скалы ревизии 06: осыпи-спрайты (50°) у подножия рисованной стены.
         public static void PlanCliffScree06(MapLabData data, MapLabSettings settings, MapLabCliffs06.Kit kit, Plan plan)
         {

@@ -537,3 +537,21 @@ Mip на крупном плане — 0 (идёт увеличение), поэ
 # 12У-C, часть 2, и основа D/E (04.11.2026)
 
 Подгрузка покраски — `MapLabView.Streaming.cs` (`Stage05 → Paint Streaming / Overview Texels / Detail Tile Budget / Detail Tiles Per Frame`), блочные поля — `MapLabPaintFields` (`BudgetMb`, 0 — четверть ОЗУ). Несколько деревень — `MapLabComposition.Settlements`. План региона игры → MapLab — сборка `Assets/_Project/MapLabBridge` (`MapLabRegionPlan.Apply(plan, settings)` → `settings.RegionPlan`), показ — `MapLabPlanBatch.Render`. Подробности — `ProjectDocs/DEVELOPMENT_STATUS.md` и `ProjectDocs/MAPLAB_MIGRATION_AUDIT.md` §§7–8.
+
+## 12У-D…F: регион из генератора игры (07.11.2026)
+
+**Окно «Kingdom Survival → Генератор карты», режим «Регион из генератора игры» (по умолчанию).** Структуру строит генератор свободной игры (`WorldMapGenerator`), MapLab рисует тот же план (мост `KingdomSurvival.MapLabBridge`). Тип региона (по seed, речная долина, лесное озеро, холм и уступ, обжитая земля), размер (40 / 60 / 80 / 100 клеток плана), рельеф, вода, лес, освоенность, насыщенность открытиями и связанность переводятся в настройки генератора; ассет генератора игры не меняется. Вкладка «Проверка» показывает паспорт региона, ошибки (H) и предупреждения (W, R, F, G) плана и схему: районы, пути, деревни (цвет — семейство, кольцо — держава), места (цвет — число оснований обнаружить), площадки, маршруты групп, нарушения. Схема — инструмент автора, игроку не показывается.
+
+**Данные, расширяемые без кода** (`WorldMapGenerationSettings`, ассет генератора игры):
+- `Landmarks` — места игры; `Visual` — рисунок (ID записи набора), `Near` — условия соседства словами: river, water, road, forest-edge, fields, slope, high, village, far. Неизвестное слово — предупреждение W13.
+- `Features` — детали мест (не места игры): рисунок, площадка, описание.
+- `Factions`, `Groups`, `ControllingPolities` — стороны (ID — строки), группы (роль: patrol, caravan, master, band), число держав, делящих деревни. Новая роль группы требует кода поведения (предупреждение F05).
+
+**Наборы арта:** «Kingdom Survival → MapLab (эксперимент) → Подключить выбранные места и фракции…» — пакеты 05.11.2026 (папка `Assets/_Project/Art/MapLabPoi`, набор `MapLabArtSet_Poi`). Высота и опора — предварительные, калибровка — вкладка «Ассеты».
+
+**Игра:** «Kingdom Survival → MapLab (эксперимент) → Подготовить рисунок MapLab для игры» обновляет `Assets/_Project/MapLabBridge/Resources/MapLabGameAssets.asset` (профиль `MapLabGameProfile`, наборы, шейдеры). Флаг `UseInGame` выключает рисунок MapLab в игре (тогда — прежний рисовальщик). Снимок карты партии кэшируется в `Application.persistentDataPath/MapLabMapCache`.
+
+**Пакетные команды:**
+- `KingdomSurvival.MapLabBridge.Editor.MapLabPlanBatch.Render -mapLabOut <папка> -mapLabSeeds 11,27 -mapLabHexes 60 [-mapLabRegion bySeed|river|lake|hill|settled|mixed] [-mapLabDiscoveries 0..2] [-mapLabConnectivity 0..1] [-mapLabPlanOnly]` — план, схема, паспорт, проверки, кадры MapLab; с `-mapLabPlanOnly` — быстрый прогон набора seed без рисунка и доля различных структур.
+- `KingdomSurvival.MapLabBridge.Editor.MapLabGameSetup.BakeBatch -mapLabOut <папка> -mapLabSeeds 11 [-mapLabHexes 100]` — снимок карты партии, как в игре.
+- `KingdomSurvival.MapLab.Editor.MapLabPoiImport.ImportBatch -mapLabPoiPackage <папка> [-mapLabFactionPackage <папка>]`.

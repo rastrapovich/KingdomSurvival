@@ -1,0 +1,455 @@
+fileFormatVersion: 2
+guid: 7bf45ae0b353a484eb4ff96d9f64793c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1270986156310007084
+    second: Emblem_Court_A_0
+  - first:
+      213: -3236318672904065155
+    second: Emblem_Court_A_1
+  - first:
+      213: 3666987695210426083
+    second: Emblem_Court_A_2
+  - first:
+      213: -1714613900048162924
+    second: Emblem_Court_A_3
+  - first:
+      213: -6691544172310629294
+    second: Emblem_Court_A_4
+  - first:
+      213: 2944014061306991159
+    second: Emblem_Court_A_5
+  - first:
+      213: -5537451419273319692
+    second: Emblem_Court_A_6
+  - first:
+      213: 2021781421535220021
+    second: Emblem_Court_A_7
+  - first:
+      213: 7611253798297160982
+    second: Emblem_Court_A_8
+  - first:
+      213: -2348642101258125672
+    second: Emblem_Court_A_9
+  - first:
+      213: 4350485399470172515
+    second: Emblem_Court_A_10
+  - first:
+      213: -3662083243522205792
+    second: Emblem_Court_A_11
+  - first:
+      213: 6579887958221591675
+    second: Emblem_Court_A_12
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Emblem_Court_A_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 15
+        width: 1243
+        height: 1239
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2d0c49dc2373a110800000000000000
+      internalID: 1270986156310007084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_Court_A_1
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 1174
+        width: 23
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7fe69150594613d0800000000000000
+      internalID: -3236318672904065155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_Court_A_2
+      rect:
+        serializedVersion: 2
+        x: 506
+        y: 1197
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3eeeeb851e1c3e230800000000000000
+      internalID: 3666987695210426083
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_Court_A_3
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 1158
+        width: 21
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49f9ea80eb77438e0800000000000000
+      internalID: -1714613900048162924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_Court_A_4
+      rect:
+        serializedVersion: 2
+        x: 1027
+        y: 1167
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 254f692570cd223a0800000000000000
+      internalID: -6691544172310629294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_Court_A_5
+      rect:
+        serializedVersion: 2
+        x: 1220
+        y: 1164
+        width: 15
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73255f1d03d3bd820800000000000000
+      internalID: 2944014061306991159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_Court_A_6
+      rect:
+        serializedVersion: 2
+        x: 450
+        y: 1150
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fa2b39d5450723b0800000000000000
+      internalID: -5537451419273319692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_Court_A_7
+      rect:
+        serializedVersion: 2
+        x: 747
+        y: 1140
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5315714bd7fce0c10800000000000000
+      internalID: 2021781421535220021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_Court_A_8
+      rect:
+        serializedVersion: 2
+        x: 770
+        y: 1131
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61d48ded00b90a960800000000000000
+      internalID: 7611253798297160982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_Court_A_9
+      rect:
+        serializedVersion: 2
+        x: 749
+        y: 1130
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89e7bf9d372f76fd0800000000000000
+      internalID: -2348642101258125672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_Court_A_10
+      rect:
+        serializedVersion: 2
+        x: 1163
+        y: 312
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36961f3cb67006c30800000000000000
+      internalID: 4350485399470172515
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_Court_A_11
+      rect:
+        serializedVersion: 2
+        x: 1157
+        y: 152
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a7d2fb41baad2dc0800000000000000
+      internalID: -3662083243522205792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Emblem_Court_A_12
+      rect:
+        serializedVersion: 2
+        x: 327
+        y: 103
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b741bab7c35705b50800000000000000
+      internalID: 6579887958221591675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Emblem_Court_A_0: 1270986156310007084
+      Emblem_Court_A_1: -3236318672904065155
+      Emblem_Court_A_10: 4350485399470172515
+      Emblem_Court_A_11: -3662083243522205792
+      Emblem_Court_A_12: 6579887958221591675
+      Emblem_Court_A_2: 3666987695210426083
+      Emblem_Court_A_3: -1714613900048162924
+      Emblem_Court_A_4: -6691544172310629294
+      Emblem_Court_A_5: 2944014061306991159
+      Emblem_Court_A_6: -5537451419273319692
+      Emblem_Court_A_7: 2021781421535220021
+      Emblem_Court_A_8: 7611253798297160982
+      Emblem_Court_A_9: -2348642101258125672
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

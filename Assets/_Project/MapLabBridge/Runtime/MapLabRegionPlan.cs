@@ -194,6 +194,7 @@ namespace KingdomSurvival.MapLabBridge
                         FieldRadius = radius + hexWorld * (1.5f + size * 1.0f),
                         Size = size,
                         Id = "village-" + v,
+                        Family = site.Family ?? string.Empty,
                     });
                     c.Flats.Add(new MapLabComposition.Zone { Center = m.ToWorld(site.XPercent, site.YPercent), Radius = radius * 1.4f, Strength = 0.7f });
                 }
@@ -205,9 +206,46 @@ namespace KingdomSurvival.MapLabBridge
                 c.SettlementRadius = c.Settlements[0].Radius;
             }
 
+            // Места и хозяйственные площадки: в рисунке — только расчищенная
+            // площадка у тропы. Знак места показывает слой знаний игры, рисунок
+            // не раскрывает неизвестное (гайд §6, дополнение о пространстве §6).
             if (plan.Landmarks != null)
+            {
                 foreach (GeneratedMapSite site in plan.Landmarks)
-                    c.Landmarks.Add((m.ToWorld(site.XPercent, site.YPercent), site.Kind, site.LocationId));
+                {
+                    Vector2 at = m.ToWorld(site.XPercent, site.YPercent);
+                    c.Landmarks.Add((at, site.Kind, site.LocationId));
+                    c.Reserved.Add(new MapLabComposition.Zone { Center = at, Radius = hexWorld * 0.75f, Strength = 1f });
+                    if (!site.Hidden && !string.IsNullOrEmpty(site.Visual))
+                        c.Features.Add((at, site.Visual, site.Kind));
+                }
+            }
+            if (plan.Features != null)
+            {
+                foreach (GeneratedMapSite site in plan.Features)
+                {
+                    Vector2 at = m.ToWorld(site.XPercent, site.YPercent);
+                    c.Reserved.Add(new MapLabComposition.Zone { Center = at, Radius = hexWorld * 0.6f, Strength = 1f });
+                    if (!site.Hidden && !string.IsNullOrEmpty(site.Visual))
+                        c.Features.Add((at, site.Visual, site.Kind));
+                }
+            }
+            // Группы мира — в предпросмотре стоят в положении на 8 ч утра
+            // первого дня, ракурс — по направлению движения (без зеркала).
+            if (plan.Actors != null)
+            {
+                foreach (GeneratedMapActor actor in plan.Actors)
+                {
+                    if (string.IsNullOrEmpty(actor.FigureSet))
+                        continue;
+                    MapPointData at = WorldMapActorMotion.PositionAt(actor, 8.0, grid, out float dx, out float dy, out _);
+                    string visual = actor.FigureSet + "_" + WorldMapActorMotion.Directions[WorldMapActorMotion.DirectionIndex(dx, dy)];
+                    c.Features.Add((m.ToWorld(at.XPercent, at.YPercent), visual, "actor:" + actor.ActorId));
+                }
+            }
+            if (plan.WorkSites != null)
+                foreach (GeneratedMapSite site in plan.WorkSites)
+                    c.Reserved.Add(new MapLabComposition.Zone { Center = m.ToWorld(site.XPercent, site.YPercent), Radius = hexWorld * 0.6f, Strength = 1f });
             return c;
         }
     }

@@ -104,10 +104,22 @@ public sealed class WorldMapLandmarkRule
     // Откуда тип места (раздел LORE/канона) — для автора, в игру не идёт.
     public string Source = string.Empty;
 
+    // 12У-E: рисунок места на карте MapLab (ID записи набора арта; пусто —
+    // без рисунка). Рисунок не определяет ни ID, ни смысл места: его можно
+    // заменить, не трогая сохранённые партии. Скрытое место не рисуется.
+    public string Visual = string.Empty;
+    // 12У-E: жёсткие условия соседства, словами (расширяемый перечень):
+    // river — берег реки; water — берег любой воды; road — у дороги или
+    // тропы; forest-edge — опушка; fields — край полей; slope — у склона или
+    // уступа; high — на холме; village — у деревни; far — вдали от деревень.
+    // Неизвестное слово — предупреждение автору, правило не ставится.
+    public List<string> Near = new List<string>();
+
     public WorldMapLandmarkRule Clone()
     {
         WorldMapLandmarkRule copy = (WorldMapLandmarkRule)MemberwiseClone();
         copy.Terrains = new List<WorldMapGameplayTerrainType>(Terrains ?? new List<WorldMapGameplayTerrainType>());
+        copy.Near = new List<string>(Near ?? new List<string>());
         return copy;
     }
 }
@@ -168,6 +180,32 @@ public sealed class WorldMapGenerationSettings
 
     public List<WorldMapLandmarkRule> Landmarks = DefaultLandmarks();
 
+    // 12У-D: структура региона (мастер-бриф §5 №1, №8, №9). Тип региона —
+    // поправки рельефа, воды, леса и освоенности с разбросом по seed;
+    // насыщенность открытиями — бюджет мест относительно площади;
+    // связанность — ответвления (хозяйственные тропы) ↔ обходы и петли.
+    // Mixed + Normal + 0.5 на стандартной сетке дают прежний состав мест и
+    // дорог (плюс хозяйственные тропы, если они включены).
+    public WorldMapRegionKind RegionKind = WorldMapRegionKind.BySeed;
+    public WorldMapDiscoveryRate Discoveries = WorldMapDiscoveryRate.Normal;
+    public float RouteConnectivity = 0.5f;
+    // Хозяйственные тропы от деревень к делянке, каменоломне, мосткам, выгону.
+    public bool WorkTrails = true;
+
+    // 12У-E: детали мест — видимые хозяйственные и памятные объекты
+    // (стан углежогов, пристань, кладбище, навес у дороги...). Это не места
+    // игры: у них нет исследования, награды и слота; только рисунок, площадка
+    // и описание для будущей подсказки. Каталог открыт для пополнения.
+    public List<WorldMapLandmarkRule> Features = DefaultFeatures();
+
+    // 12У-E: минимальный слой фракций (пакет «Фракции на карте»): стороны —
+    // данные; ControllingPolities — сколько держав делят деревни карты по
+    // связным группам дорог (0 — контроль не назначается); группы мира —
+    // постоянные, с маршрутами по дорогам. Рабочие предложения, не канон.
+    public List<WorldMapFactionDefinition> Factions = WorldMapFactionCatalog.DefaultFactions();
+    public List<WorldMapGroupRule> Groups = WorldMapFactionCatalog.DefaultGroups();
+    public int ControllingPolities = 2;
+
     public static WorldMapGenerationSettings CreateDefault() => new WorldMapGenerationSettings();
 
     // Типы мест взяты из утверждённых разделов источников (поле Source):
@@ -226,7 +264,8 @@ public sealed class WorldMapGenerationSettings
             {
                 Id = "watermill", Name = "Водяная мельница", Count = 1, MinDistanceHexes = 3f, SlotTags = "Mill, Shore",
                 NearWater = true, NearVillage = true, Hidden = false, ExplorationHours = 0,
-                Description = "Колесо на протоке, сруб под навесом, скрипит вал.", Source = "LORE §24, канон §2.2.1"
+                Description = "Колесо на протоке, сруб под навесом, скрипит вал.", Source = "LORE §24, канон §2.2.1",
+                Visual = "Watermill_A_FrontLeft", Near = new List<string> { "river" }
             }
         };
     }
@@ -260,7 +299,60 @@ public sealed class WorldMapGenerationSettings
                     copy.Landmarks.Add(rule.Clone());
             }
         }
+        copy.Factions = new List<WorldMapFactionDefinition>();
+        if (Factions != null)
+            foreach (WorldMapFactionDefinition f in Factions)
+                if (f != null)
+                    copy.Factions.Add(f.Clone());
+        copy.Groups = new List<WorldMapGroupRule>();
+        if (Groups != null)
+            foreach (WorldMapGroupRule g in Groups)
+                if (g != null)
+                    copy.Groups.Add(g.Clone());
+        copy.Features = new List<WorldMapLandmarkRule>();
+        if (Features != null)
+        {
+            foreach (WorldMapLandmarkRule rule in Features)
+            {
+                if (rule != null)
+                    copy.Features.Add(rule.Clone());
+            }
+        }
         return copy;
+    }
+
+    // Выбор автора 05.11.2026 (пакет «Выбранные объекты для MapLab», id
+    // ks-poi-*): рабочие детали эпохи, не факты мира. Описание — нейтральное
+    // наблюдение; кто здесь работает и что случилось — не утверждено.
+    public static List<WorldMapLandmarkRule> DefaultFeatures()
+    {
+        WorldMapLandmarkRule F(string id, string name, string visual, string source, string description, int count, params string[] near) =>
+            new WorldMapLandmarkRule
+            {
+                Id = id, Name = name, Visual = visual, Source = source, Description = description, Count = count,
+                Near = new List<string>(near), MinDistanceHexes = 3f, Hidden = false, DrawMark = false, ExplorationHours = 0
+            };
+        return new List<WorldMapLandmarkRule>
+        {
+            F("charcoal-camp", "Стан углежогов", "Charcoal_Mound_A", "выбор автора, ks-poi-008", "Дымится куча, обложенная дёрном; рядом шалаш и поленница.", 1, "forest-edge"),
+            F("tar-kiln", "Смолокурня", "Tar_Kiln_A", "выбор автора, ks-poi-009", "Яма с глиняным сводом, по жёлобу натекла чёрная смола.", 1, "forest-edge", "road"),
+            F("fishing-dock", "Рыбацкая пристань", "Fishing_Dock_A", "выбор автора, ks-poi-010", "Мостки на сваях, на жердях сохнут сети.", 1, "water", "village"),
+            F("fishing-nets", "Сети у реки", "Fishing_Nets_A", "выбор автора, сети возле реки", "На кольях вдоль берега растянуты сети.", 2, "river", "village"),
+            F("road-shelter", "Дорожный навес", "Road_Shelter_A", "выбор автора, ks-poi-014", "Навес на столбах у обочины, под ним — лавка и кострище.", 1, "road", "far"),
+            F("broken-cart", "Сломанная телега", "Broken_Cart_A", "выбор автора, ks-poi-025", "На обочине телега без колеса, оглобли в траве.", 1, "road"),
+            F("cemetery", "Кладбище", "Grave_Marker_A", "выбор автора, кладбище без ограды", "За полем — несколько могил с деревянными голбцами.", 1, "fields", "village"),
+            F("lone-grave", "Одинокая могила", "Grave_Marker_A", "выбор автора, одинокая могила", "У тропы — одна могила под потемневшим голбцом.", 1, "road", "far"),
+            F("offering-tree", "Дерево с дарами", "Offering_Tree_A", "выбор автора, ks-poi-031", "На ветвях старого дерева висят лоскуты и мелкие подношения.", 1, "forest-edge"),
+            F("marked-stone", "Камень с отметинами", "Marked_Stone_A", "выбор автора, ks-poi-032", "У дороги валун, на нём выбиты знаки, затёртые временем.", 1, "road"),
+            F("watch-post", "Покинутый дозорный пост", "Watch_Tower_A", "выбор автора, ks-poi-132", "Пустая вышка над дорогой, лестница без двух ступеней.", 1, "high", "road"),
+            F("wild-hives", "Бортная делянка", "Log_Beehive_A", "выбор автора, ks-poi-092", "На опушке колоды-борти, над ними гудят пчёлы.", 1, "forest-edge", "village"),
+            F("pottery-kiln", "Гончарный обжиг", "Pottery_Kiln_A", "выбор автора, ks-poi-082", "Глиняная печь на краю деревни, рядом черепки.", 1, "village"),
+            F("hide-rack", "Кожевенный двор", "Hide_Drying_Rack_A", "выбор автора, ks-poi-081", "У воды на рамах сохнут шкуры, пахнет дубильной корой.", 1, "water", "village"),
+            F("archery-range", "Стрельбище", "Archery_Target_A", "выбор автора, ks-poi-115", "За деревней соломенная мишень, утыканная следами стрел.", 1, "village"),
+            F("flax-retting", "Льняная мочка", "Flax_Bundles_A", "выбор автора, ks-poi-080", "В тихой заводи мокнут снопы льна, придавленные жердями.", 1, "water", "village"),
+            F("fish-drying", "Сушильня рыбы", "Fish_Drying_Rack_A", "выбор автора, ks-poi-086", "На вешалах вялится рыба, вокруг вьются осы.", 1, "water", "village"),
+            F("old-felling", "Старая вырубка", "Tree_Stump_A", "выбор автора, ks-poi-175", "Пни затянуло мхом, между ними поднялся молодняк.", 1, "forest-edge")
+        };
     }
 
     // Безопасные пределы: генератор не падает и не зависает на любых
@@ -299,11 +391,30 @@ public sealed class WorldMapGenerationSettings
         RoadAvoidSwamp = Clamp(RoadAvoidSwamp, 1f, 40f);
         RiverCrossingCost = Clamp(RiverCrossingCost, 1f, 100f);
         RoadWander = Clamp(RoadWander, 0f, 4f);
+        RouteConnectivity = Clamp(RouteConnectivity, 0f, 1f);
         StartClearRadiusHexes = Math.Max(0, Math.Min(6, StartClearRadiusHexes));
         if (Landmarks == null)
             Landmarks = new List<WorldMapLandmarkRule>();
+        if (Features == null)
+            Features = new List<WorldMapLandmarkRule>();
+        Factions ??= new List<WorldMapFactionDefinition>();
+        Groups ??= new List<WorldMapGroupRule>();
+        ControllingPolities = Math.Max(0, Math.Min(8, ControllingPolities));
+        foreach (WorldMapGroupRule g in Groups)
+            if (g != null)
+                g.Count = Math.Max(0, Math.Min(12, g.Count));
+        foreach (WorldMapLandmarkRule rule in Features)
+        {
+            if (rule == null)
+                continue;
+            rule.Count = Math.Max(0, Math.Min(20, rule.Count));
+            rule.MinDistanceHexes = Clamp(rule.MinDistanceHexes, 0f, 100f);
+            rule.Terrains ??= new List<WorldMapGameplayTerrainType>();
+            rule.Near ??= new List<string>();
+        }
         foreach (WorldMapLandmarkRule rule in Landmarks)
         {
+            rule?.Near?.RemoveAll(string.IsNullOrWhiteSpace);
             if (rule == null)
                 continue;
             rule.Count = Math.Max(0, Math.Min(40, rule.Count));
@@ -349,6 +460,10 @@ public sealed class GeneratedMapSite
     public int Variant;
     public bool DrawMark = true;
     public bool IsStart;
+    // 12У-E: рисунок на карте MapLab (из правила; скрытое не рисуется).
+    public string Visual = string.Empty;
+    // 12У-E: держава, контролирующая деревню (пусто — не назначено).
+    public string ControllerFactionId = string.Empty;
 
     // Место карты игры из правила (GeneratedMapPlaces): связанное место
     // Базы карты, скрытость до находки, описание, угроза, исследование.
@@ -359,6 +474,44 @@ public sealed class GeneratedMapSite
     public double ExplorationHours;
     public int RewardArmySupply;
     public int RewardArmyGold;
+
+    // 12У-D: структура. Деревня — причина положения и планировочное
+    // семейство; место — район и основания его обнаружить (сигналы).
+    public string Reason = string.Empty;
+    public string ReasonText = string.Empty;
+    public string Family = string.Empty;
+    public string DistrictId = string.Empty;
+    public List<string> Signals = new List<string>();
+
+    public const string FamilyAlongRoad = "along-road";
+    public const string FamilyCrossing = "crossing";
+    public const string FamilyCraft = "craft";
+    public const string FamilyScattered = "scattered";
+
+    public static string FamilyTitle(string family)
+    {
+        switch (family)
+        {
+            case FamilyAlongRoad: return "Деревня вдоль дороги";
+            case FamilyCrossing: return "Поселение у переправы";
+            case FamilyCraft: return "Промысловая слобода";
+            case FamilyScattered: return "Рассеянные дворы";
+            default: return "—";
+        }
+    }
+
+    public static string SignalTitle(string signal)
+    {
+        switch (signal)
+        {
+            case "trail": return "тропа";
+            case "view": return "вид с дороги";
+            case "rumor": return "слух в деревне";
+            case "water": return "по воде";
+            case "neighbor": return "соседнее место";
+            default: return signal;
+        }
+    }
 }
 
 [Serializable]
@@ -400,6 +553,19 @@ public sealed class GeneratedWorldMap
     // Пусто у карт, созданных раньше, — рисунок тогда по-старому.
     public List<MapPointData> BridgeSpans = new List<MapPointData>();
     public List<GeneratedSpawnSlot> SpawnSlots = new List<GeneratedSpawnSlot>();
+
+    // 12У-D: структура региона. Пусто у карт, созданных раньше.
+    public GeneratedRegionPassport Passport = new GeneratedRegionPassport();
+    public List<GeneratedMapDistrict> Districts = new List<GeneratedMapDistrict>();
+    // Номер района (индекс в Districts + 1; 0 — нет) по клеткам, base64.
+    public string DistrictCells = string.Empty;
+    // Хозяйственные площадки — концы хозяйственных троп (не места игры).
+    public List<GeneratedMapSite> WorkSites = new List<GeneratedMapSite>();
+    // 12У-E: детали мест (не места игры): рисунок, площадка, описание.
+    public List<GeneratedMapSite> Features = new List<GeneratedMapSite>();
+    // 12У-E: группы мира с назначенными маршрутами (PassiveRoutes).
+    public List<GeneratedMapActor> Actors = new List<GeneratedMapActor>();
+    public GeneratedRegionReport Report = new GeneratedRegionReport();
     public float StartXPercent = WorldMapNavigation.CapitalXPercent;
     public float StartYPercent = WorldMapNavigation.CapitalYPercent;
 

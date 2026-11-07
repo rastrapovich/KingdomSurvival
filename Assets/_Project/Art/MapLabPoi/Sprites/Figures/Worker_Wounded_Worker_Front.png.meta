@@ -1,0 +1,871 @@
+fileFormatVersion: 2
+guid: c0f3978186bc1394baf9cc70f1d5870e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3615381026467075026
+    second: Worker_Wounded_Worker_Front_0
+  - first:
+      213: 291173582331193363
+    second: Worker_Wounded_Worker_Front_1
+  - first:
+      213: 4572987432493453748
+    second: Worker_Wounded_Worker_Front_2
+  - first:
+      213: -8050569120640990476
+    second: Worker_Wounded_Worker_Front_3
+  - first:
+      213: -3470225165348431102
+    second: Worker_Wounded_Worker_Front_4
+  - first:
+      213: -2407276564040566209
+    second: Worker_Wounded_Worker_Front_5
+  - first:
+      213: 4171915862201591957
+    second: Worker_Wounded_Worker_Front_6
+  - first:
+      213: 6156975805261254162
+    second: Worker_Wounded_Worker_Front_7
+  - first:
+      213: -7447163216934895679
+    second: Worker_Wounded_Worker_Front_8
+  - first:
+      213: -1706771944066018435
+    second: Worker_Wounded_Worker_Front_9
+  - first:
+      213: -8412688094706179988
+    second: Worker_Wounded_Worker_Front_10
+  - first:
+      213: -4827703818457217240
+    second: Worker_Wounded_Worker_Front_11
+  - first:
+      213: 1848709366166896549
+    second: Worker_Wounded_Worker_Front_12
+  - first:
+      213: -9193908833987209749
+    second: Worker_Wounded_Worker_Front_13
+  - first:
+      213: 3391695882663517879
+    second: Worker_Wounded_Worker_Front_14
+  - first:
+      213: 1265485734947393825
+    second: Worker_Wounded_Worker_Front_15
+  - first:
+      213: -88003413449146050
+    second: Worker_Wounded_Worker_Front_16
+  - first:
+      213: 6411402868738722116
+    second: Worker_Wounded_Worker_Front_17
+  - first:
+      213: -1248875161126356184
+    second: Worker_Wounded_Worker_Front_18
+  - first:
+      213: -3093706771327938231
+    second: Worker_Wounded_Worker_Front_19
+  - first:
+      213: 2880714126555333602
+    second: Worker_Wounded_Worker_Front_20
+  - first:
+      213: -4957102612433852120
+    second: Worker_Wounded_Worker_Front_21
+  - first:
+      213: -4019419539298377678
+    second: Worker_Wounded_Worker_Front_22
+  - first:
+      213: 6927174459988709522
+    second: Worker_Wounded_Worker_Front_23
+  - first:
+      213: -4236771608236033111
+    second: Worker_Wounded_Worker_Front_24
+  - first:
+      213: -8333928768221439957
+    second: Worker_Wounded_Worker_Front_25
+  - first:
+      213: 2659798598292119774
+    second: Worker_Wounded_Worker_Front_26
+  - first:
+      213: 6946033511766383667
+    second: Worker_Wounded_Worker_Front_27
+  - first:
+      213: 7138140740784000784
+    second: Worker_Wounded_Worker_Front_28
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1237
+        height: 1222
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2c2ebd8c1693ddc0800000000000000
+      internalID: -3615381026467075026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_1
+      rect:
+        serializedVersion: 2
+        x: 498
+        y: 1181
+        width: 15
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31824d694d47a0400800000000000000
+      internalID: 291173582331193363
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_2
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 1175
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b1191457d3867f30800000000000000
+      internalID: 4572987432493453748
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_3
+      rect:
+        serializedVersion: 2
+        x: 739
+        y: 1189
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f2077cd902a64090800000000000000
+      internalID: -8050569120640990476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_4
+      rect:
+        serializedVersion: 2
+        x: 1029
+        y: 771
+        width: 196
+        height: 464
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20b19c0299847dfc0800000000000000
+      internalID: -3470225165348431102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_5
+      rect:
+        serializedVersion: 2
+        x: 521
+        y: 1181
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3a3d3428b2a79ed0800000000000000
+      internalID: -2407276564040566209
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_6
+      rect:
+        serializedVersion: 2
+        x: 733
+        y: 1143
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 598e7577f5f95e930800000000000000
+      internalID: 4171915862201591957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_7
+      rect:
+        serializedVersion: 2
+        x: 739
+        y: 1142
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21e8543bfd8f17550800000000000000
+      internalID: 6156975805261254162
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_8
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 1040
+        width: 88
+        height: 102
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1cf7d3ec28c56a890800000000000000
+      internalID: -7447163216934895679
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_9
+      rect:
+        serializedVersion: 2
+        x: 723
+        y: 1126
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d739751b5f35058e0800000000000000
+      internalID: -1706771944066018435
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_10
+      rect:
+        serializedVersion: 2
+        x: 735
+        y: 1130
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6061ec00c0204b80800000000000000
+      internalID: -8412688094706179988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_11
+      rect:
+        serializedVersion: 2
+        x: 744
+        y: 1114
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8278f0494fc800db0800000000000000
+      internalID: -4827703818457217240
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_12
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 1073
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5afb057af5fe7a910800000000000000
+      internalID: 1848709366166896549
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_13
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 1077
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be5dddc70aca86080800000000000000
+      internalID: -9193908833987209749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_14
+      rect:
+        serializedVersion: 2
+        x: 723
+        y: 1084
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7be50507f69b11f20800000000000000
+      internalID: 3391695882663517879
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_15
+      rect:
+        serializedVersion: 2
+        x: 802
+        y: 1036
+        width: 19
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1211dd33298ef8110800000000000000
+      internalID: 1265485734947393825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_16
+      rect:
+        serializedVersion: 2
+        x: 74
+        y: 861
+        width: 66
+        height: 118
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e31875a9c5957cef0800000000000000
+      internalID: -88003413449146050
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_17
+      rect:
+        serializedVersion: 2
+        x: 1109
+        y: 932
+        width: 30
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4498717a0f0e9f850800000000000000
+      internalID: 6411402868738722116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_18
+      rect:
+        serializedVersion: 2
+        x: 1117
+        y: 828
+        width: 13
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82b314468aa1baee0800000000000000
+      internalID: -1248875161126356184
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_19
+      rect:
+        serializedVersion: 2
+        x: 1129
+        y: 835
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94117c72512f015d0800000000000000
+      internalID: -3093706771327938231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 778
+        width: 5
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e3c7c44c3a5af720800000000000000
+      internalID: 2880714126555333602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_21
+      rect:
+        serializedVersion: 2
+        x: 185
+        y: 586
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82928b61075d43bb0800000000000000
+      internalID: -4957102612433852120
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_22
+      rect:
+        serializedVersion: 2
+        x: 1099
+        y: 227
+        width: 9
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2302bdc89372838c0800000000000000
+      internalID: -4019419539298377678
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_23
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 182
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29019c83874422060800000000000000
+      internalID: 6927174459988709522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_24
+      rect:
+        serializedVersion: 2
+        x: 209
+        y: 106
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9ab71a07ba6f335c0800000000000000
+      internalID: -4236771608236033111
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_25
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 95
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2890cab0ffe75c80800000000000000
+      internalID: -8333928768221439957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_26
+      rect:
+        serializedVersion: 2
+        x: 1182
+        y: 80
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed0a841abb089e420800000000000000
+      internalID: 2659798598292119774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_27
+      rect:
+        serializedVersion: 2
+        x: 627
+        y: 39
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33c5bc26da4456060800000000000000
+      internalID: 6946033511766383667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Worker_Wounded_Worker_Front_28
+      rect:
+        serializedVersion: 2
+        x: 1077
+        y: 39
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01f8c2b2f25cf0360800000000000000
+      internalID: 7138140740784000784
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Worker_Wounded_Worker_Front_0: -3615381026467075026
+      Worker_Wounded_Worker_Front_1: 291173582331193363
+      Worker_Wounded_Worker_Front_10: -8412688094706179988
+      Worker_Wounded_Worker_Front_11: -4827703818457217240
+      Worker_Wounded_Worker_Front_12: 1848709366166896549
+      Worker_Wounded_Worker_Front_13: -9193908833987209749
+      Worker_Wounded_Worker_Front_14: 3391695882663517879
+      Worker_Wounded_Worker_Front_15: 1265485734947393825
+      Worker_Wounded_Worker_Front_16: -88003413449146050
+      Worker_Wounded_Worker_Front_17: 6411402868738722116
+      Worker_Wounded_Worker_Front_18: -1248875161126356184
+      Worker_Wounded_Worker_Front_19: -3093706771327938231
+      Worker_Wounded_Worker_Front_2: 4572987432493453748
+      Worker_Wounded_Worker_Front_20: 2880714126555333602
+      Worker_Wounded_Worker_Front_21: -4957102612433852120
+      Worker_Wounded_Worker_Front_22: -4019419539298377678
+      Worker_Wounded_Worker_Front_23: 6927174459988709522
+      Worker_Wounded_Worker_Front_24: -4236771608236033111
+      Worker_Wounded_Worker_Front_25: -8333928768221439957
+      Worker_Wounded_Worker_Front_26: 2659798598292119774
+      Worker_Wounded_Worker_Front_27: 6946033511766383667
+      Worker_Wounded_Worker_Front_28: 7138140740784000784
+      Worker_Wounded_Worker_Front_3: -8050569120640990476
+      Worker_Wounded_Worker_Front_4: -3470225165348431102
+      Worker_Wounded_Worker_Front_5: -2407276564040566209
+      Worker_Wounded_Worker_Front_6: 4171915862201591957
+      Worker_Wounded_Worker_Front_7: 6156975805261254162
+      Worker_Wounded_Worker_Front_8: -7447163216934895679
+      Worker_Wounded_Worker_Front_9: -1706771944066018435
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

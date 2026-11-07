@@ -186,7 +186,7 @@ namespace KingdomSurvival.MapLab
                     if (forest > 0.02f)
                     {
                         float f = Mathf.Pow(Mathf.Clamp01(forest * 1.25f), 0.7f);
-                        c = Color.Lerp(c, pal.ForestFloor, f * 0.94f);
+                        c = Color.Lerp(c, pal.ForestFloor, f * 0.82f);
                         if (f > 0.5f) k = KeyForest;
                     }
 

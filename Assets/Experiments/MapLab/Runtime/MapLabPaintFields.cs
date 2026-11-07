@@ -175,7 +175,7 @@ namespace KingdomSurvival.MapLab
             c *= 1f + mt * 0.07f;
             float forest = showForest ? data.SampleMask(data.Forest, w.x, w.y) : 0f;
             if (forest > 0.02f)
-                c = Color.Lerp(c, pal.ForestFloor, Mathf.Pow(Mathf.Clamp01(forest * 1.25f), 0.7f) * 0.94f);
+                c = Color.Lerp(c, pal.ForestFloor, Mathf.Pow(Mathf.Clamp01(forest * 1.25f), 0.7f) * 0.82f);
             dst[o + 0] = c.r;
             dst[o + 1] = c.g;
             dst[o + 2] = c.b;

@@ -51,7 +51,7 @@ namespace KingdomSurvival.MapLab
         public Color GrassB = Hex(0xACA45B);
         public Color GrassDry = Hex(0xC4AD62);
         public Color GrassLush = Hex(0x737B3F);
-        public Color ForestFloor = Hex(0x2F3E34);
+        public Color ForestFloor = Hex(0x4F5634);
 
         [Header("Поля")]
         public Color FieldStraw = Hex(0xDDBC6A);

@@ -95,6 +95,8 @@ namespace KingdomSurvival.MapLabBridge
             }
 
             // Холмы и горы: по клетке — пологий холм; соседние сливаются в гряду.
+            // Широкие и низкие: иначе каждая клетка — крутой бугорок, и уклон
+            // красится камнем посреди луга (серые пятна); горы остаются круче.
             for (int i = 0; i < grid.CellCount; i++)
             {
                 WorldMapGameplayTerrainType t = terrain.Get(grid.CellAt(i));
@@ -103,7 +105,7 @@ namespace KingdomSurvival.MapLabBridge
                 grid.CellCenter(grid.CellAt(i), out double px, out double py);
                 Vector2 w = m.ToWorld(grid.PixelToPercentX(px), (float)(py / grid.CanvasHeight * 100.0));
                 bool mountain = t == WorldMapGameplayTerrainType.Mountains;
-                c.Hills.Add(new MapLabComposition.Hill { Center = w, Radius = Vector2.one * hexWorld * (mountain ? 1.5f : 1.25f), Height = mountain ? 0.55f : 0.28f });
+                c.Hills.Add(new MapLabComposition.Hill { Center = w, Radius = Vector2.one * hexWorld * (mountain ? 1.9f : 2.0f), Height = mountain ? 0.5f : 0.17f });
             }
 
             // Озёра: связные клетки озёр — одно озеро из долей по клеткам.
@@ -138,7 +140,7 @@ namespace KingdomSurvival.MapLabBridge
                     {
                         grid.CellCenter(grid.CellAt(cell), out double px, out double py);
                         Vector2 w = m.ToWorld(grid.PixelToPercentX(px), (float)(py / grid.CanvasHeight * 100.0));
-                        lake.Lobes.Add(new Vector4(w.x, w.y, hexWorld * 0.75f, hexWorld * 0.75f));
+                        lake.Lobes.Add(new Vector4(w.x, w.y, hexWorld * 0.95f, hexWorld * 0.95f));
                         sum += w;
                     }
                     lake.Center = sum / cluster.Count;

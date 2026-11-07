@@ -22,6 +22,24 @@ public partial class PrototypeUIController
 
     private static readonly string[] ServiceRoleOrder = { "tavern", "merchant", "board", "healer", "elder" };
 
+    // Цель здания: курсор ловит только непрозрачная часть рисунка (маска
+    // альфы), прозрачные углы и просветы — нет.
+    private sealed class MaskedTarget : VisualElement
+    {
+        public MapLabSpriteMask Mask;
+
+        public override bool ContainsPoint(Vector2 localPoint)
+        {
+            if (!base.ContainsPoint(localPoint))
+                return false;
+            if (Mask == null || layout.width <= 0f || layout.height <= 0f)
+                return true;
+            return Mask.Hit(localPoint.x / layout.width, localPoint.y / layout.height);
+        }
+    }
+
+    private string worldMapApproachRole;
+
     private static string ServiceRoleTitle(string role)
     {
         switch (role)
@@ -196,28 +214,28 @@ public partial class PrototypeUIController
             if (id != locationId)
                 continue;
             string capturedRole = role;
-            VisualElement target = new VisualElement { name = "world-map-building-" + role, pickingMode = PickingMode.Position };
+            Texture2D texture = MapLabGameMap.ServiceTexture(role);
+            MapLabSpriteMask mask = MapLabSpriteMask.For(texture);
+            MaskedTarget target = new MaskedTarget { name = "world-map-building-" + role, pickingMode = PickingMode.Position, Mask = mask };
             target.style.position = Position.Absolute;
             target.style.left = Length.Percent(rect.x);
             target.style.top = Length.Percent(rect.y);
             target.style.width = Length.Percent(rect.width);
             target.style.height = Length.Percent(rect.height);
             target.tooltip = ServiceRoleTitle(role);
-            // Подсветка — тот же рисунок здания поверх снимка, светлее и чуть
-            // крупнее; в покое невидима. Подпись — над зданием.
+            // Подсветка — по маске рисунка: мягкое осветление силуэта и тонкий
+            // тёплый контур по краю; в покое невидима. Подпись — над зданием.
             VisualElement glow = new VisualElement { pickingMode = PickingMode.Ignore };
             glow.style.position = Position.Absolute;
             glow.style.left = 0;
             glow.style.top = 0;
             glow.style.right = 0;
             glow.style.bottom = 0;
-            Texture2D texture = MapLabGameMap.ServiceTexture(role);
-            if (texture != null)
-                glow.style.backgroundImage = new StyleBackground(Background.FromTexture2D(texture));
+            if (mask?.Glow != null)
+                glow.style.backgroundImage = new StyleBackground(Background.FromTexture2D(mask.Glow));
             glow.style.unityBackgroundScaleMode = ScaleMode.StretchToFill;
             glow.style.opacity = 0f;
-            glow.style.transformOrigin = new TransformOrigin(Length.Percent(50), Length.Percent(92));
-            glow.style.transitionProperty = new List<StylePropertyName> { new StylePropertyName("opacity"), new StylePropertyName("scale") };
+            glow.style.transitionProperty = new List<StylePropertyName> { new StylePropertyName("opacity") };
             glow.style.transitionDuration = new List<TimeValue> { new TimeValue(0.1f, TimeUnit.Second) };
             target.Add(glow);
             Label label = new Label(ServiceRoleTitle(role)) { pickingMode = PickingMode.Ignore };
@@ -235,21 +253,35 @@ public partial class PrototypeUIController
             target.Add(label);
             target.RegisterCallback<PointerEnterEvent>(_ =>
             {
-                glow.style.opacity = 0.55f;
-                glow.style.scale = new Scale(new Vector3(1.05f, 1.05f, 1f));
-                glow.style.unityBackgroundImageTintColor = new Color(1f, 0.97f, 0.88f, 1f);
+                glow.style.opacity = 1f;
                 label.style.display = DisplayStyle.Flex;
             });
             target.RegisterCallback<PointerLeaveEvent>(_ =>
             {
+                if (worldMapApproachRole == capturedRole)
+                    return;
                 glow.style.opacity = 0f;
-                glow.style.scale = new Scale(Vector3.one);
                 label.style.display = DisplayStyle.None;
             });
             target.RegisterCallback<ClickEvent>(evt =>
             {
                 evt.StopPropagation();
-                OpenSettlementFromMap(capturedRole);
+                if (!string.IsNullOrEmpty(worldMapApproachRole) || IsSettlementScreenOpen)
+                    return;
+                // Подход: отряд идёт к двери — короткая пауза с подсвеченным
+                // зданием и подписью, затем окно услуги.
+                worldMapApproachRole = capturedRole;
+                glow.style.opacity = 1f;
+                label.text = ServiceRoleTitle(capturedRole) + " — подходим…";
+                label.style.display = DisplayStyle.Flex;
+                target.schedule.Execute(() =>
+                {
+                    worldMapApproachRole = null;
+                    glow.style.opacity = 0f;
+                    label.text = ServiceRoleTitle(capturedRole);
+                    label.style.display = DisplayStyle.None;
+                    OpenSettlementFromMap(capturedRole);
+                }).StartingIn(350);
             });
             worldMapBuildingLayer.Add(target);
         }

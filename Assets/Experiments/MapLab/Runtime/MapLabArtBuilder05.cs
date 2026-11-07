@@ -27,7 +27,16 @@ namespace KingdomSurvival.MapLab
                 MapLabPlacement o = data.Objects[i];
                 if ((o.Kind != MapLabObjectKind.House && o.Kind != MapLabObjectKind.Barn) || o.Yard <= 0 || o.View < 0 || o.View > 3)
                     continue;
-                // 12У-G: здание услуги — свой рисунок вместо обычной избы.
+                string group = HouseGroup(settings, o);
+                string tag = MapLabHouseViews.Tags[o.View];
+                MapLabArtEntry entry = null;
+                foreach (MapLabArtEntry e in set.Entries)
+                    if (e != null && e.HasTexture && e.Category == MapLabArtCategory.Building && e.VariantGroup == group && e.ViewTag == tag)
+                        entry = e;
+                float scale = settings.Settlement.BuildingScale * (o.Kind == MapLabObjectKind.Barn ? 0.85f : 1f);
+                // 12У-G: здание услуги — свой рисунок вместо обычной избы. Размер
+                // подгоняется под избу этого двора (рисунки пакета зданий нарисованы
+                // в своём масштабе): ширина — как у избы, чуть крупнее (общее здание).
                 if (!string.IsNullOrEmpty(o.ArtId) && services != null)
                 {
                     MapLabArtEntry art = services.Find(o.ArtId);
@@ -35,6 +44,14 @@ namespace KingdomSurvival.MapLab
                     {
                         float s = settings.Settlement.BuildingScale;
                         MapLabArtInstance instance = Make(art, o.Position, s, o.Brightness, 0f, 0.5f, i);
+                        if (entry != null && instance.Width > 0.01f)
+                        {
+                            float house = Make(entry, o.Position, settings.Settlement.BuildingScale, o.Brightness, 0f, 0.5f, i).Width;
+                            // По видимой части рисунка (SolidRect), не по холсту с полями.
+                            float own = instance.Width * Mathf.Max(0.05f, art.SolidRect.width);
+                            float fit = Mathf.Clamp(house * Mathf.Max(0.05f, entry.SolidRect.width) * ServiceWidthShare / own, 0.4f, 1.6f);
+                            instance = Make(art, o.Position, s * fit, o.Brightness, 0f, 0.5f, i);
+                        }
                         plan.Add(art, instance);
                         anyHouse = true;
                         LastDecor05.Houses++;
@@ -46,16 +63,9 @@ namespace KingdomSurvival.MapLab
                         continue;
                     }
                 }
-                string group = HouseGroup(settings, o);
-                string tag = MapLabHouseViews.Tags[o.View];
-                MapLabArtEntry entry = null;
-                foreach (MapLabArtEntry e in set.Entries)
-                    if (e != null && e.HasTexture && e.Category == MapLabArtCategory.Building && e.VariantGroup == group && e.ViewTag == tag)
-                        entry = e;
                 if (entry == null)
                     continue;
                 if (o.Kind == MapLabObjectKind.House) { anyHouse = true; LastDecor05.Houses++; } else { anyBarn = true; LastDecor05.Barns++; }
-                float scale = settings.Settlement.BuildingScale * (o.Kind == MapLabObjectKind.Barn ? 0.85f : 1f);
                 plan.Add(entry, Make(entry, o.Position, scale, o.Brightness, 0f, 0.5f, i));
             }
             if (anyHouse)
@@ -63,6 +73,9 @@ namespace KingdomSurvival.MapLab
             if (anyBarn)
                 plan.Replaced.Add(MapLabObjectKind.Barn);
         }
+
+        // Ширина здания услуги относительно избы того же двора.
+        public const float ServiceWidthShare = 1.1f;
 
         private static List<MapLabArtEntry> ByRole(MapLabArtSet set, params string[] roles)
         {

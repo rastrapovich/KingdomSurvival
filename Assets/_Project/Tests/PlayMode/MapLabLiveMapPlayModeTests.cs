@@ -131,24 +131,55 @@ public sealed class MapLabLiveMapPlayModeTests
         Assert.IsNotNull(MapLabGameLive.Current.Target, "Камера MapLab рисует видимую часть карты.");
         yield return Capture(main, "live_01_map");
 
-        // Деревня с зданиями услуг.
+        // Деревня с зданиями услуг: на живой карте — подпись, а не кнопка.
         TestPeople.AdmitAll(campaign);
-        string villageId = MapLabGameLive.Current.Buildings.Select(b => b.SettlementId).FirstOrDefault(id => campaign.FindLocation(id) != null);
-        Assert.IsNotNull(villageId, "У деревень карты есть здания услуг.");
+        VisualElement root = main.GetComponent<UIDocument>().rootVisualElement;
+        string villageId = MapLabGameLive.Current.Buildings.Select(b => b.SettlementId)
+            .FirstOrDefault(id => campaign.FindLocation(id) != null && MapLabGameLive.Current.Buildings.Any(b => b.SettlementId == id && b.Role == "merchant"));
+        Assert.IsNotNull(villageId, "У деревень карты есть лавка.");
         LocationData village = campaign.FindLocation(villageId);
+        village.IsVisibleOnMap = true;
+        village.IsDiscovered = true;
+        Invoke(main, "RefreshWorldMapPanel");
         yield return ZoomTo(main, village.MapXPercent, village.MapYPercent, 0.55f);
+        Assert.IsNull(root.Q<VisualElement>("world-map-node-" + village.Id), "Кнопки деревни на живой карте нет.");
+        Assert.IsNotNull(root.Q<Label>("world-map-village-name-" + village.Id), "Вместо кнопки — подпись деревни.");
         yield return Capture(main, "live_02_village_mid");
-        yield return ZoomTo(main, village.MapXPercent, village.MapYPercent, 1f);
-        yield return Capture(main, "live_03_village_close");
 
-        // Отряд у входа в деревню → вход: общий экран сам не открывается.
-        Assert.IsTrue(campaign.TryStartExpedition(village.Id, new List<string> { "garrick" }, out string message), message);
+        // Цель лавки этой деревни видна издалека, и курсор над ней попадает
+        // именно в неё (не в слои карты над ней).
+        VisualElement shop = root.Query<VisualElement>("world-map-building-merchant").ToList().FirstOrDefault(e => (e.userData as string) == village.Id);
+        Assert.IsNotNull(shop, "Цель лавки построена, пока отряд далеко.");
+        yield return Frames(5);
+        Rect bounds = shop.worldBound;
+        Vector2 point = new Vector2(bounds.center.x, bounds.yMin + bounds.height * 0.62f);
+        VisualElement picked = root.panel.Pick(point);
+        Assert.IsNotNull(picked, "Под курсором что-то есть.");
+        Assert.IsTrue(picked == shop || shop.Contains(picked), "Курсор над лавкой попадает в лавку, а попал в: " + picked.name);
+        using (PointerEnterEvent enter = PointerEnterEvent.GetPooled())
+        {
+            enter.target = picked;
+            picked.SendEvent(enter);
+        }
+        yield return Frames(10);
+        yield return Capture(main, "live_03_hover_far");
+
+        // Клик издалека — отряд идёт в деревню, к лавке.
+        using (ClickEvent click = ClickEvent.GetPooled())
+        {
+            click.target = picked;
+            picked.SendEvent(click);
+        }
+        yield return Frames(5);
+        Assert.IsTrue(campaign.HasActiveExpedition, "Клик по зданию отправил отряд.");
         ExpeditionData expedition = campaign.ActiveExpedition;
+        Assert.AreEqual(village.Id, expedition.LocationId, "Цель пути — эта деревня.");
+        Assert.AreEqual("merchant", Field<string>(main, "worldMapPendingRole"), "После входа — к лавке.");
+
+        // Дорогу пропускаем: отряд у входа, прибытие открывает вход.
         expedition.CurrentMapXPercent = village.MapXPercent;
         expedition.CurrentMapYPercent = village.MapYPercent;
         expedition.Phase = CommanderState.AtLocation;
-        expedition.LocationId = village.Id;
-        // Маршрут пройден: отряд стоит у входа, симуляция его не двигает.
         expedition.Route = new List<MapPointData> { new MapPointData(village.MapXPercent, village.MapYPercent) };
         expedition.RouteIndex = 0;
         expedition.RemainingRouteCells = 0;
@@ -159,43 +190,20 @@ public sealed class MapLabLiveMapPlayModeTests
             Invoke(main, "CloseLocationInteraction");
         yield return Frames(10);
         Assert.IsTrue(SettlementCampService.IsCommanderInside(campaign), "Отряд вошёл в поселение.");
-        Assert.IsFalse(Get<bool>(main, "IsSettlementScreenOpen"), "На живой карте общий экран поселения сам не открывается.");
-        yield return Frames(60);
 
-        // Герой — фигурка набора фишки MapLab.
-        Image hero = main.GetComponent<UIDocument>().rootVisualElement.Q<Image>("world-map-hero-figure");
+        // Герой — фигурка набора MapLab; после входа сам идёт к лавке.
+        Image hero = root.Q<Image>("world-map-hero-figure");
         Assert.IsNotNull(hero);
         Assert.IsTrue(MapLabGameLive.HeroFrame(0, out Texture2D frame, out _, out _, out _), "Есть кадры фишки MapLab.");
         Assert.IsNotNull(hero.image, "Герой нарисован кадром фишки MapLab.");
-        yield return Capture(main, "live_04_inside");
-
-        // Клик по зданию услуги: герой идёт к двери, затем окно услуги.
-        VisualElement root = main.GetComponent<UIDocument>().rootVisualElement;
-        List<VisualElement> buildings = root.Query<VisualElement>().Where(e => e.name != null && e.name.StartsWith("world-map-building-")).ToList();
-        Assert.IsNotEmpty(buildings, "На карте поселения есть цели зданий.");
-        Debug.Log("MapLab live: здания поселения — " + string.Join(", ", buildings.Select(b => b.name)));
-        VisualElement building = buildings.FirstOrDefault(b => b.name == "world-map-building-merchant") ?? buildings[0];
-        using (PointerEnterEvent enter = PointerEnterEvent.GetPooled())
-        {
-            enter.target = building;
-            building.SendEvent(enter);
-        }
-        yield return Frames(10);
-        yield return Capture(main, "live_05_hover");
-        using (ClickEvent click = ClickEvent.GetPooled())
-        {
-            click.target = building;
-            building.SendEvent(click);
-        }
-        yield return Frames(40);
-        yield return Capture(main, "live_06_walking");
-        started = Time.realtimeSinceStartup;
-        while (!Get<bool>(main, "IsSettlementScreenOpen") && Time.realtimeSinceStartup - started < 30f)
+        yield return Frames(30);
+        yield return Capture(main, "live_04_walking");
+        float started2 = Time.realtimeSinceStartup;
+        while (!Get<bool>(main, "IsSettlementScreenOpen") && Time.realtimeSinceStartup - started2 < 40f)
             yield return null;
         Assert.IsTrue(Get<bool>(main, "IsSettlementScreenOpen"), "Дошли до двери — окно услуги открыто.");
         yield return Frames(5);
-        if (building.name == "world-map-building-merchant")
-            Assert.IsTrue(Get<bool>(main, "IsSettlementTradeOpen"), "Клик по лавке — сразу торговля.");
-        yield return Capture(main, "live_07_service");
+        Assert.IsTrue(Get<bool>(main, "IsSettlementTradeOpen"), "Клик по лавке — сразу торговля.");
+        yield return Capture(main, "live_05_service");
     }
 }

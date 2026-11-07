@@ -318,6 +318,7 @@ public partial class PrototypeUIController
         worldMapDecoration?.Clear();
         worldMapRoutes.Clear();
         worldMapMarkers.Clear();
+        ClearWorldMapVillageNames();
         worldMapFog?.Clear();
 
         ApplyWorldMapBackground();
@@ -487,6 +488,13 @@ public partial class PrototypeUIController
         LocationData location)
     {
         string id = location.Id;
+
+        // 12У-G: поселение со зданиями на живой карте — подпись, не кнопка.
+        if (location.IsSettlement && SettlementMapMode(id))
+        {
+            CreateWorldMapVillageName(location);
+            return;
+        }
 
         Button node =
             new Button(

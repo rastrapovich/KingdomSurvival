@@ -84,7 +84,7 @@ public partial class PrototypeUIController
                     found = true;
                 }
         worldMapApproachRole = role;
-        if (worldMapBuildingGlows.TryGetValue(role, out (VisualElement Glow, Label Label) ui))
+        if (worldMapBuildingGlows.TryGetValue(GlowKey(settlementId, role), out (VisualElement Glow, Label Label) ui))
         {
             ui.Glow.style.opacity = 1f;
             ui.Label.text = ServiceRoleTitle(role) + " — идём…";
@@ -93,7 +93,7 @@ public partial class PrototypeUIController
         void Arrive()
         {
             worldMapApproachRole = null;
-            if (worldMapBuildingGlows.TryGetValue(role, out (VisualElement Glow, Label Label) done))
+            if (worldMapBuildingGlows.TryGetValue(GlowKey(settlementId, role), out (VisualElement Glow, Label Label) done))
             {
                 done.Glow.style.opacity = 0f;
                 done.Label.text = ServiceRoleTitle(role);
@@ -106,6 +106,8 @@ public partial class PrototypeUIController
         else
             Arrive();
     }
+
+    private static string GlowKey(string settlementId, string role) => settlementId + "|" + role;
 
     private static string ServiceRoleTitle(string role)
     {
@@ -210,8 +212,10 @@ public partial class PrototypeUIController
             worldMapBuildingLayer.style.top = 0;
             worldMapBuildingLayer.style.right = 0;
             worldMapBuildingLayer.style.bottom = 0;
-            VisualElement parent = worldMapArtLayers?.parent ?? worldMap;
-            int index = worldMapArtLayers != null ? parent.IndexOf(worldMapArtLayers) + 1 : parent.childCount;
+            // Над слоями значков, маршрутов и дорог: каждый из них во всю карту
+            // и ловит курсор, поэтому цели зданий лежат выше (под маркером отряда).
+            VisualElement parent = worldMapMarkers?.parent ?? worldMap;
+            int index = worldMapMarkers != null ? parent.IndexOf(worldMapMarkers) + 1 : parent.childCount;
             parent.Insert(Mathf.Clamp(index, 0, parent.childCount), worldMapBuildingLayer);
         }
         if (settlementMapPanel == null && worldMapViewport != null)
@@ -265,52 +269,78 @@ public partial class PrototypeUIController
         if (worldMapBuildingLayer == null)
             return;
         string insideId = gameState != null && !isGameOver ? SettlementCampService.InsideLocationId(gameState) : string.Empty;
-        // Здания видны и тогда, когда отряд стоит у входа: клик по зданию —
-        // войти в поселение и пойти к нему.
-        string inside = !string.IsNullOrEmpty(insideId) ? insideId : (gameState != null && !isGameOver ? SettlementCampService.SettlementHere(gameState)?.Id ?? string.Empty : string.Empty);
-        bool show = !string.IsNullOrEmpty(inside) && SettlementMapMode(inside);
-        if (!show)
-            inside = string.Empty;
-        bool isInside = show && inside == insideId;
-        // Вошли по клику на здание — идём к нему.
-        if (isInside && !string.IsNullOrEmpty(worldMapPendingRole) && worldMapPendingSettlement == inside && worldMapHeroLocalActive && !IsSettlementScreenOpen)
+        bool isInside = !string.IsNullOrEmpty(insideId) && SettlementMapMode(insideId);
+        // Здания всех известных поселений — цели всегда: клик издалека ведёт
+        // отряд в поселение, у входа — вход, внутри — герой идёт к двери.
+        if (!string.IsNullOrEmpty(worldMapPendingRole))
         {
-            string pending = worldMapPendingRole;
-            worldMapPendingRole = null;
-            StartWalkToBuilding(inside, pending);
+            if (isInside && worldMapPendingSettlement == insideId && worldMapHeroLocalActive && !IsSettlementScreenOpen)
+            {
+                string pending = worldMapPendingRole;
+                worldMapPendingRole = null;
+                StartWalkToBuilding(insideId, pending);
+            }
+            else if (!isInside && (gameState == null || !gameState.HasActiveExpedition || gameState.ActiveExpedition.LocationId != worldMapPendingSettlement))
+            {
+                // Игрок отдал другой приказ — к зданию больше не идём.
+                worldMapPendingRole = null;
+                worldMapPendingSettlement = null;
+            }
         }
-        if (inside != worldMapBuildingsShownFor || !ReferenceEquals(worldMapBuildingsShownResult, worldMapMapLab))
-            BuildWorldMapBuildingTargets(inside);
-        bool screen = IsSettlementScreenOpen;
-        worldMapBuildingLayer.style.display = show && !screen ? DisplayStyle.Flex : DisplayStyle.None;
-        PlaceWorldMapBuildingLabels(show && !screen);
+        string key = VisibleBuildingSettlementsKey();
+        if (key != worldMapBuildingsShownFor || !ReferenceEquals(worldMapBuildingsShownResult, worldMapMapLab))
+            BuildWorldMapBuildingTargets(key);
+        bool screen = IsSettlementScreenOpen || IsLocalScreenOpen;
+        bool show = !string.IsNullOrEmpty(key) && !screen && !isGameOver;
+        worldMapBuildingLayer.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+        PlaceWorldMapBuildingLabels(show);
+        PlaceWorldMapVillageNames(show, isInside ? insideId : null);
         if (settlementMapPanel != null)
         {
             settlementMapPanel.style.display = isInside && !screen ? DisplayStyle.Flex : DisplayStyle.None;
-            if (show && settlementMapTitle != null)
-                settlementMapTitle.text = gameState.FindLocation(inside)?.Name ?? "Поселение";
+            if (isInside && settlementMapTitle != null)
+                settlementMapTitle.text = gameState.FindLocation(insideId)?.Name ?? "Поселение";
         }
     }
 
-    private void BuildWorldMapBuildingTargets(string locationId)
+    // Поселения с зданиями на рисунке, которые видны на карте (известны).
+    private string VisibleBuildingSettlementsKey()
+    {
+        if (worldMapMapLab == null || gameState == null)
+            return string.Empty;
+        List<string> ids = new List<string>();
+        foreach ((string id, string _, Rect _) in worldMapMapLab.Buildings)
+        {
+            if (ids.Contains(id))
+                continue;
+            LocationData location = gameState.FindLocation(id);
+            if (location != null && location.IsVisibleOnMap)
+                ids.Add(id);
+        }
+        return string.Join(",", ids);
+    }
+
+    private void BuildWorldMapBuildingTargets(string key)
     {
         worldMapBuildingLayer.Clear();
         worldMapBuildingGlows.Clear();
         foreach ((Label l, Rect _) in worldMapBuildingLabels)
             l.RemoveFromHierarchy();
         worldMapBuildingLabels.Clear();
-        worldMapBuildingsShownFor = locationId;
+        worldMapBuildingsShownFor = key;
         worldMapBuildingsShownResult = worldMapMapLab;
-        if (string.IsNullOrEmpty(locationId) || worldMapMapLab == null)
+        if (string.IsNullOrEmpty(key) || worldMapMapLab == null)
             return;
+        HashSet<string> shown = new HashSet<string>(key.Split(','));
         foreach ((string id, string role, Rect rect) in worldMapMapLab.Buildings)
         {
-            if (id != locationId)
+            if (!shown.Contains(id))
                 continue;
             string capturedRole = role;
             Texture2D texture = MapLabGameMap.ServiceTexture(role);
             MapLabSpriteMask mask = MapLabSpriteMask.For(texture);
             MaskedTarget target = new MaskedTarget { name = "world-map-building-" + role, pickingMode = PickingMode.Position, Mask = mask };
+            target.userData = id;
             target.style.position = Position.Absolute;
             target.style.left = Length.Percent(rect.x);
             target.style.top = Length.Percent(rect.y);
@@ -361,24 +391,102 @@ public partial class PrototypeUIController
                 label.style.display = DisplayStyle.None;
             });
             string capturedSettlement = id;
+            // Курсор над зданием не начинает бег по карте (нажатие — здесь).
+            target.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
             target.RegisterCallback<ClickEvent>(evt =>
             {
                 evt.StopPropagation();
-                if (!string.IsNullOrEmpty(worldMapApproachRole) || IsSettlementScreenOpen || gameState == null)
-                    return;
-                // Отряд у входа — сначала войти (окно выбора, кто идёт), потом
-                // пойти к зданию; уже внутри — сразу идти.
-                if (SettlementCampService.InsideLocationId(gameState) != capturedSettlement)
-                {
-                    worldMapPendingRole = capturedRole;
-                    worldMapPendingSettlement = capturedSettlement;
-                    TryOpenLocationInteraction(capturedSettlement);
-                    return;
-                }
-                StartWalkToBuilding(capturedSettlement, capturedRole);
+                OnWorldMapBuildingClicked(capturedSettlement, capturedRole);
             });
-            worldMapBuildingGlows[role] = (glow, label);
+            worldMapBuildingGlows[GlowKey(id, role)] = (glow, label);
             worldMapBuildingLayer.Add(target);
+        }
+    }
+
+    // Клик по зданию: внутри — идём к двери; у входа — входим и идём; издалека —
+    // отряд отправляется в поселение, после входа герой сам идёт к зданию.
+    private void OnWorldMapBuildingClicked(string settlementId, string role)
+    {
+        if (!string.IsNullOrEmpty(worldMapApproachRole) || IsSettlementScreenOpen || gameState == null || isGameOver)
+            return;
+        string inside = SettlementCampService.InsideLocationId(gameState);
+        if (inside == settlementId)
+        {
+            StartWalkToBuilding(settlementId, role);
+            return;
+        }
+        LocationData location = gameState.FindLocation(settlementId);
+        if (location == null)
+            return;
+        if (!string.IsNullOrEmpty(inside))
+        {
+            AddReport("Отряд в поселении «" + (gameState.FindLocation(inside)?.Name ?? "") + "»: сначала «Уйти», потом — в «" + location.Name + "».");
+            return;
+        }
+        ExpeditionData expedition = gameState.ActiveExpedition;
+        if (expedition != null && (gameState.HasPendingExpeditionDecision || expedition.IsLocationResearchInProgress))
+            return;
+        worldMapPendingRole = role;
+        worldMapPendingSettlement = settlementId;
+        if (expedition != null && expedition.Phase == CommanderState.AtLocation && expedition.LocationId == settlementId && !expedition.HasTimedActivity)
+        {
+            TryOpenLocationInteraction(settlementId);
+            return;
+        }
+        ShowWorldMapClickMarker(location.MapXPercent, location.MapYPercent);
+        IssueContinuousMapOrder(location.MapXPercent, location.MapYPercent, location.Id);
+        if (gameState.HasActiveExpedition && gameState.ActiveExpedition.LocationId == settlementId)
+            AddReport("Отряд идёт в «" + location.Name + "»: " + ServiceRoleTitle(role).ToLowerInvariant() + ".");
+        else
+        {
+            worldMapPendingRole = null;
+            worldMapPendingSettlement = null;
+        }
+    }
+
+    // ---------- Подписи поселений вместо кнопок ----------
+
+    private readonly List<(Label Label, string Id)> worldMapVillageNames = new List<(Label, string)>();
+
+    private void ClearWorldMapVillageNames()
+    {
+        foreach ((Label label, string _) in worldMapVillageNames)
+            label.RemoveFromHierarchy();
+        worldMapVillageNames.Clear();
+    }
+
+    // Поселение со зданиями на живой карте — не кнопка, а подпись: входят,
+    // кликнув по нужному зданию.
+    private void CreateWorldMapVillageName(LocationData location)
+    {
+        if (worldMapViewport == null)
+            return;
+        Label label = new Label(location.Name) { name = "world-map-village-name-" + location.Id, pickingMode = PickingMode.Ignore };
+        label.style.position = Position.Absolute;
+        label.style.left = 0;
+        label.style.top = 0;
+        label.style.fontSize = 14;
+        label.style.color = new Color(0.97f, 0.93f, 0.82f);
+        label.style.backgroundColor = new Color(0.16f, 0.13f, 0.1f, 0.62f);
+        label.style.paddingLeft = label.style.paddingRight = 6;
+        label.style.borderTopLeftRadius = label.style.borderTopRightRadius = label.style.borderBottomLeftRadius = label.style.borderBottomRightRadius = 4;
+        label.style.whiteSpace = WhiteSpace.NoWrap;
+        worldMapViewport.Add(label);
+        worldMapVillageNames.Add((label, location.Id));
+    }
+
+    private void PlaceWorldMapVillageNames(bool visible, string insideId)
+    {
+        foreach ((Label label, string id) in worldMapVillageNames)
+        {
+            LocationData location = gameState?.FindLocation(id);
+            bool on = visible && location != null && location.IsVisibleOnMap && id != insideId;
+            label.style.display = on ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!on)
+                continue;
+            Vector2 at = MapPercentToWorldMapViewport(location.MapXPercent, location.MapYPercent);
+            float width = float.IsNaN(label.resolvedStyle.width) ? 0f : label.resolvedStyle.width;
+            label.style.translate = new Translate(at.x - width * 0.5f, at.y + 6f);
         }
     }
 

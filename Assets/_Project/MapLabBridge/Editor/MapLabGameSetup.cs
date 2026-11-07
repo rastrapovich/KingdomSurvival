@@ -94,7 +94,7 @@ namespace KingdomSurvival.MapLabBridge.Editor
                     // Проверка зданий услуг: у каждой деревни — корчма, лавка и столб.
                     System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<string>> services = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<string>>();
                     for (int v = 1; v < plan.Villages.Count; v++)
-                        services["village-" + v] = new System.Collections.Generic.List<string> { "tavern", "merchant", "board", "healer", "elder" };
+                        services[GeneratedMapPlaces.IdPrefix + GeneratedMapPlaces.VillageKind + "-" + v] = new System.Collections.Generic.List<string> { "tavern", "merchant", "board", "healer", "elder" };
                     MapLabGameMap.Result result = MapLabGameMap.Bake(plan, assets, services);
                     report.AppendLine($"      зданий услуг на снимке: {result.Buildings.Count}");
                     report.AppendLine($"seed {seed} ({plan.HexesAcross} клеток, {plan.Passport.KindTitle}): {(string.IsNullOrEmpty(result.Error) ? "готово" : result.Error)}, снимок {result.PixelWidth}×{result.PixelHeight}, плиток {result.Tiles.Count}, сжатие глубины {result.HeightScale:0.###}, {result.BakeMs / 1000.0:0.0} с");

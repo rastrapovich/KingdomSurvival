@@ -19,6 +19,8 @@ namespace KingdomSurvival.MapLab
     public static class MapLabPlanSource
     {
         public static Func<MapLabSettings, MapLabPlanReport> Build;
+        // Настройки окна — в новые партии игры (возвращает сообщение для автора).
+        public static Func<MapLabSettings, string> ApplyToGame;
 
         public static bool Available => Build != null;
 

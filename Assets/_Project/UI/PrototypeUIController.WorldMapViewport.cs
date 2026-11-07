@@ -81,11 +81,15 @@ public partial class PrototypeUIController
             // Канон v1.58 §9.9: полотно сгенерированной карты партии.
             worldMapCanvasWidth = gameState.GeneratedMap.CanvasWidth;
             worldMapCanvasHeight = gameState.GeneratedMap.CanvasHeight;
-            // 12У-F: рисунок MapLab снят под наклоном — глубина сжата на
-            // sin(наклона); проценты значков и рисунка совпадают.
-            worldMapMapLab = KingdomSurvival.MapLabBridge.MapLabGameMap.Get(gameState.GeneratedMap, MapLabSettlementServices());
-            if (worldMapMapLab != null && string.IsNullOrEmpty(worldMapMapLab.Error) && worldMapMapLab.Tiles.Count > 0)
-                worldMapCanvasHeight *= worldMapMapLab.HeightScale;
+            // 12У-F: живая карта MapLab рисуется камерой под наклоном — глубина
+            // сжата на sin(наклона); проценты значков и рисунка совпадают.
+            // Мир MapLab строится в следующих кадрах (экран успевает показать
+            // «Рисуем карту…»), пока — бумага.
+            if (WorldMapLiveWanted())
+            {
+                worldMapCanvasHeight *= KingdomSurvival.MapLabBridge.MapLabGameLive.ExpectedHeightScale;
+                ScheduleWorldMapLiveBuild();
+            }
             else
                 worldMapMapLab = null;
         }

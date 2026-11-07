@@ -35,6 +35,7 @@ namespace KingdomSurvival.MapLab.Editor
         private MapLabSettings snapshotOf;
         private string snapshot;
         private float leftWidth = 330f, rightWidth = 300f;
+        private Rect lastBody;
         private int dragging;
         private Vector2 leftScroll, gridScroll, rightScroll, checkScroll;
         private bool lookOpen = true, fineOpen, landingOpen, extraOpen;
@@ -179,6 +180,13 @@ namespace KingdomSurvival.MapLab.Editor
 
             tab = (Tab)GUILayout.Toolbar((int)tab, TabNames, GUILayout.Height(24));
             Rect body = GUILayoutUtility.GetRect(10f, 10000f, 10f, 10000f, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+            // В фазе разметки GetRect даёт пустой прямоугольник: левая панель
+            // получала ширину меньше пикселя и её поля раскладывались в
+            // невидимую область. Берём прямоугольник последней отрисовки.
+            if (Event.current.type == EventType.Layout)
+                body = lastBody.width > 10f ? lastBody : new Rect(0f, 52f, position.width, Mathf.Max(100f, position.height - 72f));
+            else if (Event.current.type == EventType.Repaint)
+                lastBody = body;
             bool right = tab == Tab.Assets;
             float lw = Mathf.Clamp(leftWidth, 240f, body.width * 0.45f);
             float rw = right ? Mathf.Clamp(rightWidth, 240f, body.width * 0.4f) : 0f;
@@ -440,7 +448,17 @@ namespace KingdomSurvival.MapLab.Editor
                     previewDirty = true;
                     status = "Внешний вид обновлён.";
                 });
-            if (GUILayout.Button(new GUIContent("Запустить тест на этой карте", "Play Mode в сцене генератора с этой картой и героем. Запуск основной игры на карте MapLab — этап F.")))
+            using (new EditorGUI.DisabledScope(MapLabPlanSource.ApplyToGame == null))
+            {
+                if (GUILayout.Button(new GUIContent("Применить к новой партии", "Записать эти настройки в генератор игры и профиль рисунка игры: новая партия (меню игры → Новая игра) будет такой же картой по виду и устройству; seed у партии свой. Текущая партия не меняется."), GUILayout.Height(26)))
+                    Guard(() =>
+                    {
+                        MapLabAuthor.ApplyStructure(s);
+                        MapLabAuthor.ApplyLook(s);
+                        status = MapLabPlanSource.ApplyToGame(s);
+                    });
+            }
+            if (GUILayout.Button(new GUIContent("Запустить тест на этой карте", "Play Mode в сцене генератора с этой картой и героем (без основной игры).")))
                 EditorApplication.isPlaying = true;
             EditorGUILayout.HelpBox("Ключ карты: " + MapKey(s), MessageType.None);
             EditorGUILayout.EndScrollView();

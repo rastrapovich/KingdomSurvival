@@ -133,7 +133,14 @@ public partial class PrototypeUIController
         }
         settlementPicking = false;
         CloseLocationInteraction();
-        OpenSettlementScreen(location.Id);
+        // 12У-G: на живой карте MapLab поселение показано зданиями — экран
+        // не открывается, отряд стоит внутри и идёт к выбранному зданию.
+        if (!SettlementMapMode(location.Id))
+            OpenSettlementScreen(location.Id);
+        else
+            FocusWorldMapOnSettlement(location);
+        if (SettlementMapMode(location.Id) && string.IsNullOrEmpty(worldMapPendingRole))
+            AddReport("Вы в поселении «" + location.Name + "»: выберите здание на карте или «Поселение» вверху.");
         Autosave();
     }
 

@@ -60,7 +60,9 @@ public partial class PrototypeUIController
                 return false;
             if (SettlementCampService.InsideLocationId(gameState) == location.Id)
             {
-                OpenSettlementScreen(location.Id);
+                // 12У-G: внутри поселения на живой карте — здания, а не общий экран.
+                if (!SettlementMapMode(location.Id))
+                    OpenSettlementScreen(location.Id);
                 return true;
             }
             // Бриф исправлений п. 3: обычный вход — сразу всем отрядом на
@@ -69,7 +71,7 @@ public partial class PrototypeUIController
             if (!SettlementCampService.HasCamp(gameState) && SettlementBlockedCompanions().Count == 0)
             {
                 EnterSettlementWith(location, SettlementCampService.Companions(gameState));
-                return IsSettlementScreenOpen;
+                return IsSettlementScreenOpen || SettlementCampService.IsCommanderInside(gameState);
             }
         }
         else if (TryEnterLocalExploration(location))

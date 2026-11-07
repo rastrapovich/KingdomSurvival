@@ -223,6 +223,9 @@ public partial class PrototypeUIController
                        !ContinuousSimulationSystem.IsPaused(gameState);
         if (running)
             UpdateWorldMapHeroFacing(expedition);
+        // 12У-G: на живой карте MapLab герой — фигурка набора фишки (шесть ракурсов).
+        if (TickWorldMapHeroMapLab(dt, running))
+            return;
 
         CreatureAnimationSetData set = ResolveWorldMapHeroAnimationSet(settings);
         if (set == null)
@@ -409,10 +412,13 @@ public partial class PrototypeUIController
 
         ExpeditionData expedition = gameState.ActiveExpedition;
         float zoom = Mathf.Max(0.0001f, worldMapZoom);
+        // 12У-G: в поселении на живой карте камера идёт за героем между домами.
+        float heroX = worldMapHeroLocalActive ? worldMapHeroLocal.x : expedition.CurrentMapXPercent;
+        float heroY = worldMapHeroLocalActive ? worldMapHeroLocal.y : expedition.CurrentMapYPercent;
         float targetX = worldMapViewport.resolvedStyle.width * 0.5f -
-                        expedition.CurrentMapXPercent / 100f * worldMapCanvasWidth * zoom;
+                        heroX / 100f * worldMapCanvasWidth * zoom;
         float targetY = worldMapViewport.resolvedStyle.height * 0.5f -
-                        expedition.CurrentMapYPercent / 100f * worldMapCanvasHeight * zoom;
+                        heroY / 100f * worldMapCanvasHeight * zoom;
 
         float sharpness = settings != null ? settings.CameraFollowSharpness : 6f;
         float blend = 1f - Mathf.Exp(-sharpness * dt);

@@ -53,12 +53,15 @@ namespace KingdomSurvival.MapLabBridge
         // В пакетном режиме (автотесты) игра рисует карту прежним способом:
         // снимок MapLab — минута работы на партию. Пакетные команды снимка
         // вызывают Bake напрямую.
+        // Проверка в Play Mode из пакетного прогона включает живую карту явно.
+        public static bool AllowInBatch;
+
         public static bool Enabled
         {
             get
             {
                 MapLabGameAssets assets = MapLabGameAssets.Load();
-                return assets != null && assets.UseInGame && assets.Profile != null && !Application.isBatchMode;
+                return assets != null && assets.UseInGame && assets.Profile != null && (!Application.isBatchMode || AllowInBatch);
             }
         }
 

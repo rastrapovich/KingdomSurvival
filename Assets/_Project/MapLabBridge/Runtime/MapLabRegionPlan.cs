@@ -187,6 +187,18 @@ namespace KingdomSurvival.MapLabBridge
                 for (int v = 0; v < plan.Villages.Count; v++)
                 {
                     GeneratedMapSite site = plan.Villages[v];
+                    // Старт партии — лагерь у дороги (канон), а не поселение: в
+                    // рисунке стоянка (шалаш и кострище) на расчищенной площадке,
+                    // без домов, в которые нельзя войти.
+                    if (site.IsStart)
+                    {
+                        Vector2 camp = m.ToWorld(site.XPercent, site.YPercent);
+                        c.Reserved.Add(new MapLabComposition.Zone { Center = camp, Radius = hexWorld * 1.1f, Strength = 1f });
+                        c.Flats.Add(new MapLabComposition.Zone { Center = camp, Radius = hexWorld * 1.6f, Strength = 0.6f });
+                        c.Features.Add((camp + new Vector2(-hexWorld * 0.35f, hexWorld * 0.2f), "Camp_Tent_A", "start-camp"));
+                        c.Features.Add((camp + new Vector2(hexWorld * 0.25f, -hexWorld * 0.1f), "Cold_Campfire_A", "start-camp"));
+                        continue;
+                    }
                     int size = Mathf.Clamp(site.Size, 1, 3);
                     float radius = Mathf.Max(settings.Settlement.Radius * (0.7f + 0.2f * size), hexWorld * 2.5f);
                     c.Settlements.Add(new MapLabComposition.Settlement
@@ -195,7 +207,8 @@ namespace KingdomSurvival.MapLabBridge
                         Radius = radius,
                         FieldRadius = radius + hexWorld * (1.5f + size * 1.0f),
                         Size = size,
-                        Id = "village-" + v,
+                        // Тот же ID, что у места игры (GeneratedMapPlaces): стартовая деревня — не место.
+                        Id = site.IsStart ? "start" : GeneratedMapPlaces.IdPrefix + GeneratedMapPlaces.VillageKind + "-" + v,
                         Family = site.Family ?? string.Empty,
                     });
                     c.Flats.Add(new MapLabComposition.Zone { Center = m.ToWorld(site.XPercent, site.YPercent), Radius = radius * 1.4f, Strength = 0.7f });

@@ -16,6 +16,7 @@ namespace KingdomSurvival.MapLabBridge.Editor
         static MapLabPlanHook()
         {
             MapLabPlanSource.Build = Build;
+            MapLabPlanSource.ApplyToGame = ApplyToGame;
         }
 
         public static int HexesFor(MapLabWorldSize size)
@@ -45,22 +46,65 @@ namespace KingdomSurvival.MapLabBridge.Editor
         {
             WorldMapGeneratorAsset asset = AssetDatabase.LoadAssetAtPath<WorldMapGeneratorAsset>(WorldMapGeneratorAsset.AssetPath);
             WorldMapGenerationSettings p = asset != null ? asset.Settings.Clone() : WorldMapGenerationSettings.CreateDefault();
+            // Макрорегуляторы окна отсчитываются от исходных значений
+            // генератора, а не от ассета: «Применить к новой партии» пишет их в
+            // ассет, и повторное применение не накапливает множители.
+            WorldMapGenerationSettings d = WorldMapGenerationSettings.CreateDefault();
             MapLabAuthorProfile a = s.Author;
             p.HexesAcross = HexesFor(a.WorldSize);
             p.RegionKind = KindFor(a.PlanRegion);
             float relief = MapLabAuthor.Factor(a.Relief, 0.4f, 1.8f);
-            p.HillsShare *= relief;
-            p.MountainsShare *= relief;
-            p.CliffsShare *= MapLabAuthor.Factor(a.Relief, 0.5f, 1.5f);
-            p.LakesShare *= MapLabAuthor.Factor(a.Water, 0.35f, 2f);
-            p.RiverCount = Mathf.RoundToInt(p.RiverCount * MapLabAuthor.Factor(a.Water, 0.34f, 1.67f));
-            p.ForestShare *= MapLabAuthor.Factor(a.Forest, 0.3f, 1.9f);
-            p.VillageCount = Mathf.Max(1, Mathf.RoundToInt(p.VillageCount * MapLabAuthor.Factor(a.Settlement, 0.4f, 1.6f)));
-            p.FieldDensity *= MapLabAuthor.Factor(a.Settlement, 0.5f, 1.5f);
+            p.HillsShare = d.HillsShare * relief;
+            p.MountainsShare = d.MountainsShare * relief;
+            p.CliffsShare = d.CliffsShare * MapLabAuthor.Factor(a.Relief, 0.5f, 1.5f);
+            p.LakesShare = d.LakesShare * MapLabAuthor.Factor(a.Water, 0.35f, 2f);
+            p.RiverCount = Mathf.RoundToInt(d.RiverCount * MapLabAuthor.Factor(a.Water, 0.34f, 1.67f));
+            p.ForestShare = d.ForestShare * MapLabAuthor.Factor(a.Forest, 0.3f, 1.9f);
+            p.VillageCount = Mathf.Max(1, Mathf.RoundToInt(d.VillageCount * MapLabAuthor.Factor(a.Settlement, 0.4f, 1.6f) * (p.HexesAcross / 100f) * (p.HexesAcross / 100f) * 1.6f + 1f));
+            p.FieldDensity = d.FieldDensity * MapLabAuthor.Factor(a.Settlement, 0.5f, 1.5f);
             p.Discoveries = (WorldMapDiscoveryRate)(int)a.Discoveries;
             p.RouteConnectivity = a.Connectivity;
             p.Sanitize();
             return p;
+        }
+
+        // Настройки окна — в новые партии: генератор игры (структура мира) и
+        // профиль рисунка MapLab игры (внешний вид, арт). Текущая партия не
+        // меняется: её карта хранится в сохранении.
+        public static string ApplyToGame(MapLabSettings s)
+        {
+            WorldMapGeneratorAsset asset = AssetDatabase.LoadAssetAtPath<WorldMapGeneratorAsset>(WorldMapGeneratorAsset.AssetPath);
+            if (asset == null)
+                return "Нет ассета генератора игры: " + WorldMapGeneratorAsset.AssetPath;
+            WorldMapGenerationSettings p = PlanSettings(s);
+            Undo.RecordObject(asset, "Генератор карты: применить к новой партии");
+            WorldMapGenerationSettings target = asset.Settings;
+            target.HexesAcross = p.HexesAcross;
+            target.RegionKind = p.RegionKind;
+            target.HillsShare = p.HillsShare;
+            target.MountainsShare = p.MountainsShare;
+            target.CliffsShare = p.CliffsShare;
+            target.LakesShare = p.LakesShare;
+            target.RiverCount = p.RiverCount;
+            target.ForestShare = p.ForestShare;
+            target.VillageCount = p.VillageCount;
+            target.FieldDensity = p.FieldDensity;
+            target.Discoveries = p.Discoveries;
+            target.RouteConnectivity = p.RouteConnectivity;
+            EditorUtility.SetDirty(asset);
+            MapLabGameAssets game = MapLabGameSetup.Prepare();
+            if (game.Profile != null && game.Profile != s)
+            {
+                string name = game.Profile.name;
+                Undo.RecordObject(game.Profile, "Генератор карты: профиль рисунка игры");
+                EditorUtility.CopySerialized(s, game.Profile);
+                game.Profile.name = name;
+                game.Profile.RegionPlan = null;
+                EditorUtility.SetDirty(game.Profile);
+            }
+            AssetDatabase.SaveAssets();
+            MapLabGameLive.Clear();
+            return $"Применено к новым партиям: {p.HexesAcross} клеток по ширине, тип «{WorldMapRegionKinds.Title(p.RegionKind)}», деревень до {p.VillageCount}; внешний вид — профиль рисунка игры. Текущая партия не меняется.";
         }
 
         public static MapLabPlanReport Build(MapLabSettings s)

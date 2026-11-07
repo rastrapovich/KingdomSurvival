@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1b16bdb8122fd948582415c4723edb4, type: 3}
   m_Name: KingdomSurvivalWorldMapMovement
   m_EditorClassIdentifier: 
-  heroRunSpeedHexesPerSecond: 2
+  heroRunSpeedHexesPerSecond: 0.8
   travelHoursPerHex: 1.5
   discoveryRadiusHexes: 1.25
   terrain:

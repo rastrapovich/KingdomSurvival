@@ -1,3 +1,4 @@
+using System.Linq;
 using KingdomSurvival.MapLab;
 using NUnit.Framework;
 using UnityEngine;
@@ -21,7 +22,7 @@ namespace KingdomSurvival.MapLabBridge.Tests
                 MapLabComposition c = MapLabRegionPlan.Apply(plan, s);
                 Assert.AreSame(c, s.RegionPlan);
                 Assert.IsTrue(c.FromPlan);
-                Assert.AreEqual(plan.Villages.Count, c.Settlements.Count, "каждая деревня плана — поселение MapLab");
+                Assert.AreEqual(plan.Villages.Count(v => !v.IsStart), c.Settlements.Count, "каждая деревня плана, кроме лагеря старта, — поселение MapLab");
                 Assert.AreEqual(MapLabRegionPlan.PlayWidth(plan), s.General.MapSize, 1e-3f);
                 Assert.AreEqual(plan.CanvasHeight / plan.CanvasWidth, c.PlayRect.height / c.PlayRect.width, 1e-3f, "пропорции холста");
                 Assert.LessOrEqual(c.PlayRect.yMax, s.WorldSide + 1e-3f, "игровая область внутри карты");

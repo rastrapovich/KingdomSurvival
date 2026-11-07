@@ -347,9 +347,10 @@ public partial class PrototypeUIController
         if (worldMapBackground == null)
             return;
 
-        if (gameState != null && gameState.HasGeneratedMap && worldMapMapLab != null)
+        // 12У-F: живая карта MapLab — позади полотна; фон полотна прозрачный.
+        if (gameState != null && gameState.HasGeneratedMap && (worldMapMapLab != null || worldMapLiveScheduled))
         {
-            worldMapBackground.style.backgroundColor = new Color(0.86f, 0.82f, 0.72f);
+            worldMapBackground.style.backgroundColor = Color.clear;
             worldMapBackground.style.backgroundImage = new StyleBackground(StyleKeyword.None);
             return;
         }
@@ -401,9 +402,16 @@ public partial class PrototypeUIController
             return;
 
         // 12У-F: плитки снимка MapLab — в процентах полотна, без перехвата курсора.
+        if (gameState != null && gameState.HasGeneratedMap && worldMapLiveScheduled && worldMapMapLab == null)
+        {
+            worldMapArtLayers.Clear();
+            worldMapShownLayers = null;
+            worldMapShownMapLab = null;
+            return;
+        }
         if (gameState != null && gameState.HasGeneratedMap && worldMapMapLab != null)
         {
-            if (ReferenceEquals(worldMapShownMapLab, worldMapMapLab) && worldMapArtLayers.childCount > 0)
+            if (ReferenceEquals(worldMapShownMapLab, worldMapMapLab) && (worldMapArtLayers.childCount > 0 || worldMapMapLab.Tiles.Count == 0))
                 return;
             worldMapArtLayers.Clear();
             worldMapShownLayers = null;

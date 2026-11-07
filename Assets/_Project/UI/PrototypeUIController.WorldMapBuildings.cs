@@ -39,6 +39,73 @@ public partial class PrototypeUIController
     }
 
     private string worldMapApproachRole;
+    private string worldMapPendingRole, worldMapPendingSettlement;
+    private readonly List<(Label Label, Rect Rect)> worldMapBuildingLabels = new List<(Label, Rect)>();
+
+    // Подписи зданий — над верхним краем рисунка, по центру, в координатах экрана.
+    private void PlaceWorldMapBuildingLabels(bool visible)
+    {
+        foreach ((Label label, Rect rect) in worldMapBuildingLabels)
+        {
+            if (!visible)
+            {
+                label.style.display = DisplayStyle.None;
+                continue;
+            }
+            if (label.style.display == DisplayStyle.None)
+                continue;
+            Vector2 top = MapPercentToWorldMapViewport(rect.center.x, rect.yMin);
+            float width = float.IsNaN(label.resolvedStyle.width) ? 0f : label.resolvedStyle.width;
+            float height = float.IsNaN(label.resolvedStyle.height) ? 0f : label.resolvedStyle.height;
+            label.style.translate = new Translate(top.x - width * 0.5f, top.y - height - 4f);
+        }
+    }
+    private readonly Dictionary<string, (VisualElement Glow, Label Label)> worldMapBuildingGlows = new Dictionary<string, (VisualElement, Label)>();
+
+    // Герой идёт по поселению к двери здания (подсветка и подпись держатся),
+    // у двери — окно услуги.
+    private void StartWalkToBuilding(string settlementId, string role)
+    {
+        Vector2 door = Vector2.zero;
+        bool found = false;
+        MapLabGameLive.World world = MapLabGameLive.Current;
+        if (world != null)
+            foreach ((string id, string r, Rect _, Vector2 d) in world.Buildings)
+                if (id == settlementId && r == role)
+                {
+                    door = d;
+                    found = true;
+                }
+        if (!found && worldMapMapLab != null)
+            foreach ((string id, string r, Rect rect) in worldMapMapLab.Buildings)
+                if (id == settlementId && r == role)
+                {
+                    door = new Vector2(rect.center.x, rect.yMax);
+                    found = true;
+                }
+        worldMapApproachRole = role;
+        if (worldMapBuildingGlows.TryGetValue(role, out (VisualElement Glow, Label Label) ui))
+        {
+            ui.Glow.style.opacity = 1f;
+            ui.Label.text = ServiceRoleTitle(role) + " — идём…";
+            ui.Label.style.display = DisplayStyle.Flex;
+        }
+        void Arrive()
+        {
+            worldMapApproachRole = null;
+            if (worldMapBuildingGlows.TryGetValue(role, out (VisualElement Glow, Label Label) done))
+            {
+                done.Glow.style.opacity = 0f;
+                done.Label.text = ServiceRoleTitle(role);
+                done.Label.style.display = DisplayStyle.None;
+            }
+            OpenSettlementFromMap(role);
+        }
+        if (found)
+            WalkWorldMapHeroTo(door, Arrive);
+        else
+            Arrive();
+    }
 
     private static string ServiceRoleTitle(string role)
     {
@@ -170,13 +237,24 @@ public partial class PrototypeUIController
             settlementMapPanel.Add(settlementMapTitle);
             Button general = new Button(() => OpenSettlementFromMap(null)) { text = "Поселение", name = "settlement-map-general" };
             general.tooltip = "Общий вид поселения: люди, ночлег, прогулка и все дела.";
+            StyleSettlementMapButton(general);
             settlementMapPanel.Add(general);
             Button leave = new Button(LeaveSettlementFromMap) { text = "Уйти", name = "settlement-map-leave" };
             leave.tooltip = "Выйти из поселения к стоянке у входа.";
+            StyleSettlementMapButton(leave);
             settlementMapPanel.Add(leave);
             settlementMapPanel.style.display = DisplayStyle.None;
             worldMapViewport.Add(settlementMapPanel);
         }
+    }
+
+    private static void StyleSettlementMapButton(Button button)
+    {
+        button.style.backgroundColor = new Color(0.32f, 0.25f, 0.16f, 1f);
+        button.style.color = new Color(0.97f, 0.92f, 0.8f);
+        button.style.borderTopColor = button.style.borderBottomColor = button.style.borderLeftColor = button.style.borderRightColor = new Color(0.62f, 0.5f, 0.32f);
+        button.style.paddingLeft = button.style.paddingRight = 12;
+        button.style.fontSize = 15;
     }
 
     // Каждый кадр: дешёвая проверка, перестройка — только при смене поселения
@@ -186,17 +264,29 @@ public partial class PrototypeUIController
         EnsureWorldMapBuildingUi();
         if (worldMapBuildingLayer == null)
             return;
-        string inside = gameState != null && !isGameOver ? SettlementCampService.InsideLocationId(gameState) : string.Empty;
+        string insideId = gameState != null && !isGameOver ? SettlementCampService.InsideLocationId(gameState) : string.Empty;
+        // Здания видны и тогда, когда отряд стоит у входа: клик по зданию —
+        // войти в поселение и пойти к нему.
+        string inside = !string.IsNullOrEmpty(insideId) ? insideId : (gameState != null && !isGameOver ? SettlementCampService.SettlementHere(gameState)?.Id ?? string.Empty : string.Empty);
         bool show = !string.IsNullOrEmpty(inside) && SettlementMapMode(inside);
         if (!show)
             inside = string.Empty;
+        bool isInside = show && inside == insideId;
+        // Вошли по клику на здание — идём к нему.
+        if (isInside && !string.IsNullOrEmpty(worldMapPendingRole) && worldMapPendingSettlement == inside && worldMapHeroLocalActive && !IsSettlementScreenOpen)
+        {
+            string pending = worldMapPendingRole;
+            worldMapPendingRole = null;
+            StartWalkToBuilding(inside, pending);
+        }
         if (inside != worldMapBuildingsShownFor || !ReferenceEquals(worldMapBuildingsShownResult, worldMapMapLab))
             BuildWorldMapBuildingTargets(inside);
         bool screen = IsSettlementScreenOpen;
         worldMapBuildingLayer.style.display = show && !screen ? DisplayStyle.Flex : DisplayStyle.None;
+        PlaceWorldMapBuildingLabels(show && !screen);
         if (settlementMapPanel != null)
         {
-            settlementMapPanel.style.display = show && !screen ? DisplayStyle.Flex : DisplayStyle.None;
+            settlementMapPanel.style.display = isInside && !screen ? DisplayStyle.Flex : DisplayStyle.None;
             if (show && settlementMapTitle != null)
                 settlementMapTitle.text = gameState.FindLocation(inside)?.Name ?? "Поселение";
         }
@@ -205,6 +295,10 @@ public partial class PrototypeUIController
     private void BuildWorldMapBuildingTargets(string locationId)
     {
         worldMapBuildingLayer.Clear();
+        worldMapBuildingGlows.Clear();
+        foreach ((Label l, Rect _) in worldMapBuildingLabels)
+            l.RemoveFromHierarchy();
+        worldMapBuildingLabels.Clear();
         worldMapBuildingsShownFor = locationId;
         worldMapBuildingsShownResult = worldMapMapLab;
         if (string.IsNullOrEmpty(locationId) || worldMapMapLab == null)
@@ -239,10 +333,12 @@ public partial class PrototypeUIController
             glow.style.transitionDuration = new List<TimeValue> { new TimeValue(0.1f, TimeUnit.Second) };
             target.Add(glow);
             Label label = new Label(ServiceRoleTitle(role)) { pickingMode = PickingMode.Ignore };
+            // Подпись — в слое экрана (не приближается вместе с картой): над
+            // зданием, обычного размера при любом масштабе.
             label.style.position = Position.Absolute;
-            label.style.bottom = Length.Percent(100);
-            label.style.left = Length.Percent(50);
-            label.style.translate = new Translate(Length.Percent(-50), 0);
+            label.style.left = 0;
+            label.style.top = 0;
+            label.style.fontSize = 15;
             label.style.color = new Color(0.98f, 0.93f, 0.8f);
             label.style.backgroundColor = new Color(0.18f, 0.14f, 0.1f, 0.82f);
             label.style.paddingLeft = label.style.paddingRight = 6;
@@ -250,7 +346,8 @@ public partial class PrototypeUIController
             label.style.unityTextAlign = TextAnchor.MiddleCenter;
             label.style.whiteSpace = WhiteSpace.NoWrap;
             label.style.display = DisplayStyle.None;
-            target.Add(label);
+            worldMapViewport.Add(label);
+            worldMapBuildingLabels.Add((label, rect));
             target.RegisterCallback<PointerEnterEvent>(_ =>
             {
                 glow.style.opacity = 1f;
@@ -263,26 +360,24 @@ public partial class PrototypeUIController
                 glow.style.opacity = 0f;
                 label.style.display = DisplayStyle.None;
             });
+            string capturedSettlement = id;
             target.RegisterCallback<ClickEvent>(evt =>
             {
                 evt.StopPropagation();
-                if (!string.IsNullOrEmpty(worldMapApproachRole) || IsSettlementScreenOpen)
+                if (!string.IsNullOrEmpty(worldMapApproachRole) || IsSettlementScreenOpen || gameState == null)
                     return;
-                // Подход: отряд идёт к двери — короткая пауза с подсвеченным
-                // зданием и подписью, затем окно услуги.
-                worldMapApproachRole = capturedRole;
-                glow.style.opacity = 1f;
-                label.text = ServiceRoleTitle(capturedRole) + " — подходим…";
-                label.style.display = DisplayStyle.Flex;
-                target.schedule.Execute(() =>
+                // Отряд у входа — сначала войти (окно выбора, кто идёт), потом
+                // пойти к зданию; уже внутри — сразу идти.
+                if (SettlementCampService.InsideLocationId(gameState) != capturedSettlement)
                 {
-                    worldMapApproachRole = null;
-                    glow.style.opacity = 0f;
-                    label.text = ServiceRoleTitle(capturedRole);
-                    label.style.display = DisplayStyle.None;
-                    OpenSettlementFromMap(capturedRole);
-                }).StartingIn(350);
+                    worldMapPendingRole = capturedRole;
+                    worldMapPendingSettlement = capturedSettlement;
+                    TryOpenLocationInteraction(capturedSettlement);
+                    return;
+                }
+                StartWalkToBuilding(capturedSettlement, capturedRole);
             });
+            worldMapBuildingGlows[role] = (glow, label);
             worldMapBuildingLayer.Add(target);
         }
     }

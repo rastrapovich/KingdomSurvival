@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using KingdomSurvival.MapLab;
 using UnityEngine;
@@ -33,6 +34,14 @@ namespace KingdomSurvival.MapLabBridge
             public RenderTexture Target;
             public string Error = string.Empty;
             public double BuildMs;
+            // Пошаговая сборка: вид до готовности, шаги и часы сборки.
+            public MapLabView PendingView;
+            public IEnumerator Pending;
+            public System.Diagnostics.Stopwatch Watch;
+            public MapLabAssetsSnapshot Assets;
+            public bool Building => Pending != null;
+            // Что сейчас строится (для подписи «Рисуем карту…»).
+            public string Stage => PendingView != null ? PendingView.BuildStage : string.Empty;
             // Здания услуг: поселение, роль, прямоугольник рисунка (проценты
             // полотна) и точка двери (проценты, на земле перед зданием).
             public readonly List<(string SettlementId, string Role, Rect Percent, Vector2 Door)> Buildings = new List<(string, string, Rect, Vector2)>();
@@ -62,10 +71,12 @@ namespace KingdomSurvival.MapLabBridge
         {
             if (current == null)
                 return;
-            if (current.View != null)
+            MapLabView view = current.View != null ? current.View : current.PendingView;
+            current.Pending = null;
+            if (view != null)
             {
-                current.View.Clear();
-                Object.DestroyImmediate(current.View.gameObject);
+                view.Clear();
+                Object.DestroyImmediate(view.gameObject);
             }
             if (current.Camera != null)
                 Object.DestroyImmediate(current.Camera.gameObject);
@@ -79,8 +90,18 @@ namespace KingdomSurvival.MapLabBridge
             current = null;
         }
 
-        // Построить мир MapLab для плана партии (синхронно, десятки секунд).
+        // Построить мир MapLab для плана партии сразу (пакетные проверки).
         public static World Build(GeneratedWorldMap plan, IDictionary<string, List<string>> services)
+        {
+            World w = Begin(plan, services);
+            while (!Advance(w))
+                System.Threading.Thread.Sleep(1);
+            return w;
+        }
+
+        // Начать пошаговую сборку: тяжёлые расчёты идут в фоне, а Advance раз
+        // в кадр создаёт готовые части в главном потоке (игра не замирает).
+        public static World Begin(GeneratedWorldMap plan, IDictionary<string, List<string>> services)
         {
             string key = MapLabGameMap.ServicesKey(services);
             if (Matches(plan, key))
@@ -89,7 +110,7 @@ namespace KingdomSurvival.MapLabBridge
             World w = new World { Plan = plan, ServicesKey = key };
             current = w;
             MapLabGameAssets assets = MapLabGameAssets.Load();
-            System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
+            w.Watch = System.Diagnostics.Stopwatch.StartNew();
             try
             {
                 if (assets == null || assets.Profile == null)
@@ -116,6 +137,9 @@ namespace KingdomSurvival.MapLabBridge
                 w.Rig.enabled = false;
 
                 GameObject mapObject = new GameObject("MapLab Live") { hideFlags = HideFlags.HideAndDontSave, layer = Layer };
+                // Пока строится — неактивен: части не видны чужим камерам и
+                // подгрузка покраски не стартует раньше конца сборки.
+                mapObject.SetActive(false);
                 MapLabView view = mapObject.AddComponent<MapLabView>();
                 view.GenerateOnLoad = false;
                 MapLabMarker marker = mapObject.AddComponent<MapLabMarker>();
@@ -124,8 +148,52 @@ namespace KingdomSurvival.MapLabBridge
                 assets.ApplyTo(view);
                 view.CameraRig = w.Rig;
                 view.Settings = w.Settings;
-                if (!view.Generate(null))
-                    throw new InvalidOperationException("генерация не выполнена — " + view.LastError);
+                w.PendingView = view;
+                w.Assets = new MapLabAssetsSnapshot { PitchDegrees = assets.PitchDegrees };
+                w.Pending = view.GenerateStepwise();
+            }
+            catch (Exception exception)
+            {
+                Fail(w, exception);
+            }
+            return w;
+        }
+
+        // Продвинуть сборку на шаг; true — сборка закончена (готово или ошибка).
+        public static bool Advance(World w)
+        {
+            if (w == null || w.Pending == null)
+                return true;
+            try
+            {
+                if (w.Pending.MoveNext())
+                    return false;
+                w.Pending = null;
+                Finish(w);
+            }
+            catch (Exception exception)
+            {
+                Fail(w, exception);
+            }
+            return true;
+        }
+
+        private static void Fail(World w, Exception exception)
+        {
+            w.Pending = null;
+            w.Error = "MapLab: " + exception.Message;
+            Debug.LogException(exception);
+            if (w.Watch != null)
+                w.BuildMs = w.Watch.Elapsed.TotalMilliseconds;
+        }
+
+        private static void Finish(World w)
+        {
+            MapLabView view = w.PendingView;
+            {
+                if (view == null || view.Data == null)
+                    throw new InvalidOperationException("генерация не выполнена — " + view?.LastError);
+                GameObject mapObject = view.gameObject;
                 w.View = view;
                 Transform markerRoot = mapObject.transform.Find(MapLabMarker.RootName);
                 if (markerRoot != null)
@@ -134,7 +202,7 @@ namespace KingdomSurvival.MapLabBridge
 
                 MapLabData data = view.Data;
                 w.Play = data.PlayRect.width > 0f ? data.PlayRect : new Rect(0f, 0f, data.Size, data.Size);
-                w.Pitch = Mathf.Clamp(assets.PitchDegrees, 20f, 80f);
+                w.Pitch = Mathf.Clamp(w.Assets.PitchDegrees, 20f, 80f);
                 w.Sin = Mathf.Sin(w.Pitch * Mathf.Deg2Rad);
                 w.Cos = Mathf.Cos(w.Pitch * Mathf.Deg2Rad);
                 float mean = 0f;
@@ -152,16 +220,16 @@ namespace KingdomSurvival.MapLabBridge
                     // Дверь — на земле чуть перед опорой здания (к зрителю).
                     w.Buildings.Add((b.SettlementId, b.Role, rect, basePercent + new Vector2(0f, heightPercent * 0.06f)));
                 }
+                mapObject.SetActive(true);
             }
-            catch (Exception exception)
-            {
-                w.Error = "MapLab: " + exception.Message;
-                Debug.LogException(exception);
-            }
-            w.BuildMs = watch.Elapsed.TotalMilliseconds;
+            w.BuildMs = w.Watch.Elapsed.TotalMilliseconds;
             if (w.Ready)
                 Debug.Log($"MapLab: живая карта партии построена за {w.BuildMs / 1000.0:0.0} с, зданий услуг {w.Buildings.Count}.");
-            return w;
+        }
+
+        public struct MapLabAssetsSnapshot
+        {
+            public float PitchDegrees;
         }
 
         private static void SetLayer(Transform t)

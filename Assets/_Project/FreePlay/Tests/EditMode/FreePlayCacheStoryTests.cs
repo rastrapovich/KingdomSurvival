@@ -207,4 +207,108 @@ public sealed class FreePlayCacheStoryTests
             WorldMapNavigation.ConfigureDefaultTerrain();
         }
     }
+
+    // ---------- Бриф распределения историй §23.2: сценарии корректности ----------
+
+    // §23.2.2 «Ранний вход»: береста торговца дала сведения без поручения —
+    // герой нашёл тайник раньше, чем взял дело у Ждана. Находка не теряется,
+    // нож не выдаётся второй раз, позднее поручение закрывается тем же ножом.
+    [Test]
+    public void EarlyFind_BeforeErrand_KeepsProgress_AndClosesLaterErrandOnce()
+    {
+        GameState state = NewFreePlayWithPost(out _);
+        state.Narrative.SetFlag(ItemCatalog.OldBedCacheStageFlag);
+        FreePlayContent.RefreshWithReports(state);
+        Assert.IsNotNull(state.FindLocation(FreePlayCacheStory.LocationId), "Береста — тоже источник сведений.");
+        state.Narrative.SetFlag(FreePlayCacheStory.Flags.Found);
+        FreePlayContent.RefreshWithReports(state);
+        Assert.AreEqual(1, state.Inventory.Items.Count(i => i.ItemId == ItemCatalog.CarterTokenKnife), "Нож найден до поручения.");
+        Assert.IsFalse(FreePlayContent.BuildGoals(state).Any(g => g.Id == "errand.settlement.errand.carter_knife" && g.State == JournalGoalState.Completed),
+            "Поручение не закрылось само: его ещё не брали.");
+
+        state.Narrative.SetFlag(FreePlayCacheStory.Flags.ErrandAccepted);
+        FreePlayContent.RefreshWithReports(state);
+        Assert.AreEqual(1, state.Inventory.Items.Count(i => i.ItemId == ItemCatalog.CarterTokenKnife), "Взятое позже поручение не выдаёт второй нож.");
+        state.Narrative.SetFlag(FreePlayCacheStory.Flags.TokenReturned);
+        state.Narrative.SetFlag(FreePlayCacheStory.Flags.ErrandDone);
+        FreePlayContent.RefreshWithReports(state);
+        Assert.AreEqual(0, state.Inventory.Items.Count(i => i.ItemId == ItemCatalog.CarterTokenKnife), "Отдан тот самый нож.");
+        Assert.AreEqual(JournalGoalState.Completed,
+            FreePlayContent.BuildGoals(state).Single(g => g.Id == "errand.settlement.errand.carter_knife").State);
+    }
+
+    // §23.2.3–4 «Разный порядок и другой источник»: рассказ возчика и береста
+    // торговца в любом порядке дают один тайник, одну область поиска и одно дело.
+    [Test]
+    public void TwoSources_AnyOrder_GiveOneCacheOneAreaOneErrand()
+    {
+        foreach (bool birchFirst in new[] { true, false })
+        {
+            GameState state = NewFreePlayWithPost(out _);
+            if (birchFirst)
+                state.Narrative.SetFlag(ItemCatalog.OldBedCacheStageFlag);
+            else
+                state.Narrative.AddKnowledge(ItemCatalog.OldBedCacheKnowledge);
+            FreePlayContent.RefreshWithReports(state);
+            LocationData first = state.FindLocation(FreePlayCacheStory.LocationId);
+            if (birchFirst)
+                state.Narrative.AddKnowledge(ItemCatalog.OldBedCacheKnowledge);
+            else
+                state.Narrative.SetFlag(ItemCatalog.OldBedCacheStageFlag);
+            state.Narrative.SetFlag(FreePlayCacheStory.Flags.ErrandAccepted);
+            FreePlayContent.RefreshWithReports(state);
+            FreePlayContent.RefreshWithReports(state);
+            Assert.AreEqual(1, state.Locations.Count(l => l.Id == FreePlayCacheStory.LocationId), "Один тайник (береста первой: " + birchFirst + ").");
+            Assert.AreEqual(first.MapXPercent, state.FindLocation(FreePlayCacheStory.LocationId).MapXPercent, 0.0001f, "Второй источник место не двигает.");
+            Assert.AreEqual(1, WorldMapSearchAreas.Active(state).Count, "Одна область поиска.");
+            Assert.AreEqual(1, FreePlayContent.BuildGoals(state).Count(g => g.Id == "errand.settlement.errand.carter_knife"), "Одно дело в журнале.");
+        }
+    }
+
+    // §23.2.12 «Загрузка в значимых точках»: сохранение после сведений и до
+    // находки — тайник на том же месте, область поиска на месте, ничего не выдано.
+    [Test]
+    public void SaveAfterKnowledge_BeforeFind_KeepsPlaceAndArea_NoReward()
+    {
+        GameState state = NewFreePlayWithPost(out _);
+        state.Narrative.AddKnowledge(ItemCatalog.OldBedCacheKnowledge);
+        FreePlayContent.RefreshWithReports(state);
+        LocationData cache = state.FindLocation(FreePlayCacheStory.LocationId);
+        GameState loaded = CampaignSaveService.RestoreCampaign(JsonUtility.FromJson<CampaignSaveData>(
+            JsonUtility.ToJson(CampaignSaveService.ExportCampaign(state))));
+        FreePlayContent.RefreshWithReports(loaded);
+        LocationData again = loaded.FindLocation(FreePlayCacheStory.LocationId);
+        Assert.IsNotNull(again);
+        Assert.AreEqual(cache.MapXPercent, again.MapXPercent, 0.0001f);
+        Assert.AreEqual(cache.MapYPercent, again.MapYPercent, 0.0001f);
+        Assert.IsFalse(again.IsVisibleOnMap, "После загрузки точного маркера нет.");
+        Assert.AreEqual(1, WorldMapSearchAreas.Active(loaded).Count);
+        Assert.AreEqual(0, loaded.Inventory.Items.Count(i => i.ItemId == ItemCatalog.CarterTokenKnife), "Загрузка не выдала находку.");
+    }
+
+    // §23.2.9–10 «Нет допустимого места»: невыполнимая роль не подменяется
+    // молча — привязка помечена неудачной с причиной, без исключения.
+    [Test]
+    public void ImpossibleRole_FailsHonestly_WithReason()
+    {
+        GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 41);
+        try
+        {
+            WorldMapNavigation.ConfigureFromDefinition(map.ToDefinitionData());
+            StoryRoleSpec impossible = new StoryRoleSpec
+            {
+                StoryId = "test.story", RoleId = "far", MinTravelHours = 5000.0, MaxTravelHours = 6000.0, TargetTravelHours = 5500.0,
+                Terrains = new List<WorldMapGameplayTerrainType> { WorldMapGameplayTerrainType.OpenGround }
+            };
+            GeneratedMapSite village = map.Villages[0];
+            StoryRoleBindingData result = WorldMapStoryBinder.Choose(map, 41, impossible, village.XPercent, village.YPercent);
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Bound, "Невыполнимая роль не привязана.");
+            Assert.IsNotEmpty(result.Reason, "Причина отказа видна автору.");
+        }
+        finally
+        {
+            WorldMapNavigation.ConfigureDefaultTerrain();
+        }
+    }
 }

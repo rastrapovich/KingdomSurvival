@@ -395,27 +395,167 @@ namespace KingdomSurvival.MapLab
         public static readonly List<string> MissingFeatureArt = new List<string>();
         public static int LastFeatures;
 
-        public static void PlanFeatures(MapLabData data, MapLabArtSet set, Plan plan)
+        // Детали мест. Рисунок — «ID», «ID*N» (N отдельных рисунков — могилы
+        // кладбища) или части через «+» (пещера и грибы у входа): одно место,
+        // части — только рисунок, раскладываются у опорной точки в её
+        // расчищенной площадке, не в воду. Рисунок без записи в наборе мест
+        // берётся из запасного набора (камни этапа 05).
+        public static void PlanFeatures(MapLabData data, MapLabArtSet set, Plan plan, MapLabArtSet fallback = null)
         {
             MissingFeatureArt.Clear();
             LastFeatures = 0;
+            LastFeatureParts = 0;
             MapLabComposition c = data.Composition;
             if (c == null || c.Features.Count == 0)
                 return;
             MapLabRandom rng = MapLabRandom.ForStream(data.Seed, "features", MapLabData.AlgorithmVersion);
+            List<Vector2> used = new List<Vector2>();
             foreach ((Vector2 p, string visual, string kind) in c.Features)
             {
-                MapLabArtEntry e = set != null ? set.Find(visual) : null;
-                if (e == null || !e.HasTexture || !e.Enabled)
+                List<(string Id, int Count)> parts = FeatureParts(visual);
+                float room = FeatureRoom(c, p);
+                used.Clear();
+                bool any = false;
+                float anchorHalf = 0f;
+                for (int k = 0; k < parts.Count; k++)
                 {
-                    if (!MissingFeatureArt.Contains(visual))
-                        MissingFeatureArt.Add(visual);
-                    continue;
+                    (string id, int n) = parts[k];
+                    MapLabArtEntry e = FindFeatureArt(id, set, fallback);
+                    if (e == null)
+                    {
+                        if (!MissingFeatureArt.Contains(id))
+                            MissingFeatureArt.Add(id);
+                        continue;
+                    }
+                    float half = FeatureHalfWidth(e);
+                    for (int j = 0; j < n; j++)
+                    {
+                        Vector2 q;
+                        if (k == 0 && n == 1)
+                        {
+                            q = p;
+                            anchorHalf = half;
+                        }
+                        else if (k == 0)
+                        {
+                            // Отдельные одинаковые части — неровными рядами (кладбище).
+                            if (!RowSpot(data, p, j, n, half, room, rng, used, out q))
+                                continue;
+                        }
+                        else if (!RingSpot(data, p, anchorHalf + half * 1.1f, half, room, rng, used, out q))
+                            continue;
+                        used.Add(q);
+                        Vector3 at = new Vector3(q.x, FeatureGround(data, q), q.y);
+                        plan.Add(e, Make(e, at - Vector3.up * 0.03f, Mathf.Lerp(e.ScaleRange.x, e.ScaleRange.y, rng.Value()), rng.Range(0.96f, 1.03f), 0f, 0.85f, -1));
+                        any = true;
+                        LastFeatureParts++;
+                    }
                 }
-                Vector3 at = new Vector3(p.x, data.SampleHeight(p.x, p.y), p.y);
-                plan.Add(e, Make(e, at - Vector3.up * 0.03f, Mathf.Lerp(e.ScaleRange.x, e.ScaleRange.y, rng.Value()), rng.Range(0.96f, 1.03f), 0f, 0.85f, -1));
-                LastFeatures++;
+                if (any)
+                    LastFeatures++;
             }
+        }
+
+        public static int LastFeatureParts;
+
+        public static List<(string Id, int Count)> FeatureParts(string visual)
+        {
+            List<(string, int)> parts = new List<(string, int)>();
+            if (string.IsNullOrWhiteSpace(visual))
+                return parts;
+            foreach (string raw in visual.Split('+'))
+            {
+                string token = raw.Trim();
+                if (token.Length == 0)
+                    continue;
+                int n = 1;
+                int star = token.LastIndexOf('*');
+                if (star > 0 && int.TryParse(token.Substring(star + 1), out int parsed))
+                {
+                    n = Mathf.Clamp(parsed, 1, 24);
+                    token = token.Substring(0, star).Trim();
+                }
+                parts.Add((token, n));
+            }
+            return parts;
+        }
+
+        private static MapLabArtEntry FindFeatureArt(string id, MapLabArtSet set, MapLabArtSet fallback)
+        {
+            MapLabArtEntry e = set != null ? set.Find(id) : null;
+            if ((e == null || !e.HasTexture || !e.Enabled) && fallback != null)
+                e = fallback.Find(id);
+            return e != null && e.HasTexture && e.Enabled ? e : null;
+        }
+
+        // Половина ширины рисунка на земле (единицы мира).
+        private static float FeatureHalfWidth(MapLabArtEntry e) =>
+            Mathf.Max(0.15f, e.CardHeight * e.Aspect * e.SolidRect.width * 0.5f * Mathf.Lerp(e.ScaleRange.x, e.ScaleRange.y, 0.5f));
+
+        // Радиус расчищенной площадки места (зона без леса из плана).
+        private static float FeatureRoom(MapLabComposition c, Vector2 p)
+        {
+            float best = 0f;
+            foreach (MapLabComposition.Zone z in c.Reserved)
+                if ((z.Center - p).sqrMagnitude < 0.01f)
+                    best = Mathf.Max(best, z.Radius);
+            return best > 0f ? best : 3f;
+        }
+
+        private static bool FeatureWet(MapLabData data, Vector2 q)
+        {
+            float level = data.SampleWaterLevel(q.x, q.y);
+            return !float.IsNaN(level) && level > data.SampleHeight(q.x, q.y) + 0.02f;
+        }
+
+        // Поверхность под деталью: вода — по уровню воды (запруда на русле не
+        // тонет), суша — по рельефу.
+        private static float FeatureGround(MapLabData data, Vector2 q)
+        {
+            float h = data.SampleHeight(q.x, q.y);
+            float level = data.SampleWaterLevel(q.x, q.y);
+            return float.IsNaN(level) ? h : Mathf.Max(h, level);
+        }
+
+        private static bool FeatureSpotFree(Vector2 q, float half, List<Vector2> used)
+        {
+            foreach (Vector2 u in used)
+                if ((u - q).sqrMagnitude < half * half * 2.2f)
+                    return false;
+            return true;
+        }
+
+        private static bool RowSpot(MapLabData data, Vector2 p, int index, int count, float half, float room, MapLabRandom rng, List<Vector2> used, out Vector2 q)
+        {
+            int cols = Mathf.CeilToInt(Mathf.Sqrt(count * 1.4f));
+            int rows = Mathf.CeilToInt(count / (float)cols);
+            float step = Mathf.Min(half * 2.6f, room * 1.6f / Mathf.Max(1, Mathf.Max(cols, rows)));
+            int col = index % cols, row = index / cols;
+            for (int attempt = 0; attempt < 4; attempt++)
+            {
+                q = p + new Vector2((col - (cols - 1) * 0.5f) * step + rng.Range(-0.22f, 0.22f) * step,
+                                    (row - (rows - 1) * 0.5f) * step * 0.85f + rng.Range(-0.2f, 0.2f) * step);
+                if (!FeatureWet(data, q) && FeatureSpotFree(q, half, used))
+                    return true;
+            }
+            q = p;
+            return false;
+        }
+
+        private static bool RingSpot(MapLabData data, Vector2 p, float distance, float half, float room, MapLabRandom rng, List<Vector2> used, out Vector2 q)
+        {
+            distance = Mathf.Min(distance, room * 0.9f);
+            float start = rng.Range(0f, Mathf.PI * 2f);
+            for (int attempt = 0; attempt < 8; attempt++)
+            {
+                float a = start + attempt * (Mathf.PI * 2f / 8f);
+                float r = distance * rng.Range(0.95f, 1.25f);
+                q = p + new Vector2(Mathf.Cos(a), Mathf.Sin(a) * 0.8f) * r;
+                if (!FeatureWet(data, q) && FeatureSpotFree(q, half, used))
+                    return true;
+            }
+            q = p;
+            return false;
         }
 
         // Скалы ревизии 06: осыпи-спрайты (50°) у подножия рисованной стены.

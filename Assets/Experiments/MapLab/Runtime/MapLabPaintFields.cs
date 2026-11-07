@@ -59,7 +59,22 @@ namespace KingdomSurvival.MapLab
         // четверть ОЗУ машины в пределах 1,5–16 ГБ.
         public static int BudgetMb;
 
-        private static int AutoBudgetMb() => Mathf.Clamp(SystemInfo.systemMemorySize / 4, 1536, 16384);
+        // Объём памяти спрашивается у Unity только в главном потоке: значение
+        // запоминается заранее (WarmUp), фоновая покраска берёт запомненное.
+        private static int systemMemoryMb;
+
+        public static void WarmUp()
+        {
+            if (systemMemoryMb <= 0)
+                systemMemoryMb = SystemInfo.systemMemorySize;
+        }
+
+        private static int AutoBudgetMb()
+        {
+            if (systemMemoryMb <= 0)
+                WarmUp();
+            return Mathf.Clamp(systemMemoryMb / 4, 1536, 16384);
+        }
 
         public int ResidentBlocks => residentCount;
         public int TotalBlocks => blocks.Length;

@@ -54,6 +54,64 @@ namespace KingdomSurvival.MapLab.Tests
             }
         }
 
+        // ---------- Пошаговая сборка (игра) ----------
+
+        // 12У-G: пошаговая сборка (расчёты в фоне) даёт ту же карту, что
+        // обычная: те же тайлы, перо, тени и число частей.
+        [Test]
+        public void StepwiseBuild_MatchesSynchronousBuild()
+        {
+            MapLabSettings s = Settings();
+            try
+            {
+                using (Scene scene = new Scene(s))
+                {
+                    Assert.IsTrue(scene.View.Generate(null), scene.View.LastError);
+                    int renderers = scene.View.Root.GetComponentsInChildren<MeshRenderer>(true).Length;
+                    int tiles = scene.View.PaintTileCount, shapes = scene.View.ShadowShapes;
+                    int ink = scene.View.InkStats.Vertices, field = scene.View.FieldInkStats.Vertices, shore = scene.View.ShoreInkStats.Vertices;
+                    int objects = scene.View.Data.Objects.Count;
+                    System.Collections.IEnumerator steps = scene.View.GenerateStepwise();
+                    int frames = 0;
+                    while (steps.MoveNext())
+                    {
+                        frames++;
+                        System.Threading.Thread.Sleep(1);
+                    }
+                    Assert.Greater(frames, 5, "Сборка уступает кадры");
+                    Assert.AreEqual(objects, scene.View.Data.Objects.Count, "Объекты данных");
+                    Assert.AreEqual(tiles, scene.View.PaintTileCount, "Тайлы покраски");
+                    Assert.AreEqual(shapes, scene.View.ShadowShapes, "Тени объектов");
+                    Assert.AreEqual(ink, scene.View.InkStats.Vertices, "Перо дорог");
+                    Assert.AreEqual(field, scene.View.FieldInkStats.Vertices, "Перо полей");
+                    Assert.AreEqual(shore, scene.View.ShoreInkStats.Vertices, "Перо берега");
+                    Assert.AreEqual(renderers, scene.View.Root.GetComponentsInChildren<MeshRenderer>(true).Length, "Части карты");
+                    Assert.AreEqual(string.Empty, scene.View.BuildStage);
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(s);
+            }
+        }
+
+        // Составные детали мест: «ID*N» и части через «+».
+        [Test]
+        public void FeatureParts_ParseCountsAndParts()
+        {
+            List<(string Id, int Count)> one = MapLabArtBuilder.FeatureParts("Grave_Marker_A");
+            Assert.AreEqual(1, one.Count);
+            Assert.AreEqual(("Grave_Marker_A", 1), one[0]);
+            List<(string Id, int Count)> cemetery = MapLabArtBuilder.FeatureParts("Grave_Marker_A*7");
+            Assert.AreEqual(("Grave_Marker_A", 7), cemetery[0]);
+            List<(string Id, int Count)> cave = MapLabArtBuilder.FeatureParts(" Cave_Entrance_A + Mushroom_Clump_A*2 ");
+            Assert.AreEqual(2, cave.Count);
+            Assert.AreEqual(("Cave_Entrance_A", 1), cave[0]);
+            Assert.AreEqual(("Mushroom_Clump_A", 2), cave[1]);
+            Assert.AreEqual(24, MapLabArtBuilder.FeatureParts("X*999")[0].Count, "Предел частей");
+            Assert.IsEmpty(MapLabArtBuilder.FeatureParts(""));
+        }
+
         // ---------- Камера ----------
 
         [Test]

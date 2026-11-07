@@ -109,13 +109,24 @@ public sealed class MapLabLiveMapPlayModeTests
         GameState campaign = CampaignSession.Current;
         Assert.IsTrue(campaign.HasGeneratedMap, "Свободная игра — сгенерированная карта.");
 
-        // Мир MapLab строится в кадре после показа «Рисуем карту…».
-        float started = Time.realtimeSinceStartup;
+        // Мир MapLab строится по шагам (расчёты в фоне): кадры идут, самый
+        // долгий кадр сборки — секунды, а не минута.
+        float started = Time.realtimeSinceStartup, last = started, worst = 0f;
+        int frames = 0;
         while ((MapLabGameLive.Current == null || !MapLabGameLive.Current.Ready) && Time.realtimeSinceStartup - started < 300f)
+        {
             yield return null;
+            float now = Time.realtimeSinceStartup;
+            worst = Mathf.Max(worst, now - last);
+            last = now;
+            frames++;
+        }
+        Debug.Log($"MapLab live: сборка шла {frames} кадров, самый долгий кадр {worst:0.00} с");
         Assert.IsNotNull(MapLabGameLive.Current, "Живая карта не начала строиться.");
         Assert.IsTrue(MapLabGameLive.Current.Ready, "Живая карта не построена: " + MapLabGameLive.Current.Error);
         Debug.Log($"MapLab live: построено за {MapLabGameLive.Current.BuildMs / 1000.0:0.0} с, зданий {MapLabGameLive.Current.Buildings.Count}");
+        Assert.Greater(frames, 30, "Сборка не идёт одним кадром.");
+        Assert.Less(worst, 6f, "Ни один кадр сборки не замирает надолго.");
         yield return Frames(60);
         Assert.IsNotNull(MapLabGameLive.Current.Target, "Камера MapLab рисует видимую часть карты.");
         yield return Capture(main, "live_01_map");

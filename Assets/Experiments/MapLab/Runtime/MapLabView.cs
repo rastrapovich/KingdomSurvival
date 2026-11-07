@@ -438,44 +438,14 @@ namespace KingdomSurvival.MapLab
 
         // ---------- Построение ----------
 
+        // Синхронная сборка — те же шаги, что у пошаговой (MapLabView.Stepwise.cs),
+        // все расчёты в вызывающем потоке.
         private void BuildEverything(MapLabGenerator.Progress progress)
         {
-            Stopwatch watch = Stopwatch.StartNew();
-            Phases.Clear();
-            phaseWatch.Restart();
-            EnsureRoot();
-            CreateSharedResources();
-            MapLabGenerator.Report(progress, "Покраска поверхности", 0.94f);
-            UploadDataTextures();
-            UploadShade();
-            Phase("текстуры данных");
-            Repaint();
-            Phase("покраска");
-            MapLabGenerator.Report(progress, "Меши", 0.97f);
-            BuildTerrain();
-            Phase("рельеф");
-            BuildWater();
-            BuildCliffs();
-            Phase("вода и скалы");
-            BuildObjects();
-            BuildInk();
-            Phase("перо");
-            BuildGrass();
-            BuildWireframe();
-            ApplyMaterialSettings();
-            Phase("трава и материалы");
-            if (CameraRig != null)
-                CameraRig.Bind(this, true);
-            ApplyVisibility();
-            PumpStreaming(false);
-            MapLabMarker marker = Marker;
-            if (marker != null)
-                marker.OnMapBuilt(this);
-            MapLabStats stats = data.Stats;
-            stats.PaintMs += 0f;
-            CountStats(ref stats);
-            stats.ObjectsMs += (float)watch.Elapsed.TotalMilliseconds - stats.PaintMs;
-            data.Stats = stats;
+            System.Collections.IEnumerator steps = BuildSteps(progress, false);
+            while (steps.MoveNext())
+            {
+            }
         }
 
         private void EnsureRoot()
@@ -588,19 +558,28 @@ namespace KingdomSurvival.MapLab
 
         private void UploadMasks()
         {
+            Color32[] a = pendingMaskA, b = pendingMaskB;
+            pendingMaskA = pendingMaskB = null;
+            if (a == null || b == null)
+                MaskPixels(data, out a, out b);
+            maskATexture.SetPixels32(a);
+            maskATexture.Apply(false, false);
+            maskBTexture.SetPixels32(b);
+            maskBTexture.Apply(false, false);
+        }
+
+        // Пиксели масок A/B по данным (без Unity-объектов: любой поток).
+        private static void MaskPixels(MapLabData data, out Color32[] a, out Color32[] b)
+        {
             int n = data.Resolution;
-            Color32[] a = new Color32[n * n];
-            Color32[] b = new Color32[n * n];
+            a = new Color32[n * n];
+            b = new Color32[n * n];
             for (int i = 0; i < a.Length; i++)
             {
                 bool water = data.Water[i] != (byte)MapLabWaterKind.Dry && data.Heights[i] < data.WaterLevel[i];
                 a[i] = new Color32(B(data.Forest[i]), B(data.Field[i]), B(data.Road[i]), B(data.Cliff[i]));
                 b[i] = new Color32((byte)(water ? 255 : 0), B(data.Shore[i]), B(data.Settlement[i]), B(data.Rock[i]));
             }
-            maskATexture.SetPixels32(a);
-            maskATexture.Apply(false, false);
-            maskBTexture.SetPixels32(b);
-            maskBTexture.Apply(false, false);
         }
 
         private static byte B(float v)
@@ -622,13 +601,23 @@ namespace KingdomSurvival.MapLab
                     filterMode = FilterMode.Trilinear,
                 });
             }
+            Color32[] pixels = pendingShade ?? ShadePixels(WillDrawCliffs06);
+            pendingShade = null;
+            shadeTexture.SetPixels32(pixels);
+            shadeTexture.Apply(true, false);
+        }
+
+        // Пиксели тени рельефа (без Unity-объектов: любой поток).
+        private Color32[] ShadePixels(bool drawnCliffs)
+        {
+            int r = data.ShadeResolution;
             Color32[] pixels = new Color32[r * r];
             for (int i = 0; i < pixels.Length; i++)
                 pixels[i] = new Color32(B(data.ShadeLight[i]), B(data.ShadeOcclusion[i]), 0, 255);
             // Ревизия 06: у нарисованных обрывов свет уже в рисунке — тень крутого
             // склона за стеной и над кромкой приведена к ровному лугу (без серой
             // «подложки» между стеной и полем).
-            if (WillDrawCliffs06 && data.Cliff != null)
+            if (drawnCliffs && data.Cliff != null)
             {
                 double light = 0, occlusion = 0;
                 int count = 0;
@@ -656,8 +645,7 @@ namespace KingdomSurvival.MapLab
                     }
                 }
             }
-            shadeTexture.SetPixels32(pixels);
-            shadeTexture.Apply(true, false);
+            return pixels;
             if (maskATexture != null)
                 UploadMasks();
         }
@@ -702,15 +690,7 @@ namespace KingdomSurvival.MapLab
         // Этап 03: тайлы по чанкам рельефа с плотностью PaintTexelsPerUnit.
         private void RepaintTiled()
         {
-            tileWorld = TerrainSpan * data.Cell;
-            MapLabTiledPainter.Options options = new MapLabTiledPainter.Options
-            {
-                StrokeContribution = Settings.Diagnostics.Mode == MapLabDiagnosticMode.StrokeContribution,
-                RoadInkInPaint = !Settings.Stage03.Ink,
-                Washes = Settings.IsStage05 && Settings.Diagnostics.ShowPaint ? WashLayer() : null,
-                DrawnCliffs = WillDrawCliffs06,
-            };
-            paintContribution = options.StrokeContribution;
+            MapLabTiledPainter.Options options = TiledOptions(true);
             if (WantsStreaming())
             {
                 RepaintStreaming(options);
@@ -719,6 +699,24 @@ namespace KingdomSurvival.MapLab
             DestroyStreaming();
             MapLabTiledPainter.Result result = MapLabTiledPainter.Paint(data, Settings, Palette, tileWorld, options);
             UploadTiles(result);
+        }
+
+        // Параметры покраски тайлами; placeWashes — сразу разложить акварельные
+        // пятна (иначе их раскладывает пошаговая сборка в фоне).
+        private bool WantsWashes => Settings.IsStage05 && Settings.Diagnostics.ShowPaint;
+
+        private MapLabTiledPainter.Options TiledOptions(bool placeWashes)
+        {
+            tileWorld = TerrainSpan * data.Cell;
+            MapLabTiledPainter.Options options = new MapLabTiledPainter.Options
+            {
+                StrokeContribution = Settings.Diagnostics.Mode == MapLabDiagnosticMode.StrokeContribution,
+                RoadInkInPaint = !Settings.Stage03.Ink,
+                Washes = placeWashes && WantsWashes ? WashLayer() : null,
+                DrawnCliffs = WillDrawCliffs06,
+            };
+            paintContribution = options.StrokeContribution;
+            return options;
         }
 
         // Текстуры тайлов, обзор, поля и статистика покраски из результата.
@@ -813,30 +811,69 @@ namespace KingdomSurvival.MapLab
         // ещё перо берега по общей сглаженной границе.
         private void BuildInk()
         {
-            DestroyGroup("Ink");
-            InkStats = default;
-            ShoreInkStats = default;
+            ApplyInk(ComputeInk());
+        }
+
+        // Геометрия пера (без Unity-объектов: любой поток).
+        private sealed class InkWork
+        {
+            public bool Enabled;
+            public MapLabInk.MeshData Road, Field, Shore;
+            public MapLabInk.Stats RoadStats, FieldStats, ShoreStats;
+            public bool HasField, HasShore;
+        }
+
+        private InkWork ComputeInk()
+        {
+            InkWork work = new InkWork();
             if (!Settings.IsStage03 || !Settings.Stage03.Ink || inkMaterial == null || paintFields == null)
-                return;
-            Mesh mesh = MapLabInk.BuildRoadInk(data, Settings, paintFields, out MapLabInk.Stats stats);
-            InkStats = stats;
-            AddInk("Road Ink", mesh, inkMaterial);
+                return work;
+            work.Enabled = true;
+            work.Road = MapLabInk.RoadInkData(data, Settings, paintFields, out work.RoadStats);
             if (Settings.IsStage05)
             {
-                Mesh fieldInk = MapLabInk.BuildFieldInk(data, Settings, paintFields, out MapLabInk.Stats fieldStats);
-                FieldInkStats = fieldStats;
-                AddInk("Field Ink", fieldInk, inkMaterial);
+                work.HasField = true;
+                work.Field = MapLabInk.FieldInkData(data, Settings, paintFields, out work.FieldStats);
             }
             if (Settings.IsStage05 && shoreInkMaterial != null && paintFields.Shore != null)
             {
-                Mesh shore = MapLabInk.BuildShoreInk(data, Settings, paintFields.Shore, out MapLabInk.Stats shoreStats);
-                ShoreInkStats = shoreStats;
-                AddInk("Shore Ink", shore, shoreInkMaterial);
+                work.HasShore = true;
+                work.Shore = MapLabInk.ShoreInkData(data, Settings, paintFields.Shore, out work.ShoreStats);
+            }
+            return work;
+        }
+
+        private void ApplyInk(InkWork work)
+        {
+            DestroyGroup("Ink");
+            InkStats = default;
+            ShoreInkStats = default;
+            if (!work.Enabled)
+                return;
+            InkStats = work.RoadStats;
+            AddInk("Road Ink", work.Road?.ToMesh(), inkMaterial);
+            if (work.HasField)
+            {
+                FieldInkStats = work.FieldStats;
+                AddInk("Field Ink", work.Field?.ToMesh(), inkMaterial);
+            }
+            if (work.HasShore)
+            {
+                ShoreInkStats = work.ShoreStats;
+                AddInk("Shore Ink", work.Shore?.ToMesh(), shoreInkMaterial);
             }
         }
 
         // Этап 05: акварельные пятна из Wash PNG набора (читаемые текстуры декалей).
         private MapLabWash.Layer WashLayer()
+        {
+            EnsureWashSources();
+            washLayer = MapLabWash.Place(data, Settings, washSources);
+            return washLayer;
+        }
+
+        // Пиксели Wash PNG читаются в главном потоке (раскладка — в любом).
+        private void EnsureWashSources()
         {
             MapLabArtSet set = ResolvedArtSet05;
             if (washSources == null && set != null)
@@ -849,8 +886,6 @@ namespace KingdomSurvival.MapLab
                     washSources.Add(MapLabWash.FromPixels(e.Id, e.Texture.GetPixels32(), e.Texture.width, e.Texture.height, e.OpacityRange));
                 }
             }
-            washLayer = MapLabWash.Place(data, Settings, washSources);
-            return washLayer;
         }
 
         // Этап 05: общая граница берега — в текстуру для края воды.
@@ -1014,7 +1049,7 @@ namespace KingdomSurvival.MapLab
                 Phase("план мелочи");
                 if (DrawnCliffs06)
                     MapLabArtBuilder.PlanCliffScree06(data, Settings, MapLabCliffs06.KitOf(ResolvedArtSet06), decorPlan);
-                MapLabArtBuilder.PlanFeatures(data, ResolvedArtSetPoi, decorPlan);
+                MapLabArtBuilder.PlanFeatures(data, ResolvedArtSetPoi, decorPlan, set05);
                 foreach (MapLabObjectKind kind in decorPlan.Replaced)
                     artPlan.Replaced.Add(kind);
             }
@@ -1097,14 +1132,25 @@ namespace KingdomSurvival.MapLab
             foreach (MapLabObjectKind kind in housePlan.Replaced)
                 artPlan.Replaced.Add(kind);
             Phase("меши домов и мелочи");
-            BuildObjectShadows();
-            Phase("тени объектов");
+            if (!deferObjectShadows)
+            {
+                BuildObjectShadows();
+                Phase("тени объектов");
+            }
         }
 
         // Этап 03: маска стилизованных теней по фактическим объектам (размеры
         // крон — по рисункам, если они подключены).
         private void BuildObjectShadows()
         {
+            if (PrepareObjectShadows(out List<MapLabObjectShadows.Caster> casters))
+                UploadObjectShadows(MapLabObjectShadows.Compute(data, Settings, casters));
+        }
+
+        // Снять прежнюю маску и собрать отбрасывающих тень (главный поток).
+        private bool PrepareObjectShadows(out List<MapLabObjectShadows.Caster> casters)
+        {
+            casters = null;
             if (objShadowTexture != null)
             {
                 owned.Remove(objShadowTexture);
@@ -1113,8 +1159,8 @@ namespace KingdomSurvival.MapLab
             }
             ShadowShapes = 0;
             if (!Settings.IsStage03 || !Settings.Stage03.ObjectShadows)
-                return;
-            List<MapLabObjectShadows.Caster> casters = new List<MapLabObjectShadows.Caster>();
+                return false;
+            casters = new List<MapLabObjectShadows.Caster>();
             HashSet<MapLabObjectKind> replaced = artPlan != null ? artPlan.Replaced : new HashSet<MapLabObjectKind>();
             if (artPlan != null)
             {
@@ -1164,7 +1210,11 @@ namespace KingdomSurvival.MapLab
                         break;
                 }
             }
-            MapLabObjectShadows.Result result = MapLabObjectShadows.Compute(data, Settings, casters);
+            return true;
+        }
+
+        private void UploadObjectShadows(MapLabObjectShadows.Result result)
+        {
             int res = result.Resolution;
             Color32[] pixels = new Color32[res * res];
             for (int i = 0; i < pixels.Length; i++)

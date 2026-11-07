@@ -82,7 +82,7 @@ namespace KingdomSurvival.WorldMapVisual
         // 12С-4: каталог мест по лору. Ассет, собранный раньше, получает
         // недостающие правила по умолчанию и описания у прежних правил;
         // правки автора (числа, выключенные правила) не трогаются.
-        public const int CurrentLandmarkCatalogVersion = 3;
+        public const int CurrentLandmarkCatalogVersion = 4;
         [SerializeField] private int landmarkCatalogVersion;
 
         public bool UpgradeLandmarkCatalog()
@@ -114,6 +114,18 @@ namespace KingdomSurvival.WorldMapVisual
                 existing.RewardArmySupply = fallback.RewardArmySupply;
                 existing.RewardArmyGold = fallback.RewardArmyGold;
                 existing.Placement = fallback.Placement;
+            }
+            // 12У-H: детали мест (составные — кладбище, пещера, оползень, запруда):
+            // недостающие правила по ID; прежняя одиночная могила кладбища
+            // становится кладбищем из отдельных могил.
+            settings.Features ??= new List<WorldMapLandmarkRule>();
+            foreach (WorldMapLandmarkRule fallback in WorldMapGenerationSettings.DefaultFeatures())
+            {
+                WorldMapLandmarkRule existing = settings.Features.Find(rule => rule != null && rule.Id == fallback.Id);
+                if (existing == null)
+                    settings.Features.Add(fallback);
+                else if (existing.Id == "cemetery" && existing.Visual == "Grave_Marker_A")
+                    existing.Visual = fallback.Visual;
             }
             landmarkCatalogVersion = CurrentLandmarkCatalogVersion;
             return true;

@@ -319,7 +319,9 @@ public static partial class WorldMapGenerator
         // Детали мест и условия соседства
         // ------------------------------------------------------------------
 
-        public static readonly string[] KnownNear = { "river", "water", "road", "forest-edge", "fields", "slope", "high", "village", "far" };
+        // «cliff» — рядом крутизна (скалы или горы), не просто холм; «on-river» —
+        // сама точка на русле реки (запруда), вдали от переправ.
+        public static readonly string[] KnownNear = { "river", "water", "road", "forest-edge", "fields", "slope", "high", "village", "far", "cliff", "on-river" };
 
         // Условия соседства правила (мельница — у реки, пристань — у воды и
         // деревни...). Для мест (до дорог) «road» и «fields» ещё не выполнимы.
@@ -371,6 +373,13 @@ public static partial class WorldMapGenerator
                     return false;
                 case "high":
                     return t == Hills || t == Mountains;
+                case "cliff":
+                    foreach (int i in CellsWithin(cell, 1))
+                        if (terrain[i] == Cliffs || terrain[i] == Mountains)
+                            return true;
+                    return false;
+                case "on-river":
+                    return t == Water && riverId[cell] >= 0;
                 case "village":
                 {
                     int d = result.Villages.Count == 0 ? int.MaxValue : result.Villages.Min(v => Distance(v.Cell, cell));
@@ -404,17 +413,27 @@ public static partial class WorldMapGenerator
             bool[] reachable = Reachable();
             List<int> taken = result.Landmarks.Select(l => l.Cell).Concat(result.WorkSites.Select(w => w.Cell)).ToList();
             List<int> villageCells = result.Villages.Select(v => v.Cell).ToList();
+            List<int> crossingCells = bridgeSpans.SelectMany(s => new[] { s.Entry, s.Exit }).ToList();
             foreach (WorldMapLandmarkRule rule in settings.Features)
             {
                 if (rule == null || !rule.Enabled || rule.Count <= 0)
                     continue;
                 WarnUnknownNear(rule);
                 int want = EffectiveCount(rule, random);
+                bool onRiver = rule.Near != null && rule.Near.Contains("on-river");
                 List<int> candidates = new List<int>();
                 for (int i = 0; i < count; i++)
                 {
                     byte t = terrain[i];
-                    if (t == Water || t == Cliffs || t == Road || t == Trail || t == Field || !reachable[i] || protectedStart[i] || NearEdge(i, 1))
+                    if (onRiver)
+                    {
+                        // На русле: берег рядом достижим, переправа не перекрыта
+                        // (рисунок не меняет проходимость, но не ложится на мост).
+                        if (t != Water || riverId[i] < 0 || protectedStart[i] || NearEdge(i, 1) || !NextToReachableLand(i, reachable)
+                            || (crossingCells.Count > 0 && NearestDistance(i, crossingCells) < 3))
+                            continue;
+                    }
+                    else if (t == Water || t == Cliffs || t == Road || t == Trail || t == Field || !reachable[i] || protectedStart[i] || NearEdge(i, 1))
                         continue;
                     if (rule.Terrains.Count > 0 && !rule.Terrains.Contains((WorldMapGameplayTerrainType)t))
                         continue;
@@ -438,6 +457,17 @@ public static partial class WorldMapGenerator
                     placed++;
                 }
             }
+        }
+
+        private bool NextToReachableLand(int cell, bool[] reachable)
+        {
+            for (int d = 0; d < 6; d++)
+            {
+                int n = neighbors[cell * 6 + d];
+                if (n >= 0 && terrain[n] != Water && reachable[n])
+                    return true;
+            }
+            return false;
         }
 
         // ------------------------------------------------------------------

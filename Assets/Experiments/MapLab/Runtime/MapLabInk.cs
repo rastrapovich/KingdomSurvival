@@ -25,6 +25,33 @@ namespace KingdomSurvival.MapLab
             public int EndingElements;  // штрихов и точек завершений
         }
 
+        // Геометрия ленты без Unity-объектов: считается в любом потоке, меш
+        // создаётся в главном (пошаговая сборка карты в игре).
+        public sealed class MeshData
+        {
+            public string Name;
+            public List<Vector3> Positions;
+            public List<Vector2> Uv0, Uv1;
+            public List<Vector4> Uv2;
+            public List<int> Indices;
+
+            public Mesh ToMesh()
+            {
+                Mesh mesh = new Mesh { name = Name, hideFlags = HideFlags.DontSave };
+                if (Positions.Count > 65000)
+                    mesh.indexFormat = IndexFormat.UInt32;
+                mesh.SetVertices(Positions);
+                mesh.SetUVs(0, Uv0);
+                mesh.SetUVs(1, Uv1);
+                mesh.SetUVs(2, Uv2);
+                mesh.SetTriangles(Indices, 0, true);
+                Bounds bounds = mesh.bounds;
+                bounds.Expand(2f);
+                mesh.bounds = bounds;
+                return mesh;
+            }
+        }
+
         public sealed class Contour
         {
             public readonly List<Vector2> Points = new List<Vector2>();
@@ -260,18 +287,24 @@ namespace KingdomSurvival.MapLab
             };
         }
 
-        public static Mesh BuildRoadInk(MapLabData data, MapLabSettings settings, MapLabPaintFields fields, out Stats stats)
+        public static Mesh BuildRoadInk(MapLabData data, MapLabSettings settings, MapLabPaintFields fields, out Stats stats) =>
+            RoadInkData(data, settings, fields, out stats)?.ToMesh();
+
+        public static MeshData RoadInkData(MapLabData data, MapLabSettings settings, MapLabPaintFields fields, out Stats stats)
         {
             MapLabInkStyle ink = Style(settings);
             float[] f = RoadField(data, fields, ink.Weights, out int n, out float[] weights, MapLabRoadJunction.From(settings));
             List<Contour> contours = Trace(f, weights, n, GridStep);
-            return BuildRibbon(data, settings, contours, f, n, "MapLab Road Ink", out stats, ink, GridStep);
+            return BuildRibbonData(data, settings, contours, f, n, "MapLab Road Ink", out stats, ink, GridStep);
         }
 
         // Этап 05: перо берега по той же сглаженной границе, что береговая полоса
         // и край воды (MapLabShore). Выбранные участки (мировой шум), концы
         // участков сходят на нет; лента — синяя к воде, тёплая к суше (шейдер).
-        public static Mesh BuildShoreInk(MapLabData data, MapLabSettings settings, MapLabShore shore, out Stats stats)
+        public static Mesh BuildShoreInk(MapLabData data, MapLabSettings settings, MapLabShore shore, out Stats stats) =>
+            ShoreInkData(data, settings, shore, out stats)?.ToMesh();
+
+        public static MeshData ShoreInkData(MapLabData data, MapLabSettings settings, MapLabShore shore, out Stats stats)
         {
             stats = default;
             if (shore == null)
@@ -301,7 +334,7 @@ namespace KingdomSurvival.MapLab
             }
             MapLabInkStyle style = Style(settings);
             style.Weights = Vector4.one;
-            return BuildRibbon(data, settings, kept, shore.Above, shore.N, "MapLab Shore Ink", out stats, style, MapLabShore.Step, -0.02f);
+            return BuildRibbonData(data, settings, kept, shore.Above, shore.N, "MapLab Shore Ink", out stats, style, MapLabShore.Step, -0.02f);
         }
 
         // R03: перо полей — тот же профиль и та же лента, что у дороги, ровно по
@@ -333,7 +366,10 @@ namespace KingdomSurvival.MapLab
             return Mathf.Lerp(Mathf.Lerp(a, b, fx), Mathf.Lerp(c, d, fx), fz);
         }
 
-        public static Mesh BuildFieldInk(MapLabData data, MapLabSettings settings, MapLabPaintFields fields, out Stats stats)
+        public static Mesh BuildFieldInk(MapLabData data, MapLabSettings settings, MapLabPaintFields fields, out Stats stats) =>
+            FieldInkData(data, settings, fields, out stats)?.ToMesh();
+
+        public static MeshData FieldInkData(MapLabData data, MapLabSettings settings, MapLabPaintFields fields, out Stats stats)
         {
             stats = default;
             LastFieldInner = 0;
@@ -452,10 +488,13 @@ namespace KingdomSurvival.MapLab
             }
             MapLabInkStyle style = Style(settings);
             style.Weights = Vector4.one;
-            return BuildRibbon(data, settings, contours, g, n, "MapLab Field Ink", out stats, style, FieldStep);
+            return BuildRibbonData(data, settings, contours, g, n, "MapLab Field Ink", out stats, style, FieldStep);
         }
 
-        public static Mesh BuildRibbon(MapLabData data, MapLabSettings settings, List<Contour> contours, float[] field, int n, string name, out Stats stats, MapLabInkStyle style = null, float step = GridStep, float lift = 0.03f)
+        public static Mesh BuildRibbon(MapLabData data, MapLabSettings settings, List<Contour> contours, float[] field, int n, string name, out Stats stats, MapLabInkStyle style = null, float step = GridStep, float lift = 0.03f) =>
+            BuildRibbonData(data, settings, contours, field, n, name, out stats, style, step, lift)?.ToMesh();
+
+        public static MeshData BuildRibbonData(MapLabData data, MapLabSettings settings, List<Contour> contours, float[] field, int n, string name, out Stats stats, MapLabInkStyle style = null, float step = GridStep, float lift = 0.03f)
         {
             MapLabInkStyle ink = style ?? settings.Stage03.InkStyle;
             MapLabNoise breaks = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "ink-breaks", MapLabData.AlgorithmVersion));
@@ -661,18 +700,7 @@ namespace KingdomSurvival.MapLab
             stats.Vertices = positions.Count;
             if (positions.Count == 0)
                 return null;
-            Mesh mesh = new Mesh { name = name, hideFlags = HideFlags.DontSave };
-            if (positions.Count > 65000)
-                mesh.indexFormat = IndexFormat.UInt32;
-            mesh.SetVertices(positions);
-            mesh.SetUVs(0, uv0);
-            mesh.SetUVs(1, uv1);
-            mesh.SetUVs(2, uv2);
-            mesh.SetTriangles(indices, 0, true);
-            Bounds bounds = mesh.bounds;
-            bounds.Expand(2f);
-            mesh.bounds = bounds;
-            return mesh;
+            return new MeshData { Name = name, Positions = positions, Uv0 = uv0, Uv1 = uv1, Uv2 = uv2, Indices = indices };
         }
 
         private static void Rotate<T>(List<T> list, int first)

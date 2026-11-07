@@ -16,6 +16,8 @@ public partial class PrototypeUIController
     private bool worldMapLiveScheduled;
     private bool worldMapLiveFailed;
     private RenderTexture worldMapLiveShown;
+    private MapLabGameLive.World worldMapLiveBuilding;
+    private bool WorldMapLivePending => worldMapLiveScheduled || worldMapLiveBuilding != null;
 
     private bool WorldMapLiveWanted() =>
         !worldMapLiveFailed && gameState != null && gameState.HasGeneratedMap && MapLabGameMap.Enabled;
@@ -57,18 +59,45 @@ public partial class PrototypeUIController
         worldMapLiveScheduled = true;
         if (worldMapLiveLabel != null)
         {
-            worldMapLiveLabel.text = "Рисуем карту… (до минуты на новую партию)";
+            worldMapLiveLabel.text = "Рисуем карту…";
             worldMapLiveLabel.style.display = DisplayStyle.Flex;
         }
         worldMapViewport.schedule.Execute(BuildWorldMapLive).ExecuteLater(60);
     }
 
+    // Сборка мира MapLab — пошаговая: расчёты идут в фоне, готовые части
+    // создаются раз в кадр (TickWorldMapLive), игра не замирает.
     private void BuildWorldMapLive()
     {
         worldMapLiveScheduled = false;
         if (gameState == null || !gameState.HasGeneratedMap)
             return;
-        MapLabGameLive.World world = MapLabGameLive.Build(gameState.GeneratedMap, MapLabSettlementServices());
+        worldMapLiveBuilding = MapLabGameLive.Begin(gameState.GeneratedMap, MapLabSettlementServices());
+        PollWorldMapLiveBuild();
+    }
+
+    private void PollWorldMapLiveBuild()
+    {
+        MapLabGameLive.World world = worldMapLiveBuilding;
+        if (world == null)
+            return;
+        // Партия сменилась во время сборки — эту сборку уже сняли.
+        if (!ReferenceEquals(world, MapLabGameLive.Current))
+        {
+            worldMapLiveBuilding = null;
+            return;
+        }
+        if (!MapLabGameLive.Advance(world))
+        {
+            if (worldMapLiveLabel != null)
+            {
+                string stage = world.Stage;
+                worldMapLiveLabel.text = string.IsNullOrEmpty(stage) ? "Рисуем карту…" : "Рисуем карту: " + stage + "…";
+                worldMapLiveLabel.style.display = DisplayStyle.Flex;
+            }
+            return;
+        }
+        worldMapLiveBuilding = null;
         if (worldMapLiveLabel != null)
             worldMapLiveLabel.style.display = DisplayStyle.None;
         if (world == null || !world.Ready)
@@ -106,11 +135,12 @@ public partial class PrototypeUIController
     // Каждый кадр: камера MapLab рисует видимую часть полотна.
     private void TickWorldMapLive()
     {
+        PollWorldMapLiveBuild();
         MapLabGameLive.World world = MapLabGameLive.Current;
         bool active = worldMapMapLab != null && world != null && world.Ready && gameState != null && gameState.HasGeneratedMap
                       && ReferenceEquals(world.Plan, gameState.GeneratedMap) && IsWorldMapScreenOpen;
         if (worldMapLiveImage != null)
-            worldMapLiveImage.style.display = worldMapMapLab != null || worldMapLiveScheduled ? DisplayStyle.Flex : DisplayStyle.None;
+            worldMapLiveImage.style.display = worldMapMapLab != null || worldMapLiveScheduled || worldMapLiveBuilding != null ? DisplayStyle.Flex : DisplayStyle.None;
         if (!active || worldMapViewport == null)
             return;
         float width = worldMapViewport.resolvedStyle.width, height = worldMapViewport.resolvedStyle.height;

@@ -220,7 +220,10 @@ public sealed class WorldMapRegionStructureTests
         {
             Assert.That(f.Visual, Is.Not.Empty);
             WorldMapGameplayTerrainType t = layer.GetAtIndex(f.Cell);
-            Assert.That(t, Is.Not.EqualTo(WorldMapGameplayTerrainType.Water).And.Not.EqualTo(WorldMapGameplayTerrainType.Road).And.Not.EqualTo(WorldMapGameplayTerrainType.Field));
+            if (f.Kind == "beaver-dam")
+                Assert.That(river.Contains(f.Cell), Is.True, "Запруда — на русле реки.");
+            else
+                Assert.That(t, Is.Not.EqualTo(WorldMapGameplayTerrainType.Water).And.Not.EqualTo(WorldMapGameplayTerrainType.Road).And.Not.EqualTo(WorldMapGameplayTerrainType.Field));
             Assert.That(map.Villages.All(v => grid.CellAt(v.Cell).DistanceTo(grid.CellAt(f.Cell)) >= 2), Is.True, f.Name + " не внутри деревни");
             if (f.Kind == "fishing-nets")
                 Assert.That(Enumerable.Range(0, 6).Any(d => { WorldMapHexCell n = grid.CellAt(f.Cell).Neighbor(d); return grid.IsInside(n) && river.Contains(grid.IndexOf(n)); }), Is.True, "Сети — у реки.");
@@ -228,6 +231,49 @@ public sealed class WorldMapRegionStructureTests
         // Детали не становятся местами игры и слотами.
         Assert.That(map.SpawnSlots.Any(slot => map.Features.Any(f => slot.Id.StartsWith(f.Kind))), Is.False);
         Assert.That(map.Landmarks.Any(l => map.Features.Any(f => f.Kind == l.Kind)), Is.False);
+    }
+
+    // Составные места пакета POI: грот и оползень — у крутизны (скалы/горы),
+    // оползень ещё и у дороги; запруда — на русле реки, не у переправы;
+    // кладбище — отдельные могилы (несколько рисунков одного места).
+    [Test]
+    public void CompositePlaces_StandWhereTheirRulesSay()
+    {
+        Dictionary<string, int> seen = new Dictionary<string, int>();
+        for (int seed = 1; seed <= 10; seed++)
+        {
+            GeneratedWorldMap map = WorldMapGenerator.Generate(Settings(WorldMapRegionKind.HillAndLedge), seed);
+            WorldMapTerrainLayer layer = map.CreateTerrainLayer();
+            WorldMapHexGrid grid = layer.Grid;
+            HashSet<int> river = new HashSet<int>(map.RiverCells);
+            bool Near(int cell, int radius, System.Func<WorldMapGameplayTerrainType, bool> test)
+            {
+                WorldMapHexCell c = grid.CellAt(cell);
+                for (int i = 0; i < grid.CellCount; i++)
+                    if (grid.CellAt(i).DistanceTo(c) <= radius && test(layer.GetAtIndex(i)))
+                        return true;
+                return false;
+            }
+            bool Steep(WorldMapGameplayTerrainType t) => t == WorldMapGameplayTerrainType.Cliffs || t == WorldMapGameplayTerrainType.Mountains;
+            foreach (GeneratedMapSite f in map.Features)
+            {
+                seen[f.Kind] = seen.TryGetValue(f.Kind, out int n) ? n + 1 : 1;
+                if (f.Kind == "dry-grotto")
+                    Assert.That(Near(f.Cell, 1, Steep), Is.True, "Грот — под скалой.");
+                if (f.Kind == "landslide")
+                {
+                    Assert.That(Near(f.Cell, 1, Steep), Is.True, "Оползень — под крутым склоном.");
+                    Assert.That(Near(f.Cell, 2, t => t == WorldMapGameplayTerrainType.Road || t == WorldMapGameplayTerrainType.Trail), Is.True, "Оползень — у дороги.");
+                    Assert.That(layer.GetAtIndex(f.Cell), Is.Not.EqualTo(WorldMapGameplayTerrainType.Road), "Оползень не перекрывает дорогу.");
+                }
+                if (f.Kind == "beaver-dam")
+                    Assert.That(river.Contains(f.Cell), Is.True, "Запруда — на русле.");
+                if (f.Kind == "cemetery")
+                    Assert.That(f.Visual, Does.Contain("*"), "Кладбище — несколько отдельных могил.");
+            }
+        }
+        Assert.That(seen.ContainsKey("beaver-dam") && seen.ContainsKey("cemetery"), Is.True,
+            "За 10 карт встречаются запруда и кладбище: " + string.Join(", ", seen.Keys));
     }
 
     [Test]

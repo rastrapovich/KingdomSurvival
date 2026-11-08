@@ -14,6 +14,10 @@ namespace KingdomSurvival.MapLab
         public readonly List<string> Passport = new List<string>();
         public string Key = string.Empty;
         public Texture2D Diagram;
+        // Диагностические слои (проходимость, время пути, заметность) и
+        // привязка историй к этому плану.
+        public readonly List<(string Title, string Legend, Texture2D Texture)> Layers = new List<(string, string, Texture2D)>();
+        public readonly List<string> Stories = new List<string>();
     }
 
     public static class MapLabPlanSource

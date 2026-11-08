@@ -137,6 +137,11 @@ namespace KingdomSurvival.MapLabBridge.Editor
             foreach (GeneratedRegionIssue issue in plan.Report.Issues)
                 r.Issues.Add((issue.Error, $"{issue.Code}: {issue.Message}"));
             r.Diagram = MapLabPlanDiagram.Render(plan, 900);
+            r.Layers.Add(("Проходимость", "Зелёный — проходимо (темнее — дороже), светлый — дороги и тропы, синий — вода, тёмный — непроходимо.", MapLabPlanLayers.Passability(plan, 900)));
+            Texture2D travel = MapLabPlanLayers.TravelTime(plan, 900, out double maxHours);
+            r.Layers.Add(("Время пути", $"От старта: зелёный — близко, красный — до {maxHours:0} ч пути; серое — недостижимо.", travel));
+            r.Layers.Add(("Заметность", "Пятно у места — по числу оснований обнаружить (красный 0–1, жёлтый 2, зелёный 3+), чёрная точка — скрытое место.", MapLabPlanLayers.Discoverability(plan, 900)));
+            r.Stories.AddRange(MapLabPlanLayers.Stories(plan));
             return r;
         }
     }

@@ -383,7 +383,7 @@ public partial class PrototypeUIController
             case "relief": return o.Relief;
             case "water": return o.Water;
             case "forest": return o.Forest;
-            case "settlements": return o.Settlements;
+            case "settlements": return o.Villages;
             case "discoveries": return o.Discoveries;
             case "enemies": return o.Enemies;
             default: return -1;
@@ -401,7 +401,7 @@ public partial class PrototypeUIController
             case "relief": o.Relief = value; break;
             case "water": o.Water = value; break;
             case "forest": o.Forest = value; break;
-            case "settlements": o.Settlements = value; break;
+            case "settlements": o.Villages = value; break;
             case "discoveries": o.Discoveries = value; break;
             case "enemies": o.Enemies = value; break;
         }

@@ -213,6 +213,9 @@ public sealed class MapLabLiveMapPlayModeTests
         // именно в неё (не в слои карты над ней).
         VisualElement shop = root.Query<VisualElement>("world-map-building-merchant").ToList().FirstOrDefault(e => (e.userData as string) == village.Id);
         Assert.IsNotNull(shop, "Цель лавки построена, пока отряд далеко.");
+        // Камера — на саму лавку (она может стоять в стороне от центра деревни).
+        Rect shopPercent = MapLabGameLive.Current.Buildings.First(b => b.SettlementId == village.Id && b.Role == "merchant").Percent;
+        yield return ZoomTo(main, shopPercent.center.x, shopPercent.center.y, 0.55f);
         yield return Frames(5);
         Rect bounds = shop.worldBound;
         Vector2 point = new Vector2(bounds.center.x, bounds.yMin + bounds.height * 0.62f);

@@ -103,4 +103,19 @@ public sealed class CampaignSetupTests
         Assert.AreEqual(CampaignMapOptions.Low, loaded.Configuration.MapOptions.Enemies, "Выбор карты сохраняется в партии.");
         Assert.AreEqual(CampaignMapOptions.High, loaded.Configuration.MapOptions.Forest);
     }
+
+    // Старое сохранение (до параметров карты): поле MapOptions отсутствует —
+    // партия загружается со значениями «обычно», встречи на дороге каждый день.
+    [Test]
+    public void OldSaveWithoutMapOptions_LoadsWithNormalOptions()
+    {
+        GameState state = new CampaignSetup { WorldSeed = 11 }.CreateCampaign();
+        string json = JsonUtility.ToJson(CampaignSaveService.ExportCampaign(state));
+        string old = System.Text.RegularExpressions.Regex.Replace(json, @",?""MapOptions"":\{[^}]*\}", string.Empty);
+        Assert.That(old, Does.Not.Contain("MapOptions"), "Поле убрано, как в старом файле.");
+        GameState loaded = CampaignSaveService.RestoreCampaign(JsonUtility.FromJson<CampaignSaveData>(old));
+        Assert.IsNotNull(loaded.Configuration.MapOptions);
+        Assert.AreEqual(CampaignMapOptions.Normal, loaded.Configuration.MapOptions.Enemies);
+        Assert.AreEqual(1.0, loaded.Configuration.MapOptions.RoadEncounterShare);
+    }
 }

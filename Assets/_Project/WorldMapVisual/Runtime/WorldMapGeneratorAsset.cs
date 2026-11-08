@@ -93,7 +93,7 @@ namespace KingdomSurvival.WorldMapVisual
         // 12С-4: каталог мест по лору. Ассет, собранный раньше, получает
         // недостающие правила по умолчанию и описания у прежних правил;
         // правки автора (числа, выключенные правила) не трогаются.
-        public const int CurrentLandmarkCatalogVersion = 4;
+        public const int CurrentLandmarkCatalogVersion = 5;
         [SerializeField] private int landmarkCatalogVersion;
 
         public bool UpgradeLandmarkCatalog()

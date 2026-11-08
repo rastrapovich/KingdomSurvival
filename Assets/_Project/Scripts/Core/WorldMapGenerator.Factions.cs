@@ -308,7 +308,8 @@ public static partial class WorldMapGenerator
                 Cell = camp,
                 XPercent = grid.PixelToPercentX(x),
                 YPercent = grid.PixelToPercentY(y),
-                Visual = "Camp_Tent_A",
+                // Лагерь группы — шатёр, кострище и знамя её стороны (если есть).
+                Visual = "Camp_Tent_A+Cold_Campfire_A" + (string.IsNullOrEmpty(WorldMapFactionCatalog.Find(settings.Factions, actor.FactionId)?.Banner) ? "" : "+" + WorldMapFactionCatalog.Find(settings.Factions, actor.FactionId).Banner),
                 DrawMark = false,
                 Description = "Шалаши у опушки, кострище присыпано землёй."
             });

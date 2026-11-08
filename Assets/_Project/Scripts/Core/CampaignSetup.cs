@@ -36,7 +36,7 @@ public sealed class CampaignMapOptions
     public int Relief = Normal;
     public int Water = Normal;
     public int Forest = Normal;
-    public int Settlements = Normal;
+    public int Villages = Normal;
     public int Discoveries = Normal;
     public int Enemies = Normal;
 
@@ -61,8 +61,8 @@ public sealed class CampaignMapOptions
         p.ForestShare *= Level(Forest, 0.3f, 1.9f);
         // Деревень больше на большой карте: на 100 клетках — как в ассете.
         double area = Math.Max(1.0, Math.Pow(p.HexesAcross / 100.0, 1.5));
-        p.VillageCount = Math.Max(2, (int)Math.Round(p.VillageCount * area * Level(Settlements, 0.5f, 1.6f)));
-        p.FieldDensity *= Level(Settlements, 0.5f, 1.5f);
+        p.VillageCount = Math.Max(2, (int)Math.Round(p.VillageCount * area * Level(Villages, 0.5f, 1.6f)));
+        p.FieldDensity *= Level(Villages, 0.5f, 1.5f);
         p.Discoveries = (WorldMapDiscoveryRate)Math.Max(0, Math.Min(2, Discoveries));
         // Враги: ватаги на дорогах и звериные логова (мест «логово» и групп
         // «ватага» меньше или больше; на большой карте — по площади).

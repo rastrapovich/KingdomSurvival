@@ -359,16 +359,41 @@ namespace KingdomSurvival.MapLab
                 float db = Vector2.Distance(new Vector2(data.Objects[b].Position.x, data.Objects[b].Position.z), plaza);
                 return da != db ? da.CompareTo(db) : a.CompareTo(b);
             });
-            for (int k = 0; k < st.Services.Count && k < houses.Count; k++)
+            // У рисунков зданий услуг один ракурс — «спереди справа», вход
+            // смотрит туда же. Двор выбран генератором так, что вход избы
+            // смотрит на улицу; поэтому под здание услуги берётся ближняя к
+            // площади изба с тем же ракурсом (вход к улице), а если такой
+            // поблизости нет — просто ближняя.
+            int frontRight = System.Array.IndexOf(MapLabHouseViews.Tags, "FrontRight");
+            int window = Mathf.Max(st.Services.Count * 3, 6);
+            HashSet<int> used = new HashSet<int>();
+            for (int k = 0; k < st.Services.Count && used.Count < houses.Count; k++)
             {
                 string art = ServiceArt(st.Services[k]);
                 if (art == null)
                     continue;
-                MapLabPlacement o = data.Objects[houses[k]];
+                int pick = -1;
+                for (int c = 0; c < houses.Count && c < window; c++)
+                    if (!used.Contains(houses[c]) && data.Objects[houses[c]].View == frontRight)
+                    {
+                        pick = houses[c];
+                        break;
+                    }
+                if (pick < 0)
+                    foreach (int h in houses)
+                        if (!used.Contains(h))
+                        {
+                            pick = h;
+                            break;
+                        }
+                if (pick < 0)
+                    break;
+                used.Add(pick);
+                MapLabPlacement o = data.Objects[pick];
                 o.ArtId = art;
                 o.SettlementId = st.Id;
                 o.Role = st.Services[k];
-                data.Objects[houses[k]] = o;
+                data.Objects[pick] = o;
             }
         }
 

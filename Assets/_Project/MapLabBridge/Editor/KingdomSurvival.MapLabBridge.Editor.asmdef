@@ -6,7 +6,8 @@
     "KingdomSurvival.Core",
     "KingdomSurvival.MapLab",
     "KingdomSurvival.MapLab.Editor",
-    "KingdomSurvival.WorldMapVisual"
+    "KingdomSurvival.WorldMapVisual",
+    "KingdomSurvival.FreePlay"
   ],
   "includePlatforms": [
     "Editor"

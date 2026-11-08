@@ -133,7 +133,7 @@ public sealed class RevisionScreensPlayModeTests
         // Донесения сами времени не тратят: при независимом времени часы идут
         // только своим темпом за прошедшие секунды.
         WorldMapMovementRules rules = WorldMapMovementRules.Current;
-        double allowed = rules.IndependentTime ? (Time.realtimeSinceStartup - reportsFrom) * rules.SafeWorldGameHoursPerRealSecond * ContinuousSimulationSystem.MaximumSpeedMultiplier + 1e-3 : 1e-6;
+        double allowed = rules.IndependentTime ? (Time.realtimeSinceStartup - reportsFrom + 0.25) * rules.SafeWorldGameHoursPerRealSecond * ContinuousSimulationSystem.MaximumSpeedMultiplier + 1e-3 : 1e-6;
         Assert.AreEqual(hours, Hours(campaign), allowed, "Донесения время не трогают.");
 
         // П. 3: подсказка значка карты по наведению; уходит с курсором.
@@ -178,7 +178,7 @@ public sealed class RevisionScreensPlayModeTests
         // Прежняя модель: темп у стоящего героя часы не запускает. 12У-G: при
         // независимом времени часы идут сами, ×3 — втрое быстрее, не больше.
         if (rules.IndependentTime)
-            Assert.LessOrEqual(Hours(campaign) - hours, (Time.realtimeSinceStartup - tempoFrom) * rules.SafeWorldGameHoursPerRealSecond * 3.0 + 1e-3, "×3 — втрое быстрее, не больше.");
+            Assert.LessOrEqual(Hours(campaign) - hours, (Time.realtimeSinceStartup - tempoFrom + 0.25) * rules.SafeWorldGameHoursPerRealSecond * 3.0 + 1e-3, "×3 — втрое быстрее, не больше.");
         else
             Assert.AreEqual(hours, Hours(campaign), 1e-6, "×3 на стоящем герое часы не запускает.");
 

@@ -38,6 +38,7 @@ namespace KingdomSurvival.MapLab.Editor
         private Rect lastBody;
         private int dragging;
         private Vector2 leftScroll, gridScroll, rightScroll, checkScroll;
+        private int checkLayer;
         private bool lookOpen = true, fineOpen, landingOpen, extraOpen;
         private RenderTexture preview;
         private bool previewDirty = true;
@@ -503,6 +504,10 @@ namespace KingdomSurvival.MapLab.Editor
                 {
                     if (planReport?.Diagram != null)
                         DestroyImmediate(planReport.Diagram);
+                    if (planReport != null)
+                        foreach ((string _, string _, Texture2D layerTexture) in planReport.Layers)
+                            if (layerTexture != null)
+                                DestroyImmediate(layerTexture);
                     planReport = MapLabPlanSource.Build(s);
                 }
                 else
@@ -946,11 +951,30 @@ namespace KingdomSurvival.MapLab.Editor
                     EditorGUILayout.LabelField(line, EditorStyles.wordWrappedMiniLabel);
                 if (planReport.Diagram != null)
                 {
-                    EditorGUILayout.LabelField("Схема: районы, пути, деревни (цвет — семейство), места (цвет — число оснований обнаружить: красный 0–1, жёлтый 2, зелёный 3+), площадки, нарушения.", EditorStyles.wordWrappedMiniLabel);
+                    // Слой схемы: районы и пути или диагностический слой.
+                    List<string> layerNames = new List<string> { "Районы" };
+                    foreach ((string title, string _, Texture2D _) in planReport.Layers)
+                        layerNames.Add(title);
+                    checkLayer = Mathf.Clamp(GUILayout.Toolbar(checkLayer, layerNames.ToArray()), 0, layerNames.Count - 1);
+                    Texture2D shown = planReport.Diagram;
+                    string legend = "Схема: районы, пути, деревни (цвет — семейство), места (цвет — число оснований обнаружить: красный 0–1, жёлтый 2, зелёный 3+), площадки, нарушения.";
+                    if (checkLayer > 0 && planReport.Layers[checkLayer - 1].Texture != null)
+                    {
+                        shown = planReport.Layers[checkLayer - 1].Texture;
+                        legend = planReport.Layers[checkLayer - 1].Legend;
+                    }
+                    EditorGUILayout.LabelField(legend, EditorStyles.wordWrappedMiniLabel);
                     float w = Mathf.Max(100f, leftWidth - 24f);
-                    float h = w * planReport.Diagram.height / Mathf.Max(1f, planReport.Diagram.width);
+                    float h = w * shown.height / Mathf.Max(1f, shown.width);
                     Rect r = GUILayoutUtility.GetRect(w, h, GUILayout.ExpandWidth(false));
-                    GUI.DrawTexture(r, planReport.Diagram, ScaleMode.ScaleToFit);
+                    GUI.DrawTexture(r, shown, ScaleMode.ScaleToFit);
+                }
+                if (planReport.Stories.Count > 0)
+                {
+                    EditorGUILayout.Space(4);
+                    EditorGUILayout.LabelField("Истории", EditorStyles.boldLabel);
+                    foreach (string line in planReport.Stories)
+                        EditorGUILayout.LabelField(line, EditorStyles.wordWrappedMiniLabel);
                 }
             }
             EditorGUILayout.Space(6);

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using KingdomSurvival.MapLabBridge;
+using KingdomSurvival.WorldMapVisual;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -446,11 +447,11 @@ public partial class PrototypeUIController
 
     // ---------- Подписи поселений вместо кнопок ----------
 
-    private readonly List<(Label Label, string Id)> worldMapVillageNames = new List<(Label, string)>();
+    private readonly List<(VisualElement Label, string Id)> worldMapVillageNames = new List<(VisualElement, string)>();
 
     private void ClearWorldMapVillageNames()
     {
-        foreach ((Label label, string _) in worldMapVillageNames)
+        foreach ((VisualElement label, string _) in worldMapVillageNames)
             label.RemoveFromHierarchy();
         worldMapVillageNames.Clear();
     }
@@ -461,23 +462,61 @@ public partial class PrototypeUIController
     {
         if (worldMapViewport == null)
             return;
+        // Подпись: герб стороны, которой подчиняется поселение (если есть), и название.
+        VisualElement plate = new VisualElement { name = "world-map-village-plate-" + location.Id, pickingMode = PickingMode.Ignore };
+        plate.style.position = Position.Absolute;
+        plate.style.left = 0;
+        plate.style.top = 0;
+        plate.style.flexDirection = FlexDirection.Row;
+        plate.style.alignItems = Align.Center;
+        plate.style.backgroundColor = new Color(0.16f, 0.13f, 0.1f, 0.62f);
+        plate.style.paddingLeft = plate.style.paddingRight = 6;
+        plate.style.borderTopLeftRadius = plate.style.borderTopRightRadius = plate.style.borderBottomLeftRadius = plate.style.borderBottomRightRadius = 4;
+        Texture2D emblem = VillageEmblem(location);
+        if (emblem != null)
+        {
+            Image image = new Image { name = "world-map-village-emblem-" + location.Id, image = emblem, scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
+            image.style.width = 18;
+            image.style.height = 18;
+            image.style.marginRight = 4;
+            plate.Add(image);
+        }
         Label label = new Label(location.Name) { name = "world-map-village-name-" + location.Id, pickingMode = PickingMode.Ignore };
-        label.style.position = Position.Absolute;
-        label.style.left = 0;
-        label.style.top = 0;
         label.style.fontSize = 14;
         label.style.color = new Color(0.97f, 0.93f, 0.82f);
-        label.style.backgroundColor = new Color(0.16f, 0.13f, 0.1f, 0.62f);
-        label.style.paddingLeft = label.style.paddingRight = 6;
-        label.style.borderTopLeftRadius = label.style.borderTopRightRadius = label.style.borderBottomLeftRadius = label.style.borderBottomRightRadius = 4;
         label.style.whiteSpace = WhiteSpace.NoWrap;
-        worldMapViewport.Add(label);
-        worldMapVillageNames.Add((label, location.Id));
+        plate.Add(label);
+        worldMapViewport.Add(plate);
+        worldMapVillageNames.Add((plate, location.Id));
+    }
+
+    // Герб стороны-владельца: ближайшая деревня плана и её подчинение.
+    private Texture2D VillageEmblem(LocationData location)
+    {
+        GeneratedWorldMap map = gameState?.GeneratedMap;
+        if (map?.Villages == null)
+            return null;
+        GeneratedMapSite best = null;
+        float bestDistance = 1.5f;
+        foreach (GeneratedMapSite site in map.Villages)
+        {
+            float d = Mathf.Abs(site.XPercent - location.MapXPercent) + Mathf.Abs(site.YPercent - location.MapYPercent);
+            if (d < bestDistance)
+            {
+                bestDistance = d;
+                best = site;
+            }
+        }
+        if (best == null || string.IsNullOrEmpty(best.ControllerFactionId))
+            return null;
+        WorldMapGeneratorAsset generator = WorldMapVisualRuntime.LoadGenerator();
+        WorldMapFactionDefinition faction = WorldMapFactionCatalog.Find(generator != null ? generator.Settings.Factions : WorldMapFactionCatalog.DefaultFactions(), best.ControllerFactionId);
+        return faction != null ? MapLabGameMap.ArtTexture(faction.Emblem) : null;
     }
 
     private void PlaceWorldMapVillageNames(bool visible, string insideId)
     {
-        foreach ((Label label, string id) in worldMapVillageNames)
+        foreach ((VisualElement label, string id) in worldMapVillageNames)
         {
             LocationData location = gameState?.FindLocation(id);
             bool on = visible && location != null && location.IsVisibleOnMap && id != insideId;

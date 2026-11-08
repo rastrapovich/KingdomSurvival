@@ -32,6 +32,9 @@ public sealed class WorldMapDefinitionData
     public string TerrainCells = string.Empty;
 
     public List<WorldMapRegionDefinition> Regions = new List<WorldMapRegionDefinition>();
+    // 12У-H: линии дорог и троп (как нарисованы) — путь героя по дорожным
+    // клеткам идёт по самой линии, а не наискось по центрам клеток.
+    [NonSerialized] public List<List<MapPointData>> RoadLines = new List<List<MapPointData>>();
     public List<WorldMapSpawnSlotDefinition> SpawnSlots = new List<WorldMapSpawnSlotDefinition>();
 
     public bool IsValid =>

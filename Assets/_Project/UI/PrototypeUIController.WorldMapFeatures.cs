@@ -125,19 +125,16 @@ public partial class PrototypeUIController
                       && ReferenceEquals(world.Plan, gameState.GeneratedMap) && !isGameOver;
         if (worldMap == null)
             return;
+        // Детали мест — в общем слое со зданиями: так ближний рисунок
+        // перекрывает дальний независимо от того, здание это или деталь.
+        EnsureWorldMapBuildingUi();
+        worldMapFeatureLayer = worldMapBuildingLayer;
         if (worldMapFeatureLayer == null)
-        {
-            worldMapFeatureLayer = new VisualElement { name = "world-map-features", pickingMode = PickingMode.Ignore };
-            worldMapFeatureLayer.style.position = Position.Absolute;
-            worldMapFeatureLayer.style.left = worldMapFeatureLayer.style.top = worldMapFeatureLayer.style.right = worldMapFeatureLayer.style.bottom = 0;
-            VisualElement parent = worldMapMarkers?.parent ?? worldMap;
-            int index = worldMapMarkers != null ? parent.IndexOf(worldMapMarkers) + 1 : parent.childCount;
-            parent.Insert(Mathf.Clamp(index, 0, parent.childCount), worldMapFeatureLayer);
-        }
+            return;
         if (!ReferenceEquals(world, worldMapFeaturesWorld))
             BuildWorldMapFeatureTargets(active ? world : null);
         bool screen = IsSettlementScreenOpen || IsLocalScreenOpen;
-        worldMapFeatureLayer.style.display = active && !screen ? DisplayStyle.Flex : DisplayStyle.None;
+        TickWorldMapFeatureArrival();
         if (!active || screen)
         {
             foreach ((GeneratedMapSite _, List<VisualElement> _, Label label, Rect _) in worldMapFeatureTargets)
@@ -173,7 +170,7 @@ public partial class PrototypeUIController
         foreach ((GeneratedMapSite _, List<VisualElement> _, Label label, Rect _) in worldMapFeatureTargets)
             label.RemoveFromHierarchy();
         worldMapFeatureTargets.Clear();
-        worldMapFeatureLayer.Clear();
+        RemoveWorldMapTargets("world-map-feature-");
         worldMapFeaturesWorld = world;
         if (world == null)
             return;
@@ -225,8 +222,8 @@ public partial class PrototypeUIController
                             SelectWorldMapLocation(place.Id);
                         return;
                     }
-                    ShowWorldMapInfoCard(captured.Name, captured.Description, "Идти сюда",
-                        () => GoToWorldMapPoint(captured.XPercent, captured.YPercent));
+                    // Деталь места: герой идёт к ней, на месте — её карточка.
+                    WalkToWorldMapFeature(captured, union);
                 });
                 target.style.display = DisplayStyle.None;
                 worldMapFeatureLayer.Add(target);
@@ -234,6 +231,79 @@ public partial class PrototypeUIController
             }
             worldMapFeatureTargets.Add((site, targets, label, union));
         }
+        SortWorldMapTargetsByDepth();
+    }
+
+    // ---------- Подход к детали места ----------
+
+    private GeneratedMapSite worldMapPendingFeature;
+    private Rect worldMapPendingFeatureRect;
+
+    private void WalkToWorldMapFeature(GeneratedMapSite site, Rect union)
+    {
+        if (gameState == null || isGameOver || site == null)
+            return;
+        HideWorldMapInfoCard();
+        // Уже рядом — карточка сразу.
+        if (HeroNearWorldMapPoint(site.XPercent, site.YPercent, 1.2))
+        {
+            ShowWorldMapFeatureCard(site, union);
+            return;
+        }
+        string inside = SettlementCampService.InsideLocationId(gameState);
+        if (!string.IsNullOrEmpty(inside))
+        {
+            AddReport("Отряд в поселении: сначала «Уйти», потом — к месту «" + site.Name + "».");
+            return;
+        }
+        worldMapPendingFeature = site;
+        worldMapPendingFeatureRect = union;
+        GoToWorldMapPoint(site.XPercent, site.YPercent);
+    }
+
+    private bool HeroNearWorldMapPoint(float x, float y, double hexes)
+    {
+        ExpeditionData expedition = gameState?.ActiveExpedition;
+        float hx = expedition != null ? expedition.CurrentMapXPercent : WorldMapNavigation.CapitalXPercent;
+        float hy = expedition != null ? expedition.CurrentMapYPercent : WorldMapNavigation.CapitalYPercent;
+        WorldMapHexGrid grid = WorldMapNavigation.Grid;
+        return grid != null && grid.DistanceHexes(hx, hy, x, y) <= hexes;
+    }
+
+    // Отряд дошёл (остановился рядом) — карточка; ушёл в другую сторону — отмена.
+    private void TickWorldMapFeatureArrival()
+    {
+        GeneratedMapSite site = worldMapPendingFeature;
+        if (site == null || gameState == null)
+            return;
+        bool running = ContinuousSimulationSystem.IsExpeditionRunning(gameState);
+        ExpeditionData expedition = gameState.ActiveExpedition;
+        if (expedition != null && running && expedition.Route != null && expedition.Route.Count > 0)
+        {
+            MapPointData end = expedition.Route[expedition.Route.Count - 1];
+            WorldMapHexGrid grid = WorldMapNavigation.Grid;
+            if (grid != null && grid.DistanceHexes(end.XPercent, end.YPercent, site.XPercent, site.YPercent) > 1.5)
+                worldMapPendingFeature = null;
+            return;
+        }
+        if (running)
+            return;
+        worldMapPendingFeature = null;
+        if (HeroNearWorldMapPoint(site.XPercent, site.YPercent, 1.5))
+            ShowWorldMapFeatureCard(site, worldMapPendingFeatureRect);
+    }
+
+    private void ShowWorldMapFeatureCard(GeneratedMapSite site, Rect union)
+    {
+        ShowWorldMapInfoCard(site.Name, site.Description, null, null);
+        if (worldMapInfoCard == null)
+            return;
+        // Карточка — рядом с местом, а не в углу экрана.
+        Vector2 at = MapPercentToWorldMapViewport(union.xMax, union.yMin);
+        float vw = worldMapViewport.resolvedStyle.width, vh = worldMapViewport.resolvedStyle.height;
+        worldMapInfoCard.style.right = StyleKeyword.Auto;
+        worldMapInfoCard.style.left = Mathf.Clamp(at.x + 8f, 8f, Mathf.Max(8f, vw - 336f));
+        worldMapInfoCard.style.top = Mathf.Clamp(at.y, 8f, Mathf.Max(8f, vh - 160f));
     }
 
     // Место игры, созданное из места плана (по виду и точке); null — деталь.
@@ -332,6 +402,10 @@ public partial class PrototypeUIController
         EnsureWorldMapInfoCard();
         if (worldMapInfoCard == null)
             return;
+        // По умолчанию — справа вверху (группы); детали ставят её у места.
+        worldMapInfoCard.style.left = StyleKeyword.Auto;
+        worldMapInfoCard.style.right = 16;
+        worldMapInfoCard.style.top = 64;
         worldMapInfoTitle.text = title ?? string.Empty;
         worldMapInfoText.text = string.IsNullOrWhiteSpace(text) ? "—" : text;
         worldMapInfoGoAction = go;

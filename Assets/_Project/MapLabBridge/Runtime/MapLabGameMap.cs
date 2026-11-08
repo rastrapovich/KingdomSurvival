@@ -134,7 +134,7 @@ namespace KingdomSurvival.MapLabBridge
             if (entry == null)
                 return false;
             texture = entry.Texture;
-            worldHeight = entry.CardHeight * Mathf.Lerp(entry.ScaleRange.x, entry.ScaleRange.y, 0.5f);
+            worldHeight = MapLabArtBuilder.FeatureWorldHeight(entry);
             aspect = entry.Aspect;
             pivot = entry.Pivot;
             return true;

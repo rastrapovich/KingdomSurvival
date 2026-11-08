@@ -638,6 +638,10 @@ public sealed class GeneratedWorldMap
             HexesAcross = HexesAcross,
             TerrainCells = TerrainCells ?? string.Empty
         };
+        if (Roads != null)
+            foreach (GeneratedMapLine line in Roads)
+                if (line?.Points != null && line.Points.Count >= 2)
+                    data.RoadLines.Add(new List<MapPointData>(line.Points));
 
         if (SpawnSlots != null)
         {

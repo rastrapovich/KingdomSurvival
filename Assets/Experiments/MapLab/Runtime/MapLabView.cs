@@ -1049,7 +1049,7 @@ namespace KingdomSurvival.MapLab
                 Phase("план мелочи");
                 if (DrawnCliffs06)
                     MapLabArtBuilder.PlanCliffScree06(data, Settings, MapLabCliffs06.KitOf(ResolvedArtSet06), decorPlan);
-                MapLabArtBuilder.PlanFeatures(data, ResolvedArtSetPoi, decorPlan, set05);
+                MapLabArtBuilder.PlanFeatures(data, ResolvedArtSetPoi, decorPlan, set05, FeatureScaleNorm(set05));
                 foreach (MapLabObjectKind kind in decorPlan.Replaced)
                     artPlan.Replaced.Add(kind);
             }
@@ -1192,7 +1192,12 @@ namespace KingdomSurvival.MapLab
                 {
                     case MapLabObjectKind.House:
                     case MapLabObjectKind.Barn:
-                        casters.Add(new MapLabObjectShadows.Caster { Base = o.Position, Building = true, Size = o.Size, Yaw = o.Yaw, Height = o.Kind == MapLabObjectKind.House ? 3.4f : 2.6f });
+                        // Здание услуги: высота тени — по его рисунку (Scale задан при
+                        // подборе рисунка; у столба объявлений — низкая).
+                        float buildingHeight = o.Kind == MapLabObjectKind.House ? 3.4f : 2.6f;
+                        if (!string.IsNullOrEmpty(o.ArtId) && o.Scale > 0.01f)
+                            buildingHeight *= o.Scale;
+                        casters.Add(new MapLabObjectShadows.Caster { Base = o.Position, Building = true, Size = o.Size, Yaw = o.Yaw, Height = buildingHeight });
                         break;
                     case MapLabObjectKind.Deciduous:
                     case MapLabObjectKind.DeciduousGroup:
@@ -1230,6 +1235,25 @@ namespace KingdomSurvival.MapLab
             ShadowShapes = result.Shapes;
             ShadowResolution = res;
             ShadowMs = result.Milliseconds;
+        }
+
+        // Масштаб деталей мест: рост фишки героя и размер избы деревни.
+        private MapLabArtBuilder.FeatureScale FeatureScaleNorm(MapLabArtSet set05)
+        {
+            MapLabArtBuilder.FeatureScale norm = default;
+            MapLabArtEntry hero = ActiveMarkerSet?.View(MapLabMarkerDirection.Front);
+            if (hero != null && hero.HasTexture)
+                norm.FigureHeight = hero.CardHeight;
+            if (set05 != null)
+                foreach (MapLabArtEntry e in set05.Entries)
+                    if (e != null && e.HasTexture && e.Category == MapLabArtCategory.Building && e.ViewTag == "FrontRight")
+                    {
+                        float s = Settings.Settlement.BuildingScale;
+                        norm.HouseSolidWidth = e.CardHeight * s * e.Aspect * Mathf.Max(0.05f, e.SolidRect.width);
+                        norm.HouseSolidHeight = e.CardHeight * s * Mathf.Max(0.05f, e.SolidRect.height);
+                        break;
+                    }
+            return norm;
         }
 
         // Кадр домов этапа 03 по наклону, с гистерезисом вокруг порога.

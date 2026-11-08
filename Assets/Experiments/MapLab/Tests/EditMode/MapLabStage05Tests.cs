@@ -95,6 +95,35 @@ namespace KingdomSurvival.MapLab.Tests
             }
         }
 
+        // Дворы с оградами не заходят друг на друга ни в одной деревне и ни
+        // в одном пресете (точная проверка повёрнутых прямоугольников).
+        [Test]
+        public void VillageYards_NeverOverlap()
+        {
+            int totalYards = 0;
+            foreach (MapLabPresetKind preset in new[] { MapLabPresetKind.RiverValley, MapLabPresetKind.ForestLake, MapLabPresetKind.HillAndLedge })
+            {
+                MapLabSettings s = Settings(preset);
+                try
+                {
+                    using (Scene scene = new Scene(s))
+                    {
+                        Assert.IsTrue(scene.View.Generate(null), scene.View.LastError);
+                        List<MapLabYardRect> yards = scene.View.Data.YardRects;
+                        totalYards += yards.Count;
+                        for (int a = 0; a < yards.Count; a++)
+                            for (int b = a + 1; b < yards.Count; b++)
+                                Assert.IsFalse(yards[a].Overlaps(yards[b], 0.1f), $"{preset}: дворы {a} и {b} заходят друг на друга");
+                    }
+                }
+                finally
+                {
+                    Object.DestroyImmediate(s);
+                }
+            }
+            Assert.Greater(totalYards, 0, "Хотя бы в одном пресете есть дворы.");
+        }
+
         // Составные детали мест: «ID*N» и части через «+».
         [Test]
         public void FeatureParts_ParseCountsAndParts()

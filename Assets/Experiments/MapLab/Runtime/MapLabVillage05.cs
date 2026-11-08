@@ -447,12 +447,15 @@ namespace KingdomSurvival.MapLab
                 for (int b = 0; b < data.Bridges.Count; b++)
                     if (Vector2.Distance(q, data.Bridges[b].EndA) < 12f || Vector2.Distance(q, data.Bridges[b].EndB) < 12f)
                         return;
-                foreach (MapLabYardRect other in yards)
-                    if (other.Contains(q, -0.4f))
-                        return;
             }
+            // Дворы (и их ограды) не заходят друг на друга нигде — точная
+            // проверка повёрнутых прямоугольников; касание стороной допустимо.
             foreach (MapLabYardRect other in yards)
-                if (rect.Contains(other.Center, -0.4f))
+                if (rect.Overlaps(other, 0.15f))
+                    return;
+            // И с дворами соседних поселений.
+            foreach (MapLabYardRect other in data.YardRects)
+                if (rect.Overlaps(other, 0.15f))
                     return;
             if (data.Plaza.z > 0f && Vector2.Distance(center, new Vector2(data.Plaza.x, data.Plaza.y)) < data.Plaza.z + Mathf.Max(width, depth) * 0.5f)
                 return;

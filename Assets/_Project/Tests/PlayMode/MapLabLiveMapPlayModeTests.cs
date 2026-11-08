@@ -141,6 +141,86 @@ public sealed class MapLabLiveMapPlayModeTests
         yield return Capture(main, "ng_02_huge_map");
     }
 
+    // Настоящая дорога: клик по каждому зданию услуги из лагеря — отряд идёт
+    // сам (без телепорта), входит, герой доходит до двери, открывается окно.
+    [UnityTest]
+    public IEnumerator RealTravel_ClickEachServiceBuilding_OpensItsWindow()
+    {
+        SceneManager.LoadScene(MainScene);
+        for (int i = 0; i < 600 && SceneManager.GetActiveScene().name != MainScene; i++)
+            yield return null;
+        yield return Frames(20);
+        MonoBehaviour main = FindBehaviour("PrototypeUIController");
+        Invoke(main, "StartNewGameFromMenu");
+        float started = Time.realtimeSinceStartup;
+        while ((MapLabGameLive.Current == null || !MapLabGameLive.Current.Ready) && Time.realtimeSinceStartup - started < 300f)
+            yield return null;
+        Assert.IsTrue(MapLabGameLive.Current != null && MapLabGameLive.Current.Ready);
+        yield return Frames(30);
+        GameState campaign = CampaignSession.Current;
+        TestPeople.AdmitAll(campaign);
+        VisualElement root = main.GetComponent<UIDocument>().rootVisualElement;
+        // Ближайшая к старту деревня с услугами.
+        string villageId = MapLabGameLive.Current.Buildings.Select(b => b.SettlementId).Distinct()
+            .Where(id => campaign.FindLocation(id) != null)
+            .OrderBy(id => Mathf.Abs(campaign.FindLocation(id).MapXPercent - WorldMapNavigation.CapitalXPercent) + Mathf.Abs(campaign.FindLocation(id).MapYPercent - WorldMapNavigation.CapitalYPercent))
+            .First();
+        LocationData village = campaign.FindLocation(villageId);
+        village.IsVisibleOnMap = true;
+        village.IsDiscovered = true;
+        Invoke(main, "RefreshWorldMapPanel");
+        List<string> roles = MapLabGameLive.Current.Buildings.Where(b => b.SettlementId == villageId).Select(b => b.Role).ToList();
+        Debug.Log("MapLab real: деревня " + village.Name + ", здания: " + string.Join(", ", roles));
+        ContinuousSimulationSystem.SetSpeedMultiplier(campaign, ContinuousSimulationSystem.MaximumSpeedMultiplier);
+        List<string> failures = new List<string>();
+        foreach (string role in roles)
+        {
+            // Если окно или поселение открыты — выйти на карту.
+            if (Get<bool>(main, "IsSettlementScreenOpen"))
+                Invoke(main, "CloseSettlementScreen");
+            yield return Frames(5);
+            Rect rect = MapLabGameLive.Current.Buildings.First(b => b.SettlementId == villageId && b.Role == role).Percent;
+            yield return ZoomTo(main, rect.center.x, rect.center.y, 0.55f);
+            VisualElement target = root.Query<VisualElement>("world-map-building-" + role).ToList().FirstOrDefault(e => (e.userData as string) == villageId);
+            if (target == null)
+            {
+                failures.Add(role + ": нет цели");
+                continue;
+            }
+            Rect bounds = target.worldBound;
+            VisualElement picked = root.panel.Pick(new Vector2(bounds.center.x, bounds.yMin + bounds.height * 0.62f));
+            if (picked == null || !(picked == target || target.Contains(picked)))
+            {
+                failures.Add(role + ": курсор попадает в " + (picked?.name ?? "ничто"));
+                continue;
+            }
+            using (ClickEvent click = ClickEvent.GetPooled())
+            {
+                click.target = picked;
+                picked.SendEvent(click);
+            }
+            float t0 = Time.realtimeSinceStartup;
+            string last = string.Empty;
+            while (!Get<bool>(main, "IsSettlementScreenOpen") && Time.realtimeSinceStartup - t0 < 120f)
+            {
+                ExpeditionData e = campaign.ActiveExpedition;
+                string state = e == null ? "нет похода" : $"{e.Phase} loc={e.LocationId} inside={SettlementCampService.InsideLocationId(campaign)} pending={Field<string>(main, "worldMapPendingRole")} interaction={Get<bool>(main, "IsLocationInteractionActive")}";
+                if (state != last)
+                {
+                    Debug.Log("MapLab real: " + role + " — " + state);
+                    last = state;
+                }
+                yield return null;
+            }
+            if (!Get<bool>(main, "IsSettlementScreenOpen"))
+                failures.Add(role + ": окно не открылось, последнее состояние — " + last);
+            else
+                Debug.Log("MapLab real: " + role + " — окно открыто за " + (Time.realtimeSinceStartup - t0).ToString("0.0") + " с");
+            yield return Frames(5);
+        }
+        Assert.IsEmpty(failures, string.Join("; ", failures));
+    }
+
     [UnityTest]
     public IEnumerator LiveMap_HeroFigure_WalkToBuilding_OpensService()
     {
@@ -191,6 +271,12 @@ public sealed class MapLabLiveMapPlayModeTests
         Assert.IsFalse(Get<bool>(main, "IsLoadingScreenOpen"), "Карта готова — экран загрузки убран.");
         Assert.IsNotNull(MapLabGameLive.Current.Target, "Камера MapLab рисует видимую часть карты.");
         Assert.IsNotEmpty(MapLabGameLive.Current.Features, "У деталей мест есть цели наведения.");
+        // Дворы с оградами всех деревень партии не заходят друг на друга.
+        List<KingdomSurvival.MapLab.MapLabYardRect> yards = MapLabGameLive.Current.View.Data.YardRects;
+        Assert.Greater(yards.Count, 10, "В деревнях партии есть дворы.");
+        for (int ya = 0; ya < yards.Count; ya++)
+            for (int yb = ya + 1; yb < yards.Count; yb++)
+                Assert.IsFalse(yards[ya].Overlaps(yards[yb], 0.1f), $"Дворы {ya} и {yb} заходят друг на друга.");
         Debug.Log("MapLab live: деталей мест с целями — " + MapLabGameLive.Current.Features.Count);
         yield return Capture(main, "live_01_map");
 

@@ -61,6 +61,12 @@ namespace KingdomSurvival.MapLab
                                 fit = Mathf.Clamp(houseInstance.Width * Mathf.Max(0.05f, entry.SolidRect.width) * ServiceWidthShare / own, 0.4f, 1.6f);
                             }
                             instance = Make(art, o.Position, s * fit, o.Brightness, 0f, 0.5f, i);
+                            // Тень — по размеру нарисованного здания, а не избы, на
+                            // месте которой оно стоит: столб — маленький, без тени дома.
+                            float footprint = (instance.Width * Mathf.Max(0.05f, art.SolidRect.width)) / Mathf.Max(0.01f, houseInstance.Width * Mathf.Max(0.05f, entry.SolidRect.width));
+                            o.Size *= Mathf.Clamp(o.Role == "board" ? footprint * 0.45f : footprint, 0.15f, 1.6f);
+                            o.Scale = o.Role == "board" ? 0.5f : Mathf.Clamp(footprint, 0.5f, 1.4f);
+                            data.Objects[i] = o;
                         }
                         plan.Add(art, instance);
                         anyHouse = true;
@@ -425,8 +431,43 @@ namespace KingdomSurvival.MapLab
         // части — только рисунок, раскладываются у опорной точки в её
         // расчищенной площадке, не в воду. Рисунок без записи в наборе мест
         // берётся из запасного набора (камни этапа 05).
-        public static void PlanFeatures(MapLabData data, MapLabArtSet set, Plan plan, MapLabArtSet fallback = null)
+        // Единый масштаб деталей: фигуры людей — ростом с фишку героя, постройки —
+        // шириной с избу деревни (высокие узкие — высотой полторы избы). Иначе
+        // рисунки пакетов, нарисованные в своём масштабе, «скачут» по размерам.
+        public struct FeatureScale
         {
+            public float FigureHeight;
+            public float HouseSolidWidth;
+            public float HouseSolidHeight;
+        }
+
+        public static FeatureScale LastFeatureScale;
+
+        private static bool IsFigure(MapLabArtEntry e) =>
+            e.Category == MapLabArtCategory.Figure || (e.Id != null && e.Id.StartsWith("Worker_"));
+
+        private static float? NormalizedScale(MapLabArtEntry e, FeatureScale norm)
+        {
+            if (IsFigure(e) && norm.FigureHeight > 0.01f)
+                return norm.FigureHeight / Mathf.Max(0.01f, e.CardHeight);
+            if (e.Category == MapLabArtCategory.Building && norm.HouseSolidWidth > 0.01f)
+            {
+                float w = e.CardHeight * e.Aspect * Mathf.Max(0.05f, e.SolidRect.width);
+                float h = e.CardHeight * Mathf.Max(0.05f, e.SolidRect.height);
+                bool tall = w < h * 0.8f;
+                return tall ? norm.HouseSolidHeight * 1.5f / Mathf.Max(0.01f, h) : norm.HouseSolidWidth / Mathf.Max(0.01f, w);
+            }
+            return null;
+        }
+
+        // Высота рисунка детали в мире с тем же единым масштабом (для рисунков
+        // поверх карты в игре).
+        public static float FeatureWorldHeight(MapLabArtEntry e) =>
+            e.CardHeight * (NormalizedScale(e, LastFeatureScale) ?? Mathf.Lerp(e.ScaleRange.x, e.ScaleRange.y, 0.5f));
+
+        public static void PlanFeatures(MapLabData data, MapLabArtSet set, Plan plan, MapLabArtSet fallback = null, FeatureScale norm = default)
+        {
+            LastFeatureScale = norm;
             MissingFeatureArt.Clear();
             LastFeatures = 0;
             LastFeatureParts = 0;
@@ -453,7 +494,10 @@ namespace KingdomSurvival.MapLab
                             MissingFeatureArt.Add(id);
                         continue;
                     }
-                    float half = FeatureHalfWidth(e);
+                    float? fixedScale = NormalizedScale(e, norm);
+                    float half = fixedScale.HasValue
+                        ? Mathf.Max(0.15f, e.CardHeight * e.Aspect * e.SolidRect.width * 0.5f * fixedScale.Value)
+                        : FeatureHalfWidth(e);
                     for (int j = 0; j < n; j++)
                     {
                         Vector2 q;
@@ -472,7 +516,10 @@ namespace KingdomSurvival.MapLab
                             continue;
                         used.Add(q);
                         Vector3 at = new Vector3(q.x, FeatureGround(data, q), q.y);
-                        MapLabArtInstance part = Make(e, at - Vector3.up * 0.03f, Mathf.Lerp(e.ScaleRange.x, e.ScaleRange.y, rng.Value()), rng.Range(0.96f, 1.03f), 0f, 0.85f, -1);
+                        float partScale = Mathf.Lerp(e.ScaleRange.x, e.ScaleRange.y, rng.Value());
+                        if (fixedScale.HasValue)
+                            partScale = fixedScale.Value;
+                        MapLabArtInstance part = Make(e, at - Vector3.up * 0.03f, partScale, rng.Range(0.96f, 1.03f), 0f, 0.85f, -1);
                         plan.Add(e, part);
                         data.FeatureSprites.Add(new MapLabFeatureSprite { Point = p, Kind = kind, ArtId = id, Base = at, Height = part.Height, Width = part.Width, Pivot = part.Pivot });
                         any = true;

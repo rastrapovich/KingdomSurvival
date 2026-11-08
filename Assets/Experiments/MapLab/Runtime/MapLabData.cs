@@ -215,6 +215,23 @@ namespace KingdomSurvival.MapLab
             float v = Vector2.Dot(d, new Vector2(-AxisU.y, AxisU.x));
             return Mathf.Abs(u) < Half.x + margin && Mathf.Abs(v) < Half.y + margin;
         }
+
+        // Пересечение двух повёрнутых прямоугольников (разделяющие оси):
+        // true, если они заходят друг на друга глубже tolerance.
+        public bool Overlaps(MapLabYardRect other, float tolerance)
+        {
+            Vector2 au = AxisU.normalized, av = new Vector2(-au.y, au.x);
+            Vector2 bu = other.AxisU.normalized, bv = new Vector2(-bu.y, bu.x);
+            Vector2 d = other.Center - Center;
+            foreach (Vector2 axis in new[] { au, av, bu, bv })
+            {
+                float ra = Half.x * Mathf.Abs(Vector2.Dot(au, axis)) + Half.y * Mathf.Abs(Vector2.Dot(av, axis));
+                float rb = other.Half.x * Mathf.Abs(Vector2.Dot(bu, axis)) + other.Half.y * Mathf.Abs(Vector2.Dot(bv, axis));
+                if (Mathf.Abs(Vector2.Dot(d, axis)) >= ra + rb - tolerance)
+                    return false;
+            }
+            return true;
+        }
     }
 
     public struct MapLabFence

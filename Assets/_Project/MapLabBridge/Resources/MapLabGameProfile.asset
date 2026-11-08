@@ -171,7 +171,7 @@ MonoBehaviour:
     ContactStrength: 0.25
     ShadowTones: 2
     ShadowColor: {r: 0.56, g: 0.6, b: 0.62, a: 1}
-    ShadowTexelsPerUnit: 3
+    ShadowTexelsPerUnit: 4
     HouseViewSwitch: 42.5
     HouseViewHysteresis: 2
   Stage04:

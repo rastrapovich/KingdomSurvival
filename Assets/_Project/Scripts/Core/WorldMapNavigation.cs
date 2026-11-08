@@ -115,7 +115,124 @@ public static class WorldMapNavigation
         {
             route.RemoveAt(1);
         }
-        return route;
+        return FollowRoads(route, layer, grid);
+    }
+
+    // 12У-H: на дорожных клетках путь идёт по нарисованной линии дороги —
+    // точки пути (через четверть клетки) притягиваются к ближайшей линии
+    // дороги или тропы в пределах клетки; вне дорог путь прежний. Начало и
+    // конец не двигаются; притяжение не уводит в непроходимую клетку.
+    private const double RoadSnapHexes = 0.75;
+    private const double RoadStepHexes = 0.25;
+
+    private static List<MapPointData> FollowRoads(List<MapPointData> route, WorldMapTerrainLayer layer, WorldMapHexGrid grid)
+    {
+        List<List<MapPointData>> lines = activeDefinition?.RoadLines;
+        if (lines == null || lines.Count == 0 || route.Count < 2)
+            return route;
+        WorldMapMovementRules rules = WorldMapMovementRules.Current;
+        bool OnRoad(float x, float y)
+        {
+            WorldMapGameplayTerrainType t = layer.GetAtPercent(x, y);
+            return t == WorldMapGameplayTerrainType.Road || t == WorldMapGameplayTerrainType.Trail;
+        }
+        List<MapPointData> result = new List<MapPointData> { route[0] };
+        bool changed = false;
+        for (int i = 1; i < route.Count; i++)
+        {
+            MapPointData a = route[i - 1], b = route[i];
+            double length = grid.DistanceHexes(a.XPercent, a.YPercent, b.XPercent, b.YPercent);
+            int steps = Math.Max(1, (int)Math.Ceiling(length / RoadStepHexes));
+            for (int s = 1; s <= steps; s++)
+            {
+                float t = s / (float)steps;
+                float x = a.XPercent + (b.XPercent - a.XPercent) * t;
+                float y = a.YPercent + (b.YPercent - a.YPercent) * t;
+                bool last = i == route.Count - 1 && s == steps;
+                if (!last && OnRoad(x, y) && NearestOnRoads(lines, grid, x, y, out float sx, out float sy)
+                    && rules.IsTraversable(layer.GetAtPercent(sx, sy)))
+                {
+                    x = sx;
+                    y = sy;
+                    changed = true;
+                }
+                else if (!last && s < steps)
+                    continue;
+                result.Add(new MapPointData(x, y));
+            }
+        }
+        return changed ? result : route;
+    }
+
+    // Отрезки дорог в пикселях, разложенные по корзинам размером в клетку
+    // (строятся один раз на определение карты).
+    private static object roadIndexOwner;
+    private static double roadBucket;
+    private static readonly List<double[]> roadSegments = new List<double[]>();
+    private static readonly Dictionary<long, List<int>> roadBuckets = new Dictionary<long, List<int>>();
+
+    private static long BucketKey(int bx, int by) => ((long)bx << 32) ^ (uint)by;
+
+    private static void EnsureRoadIndex(List<List<MapPointData>> lines, WorldMapHexGrid grid)
+    {
+        if (ReferenceEquals(roadIndexOwner, lines))
+            return;
+        roadIndexOwner = lines;
+        roadSegments.Clear();
+        roadBuckets.Clear();
+        roadBucket = Math.Max(1.0, grid.HexWidth);
+        double reach = RoadSnapHexes * grid.HexWidth;
+        foreach (List<MapPointData> line in lines)
+            for (int k = 1; k < line.Count; k++)
+            {
+                double ax = grid.PercentToPixelX(line[k - 1].XPercent), ay = grid.PercentToPixelY(line[k - 1].YPercent);
+                double bx = grid.PercentToPixelX(line[k].XPercent), by = grid.PercentToPixelY(line[k].YPercent);
+                int id = roadSegments.Count;
+                roadSegments.Add(new[] { ax, ay, bx, by });
+                int x0 = (int)Math.Floor((Math.Min(ax, bx) - reach) / roadBucket), x1 = (int)Math.Floor((Math.Max(ax, bx) + reach) / roadBucket);
+                int y0 = (int)Math.Floor((Math.Min(ay, by) - reach) / roadBucket), y1 = (int)Math.Floor((Math.Max(ay, by) + reach) / roadBucket);
+                for (int gx = x0; gx <= x1; gx++)
+                    for (int gy = y0; gy <= y1; gy++)
+                    {
+                        long key = BucketKey(gx, gy);
+                        if (!roadBuckets.TryGetValue(key, out List<int> list))
+                            roadBuckets[key] = list = new List<int>();
+                        list.Add(id);
+                    }
+            }
+    }
+
+    private static bool NearestOnRoads(List<List<MapPointData>> lines, WorldMapHexGrid grid, float x, float y, out float sx, out float sy)
+    {
+        EnsureRoadIndex(lines, grid);
+        double px = grid.PercentToPixelX(x), py = grid.PercentToPixelY(y);
+        double reach = RoadSnapHexes * grid.HexWidth;
+        double best = reach * reach;
+        sx = x;
+        sy = y;
+        bool found = false;
+        if (!roadBuckets.TryGetValue(BucketKey((int)Math.Floor(px / roadBucket), (int)Math.Floor(py / roadBucket)), out List<int> candidates))
+            return false;
+        foreach (int id in candidates)
+        {
+            {
+                double[] seg = roadSegments[id];
+                double ax = seg[0], ay = seg[1], bx = seg[2], by = seg[3];
+                double dx = bx - ax, dy = by - ay;
+                double len2 = dx * dx + dy * dy;
+                double u = len2 > 1e-9 ? Math.Max(0, Math.Min(1, ((px - ax) * dx + (py - ay) * dy) / len2)) : 0;
+                double qx = ax + dx * u, qy = ay + dy * u;
+                double d2 = (qx - px) * (qx - px) + (qy - py) * (qy - py);
+                if (d2 < best)
+                {
+                    best = d2;
+                    sx = grid.PixelToPercentX(qx);
+                    sy = grid.PixelToPercentY(qy);
+                    found = true;
+                }
+            }
+        }
+        return found;
     }
 
     // Длина оставшегося пути в клетках, с округлением вверх.

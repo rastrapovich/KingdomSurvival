@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using KingdomSurvival.MapLabBridge;
+using KingdomSurvival.WorldMapVisual;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -142,7 +143,12 @@ public partial class PrototypeUIController
         if (worldMapLiveImage != null)
             worldMapLiveImage.style.display = worldMapMapLab != null || worldMapLiveScheduled || worldMapLiveBuilding != null ? DisplayStyle.Flex : DisplayStyle.None;
         if (!active || worldMapViewport == null)
+        {
+            foreach (VisualElement m in worldMapLiveMargins)
+                if (m != null)
+                    m.style.display = DisplayStyle.None;
             return;
+        }
         float width = worldMapViewport.resolvedStyle.width, height = worldMapViewport.resolvedStyle.height;
         if (float.IsNaN(width) || float.IsNaN(height) || width < 8f || height < 8f)
             return;
@@ -153,6 +159,7 @@ public partial class PrototypeUIController
         RenderTexture rt = MapLabGameLive.Render(world, visible, Mathf.RoundToInt(width * scale), Mathf.RoundToInt(height * scale));
         if (rt == null)
             return;
+        PlaceWorldMapLiveMargins(a, b, width, height);
         if (!ReferenceEquals(worldMapLiveShown, rt))
         {
             worldMapLiveImage.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(rt));
@@ -160,6 +167,45 @@ public partial class PrototypeUIController
             worldMapLiveShown = rt;
         }
         worldMapLiveImage.MarkDirtyRepaint();
+    }
+
+    // За краем полотна карты рисунок MapLab — незатянутые туманом окраины
+    // (светлые полосы при отдалении). Там — цвет тумана, сплошной рамкой.
+    private readonly VisualElement[] worldMapLiveMargins = new VisualElement[4];
+
+    private void PlaceWorldMapLiveMargins(Vector2 a, Vector2 b, float width, float height)
+    {
+        if (worldMapLiveImage == null)
+            return;
+        if (worldMapLiveMargins[0] == null)
+        {
+            WorldMapMovementSettingsAsset settings = WorldMapVisualRuntime.LoadMovementSettings();
+            Color fog = settings != null ? settings.FogColor : new Color(0.055f, 0.06f, 0.07f, 0.86f);
+            fog.a = 1f;
+            int index = worldMapViewport.IndexOf(worldMapLiveImage) + 1;
+            for (int i = 0; i < 4; i++)
+            {
+                VisualElement m = new VisualElement { name = "world-map-live-margin-" + i, pickingMode = PickingMode.Ignore };
+                m.style.position = Position.Absolute;
+                m.style.backgroundColor = fog;
+                worldMapViewport.Insert(index, m);
+                worldMapLiveMargins[i] = m;
+            }
+        }
+        float left = Mathf.Clamp(a.x, 0f, width), right = Mathf.Clamp(b.x, 0f, width);
+        float top = Mathf.Clamp(a.y, 0f, height), bottom = Mathf.Clamp(b.y, 0f, height);
+        void Set(VisualElement m, float x, float y, float w, float h)
+        {
+            m.style.display = w > 0.5f && h > 0.5f ? DisplayStyle.Flex : DisplayStyle.None;
+            m.style.left = x;
+            m.style.top = y;
+            m.style.width = Mathf.Max(0f, w);
+            m.style.height = Mathf.Max(0f, h);
+        }
+        Set(worldMapLiveMargins[0], 0f, 0f, width, top);
+        Set(worldMapLiveMargins[1], 0f, bottom, width, height - bottom);
+        Set(worldMapLiveMargins[2], 0f, top, left, bottom - top);
+        Set(worldMapLiveMargins[3], right, top, width - right, bottom - top);
     }
 
     // ------------------------------------------------------------------

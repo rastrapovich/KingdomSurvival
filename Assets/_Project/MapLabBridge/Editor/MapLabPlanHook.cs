@@ -13,7 +13,7 @@ namespace KingdomSurvival.MapLabBridge.Editor
     [InitializeOnLoad]
     public static class MapLabPlanHook
     {
-        public const float GameOverviewTexels = 1.5f, GameShadowTexels = 3f;
+        public const float GameOverviewTexels = 1.5f, GameShadowTexels = 4f;
 
         static MapLabPlanHook()
         {

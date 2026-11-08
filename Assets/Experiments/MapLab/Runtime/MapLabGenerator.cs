@@ -432,7 +432,10 @@ namespace KingdomSurvival.MapLab
                     for (int i = 0; i < line.Count; i++)
                     {
                         float width = water.RiverWidth * source.WidthScale * (1f + 0.2f * meander.Fbm(st[i] / 60f, 11.3f + k, 2));
-                        width = Mathf.Max(2f, width);
+                        // Русло не уже двух с лишним клеток сетки высот: иначе вода не
+                        // заливается (ни одна клетка не попадает внутрь), а линия реки
+                        // остаётся — мост встаёт на сухое место, мельница — без воды.
+                        width = Mathf.Max(Mathf.Max(2f, data.Cell * 2.4f), width);
                         river.Points.Add(line[i]);
                         river.Widths.Add(width);
                         Vector2 p = line[i];
@@ -676,6 +679,9 @@ namespace KingdomSurvival.MapLab
                             if (!MapLabGeometry.SegmentIntersection(road.Points[i], road.Points[i + 1], river.Points[j], river.Points[j + 1], out Vector2 hit, out _, out float tr))
                                 continue;
                             if (!data.Contains(hit.x, hit.y))
+                                continue;
+                            // Моста без воды не бывает: пересечение с сухой линией реки — просто дорога.
+                            if (!data.IsUnderWater(hit.x, hit.y, 0f))
                                 continue;
                             Vector2 flow = (river.Points[j + 1] - river.Points[j]).normalized;
                             Vector2 across = MapLabGeometry.LeftNormal(flow);

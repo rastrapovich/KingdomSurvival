@@ -70,6 +70,11 @@ public partial class PrototypeUIController
         float heroY = expedition != null ? expedition.CurrentMapYPercent : WorldMapNavigation.CapitalYPercent;
         double sight = WorldMapMovementRules.Current.FogRevealRadiusHexes + 1.0;
         float hexPx = (float)(grid.HexWidth / grid.CanvasWidth * worldMapCanvasWidth);
+        // Рост фигуры группы — как у фигурки героя (одинаковый масштаб людей).
+        float figureHeight = hexPx * 1.1f;
+        MapLabGameLive.World live = MapLabGameLive.Current;
+        if (live != null && live.Ready && MapLabGameLive.HeroFrame(0, out Texture2D _, out float heroWorldHeight, out float _, out Vector2 _))
+            figureHeight = heroWorldHeight * live.CanvasPixelsPerUnit(worldMapCanvasWidth);
         foreach (GeneratedMapActor actor in map.Actors)
         {
             if (actor == null || string.IsNullOrEmpty(actor.FigureSet))
@@ -92,8 +97,8 @@ public partial class PrototypeUIController
                 VisualElement marker = new VisualElement { name = "world-map-group-" + actor.ActorId, pickingMode = PickingMode.Position };
                 marker.style.position = Position.Absolute;
                 marker.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
-                marker.style.width = hexPx * 0.9f;
-                marker.style.height = hexPx * 1.1f;
+                marker.style.width = figureHeight;
+                marker.style.height = figureHeight;
                 Label label = MakeWorldMapHoverLabel(actor.Name);
                 worldMapGroupLabels[actor.ActorId] = label;
                 hoverLabel = label;
@@ -127,14 +132,16 @@ public partial class PrototypeUIController
             }
             entry.Marker.style.display = DisplayStyle.Flex;
             // Опора фигуры — низ по центру, в точке маршрута.
-            entry.Marker.style.left = at.XPercent / 100f * worldMapCanvasWidth - hexPx * 0.45f;
-            entry.Marker.style.top = at.YPercent / 100f * worldMapCanvasHeight - hexPx * 1.05f;
+            entry.Marker.style.width = figureHeight;
+            entry.Marker.style.height = figureHeight;
+            entry.Marker.style.left = at.XPercent / 100f * worldMapCanvasWidth - figureHeight * 0.5f;
+            entry.Marker.style.top = at.YPercent / 100f * worldMapCanvasHeight - figureHeight * 0.97f;
             worldMapGroupMarkers[actor.ActorId] = entry;
             if (hoverLabel != null && hoverLabel.style.display == DisplayStyle.Flex)
             {
                 Vector2 head = MapPercentToWorldMapViewport(at.XPercent, at.YPercent);
                 float lw = float.IsNaN(hoverLabel.resolvedStyle.width) ? 0f : hoverLabel.resolvedStyle.width;
-                hoverLabel.style.translate = new Translate(head.x - lw * 0.5f, head.y - hexPx * worldMapZoom * 1.1f - 22f);
+                hoverLabel.style.translate = new Translate(head.x - lw * 0.5f, head.y - figureHeight * worldMapZoom - 22f);
             }
         }
     }

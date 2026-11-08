@@ -416,7 +416,241 @@ public static class WorldMapRegionValidator
                 }
             }
         }
+        ValidateGuideChecks(map, grid, layer, rules, issues, reached);
         return issues;
+    }
+
+    // Гайд исследования (12У-H): проверки H03, H05, H07, H10, W01, W02, W05,
+    // W09 по данным плана. H11/H12 (закрепления автора, изменение прохода) и
+    // W04/W06 (сравнение маршрутов) требуют систем, которых в проекте нет —
+    // не проверяются (в паспорте — «неприменимо»).
+    public static readonly string[] NotApplicableChecks = { "H11", "H12", "W04", "W06" };
+
+    private static void ValidateGuideChecks(GeneratedWorldMap map, WorldMapHexGrid grid, WorldMapTerrainLayer layer, WorldMapMovementRules rules,
+        List<GeneratedRegionIssue> issues, bool[] reached)
+    {
+        int count = grid.CellCount;
+        void Add(string code, bool error, string message, float x, float y) =>
+            issues.Add(new GeneratedRegionIssue { Code = code, Error = error, Message = message, XPercent = x, YPercent = y });
+        string At(float x, float y) => $"({x:0.#}%, {y:0.#}%)";
+        void Center(int cell, out float x, out float y)
+        {
+            grid.CellCenter(grid.CellAt(cell), out double cx, out double cy);
+            x = grid.PixelToPercentX(cx);
+            y = grid.PixelToPercentY(cy);
+        }
+        WorldMapGameplayTerrainType T(int i) => layer.GetAtIndex(i);
+        HashSet<int> river = new HashSet<int>(map.RiverCells ?? new List<int>());
+        HashSet<int> bridgeCells = new HashSet<int>();
+        if (map.BridgeSpans != null)
+            for (int i = 0; i + 1 < map.BridgeSpans.Count; i += 2)
+            {
+                WorldMapHexCell a = grid.CellAtPercent(map.BridgeSpans[i].XPercent, map.BridgeSpans[i].YPercent);
+                WorldMapHexCell b = grid.CellAtPercent(map.BridgeSpans[i + 1].XPercent, map.BridgeSpans[i + 1].YPercent);
+                int steps = Math.Max(1, a.DistanceTo(b));
+                for (int s = 0; s <= steps; s++)
+                {
+                    float t = s / (float)steps;
+                    bridgeCells.Add(grid.IndexOf(grid.CellAtPercent(
+                        map.BridgeSpans[i].XPercent + (map.BridgeSpans[i + 1].XPercent - map.BridgeSpans[i].XPercent) * t,
+                        map.BridgeSpans[i].YPercent + (map.BridgeSpans[i + 1].YPercent - map.BridgeSpans[i].YPercent) * t)));
+                }
+            }
+        HashSet<int> roadCells = new HashSet<int>();
+        if (map.Roads != null)
+            foreach (GeneratedMapLine line in map.Roads)
+                if (line?.Cells != null)
+                    foreach (int c in line.Cells)
+                        if (c >= 0 && c < count)
+                            roadCells.Add(c);
+
+        // H03: путь дороги проходим — не по воде и скалам вне переправы,
+        // соседние клетки линии смежны (нет «прыжков» через клетку).
+        if (map.Roads != null)
+            foreach (GeneratedMapLine line in map.Roads)
+            {
+                if (line?.Cells == null)
+                    continue;
+                for (int k = 0; k < line.Cells.Count; k++)
+                {
+                    int c = line.Cells[k];
+                    if (c < 0 || c >= count)
+                        continue;
+                    WorldMapGameplayTerrainType t = T(c);
+                    if ((t == WorldMapGameplayTerrainType.Water || t == WorldMapGameplayTerrainType.Cliffs) && !bridgeCells.Contains(c))
+                    {
+                        Center(c, out float x, out float y);
+                        Add("H03", true, $"Дорога у {At(x, y)} идёт по «{t}» вне переправы.", x, y);
+                        break;
+                    }
+                    if (k > 0 && line.Cells[k - 1] >= 0 && grid.CellAt(line.Cells[k - 1]).DistanceTo(grid.CellAt(c)) > 1 && !bridgeCells.Contains(c))
+                    {
+                        Center(c, out float x, out float y);
+                        Add("H03", true, $"Дорога у {At(x, y)} разрывается: соседние клетки линии не смежны.", x, y);
+                        break;
+                    }
+                }
+            }
+
+        // H05: к обязательному месту можно подойти пешком — рядом есть
+        // достижимая проходимая клетка (не остров среди воды и скал).
+        void CheckApproach(GeneratedMapSite site, string title)
+        {
+            if (site == null || site.Cell < 0 || site.Cell >= count)
+                return;
+            WorldMapHexCell cell = grid.CellAt(site.Cell);
+            bool any = reached[site.Cell];
+            for (int d = 0; d < 6 && !any; d++)
+            {
+                WorldMapHexCell n = cell.Neighbor(d);
+                if (grid.IsInside(n) && reached[grid.IndexOf(n)])
+                    any = true;
+            }
+            if (!any)
+                Add("H05", true, $"{title} {At(site.XPercent, site.YPercent)}: подойти можно только вплавь, на лодке или по скалам.", site.XPercent, site.YPercent);
+        }
+        if (map.Landmarks != null)
+            foreach (GeneratedMapSite site in map.Landmarks)
+                if (!string.IsNullOrEmpty(site?.LocationId))
+                    CheckApproach(site, $"Место «{site.Name}»");
+        if (map.Villages != null)
+            foreach (GeneratedMapSite site in map.Villages)
+                CheckApproach(site, $"Деревня «{site?.Name}»");
+
+        // H07: условия соседства деталей выполнены после расстановки.
+        bool NearRiver(int cell)
+        {
+            WorldMapHexCell c = grid.CellAt(cell);
+            for (int d = 0; d < 6; d++)
+            {
+                WorldMapHexCell n = c.Neighbor(d);
+                if (grid.IsInside(n) && river.Contains(grid.IndexOf(n)))
+                    return true;
+            }
+            return false;
+        }
+        bool NearRoad(int cell)
+        {
+            WorldMapHexCell c = grid.CellAt(cell);
+            foreach (int r in roadCells)
+                if (grid.CellAt(r).DistanceTo(c) <= 2)
+                    return true;
+            return false;
+        }
+        bool NearSteep(int cell)
+        {
+            WorldMapHexCell c = grid.CellAt(cell);
+            for (int d = -1; d < 6; d++)
+            {
+                WorldMapHexCell n = d < 0 ? c : c.Neighbor(d);
+                if (!grid.IsInside(n))
+                    continue;
+                WorldMapGameplayTerrainType t = T(grid.IndexOf(n));
+                if (t == WorldMapGameplayTerrainType.Cliffs || t == WorldMapGameplayTerrainType.Mountains)
+                    return true;
+            }
+            return false;
+        }
+        if (map.Features != null)
+            foreach (GeneratedMapSite f in map.Features)
+            {
+                if (f == null || f.Cell < 0 || f.Cell >= count)
+                    continue;
+                string broken = null;
+                switch (f.Kind)
+                {
+                    case "beaver-dam": if (!river.Contains(f.Cell)) broken = "запруда не на русле"; break;
+                    case "fishing-nets": if (!NearRiver(f.Cell)) broken = "сети не у реки"; break;
+                    case "landslide": if (!NearSteep(f.Cell) || !NearRoad(f.Cell)) broken = "оползень не под крутизной у дороги"; break;
+                    case "dry-grotto": if (!NearSteep(f.Cell)) broken = "грот не под скалой"; break;
+                }
+                if (broken != null)
+                    Add("H07", true, $"Деталь «{f.Name}» {At(f.XPercent, f.YPercent)}: {broken}.", f.XPercent, f.YPercent);
+            }
+
+        // H10: после расстановки мест вода и пути согласованы — ни место, ни
+        // деталь не стоят в воде (кроме детали на русле), дороги не стоят на
+        // клетке места.
+        void CheckDry(GeneratedMapSite site, string title, bool waterAllowed)
+        {
+            if (site == null || site.Cell < 0 || site.Cell >= count || waterAllowed)
+                return;
+            if (T(site.Cell) == WorldMapGameplayTerrainType.Water)
+                Add("H10", true, $"{title} {At(site.XPercent, site.YPercent)} стоит в воде.", site.XPercent, site.YPercent);
+        }
+        map.Landmarks?.ForEach(s => CheckDry(s, $"Место «{s?.Name}»", false));
+        map.Features?.ForEach(s => CheckDry(s, $"Деталь «{s?.Name}»", s != null && s.Kind == "beaver-dam"));
+        map.WorkSites?.ForEach(s => CheckDry(s, $"Площадка «{s?.Name}»", false));
+
+        if (map.Landmarks != null)
+        {
+            // W01: сильный сигнал (несколько оснований заметить) ведёт к месту
+            // без описания и без дела (пустое обещание).
+            foreach (GeneratedMapSite site in map.Landmarks)
+                if ((site.Signals?.Count ?? 0) >= 2 && string.IsNullOrWhiteSpace(site.Description) && site.ExplorationHours <= 0 && string.IsNullOrEmpty(site.LocationId))
+                    Add("W01", false, $"Место «{site.Name}» {At(site.XPercent, site.YPercent)} хорошо заметно, но за ним нет ни описания, ни дела.", site.XPercent, site.YPercent);
+
+            // W05: одинаковые места рядом — повтор действия и обещания.
+            for (int a = 0; a < map.Landmarks.Count; a++)
+                for (int b = a + 1; b < map.Landmarks.Count; b++)
+                {
+                    GeneratedMapSite p = map.Landmarks[a], q = map.Landmarks[b];
+                    if (p != null && q != null && p.Kind == q.Kind && grid.DistanceHexes(p.XPercent, p.YPercent, q.XPercent, q.YPercent) <= 6.0)
+                        Add("W05", false, $"Два места «{p.Name}» рядом {At(p.XPercent, p.YPercent)} и {At(q.XPercent, q.YPercent)} — одно и то же дважды.", q.XPercent, q.YPercent);
+                }
+        }
+
+        // W02: длинная тропа-тупик ведёт только к детали без дела.
+        if (map.Roads != null && map.Features != null)
+            foreach (GeneratedMapLine line in map.Roads)
+            {
+                if (line?.Cells == null || line.Kind == GeneratedMapLine.RoadKind || line.Cells.Count < 12)
+                    continue;
+                int end = line.Cells[line.Cells.Count - 1];
+                if (end < 0 || end >= count)
+                    continue;
+                WorldMapHexCell ec = grid.CellAt(end);
+                bool place = (map.Landmarks?.Any(s => s != null && s.Cell >= 0 && grid.CellAt(s.Cell).DistanceTo(ec) <= 1) ?? false)
+                             || (map.Villages?.Any(s => s != null && s.Cell >= 0 && grid.CellAt(s.Cell).DistanceTo(ec) <= 1) ?? false)
+                             || (map.WorkSites?.Any(s => s != null && s.Cell >= 0 && grid.CellAt(s.Cell).DistanceTo(ec) <= 1) ?? false);
+                if (place)
+                    continue;
+                bool featureOnly = map.Features.Any(s => s != null && s.Cell >= 0 && grid.CellAt(s.Cell).DistanceTo(ec) <= 2);
+                if (featureOnly)
+                {
+                    Center(end, out float x, out float y);
+                    Add("W02", false, $"Тропа в {line.Cells.Count} клеток у {At(x, y)} кончается только деталью без дела — слабая награда за крюк.", x, y);
+                }
+            }
+
+        // W09: подход к месту со стороны камеры (клетка ниже по экрану)
+        // закрыт кронами леса или стеной скалы — на рабочей камере вход не виден.
+        void CheckView(GeneratedMapSite site, string title)
+        {
+            // Лесные места (роща, глубь леса, логово) и должны стоять в кронах.
+            if (site == null || site.Cell < 0 || site.Cell >= count || site.Hidden || site.Kind == "grove" || site.Kind == "deep-forest" || site.Kind == "lair")
+                return;
+            WorldMapHexCell c = grid.CellAt(site.Cell);
+            int front = 0, blocked = 0;
+            for (int d = 0; d < 6; d++)
+            {
+                WorldMapHexCell n = c.Neighbor(d);
+                if (!grid.IsInside(n))
+                    continue;
+                grid.CellCenter(n, out double nx, out double ny);
+                grid.CellCenter(c, out double cx, out double cy);
+                if (ny <= cy + 0.1)
+                    continue;
+                front++;
+                WorldMapGameplayTerrainType t = T(grid.IndexOf(n));
+                if (t == WorldMapGameplayTerrainType.Forest || t == WorldMapGameplayTerrainType.Cliffs)
+                    blocked++;
+            }
+            if (front > 0 && blocked == front)
+                Add("W09", false, $"{title} {At(site.XPercent, site.YPercent)}: со стороны камеры его закрывают кроны или скала.", site.XPercent, site.YPercent);
+        }
+        map.Landmarks?.ForEach(s => CheckView(s, $"Место «{s?.Name}»"));
+        map.Villages?.ForEach(s => CheckView(s, $"Деревня «{s?.Name}»"));
     }
 
     public static byte[] DecodeDistricts(GeneratedWorldMap map)

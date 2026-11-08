@@ -337,6 +337,11 @@ public static partial class WorldMapGenerator
             return true;
         }
 
+        // Русло реки — как в готовой карте (RiverCells): без озёр, через
+        // которые река протекает (иначе «у реки» оказывалось у озера).
+        private HashSet<int> riverSet;
+        private HashSet<int> RiverSet => riverSet ??= new HashSet<int>(result.RiverCells);
+
         private bool NearHolds(string token, int cell)
         {
             byte t = terrain[cell];
@@ -346,7 +351,7 @@ public static partial class WorldMapGenerator
                     for (int d = 0; d < 6; d++)
                     {
                         int n = neighbors[cell * 6 + d];
-                        if (n >= 0 && riverId[n] >= 0 && terrain[n] == Water)
+                        if (n >= 0 && RiverSet.Contains(n) && terrain[n] == Water)
                             return true;
                     }
                     return false;
@@ -379,7 +384,7 @@ public static partial class WorldMapGenerator
                             return true;
                     return false;
                 case "on-river":
-                    return t == Water && riverId[cell] >= 0;
+                    return t == Water && RiverSet.Contains(cell);
                 case "village":
                 {
                     int d = result.Villages.Count == 0 ? int.MaxValue : result.Villages.Min(v => Distance(v.Cell, cell));
@@ -429,7 +434,7 @@ public static partial class WorldMapGenerator
                     {
                         // На русле: берег рядом достижим, переправа не перекрыта
                         // (рисунок не меняет проходимость, но не ложится на мост).
-                        if (t != Water || riverId[i] < 0 || protectedStart[i] || NearEdge(i, 1) || !NextToReachableLand(i, reachable)
+                        if (t != Water || !RiverSet.Contains(i) || protectedStart[i] || NearEdge(i, 1) || !NextToReachableLand(i, reachable)
                             || (crossingCells.Count > 0 && NearestDistance(i, crossingCells) < 3))
                             continue;
                     }

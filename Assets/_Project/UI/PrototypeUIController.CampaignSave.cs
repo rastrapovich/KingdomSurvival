@@ -200,6 +200,9 @@ public partial class PrototypeUIController
         ReportCampaignIo(read.FromBackup
             ? "[Загрузка] Основной файл повреждён — партия загружена из резервной копии."
             : "[Загрузка] Партия загружена: " + CampaignSaveStore.GetSlotTitle(slotId) + ".");
+        // 12У-G: экран загрузки, пока строится живая карта партии.
+        ShowLoadingScreen("Загружаем партию…", 0.05f);
+        loadingCampaignReady = true;
         RefreshInterface();
         return true;
     }

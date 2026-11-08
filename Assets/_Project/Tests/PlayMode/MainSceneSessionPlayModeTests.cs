@@ -125,6 +125,10 @@ public sealed class MainSceneSessionPlayModeTests
         int generationBefore = CampaignSession.Generation;
         Invoke(controller, "OnNewGameStartClicked");
         Invoke(controller, "OnNewGameStartClicked");
+        // 12У-G: мир создаётся после показа экрана загрузки (следующие кадры).
+        float waitUntil = Time.realtimeSinceStartup + 3f;
+        while (!CampaignSession.HasActive && Time.realtimeSinceStartup < waitUntil)
+            yield return null;
         yield return null;
 
         Assert.IsTrue(CampaignSession.HasActive);

@@ -13,6 +13,8 @@ namespace KingdomSurvival.MapLabBridge.Editor
     [InitializeOnLoad]
     public static class MapLabPlanHook
     {
+        public const float GameOverviewTexels = 1.5f, GameShadowTexels = 3f;
+
         static MapLabPlanHook()
         {
             MapLabPlanSource.Build = Build;
@@ -100,6 +102,10 @@ namespace KingdomSurvival.MapLabBridge.Editor
                 EditorUtility.CopySerialized(s, game.Profile);
                 game.Profile.name = name;
                 game.Profile.RegionPlan = null;
+                // Загрузка партии быстрее: обзор и тени — облегчённой плотности
+                // (подробные участки покраски догружаются при приближении).
+                game.Profile.Stage05.OverviewTexels = Mathf.Min(game.Profile.Stage05.OverviewTexels, GameOverviewTexels);
+                game.Profile.Stage03.ShadowTexelsPerUnit = Mathf.Min(game.Profile.Stage03.ShadowTexelsPerUnit, GameShadowTexels);
                 EditorUtility.SetDirty(game.Profile);
             }
             AssetDatabase.SaveAssets();

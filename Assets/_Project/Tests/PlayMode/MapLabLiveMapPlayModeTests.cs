@@ -113,6 +113,8 @@ public sealed class MapLabLiveMapPlayModeTests
         // долгий кадр сборки — секунды, а не минута.
         float started = Time.realtimeSinceStartup, last = started, worst = 0f;
         int frames = 0;
+        bool loadingSeen = false, capturedLoading = false;
+        float progressSeen = 0f;
         while ((MapLabGameLive.Current == null || !MapLabGameLive.Current.Ready) && Time.realtimeSinceStartup - started < 300f)
         {
             yield return null;
@@ -120,7 +122,20 @@ public sealed class MapLabLiveMapPlayModeTests
             worst = Mathf.Max(worst, now - last);
             last = now;
             frames++;
+            // Экран загрузки закрывает всё, пока карта строится; полоска растёт.
+            if (Get<bool>(main, "IsLoadingScreenOpen"))
+            {
+                loadingSeen = true;
+                progressSeen = Mathf.Max(progressSeen, Field<float>(main, "loadingShown"));
+                if (!capturedLoading && progressSeen > 0.3f)
+                {
+                    capturedLoading = true;
+                    yield return Capture(main, "live_00_loading");
+                }
+            }
         }
+        Assert.IsTrue(loadingSeen, "Пока строится карта, виден экран загрузки.");
+        Assert.Greater(progressSeen, 0.3f, "Полоска загрузки растёт по шагам сборки.");
         Debug.Log($"MapLab live: сборка шла {frames} кадров, самый долгий кадр {worst:0.00} с");
         Assert.IsNotNull(MapLabGameLive.Current, "Живая карта не начала строиться.");
         Assert.IsTrue(MapLabGameLive.Current.Ready, "Живая карта не построена: " + MapLabGameLive.Current.Error);
@@ -128,7 +143,10 @@ public sealed class MapLabLiveMapPlayModeTests
         Assert.Greater(frames, 30, "Сборка не идёт одним кадром.");
         Assert.Less(worst, 6f, "Ни один кадр сборки не замирает надолго.");
         yield return Frames(60);
+        Assert.IsFalse(Get<bool>(main, "IsLoadingScreenOpen"), "Карта готова — экран загрузки убран.");
         Assert.IsNotNull(MapLabGameLive.Current.Target, "Камера MapLab рисует видимую часть карты.");
+        Assert.IsNotEmpty(MapLabGameLive.Current.Features, "У деталей мест есть цели наведения.");
+        Debug.Log("MapLab live: деталей мест с целями — " + MapLabGameLive.Current.Features.Count);
         yield return Capture(main, "live_01_map");
 
         // Деревня с зданиями услуг: на живой карте — подпись, а не кнопка.

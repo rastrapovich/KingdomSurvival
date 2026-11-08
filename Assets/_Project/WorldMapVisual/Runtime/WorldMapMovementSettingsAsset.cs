@@ -17,8 +17,12 @@ namespace KingdomSurvival.WorldMapVisual
         public const string AssetPath = "Assets/_Project/WorldMapVisual/Resources/WorldMapVisual/KingdomSurvivalWorldMapMovement.asset";
 
         [Header("Темп")]
-        [Tooltip("Сколько клеток в секунду реального времени пробегает герой по открытой местности.")]
-        [SerializeField, Range(0.25f, 12f)] private float heroRunSpeedHexesPerSecond = WorldMapMovementRules.DefaultHeroRunSpeedHexesPerSecond;
+        [Tooltip("Общая скорость передвижения по карте: сколько клеток в секунду реального времени проходит герой по открытой местности. Группы мира (обоз, дозор, мастер, ватага) идут с той же общей скоростью, каждая со своей долей.")]
+        [SerializeField, Range(0.1f, 12f)] private float heroRunSpeedHexesPerSecond = WorldMapMovementRules.DefaultHeroRunSpeedHexesPerSecond;
+        [Tooltip("Время идёт само, ровным темпом — независимо от того, идёт ли герой; группы движутся по часам мира. Выключено — прежняя модель: часы идут, только пока отряд в пути или занят делом.")]
+        [SerializeField] private bool independentTime = true;
+        [Tooltip("Скорость времени: игровых часов за секунду реального времени (0,3 — сутки за 80 секунд). Часы на клетку пути = скорость времени / скорость передвижения.")]
+        [SerializeField, Range(0.02f, 4f)] private float worldGameHoursPerRealSecond = WorldMapMovementRules.DefaultWorldGameHoursPerRealSecond;
         [Tooltip("Сколько игровых часов занимает одна клетка открытой местности. Пока отряд бежит, часы идут со скоростью бега.")]
         [SerializeField, Range(0.05f, 24f)] private float travelHoursPerHex = 1.5f;
         [Tooltip("На каком расстоянии (в клетках) от фактического пути замечается скрытое место.")]
@@ -62,6 +66,17 @@ namespace KingdomSurvival.WorldMapVisual
         [SerializeField, Range(0.5f, 30f)] private float cameraFollowSharpness = 6f;
 
         public float HeroRunSpeedHexesPerSecond => heroRunSpeedHexesPerSecond;
+        public bool IndependentTime => independentTime;
+        public float WorldGameHoursPerRealSecond => worldGameHoursPerRealSecond;
+
+        // Общие настройки (окно «Генератор карты» → «Время и движение»).
+        public void SetPace(float mapSpeedHexesPerSecond, bool independent, float gameHoursPerRealSecond)
+        {
+            heroRunSpeedHexesPerSecond = Mathf.Clamp(mapSpeedHexesPerSecond, 0.1f, 12f);
+            independentTime = independent;
+            worldGameHoursPerRealSecond = Mathf.Clamp(gameHoursPerRealSecond, 0.02f, 4f);
+            ApplyToCore();
+        }
         public float TravelHoursPerHex => travelHoursPerHex;
         public float DiscoveryRadiusHexes => discoveryRadiusHexes;
         public float FogRevealRadiusHexes => fogRevealRadiusHexes;
@@ -87,7 +102,9 @@ namespace KingdomSurvival.WorldMapVisual
                 HeroRunSpeedHexesPerSecond = heroRunSpeedHexesPerSecond,
                 TravelHoursPerHex = travelHoursPerHex,
                 DiscoveryRadiusHexes = discoveryRadiusHexes,
-                FogRevealRadiusHexes = fogRevealRadiusHexes
+                FogRevealRadiusHexes = fogRevealRadiusHexes,
+                IndependentTime = independentTime,
+                WorldGameHoursPerRealSecond = worldGameHoursPerRealSecond
             };
             foreach (WorldMapTerrainRule fallback in WorldMapMovementRules.DefaultTerrainRules())
             {

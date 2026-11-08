@@ -42,9 +42,14 @@ namespace KingdomSurvival.MapLabBridge
             public bool Building => Pending != null;
             // Что сейчас строится (для подписи «Рисуем карту…»).
             public string Stage => PendingView != null ? PendingView.BuildStage : string.Empty;
+            // Доля готовности 0..1 (полоска загрузки).
+            public float Progress => Ready ? 1f : PendingView != null ? PendingView.BuildProgress : 0f;
             // Здания услуг: поселение, роль, прямоугольник рисунка (проценты
             // полотна) и точка двери (проценты, на земле перед зданием).
             public readonly List<(string SettlementId, string Role, Rect Percent, Vector2 Door)> Buildings = new List<(string, string, Rect, Vector2)>();
+            // Детали мест: место плана, общий прямоугольник рисунка всех его
+            // частей (проценты полотна) и опоры частей.
+            public readonly List<(GeneratedMapSite Site, Rect Percent, List<(Rect Rect, string ArtId)> Parts)> Features = new List<(GeneratedMapSite, Rect, List<(Rect, string)>)>();
             public bool Ready => View != null && View.Data != null && string.IsNullOrEmpty(Error);
             // Пикселей полотна UI на единицу мира MapLab (по ширине).
             public float CanvasPixelsPerUnit(float canvasWidth) => canvasWidth / Mathf.Max(1f, Play.width);
@@ -117,7 +122,7 @@ namespace KingdomSurvival.MapLabBridge
                     throw new InvalidOperationException("нет MapLabGameAssets (Генератор карты → Сервис → Подготовить рисунок карты для игры)");
                 w.Settings = Object.Instantiate(assets.Profile);
                 w.Settings.name = "MapLab Game Live Profile";
-                MapLabComposition composition = MapLabRegionPlan.Apply(plan, w.Settings);
+                MapLabComposition composition = MapLabRegionPlan.Apply(plan, w.Settings, includeActors: false);
                 if (services != null)
                     foreach (MapLabComposition.Settlement st in composition.Settlements)
                         if (services.TryGetValue(st.Id, out List<string> roles) && roles != null)
@@ -220,6 +225,28 @@ namespace KingdomSurvival.MapLabBridge
                     // Дверь — на земле чуть перед опорой здания (к зрителю).
                     w.Buildings.Add((b.SettlementId, b.Role, rect, basePercent + new Vector2(0f, heightPercent * 0.06f)));
                 }
+                // Детали мест: части — к месту плана по виду и ближайшей точке.
+                Dictionary<GeneratedMapSite, List<(Rect Rect, string ArtId)>> parts = new Dictionary<GeneratedMapSite, List<(Rect, string)>>();
+                foreach (MapLabFeatureSprite f in data.FeatureSprites)
+                {
+                    GeneratedMapSite site = NearestFeature(w, f.Kind, f.Point);
+                    if (site == null)
+                        continue;
+                    Vector2 basePercent = ToPercent(w, f.Base);
+                    float widthPercent = f.Width / w.Play.width * 100f;
+                    float heightPercent = f.Height * 100f / (w.Play.height * w.Sin);
+                    Rect rect = new Rect(basePercent.x - f.Pivot.x * widthPercent, basePercent.y - (1f - f.Pivot.y) * heightPercent, widthPercent, heightPercent);
+                    if (!parts.TryGetValue(site, out List<(Rect Rect, string ArtId)> list))
+                        parts[site] = list = new List<(Rect, string)>();
+                    list.Add((rect, f.ArtId));
+                }
+                foreach (KeyValuePair<GeneratedMapSite, List<(Rect Rect, string ArtId)>> pair in parts)
+                {
+                    Rect union = pair.Value[0].Rect;
+                    foreach ((Rect r, string _) in pair.Value)
+                        union = Rect.MinMaxRect(Mathf.Min(union.xMin, r.xMin), Mathf.Min(union.yMin, r.yMin), Mathf.Max(union.xMax, r.xMax), Mathf.Max(union.yMax, r.yMax));
+                    w.Features.Add((pair.Key, union, pair.Value));
+                }
                 mapObject.SetActive(true);
             }
             w.BuildMs = w.Watch.Elapsed.TotalMilliseconds;
@@ -230,6 +257,33 @@ namespace KingdomSurvival.MapLabBridge
         public struct MapLabAssetsSnapshot
         {
             public float PitchDegrees;
+        }
+
+        // Место плана (деталь или видимое место) по виду и точке рисунка.
+        private static GeneratedMapSite NearestFeature(World w, string kind, Vector2 point)
+        {
+            GeneratedMapSite best = null;
+            float bestDistance = float.MaxValue;
+            void Consider(List<GeneratedMapSite> list)
+            {
+                if (list == null)
+                    return;
+                foreach (GeneratedMapSite site in list)
+                {
+                    if (site == null || site.Hidden || site.Kind != kind)
+                        continue;
+                    Vector2 at = new Vector2(w.Play.xMin + site.XPercent / 100f * w.Play.width, w.Play.yMax - site.YPercent / 100f * w.Play.height);
+                    float d = (at - point).sqrMagnitude;
+                    if (d < bestDistance)
+                    {
+                        bestDistance = d;
+                        best = site;
+                    }
+                }
+            }
+            Consider(w.Plan.Features);
+            Consider(w.Plan.Landmarks);
+            return best;
         }
 
         private static void SetLayer(Transform t)

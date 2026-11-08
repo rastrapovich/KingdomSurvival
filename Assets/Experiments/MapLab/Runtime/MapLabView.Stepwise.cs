@@ -18,7 +18,48 @@ namespace KingdomSurvival.MapLab
         private bool deferObjectShadows;
 
         // Текущий шаг пошаговой сборки (для подписи «Рисуем карту…»).
-        public string BuildStage { get; private set; } = string.Empty;
+        private string buildStage = string.Empty;
+        public string BuildStage
+        {
+            get => buildStage;
+            private set
+            {
+                buildStage = value ?? string.Empty;
+                int index = System.Array.IndexOf(StageNames, buildStage);
+                if (index >= 0)
+                {
+                    stageIndex = index;
+                    stageWatch.Restart();
+                }
+            }
+        }
+
+        // Доля готовности сборки 0..1 для полоски загрузки: шаги весят по
+        // обычной длительности, внутри шага доля растёт по времени (не
+        // дальше 95% шага, пока он не закончится).
+        private static readonly string[] StageNames =
+            { "земля, вода, дороги и поселения", "подготовка рельефа", "покраска", "рельеф, вода и скалы", "деревья, дома и мелочи", "тени", "перо", "трава и материалы" };
+        private static readonly float[] StageSeconds = { 12f, 3f, 18f, 0.5f, 1.5f, 13f, 6f, 0.5f };
+        private int stageIndex = -1;
+        private readonly Stopwatch stageWatch = new Stopwatch();
+
+        public float BuildProgress
+        {
+            get
+            {
+                if (stageIndex < 0)
+                    return 0f;
+                float total = 0f, done = 0f;
+                for (int i = 0; i < StageSeconds.Length; i++)
+                {
+                    total += StageSeconds[i];
+                    if (i < stageIndex)
+                        done += StageSeconds[i];
+                }
+                float inStage = Mathf.Min((float)stageWatch.Elapsed.TotalSeconds / StageSeconds[stageIndex], 0.95f) * StageSeconds[stageIndex];
+                return Mathf.Clamp01((done + inStage) / total);
+            }
+        }
 
         // Генерация по шагам: перечислитель продвигают раз в кадр (MoveNext);
         // ошибка расчёта выбрасывается из MoveNext. Пока шаг ждёт фонового
@@ -52,6 +93,7 @@ namespace KingdomSurvival.MapLab
             data.Stats = stats;
             LastStats = stats;
             BuildStage = string.Empty;
+            stageIndex = StageNames.Length - 1;
         }
 
         private static void Rethrow(Task task)

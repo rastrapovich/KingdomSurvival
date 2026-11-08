@@ -218,7 +218,9 @@ public partial class PrototypeUIController
         }
 
         if (LoadMostRecentCampaign())
+        {
             HideMainMenu();
+        }
         else
             mainMenuMessage.text = lastCampaignIoMessage;
     }
@@ -245,9 +247,11 @@ public partial class PrototypeUIController
     private void StartNewGameFromMenu()
     {
         SetNewGameConfirmOpen(false);
+        ShowLoadingScreen("Создаём мир…", 0.02f);
         StartNewGame(new CampaignSetup());
         CloseMenuOverlay(newGameOverlay);
         HideMainMenu();
+        loadingCampaignReady = true;
     }
 
     // ------------------------------------------------------------------
@@ -375,9 +379,15 @@ public partial class PrototypeUIController
             return;
 
         newGameStartButton.SetEnabled(false);
-        StartNewGame(setup);
-        CloseMenuOverlay(newGameOverlay);
-        HideMainMenu();
+        // Сначала экран загрузки (виден сразу), мир создаётся следующим кадром.
+        ShowLoadingScreen("Создаём мир…", 0.02f);
+        rootVisualElementForLoading()?.schedule.Execute(() =>
+        {
+            StartNewGame(setup);
+            CloseMenuOverlay(newGameOverlay);
+            HideMainMenu();
+            loadingCampaignReady = true;
+        }).ExecuteLater(30);
     }
 
     private void CloseNewGameSummary()

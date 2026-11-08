@@ -461,6 +461,11 @@ namespace KingdomSurvival.MapLab.Editor
             if (GUILayout.Button(new GUIContent("Запустить тест на этой карте", "Play Mode в сцене генератора с этой картой и героем (без основной игры).")))
                 EditorApplication.isPlaying = true;
             EditorGUILayout.HelpBox("Ключ карты: " + MapKey(s), MessageType.None);
+            if (MapLabPlanSource.DrawGameSettings != null)
+            {
+                EditorGUILayout.Space(8);
+                MapLabPlanSource.DrawGameSettings();
+            }
             EditorGUILayout.EndScrollView();
         }
 

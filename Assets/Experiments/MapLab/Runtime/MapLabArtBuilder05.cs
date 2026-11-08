@@ -46,10 +46,20 @@ namespace KingdomSurvival.MapLab
                         MapLabArtInstance instance = Make(art, o.Position, s, o.Brightness, 0f, 0.5f, i);
                         if (entry != null && instance.Width > 0.01f)
                         {
-                            float house = Make(entry, o.Position, settings.Settlement.BuildingScale, o.Brightness, 0f, 0.5f, i).Width;
-                            // По видимой части рисунка (SolidRect), не по холсту с полями.
-                            float own = instance.Width * Mathf.Max(0.05f, art.SolidRect.width);
-                            float fit = Mathf.Clamp(house * Mathf.Max(0.05f, entry.SolidRect.width) * ServiceWidthShare / own, 0.4f, 1.6f);
+                            MapLabArtInstance houseInstance = Make(entry, o.Position, settings.Settlement.BuildingScale, o.Brightness, 0f, 0.5f, i);
+                            float fit;
+                            if (o.Role == "board")
+                            {
+                                // Столб объявлений — узкий: по высоте, чуть ниже избы.
+                                float ownHeight = instance.Height * Mathf.Max(0.05f, art.SolidRect.height);
+                                fit = Mathf.Clamp(houseInstance.Height * Mathf.Max(0.05f, entry.SolidRect.height) * BoardHeightShare / ownHeight, 0.2f, 1.6f);
+                            }
+                            else
+                            {
+                                // По видимой части рисунка (SolidRect), не по холсту с полями.
+                                float own = instance.Width * Mathf.Max(0.05f, art.SolidRect.width);
+                                fit = Mathf.Clamp(houseInstance.Width * Mathf.Max(0.05f, entry.SolidRect.width) * ServiceWidthShare / own, 0.4f, 1.6f);
+                            }
                             instance = Make(art, o.Position, s * fit, o.Brightness, 0f, 0.5f, i);
                         }
                         plan.Add(art, instance);
@@ -76,6 +86,8 @@ namespace KingdomSurvival.MapLab
 
         // Ширина здания услуги относительно избы того же двора.
         public const float ServiceWidthShare = 1.1f;
+        // Высота столба объявлений относительно избы.
+        public const float BoardHeightShare = 0.7f;
 
         private static List<MapLabArtEntry> ByRole(MapLabArtSet set, params string[] roles)
         {
@@ -418,6 +430,7 @@ namespace KingdomSurvival.MapLab
             MissingFeatureArt.Clear();
             LastFeatures = 0;
             LastFeatureParts = 0;
+            data.FeatureSprites.Clear();
             MapLabComposition c = data.Composition;
             if (c == null || c.Features.Count == 0)
                 return;
@@ -459,7 +472,9 @@ namespace KingdomSurvival.MapLab
                             continue;
                         used.Add(q);
                         Vector3 at = new Vector3(q.x, FeatureGround(data, q), q.y);
-                        plan.Add(e, Make(e, at - Vector3.up * 0.03f, Mathf.Lerp(e.ScaleRange.x, e.ScaleRange.y, rng.Value()), rng.Range(0.96f, 1.03f), 0f, 0.85f, -1));
+                        MapLabArtInstance part = Make(e, at - Vector3.up * 0.03f, Mathf.Lerp(e.ScaleRange.x, e.ScaleRange.y, rng.Value()), rng.Range(0.96f, 1.03f), 0f, 0.85f, -1);
+                        plan.Add(e, part);
+                        data.FeatureSprites.Add(new MapLabFeatureSprite { Point = p, Kind = kind, ArtId = id, Base = at, Height = part.Height, Width = part.Width, Pivot = part.Pivot });
                         any = true;
                         LastFeatureParts++;
                     }

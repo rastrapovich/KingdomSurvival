@@ -175,7 +175,9 @@ public partial class PrototypeUIController
         TickSettlementScreen();
         TickWorldMapBuildings();
         TickWorldMapGroups();
+        TickWorldMapFeatures();
         TickWorldMapLive();
+        TickLoadingScreen();
         TickWorldMapSearchAreas();
         TickWorldMapFog();
         TickRewardToasts();
@@ -359,8 +361,10 @@ public partial class PrototypeUIController
             return;
 
         // Бриф исправлений п. 13: время идёт только при движении и явно
-        // начатом деле похода.
-        bool shouldRun = ContinuousSimulationSystem.HasMovementOrActivityInProgress(gameState);
+        // начатом деле похода. 12У-G: при независимом времени (настройка
+        // движения) часы идут всегда, пока нет окна, журнала или места.
+        bool shouldRun = WorldMapMovementRules.Current.IndependentTime ||
+                         ContinuousSimulationSystem.HasMovementOrActivityInProgress(gameState);
         ContinuousSimulationSystem.SetPaused(gameState, !shouldRun);
     }
 

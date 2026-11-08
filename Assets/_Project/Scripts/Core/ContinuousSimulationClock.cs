@@ -328,10 +328,15 @@ public static partial class ContinuousSimulationSystem
 
         // 12И: бегущий отряд задаёт темп часов сам — кнопки скорости на бег
         // не действуют; дома и в делах похода часы идут как прежде.
-        bool running = IsExpeditionRunning(state);
-        double remainingGameHours = running
-            ? unscaledRealSeconds * GetRunningGameHoursPerRealSecond(state)
-            : unscaledRealSeconds * runtime.SpeedMultiplier * GameHoursPerRealSecond;
+        // 12У-G: при независимом времени часы идут ровно (темп из настроек,
+        // кнопки скорости ускоряют всё сразу); бег героя на темп не влияет.
+        WorldMapMovementRules rules = WorldMapMovementRules.Current;
+        bool running = !rules.IndependentTime && IsExpeditionRunning(state);
+        double remainingGameHours = rules.IndependentTime
+            ? unscaledRealSeconds * runtime.SpeedMultiplier * rules.SafeWorldGameHoursPerRealSecond
+            : running
+                ? unscaledRealSeconds * GetRunningGameHoursPerRealSecond(state)
+                : unscaledRealSeconds * runtime.SpeedMultiplier * GameHoursPerRealSecond;
 
         while (remainingGameHours > Epsilon && !runtime.IsPaused)
         {

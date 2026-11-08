@@ -223,6 +223,23 @@ public sealed class WorldMapMovementRules
 
     public float HeroRunSpeedHexesPerSecond = DefaultHeroRunSpeedHexesPerSecond;
     public float TravelHoursPerHex = DefaultTravelHoursPerHex;
+
+    // 12У-G (запрос пользователя 08.11.2026): время мира идёт само, ровным
+    // темпом, а не только пока бежит герой; группы движутся по часам мира.
+    // Тогда HeroRunSpeedHexesPerSecond — общая скорость передвижения по
+    // карте (герой и группы), а часы на клетку пути выводятся из темпа
+    // времени и скорости: часы на клетку = темп времени / скорость.
+    // Выключено — прежняя модель «движение = течение времени» (канон §9.6).
+    public const float DefaultWorldGameHoursPerRealSecond = 0.3f;
+    // По умолчанию в ядре — прежняя модель (тесты, авторские миры); игра
+    // берёт значение из ассета настроек движения.
+    public bool IndependentTime;
+    public float WorldGameHoursPerRealSecond = DefaultWorldGameHoursPerRealSecond;
+
+    public double SafeWorldGameHoursPerRealSecond =>
+        WorldGameHoursPerRealSecond > 0.001f && !float.IsNaN(WorldGameHoursPerRealSecond)
+            ? WorldGameHoursPerRealSecond
+            : DefaultWorldGameHoursPerRealSecond;
     public float DiscoveryRadiusHexes = DefaultDiscoveryRadiusHexes;
     public float FogRevealRadiusHexes = DefaultFogRevealRadiusHexes;
     public List<WorldMapTerrainRule> Terrain = new List<WorldMapTerrainRule>();
@@ -288,9 +305,24 @@ public sealed class WorldMapMovementRules
             ? HeroRunSpeedHexesPerSecond
             : DefaultHeroRunSpeedHexesPerSecond;
 
-    // Игровые часы на одну клетку пути в этой местности.
+    // Игровые часы на одну клетку пути в этой местности. При независимом
+    // времени — столько, сколько часов мира проходит, пока фигура пробегает
+    // клетку с общей скоростью (местность — множитель бега).
     public double HoursPerHex(WorldMapGameplayTerrainType terrain) =>
-        SafeTravelHoursPerHex / Math.Max(MinSpeedMultiplier, GetRule(terrain).TravelSpeedMultiplier);
+        IndependentTime
+            ? SafeWorldGameHoursPerRealSecond / (SafeRunSpeedHexesPerSecond * RunSpeedMultiplier(terrain))
+            : SafeTravelHoursPerHex / Math.Max(MinSpeedMultiplier, GetRule(terrain).TravelSpeedMultiplier);
+
+    // Группы мира: клеток за игровой час. Их собственный темп задан долей
+    // от прежнего (обоз медленнее дозора); при независимом времени он
+    // приводится к общей скорости передвижения по карте.
+    public double GroupHexesPerGameHour(double baseHexesPerHour)
+    {
+        if (!IndependentTime)
+            return baseHexesPerHour;
+        double relative = baseHexesPerHour / 0.4;
+        return relative * SafeRunSpeedHexesPerSecond / SafeWorldGameHoursPerRealSecond;
+    }
 
     public double RunSpeedMultiplier(WorldMapGameplayTerrainType terrain) =>
         Math.Max(MinSpeedMultiplier, GetRule(terrain).RunSpeedMultiplier);
@@ -323,7 +355,10 @@ public sealed class WorldMapMovementRules
         {
             HeroRunSpeedHexesPerSecond = HeroRunSpeedHexesPerSecond,
             TravelHoursPerHex = TravelHoursPerHex,
-            DiscoveryRadiusHexes = DiscoveryRadiusHexes
+            DiscoveryRadiusHexes = DiscoveryRadiusHexes,
+            FogRevealRadiusHexes = FogRevealRadiusHexes,
+            IndependentTime = IndependentTime,
+            WorldGameHoursPerRealSecond = WorldGameHoursPerRealSecond
         };
         if (Terrain != null)
         {

@@ -171,7 +171,7 @@ MonoBehaviour:
     ContactStrength: 0.25
     ShadowTones: 2
     ShadowColor: {r: 0.56, g: 0.6, b: 0.62, a: 1}
-    ShadowTexelsPerUnit: 4
+    ShadowTexelsPerUnit: 3
     HouseViewSwitch: 42.5
     HouseViewHysteresis: 2
   Stage04:
@@ -261,7 +261,7 @@ MonoBehaviour:
     WideFrame: 1
     FrameWidth: 0
     PaintStreaming: 0
-    OverviewTexels: 2
+    OverviewTexels: 1.5
     DetailTileBudget: 64
     DetailTilesPerFrame: 2
   Diagnostics:

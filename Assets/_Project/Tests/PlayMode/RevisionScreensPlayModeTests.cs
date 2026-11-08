@@ -124,12 +124,17 @@ public sealed class RevisionScreensPlayModeTests
         VisualElement dock = root.Q(className: "shell-reports-dock");
         Assert.AreEqual(DisplayStyle.None, dock.resolvedStyle.display, "Свёрнуто — места не занимает.");
         double hours = Hours(campaign);
+        float reportsFrom = Time.realtimeSinceStartup;
         yield return Click(reports);
         Assert.AreEqual(DisplayStyle.Flex, dock.resolvedStyle.display, "Список раскрылся.");
         yield return Capture(main, "rev_02_reports_open");
         yield return Click(reports);
         Assert.AreEqual(DisplayStyle.None, dock.resolvedStyle.display, "Список свернулся.");
-        Assert.AreEqual(hours, Hours(campaign), 1e-6, "Донесения время не трогают.");
+        // Донесения сами времени не тратят: при независимом времени часы идут
+        // только своим темпом за прошедшие секунды.
+        WorldMapMovementRules rules = WorldMapMovementRules.Current;
+        double allowed = rules.IndependentTime ? (Time.realtimeSinceStartup - reportsFrom) * rules.SafeWorldGameHoursPerRealSecond * ContinuousSimulationSystem.MaximumSpeedMultiplier + 1e-3 : 1e-6;
+        Assert.AreEqual(hours, Hours(campaign), allowed, "Донесения время не трогают.");
 
         // П. 3: подсказка значка карты по наведению; уходит с курсором.
         // Бриф правок (19 пунктов) п. 1: в начале партии места за округой
@@ -168,8 +173,14 @@ public sealed class RevisionScreensPlayModeTests
         yield return Click(tempo3);
         Assert.IsTrue(tempo3.ClassListContains("map-tempo-button--active"), "Активный темп виден.");
         hours = Hours(campaign);
+        float tempoFrom = Time.realtimeSinceStartup;
         yield return Frames(30);
-        Assert.AreEqual(hours, Hours(campaign), 1e-6, "×3 на стоящем герое часы не запускает.");
+        // Прежняя модель: темп у стоящего героя часы не запускает. 12У-G: при
+        // независимом времени часы идут сами, ×3 — втрое быстрее, не больше.
+        if (rules.IndependentTime)
+            Assert.LessOrEqual(Hours(campaign) - hours, (Time.realtimeSinceStartup - tempoFrom) * rules.SafeWorldGameHoursPerRealSecond * 3.0 + 1e-3, "×3 — втрое быстрее, не больше.");
+        else
+            Assert.AreEqual(hours, Hours(campaign), 1e-6, "×3 на стоящем герое часы не запускает.");
 
         // П. 11: журнал — непрозрачный отдельный экран, время стоит.
         Invoke(main, "OpenJournal");

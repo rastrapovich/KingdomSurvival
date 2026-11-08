@@ -212,7 +212,7 @@ public static class WorldMapActorMotion
         double length = cumulative[cumulative.Count - 1];
         if (length <= 0.0001)
             return actor.Route[0];
-        double travel = length / Math.Max(0.01, SpeedHexesPerHour(actor.Role));
+        double travel = length / Math.Max(0.01, WorldMapMovementRules.Current.GroupHexesPerGameHour(SpeedHexesPerHour(actor.Role)));
         double wait = Math.Max(0, actor.WaitHours);
         double cycle = actor.Loop ? travel + wait : 2 * (travel + wait);
         double t = (worldHour + actor.PhaseHours) % cycle;

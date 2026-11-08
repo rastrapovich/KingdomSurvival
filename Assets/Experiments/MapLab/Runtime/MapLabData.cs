@@ -140,6 +140,19 @@ namespace KingdomSurvival.MapLab
 
     // 12У-G: здание услуги на рисунке — опора, высота и ширина карточки,
     // опора рисунка; по ним снимок карты находит точное место здания на экране.
+    // 12У-G: нарисованная часть детали места — для цели наведения в игре
+    // (точка места, вид, опора и размер карточки).
+    public struct MapLabFeatureSprite
+    {
+        public Vector2 Point;
+        public string Kind;
+        public string ArtId;
+        public Vector3 Base;
+        public float Height;
+        public float Width;
+        public Vector2 Pivot;
+    }
+
     public struct MapLabServiceBuilding
     {
         public string SettlementId;
@@ -295,6 +308,7 @@ namespace KingdomSurvival.MapLab
         public MapLabFenceGraph FenceGraph;
         public readonly List<MapLabProp> Props = new List<MapLabProp>();
         public readonly List<MapLabServiceBuilding> ServiceBuildings = new List<MapLabServiceBuilding>();
+        public readonly List<MapLabFeatureSprite> FeatureSprites = new List<MapLabFeatureSprite>();
         public Vector3 Plaza;
         // 12У-E: площадки всех деревень (первая совпадает с Plaza).
         public readonly List<Vector3> Plazas = new List<Vector3>();

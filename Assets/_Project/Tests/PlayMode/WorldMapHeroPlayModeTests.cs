@@ -116,14 +116,25 @@ public sealed class WorldMapHeroPlayModeTests
         Assert.Less(Vector2.Distance(heroOnScreen, center), Mathf.Min(center.x, center.y) * 0.25f,
             "Камера следует за героем.");
 
-        // Стоящий в поле отряд время не тратит.
+        // Прежняя модель: стоящий в поле отряд время не тратит. 12У-G: при
+        // независимом времени (настройка движения) часы идут и на стоянке —
+        // ровным темпом, не быстрее заданного.
         double hour = ContinuousSimulationSystem.GetClock(campaign).HourOfDay;
         int day = campaign.Day;
+        float waitedFrom = Time.realtimeSinceStartup;
         until = Time.realtimeSinceStartup + 0.5f;
         while (Time.realtimeSinceStartup < until)
             yield return null;
         Assert.AreEqual(day, campaign.Day);
-        Assert.AreEqual(hour, ContinuousSimulationSystem.GetClock(campaign).HourOfDay, 0.0001, "Время стоит.");
+        double passed = ContinuousSimulationSystem.GetClock(campaign).HourOfDay - hour;
+        WorldMapMovementRules rules = WorldMapMovementRules.Current;
+        if (rules.IndependentTime)
+        {
+            Assert.Greater(passed, 0.0, "Время идёт само и на стоянке.");
+            Assert.LessOrEqual(passed, (Time.realtimeSinceStartup - waitedFrom) * rules.SafeWorldGameHoursPerRealSecond * ContinuousSimulationSystem.MaximumSpeedMultiplier + 0.01, "Темп — заданный.");
+        }
+        else
+            Assert.AreEqual(0.0, passed, 0.0001, "Время стоит.");
 
         // Новый клик — отряд снова бежит от текущей позиции.
         Invoke(main, "IssueContinuousMapOrder", targetX + 3f, targetY, null, false);

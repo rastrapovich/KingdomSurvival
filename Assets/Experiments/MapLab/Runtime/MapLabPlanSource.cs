@@ -24,6 +24,10 @@ namespace KingdomSurvival.MapLab
 
         public static bool Available => Build != null;
 
+        // Общие настройки игры для окна генератора (время и движение по карте):
+        // рисует мост к игре, у самого MapLab таких данных нет.
+        public static Action DrawGameSettings;
+
         public static readonly string[] RegionNames = { "По seed", "Речная долина", "Лесное озеро", "Холм и уступ", "Обжитая земля" };
     }
 }

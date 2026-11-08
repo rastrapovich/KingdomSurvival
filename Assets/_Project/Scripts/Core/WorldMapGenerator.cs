@@ -141,6 +141,9 @@ public static partial class WorldMapGenerator
                 BuildSpawnSlots();
                 BuildFeatures();
                 BuildFactions();
+                // Проверки (H01–H10, W…) читают рельеф плана — он должен быть
+                // записан до них, а не после (иначе проверялся пустой рельеф).
+                result.TerrainCells = new WorldMapTerrainLayer(grid, (byte[])terrain.Clone()).Encode();
                 BuildStructure();
             }
 

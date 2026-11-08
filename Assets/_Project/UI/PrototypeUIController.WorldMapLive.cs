@@ -177,14 +177,26 @@ public partial class PrototypeUIController
     private float worldMapHeroBob;
 
     // Скорость ходьбы по поселению — гексов в секунду реального времени.
-    private const float WorldMapSettlementWalkHexesPerSecond = 0.55f;
+    // Шаг по поселению — от общей скорости передвижения по карте.
+    private static float WorldMapSettlementWalkHexesPerSecond => Mathf.Clamp((float)WorldMapMovementRules.Current.SafeRunSpeedHexesPerSecond * 0.7f, 0.15f, 3f);
 
     // Фигура героя MapLab (шесть ракурсов набора фишки). False — живой
     // карты нет, герой рисуется прежним способом.
     private bool TickWorldMapHeroMapLab(float dt, bool running)
     {
         MapLabGameLive.World world = MapLabGameLive.Current;
-        if (worldMapMapLab == null || world == null || !world.Ready || worldMapHeroImage == null)
+        if (worldMapHeroImage == null)
+            return false;
+        // Живая карта ещё строится — прежняя анимация героя не показывается
+        // (экран загрузки), фигура MapLab появится вместе с картой.
+        if (WorldMapLiveWanted() && (worldMapMapLab == null || world == null || !world.Ready))
+        {
+            worldMapHeroImage.style.display = DisplayStyle.None;
+            if (worldMapHeroFallback != null)
+                worldMapHeroFallback.style.display = DisplayStyle.None;
+            return true;
+        }
+        if (worldMapMapLab == null || world == null || !world.Ready)
             return false;
         ExpeditionData expedition = gameState.ActiveExpedition;
         Vector2 percent = expedition != null

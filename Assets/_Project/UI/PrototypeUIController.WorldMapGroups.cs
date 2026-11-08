@@ -16,11 +16,14 @@ public partial class PrototypeUIController
     private readonly Dictionary<string, (VisualElement Marker, int Direction)> worldMapGroupMarkers = new Dictionary<string, (VisualElement, int)>();
     private float worldMapGroupTimer;
     private GeneratedWorldMap worldMapGroupsMap;
+    private WorldMapHexGrid worldMapGroupsGrid;
+    private readonly Dictionary<string, Label> worldMapGroupLabels = new Dictionary<string, Label>();
 
     private void TickWorldMapGroups()
     {
         worldMapGroupTimer += Time.unscaledDeltaTime;
-        if (worldMapGroupTimer < 0.25f)
+        // Время идёт само — группы движутся плавно (часто, но не каждый кадр).
+        if (worldMapGroupTimer < 0.05f)
             return;
         worldMapGroupTimer = 0f;
         if (worldMap == null)
@@ -31,12 +34,18 @@ public partial class PrototypeUIController
         {
             worldMapGroupLayer?.Clear();
             worldMapGroupMarkers.Clear();
+            foreach (Label l in worldMapGroupLabels.Values)
+                l.RemoveFromHierarchy();
+            worldMapGroupLabels.Clear();
             worldMapGroupsMap = map;
+            worldMapGroupsGrid = map?.CreateGrid();
         }
         if (!active)
         {
             if (worldMapGroupLayer != null)
                 worldMapGroupLayer.style.display = DisplayStyle.None;
+            foreach (Label l in worldMapGroupLabels.Values)
+                l.style.display = DisplayStyle.None;
             return;
         }
         if (worldMapGroupLayer == null)
@@ -47,13 +56,14 @@ public partial class PrototypeUIController
             worldMapGroupLayer.style.top = 0;
             worldMapGroupLayer.style.right = 0;
             worldMapGroupLayer.style.bottom = 0;
-            VisualElement parent = worldMapArtLayers?.parent ?? worldMap;
-            int index = worldMapBuildingLayer != null ? parent.IndexOf(worldMapBuildingLayer) + 1 : worldMapArtLayers != null ? parent.IndexOf(worldMapArtLayers) + 1 : parent.childCount;
+            // Над слоями карты (как здания): иначе курсор до групп не доходит.
+            VisualElement parent = worldMapMarkers?.parent ?? worldMap;
+            int index = worldMapMarkers != null ? parent.IndexOf(worldMapMarkers) + 1 : parent.childCount;
             parent.Insert(Mathf.Clamp(index, 0, parent.childCount), worldMapGroupLayer);
         }
         worldMapGroupLayer.style.display = DisplayStyle.Flex;
 
-        WorldMapHexGrid grid = map.CreateGrid();
+        WorldMapHexGrid grid = worldMapGroupsGrid ??= map.CreateGrid();
         double hour = ContinuousSimulationSystem.GetAbsoluteHours(gameState);
         ExpeditionData expedition = gameState.ActiveExpedition;
         float heroX = expedition != null ? expedition.CurrentMapXPercent : WorldMapNavigation.CapitalXPercent;
@@ -67,10 +77,13 @@ public partial class PrototypeUIController
             MapPointData at = WorldMapActorMotion.PositionAt(actor, hour, grid, out float dx, out float dy, out bool waiting);
             bool visible = grid.DistanceHexes(heroX, heroY, at.XPercent, at.YPercent) <= sight && WorldMapFog.IsExploredAtPercent(gameState, at.XPercent, at.YPercent);
             worldMapGroupMarkers.TryGetValue(actor.ActorId, out (VisualElement Marker, int Direction) entry);
+            worldMapGroupLabels.TryGetValue(actor.ActorId, out Label hoverLabel);
             if (!visible)
             {
                 if (entry.Marker != null)
                     entry.Marker.style.display = DisplayStyle.None;
+                if (hoverLabel != null)
+                    hoverLabel.style.display = DisplayStyle.None;
                 continue;
             }
             int direction = waiting && entry.Marker != null ? entry.Direction : WorldMapActorMotion.DirectionIndex(dx, dy);
@@ -81,9 +94,28 @@ public partial class PrototypeUIController
                 marker.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
                 marker.style.width = hexPx * 0.9f;
                 marker.style.height = hexPx * 1.1f;
-                marker.tooltip = actor.Name;
-                marker.RegisterCallback<PointerEnterEvent>(_ => marker.style.scale = new Scale(new Vector3(1.08f, 1.08f, 1f)));
-                marker.RegisterCallback<PointerLeaveEvent>(_ => marker.style.scale = new Scale(Vector3.one));
+                Label label = MakeWorldMapHoverLabel(actor.Name);
+                worldMapGroupLabels[actor.ActorId] = label;
+                hoverLabel = label;
+                GeneratedMapActor captured = actor;
+                marker.RegisterCallback<PointerEnterEvent>(_ =>
+                {
+                    marker.style.scale = new Scale(new Vector3(1.08f, 1.08f, 1f));
+                    label.style.display = DisplayStyle.Flex;
+                });
+                marker.RegisterCallback<PointerLeaveEvent>(_ =>
+                {
+                    marker.style.scale = new Scale(Vector3.one);
+                    label.style.display = DisplayStyle.None;
+                });
+                marker.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+                // Клик — карточка группы: кто это видно со стороны; встречи
+                // и разговора пока нет (содержание — CONTENT_TODO).
+                marker.RegisterCallback<ClickEvent>(evt =>
+                {
+                    evt.StopPropagation();
+                    ShowWorldMapInfoCard(captured.Name, captured.Description, null, null);
+                });
                 worldMapGroupLayer.Add(marker);
                 entry = (marker, -1);
             }
@@ -98,6 +130,12 @@ public partial class PrototypeUIController
             entry.Marker.style.left = at.XPercent / 100f * worldMapCanvasWidth - hexPx * 0.45f;
             entry.Marker.style.top = at.YPercent / 100f * worldMapCanvasHeight - hexPx * 1.05f;
             worldMapGroupMarkers[actor.ActorId] = entry;
+            if (hoverLabel != null && hoverLabel.style.display == DisplayStyle.Flex)
+            {
+                Vector2 head = MapPercentToWorldMapViewport(at.XPercent, at.YPercent);
+                float lw = float.IsNaN(hoverLabel.resolvedStyle.width) ? 0f : hoverLabel.resolvedStyle.width;
+                hoverLabel.style.translate = new Translate(head.x - lw * 0.5f, head.y - hexPx * worldMapZoom * 1.1f - 22f);
+            }
         }
     }
 }

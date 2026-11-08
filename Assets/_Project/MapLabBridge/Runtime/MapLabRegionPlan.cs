@@ -51,16 +51,39 @@ namespace KingdomSurvival.MapLabBridge
         }
 
         // Настроить профиль под план и собрать композицию (settings.RegionPlan).
-        public static MapLabComposition Apply(GeneratedWorldMap plan, MapLabSettings settings)
+        // includeActors — нарисовать группы мира в положении на 8 ч (предпросмотр);
+        // в игре группы рисует экран карты по часам мира, в рисунке их нет.
+        // Рисунок места генератора по его виду, если правило своего не задаёт
+        // (пакет выбранных мест 05.11.2026: ks-poi-043/044/045/046/048/051/052/053/057).
+        // Рисунок не определяет смысла места; скрытое место до обнаружения не рисуется.
+        public static string DefaultPlaceVisual(string kind)
+        {
+            switch (kind)
+            {
+                case "ruins": return "Ruined_Wall_A";
+                case "hillfort": return "Ruined_Wall_A";
+                case "mine": return "Mine_Entrance_A";
+                case "cave": return "Cave_Entrance_A+Mushroom_Clump_A*2";
+                case "lair": return "Cave_Entrance_A";
+                case "barrow": return "Grave_Marker_A";
+                case "abandoned-village": return "Burnt_House_A_FrontRight";
+                case "abandoned-yard": return "Burnt_House_A_FrontRight";
+                case "sanctuary": return "Old_Shrine_A";
+                case "apiary": return "Log_Beehive_A";
+                default: return string.Empty;
+            }
+        }
+
+        public static MapLabComposition Apply(GeneratedWorldMap plan, MapLabSettings settings, bool includeActors = true)
         {
             settings.General.MapSize = PlayWidth(plan);
             settings.General.Seed = plan.Seed;
-            MapLabComposition c = Build(plan, settings);
+            MapLabComposition c = Build(plan, settings, includeActors);
             settings.RegionPlan = c;
             return c;
         }
 
-        public static MapLabComposition Build(GeneratedWorldMap plan, MapLabSettings settings)
+        public static MapLabComposition Build(GeneratedWorldMap plan, MapLabSettings settings, bool includeActors = true)
         {
             Mapping m = MappingFor(plan, settings);
             WorldMapHexGrid grid = plan.CreateGrid();
@@ -231,8 +254,9 @@ namespace KingdomSurvival.MapLabBridge
                     Vector2 at = m.ToWorld(site.XPercent, site.YPercent);
                     c.Landmarks.Add((at, site.Kind, site.LocationId));
                     c.Reserved.Add(new MapLabComposition.Zone { Center = at, Radius = hexWorld * 0.75f, Strength = 1f });
-                    if (!site.Hidden && !string.IsNullOrEmpty(site.Visual))
-                        c.Features.Add((at, site.Visual, site.Kind));
+                    string visual = !string.IsNullOrEmpty(site.Visual) ? site.Visual : DefaultPlaceVisual(site.Kind);
+                    if (!site.Hidden && !string.IsNullOrEmpty(visual))
+                        c.Features.Add((at, visual, site.Kind));
                 }
             }
             if (plan.Features != null)
@@ -247,7 +271,7 @@ namespace KingdomSurvival.MapLabBridge
             }
             // Группы мира — в предпросмотре стоят в положении на 8 ч утра
             // первого дня, ракурс — по направлению движения (без зеркала).
-            if (plan.Actors != null)
+            if (includeActors && plan.Actors != null)
             {
                 foreach (GeneratedMapActor actor in plan.Actors)
                 {

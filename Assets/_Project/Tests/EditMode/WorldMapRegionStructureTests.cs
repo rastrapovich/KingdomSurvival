@@ -276,6 +276,27 @@ public sealed class WorldMapRegionStructureTests
             "За 10 карт встречаются запруда и кладбище: " + string.Join(", ", seen.Keys));
     }
 
+    // Гайд исследования: прогон 30 seed всех типов региона — ни одной ошибки
+    // (H01–H10), все карты разные; проверка при генерации совпадает с
+    // проверкой готовой карты (рельеф записан до проверок).
+    [Test]
+    public void ThirtySeeds_HaveNoErrors_AndDiffer()
+    {
+        WorldMapRegionKind[] kinds = { WorldMapRegionKind.BySeed, WorldMapRegionKind.RiverValley, WorldMapRegionKind.ForestLake, WorldMapRegionKind.HillAndLedge, WorldMapRegionKind.SettledLand, WorldMapRegionKind.Mixed };
+        HashSet<string> prints = new HashSet<string>();
+        List<string> errors = new List<string>();
+        for (int i = 0; i < 30; i++)
+        {
+            int seed = 1000 + i * 37;
+            GeneratedWorldMap map = WorldMapGenerator.Generate(Settings(kinds[i % kinds.Length]), seed);
+            prints.Add(map.Passport.Fingerprint);
+            errors.AddRange(map.Report.Issues.Where(x => x.Error).Select(x => "seed " + seed + ": " + x.Code + " " + x.Message));
+            Assert.That(WorldMapRegionValidator.Validate(map).Count(x => x.Error), Is.EqualTo(map.Report.Issues.Count(x => x.Error)), "seed " + seed);
+        }
+        Assert.That(errors, Is.Empty, string.Join("\n", errors));
+        Assert.That(prints.Count, Is.EqualTo(30), "30 разных карт.");
+    }
+
     [Test]
     public void UnknownNearWord_IsReportedAndTheRuleIsSkipped()
     {

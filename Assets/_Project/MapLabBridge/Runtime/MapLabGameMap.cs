@@ -109,6 +109,49 @@ namespace KingdomSurvival.MapLabBridge
             return entry != null ? entry.Texture : null;
         }
 
+        // Запись рисунка по ID (набор мест, затем этап 05); null — нет.
+        public static MapLabArtEntry ArtEntry(string artId)
+        {
+            MapLabGameAssets assets = MapLabGameAssets.Load();
+            if (assets == null || string.IsNullOrEmpty(artId))
+                return null;
+            MapLabArtEntry entry = assets.ArtSetPoi != null ? assets.ArtSetPoi.Find(artId) : null;
+            if ((entry == null || !entry.HasTexture) && assets.ArtSet05 != null)
+                entry = assets.ArtSet05.Find(artId);
+            return entry != null && entry.HasTexture ? entry : null;
+        }
+
+        // Рисунок места генератора по виду (первая часть составного рисунка):
+        // текстура, высота карточки в мире, пропорция и опора.
+        public static bool PlaceArt(string kind, out Texture2D texture, out float worldHeight, out float aspect, out Vector2 pivot)
+        {
+            texture = null;
+            worldHeight = 0f;
+            aspect = 1f;
+            pivot = new Vector2(0.5f, 0f);
+            List<(string Id, int Count)> parts = MapLabArtBuilder.FeatureParts(MapLabRegionPlan.DefaultPlaceVisual(kind));
+            MapLabArtEntry entry = parts.Count > 0 ? ArtEntry(parts[0].Id) : null;
+            if (entry == null)
+                return false;
+            texture = entry.Texture;
+            worldHeight = entry.CardHeight * Mathf.Lerp(entry.ScaleRange.x, entry.ScaleRange.y, 0.5f);
+            aspect = entry.Aspect;
+            pivot = entry.Pivot;
+            return true;
+        }
+
+        // Рисунок детали места по ID записи (набор мест, затем этап 05).
+        public static Texture2D ArtTexture(string artId)
+        {
+            MapLabGameAssets assets = MapLabGameAssets.Load();
+            if (assets == null || string.IsNullOrEmpty(artId))
+                return null;
+            MapLabArtEntry entry = assets.ArtSetPoi != null ? assets.ArtSetPoi.Find(artId) : null;
+            if ((entry == null || !entry.HasTexture) && assets.ArtSet05 != null)
+                entry = assets.ArtSet05.Find(artId);
+            return entry != null ? entry.Texture : null;
+        }
+
         public static string ServicesKey(IDictionary<string, List<string>> services)
         {
             if (services == null || services.Count == 0)

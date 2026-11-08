@@ -319,6 +319,7 @@ public partial class PrototypeUIController
         worldMapRoutes.Clear();
         worldMapMarkers.Clear();
         ClearWorldMapVillageNames();
+        ClearWorldMapPlacePictures();
         worldMapFog?.Clear();
 
         ApplyWorldMapBackground();
@@ -495,6 +496,9 @@ public partial class PrototypeUIController
             CreateWorldMapVillageName(location);
             return;
         }
+        // Найденное место с рисунком — рисунок на карте вместо значка.
+        if (TryCreateWorldMapPlacePicture(location))
+            return;
 
         Button node =
             new Button(

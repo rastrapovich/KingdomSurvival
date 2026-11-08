@@ -48,7 +48,9 @@ namespace KingdomSurvival.MapLab
         {
             MapLabComposition c = data.Composition;
             MapLabSettlementSettings s = settings.Settlement;
-            if (c == null || !c.HasSettlement || s.HousesMax <= 0)
+            // Деревни плана игры строятся всегда: «без домов» (HousesMax = 0)
+            // — только свойство пресета MapLab для предпросмотра рисунка.
+            if (c == null || !c.HasSettlement || (s.HousesMax <= 0 && !c.FromPlan))
             {
                 if (c != null && c.Pier)
                     PlacePier(data, c.SettlementCenter);

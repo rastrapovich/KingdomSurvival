@@ -386,7 +386,7 @@ public partial class PrototypeUIController
         settlementPeopleTitle.style.display = showPeople ? DisplayStyle.Flex : DisplayStyle.None;
 
         settlementParty.text = SettlementPartyLine();
-        settlementExitButton.text = SettlementCampService.HasCamp(gameState) ? "ВЕРНУТЬСЯ К ЛАГЕРЮ" : "ВЫЙТИ ИЗ ПОСЕЛЕНИЯ";
+        settlementExitButton.text = SettlementCampService.HasCamp(gameState) ? "ВЕРНУТЬСЯ К ЛАГЕРЮ" : "ВЫЙТИ";
         settlementMessage.text = settlementMessageText;
         // Ночлег: экран остаётся, время идёт до утра; уйти посреди ночи нельзя.
         bool resting = CampRest.IsResting(gameState);

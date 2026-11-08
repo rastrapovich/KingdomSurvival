@@ -286,7 +286,7 @@ public static partial class WorldMapGenerator
             List<int> camps = new List<int>();
             for (int i = 0; i < count; i++)
             {
-                if (!reachable[i] || NearEdge(i, 2) || protectedStart[i] || terrain[i] == Road || terrain[i] == Trail)
+                if (!reachable[i] || InEdgeBand(i) || protectedStart[i] || terrain[i] == Road || terrain[i] == Trail)
                     continue;
                 if (!NearHolds("forest-edge", i) || (villageCells.Count > 0 && NearestDistance(i, villageCells) < 7) || IsNear(i, taken, 3))
                     continue;

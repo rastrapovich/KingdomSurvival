@@ -467,7 +467,7 @@ namespace KingdomSurvival.MapLab
         public static float FeatureWorldHeight(MapLabArtEntry e) =>
             e.CardHeight * (NormalizedScale(e, LastFeatureScale) ?? Mathf.Lerp(e.ScaleRange.x, e.ScaleRange.y, 0.5f));
 
-        public static void PlanFeatures(MapLabData data, MapLabArtSet set, Plan plan, MapLabArtSet fallback = null, FeatureScale norm = default)
+        public static void PlanFeatures(MapLabData data, MapLabArtSet set, Plan plan, MapLabArtSet fallback = null, FeatureScale norm = default, IList<MapLabArtSet> extra = null)
         {
             LastFeatureScale = norm;
             MissingFeatureArt.Clear();
@@ -490,6 +490,10 @@ namespace KingdomSurvival.MapLab
                 {
                     (string id, int n) = parts[k];
                     MapLabArtEntry e = FindFeatureArt(id, set, fallback);
+                    if (e == null && extra != null)
+                        foreach (MapLabArtSet more in extra)
+                            if (more != null && (e = FindFeatureArt(id, more, null)) != null)
+                                break;
                     if (e == null)
                     {
                         if (!MissingFeatureArt.Contains(id))

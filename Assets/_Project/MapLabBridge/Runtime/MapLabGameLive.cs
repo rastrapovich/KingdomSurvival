@@ -222,8 +222,14 @@ namespace KingdomSurvival.MapLabBridge
                     float widthPercent = b.Width / w.Play.width * 100f;
                     float heightPercent = b.Height * 100f / (w.Play.height * w.Sin);
                     Rect rect = new Rect(basePercent.x - b.Pivot.x * widthPercent, basePercent.y - (1f - b.Pivot.y) * heightPercent, widthPercent, heightPercent);
-                    // Дверь — на земле чуть перед опорой здания (к зрителю).
-                    w.Buildings.Add((b.SettlementId, b.Role, rect, basePercent + new Vector2(0f, heightPercent * 0.06f)));
+                    // Точка подхода — на земле перед зданием (к зрителю), за его
+                    // основанием: герой встаёт рядом, а не внутри рисунка. Узкий
+                    // столб объявлений — подходят сбоку.
+                    Vector3 approach = b.Role == "board"
+                        ? b.Base + new Vector3(b.Width * 0.45f + 0.9f, 0f, -0.4f)
+                        : b.Base + new Vector3(0f, 0f, -(b.Width * 0.18f + 1.1f));
+                    approach.y = data.SampleHeight(approach.x, approach.z);
+                    w.Buildings.Add((b.SettlementId, b.Role, rect, ToPercent(w, approach)));
                 }
                 // Детали мест: части — к месту плана по виду и ближайшей точке.
                 Dictionary<GeneratedMapSite, List<(Rect Rect, string ArtId)>> parts = new Dictionary<GeneratedMapSite, List<(Rect, string)>>();

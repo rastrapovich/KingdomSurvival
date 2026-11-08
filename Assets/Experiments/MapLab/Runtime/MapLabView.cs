@@ -20,6 +20,9 @@ namespace KingdomSurvival.MapLab
         public MapLabCameraRig CameraRig;
         [Tooltip("Строить карту при открытии сцены и входе в Play Mode.")]
         public bool GenerateOnLoad = true;
+        // Поле ассетов окна генератора: детали могут брать рисунок из любого
+        // подключённого набора (дома, деревья, фигуры, знамёна).
+        [System.NonSerialized] public List<MapLabArtSet> FeatureExtraSets;
 
         [Header("Шейдеры (назначаются при создании сцены)")]
         public Shader TerrainShader;
@@ -1049,7 +1052,7 @@ namespace KingdomSurvival.MapLab
                 Phase("план мелочи");
                 if (DrawnCliffs06)
                     MapLabArtBuilder.PlanCliffScree06(data, Settings, MapLabCliffs06.KitOf(ResolvedArtSet06), decorPlan);
-                MapLabArtBuilder.PlanFeatures(data, ResolvedArtSetPoi, decorPlan, set05, FeatureScaleNorm(set05));
+                MapLabArtBuilder.PlanFeatures(data, ResolvedArtSetPoi, decorPlan, set05, FeatureScaleNorm(set05), FeatureExtraSets);
                 foreach (MapLabObjectKind kind in decorPlan.Replaced)
                     artPlan.Replaced.Add(kind);
             }

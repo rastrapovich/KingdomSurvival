@@ -258,7 +258,9 @@ public partial class PrototypeUIController
         }
         worldMapPendingFeature = site;
         worldMapPendingFeatureRect = union;
-        GoToWorldMapPoint(site.XPercent, site.YPercent);
+        // Подходят к месту сбоку-спереди, не встают на рисунок.
+        Vector2 beside = new Vector2(union.xMax + union.width * 0.15f, union.yMax + union.height * 0.05f);
+        GoToWorldMapPoint(beside.x, beside.y);
     }
 
     private bool HeroNearWorldMapPoint(float x, float y, double hexes)

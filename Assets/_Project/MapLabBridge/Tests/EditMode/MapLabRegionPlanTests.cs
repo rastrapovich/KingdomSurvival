@@ -73,5 +73,59 @@ namespace KingdomSurvival.MapLabBridge.Tests
             Assert.IsTrue(services.Values.Any(r => r.Contains("merchant")), "Есть лавка.");
             Assert.IsTrue(services.Keys.All(k => k.StartsWith(GeneratedMapPlaces.IdPrefix)), "ID — как у мест игры.");
         }
+
+        // Путь окна «Генератор карты»: профиль пресета A → план игры → рисунок
+        // MapLab. У каждой деревни плана — дома (не один колодец), на всех
+        // размерах карты.
+        [Test]
+        [Timeout(600000)]
+        public void GeneratorWindowPath_EveryVillageHasHouses()
+        {
+            MapLabSettings source = UnityEditor.AssetDatabase.LoadAssetAtPath<MapLabSettings>("Assets/Experiments/MapLab/Presets/MapLab_A_HillAndLedge.asset");
+            Assert.IsNotNull(source, "пресет A");
+            GameObject host = new GameObject("MapLabWindowPathTest");
+            MapLabSettings s = Object.Instantiate(source);
+            try
+            {
+                MapLabView view = host.AddComponent<MapLabView>();
+                foreach (MapLabWorldSize size in new[] { MapLabWorldSize.Small })
+                    foreach (int seed in new[] { 104, 7 })
+                    {
+                        s.Author.UseGamePlan = true;
+                        s.Author.WorldSize = size;
+                        s.General.Seed = seed;
+                        MapLabAuthor.ApplyStructure(s);
+                        MapLabAuthor.ApplyLook(s);
+                        global::KingdomSurvival.MapLabBridge.Editor.MapLabPlanHook.Build(s);
+                        Assert.IsNotNull(s.RegionPlan, "план региона назначен");
+                        view.Settings = s;
+                        Assert.IsTrue(view.Generate(null), "генерация");
+                        MapLabData data = view.Data;
+                        int settlements = s.RegionPlan.Settlements.Count;
+                        int houses = data.Objects.Count(o => o.Kind == MapLabObjectKind.House);
+                        Debug.Log($"Окно генератора {size}/{seed}: поселений {settlements}, домов {houses}, объектов {data.Objects.Count}");
+                        Assert.Greater(settlements, 0, $"{size}/{seed}: в плане есть деревни");
+                        Assert.GreaterOrEqual(houses, settlements * 2, $"{size}/{seed}: у деревень есть дома");
+                        // Мосты никогда не стоят друг на друге.
+                        for (int i = 0; i < data.Bridges.Count; i++)
+                            for (int j = i + 1; j < data.Bridges.Count; j++)
+                            {
+                                Vector2 ci = (data.Bridges[i].EndA + data.Bridges[i].EndB) * 0.5f, cj = (data.Bridges[j].EndA + data.Bridges[j].EndB) * 0.5f;
+                                float reach = (Vector2.Distance(data.Bridges[i].EndA, data.Bridges[i].EndB) + Vector2.Distance(data.Bridges[j].EndA, data.Bridges[j].EndB)) * 0.5f;
+                                Assert.Greater(Vector2.Distance(ci, cj), reach, $"{size}/{seed}: мосты {i} и {j} накладываются");
+                            }
+                        foreach (MapLabComposition.Settlement st in s.RegionPlan.Settlements)
+                        {
+                            int near = data.Objects.Count(o => o.Kind == MapLabObjectKind.House && Vector2.Distance(new Vector2(o.Position.x, o.Position.z), st.Center) < st.Radius * 2f);
+                            Assert.GreaterOrEqual(near, 1, $"{size}/{seed}: у деревни {st.Id} нет ни одного дома");
+                        }
+                    }
+            }
+            finally
+            {
+                Object.DestroyImmediate(host);
+                Object.DestroyImmediate(s);
+            }
+        }
     }
 }

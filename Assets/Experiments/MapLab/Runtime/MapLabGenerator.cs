@@ -688,6 +688,28 @@ namespace KingdomSurvival.MapLab
                             Vector2 roadDir = (road.Points[i + 1] - road.Points[i]).normalized;
                             if (Vector2.Dot(across, roadDir) < 0f)
                                 across = -across;
+                            // Рядом уже есть мост (другая дорога через ту же реку) — дорога
+                            // идёт по нему, второй мост поверх не ставится.
+                            bool reused = false;
+                            foreach (MapLabBridge existing in data.Bridges)
+                            {
+                                Vector2 center = (existing.EndA + existing.EndB) * 0.5f;
+                                float halfLength = Vector2.Distance(existing.EndA, existing.EndB) * 0.5f;
+                                if (Vector2.Distance(center, hit) > halfLength + 14f)
+                                    continue;
+                                Vector2 a = existing.EndA, b = existing.EndB;
+                                Vector2 axis = (b - a).normalized;
+                                if (Vector2.Dot(axis, roadDir) < 0f)
+                                {
+                                    (a, b) = (b, a);
+                                    axis = -axis;
+                                }
+                                SpliceBridge(road, hit, a, b, axis, Vector2.Distance(center, hit) + halfLength);
+                                reused = true;
+                                break;
+                            }
+                            if (reused)
+                                return;
                             float width = Mathf.Lerp(river.Widths[j], river.Widths[j + 1], tr);
                             float level = Mathf.Lerp(river.Levels[j], river.Levels[j + 1], tr);
                             float half = width * 0.5f + 2f;

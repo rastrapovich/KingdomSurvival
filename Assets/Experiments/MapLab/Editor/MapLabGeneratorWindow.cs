@@ -13,7 +13,7 @@ namespace KingdomSurvival.MapLab.Editor
     // пишут в существующие MapLabSettings / MapLabArtEntry (второй копии чисел
     // нет); структурные правки применяются отдельной командой, цвет и
     // внешний вид — сразу без новой карты. Undo — через Unity Undo.
-    public sealed class MapLabGeneratorWindow : EditorWindow
+    public sealed partial class MapLabGeneratorWindow : EditorWindow
     {
         private enum Tab { Map = 0, Assets = 1, Check = 2 }
 
@@ -375,26 +375,7 @@ namespace KingdomSurvival.MapLab.Editor
             }
 
             EditorGUILayout.Space(6);
-            lookOpen = EditorGUILayout.BeginFoldoutHeaderGroup(lookOpen, "Внешний вид · применяется сразу, мир не меняет");
-            if (lookOpen)
-            {
-                EditorGUI.BeginChangeCheck();
-                MapLabPalette palette = (MapLabPalette)EditorGUILayout.ObjectField(new GUIContent("Палитра", "Палитра среды."), s.PainterlyStyle.Palette, typeof(MapLabPalette), false);
-                float saturation = EditorGUILayout.Slider(new GUIContent("Насыщенность", "Общая насыщенность карты (отдельно от коррекции ассета)."), s.PainterlyStyle.Saturation, 0.5f, 1.5f);
-                a.StrokeStrength = Slider("Сила мазков", "Заметность живописной обработки поверхности.", a.StrokeStrength);
-                a.StrokeSize = Slider("Размер мазков", "Масштаб мазков в мире.", a.StrokeSize);
-                a.InkWeight = Slider("Выраженность туши", "Общий вес согласованного профиля линий.", a.InkWeight);
-                a.ShadowStrength = Slider("Сила теней", "Падающие и контактные тени объектов.", a.ShadowStrength);
-                a.Details = Slider("Мелкие детали", "Трава, камыш, мелкие камни, сено.", a.Details);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    Undo.RecordObject(s, "Генератор карты: внешний вид");
-                    s.PainterlyStyle.Palette = palette;
-                    s.PainterlyStyle.Saturation = saturation;
-                    look = true;
-                }
-            }
-            EditorGUILayout.EndFoldoutHeaderGroup();
+            look |= DrawLookGroup(s, a);
 
             fineOpen = EditorGUILayout.BeginFoldoutHeaderGroup(fineOpen, "Точная настройка · переопределения");
             if (fineOpen)
@@ -474,6 +455,34 @@ namespace KingdomSurvival.MapLab.Editor
             EditorGUILayout.EndScrollView();
         }
 
+        // Внешний вид: палитра, насыщенность, мазки, тушь, тени, детали.
+        // Общий блок вкладок «Карта» и «Ассеты» (поле ассетов).
+        private bool DrawLookGroup(MapLabSettings s, MapLabAuthorProfile a)
+        {
+            bool look = false;
+            lookOpen = EditorGUILayout.BeginFoldoutHeaderGroup(lookOpen, "Внешний вид · применяется сразу, мир не меняет");
+            if (lookOpen)
+            {
+                EditorGUI.BeginChangeCheck();
+                MapLabPalette palette = (MapLabPalette)EditorGUILayout.ObjectField(new GUIContent("Палитра", "Палитра среды."), s.PainterlyStyle.Palette, typeof(MapLabPalette), false);
+                float saturation = EditorGUILayout.Slider(new GUIContent("Насыщенность", "Общая насыщенность карты (отдельно от коррекции ассета)."), s.PainterlyStyle.Saturation, 0.5f, 1.5f);
+                a.StrokeStrength = Slider("Сила мазков", "Заметность живописной обработки поверхности.", a.StrokeStrength);
+                a.StrokeSize = Slider("Размер мазков", "Масштаб мазков в мире.", a.StrokeSize);
+                a.InkWeight = Slider("Выраженность туши", "Общий вес согласованного профиля линий.", a.InkWeight);
+                a.ShadowStrength = Slider("Сила теней", "Падающие и контактные тени объектов.", a.ShadowStrength);
+                a.Details = Slider("Мелкие детали", "Трава, камыш, мелкие камни, сено.", a.Details);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    Undo.RecordObject(s, "Генератор карты: внешний вид");
+                    s.PainterlyStyle.Palette = palette;
+                    s.PainterlyStyle.Saturation = saturation;
+                    look = true;
+                }
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
+            return look;
+        }
+
         private static float Slider(string label, string tip, float value)
         {
             return EditorGUILayout.Slider(new GUIContent(label, tip), value, 0f, 1f);
@@ -519,6 +528,8 @@ namespace KingdomSurvival.MapLab.Editor
                     s.RegionPlan = null;
                     planReport = null;
                 }
+                view.FeatureExtraSets = null;
+                fieldBuilt = false;
                 bool ok = view.Generate((stage, fraction) => EditorUtility.DisplayCancelableProgressBar("Генератор карты", stage, fraction));
                 if (!ok)
                     throw new Exception("генерация не выполнена (проверьте профиль и шейдеры)");
@@ -685,6 +696,8 @@ namespace KingdomSurvival.MapLab.Editor
             if (cards.Count == 0)
                 RebuildCards();
             leftScroll = EditorGUILayout.BeginScrollView(leftScroll);
+            if (fieldMode)
+                DrawFieldControls();
             search = EditorGUILayout.TextField(new GUIContent("Поиск", "По имени, роли или категории"), search);
             usedOnly = EditorGUILayout.ToggleLeft("Только используемые на этой карте", usedOnly);
             EditorGUILayout.Space(4);
@@ -739,22 +752,17 @@ namespace KingdomSurvival.MapLab.Editor
             EditorGUILayout.EndScrollView();
         }
 
-        // Вид каталога: карточки или поле сравнения (все рисунки в одном ряду
-        // на земле, в мировом масштабе, рядом с фигуркой героя).
+        // Вид каталога: карточки или поле ассетов (ровная земля карты MapLab
+        // с рекой; см. MapLabGeneratorWindow.AssetField.cs).
         private bool fieldMode;
-        private float fieldPixelsPerUnit = 24f;
-        private Vector2 fieldScroll;
 
         private void DrawAssetGrid(Rect rect)
         {
             Rect bar = new Rect(rect.x, rect.y, rect.width, 22f);
             EditorGUI.DrawRect(bar, new Color(0.15f, 0.15f, 0.15f));
-            fieldMode = GUI.Toolbar(new Rect(bar.x + 4f, bar.y + 2f, 260f, 18f), fieldMode ? 1 : 0, new[] { "Карточки", "Поле сравнения" }, EditorStyles.miniButton) == 1;
+            fieldMode = GUI.Toolbar(new Rect(bar.x + 4f, bar.y + 2f, 260f, 18f), fieldMode ? 1 : 0, new[] { "Карточки", "Поле ассетов" }, EditorStyles.miniButton) == 1;
             if (fieldMode)
-            {
-                GUI.Label(new Rect(bar.x + 272f, bar.y + 2f, 60f, 18f), "Масштаб", EditorStyles.miniLabel);
-                fieldPixelsPerUnit = GUI.HorizontalSlider(new Rect(bar.x + 330f, bar.y + 5f, 140f, 14f), fieldPixelsPerUnit, 6f, 80f);
-            }
+                GUI.Label(new Rect(bar.x + 272f, bar.y + 2f, bar.width - 276f, 18f), "Левая кнопка на ассете — перетащить · правая/средняя — сдвиг · колесо — приближение", EditorStyles.miniLabel);
             rect = new Rect(rect.x, rect.y + 22f, rect.width, rect.height - 22f);
             if (fieldMode)
             {
@@ -807,67 +815,6 @@ namespace KingdomSurvival.MapLab.Editor
                         focus = c;
                         focusView = 0;
                     }
-                    Event.current.Use();
-                    Repaint();
-                }
-            }
-            GUI.EndScrollView();
-        }
-
-        // Высота рисунка в мире так, как его ставит генератор (детали мест —
-        // с единым масштабом людей и построек; размер ассета учитывается).
-        private float FieldHeight(MapLabArtEntry e) =>
-            e.HasTexture ? MapLabArtBuilder.FeatureWorldHeight(e) : 0f;
-
-        private void DrawAssetField(Rect rect)
-        {
-            EditorGUI.DrawRect(rect, new Color(0.58f, 0.62f, 0.36f));
-            List<Card> visible = cards.Where(Visible).Where(c => c.Views[0].Entry.HasTexture).ToList();
-            // Первой — фигурка героя: по ней сравнивают рост людей и построек.
-            MapLabArtEntry hero = view.ActiveMarkerSet?.View(MapLabMarkerDirection.Front);
-            float ppu = fieldPixelsPerUnit;
-            float maxHeight = 1f;
-            foreach (Card c in visible)
-                maxHeight = Mathf.Max(maxHeight, FieldHeight(c.Views[0].Entry));
-            if (hero != null && hero.HasTexture)
-                maxHeight = Mathf.Max(maxHeight, hero.CardHeight);
-            float ground = maxHeight * ppu + 40f;
-            float x = 12f;
-            List<(Rect R, Card C, MapLabArtEntry E)> placed = new List<(Rect, Card, MapLabArtEntry)>();
-            void Place(Card c, MapLabArtEntry e, float h)
-            {
-                float w = h * e.Aspect * ppu;
-                float hp = h * ppu;
-                Rect r = new Rect(x, ground - hp * (1f - e.Pivot.y), w, hp);
-                placed.Add((r, c, e));
-                x += Mathf.Max(w * Mathf.Max(0.3f, e.SolidRect.width), 24f) + 16f;
-            }
-            if (hero != null && hero.HasTexture)
-                Place(null, hero, hero.CardHeight);
-            foreach (Card c in visible)
-                Place(c, c.Views[0].Entry, FieldHeight(c.Views[0].Entry));
-            Rect content = new Rect(0f, 0f, Mathf.Max(rect.width, x + 20f), Mathf.Max(rect.height - 16f, ground + 60f));
-            fieldScroll = GUI.BeginScrollView(rect, fieldScroll, content);
-            // Линейка: каждая единица мира — тонкая линия, каждые 5 — с подписью.
-            for (int u = 0; u <= Mathf.CeilToInt(maxHeight); u++)
-            {
-                float y = ground - u * ppu;
-                EditorGUI.DrawRect(new Rect(0f, y, content.width, u % 5 == 0 ? 1.5f : 0.5f), new Color(0f, 0f, 0f, u % 5 == 0 ? 0.35f : 0.15f));
-                if (u % 5 == 0 && u > 0)
-                    GUI.Label(new Rect(fieldScroll.x + 2f, y - 14f, 60f, 14f), u + " ед.", EditorStyles.miniLabel);
-            }
-            EditorGUI.DrawRect(new Rect(0f, ground, content.width, content.height - ground), new Color(0.47f, 0.5f, 0.3f));
-            foreach ((Rect r, Card c, MapLabArtEntry e) in placed)
-            {
-                if (c != null && focus == c)
-                    EditorGUI.DrawRect(new Rect(r.x - 2f, r.y - 2f, r.width + 4f, r.height + 4f), new Color(0.24f, 0.37f, 0.55f, 0.6f));
-                GUI.DrawTexture(r, e.Texture, ScaleMode.StretchToFill, true);
-                GUI.Label(new Rect(r.x, ground + 4f, Mathf.Max(80f, r.width), 14f), c == null ? "Герой" : c.Title, EditorStyles.miniLabel);
-                GUI.Label(new Rect(r.x, ground + 18f, Mathf.Max(80f, r.width), 14f), FieldHeight(e).ToString("0.0") + " ед.", EditorStyles.centeredGreyMiniLabel);
-                if (c != null && Event.current.type == EventType.MouseDown && r.Contains(Event.current.mousePosition))
-                {
-                    focus = c;
-                    focusView = 0;
                     Event.current.Use();
                     Repaint();
                 }

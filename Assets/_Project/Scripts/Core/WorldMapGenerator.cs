@@ -71,6 +71,7 @@ public static partial class WorldMapGenerator
         private readonly bool[] protectedStart;
         private readonly GeneratedWorldMap result;
         private readonly int startCell;
+        private readonly int edgeBand;
         private float hillsThreshold;
         private int[] waterDistance;
         private float[] roadWander;
@@ -104,6 +105,9 @@ public static partial class WorldMapGenerator
             }
 
             startCell = grid.IndexOf(grid.CellAtPercent(WorldMapNavigation.CapitalXPercent, WorldMapNavigation.CapitalYPercent));
+            // Лесная кромка вокруг карты: в ней нет деревень, мест и деталей —
+            // камера может отъехать к краю, а всё интересное лежит внутри.
+            edgeBand = Math.Max(3, grid.HexesAcross / 12);
             WorldMapHexCell start = grid.CellAt(startCell);
             for (int i = 0; i < count; i++)
                 protectedStart[i] = grid.CellAt(i).DistanceTo(start) <= settings.StartClearRadiusHexes;
@@ -475,6 +479,21 @@ public static partial class WorldMapGenerator
                 }
                 SelectTop(score, eligible, (int)(land * settings.ForestShare), Forest);
             }
+
+            // Кромка — сплошной лес с неровной внутренней границей; вода, горы,
+            // скалы и болота остаются, старт не трогается.
+            for (int i = 0; i < count; i++)
+            {
+                if (protectedStart[i] || (terrain[i] != OpenGround && terrain[i] != Hills))
+                    continue;
+                int depth = EdgeDepth(i);
+                if (depth >= edgeBand)
+                    continue;
+                grid.CellCenter(grid.CellAt(i), out double x, out double y);
+                double ragged = forestNoise.Fbm(x / (grid.HexWidth * 3.0) + 17.3, y / (grid.HexWidth * 3.0) - 5.1, 2, 0.5) * 0.5 + 0.5;
+                if (depth < edgeBand - 2 || ragged > (depth - (edgeBand - 2)) / 2.0 * 0.6)
+                    terrain[i] = Forest;
+            }
         }
 
         // ------------------------------------------------------------------
@@ -485,14 +504,13 @@ public static partial class WorldMapGenerator
         {
             Random random = new Random(StreamSeed(seed, "villages"));
             bool[] reachable = Reachable();
-            int edgeMargin = 2;
 
             List<int> candidates = new List<int>();
             List<float> scores = new List<float>();
             for (int i = 0; i < count; i++)
             {
                 byte t = terrain[i];
-                if (!reachable[i] || NearEdge(i, edgeMargin) || protectedStart[i])
+                if (!reachable[i] || InEdgeBand(i) || protectedStart[i])
                     continue;
                 if (t != OpenGround && t != Forest && t != Hills && t != Field)
                     continue;
@@ -575,7 +593,7 @@ public static partial class WorldMapGenerator
                     for (int i = 0; i < count; i++)
                     {
                         byte t = terrain[i];
-                        if (t == Water || t == Cliffs || protectedStart[i] || NearEdge(i, 1))
+                        if (t == Water || t == Cliffs || protectedStart[i] || InEdgeBand(i))
                             continue;
                         if (rule.Terrains.Count > 0 && !rule.Terrains.Contains((WorldMapGameplayTerrainType)t))
                             continue;
@@ -647,7 +665,7 @@ public static partial class WorldMapGenerator
                 List<int> candidates = new List<int>();
                 for (int i = 0; i < count; i++)
                 {
-                    if (terrain[i] != Road || riverId[i] >= 0 || NearEdge(i, 2))
+                    if (terrain[i] != Road || riverId[i] >= 0 || InEdgeBand(i))
                         continue;
                     int roads = 0;
                     for (int d = 0; d < 6; d++)
@@ -1195,11 +1213,14 @@ public static partial class WorldMapGenerator
             return false;
         }
 
-        private bool NearEdge(int cell, int margin)
+        private int EdgeDepth(int cell)
         {
             WorldMapHexCell c = grid.CellAt(cell);
-            return c.Column < margin || c.Row < margin || c.Column >= grid.Columns - margin || c.Row >= grid.Rows - margin;
+            return Math.Min(Math.Min(c.Column, c.Row), Math.Min(grid.Columns - 1 - c.Column, grid.Rows - 1 - c.Row));
         }
+
+        // Клетка в лесной кромке карты (см. edgeBand).
+        private bool InEdgeBand(int cell) => EdgeDepth(cell) < edgeBand;
 
         private int Distance(int a, int b) => grid.CellAt(a).DistanceTo(grid.CellAt(b));
 

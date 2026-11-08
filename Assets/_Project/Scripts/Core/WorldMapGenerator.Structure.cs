@@ -69,7 +69,7 @@ public static partial class WorldMapGenerator
                 for (int i = 0; i < count; i++)
                 {
                     byte t = terrain[i];
-                    if (t == Water || t == Cliffs || protectedStart[i] || NearEdge(i, 1) || !reachable[i])
+                    if (t == Water || t == Cliffs || protectedStart[i] || InEdgeBand(i) || !reachable[i])
                         continue;
                     if (!anyTerrain && rule.Terrains.Count > 0 && !rule.Terrains.Contains((WorldMapGameplayTerrainType)t))
                         continue;
@@ -241,7 +241,7 @@ public static partial class WorldMapGenerator
                 foreach (int i in CellsWithin(village.Cell, max))
                 {
                     int d = Distance(i, village.Cell);
-                    if (d < min || NearEdge(i, 1) || !fits(i))
+                    if (d < min || InEdgeBand(i) || !fits(i))
                         continue;
                     if (IsNear(i, occupied, 3) || NearestDistance(i, villageCells) < 2)
                         continue;
@@ -434,11 +434,11 @@ public static partial class WorldMapGenerator
                     {
                         // На русле: берег рядом достижим, переправа не перекрыта
                         // (рисунок не меняет проходимость, но не ложится на мост).
-                        if (t != Water || !RiverSet.Contains(i) || protectedStart[i] || NearEdge(i, 1) || !NextToReachableLand(i, reachable)
+                        if (t != Water || !RiverSet.Contains(i) || protectedStart[i] || InEdgeBand(i) || !NextToReachableLand(i, reachable)
                             || (crossingCells.Count > 0 && NearestDistance(i, crossingCells) < 3))
                             continue;
                     }
-                    else if (t == Water || t == Cliffs || t == Road || t == Trail || t == Field || !reachable[i] || protectedStart[i] || NearEdge(i, 1))
+                    else if (t == Water || t == Cliffs || t == Road || t == Trail || t == Field || !reachable[i] || protectedStart[i] || InEdgeBand(i))
                         continue;
                     if (rule.Terrains.Count > 0 && !rule.Terrains.Contains((WorldMapGameplayTerrainType)t))
                         continue;

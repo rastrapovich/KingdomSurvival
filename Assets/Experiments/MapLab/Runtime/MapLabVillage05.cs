@@ -276,6 +276,36 @@ namespace KingdomSurvival.MapLab
                     TryYard05(data, settings, ref rng, spot.road, spot.p, spot.t, normal * side, houseViews, barnViews, yards, outlines, placed, spacious.Contains(yards.Count));
                 }
             }
+            // Запас: деревня не остаётся с одним колодцем. Если строгий проход
+            // поставил меньше двух дворов — все точки дорог в 1.8 радиуса, без
+            // пропусков и без привязки к группам.
+            int minimum = Mathf.Min(2, target);
+            if (yards.Count < minimum)
+            {
+                List<(Vector2 p, Vector2 t, MapLabPolyline road, float d)> spare = new List<(Vector2, Vector2, MapLabPolyline, float)>();
+                foreach (MapLabPolyline road in data.Roads)
+                {
+                    if (road.Widening || road.Points.Count < 2)
+                        continue;
+                    List<Vector2> pts = MapLabGeometry.Resample(road.Points, 2f);
+                    for (int i = 1; i < pts.Count - 1; i++)
+                    {
+                        float dc = Vector2.Distance(pts[i], st.Center);
+                        if (dc > st.Radius * 1.8f || Vector2.Distance(pts[i], plaza) < s5.WellWidening + 4f)
+                            continue;
+                        spare.Add((pts[i], (pts[i + 1] - pts[i - 1]).normalized, road, Vector2.Distance(pts[i], plaza)));
+                    }
+                }
+                spare.Sort((x, y) => x.d.CompareTo(y.d));
+                foreach (var spot in spare)
+                {
+                    if (yards.Count >= minimum)
+                        break;
+                    Vector2 normal = MapLabGeometry.LeftNormal(spot.t);
+                    for (int side = 1; side >= -1 && yards.Count < minimum; side -= 2)
+                        TryYard05(data, settings, ref rng, spot.road, spot.p, spot.t, normal * side, houseViews, barnViews, yards, outlines, placed, false);
+                }
+            }
             data.YardRects.AddRange(yards);
             AssignServiceBuildings(data, st, plaza, objectsBefore);
             BuildFenceGraph(data, settings, outlines, placed);

@@ -70,6 +70,12 @@ namespace KingdomSurvival.MapLabBridge
                 case "abandoned-yard": return "Burnt_House_A_FrontRight";
                 case "sanctuary": return "Old_Shrine_A";
                 case "apiary": return "Log_Beehive_A";
+                // Места без своего рисунка в пакете — знакомыми рисунками, чтобы
+                // на живой карте не оставалось кнопок-значков.
+                case "crossroads": return "Boundary_Post_A";
+                case "grove": return "Fruit_Tree_A*2+Berry_Bush_A";
+                case "spring": return "Map05_Rock_Round_A+Herb_Clump_A";
+                case "hunters-hut": return "Camp_Tent_A";
                 default: return string.Empty;
             }
         }
@@ -78,6 +84,10 @@ namespace KingdomSurvival.MapLabBridge
         {
             settings.General.MapSize = PlayWidth(plan);
             settings.General.Seed = plan.Seed;
+            // Пресеты MapLab «без деревни» (холм и уступ) держат нулевые поля и
+            // дома; у плана игры деревни есть всегда — им нужны поля.
+            if (settings.RoadsAndFields.FieldDensity < 0.05f)
+                settings.RoadsAndFields.FieldDensity = 0.7f;
             MapLabComposition c = Build(plan, settings, includeActors);
             settings.RegionPlan = c;
             return c;

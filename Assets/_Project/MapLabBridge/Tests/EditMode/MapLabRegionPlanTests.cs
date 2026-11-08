@@ -58,5 +58,20 @@ namespace KingdomSurvival.MapLabBridge.Tests
                 Object.DestroyImmediate(s);
             }
         }
+
+        // Окно «Генератор карты» строит ту же карту, что игра: размеры как на
+        // экране «Новая игра», деревням назначаются услуги из профилей поселений.
+        [Test]
+        public void GeneratorPreview_UsesGameSizesAndVillageServices()
+        {
+            Assert.AreEqual(CampaignStartOptions.SmallMapHexesAcross, global::KingdomSurvival.MapLabBridge.Editor.MapLabPlanHook.HexesFor(MapLabWorldSize.Small));
+            Assert.AreEqual(CampaignStartOptions.MediumMapHexesAcross, global::KingdomSurvival.MapLabBridge.Editor.MapLabPlanHook.HexesFor(MapLabWorldSize.Medium));
+            Assert.AreEqual(CampaignStartOptions.HugeMapHexesAcross, global::KingdomSurvival.MapLabBridge.Editor.MapLabPlanHook.HexesFor(MapLabWorldSize.Huge));
+            GeneratedWorldMap plan = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 41);
+            System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<string>> services = global::KingdomSurvival.MapLabBridge.Editor.MapLabPlanHook.PreviewServices(plan);
+            Assert.IsNotEmpty(services, "Деревням предпросмотра назначены услуги.");
+            Assert.IsTrue(services.Values.Any(r => r.Contains("merchant")), "Есть лавка.");
+            Assert.IsTrue(services.Keys.All(k => k.StartsWith(GeneratedMapPlaces.IdPrefix)), "ID — как у мест игры.");
+        }
     }
 }

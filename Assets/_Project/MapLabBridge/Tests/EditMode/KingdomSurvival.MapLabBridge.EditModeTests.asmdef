@@ -4,7 +4,8 @@
   "references": [
     "KingdomSurvival.MapLabBridge",
     "KingdomSurvival.Core",
-    "KingdomSurvival.MapLab"
+    "KingdomSurvival.MapLab",
+    "KingdomSurvival.MapLabBridge.Editor"
   ],
   "includePlatforms": [
     "Editor"

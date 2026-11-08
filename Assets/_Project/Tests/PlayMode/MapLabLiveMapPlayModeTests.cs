@@ -177,7 +177,7 @@ public sealed class MapLabLiveMapPlayModeTests
         {
             // Если окно или поселение открыты — выйти на карту.
             if (Get<bool>(main, "IsSettlementScreenOpen"))
-                Invoke(main, "CloseSettlementScreen");
+                Invoke(main, "OnSettlementExitClicked");
             yield return Frames(5);
             Rect rect = MapLabGameLive.Current.Buildings.First(b => b.SettlementId == villageId && b.Role == role).Percent;
             yield return ZoomTo(main, rect.center.x, rect.center.y, 0.55f);
@@ -328,28 +328,25 @@ public sealed class MapLabLiveMapPlayModeTests
         Assert.AreEqual(village.Id, expedition.LocationId, "Цель пути — эта деревня.");
         Assert.AreEqual("merchant", Field<string>(main, "worldMapPendingRole"), "После входа — к лавке.");
 
-        // Дорогу пропускаем: отряд у входа, прибытие открывает вход.
-        expedition.CurrentMapXPercent = village.MapXPercent;
-        expedition.CurrentMapYPercent = village.MapYPercent;
-        expedition.Phase = CommanderState.AtLocation;
-        expedition.Route = new List<MapPointData> { new MapPointData(village.MapXPercent, village.MapYPercent) };
-        expedition.RouteIndex = 0;
-        expedition.RemainingRouteCells = 0;
-        yield return Frames(5);
-        Invoke(main, "TryOpenLocationInteraction", village.Id);
-        yield return Frames(10);
-        if (Get<bool>(main, "IsLocationInteractionActive"))
-            Invoke(main, "CloseLocationInteraction");
-        yield return Frames(10);
-        Assert.IsTrue(SettlementCampService.IsCommanderInside(campaign), "Отряд вошёл в поселение.");
-
-        // Герой — фигурка набора MapLab; после входа сам идёт к лавке.
+        // Отряд идёт прямо к двери лавки (цель пути — дверь, не центр деревни).
+        MapPointData target = expedition.Route[expedition.Route.Count - 1];
+        Vector2 shopDoor = MapLabGameLive.Current.Buildings.First(b => b.SettlementId == village.Id && b.Role == "merchant").Door;
+        Assert.Less(Mathf.Abs(target.XPercent - shopDoor.x) + Mathf.Abs(target.YPercent - shopDoor.y), 0.8f, "Путь ведёт к двери лавки, а не в центр поселения.");
         Image hero = root.Q<Image>("world-map-hero-figure");
         Assert.IsNotNull(hero);
         Assert.IsTrue(MapLabGameLive.HeroFrame(0, out Texture2D frame, out _, out _, out _), "Есть кадры фишки MapLab.");
-        Assert.IsNotNull(hero.image, "Герой нарисован кадром фишки MapLab.");
         yield return Frames(30);
+        Assert.IsNotNull(hero.image, "Герой нарисован кадром фишки MapLab.");
         yield return Capture(main, "live_04_walking");
+        // Дорогу пропускаем: отряд у двери, прибытие — вход и окно лавки.
+        expedition.CurrentMapXPercent = target.XPercent;
+        expedition.CurrentMapYPercent = target.YPercent;
+        expedition.Phase = CommanderState.AtLocation;
+        expedition.Route = new List<MapPointData> { new MapPointData(target.XPercent, target.YPercent) };
+        expedition.RouteIndex = 0;
+        expedition.RemainingRouteCells = 0;
+        Invoke(main, "TryOpenLocationInteraction", village.Id);
+        Assert.IsNull(root.Q<VisualElement>("settlement-map-panel")?.resolvedStyle.display == DisplayStyle.Flex ? "плашка" : null, "Плашки «Поселение / Уйти» нет.");
         float started2 = Time.realtimeSinceStartup;
         while (!Get<bool>(main, "IsSettlementScreenOpen") && Time.realtimeSinceStartup - started2 < 40f)
             yield return null;
@@ -357,5 +354,10 @@ public sealed class MapLabLiveMapPlayModeTests
         yield return Frames(5);
         Assert.IsTrue(Get<bool>(main, "IsSettlementTradeOpen"), "Клик по лавке — сразу торговля.");
         yield return Capture(main, "live_05_service");
+        // Закрыли окно — отряд на карте у лавки, не «внутри поселения».
+        Invoke(main, "OnSettlementExitClicked");
+        yield return Frames(5);
+        Assert.IsFalse(Get<bool>(main, "IsSettlementScreenOpen"));
+        Assert.IsFalse(SettlementCampService.IsCommanderInside(campaign), "После окна здания отряд снова на карте.");
     }
 }

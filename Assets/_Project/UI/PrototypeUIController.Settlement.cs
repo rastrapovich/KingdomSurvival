@@ -291,10 +291,11 @@ public partial class PrototypeUIController
             return;
         }
         string locationId = settlementLocationId;
-        // 12У-G: из окна услуги — обратно на карту поселения (отряд внутри);
-        // уйти из поселения — кнопка «Уйти» на карте.
-        if (SettlementMapMode(locationId))
+        // 12У-G: живая карта — закрыли окно здания, и отряд снова на карте
+        // у этого здания (выход из поселения молча, без лагеря и «Уйти»).
+        if (SettlementMapMode(locationId) && !SettlementCampService.HasCamp(gameState))
         {
+            SettlementCampService.ReturnToCamp(gameState);
             CloseSettlementScreen();
             Autosave();
             return;

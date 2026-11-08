@@ -58,6 +58,10 @@ public partial class PrototypeUIController
         {
             if (IsSettlementScreenOpen)
                 return false;
+            // Отряд идёт к двери здания этого поселения — прибытие обрабатывает
+            // подход к зданию (вход и окно здания), а не общий вход.
+            if (worldMapPendingSettlement == location.Id && !string.IsNullOrEmpty(worldMapPendingRole))
+                return true;
             if (SettlementCampService.InsideLocationId(gameState) == location.Id)
             {
                 // 12У-G: внутри поселения на живой карте — здания, а не общий экран.

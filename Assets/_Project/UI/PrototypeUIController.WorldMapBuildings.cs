@@ -273,21 +273,27 @@ public partial class PrototypeUIController
         bool isInside = !string.IsNullOrEmpty(insideId) && SettlementMapMode(insideId);
         // Здания всех известных поселений — цели всегда: клик издалека ведёт
         // отряд в поселение, у входа — вход, внутри — герой идёт к двери.
-        if (!string.IsNullOrEmpty(worldMapPendingRole))
+        // Отряд идёт прямо к двери выбранного здания (не через центр
+        // поселения): дошёл и встал — вход и окно этого здания.
+        if (!string.IsNullOrEmpty(worldMapPendingRole) && gameState != null && !IsSettlementScreenOpen)
         {
-            if (isInside && worldMapPendingSettlement == insideId && worldMapHeroLocalActive && !IsSettlementScreenOpen)
-            {
-                string pending = worldMapPendingRole;
-                worldMapPendingRole = null;
-                StartWalkToBuilding(insideId, pending);
-            }
-            else if (!isInside && (gameState == null || !gameState.HasActiveExpedition || gameState.ActiveExpedition.LocationId != worldMapPendingSettlement))
+            ExpeditionData expedition = gameState.ActiveExpedition;
+            if (expedition == null || expedition.LocationId != worldMapPendingSettlement)
             {
                 // Игрок отдал другой приказ — к зданию больше не идём.
                 worldMapPendingRole = null;
                 worldMapPendingSettlement = null;
             }
+            else if (expedition.Phase == CommanderState.AtLocation && !ContinuousSimulationSystem.IsExpeditionRunning(gameState))
+            {
+                string role = worldMapPendingRole, settlement = worldMapPendingSettlement;
+                worldMapPendingRole = null;
+                worldMapPendingSettlement = null;
+                EnterBuildingNow(settlement, role);
+            }
         }
+        // Цели зданий — у поселений, видимых на карте, и у тех, чьи здания
+        // уже на разведанной земле (здание видно — значит, к нему можно идти).
         string key = VisibleBuildingSettlementsKey();
         if (key != worldMapBuildingsShownFor || !ReferenceEquals(worldMapBuildingsShownResult, worldMapMapLab))
             BuildWorldMapBuildingTargets(key);
@@ -300,7 +306,9 @@ public partial class PrototypeUIController
         PlaceWorldMapVillageNames(show, isInside ? insideId : null);
         if (settlementMapPanel != null)
         {
-            settlementMapPanel.style.display = isInside && !screen ? DisplayStyle.Flex : DisplayStyle.None;
+            // Плашка «Поселение / Уйти» не показывается: в поселение входят
+            // через его здания, выходят — закрыв окно.
+            settlementMapPanel.style.display = DisplayStyle.None;
             if (isInside && settlementMapTitle != null)
                 settlementMapTitle.text = gameState.FindLocation(insideId)?.Name ?? "Поселение";
         }
@@ -317,10 +325,53 @@ public partial class PrototypeUIController
             if (ids.Contains(id))
                 continue;
             LocationData location = gameState.FindLocation(id);
-            if (location != null && location.IsVisibleOnMap)
+            if (location == null)
+                continue;
+            bool seen = location.IsVisibleOnMap;
+            if (!seen)
+                foreach ((string bid, string _, Rect r) in worldMapMapLab.Buildings)
+                    if (bid == id && WorldMapFog.IsExploredAtPercent(gameState, r.center.x, r.yMax))
+                    {
+                        seen = true;
+                        break;
+                    }
+            if (seen)
                 ids.Add(id);
         }
         return string.Join(",", ids);
+    }
+
+
+    // Точка двери здания (проценты полотна).
+    private bool WorldMapDoor(string settlementId, string role, out Vector2 door)
+    {
+        door = Vector2.zero;
+        MapLabGameLive.World world = MapLabGameLive.Current;
+        if (world == null)
+            return false;
+        foreach ((string id, string r, Rect _, Vector2 d) in world.Buildings)
+            if (id == settlementId && r == role)
+            {
+                door = d;
+                return true;
+            }
+        return false;
+    }
+
+    // Отряд у двери: войти в поселение (всем, без экрана) и открыть окно здания.
+    private void EnterBuildingNow(string settlementId, string role)
+    {
+        if (SettlementCampService.InsideLocationId(gameState) != settlementId)
+        {
+            if (!SettlementCampService.Enter(gameState, SettlementCampService.Companions(gameState), out string reason))
+            {
+                // Кого-то не пускают — прежний вход с выбором, кто идёт.
+                if (!TryOpenLocationInteraction(settlementId))
+                    AddReport(reason);
+                return;
+            }
+        }
+        OpenSettlementFromMap(role);
     }
 
     private void BuildWorldMapBuildingTargets(string key)
@@ -436,35 +487,31 @@ public partial class PrototypeUIController
     {
         if (!string.IsNullOrEmpty(worldMapApproachRole) || IsSettlementScreenOpen || gameState == null || isGameOver)
             return;
-        string inside = SettlementCampService.InsideLocationId(gameState);
-        if (inside == settlementId)
-        {
-            StartWalkToBuilding(settlementId, role);
-            return;
-        }
         LocationData location = gameState.FindLocation(settlementId);
-        if (location == null)
+        if (location == null || !WorldMapDoor(settlementId, role, out Vector2 door))
             return;
-        if (!string.IsNullOrEmpty(inside))
-        {
-            AddReport("Отряд в поселении «" + (gameState.FindLocation(inside)?.Name ?? "") + "»: сначала «Уйти», потом — в «" + location.Name + "».");
-            return;
-        }
+        // Здание видно — поселение известно.
+        location.IsVisibleOnMap = true;
+        location.IsDiscovered = true;
         ExpeditionData expedition = gameState.ActiveExpedition;
         if (expedition != null && (gameState.HasPendingExpeditionDecision || expedition.IsLocationResearchInProgress))
             return;
-        worldMapPendingRole = role;
-        worldMapPendingSettlement = settlementId;
-        if (expedition != null && expedition.Phase == CommanderState.AtLocation && expedition.LocationId == settlementId && !expedition.HasTimedActivity)
+        // Герой ходит по карте сам, без входа в поселение и выхода из него:
+        // пребывание внутри снимается молча (лагерь с ожидающими — как прежде).
+        if (SettlementCampService.HasVisit(gameState) && !SettlementCampService.HasCamp(gameState))
+            SettlementCampService.ReturnToCamp(gameState);
+        // Уже у этой двери — сразу внутрь.
+        if (expedition != null && expedition.Phase == CommanderState.AtLocation && expedition.LocationId == settlementId
+            && HeroNearWorldMapPoint(door.x, door.y, 0.4) && !ContinuousSimulationSystem.IsExpeditionRunning(gameState))
         {
-            TryOpenLocationInteraction(settlementId);
+            EnterBuildingNow(settlementId, role);
             return;
         }
-        ShowWorldMapClickMarker(location.MapXPercent, location.MapYPercent);
-        IssueContinuousMapOrder(location.MapXPercent, location.MapYPercent, location.Id);
-        if (gameState.HasActiveExpedition && gameState.ActiveExpedition.LocationId == settlementId)
-            AddReport("Отряд идёт в «" + location.Name + "»: " + ServiceRoleTitle(role).ToLowerInvariant() + ".");
-        else
+        worldMapPendingRole = role;
+        worldMapPendingSettlement = settlementId;
+        ShowWorldMapClickMarker(door.x, door.y);
+        IssueContinuousMapOrder(door.x, door.y, location.Id);
+        if (!gameState.HasActiveExpedition || gameState.ActiveExpedition.LocationId != settlementId)
         {
             worldMapPendingRole = null;
             worldMapPendingSettlement = null;
@@ -489,7 +536,24 @@ public partial class PrototypeUIController
         if (worldMapViewport == null)
             return;
         // Подпись: герб стороны, которой подчиняется поселение (если есть), и название.
-        VisualElement plate = new VisualElement { name = "world-map-village-plate-" + location.Id, pickingMode = PickingMode.Ignore };
+        // На дальнем отдалении подпись — вход в поселение целиком (общий
+        // экран: люди, ночлег, все дела): отряд идёт туда, прибытие открывает.
+        VisualElement plate = new VisualElement { name = "world-map-village-plate-" + location.Id, pickingMode = PickingMode.Position };
+        string plateId = location.Id;
+        plate.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+        plate.RegisterCallback<ClickEvent>(evt =>
+        {
+            evt.StopPropagation();
+            if (gameState == null || isGameOver || IsSettlementScreenOpen)
+                return;
+            worldMapPendingRole = null;
+            worldMapPendingSettlement = null;
+            ExpeditionData e = gameState.ActiveExpedition;
+            if (e != null && e.Phase == CommanderState.AtLocation && e.LocationId == plateId && !e.HasTimedActivity)
+                TryOpenLocationInteraction(plateId);
+            else
+                SelectWorldMapLocation(plateId);
+        });
         plate.style.position = Position.Absolute;
         plate.style.left = 0;
         plate.style.top = 0;

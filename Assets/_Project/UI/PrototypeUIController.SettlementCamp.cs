@@ -135,12 +135,11 @@ public partial class PrototypeUIController
         CloseLocationInteraction();
         // 12У-G: на живой карте MapLab поселение показано зданиями — экран
         // не открывается, отряд стоит внутри и идёт к выбранному зданию.
-        if (!SettlementMapMode(location.Id))
+        // Живая карта: к зданию — окно этого здания (его открывает подход к
+        // двери); вход без здания (подпись деревни, прежний значок) — общий
+        // экран поселения. Камера не прыгает.
+        if (!SettlementMapMode(location.Id) || string.IsNullOrEmpty(worldMapPendingRole))
             OpenSettlementScreen(location.Id);
-        else
-            FocusWorldMapOnSettlement(location);
-        if (SettlementMapMode(location.Id) && string.IsNullOrEmpty(worldMapPendingRole))
-            AddReport("Вы в поселении «" + location.Name + "»: выберите здание на карте или «Поселение» вверху.");
         Autosave();
     }
 

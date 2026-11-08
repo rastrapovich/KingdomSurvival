@@ -21,11 +21,13 @@ namespace KingdomSurvival.MapLab.Editor
 
         private static readonly string[] Categories =
         {
-            "Все", "Деревья и кусты", "Трава и камыш", "Камни", "Скалы", "Дома и постройки", "Реквизит", "Ограды", "Мосты", "Фигуры", "Пятна и поверхность", "Процедурные",
+            "Все", "Деревья и кусты", "Трава и камыш", "Камни", "Скалы", "Дома и постройки", "Реквизит", "Ограды", "Мосты", "Фигуры", "Знамёна и знаки", "Пятна и поверхность", "Процедурные",
         };
 
         private static readonly string[] RegionNames = { "Холм и уступ", "Лесное озеро", "Речная долина" };
         private static readonly string[] SizeNames = { "Малый · 192", "Средний · 256", "Большой · 384", "Очень большой · 512 (проверочный)" };
+        // Регион из генератора игры — те же размеры, что на экране «Новая игра».
+        private static readonly string[] PlanSizeNames = { "Маленькая · 50 клеток", "Средняя · 100 клеток", "Большая · 140 клеток", "Очень большая · 180 клеток" };
         private static readonly string[] QualityNames = { "Быстро", "Стандарт", "Высокое" };
         private static readonly string[] DiscoveryNames = { "Редко", "Обычно", "Насыщенно" };
         private static readonly string[] VillageNames = { "Авто (от освоенности)", "Малая · 3–6 дворов", "Средняя · 7–12", "Крупная · 12–18, с переулками" };
@@ -351,8 +353,10 @@ namespace KingdomSurvival.MapLab.Editor
                 }
             }
             EditorGUI.BeginChangeCheck();
-            a.WorldSize = (MapLabWorldSize)EditorGUILayout.Popup(new GUIContent("Размер мира", "Сторона мира в условных единицах. Больше 512 — после подгрузки участков (этап C)."), (int)a.WorldSize, SizeNames);
-            if (!MapLabAuthor.Verified(a.WorldSize))
+            a.WorldSize = planMode
+                ? (MapLabWorldSize)EditorGUILayout.Popup(new GUIContent("Размер карты", "Как на экране «Новая игра»: клеток по ширине карты."), (int)a.WorldSize, PlanSizeNames)
+                : (MapLabWorldSize)EditorGUILayout.Popup(new GUIContent("Размер мира", "Сторона мира в условных единицах. Больше 512 — после подгрузки участков (этап C)."), (int)a.WorldSize, SizeNames);
+            if (!planMode && !MapLabAuthor.Verified(a.WorldSize))
                 EditorGUILayout.HelpBox("Проверочный размер: полная карта держится в памяти целиком, для игры не проверен.", MessageType.Warning);
             a.Relief = Slider("Выраженность рельефа", "Спокойный ← → пересечённый: высоты, холмы и уступы.", a.Relief);
             a.Water = Slider("Количество воды", "Мало ← → много: охват озёр, уровень и ширина реки.", a.Water);
@@ -598,14 +602,23 @@ namespace KingdomSurvival.MapLab.Editor
         private IEnumerable<MapLabArtSet> ActiveSets()
         {
             HashSet<MapLabArtSet> sets = new HashSet<MapLabArtSet>();
-            foreach (MapLabArtSet set in new[] { view.ObjectArtSet, view.ResolvedArtSet05, view.ResolvedArtSet06, view.ArtSet })
+            // Все наборы карты: деревья и дома, этап 05, скалы 06, выбранные места
+            // и фракции (пакеты POI), фишка героя.
+            foreach (MapLabArtSet set in new[] { view.ObjectArtSet, view.ResolvedArtSet05, view.ResolvedArtSet06, view.ArtSet, view.ResolvedArtSetPoi, view.ActiveMarkerSet?.ArtSet })
                 if (set != null)
                     sets.Add(set);
             return sets;
         }
 
+        private static readonly string[] FigurePrefixes = { "Worker_", "Caravan_", "Patrol_", "Bandit_", "Wandering_Master_", "Faction_", "Hero" };
+
         private static string CategoryOf(MapLabArtEntry e)
         {
+            string id = e.Id ?? string.Empty;
+            if (FigurePrefixes.Any(p => id.StartsWith(p)))
+                return "Фигуры";
+            if (id.StartsWith("Banner_") || id.StartsWith("Emblem_") || id.StartsWith("Event_") || id.StartsWith("Portal_"))
+                return "Знамёна и знаки";
             switch (e.Category)
             {
                 case MapLabArtCategory.Vegetation:
@@ -726,8 +739,28 @@ namespace KingdomSurvival.MapLab.Editor
             EditorGUILayout.EndScrollView();
         }
 
+        // Вид каталога: карточки или поле сравнения (все рисунки в одном ряду
+        // на земле, в мировом масштабе, рядом с фигуркой героя).
+        private bool fieldMode;
+        private float fieldPixelsPerUnit = 24f;
+        private Vector2 fieldScroll;
+
         private void DrawAssetGrid(Rect rect)
         {
+            Rect bar = new Rect(rect.x, rect.y, rect.width, 22f);
+            EditorGUI.DrawRect(bar, new Color(0.15f, 0.15f, 0.15f));
+            fieldMode = GUI.Toolbar(new Rect(bar.x + 4f, bar.y + 2f, 260f, 18f), fieldMode ? 1 : 0, new[] { "Карточки", "Поле сравнения" }, EditorStyles.miniButton) == 1;
+            if (fieldMode)
+            {
+                GUI.Label(new Rect(bar.x + 272f, bar.y + 2f, 60f, 18f), "Масштаб", EditorStyles.miniLabel);
+                fieldPixelsPerUnit = GUI.HorizontalSlider(new Rect(bar.x + 330f, bar.y + 5f, 140f, 14f), fieldPixelsPerUnit, 6f, 80f);
+            }
+            rect = new Rect(rect.x, rect.y + 22f, rect.width, rect.height - 22f);
+            if (fieldMode)
+            {
+                DrawAssetField(rect);
+                return;
+            }
             EditorGUI.DrawRect(rect, new Color(0.19f, 0.19f, 0.19f));
             if (category == Categories.Length - 1)
             {
@@ -779,6 +812,133 @@ namespace KingdomSurvival.MapLab.Editor
                 }
             }
             GUI.EndScrollView();
+        }
+
+        // Высота рисунка в мире так, как его ставит генератор (детали мест —
+        // с единым масштабом людей и построек; размер ассета учитывается).
+        private float FieldHeight(MapLabArtEntry e) =>
+            e.HasTexture ? MapLabArtBuilder.FeatureWorldHeight(e) : 0f;
+
+        private void DrawAssetField(Rect rect)
+        {
+            EditorGUI.DrawRect(rect, new Color(0.58f, 0.62f, 0.36f));
+            List<Card> visible = cards.Where(Visible).Where(c => c.Views[0].Entry.HasTexture).ToList();
+            // Первой — фигурка героя: по ней сравнивают рост людей и построек.
+            MapLabArtEntry hero = view.ActiveMarkerSet?.View(MapLabMarkerDirection.Front);
+            float ppu = fieldPixelsPerUnit;
+            float maxHeight = 1f;
+            foreach (Card c in visible)
+                maxHeight = Mathf.Max(maxHeight, FieldHeight(c.Views[0].Entry));
+            if (hero != null && hero.HasTexture)
+                maxHeight = Mathf.Max(maxHeight, hero.CardHeight);
+            float ground = maxHeight * ppu + 40f;
+            float x = 12f;
+            List<(Rect R, Card C, MapLabArtEntry E)> placed = new List<(Rect, Card, MapLabArtEntry)>();
+            void Place(Card c, MapLabArtEntry e, float h)
+            {
+                float w = h * e.Aspect * ppu;
+                float hp = h * ppu;
+                Rect r = new Rect(x, ground - hp * (1f - e.Pivot.y), w, hp);
+                placed.Add((r, c, e));
+                x += Mathf.Max(w * Mathf.Max(0.3f, e.SolidRect.width), 24f) + 16f;
+            }
+            if (hero != null && hero.HasTexture)
+                Place(null, hero, hero.CardHeight);
+            foreach (Card c in visible)
+                Place(c, c.Views[0].Entry, FieldHeight(c.Views[0].Entry));
+            Rect content = new Rect(0f, 0f, Mathf.Max(rect.width, x + 20f), Mathf.Max(rect.height - 16f, ground + 60f));
+            fieldScroll = GUI.BeginScrollView(rect, fieldScroll, content);
+            // Линейка: каждая единица мира — тонкая линия, каждые 5 — с подписью.
+            for (int u = 0; u <= Mathf.CeilToInt(maxHeight); u++)
+            {
+                float y = ground - u * ppu;
+                EditorGUI.DrawRect(new Rect(0f, y, content.width, u % 5 == 0 ? 1.5f : 0.5f), new Color(0f, 0f, 0f, u % 5 == 0 ? 0.35f : 0.15f));
+                if (u % 5 == 0 && u > 0)
+                    GUI.Label(new Rect(fieldScroll.x + 2f, y - 14f, 60f, 14f), u + " ед.", EditorStyles.miniLabel);
+            }
+            EditorGUI.DrawRect(new Rect(0f, ground, content.width, content.height - ground), new Color(0.47f, 0.5f, 0.3f));
+            foreach ((Rect r, Card c, MapLabArtEntry e) in placed)
+            {
+                if (c != null && focus == c)
+                    EditorGUI.DrawRect(new Rect(r.x - 2f, r.y - 2f, r.width + 4f, r.height + 4f), new Color(0.24f, 0.37f, 0.55f, 0.6f));
+                GUI.DrawTexture(r, e.Texture, ScaleMode.StretchToFill, true);
+                GUI.Label(new Rect(r.x, ground + 4f, Mathf.Max(80f, r.width), 14f), c == null ? "Герой" : c.Title, EditorStyles.miniLabel);
+                GUI.Label(new Rect(r.x, ground + 18f, Mathf.Max(80f, r.width), 14f), FieldHeight(e).ToString("0.0") + " ед.", EditorStyles.centeredGreyMiniLabel);
+                if (c != null && Event.current.type == EventType.MouseDown && r.Contains(Event.current.mousePosition))
+                {
+                    focus = c;
+                    focusView = 0;
+                    Event.current.Use();
+                    Repaint();
+                }
+            }
+            GUI.EndScrollView();
+        }
+
+        // Удалить ассет из проекта: запись из всех наборов и PNG (если на него
+        // больше ничто не ссылается). Действие отменить нельзя (Undo не вернёт файл).
+        private void DeleteAssetEverywhere(MapLabArtSet ownerSet, MapLabArtEntry e)
+        {
+            if (e == null)
+                return;
+            MapLabMarkerSet markers = view.ActiveMarkerSet;
+            if (markers != null && markers.ViewIds != null && markers.ViewIds.Contains(e.Id))
+            {
+                EditorUtility.DisplayDialog("Генератор карты", $"«{e.Id}» — кадр фишки героя; его нельзя удалить отсюда.", "Понятно");
+                return;
+            }
+            int onMap = view.Usage.TryGetValue(e, out int n) ? n : 0;
+            string path = e.Texture != null ? AssetDatabase.GetAssetPath(e.Texture) : string.Empty;
+            string message = $"Удалить «{e.Id}» из проекта?\n\n" +
+                             (onMap > 0 ? $"Сейчас на карте: {onMap}. После перестройки их не будет.\n" : "Сейчас на карте не используется.\n") +
+                             (string.IsNullOrEmpty(path) ? "" : $"Файл рисунка будет удалён: {path}\n") +
+                             "Если ID указан в правилах генератора (детали мест), такая деталь просто перестанет рисоваться.\n\nОтменить нельзя.";
+            if (!EditorUtility.DisplayDialog("Удалить ассет", message, "Удалить", "Отмена"))
+                return;
+            int removed = 0;
+            foreach (string guid in AssetDatabase.FindAssets("t:MapLabArtSet"))
+            {
+                MapLabArtSet set = AssetDatabase.LoadAssetAtPath<MapLabArtSet>(AssetDatabase.GUIDToAssetPath(guid));
+                if (set == null || set.Entries == null)
+                    continue;
+                int before = set.Entries.Count;
+                set.Entries.RemoveAll(x => x != null && (x.Id == e.Id || (e.Texture != null && x.Texture == e.Texture)));
+                if (set.Entries.Count != before)
+                {
+                    removed += before - set.Entries.Count;
+                    EditorUtility.SetDirty(set);
+                }
+            }
+            AssetDatabase.SaveAssets();
+            bool fileDeleted = false;
+            if (!string.IsNullOrEmpty(path))
+            {
+                // Файл удаляется, только если другие ассеты на него не ссылаются.
+                string fileGuid = AssetDatabase.AssetPathToGUID(path);
+                bool referenced = false;
+                foreach (string guid in AssetDatabase.FindAssets("t:ScriptableObject t:Prefab t:Material"))
+                {
+                    string p = AssetDatabase.GUIDToAssetPath(guid);
+                    if (p == path || !p.StartsWith("Assets/"))
+                        continue;
+                    foreach (string dep in AssetDatabase.GetDependencies(p, false))
+                        if (dep == path)
+                        {
+                            referenced = true;
+                            break;
+                        }
+                    if (referenced)
+                        break;
+                }
+                if (!referenced && !string.IsNullOrEmpty(fileGuid))
+                    fileDeleted = AssetDatabase.DeleteAsset(path);
+            }
+            focus = null;
+            selected.Clear();
+            RebuildCards();
+            objectsPending = true;
+            status = $"«{e.Id}» удалён: записей {removed}" + (fileDeleted ? ", файл удалён." : string.IsNullOrEmpty(path) ? "." : ", файл оставлен — на него ссылаются другие ассеты.");
+            Repaint();
         }
 
         private static void ProceduralRow(string title, string where)
@@ -855,6 +1015,15 @@ namespace KingdomSurvival.MapLab.Editor
             }
             if (GUILayout.Button(new GUIContent("Найти на карте", "Навести предпросмотр на один экземпляр (вкладка «Карта»).")))
                 FindOnMap(e);
+            GUI.backgroundColor = new Color(1f, 0.6f, 0.55f);
+            if (GUILayout.Button(new GUIContent("Удалить из проекта", "Убрать ассет из всех наборов и удалить его файл (если на файл больше ничто не ссылается).")))
+            {
+                GUI.backgroundColor = Color.white;
+                DeleteAssetEverywhere(set, e);
+                EditorGUILayout.EndScrollView();
+                GUIUtility.ExitGUI();
+            }
+            GUI.backgroundColor = Color.white;
 
             extraOpen = EditorGUILayout.Foldout(extraOpen, "Дополнительно", true);
             if (extraOpen)

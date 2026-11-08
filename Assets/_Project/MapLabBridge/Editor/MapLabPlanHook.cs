@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using KingdomSurvival.MapLab;
 using KingdomSurvival.WorldMapVisual;
 using UnityEditor;
@@ -25,10 +26,11 @@ namespace KingdomSurvival.MapLabBridge.Editor
         {
             switch (size)
             {
-                case MapLabWorldSize.Small: return 40;
-                case MapLabWorldSize.Large: return 80;
-                case MapLabWorldSize.Huge: return 100;
-                default: return 60;
+                // Те же размеры, что на экране игры «Новая игра».
+                case MapLabWorldSize.Small: return CampaignStartOptions.SmallMapHexesAcross;
+                case MapLabWorldSize.Large: return CampaignStartOptions.LargeMapHexesAcross;
+                case MapLabWorldSize.Huge: return CampaignStartOptions.HugeMapHexesAcross;
+                default: return CampaignStartOptions.MediumMapHexesAcross;
             }
         }
 
@@ -62,7 +64,15 @@ namespace KingdomSurvival.MapLabBridge.Editor
             p.LakesShare = d.LakesShare * MapLabAuthor.Factor(a.Water, 0.35f, 2f);
             p.RiverCount = Mathf.RoundToInt(d.RiverCount * MapLabAuthor.Factor(a.Water, 0.34f, 1.67f));
             p.ForestShare = d.ForestShare * MapLabAuthor.Factor(a.Forest, 0.3f, 1.9f);
-            p.VillageCount = Mathf.Max(1, Mathf.RoundToInt(d.VillageCount * MapLabAuthor.Factor(a.Settlement, 0.4f, 1.6f) * (p.HexesAcross / 100f) * (p.HexesAcross / 100f) * 1.6f + 1f));
+            // Деревни и опасные группы — по тем же правилам, что у новой партии
+            // игры (CampaignMapOptions): на 100 клетках — как в ассете.
+            double area = System.Math.Max(1.0, System.Math.Pow(p.HexesAcross / 100.0, 1.5));
+            p.VillageCount = Mathf.Max(2, Mathf.RoundToInt((float)(p.VillageCount * area) * MapLabAuthor.Factor(a.Settlement, 0.5f, 1.6f)));
+            double areaLinear = System.Math.Max(1.0, p.HexesAcross / 100.0);
+            if (p.Groups != null)
+                foreach (WorldMapGroupRule g in p.Groups)
+                    if (g != null && g.Role == WorldMapGroupRule.Band)
+                        g.Count = Mathf.Max(1, Mathf.RoundToInt((float)(g.Count * areaLinear)));
             p.FieldDensity = d.FieldDensity * MapLabAuthor.Factor(a.Settlement, 0.5f, 1.5f);
             p.Discoveries = (WorldMapDiscoveryRate)(int)a.Discoveries;
             p.RouteConnectivity = a.Connectivity;
@@ -117,10 +127,67 @@ namespace KingdomSurvival.MapLabBridge.Editor
         {
             WorldMapGenerationSettings p = PlanSettings(s);
             GeneratedWorldMap plan = WorldMapGenerator.Generate(p, s.General.Seed);
-            MapLabRegionPlan.Apply(plan, s);
+            MapLabComposition composition = MapLabRegionPlan.Apply(plan, s);
+            // Здания услуг — как в игре: профили поселений назначаются той же
+            // настройкой партии, роли — по действиям профиля.
+            foreach (KeyValuePair<string, List<string>> pair in PreviewServices(plan))
+                foreach (MapLabComposition.Settlement st in composition.Settlements)
+                    if (st.Id == pair.Key)
+                        st.Services.AddRange(pair.Value);
             if (s.WorldSide > 600f && s.General.Quality != MapLabQuality.Samples513)
                 s.General.Quality = MapLabQuality.Samples513;
             return Report(plan);
+        }
+
+        // Услуги деревень плана, как в новой партии: временная партия по плану
+        // (профили поселений из Базы поселений), роли — по типам действий.
+        public static Dictionary<string, List<string>> PreviewServices(GeneratedWorldMap plan)
+        {
+            Dictionary<string, List<string>> services = new Dictionary<string, List<string>>();
+            try
+            {
+                KingdomSurvival.SettlementDatabase.SettlementDatabaseRuntime.ApplyFromResources();
+                GameState state = new CampaignSetup { WorldSeed = plan.Seed, MapHexesAcross = plan.HexesAcross }.CreateCampaign(null, null, plan);
+                string[] order = { "tavern", "merchant", "board", "healer", "elder" };
+                foreach (SettlementInstanceData instance in state.Settlements.Instances)
+                {
+                    SettlementProfileDefinition profile = SettlementCatalog.Current.FindProfile(instance.ProfileId);
+                    if (profile?.Actions == null)
+                        continue;
+                    List<string> roles = new List<string>();
+                    foreach (string role in order)
+                        foreach (SettlementActionDefinition action in profile.Actions)
+                            if (action != null && RoleOf(action.Type) == role)
+                            {
+                                roles.Add(role);
+                                break;
+                            }
+                    if (roles.Count > 0)
+                        services[instance.LocationId] = roles;
+                }
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogWarning("Генератор карты: услуги деревень для предпросмотра не назначены — " + exception.Message);
+            }
+            finally
+            {
+                WorldMapNavigation.ConfigureDefaultTerrain();
+            }
+            return services;
+        }
+
+        private static string RoleOf(SettlementActionType type)
+        {
+            switch (type)
+            {
+                case SettlementActionType.Tavern: return "tavern";
+                case SettlementActionType.Trade: return "merchant";
+                case SettlementActionType.NoticeBoard: return "board";
+                case SettlementActionType.Healer: return "healer";
+                case SettlementActionType.Dialogue: return "elder";
+                default: return null;
+            }
         }
 
         public static MapLabPlanReport Report(GeneratedWorldMap plan)

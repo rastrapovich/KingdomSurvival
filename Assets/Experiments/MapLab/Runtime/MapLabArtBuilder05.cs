@@ -448,14 +448,16 @@ namespace KingdomSurvival.MapLab
 
         private static float? NormalizedScale(MapLabArtEntry e, FeatureScale norm)
         {
+            // «Размер» ассета (SizeScale) — поправка поверх единого масштаба.
+            float own = Mathf.Max(0.05f, e.SizeScale);
             if (IsFigure(e) && norm.FigureHeight > 0.01f)
-                return norm.FigureHeight / Mathf.Max(0.01f, e.CardHeight);
+                return norm.FigureHeight / Mathf.Max(0.01f, e.CardHeight) * own;
             if (e.Category == MapLabArtCategory.Building && norm.HouseSolidWidth > 0.01f)
             {
                 float w = e.CardHeight * e.Aspect * Mathf.Max(0.05f, e.SolidRect.width);
                 float h = e.CardHeight * Mathf.Max(0.05f, e.SolidRect.height);
                 bool tall = w < h * 0.8f;
-                return tall ? norm.HouseSolidHeight * 1.5f / Mathf.Max(0.01f, h) : norm.HouseSolidWidth / Mathf.Max(0.01f, w);
+                return (tall ? norm.HouseSolidHeight * 1.5f / Mathf.Max(0.01f, h) : norm.HouseSolidWidth / Mathf.Max(0.01f, w)) * own;
             }
             return null;
         }

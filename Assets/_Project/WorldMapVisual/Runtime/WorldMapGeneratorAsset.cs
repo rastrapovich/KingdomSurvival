@@ -65,6 +65,17 @@ namespace KingdomSurvival.WorldMapVisual
             return WorldMapGenerator.Generate(settings, seed);
         }
 
+        // 12У-H: карта партии с выбором игрока на экране «Новая игра».
+        public GeneratedWorldMap Generate(int seed, int hexesAcross, CampaignMapOptions options)
+        {
+            WorldMapGenerationSettings settings = Settings.Clone();
+            if (options != null)
+                options.ApplyTo(settings, hexesAcross);
+            else if (hexesAcross > 0)
+                settings.HexesAcross = hexesAcross;
+            return WorldMapGenerator.Generate(settings, seed);
+        }
+
         public WorldMapGeneratorPreset FindPreset(string id) =>
             string.IsNullOrEmpty(id) ? null : Presets.Find(preset => preset != null && preset.Id == id);
 

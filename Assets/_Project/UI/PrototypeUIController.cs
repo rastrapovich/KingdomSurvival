@@ -258,7 +258,7 @@ public partial class PrototypeUIController : MonoBehaviour
         if (generator != null && generator.UseForFreePlay)
         {
             setup.WorldSeed ??= Guid.NewGuid().GetHashCode();
-            generatedMap = generator.Generate(setup.WorldSeed.Value, setup.MapHexesAcross);
+            generatedMap = generator.Generate(setup.WorldSeed.Value, setup.MapHexesAcross, setup.MapOptions);
         }
 
         GameState created = setup.CreateCampaign(

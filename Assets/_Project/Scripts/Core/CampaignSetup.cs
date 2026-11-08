@@ -18,6 +18,72 @@ public sealed class CampaignConfiguration
     public string StartingConditionId = string.Empty;
     public int ContentVersion = CurrentContentVersion;
     public int WorldSeed;
+    // 12У-H: выбор карты при старте (размер, местность, враги...). Старые
+    // сохранения без поля получают значения по умолчанию («обычно»).
+    public CampaignMapOptions MapOptions = new CampaignMapOptions();
+}
+
+// 12У-H (запрос пользователя 08.11.2026): основные параметры карты новой
+// партии — уровни «мало / обычно / много» (0/1/2) поверх настроек ассета
+// генератора. Множители — те же, что у регуляторов окна «Генератор карты».
+// Это рабочие настройки, не канон.
+[Serializable]
+public sealed class CampaignMapOptions
+{
+    public const int Low = 0, Normal = 1, High = 2;
+
+    public WorldMapRegionKind RegionKind = WorldMapRegionKind.BySeed;
+    public int Relief = Normal;
+    public int Water = Normal;
+    public int Forest = Normal;
+    public int Settlements = Normal;
+    public int Discoveries = Normal;
+    public int Enemies = Normal;
+
+    public static float Level(int level, float low, float high) => level <= Low ? low : level >= High ? high : 1f;
+
+    public CampaignMapOptions Clone() => (CampaignMapOptions)MemberwiseClone();
+
+    // Применить к копии настроек генератора (ассет не меняется).
+    public void ApplyTo(WorldMapGenerationSettings p, int hexesAcross)
+    {
+        if (p == null)
+            return;
+        if (hexesAcross > 0)
+            p.HexesAcross = hexesAcross;
+        p.RegionKind = RegionKind;
+        float relief = Level(Relief, 0.4f, 1.8f);
+        p.HillsShare *= relief;
+        p.MountainsShare *= relief;
+        p.CliffsShare *= Level(Relief, 0.5f, 1.5f);
+        p.LakesShare *= Level(Water, 0.35f, 2f);
+        p.RiverCount = (int)Math.Round(p.RiverCount * Level(Water, 0.34f, 1.67f));
+        p.ForestShare *= Level(Forest, 0.3f, 1.9f);
+        // Деревень больше на большой карте: на 100 клетках — как в ассете.
+        double area = Math.Max(1.0, Math.Pow(p.HexesAcross / 100.0, 1.5));
+        p.VillageCount = Math.Max(2, (int)Math.Round(p.VillageCount * area * Level(Settlements, 0.5f, 1.6f)));
+        p.FieldDensity *= Level(Settlements, 0.5f, 1.5f);
+        p.Discoveries = (WorldMapDiscoveryRate)Math.Max(0, Math.Min(2, Discoveries));
+        // Враги: ватаги на дорогах и звериные логова (мест «логово» и групп
+        // «ватага» меньше или больше; на большой карте — по площади).
+        double enemies = Level(Enemies, 0.4f, 2f);
+        double areaLinear = Math.Max(1.0, p.HexesAcross / 100.0);
+        if (p.Groups != null)
+            foreach (WorldMapGroupRule g in p.Groups)
+                if (g != null && g.Role == WorldMapGroupRule.Band)
+                    g.Count = Math.Max(Enemies <= Low ? 0 : 1, (int)Math.Round(g.Count * enemies * areaLinear));
+        if (p.Landmarks != null)
+            foreach (WorldMapLandmarkRule rule in p.Landmarks)
+                if (rule != null && rule.Id == "lair")
+                    rule.Count = Math.Max(Enemies <= Low ? 0 : 1, (int)Math.Round(rule.Count * enemies));
+        p.Sanitize();
+    }
+
+    // Доля дней, в которые дорога может предложить встречу (враги «мало» —
+    // через день в среднем; «обычно» и «много» — каждый день, как раньше).
+    public double RoadEncounterShare => Enemies <= Low ? 0.5 : 1.0;
+
+    public static readonly string[] LevelTitles = { "Мало", "Обычно", "Много" };
 }
 
 public sealed class CampaignOptionDefinition
@@ -57,12 +123,16 @@ public static class CampaignStartOptions
     // 01.11.2026). Генератор берёт остальные настройки из своего ассета.
     public const int SmallMapHexesAcross = 50;
     public const int MediumMapHexesAcross = 100;
+    public const int LargeMapHexesAcross = 140;
+    public const int HugeMapHexesAcross = 180;
     public const int DefaultMapHexesAcross = MediumMapHexesAcross;
 
     public static readonly IReadOnlyList<MapSizeOption> MapSizes = new[]
     {
         new MapSizeOption(SmallMapHexesAcross, "Маленькая", "50 клеток по ширине: места ближе, дороги короче."),
-        new MapSizeOption(MediumMapHexesAcross, "Средняя", "100 клеток по ширине: округа больше, путь между местами дольше.")
+        new MapSizeOption(MediumMapHexesAcross, "Средняя", "100 клеток по ширине: округа больше, путь между местами дольше."),
+        new MapSizeOption(LargeMapHexesAcross, "Большая", "140 клеток по ширине: вдвое больше земли, больше деревень и мест; загрузка дольше."),
+        new MapSizeOption(HugeMapHexesAcross, "Очень большая", "180 клеток по ширине: втрое больше земли; первая загрузка заметно дольше.")
     };
 
     public static MapSizeOption FindMapSize(int hexesAcross)
@@ -108,6 +178,8 @@ public sealed class CampaignSetup
     public int? WorldSeed;
     // Клеток по ширине генерируемой карты (CampaignStartOptions.MapSizes).
     public int MapHexesAcross = CampaignStartOptions.DefaultMapHexesAcross;
+    // Основные параметры карты (местность, рельеф, вода, лес, деревни, места, враги).
+    public CampaignMapOptions MapOptions = new CampaignMapOptions();
 
     public bool Validate(out string reason)
     {
@@ -158,7 +230,8 @@ public sealed class CampaignSetup
             CommanderProfileId = CommanderProfileId,
             StartingConditionId = CampaignStartOptions.RoadCampStartId,
             ContentVersion = CampaignConfiguration.CurrentContentVersion,
-            WorldSeed = state.WorldSeed
+            WorldSeed = state.WorldSeed,
+            MapOptions = (MapOptions ?? new CampaignMapOptions()).Clone()
         };
 
         // Бриф правок (19 пунктов) п. 1: места, видимые лишь глазом, прячутся

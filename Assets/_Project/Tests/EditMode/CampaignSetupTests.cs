@@ -63,4 +63,44 @@ public sealed class CampaignSetupTests
         foreach (CampaignOptionDefinition option in CampaignStartOptions.Commanders)
             Assert.IsNotEmpty(option.Summary, option.Id);
     }
+
+    // 12У-H: основные параметры карты новой партии.
+    [Test]
+    public void MapOptions_FourSizes_ApplyToCopy_AndSurviveSave()
+    {
+        foreach (int size in new[] { 50, 100, 140, 180 })
+            Assert.IsNotNull(CampaignStartOptions.FindMapSize(size), "Размер " + size);
+
+        WorldMapGenerationSettings asset = WorldMapGenerationSettings.CreateDefault();
+        int bands = asset.Groups.Find(g => g.Role == WorldMapGroupRule.Band).Count;
+        int lairs = asset.Landmarks.Find(r => r.Id == "lair").Count;
+
+        WorldMapGenerationSettings many = asset.Clone();
+        new CampaignMapOptions { Enemies = CampaignMapOptions.High, Water = CampaignMapOptions.High, Relief = CampaignMapOptions.Low, RegionKind = WorldMapRegionKind.RiverValley }.ApplyTo(many, 180);
+        Assert.AreEqual(180, many.HexesAcross);
+        Assert.AreEqual(WorldMapRegionKind.RiverValley, many.RegionKind);
+        Assert.Greater(many.Groups.Find(g => g.Role == WorldMapGroupRule.Band).Count, bands, "Врагов много — ватаг больше.");
+        Assert.Greater(many.Landmarks.Find(r => r.Id == "lair").Count, lairs, "Врагов много — логов больше.");
+        Assert.Greater(many.LakesShare, asset.LakesShare);
+        Assert.Less(many.HillsShare, asset.HillsShare);
+        Assert.Greater(many.VillageCount, asset.VillageCount, "Большая карта — больше деревень.");
+
+        WorldMapGenerationSettings few = asset.Clone();
+        new CampaignMapOptions { Enemies = CampaignMapOptions.Low }.ApplyTo(few, 100);
+        Assert.Less(few.Landmarks.Find(r => r.Id == "lair").Count, lairs + 0, "Врагов мало — логов меньше.");
+        Assert.AreEqual(bands, asset.Groups.Find(g => g.Role == WorldMapGroupRule.Band).Count, "Исходные настройки не меняются.");
+        Assert.AreEqual(1.0, new CampaignMapOptions().RoadEncounterShare);
+        Assert.Less(new CampaignMapOptions { Enemies = CampaignMapOptions.Low }.RoadEncounterShare, 1.0);
+
+        GeneratedWorldMap map = WorldMapGenerator.Generate(many, 7);
+        Assert.IsTrue(map.IsValid, "Очень большая карта генерируется.");
+        Assert.That(map.Report.Issues.FindAll(x => x.Error), Is.Empty);
+
+        CampaignSetup setup = new CampaignSetup { WorldSeed = 5, MapHexesAcross = 140, MapOptions = new CampaignMapOptions { Enemies = CampaignMapOptions.Low, Forest = CampaignMapOptions.High } };
+        Assert.IsTrue(setup.Validate(out string reason), reason);
+        GameState state = setup.CreateCampaign();
+        GameState loaded = CampaignSaveService.RestoreCampaign(JsonUtility.FromJson<CampaignSaveData>(JsonUtility.ToJson(CampaignSaveService.ExportCampaign(state))));
+        Assert.AreEqual(CampaignMapOptions.Low, loaded.Configuration.MapOptions.Enemies, "Выбор карты сохраняется в партии.");
+        Assert.AreEqual(CampaignMapOptions.High, loaded.Configuration.MapOptions.Forest);
+    }
 }

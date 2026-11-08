@@ -187,6 +187,19 @@ public static class ExpeditionIncidentSystem
         if (string.IsNullOrWhiteSpace(commanderId))
             return;
 
+        // 12У-H: «врагов мало» — дорога предлагает встречу не каждый день.
+        // Выбор дня детерминирован от партии и дня (загрузка его не меняет).
+        double share = state.Configuration?.MapOptions?.RoadEncounterShare ?? 1.0;
+        if (share < 1.0)
+        {
+            uint h = (uint)(state.WorldSeed * 73856093) ^ (uint)(finishedDay * 19349663);
+            h ^= h >> 13;
+            h *= 0x5bd1e995;
+            h ^= h >> 15;
+            if ((h % 1000) / 1000.0 >= share)
+                return;
+        }
+
         result.HasRoadEncounterOpportunity = true;
         result.RoadEncounterOpportunityId = "road_" + commanderId + "_day" + finishedDay;
         result.RoadEncounterWorldHour = finishedDay * 24.0;

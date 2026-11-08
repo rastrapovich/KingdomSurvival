@@ -96,6 +96,51 @@ public sealed class MapLabLiveMapPlayModeTests
         yield return Frames(30);
     }
 
+    // 12У-H: экран «Новая игра» — восемь параметров карты; очень большая
+    // карта с «много врагов» создаётся, живая карта строится за экраном загрузки.
+    [UnityTest]
+    public IEnumerator NewGameScreen_EightMapOptions_HugeMapBuilds()
+    {
+        SceneManager.LoadScene(MainScene);
+        for (int i = 0; i < 600 && SceneManager.GetActiveScene().name != MainScene; i++)
+            yield return null;
+        yield return Frames(20);
+        MonoBehaviour main = FindBehaviour("PrototypeUIController");
+        VisualElement root = main.GetComponent<UIDocument>().rootVisualElement;
+        Invoke(main, "OnMainMenuNewGameClicked");
+        yield return Frames(5);
+        Assert.IsNotNull(root.Q("new-game-map-size-row"), "Строка размера карты.");
+        Assert.AreEqual(4, root.Q("new-game-map-size-row").childCount, "Четыре размера.");
+        VisualElement options = root.Q("new-game-map-options");
+        Assert.IsNotNull(options);
+        Assert.AreEqual(7, options.childCount, "Ещё семь строк: местность, рельеф, вода, лес, деревни, тайны, враги.");
+        Invoke(main, "SelectNewGameMapSize", CampaignStartOptions.HugeMapHexesAcross);
+        Invoke(main, "SelectNewGameMapOption", "enemies", CampaignMapOptions.High);
+        Invoke(main, "SelectNewGameMapOption", "region", (int)WorldMapRegionKind.RiverValley);
+        yield return Frames(5);
+        yield return Capture(main, "ng_01_new_game");
+        Invoke(main, "OnNewGameStartClicked");
+        float started = Time.realtimeSinceStartup;
+        bool loading = false;
+        while ((MapLabGameLive.Current == null || !MapLabGameLive.Current.Ready) && Time.realtimeSinceStartup - started < 900f)
+        {
+            loading |= Get<bool>(main, "IsLoadingScreenOpen");
+            yield return null;
+        }
+        GameState campaign = CampaignSession.Current;
+        Assert.IsNotNull(campaign);
+        Assert.AreEqual(CampaignStartOptions.HugeMapHexesAcross, campaign.GeneratedMap.HexesAcross, "Очень большая карта.");
+        Assert.AreEqual(CampaignMapOptions.High, campaign.Configuration.MapOptions.Enemies);
+        Assert.AreEqual(WorldMapRegionKind.RiverValley, campaign.Configuration.MapOptions.RegionKind);
+        Assert.IsTrue(loading, "Был экран загрузки.");
+        Assert.IsNotNull(MapLabGameLive.Current);
+        Assert.IsTrue(MapLabGameLive.Current.Ready, "Живая карта очень большой партии построена: " + MapLabGameLive.Current.Error);
+        Debug.Log($"MapLab live: очень большая карта ({campaign.GeneratedMap.HexesAcross} клеток) построена за {MapLabGameLive.Current.BuildMs / 1000.0:0.0} с, деревень {campaign.GeneratedMap.Villages.Count}, групп {campaign.GeneratedMap.Actors.Count}");
+        yield return Frames(60);
+        Assert.IsFalse(Get<bool>(main, "IsLoadingScreenOpen"));
+        yield return Capture(main, "ng_02_huge_map");
+    }
+
     [UnityTest]
     public IEnumerator LiveMap_HeroFigure_WalkToBuilding_OpensService()
     {

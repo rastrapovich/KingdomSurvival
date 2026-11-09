@@ -223,6 +223,7 @@ public partial class PrototypeUIController
 
         RegisterContinuousDebugAutopause();
         EnsureMapTempoBar();
+        HandleUserPauseHotkey();
         EnsureReportsDock();
         EnsureDeferredWorldMapUi();
         RefreshContinuousClockOnly();
@@ -359,6 +360,13 @@ public partial class PrototypeUIController
 
         if (HasBlockingModalWork())
             return;
+
+        // Пауза игрока (кнопка рядом со скоростями).
+        if (userTimePaused)
+        {
+            ContinuousSimulationSystem.SetPaused(gameState, true);
+            return;
+        }
 
         // Бриф исправлений п. 13: время идёт только при движении и явно
         // начатом деле похода. 12У-G: при независимом времени (настройка

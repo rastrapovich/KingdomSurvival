@@ -100,6 +100,9 @@ namespace KingdomSurvival.MapLab
         // Игровая область плана (может быть прямоугольной) и сетки клеток плана:
         // лес и поля — 0..1 на регулярной сетке PlanRect × PlanCols × PlanRows.
         public bool FromPlan;
+        // Поле ассетов окна генератора: пустая поляна без леса и без случайных
+        // одиночных объектов.
+        public bool AssetField;
         public Rect PlayRect;
         public float[] PlanForest, PlanField;
         public int PlanCols, PlanRows;

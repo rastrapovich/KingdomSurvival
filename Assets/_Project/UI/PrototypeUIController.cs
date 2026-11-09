@@ -129,6 +129,7 @@ public partial class PrototypeUIController : MonoBehaviour
 
     private void OnEnable()
     {
+        WorldMapVisualRuntime.ApplyMovementRules();
         UIDocument document = GetComponent<UIDocument>();
         VisualElement root = document.rootVisualElement;
 
@@ -250,6 +251,11 @@ public partial class PrototypeUIController : MonoBehaviour
     // фиксирует свою конфигурацию в GameState.Configuration.
     private void StartNewGame(CampaignSetup setup)
     {
+        // Правила движения и времени (время идёт само, темп, скорость) — из
+        // ассета настроек и для новой партии: раньше они подхватывались
+        // только при загрузке сохранения, и в новой партии часы мира вставали,
+        // как только герой останавливался.
+        WorldMapVisualRuntime.ApplyMovementRules();
         WorldMapDatabaseAsset mapDatabase = WorldMapVisualRuntime.LoadDatabase();
 
         // Канон v1.58 §9.9: свободная игра получает свою карту из генератора.

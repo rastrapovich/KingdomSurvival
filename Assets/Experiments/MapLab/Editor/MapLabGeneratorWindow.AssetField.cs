@@ -47,6 +47,13 @@ namespace KingdomSurvival.MapLab.Editor
         private bool fieldLoaded, fieldBuilt, fieldLabels = true, fieldRiver = true;
         private Vector2 fieldOrigin;
         private float fieldSize;
+        // Своя копия рисовальщика, профиля и камеры: поле не трогает карту
+        // окна и не смешивается с ней (свой слой камеры).
+        private const int FieldLayer = 30;
+        private MapLabView fieldView;
+        private MapLabSettings fieldSettings;
+        private Camera fieldCamera;
+        private int fieldHover = -1;
         private int fieldDrag = -1;
         private Vector2 fieldDragOffset, fieldDragAt, fieldDragStart;
         private bool fieldDragMoved;
@@ -102,6 +109,9 @@ namespace KingdomSurvival.MapLab.Editor
             {
                 MapLabArtEntry e = c.Views[0].Entry;
                 if (e == null || !e.HasTexture || (!spots && c.Category == "Пятна и поверхность"))
+                    continue;
+                // Фишка героя уже стоит первой.
+                if (hero != null && c.Views.Any(v => v.Entry == hero))
                     continue;
                 fieldItems.Add(new FieldItem { Key = c.Key, Title = c.Title, Group = c.Category, Card = c, Entry = e });
             }
@@ -187,11 +197,12 @@ namespace KingdomSurvival.MapLab.Editor
 
         private void BuildField()
         {
-            MapLabSettings s = view.Settings;
-            if (s == null)
+            if (view.Settings == null)
                 return;
             Guard(() =>
             {
+                MapLabView fv = EnsureFieldView();
+                MapLabSettings s = fieldSettings;
                 LoadFieldLayout();
                 // Каталог перечитывается при каждой постройке: новые ассеты
                 // (подключённые пакеты, правки наборов) встают на поле сами.
@@ -252,6 +263,7 @@ namespace KingdomSurvival.MapLab.Editor
                 MapLabComposition c = new MapLabComposition
                 {
                     FromPlan = true,
+                    AssetField = true,
                     PlayRect = new Rect(frame, frame, size, size),
                     PlanRect = new Rect(frame, frame, size, size),
                     PlanCols = 2,
@@ -279,36 +291,29 @@ namespace KingdomSurvival.MapLab.Editor
                     c.Features.Add((p, item.Entry.Id, FieldKind));
                     c.Reserved.Add(new MapLabComposition.Zone { Center = p, Radius = item.Width * 0.6f + 1.5f, Strength = 1f });
                 }
-                MapLabComposition keep = s.RegionPlan;
                 s.RegionPlan = c;
-                view.FeatureExtraSets = ActiveSets().ToList();
-                try
-                {
-                    if (!view.Generate((stage, fraction) => EditorUtility.DisplayCancelableProgressBar("Поле ассетов", stage, fraction)))
-                        throw new Exception("поле не построено (проверьте профиль и шейдеры)");
-                }
-                finally
-                {
-                    s.RegionPlan = keep;
-                }
-                view.CameraRig?.Fit();
+                fv.FeatureExtraSets = ActiveSets().ToList();
+                if (!fv.Generate((stage, fraction) => EditorUtility.DisplayCancelableProgressBar("Поле ассетов", stage, fraction)))
+                    throw new Exception("поле не построено (проверьте профиль и шейдеры)");
+                SetFieldLayer();
+                fv.CameraRig?.Fit();
                 fieldBuilt = true;
                 objectsPending = false;
                 previewDirty = true;
                 string missingArt = MapLabArtBuilder.MissingFeatureArt.Count > 0 ? " · без рисунка: " + string.Join(", ", MapLabArtBuilder.MissingFeatureArt.Take(6)) : string.Empty;
-                status = $"Поле ассетов: {fieldItems.Count} шт. на {size:0}×{size:0} ед.{missingArt} Вкладка «Карта» → «Сгенерировать предпросмотр» вернёт карту.";
+                status = $"Поле ассетов: {fieldItems.Count} шт. на {size:0}×{size:0} ед.{missingArt}";
             });
         }
 
         // Перестановка без нового рельефа: только объекты (ассеты на поле).
         private void RefreshFieldObjects()
         {
-            if (!fieldBuilt || view.Data?.Composition == null)
+            if (!fieldBuilt || fieldView == null || fieldView.Data?.Composition == null)
             {
                 BuildField();
                 return;
             }
-            MapLabComposition c = view.Data.Composition;
+            MapLabComposition c = fieldView.Data.Composition;
             c.Features.Clear();
             c.Reserved.Clear();
             foreach (FieldItem item in fieldItems)
@@ -318,9 +323,97 @@ namespace KingdomSurvival.MapLab.Editor
                     c.Features.Add((p, item.Entry.Id, FieldKind));
                     c.Reserved.Add(new MapLabComposition.Zone { Center = p, Radius = item.Width * 0.6f + 1.5f, Strength = 1f });
                 }
-            view.FeatureExtraSets = ActiveSets().ToList();
-            Guard(() => view.RebuildObjects((stage, fraction) => EditorUtility.DisplayCancelableProgressBar("Поле ассетов", stage, fraction)));
+            fieldView.FeatureExtraSets = ActiveSets().ToList();
+            Guard(() =>
+            {
+                fieldView.RebuildObjects((stage, fraction) => EditorUtility.DisplayCancelableProgressBar("Поле ассетов", stage, fraction));
+                SetFieldLayer();
+            });
             objectsPending = false;
+            previewDirty = true;
+        }
+
+        // Копия рисовальщика сцены без карты: свой профиль (копия рабочего) и
+        // своя камера, видящая только слой поля; камера карты слой поля не видит.
+        private MapLabView EnsureFieldView()
+        {
+            if (fieldSettings == null)
+                fieldSettings = Instantiate(view.Settings);
+            else
+                EditorJsonUtility.FromJsonOverwrite(EditorJsonUtility.ToJson(view.Settings), fieldSettings);
+            fieldSettings.name = "Поле ассетов · профиль";
+            fieldSettings.hideFlags = HideFlags.DontSave;
+            if (fieldView == null)
+            {
+                bool generate = view.GenerateOnLoad;
+                view.GenerateOnLoad = false;
+                GameObject copy;
+                try
+                {
+                    copy = Instantiate(view.gameObject);
+                }
+                finally
+                {
+                    view.GenerateOnLoad = generate;
+                }
+                copy.name = "Поле ассетов";
+                copy.hideFlags = HideFlags.DontSave | HideFlags.HideInHierarchy;
+                fieldView = copy.GetComponent<MapLabView>();
+                fieldView.GenerateOnLoad = false;
+                GameObject cameraObject = new GameObject("Поле ассетов · камера") { hideFlags = HideFlags.DontSave | HideFlags.HideInHierarchy };
+                fieldCamera = cameraObject.AddComponent<Camera>();
+                Camera main = view.CameraRig != null ? view.CameraRig.Camera : null;
+                if (main != null)
+                    fieldCamera.CopyFrom(main);
+                fieldCamera.enabled = false;
+                fieldCamera.cullingMask = 1 << FieldLayer;
+                fieldView.CameraRig = cameraObject.AddComponent<MapLabCameraRig>();
+            }
+            fieldView.Settings = fieldSettings;
+            if (view.CameraRig != null && view.CameraRig.Camera != null)
+                view.CameraRig.Camera.cullingMask &= ~(1 << FieldLayer);
+            return fieldView;
+        }
+
+        private void SetFieldLayer()
+        {
+            if (fieldView == null)
+                return;
+            foreach (Transform t in fieldView.GetComponentsInChildren<Transform>(true))
+                t.gameObject.layer = FieldLayer;
+        }
+
+        // Поле живёт, пока открыто окно: копия сцены не сохраняется.
+        private void DestroyFieldView()
+        {
+            if (fieldView != null)
+            {
+                fieldView.Clear();
+                DestroyImmediate(fieldView.gameObject);
+            }
+            if (fieldCamera != null)
+                DestroyImmediate(fieldCamera.gameObject);
+            if (fieldSettings != null)
+                DestroyImmediate(fieldSettings);
+            fieldView = null;
+            fieldCamera = null;
+            fieldSettings = null;
+            fieldBuilt = false;
+        }
+
+        // Правка вида в окне — в копию поля (размер поля сохраняется).
+        private void SyncFieldLook(bool rebuildLayers)
+        {
+            if (fieldView == null || fieldSettings == null)
+                return;
+            float size = fieldSettings.General.MapSize;
+            MapLabComposition plan = fieldSettings.RegionPlan;
+            EditorJsonUtility.FromJsonOverwrite(EditorJsonUtility.ToJson(view.Settings), fieldSettings);
+            fieldSettings.General.MapSize = size;
+            fieldSettings.RegionPlan = plan;
+            fieldView.ApplyMaterialSettings();
+            if (rebuildLayers)
+                fieldView.RebuildStage03Layers();
             previewDirty = true;
         }
 
@@ -364,14 +457,13 @@ namespace KingdomSurvival.MapLab.Editor
                 MapLabAuthor.ApplyLook(s);
                 EditorUtility.SetDirty(s);
                 view.ApplyMaterialSettings();
-                previewDirty = true;
+                SyncFieldLook(false);
             }
             if (GUILayout.Button(new GUIContent("Обновить внешний вид", "Перекрасить поверхность, перо и тени поля без перестройки.")))
                 Guard(() =>
                 {
                     MapLabAuthor.ApplyLook(s);
-                    view.RebuildStage03Layers();
-                    previewDirty = true;
+                    SyncFieldLook(true);
                 });
             EditorGUILayout.Space(6);
         }
@@ -380,7 +472,7 @@ namespace KingdomSurvival.MapLab.Editor
 
         private void DrawAssetField(Rect rect)
         {
-            if (!fieldBuilt)
+            if (!fieldBuilt || fieldView == null || fieldView.Data == null)
             {
                 EditorGUI.DrawRect(rect, new Color(0.16f, 0.16f, 0.16f));
                 GUI.Label(new Rect(rect.x + 12f, rect.y + 12f, rect.width - 24f, 60f), "Поле ассетов ещё не построено — «Построить поле» слева.\nВсе показанные фильтром ассеты встанут на ровную землю карты рядом с рекой.", EditorStyles.whiteLabel);
@@ -388,18 +480,19 @@ namespace KingdomSurvival.MapLab.Editor
             }
             Rect image = new Rect(rect.x, rect.y, rect.width, rect.height - 22f);
             HandleFieldDrag(image);
-            DrawPreview(rect);
-            Camera cam = view.CameraRig != null ? view.CameraRig.Camera : null;
-            if (cam == null || view.Data == null)
+            DrawPreview(rect, fieldView);
+            Camera cam = fieldView.CameraRig != null ? fieldView.CameraRig.Camera : null;
+            if (cam == null)
                 return;
             List<(Rect R, FieldItem Item)> marks = FieldScreenRects(image, cam);
             foreach ((Rect r, FieldItem item) in marks)
             {
                 bool isFocus = item.Card != null && focus == item.Card;
                 bool isDrag = fieldDrag >= 0 && fieldDrag < fieldItems.Count && fieldItems[fieldDrag] == item;
-                if (isFocus || isDrag)
+                bool isHover = fieldHover >= 0 && fieldHover < fieldItems.Count && fieldItems[fieldHover] == item;
+                if (isFocus || isDrag || isHover)
                 {
-                    Color frameColor = isDrag ? new Color(1f, 0.85f, 0.3f, 0.9f) : new Color(0.35f, 0.6f, 1f, 0.9f);
+                    Color frameColor = isDrag ? new Color(1f, 0.85f, 0.3f, 0.9f) : isFocus ? new Color(0.35f, 0.6f, 1f, 0.9f) : new Color(1f, 0.96f, 0.82f, 0.85f);
                     Rect shown = r;
                     if (isDrag && fieldDragMoved)
                         shown.position += fieldDragAt - fieldDragStart;
@@ -408,6 +501,8 @@ namespace KingdomSurvival.MapLab.Editor
                     EditorGUI.DrawRect(new Rect(shown.x, shown.y, 1f, shown.height), frameColor);
                     EditorGUI.DrawRect(new Rect(shown.xMax - 1f, shown.y, 1f, shown.height), frameColor);
                 }
+                if (isHover && !fieldLabels)
+                    GUI.Label(new Rect(r.center.x - 60f, r.yMax + 1f, 120f, 14f), item.Title, LabelStyle);
                 if (fieldLabels && r.width > 6f)
                 {
                     GUI.Label(new Rect(r.center.x - 60f, r.yMax + 1f, 120f, 14f), item.Title, LabelStyle);
@@ -433,7 +528,7 @@ namespace KingdomSurvival.MapLab.Editor
             foreach (FieldItem item in fieldItems)
                 if (fieldSpots.TryGetValue(item.Key, out Vector2 spot))
                     byPoint[fieldOrigin + spot] = item;
-            foreach (MapLabFeatureSprite sprite in view.Data.FeatureSprites)
+            foreach (MapLabFeatureSprite sprite in fieldView.Data.FeatureSprites)
             {
                 if (sprite.Kind != FieldKind || !byPoint.TryGetValue(sprite.Point, out FieldItem item))
                     continue;
@@ -450,19 +545,52 @@ namespace KingdomSurvival.MapLab.Editor
             return rects;
         }
 
-        // Левая кнопка на ассете — перетаскивание (по отпусканию ассет встаёт
-        // на новое место); на пустой земле — выбор снимается.
+        // Ассет под курсором: внутри рисунка (ближний к зрителю — первым), иначе
+        // ближайшая опора в пределах 18 px — мелкие рисунки ловятся легко.
+        private (Rect R, FieldItem Item) FieldHit(List<(Rect R, FieldItem Item)> marks, Vector2 mouse)
+        {
+            (Rect R, FieldItem Item) hit = marks.Where(m => m.R.Contains(mouse)).OrderByDescending(m => m.R.yMax).FirstOrDefault();
+            if (hit.Item != null)
+                return hit;
+            float best = 18f;
+            foreach ((Rect R, FieldItem Item) m in marks)
+            {
+                float d = Vector2.Distance(mouse, new Vector2(m.R.center.x, m.R.yMax - Mathf.Min(m.R.height * 0.3f, 10f)));
+                if (d < best)
+                {
+                    best = d;
+                    hit = m;
+                }
+            }
+            return hit;
+        }
+
+        // Наведение — подсветка; левая кнопка на ассете — выбор, а движение
+        // дальше 4 px — перетаскивание (по отпусканию ассет встаёт на новое
+        // место, пересобираются только объекты).
         private void HandleFieldDrag(Rect image)
         {
             Event e = Event.current;
-            Camera cam = view.CameraRig != null ? view.CameraRig.Camera : null;
-            if (cam == null || view.Data == null)
+            Camera cam = fieldView.CameraRig != null ? fieldView.CameraRig.Camera : null;
+            if (cam == null || fieldView.Data == null)
                 return;
+            if (e.type == EventType.MouseMove)
+            {
+                int hover = -1;
+                if (image.Contains(e.mousePosition))
+                {
+                    (Rect R, FieldItem Item) h = FieldHit(FieldScreenRects(image, cam), e.mousePosition);
+                    hover = h.Item != null ? fieldItems.IndexOf(h.Item) : -1;
+                }
+                if (hover != fieldHover)
+                {
+                    fieldHover = hover;
+                    Repaint();
+                }
+            }
             if (e.type == EventType.MouseDown && e.button == 0 && image.Contains(e.mousePosition))
             {
-                List<(Rect R, FieldItem Item)> marks = FieldScreenRects(image, cam);
-                // Ближе к зрителю — выше в списке (рисуется поверх).
-                (Rect R, FieldItem Item) hit = marks.Where(m => m.R.Contains(e.mousePosition)).OrderByDescending(m => m.R.yMax).FirstOrDefault();
+                (Rect R, FieldItem Item) hit = FieldHit(FieldScreenRects(image, cam), e.mousePosition);
                 if (hit.Item != null)
                 {
                     fieldDrag = fieldItems.IndexOf(hit.Item);
@@ -481,7 +609,7 @@ namespace KingdomSurvival.MapLab.Editor
             else if (e.type == EventType.MouseDrag && e.button == 0 && fieldDrag >= 0)
             {
                 fieldDragAt = e.mousePosition;
-                fieldDragMoved = true;
+                fieldDragMoved |= Vector2.Distance(fieldDragAt, fieldDragStart) > 4f;
                 e.Use();
                 Repaint();
             }
@@ -491,7 +619,7 @@ namespace KingdomSurvival.MapLab.Editor
                 fieldDrag = -1;
                 if (item != null && fieldDragMoved && GroundPoint(image, cam, e.mousePosition - fieldDragOffset, out Vector2 ground))
                 {
-                    float frame = view.Settings.FrameWidth;
+                    float frame = fieldSettings.FrameWidth;
                     Rect play = new Rect(frame, frame, fieldSize, fieldSize);
                     ground.x = Mathf.Clamp(ground.x, play.xMin + 1f, play.xMax - 1f);
                     ground.y = Mathf.Clamp(ground.y, play.yMin + 1f, play.yMax - 1f);
@@ -511,7 +639,7 @@ namespace KingdomSurvival.MapLab.Editor
             ground = default;
             Vector2 viewport = new Vector2((screen.x - image.x) / image.width, 1f - (screen.y - image.y) / image.height);
             Ray ray = cam.ViewportPointToRay(new Vector3(viewport.x, viewport.y, 0f));
-            float height = view.Data.SampleHeight(fieldOrigin.x + fieldSize * 0.3f, fieldOrigin.y + fieldSize * 0.3f);
+            float height = fieldView.Data.SampleHeight(fieldOrigin.x + fieldSize * 0.3f, fieldOrigin.y + fieldSize * 0.3f);
             Plane plane = new Plane(Vector3.up, new Vector3(0f, height, 0f));
             if (!plane.Raycast(ray, out float distance))
                 return false;

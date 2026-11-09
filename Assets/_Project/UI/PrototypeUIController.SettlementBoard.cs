@@ -68,6 +68,12 @@ public partial class PrototypeUIController
     private void CloseSettlementBoard()
     {
         HideSettlementBoard();
+        // Доска открыта со столба на карте — «Назад» возвращает на карту.
+        if (InSettlementBuilding)
+        {
+            OnSettlementExitClicked();
+            return;
+        }
         RenderSettlement();
     }
 

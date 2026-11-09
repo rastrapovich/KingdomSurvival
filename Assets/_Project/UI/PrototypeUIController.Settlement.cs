@@ -22,8 +22,16 @@ public partial class PrototypeUIController
         Main,
         Tavern,
         // Бриф исправлений п. 14: все, с кем сейчас можно говорить здесь.
-        People
+        People,
+        // 12У-H: страница одного здания карты (знахарка): его дело и «Выйти».
+        Building
     }
+
+    // 12У-H: окно открыто из здания на карте (роль здания). Все «назад» и
+    // конец разговора ведут обратно на карту, а не на общий экран поселения.
+    private string settlementBuildingRole;
+    private SettlementActionDefinition settlementBuildingAction;
+    private bool InSettlementBuilding => !string.IsNullOrEmpty(settlementBuildingRole);
 
     private VisualElement settlementScreen;
     private VisualElement settlementArt;
@@ -155,6 +163,10 @@ public partial class PrototypeUIController
                 settlementDialogueTimePending = false;
                 SpendSettlementActionTime();
             }
+            // Разговор начат в здании карты (староста) — после него отряд
+            // снова на карте, общий экран поселения не показывается.
+            if (restoring && InSettlementBuilding && mode == SettlementMode.Main)
+                OnSettlementExitClicked();
         }
         if (pendingStoryBattle != null)
             settlementDialogueTimePending = false;
@@ -248,6 +260,8 @@ public partial class PrototypeUIController
         HideSettlementPages();
         CloseSettlementConfirm();
         settlementLocationId = null;
+        settlementBuildingRole = null;
+        settlementBuildingAction = null;
         settlementScreen.style.display = DisplayStyle.None;
         RefreshInterface();
         RefreshTimeControlAvailability();
@@ -330,7 +344,16 @@ public partial class PrototypeUIController
         string time = "День " + clock.Day + ", " + ContinuousSimulationSystem.FormatClock(clock.HourOfDay);
         string place = location != null ? location.Name : (profile != null ? profile.Name : "Поселение");
         string text;
-        if (settlementMode == SettlementMode.People)
+        if (settlementMode == SettlementMode.Building && settlementBuildingAction == null)
+            settlementMode = SettlementMode.Main;
+        if (settlementMode == SettlementMode.Building)
+        {
+            settlementTitle.text = ServiceRoleTitle(settlementBuildingRole);
+            settlementSubtitle.text = place + " · " + time;
+            text = settlementBuildingAction.Hint;
+            settlementMoreButton.style.display = DisplayStyle.None;
+        }
+        else if (settlementMode == SettlementMode.People)
         {
             settlementTitle.text = "Люди поселения";
             settlementSubtitle.text = place + " · " + time;
@@ -359,13 +382,15 @@ public partial class PrototypeUIController
 
         settlementActions.Clear();
         HideSettlementGallery();
-        if (settlementMode == SettlementMode.People)
+        if (settlementMode == SettlementMode.Building)
+            RenderSettlementBuildingActions();
+        else if (settlementMode == SettlementMode.People)
             RenderSettlementPeopleList(profile, tavern);
         else if (settlementMode == SettlementMode.Tavern)
             RenderTavernActions(tavern);
         else
             RenderSettlementActions(profile);
-        if (profile == null)
+        if (profile == null && settlementMode != SettlementMode.Building)
             AddSettlementHint("Здесь живут, но для проезжих ничего не устроено.", false);
 
         // Местные собеседники — внизу левой колонки: в корчме её люди, на
@@ -625,12 +650,36 @@ public partial class PrototypeUIController
         }
 
         AddSettlementSection(string.Empty);
+        if (InSettlementBuilding)
+        {
+            AddSettlementAction("Выйти", null, true, OnSettlementExitClicked, false);
+            return;
+        }
         AddSettlementAction("Вернуться в поселение", null, true, () =>
         {
             settlementMode = SettlementMode.Main;
             settlementMessageText = string.Empty;
             RenderSettlement();
         }, false);
+    }
+
+    // Страница здания (знахарка): его дело с ценой и причиной недоступности.
+    private void RenderSettlementBuildingActions()
+    {
+        SettlementActionDefinition action = settlementBuildingAction;
+        bool enabled = action.EnableConditions?.Evaluate(SettlementService.Context(gameState)) ?? true;
+        string reason = enabled ? string.Empty : (string.IsNullOrWhiteSpace(action.DisabledReason) ? "Сейчас недоступно." : action.DisabledReason);
+        if (enabled && action.Type == SettlementActionType.Healer && !WoundRecovery.CanVisitHealer(gameState, action.Price, out string healerReason))
+        {
+            enabled = false;
+            reason = healerReason;
+        }
+        string hint = enabled ? string.Empty : reason;
+        if (action.Type == SettlementActionType.Healer && action.Price > 0)
+            hint = (string.IsNullOrEmpty(hint) ? string.Empty : hint + " ") + "Цена: " + action.Price + " зол. за раненого.";
+        AddSettlementAction(action.Label, hint, enabled, () => RunSettlementAction(action), true);
+        AddSettlementSection(string.Empty);
+        AddSettlementAction("Выйти", null, true, OnSettlementExitClicked, false);
     }
 
     private string ErrandLimitSuffix(string errandId)
@@ -984,6 +1033,11 @@ public partial class PrototypeUIController
         if (IsSettlementBoardOpen)
         {
             CloseSettlementBoard();
+            return;
+        }
+        if (InSettlementBuilding)
+        {
+            OnSettlementExitClicked();
             return;
         }
         if (settlementMode != SettlementMode.Main)

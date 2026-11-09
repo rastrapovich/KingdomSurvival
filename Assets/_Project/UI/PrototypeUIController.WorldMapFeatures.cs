@@ -260,6 +260,8 @@ public partial class PrototypeUIController
         worldMapPendingFeatureRect = union;
         // Подходят к месту сбоку-спереди, не встают на рисунок.
         Vector2 beside = new Vector2(union.xMax + union.width * 0.15f, union.yMax + union.height * 0.05f);
+        // Рисунок сдвинут по высоте земли; путь — в координатах земли.
+        beside.y -= MapLabGameLive.ElevationShiftPercent(MapLabGameLive.Current, beside.x, beside.y);
         GoToWorldMapPoint(beside.x, beside.y);
     }
 

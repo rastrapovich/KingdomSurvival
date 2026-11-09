@@ -34,6 +34,7 @@ public partial class PrototypeUIController
         {
             worldMapGroupLayer?.Clear();
             worldMapGroupMarkers.Clear();
+            worldMapGroupShadows.Clear();
             foreach (Label l in worldMapGroupLabels.Values)
                 l.RemoveFromHierarchy();
             worldMapGroupLabels.Clear();
@@ -89,6 +90,7 @@ public partial class PrototypeUIController
                     entry.Marker.style.display = DisplayStyle.None;
                 if (hoverLabel != null)
                     hoverLabel.style.display = DisplayStyle.None;
+                PlaceGroupShadow(actor.ActorId, 0f, 0f, figureHeight, false);
                 continue;
             }
             int direction = waiting && entry.Marker != null ? entry.Direction : WorldMapActorMotion.DirectionIndex(dx, dy);
@@ -136,6 +138,7 @@ public partial class PrototypeUIController
             entry.Marker.style.height = figureHeight;
             entry.Marker.style.left = at.XPercent / 100f * worldMapCanvasWidth - figureHeight * 0.5f;
             entry.Marker.style.top = at.YPercent / 100f * worldMapCanvasHeight - figureHeight * 0.97f;
+            PlaceGroupShadow(actor.ActorId, at.XPercent / 100f * worldMapCanvasWidth - figureHeight * 0.5f, at.YPercent / 100f * worldMapCanvasHeight - figureHeight * 0.97f, figureHeight, true);
             worldMapGroupMarkers[actor.ActorId] = entry;
             if (hoverLabel != null && hoverLabel.style.display == DisplayStyle.Flex)
             {

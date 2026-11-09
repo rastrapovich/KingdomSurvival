@@ -30,9 +30,14 @@ namespace KingdomSurvival.MapLab
                     buildings.Add(data.Objects[i]);
             BuildForestMask(data, settings);
             PlaceForest(data, settings);
-            PlaceSingles(data, settings);
-            PlaceBushes(data, settings);
-            PlaceRocks(data, settings);
+            // Поле ассетов окна генератора: между ассетами нет случайных
+            // деревьев, кустов и валунов — только сами ассеты и река.
+            if (data.Composition == null || !data.Composition.AssetField)
+            {
+                PlaceSingles(data, settings);
+                PlaceBushes(data, settings);
+                PlaceRocks(data, settings);
+            }
             PlaceReeds(data, settings);
             PlaceHaystacks(data, settings);
         }
@@ -366,7 +371,8 @@ namespace KingdomSurvival.MapLab
                     float forest = MapLabGeometry.SmoothStep(threshold - 0.06f, threshold + 0.06f, f) * MapLabGeometry.SmoothStep(0f, 0.08f, v.ForestDensity);
                     float g = glade.Fbm(p.x / 28f, p.y / 28f, 2);
                     forest *= 1f - MapLabGeometry.SmoothStep(0.32f, 0.5f, g) * 0.95f;
-                    if (frame > 0f)
+                    // Поле ассетов — пустая поляна без леса по краям.
+                    if (frame > 0f && (c == null || !c.AssetField))
                         forest = Mathf.Max(forest, FrameForest(p, play, frame, frameDepth, frameTongue) * MapLabGeometry.SmoothStep(0f, 0.08f, v.ForestDensity));
                     // Исключения: дворы, поля, дорога, вода, стенки уступов, крутизна.
                     forest *= 1f - data.Settlement[i];

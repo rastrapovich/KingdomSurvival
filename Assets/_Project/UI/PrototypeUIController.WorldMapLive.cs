@@ -238,6 +238,7 @@ public partial class PrototypeUIController
         if (WorldMapLiveWanted() && (worldMapMapLab == null || world == null || !world.Ready))
         {
             worldMapHeroImage.style.display = DisplayStyle.None;
+            HideHeroFigureLook();
             if (worldMapHeroFallback != null)
                 worldMapHeroFallback.style.display = DisplayStyle.None;
             return true;
@@ -324,6 +325,7 @@ public partial class PrototypeUIController
             worldMapHeroAppliedSize = new Vector2(width, height);
         }
         worldMapHeroImage.style.translate = new Translate(ground2.x - pivot.x * width, ground2.y - (1f - pivot.y) * height - bob);
+        UpdateHeroFigureLook(percent, texture, ground2, width, height, pivot, bob);
         return true;
     }
 

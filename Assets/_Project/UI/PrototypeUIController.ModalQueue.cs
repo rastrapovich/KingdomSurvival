@@ -208,6 +208,30 @@ public partial class PrototypeUIController
                 queuedModals.Count > 0);
     }
 
+    // Что сейчас держит часы мира (для проверок и отладки): пусто — ничего.
+    private string TimeBlockReason()
+    {
+        if (gameState == null)
+            return "нет партии";
+        List<string> reasons = new List<string>();
+        if (IsGameMenuOpen) reasons.Add("меню");
+        if (IsNarrativeDialogueActive) reasons.Add("разговор");
+        if (IsLocationInteractionActive) reasons.Add("окно места");
+        if (IsSettlementScreenBlocking) reasons.Add("экран поселения");
+        if (IsHeroScreenOpen) reasons.Add("экран героя");
+        if (gameState.HasPendingExpeditionDecision) reasons.Add("решение похода");
+        if (openedIncident != null) reasons.Add("событие");
+        if (openedDecision != null) reasons.Add("окно решения");
+        if (activeQueuedModal != null) reasons.Add("окно из очереди");
+        if (queuedModals.Count > 0) reasons.Add("очередь окон " + queuedModals.Count);
+        if (IsCampScreenOpen) reasons.Add("лагерь");
+        if (!string.IsNullOrEmpty(settlementSuspendedLocationId)) reasons.Add("поселение за разговором");
+        if (IsJournalOpen) reasons.Add("журнал");
+        if (LocalExplorationService.IsActive(gameState)) reasons.Add("исследуемое место");
+        if (userTimePaused) reasons.Add("пауза игрока");
+        return string.Join(", ", reasons);
+    }
+
     private bool HasBlockingModalWork()
     {
         // 12Т: экран поселения, ушедший на время разговора, вернётся —

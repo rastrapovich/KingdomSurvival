@@ -24,6 +24,10 @@ public partial class PrototypeUIController
 
         mapTempoBar = new VisualElement { name = "map-tempo-bar" };
         mapTempoBar.AddToClassList("map-tempo-bar");
+        // Пауза игрока — рядом со скоростями; часы мира сами не встают.
+        mapPauseButton = new Button(ToggleUserTimePause) { name = "map-time-pause", tooltip = "Пауза: остановить время мира (пробел)." };
+        mapPauseButton.AddToClassList("map-tempo-button");
+        mapTempoBar.Add(mapPauseButton);
         for (int i = 0; i < MapTempoSteps.Length; i++)
         {
             int tempo = MapTempoSteps[i];
@@ -46,12 +50,39 @@ public partial class PrototypeUIController
     private void SetMapTempo(int tempo)
     {
         mapTempo = System.Array.IndexOf(MapTempoSteps, tempo) >= 0 ? tempo : 1;
+        // Выбор скорости снимает паузу игрока.
+        userTimePaused = false;
+        RefreshMapTempoBar();
+    }
+
+    private Button mapPauseButton;
+    private bool userTimePaused;
+
+    // Пробел на карте (без открытых окон и полей ввода) — та же пауза.
+    private void HandleUserPauseHotkey()
+    {
+        UnityEngine.InputSystem.Keyboard keyboard = UnityEngine.InputSystem.Keyboard.current;
+        if (keyboard == null || !keyboard.spaceKey.wasPressedThisFrame || gameState == null || isGameOver || HasBlockingModalWork())
+            return;
+        if (GetComponent<UIDocument>()?.rootVisualElement?.focusController?.focusedElement is TextField)
+            return;
+        ToggleUserTimePause();
+    }
+
+    private void ToggleUserTimePause()
+    {
+        userTimePaused = !userTimePaused;
         RefreshMapTempoBar();
     }
 
     private void RefreshMapTempoBar()
     {
         for (int i = 0; i < MapTempoSteps.Length; i++)
-            mapTempoButtons[i]?.EnableInClassList("map-tempo-button--active", MapTempoSteps[i] == mapTempo);
+            mapTempoButtons[i]?.EnableInClassList("map-tempo-button--active", !userTimePaused && MapTempoSteps[i] == mapTempo);
+        if (mapPauseButton != null)
+        {
+            mapPauseButton.text = userTimePaused ? "▶" : "❚❚";
+            mapPauseButton.EnableInClassList("map-tempo-button--active", userTimePaused);
+        }
     }
 }

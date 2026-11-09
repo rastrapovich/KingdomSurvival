@@ -143,6 +143,92 @@ public sealed class MapLabLiveMapPlayModeTests
 
     // Настоящая дорога: клик по каждому зданию услуги из лагеря — отряд идёт
     // сам (без телепорта), входит, герой доходит до двери, открывается окно.
+    // Время мира идёт само (канон v1.66): герой дошёл и стоит — часы идут
+    // дальше, без окон. Пауза — только кнопкой рядом со скоростями.
+    [UnityTest]
+    public IEnumerator Time_KeepsRunningAfterHeroStops_PauseButtonStopsIt()
+    {
+        SceneManager.LoadScene(MainScene);
+        for (int i = 0; i < 600 && SceneManager.GetActiveScene().name != MainScene; i++)
+            yield return null;
+        yield return Frames(20);
+        MonoBehaviour main = FindBehaviour("PrototypeUIController");
+        Invoke(main, "StartNewGameFromMenu");
+        float started = Time.realtimeSinceStartup;
+        while ((MapLabGameLive.Current == null || !MapLabGameLive.Current.Ready) && Time.realtimeSinceStartup - started < 300f)
+            yield return null;
+        Assert.IsTrue(MapLabGameLive.Current != null && MapLabGameLive.Current.Ready);
+        yield return Frames(60);
+        GameState campaign = CampaignSession.Current;
+        TestPeople.AdmitAll(campaign);
+        ContinuousSimulationSystem.SetSpeedMultiplier(campaign, ContinuousSimulationSystem.MaximumSpeedMultiplier);
+
+        double Hours()
+        {
+            ContinuousClockSnapshot c = ContinuousSimulationSystem.GetClock(campaign);
+            return c.Day * 24.0 + c.HourOfDay;
+        }
+
+        // Точки: вокруг старта, к ближайшей деревне (не входя), к детали места.
+        List<Vector2> points = new List<Vector2>
+        {
+            new Vector2(WorldMapNavigation.CapitalXPercent + 3f, WorldMapNavigation.CapitalYPercent - 4f),
+            new Vector2(WorldMapNavigation.CapitalXPercent - 4f, WorldMapNavigation.CapitalYPercent - 2f),
+        };
+        LocationData near = campaign.Locations.Where(l => l != null && l.Id.StartsWith(GeneratedMapPlaces.IdPrefix))
+            .OrderBy(l => Mathf.Abs(l.MapXPercent - WorldMapNavigation.CapitalXPercent) + Mathf.Abs(l.MapYPercent - WorldMapNavigation.CapitalYPercent)).FirstOrDefault();
+        if (near != null)
+            points.Add(new Vector2(near.MapXPercent + 2.5f, near.MapYPercent + 2.5f));
+        if (MapLabGameLive.Current.Features.Count > 0)
+        {
+            Rect f = MapLabGameLive.Current.Features.OrderBy(x => Mathf.Abs(x.Percent.center.x - WorldMapNavigation.CapitalXPercent) + Mathf.Abs(x.Percent.center.y - WorldMapNavigation.CapitalYPercent)).First().Percent;
+            points.Add(new Vector2(f.xMax + f.width * 0.15f, f.yMax));
+        }
+
+        List<string> failures = new List<string>();
+        foreach (Vector2 p in points)
+        {
+            Invoke(main, "GoToWorldMapPoint", p.x, p.y);
+            float t0 = Time.realtimeSinceStartup;
+            yield return Frames(10);
+            while (ContinuousSimulationSystem.HasMovementOrActivityInProgress(campaign) && Time.realtimeSinceStartup - t0 < 90f)
+                yield return null;
+            // Окна, открывшиеся по прибытии (если есть), — закрыть, как игрок.
+            if (Get<bool>(main, "IsLocationInteractionActive"))
+                Invoke(main, "CloseLocationInteraction");
+            yield return Frames(10);
+            double before = Hours();
+            float w0 = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - w0 < 1.5f)
+                yield return null;
+            double after = Hours();
+            string reason = (string)Invoke(main, "TimeBlockReason");
+            Debug.Log($"Время: точка {p}, стоим, за 1,5 с прошло {after - before:0.000} ч; держит: «{reason}»; фаза {campaign.ActiveExpedition?.Phase}; пауза {ContinuousSimulationSystem.IsPaused(campaign)}; независимое {WorldMapMovementRules.Current.IndependentTime}; темп {WorldMapMovementRules.Current.WorldGameHoursPerRealSecond}; скорость {ContinuousSimulationSystem.GetClock(campaign).SpeedMultiplier}; точек пути {campaign.ActiveExpedition?.LastTravelPoints?.Count}");
+            if (after - before <= 0.0001)
+                failures.Add($"{p}: часы стоят ({reason})");
+        }
+        Assert.IsEmpty(failures, string.Join("; ", failures));
+
+        // Кнопка паузы — часы стоят, повторное нажатие — идут.
+        VisualElement root = main.GetComponent<UIDocument>().rootVisualElement;
+        Button pause = root.Q<Button>("map-time-pause");
+        Assert.IsNotNull(pause, "Кнопка паузы рядом со скоростями.");
+        Invoke(main, "ToggleUserTimePause");
+        yield return Frames(5);
+        double p0 = Hours();
+        float s0 = Time.realtimeSinceStartup;
+        while (Time.realtimeSinceStartup - s0 < 1f)
+            yield return null;
+        Assert.Less(Hours() - p0, 0.0001, "Пауза останавливает время.");
+        Invoke(main, "ToggleUserTimePause");
+        yield return Frames(5);
+        p0 = Hours();
+        s0 = Time.realtimeSinceStartup;
+        while (Time.realtimeSinceStartup - s0 < 1f)
+            yield return null;
+        Assert.Greater(Hours() - p0, 0.0001, "Снятие паузы пускает время.");
+    }
+
     [UnityTest]
     public IEnumerator RealTravel_ClickEachServiceBuilding_OpensItsWindow()
     {
@@ -215,7 +301,28 @@ public sealed class MapLabLiveMapPlayModeTests
             if (!Get<bool>(main, "IsSettlementScreenOpen"))
                 failures.Add(role + ": окно не открылось, последнее состояние — " + last);
             else
+            {
                 Debug.Log("MapLab real: " + role + " — окно открыто за " + (Time.realtimeSinceStartup - t0).ToString("0.0") + " с");
+                yield return Frames(5);
+                // Окно здания — не общий экран поселения: знахарка — своя
+                // страница, «Вернуться в поселение» нигде нет.
+                string mode = Field<object>(main, "settlementMode").ToString();
+                Debug.Log("MapLab real: " + role + " — режим окна " + mode);
+                if (role == "healer" && mode != "Building")
+                    failures.Add(role + ": открыт режим " + mode + ", а не страница здания");
+                if (role != "elder" && mode == "Main" && !Get<bool>(main, "IsSettlementTradeOpen") && !Get<bool>(main, "IsSettlementBoardOpen"))
+                    failures.Add(role + ": открыт общий экран поселения");
+                if (root.Query<Button>().ToList().Any(b => b.text == "Вернуться в поселение" && b.resolvedStyle.display != DisplayStyle.None))
+                    failures.Add(role + ": есть кнопка «Вернуться в поселение»");
+                // «Назад» из лавки и доски — на карту, а не на экран поселения.
+                if (role == "merchant" || role == "board")
+                {
+                    Invoke(main, role == "merchant" ? "OnTradeBackClicked" : "CloseSettlementBoard");
+                    yield return Frames(5);
+                    if (Get<bool>(main, "IsSettlementScreenOpen"))
+                        failures.Add(role + ": «Назад» оставил экран поселения");
+                }
+            }
             yield return Frames(5);
         }
         Assert.IsEmpty(failures, string.Join("; ", failures));

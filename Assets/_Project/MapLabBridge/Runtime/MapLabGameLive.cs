@@ -74,6 +74,7 @@ namespace KingdomSurvival.MapLabBridge
 
         public static void Clear()
         {
+            WorldMapObstacles.Clear();
             if (current == null)
                 return;
             MapLabView view = current.View != null ? current.View : current.PendingView;
@@ -229,7 +230,7 @@ namespace KingdomSurvival.MapLabBridge
                         ? b.Base + new Vector3(b.Width * 0.45f + 0.9f, 0f, -0.4f)
                         : b.Base + new Vector3(0f, 0f, -(b.Width * 0.18f + 1.1f));
                     approach.y = data.SampleHeight(approach.x, approach.z);
-                    w.Buildings.Add((b.SettlementId, b.Role, rect, ToPercent(w, approach)));
+                    w.Buildings.Add((b.SettlementId, b.Role, rect, NavPercent(w, approach.x, approach.z)));
                 }
                 // Детали мест: части — к месту плана по виду и ближайшей точке.
                 Dictionary<GeneratedMapSite, List<(Rect Rect, string ArtId)>> parts = new Dictionary<GeneratedMapSite, List<(Rect, string)>>();
@@ -253,6 +254,7 @@ namespace KingdomSurvival.MapLabBridge
                         union = Rect.MinMaxRect(Mathf.Min(union.xMin, r.xMin), Mathf.Min(union.yMin, r.yMin), Mathf.Max(union.xMax, r.xMax), Mathf.Max(union.yMax, r.yMax));
                     w.Features.Add((pair.Key, union, pair.Value));
                 }
+                WorldMapObstacles.Set(Obstacles(w, data));
                 mapObject.SetActive(true);
             }
             w.BuildMs = w.Watch.Elapsed.TotalMilliseconds;
@@ -301,6 +303,48 @@ namespace KingdomSurvival.MapLabBridge
 
         // Точка мира → проценты полотна UI (с учётом высоты рельефа: точка на
         // холме видна выше — как на рисунке).
+        // Основания построек (дома, амбары) и предметов мест — препятствия пути
+        // героя и групп (проценты карты). Лес, трава и камни — не препятствия.
+        private static List<WorldMapObstacle> Obstacles(World w, MapLabData data)
+        {
+            List<WorldMapObstacle> list = new List<WorldMapObstacle>();
+            void Add(Vector3 center, Vector2 axisU, float halfU, float halfV)
+            {
+                Vector2 axisV = new Vector2(-axisU.y, axisU.x);
+                float xMin = float.MaxValue, yMin = float.MaxValue, xMax = float.MinValue, yMax = float.MinValue;
+                for (int i = 0; i < 4; i++)
+                {
+                    Vector2 c = new Vector2(center.x, center.z) + axisU * (i % 2 == 0 ? -halfU : halfU) + axisV * (i < 2 ? -halfV : halfV);
+                    Vector2 p = NavPercent(w, c.x, c.y);
+                    xMin = Mathf.Min(xMin, p.x);
+                    yMin = Mathf.Min(yMin, p.y);
+                    xMax = Mathf.Max(xMax, p.x);
+                    yMax = Mathf.Max(yMax, p.y);
+                }
+                list.Add(new WorldMapObstacle(xMin, yMin, xMax, yMax));
+            }
+            foreach (MapLabPlacement o in data.Objects)
+            {
+                if (o.Kind != MapLabObjectKind.House && o.Kind != MapLabObjectKind.Barn)
+                    continue;
+                Vector2 ridge = new Vector2(Mathf.Cos(o.Yaw * Mathf.Deg2Rad), Mathf.Sin(o.Yaw * Mathf.Deg2Rad));
+                Vector2 size = o.Size.sqrMagnitude > 0.01f ? o.Size : new Vector2(4f, 3f);
+                // Чуть уже основания: путь вдоль стены не упирается в угол.
+                Add(o.Position, ridge, size.x * 0.45f, size.y * 0.45f);
+            }
+            foreach (MapLabFeatureSprite f in data.FeatureSprites)
+            {
+                float half = Mathf.Clamp(f.Width * 0.28f, 0.25f, 3f);
+                Add(f.Base, Vector2.right, half, half * 0.6f);
+            }
+            return list;
+        }
+
+        // Точка земли → проценты карты пути (без сдвига рисунка по высоте):
+        // в этих координатах ходят герой и группы.
+        public static Vector2 NavPercent(World w, float x, float z) =>
+            new Vector2((x - w.Play.xMin) / w.Play.width * 100f, (w.Play.yMax - z) / w.Play.height * 100f);
+
         public static Vector2 ToPercent(World w, Vector3 p)
         {
             float x = (p.x - w.Play.xMin) / w.Play.width * 100f;

@@ -39,11 +39,20 @@ namespace KingdomSurvival.MapLab.Tests
                 typeof(MapLabGeneratorWindow).GetField("view", Any).SetValue(window, view);
                 typeof(MapLabGeneratorWindow).GetMethod("RebuildCards", Any).Invoke(window, null);
 
+                MapLabData mapBefore = view.Data;
                 typeof(MapLabGeneratorWindow).GetMethod("BuildField", Any).Invoke(window, null);
                 Assert.IsTrue((bool)typeof(MapLabGeneratorWindow).GetField("fieldBuilt", Any).GetValue(window), "поле построено");
                 IList items = (IList)typeof(MapLabGeneratorWindow).GetField("fieldItems", Any).GetValue(window);
                 Assert.Greater(items.Count, 20, "на поле — ассеты каталога");
-                MapLabData data = view.Data;
+                MapLabView fieldView = (MapLabView)typeof(MapLabGeneratorWindow).GetField("fieldView", Any).GetValue(window);
+                Assert.IsNotNull(fieldView, "у поля свой вид");
+                Assert.AreNotSame(view, fieldView, "поле не рисуется поверх карты окна");
+                Assert.AreSame(mapBefore, view.Data, "карта окна не перестроена полем");
+                MapLabData data = fieldView.Data;
+                Assert.AreEqual(0, data.Objects.Count(o => o.Kind == MapLabObjectKind.Conifer || o.Kind == MapLabObjectKind.Deciduous || o.Kind == MapLabObjectKind.DeciduousGroup), "на поляне нет леса");
+                // Фигура группы — один человечек, а не шесть ракурсов.
+                int figureFrames = data.FeatureSprites.Count(f => f.Kind == "asset-field" && f.ArtId.StartsWith("Bandit_"));
+                Assert.LessOrEqual(figureFrames, 1, "фигура ватаги — одна на поле");
                 int drawn = data.FeatureSprites.Count(f => f.Kind == "asset-field");
                 Debug.Log($"Поле ассетов: ассетов {items.Count}, нарисовано {drawn}, без рисунка: {string.Join(", ", MapLabArtBuilder.MissingFeatureArt)}");
                 Assert.GreaterOrEqual(drawn, items.Count - MapLabArtBuilder.MissingFeatureArt.Count, "каждый ассет с рисунком стоит на поле");
@@ -62,13 +71,13 @@ namespace KingdomSurvival.MapLab.Tests
 
                 // «Квадрат»: позиции на одной сетке.
                 typeof(MapLabGeneratorWindow).GetMethod("Arrange", Any).Invoke(window, new object[] { 0 });
-                var spots = view.Data.FeatureSprites.Where(f => f.Kind == "asset-field").Select(f => f.Point).Distinct().ToList();
+                var spots = fieldView.Data.FeatureSprites.Where(f => f.Kind == "asset-field").Select(f => f.Point).Distinct().ToList();
                 int columns = spots.Select(p => Mathf.Round(p.x * 10f)).Distinct().Count();
                 int rows = spots.Select(p => Mathf.Round(p.y * 10f)).Distinct().Count();
                 Debug.Log($"Квадрат: столбцов {columns}, рядов {rows}, мест {spots.Count}");
                 Assert.LessOrEqual(Mathf.Abs(columns - rows), 2, "квадратная сетка");
                 Assert.IsTrue(EditorPrefs.HasKey(PrefsKey), "расстановка сохранена");
-                Snapshot(view, "asset_field_square.png");
+                Snapshot(fieldView, "asset_field_square.png");
             }
             finally
             {

@@ -636,6 +636,8 @@ public partial class PrototypeUIController
         if (string.IsNullOrEmpty(inside) || IsSettlementScreenOpen)
             return;
         OpenSettlementScreen(inside, SettlementMode.Main);
+        settlementBuildingRole = role;
+        settlementBuildingAction = null;
         if (string.IsNullOrEmpty(role))
             return;
         foreach ((string r, SettlementActionDefinition action) in SettlementBuildingActions(inside))
@@ -647,6 +649,17 @@ public partial class PrototypeUIController
             if (!enabled)
             {
                 settlementMessageText = string.IsNullOrWhiteSpace(action.DisabledReason) ? ServiceRoleTitle(role) + ": сейчас закрыто." : action.DisabledReason;
+                settlementBuildingAction = action;
+                settlementMode = SettlementMode.Building;
+                RenderSettlement();
+                return;
+            }
+            // У знахарки своей страницы нет — показывается страница здания
+            // (её дело и «Выйти»), а не общий экран поселения.
+            if (action.Type == SettlementActionType.Healer)
+            {
+                settlementBuildingAction = action;
+                settlementMode = SettlementMode.Building;
                 RenderSettlement();
                 return;
             }

@@ -63,6 +63,9 @@ namespace KingdomSurvival.MapLab.Editor
         private sealed class Card
         {
             public string Key, Title, Category, Role;
+            // Фигура с ракурсами: на поле и в каталоге — один человечек
+            // (вид спереди); ракурсы — по «Открыть ракурсы».
+            public bool Figure;
             public readonly List<(MapLabArtSet Set, MapLabArtEntry Entry)> Views = new List<(MapLabArtSet, MapLabArtEntry)>();
         }
 
@@ -126,11 +129,13 @@ namespace KingdomSurvival.MapLab.Editor
         private void OnEnable()
         {
             Undo.undoRedoPerformed += OnUndoRedo;
+            wantsMouseMove = true;
         }
 
         private void OnDisable()
         {
             Undo.undoRedoPerformed -= OnUndoRedo;
+            DestroyFieldView();
             if (preview != null)
             {
                 preview.Release();
@@ -528,8 +533,6 @@ namespace KingdomSurvival.MapLab.Editor
                     s.RegionPlan = null;
                     planReport = null;
                 }
-                view.FeatureExtraSets = null;
-                fieldBuilt = false;
                 bool ok = view.Generate((stage, fraction) => EditorUtility.DisplayCancelableProgressBar("Генератор карты", stage, fraction));
                 if (!ok)
                     throw new Exception("генерация не выполнена (проверьте профиль и шейдеры)");
@@ -543,11 +546,12 @@ namespace KingdomSurvival.MapLab.Editor
 
         // ---------- Предпросмотр ----------
 
-        private void DrawPreview(Rect rect)
+        private void DrawPreview(Rect rect, MapLabView target = null)
         {
+            MapLabView shown = target != null ? target : view;
             EditorGUI.DrawRect(rect, new Color(0.16f, 0.16f, 0.16f));
-            MapLabCameraRig rig = view.CameraRig;
-            if (rig == null || view.Data == null)
+            MapLabCameraRig rig = shown.CameraRig;
+            if (rig == null || shown.Data == null)
             {
                 GUI.Label(new Rect(rect.x + 12f, rect.y + 12f, rect.width - 24f, 40f), "Карта ещё не построена — «Сгенерировать предпросмотр».", EditorStyles.whiteLabel);
                 return;
@@ -622,6 +626,25 @@ namespace KingdomSurvival.MapLab.Editor
         }
 
         private static readonly string[] FigurePrefixes = { "Worker_", "Caravan_", "Patrol_", "Bandit_", "Wandering_Master_", "Faction_", "Hero" };
+        // Суффиксы ракурсов фигур; вид спереди — первым.
+        private static readonly string[] FigureDirections = { "_Front", "_Front_Right", "_Back_Right", "_Back", "_Back_Left", "_Front_Left" };
+        private bool figureViewsOpen;
+
+        // Имя фигуры без ракурса и порядок ракурса (или -1, если это не кадр фигуры).
+        private static string FigureBase(string id, out int order)
+        {
+            order = -1;
+            if (string.IsNullOrEmpty(id) || !FigurePrefixes.Any(p => id.StartsWith(p)))
+                return null;
+            string best = null;
+            for (int i = 0; i < FigureDirections.Length; i++)
+                if (id.EndsWith(FigureDirections[i]) && (best == null || FigureDirections[i].Length > best.Length))
+                {
+                    best = FigureDirections[i];
+                    order = i;
+                }
+            return best == null ? null : id.Substring(0, id.Length - best.Length);
+        }
 
         private static string CategoryOf(MapLabArtEntry e)
         {
@@ -657,16 +680,20 @@ namespace KingdomSurvival.MapLab.Editor
                 {
                     if (e == null)
                         continue;
-                    // Кадры одного дома / героя — одна карточка с переключением вида.
-                    string key = !string.IsNullOrEmpty(e.VariantGroup) ? set.name + "/" + e.VariantGroup : set.name + "/" + e.Id;
+                    // Кадры одного дома / героя — одна карточка с переключением вида;
+                    // шесть ракурсов фигуры группы — тоже одна карточка.
+                    string figure = FigureBase(e.Id, out int _);
+                    string key = figure != null ? set.name + "/" + figure
+                        : !string.IsNullOrEmpty(e.VariantGroup) ? set.name + "/" + e.VariantGroup : set.name + "/" + e.Id;
                     if (!byKey.TryGetValue(key, out Card card))
                     {
                         card = new Card
                         {
                             Key = key,
-                            Title = !string.IsNullOrEmpty(e.VariantGroup) ? e.VariantGroup : e.Id,
+                            Title = figure ?? (!string.IsNullOrEmpty(e.VariantGroup) ? e.VariantGroup : e.Id),
                             Category = CategoryOf(e),
                             Role = e.Role,
+                            Figure = figure != null,
                         };
                         byKey[key] = card;
                         cards.Add(card);
@@ -674,6 +701,9 @@ namespace KingdomSurvival.MapLab.Editor
                     card.Views.Add((set, e));
                 }
             }
+            // Ракурсы фигуры — по кругу, вид спереди первым (его ставит поле).
+            foreach (Card c in cards.Where(c => c.Figure))
+                c.Views.Sort((a, b) => { FigureBase(a.Entry.Id, out int oa); FigureBase(b.Entry.Id, out int ob); return oa.CompareTo(ob); });
             cards.Sort((x, y) => string.CompareOrdinal(x.Category + x.Title, y.Category + y.Title));
         }
 
@@ -904,7 +934,39 @@ namespace KingdomSurvival.MapLab.Editor
                 EditorGUILayout.EndScrollView();
                 return;
             }
-            if (focus.Views.Count > 1)
+            if (focus.Figure && focus.Views.Count > 1)
+            {
+                // Фигура — один человечек; ракурсы открываются по кнопке.
+                if (GUILayout.Button(figureViewsOpen ? "Скрыть ракурсы" : $"Открыть ракурсы ({focus.Views.Count})"))
+                    figureViewsOpen = !figureViewsOpen;
+                if (!figureViewsOpen)
+                    focusView = 0;
+                else
+                {
+                    const float thumb = 44f;
+                    int perRow = Mathf.Max(1, Mathf.FloorToInt((rightWidth - 24f) / (thumb + 4f)));
+                    for (int row = 0; row * perRow < focus.Views.Count; row++)
+                    {
+                        Rect line = GUILayoutUtility.GetRect(10f, thumb + 4f, GUILayout.ExpandWidth(true));
+                        for (int k = 0; k < perRow && row * perRow + k < focus.Views.Count; k++)
+                        {
+                            int index = row * perRow + k;
+                            Rect cell = new Rect(line.x + k * (thumb + 4f), line.y + 2f, thumb, thumb);
+                            EditorGUI.DrawRect(cell, index == focusView ? new Color(0.24f, 0.37f, 0.55f) : new Color(0.23f, 0.23f, 0.23f));
+                            Texture2D t = focus.Views[index].Entry.Texture;
+                            if (t != null)
+                                GUI.DrawTexture(cell, t, ScaleMode.ScaleToFit, true);
+                            if (Event.current.type == EventType.MouseDown && cell.Contains(Event.current.mousePosition))
+                            {
+                                focusView = index;
+                                Event.current.Use();
+                                Repaint();
+                            }
+                        }
+                    }
+                }
+            }
+            else if (focus.Views.Count > 1)
                 focusView = EditorGUILayout.Popup("Вид", Mathf.Clamp(focusView, 0, focus.Views.Count - 1), focus.Views.Select(v => string.IsNullOrEmpty(v.Entry.Direction) ? v.Entry.Id : v.Entry.Direction + " · " + v.Entry.Id).ToArray());
             focusView = Mathf.Clamp(focusView, 0, focus.Views.Count - 1);
             (MapLabArtSet set, MapLabArtEntry e) = focus.Views[focusView];
@@ -940,6 +1002,17 @@ namespace KingdomSurvival.MapLab.Editor
                 e.Brightness = brightness;
                 e.HueShift = hue;
                 e.Saturation = saturation;
+                // Размер и цвет фигуры — общие для всех её ракурсов.
+                if (focus.Figure)
+                    foreach ((MapLabArtSet viewSet, MapLabArtEntry other) in focus.Views)
+                    {
+                        Undo.RecordObject(viewSet, "Генератор карты: ракурсы " + focus.Title);
+                        other.SizeScale = size;
+                        other.Brightness = brightness;
+                        other.HueShift = hue;
+                        other.Saturation = saturation;
+                        EditorUtility.SetDirty(viewSet);
+                    }
                 EditorUtility.SetDirty(set);
                 if (structural)
                     objectsPending = true;

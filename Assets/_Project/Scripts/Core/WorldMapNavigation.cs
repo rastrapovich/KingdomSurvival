@@ -115,7 +115,8 @@ public static class WorldMapNavigation
         {
             route.RemoveAt(1);
         }
-        return FollowRoads(route, layer, grid);
+        // 12У-H: основания построек и предметов мест обходятся.
+        return WorldMapObstacles.Avoid(FollowRoads(route, layer, grid), IsTraversableAtPercent);
     }
 
     // 12У-H: на дорожных клетках путь идёт по нарисованной линии дороги —

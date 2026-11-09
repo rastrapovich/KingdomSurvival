@@ -192,6 +192,12 @@ public partial class PrototypeUIController
             return;
         }
         HideSettlementTrade();
+        // Лавка открыта с карты (не из разговора) — «Назад» ведёт на карту.
+        if (InSettlementBuilding && string.IsNullOrEmpty(tradeReturnPersonId))
+        {
+            OnSettlementExitClicked();
+            return;
+        }
         RenderSettlement();
         // Бриф правок (19 пунктов) п. 2: из разговора — назад в разговор,
         // из кнопки лавки — на страницу поселения.

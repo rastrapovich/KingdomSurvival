@@ -1,6 +1,6 @@
 # Kingdom Survival — карта репозитория
 
-Сюжетная основа 04.11.2026 — [актуальный канон v1.66](../KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_66.md) §6, [NARRATIVE.md](NARRATIVE.md) §26.4 и [LORE.md](LORE.md) §17.2. Дом — [архивное направление под вопросом](Archive/HOME_DESIGN_ON_HOLD_2026-11-04.md); его старый лор и прежняя обязательная тема отменены.
+Сюжетная основа 04.11.2026 — [актуальный канон v1.67](../KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_67.md) §6, [NARRATIVE.md](NARRATIVE.md) §26.4 и [LORE.md](LORE.md) §17.2. Дом — [архивное направление под вопросом](Archive/HOME_DESIGN_ON_HOLD_2026-11-04.md); его старый лор и прежняя обязательная тема отменены.
 
 Проверено по локальному checkout 02.11.2026. Это справочник путей, а не новый канон. Рабочие правила — [AGENTS.md](../AGENTS.md). Пути в таблицах ниже указаны от корня репозитория; Markdown-ссылки разрешаются из ProjectDocs. При изменении структуры обновляй карту.
 
@@ -17,7 +17,7 @@
 | Глобальная карта: правила | `Scripts/Core/WorldMap*.cs`: генератор, навигация, поиск пути, туман; результат — `GameState.GeneratedMap` |
 | Глобальная карта: рисунок и настройки | [WorldMapVisual/](../Assets/_Project/WorldMapVisual/), `Runtime/WorldMapPainter*.cs`; UI — `UI/PrototypeUIController.WorldMap*.cs` |
 | Локальное исследование | `Scripts/Core/LocalExploration*.cs`; [LocalHexMover.cs](../Assets/_Project/BattlefieldDatabase/Runtime/LocalHexMover.cs); `UI/PrototypeUIController.Local*.cs` |
-| Бой | [BattleSandbox/](../Assets/_Project/BattleSandbox/) — `Runtime/SandboxBattle.cs`; сцена [BattleSandbox.unity](../Assets/_Project/Scenes/BattleSandbox.unity), связь с партией — `UI/PrototypeUIController.CampaignBattle.cs` |
+| Бой | [BattleSandbox/](../Assets/_Project/BattleSandbox/) — `Runtime/SandboxBattle.cs`; сцена [BattleSandbox.unity](../Assets/_Project/Scenes/BattleSandbox.unity), связь с партией — `UI/PrototypeUIController.CampaignBattle.cs`; арена в стиле карты — `BattleSandbox/UI/MapLabArenaDriver.cs` + `MapLabBridge/Runtime/MapLabArena*.cs` (рельеф по раскладке, декор из Базы ассетов, `MapLabArtAssets.cs`), рельеф доски — `BattlefieldDatabase/Runtime/BattlefieldRelief.cs` |
 | Локации и поля боя | [BattlefieldDatabase/](../Assets/_Project/BattlefieldDatabase/) — данные и База локаций; отдельное окно Базы полей боя не восстанавливать |
 | Общий рендер мест, земля, свет, тени | [LocationRendering/](../Assets/_Project/LocationRendering/) — `Runtime/LocationWorldRenderer*.cs`, импорт земли — `Editor/GroundImporter.cs` |
 | Диалоги и встречи | [DialogueDatabase/](../Assets/_Project/DialogueDatabase/), [Encounters/](../Assets/_Project/Encounters/); ядро — `Scripts/Core/Narrative*.cs`, подача — `UI/PrototypeUIController.Narrative*.cs`, `UI/NarrativeDialogueRendering.cs` |

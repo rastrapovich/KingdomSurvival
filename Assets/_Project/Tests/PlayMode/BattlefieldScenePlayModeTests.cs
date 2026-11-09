@@ -46,6 +46,11 @@ public sealed class BattlefieldScenePlayModeTests
             locations.locations.Add(scene);
             locations.visuals.Add(visual);
         }
+        // Арена MapLab (обычный бой) идёт раньше места «Поле боя» — здесь
+        // проверяется прежний путь, арена на время теста выключена.
+        KingdomSurvival.MapLabBridge.MapLabGameAssets arenaAssets = KingdomSurvival.MapLabBridge.MapLabGameAssets.Load();
+        bool arenaWas = arenaAssets != null && arenaAssets.ArenaInBattle;
+        if (arenaAssets != null) arenaAssets.ArenaInBattle = false;
         try
         {
             SceneManager.LoadScene("BattleSandbox");
@@ -98,6 +103,7 @@ public sealed class BattlefieldScenePlayModeTests
         }
         finally
         {
+            if (arenaAssets != null) arenaAssets.ArenaInBattle = arenaWas;
             if (added)
             {
                 locations.locations.Remove(scene);

@@ -25,6 +25,8 @@ namespace KingdomSurvival.BattleSandbox
         private bool attached, disposed;
         private float readyAt = -1f;
         private Vector2Int lastSize;
+        private float renderedAt = -1f;
+        private static MapLabArenaDriver current;
 
         public MapLabArena Arena => arena;
 
@@ -83,6 +85,11 @@ namespace KingdomSurvival.BattleSandbox
         {
             this.surface = surface;
             this.board = board;
+            // На экране один бой — одна арена: прежняя (экран боя закрыт или
+            // сцена выгружена без события отсоединения панели) освобождается.
+            if (current != null && !current.disposed)
+                current.Dispose();
+            current = this;
             arena = MapLabArena.Begin(spec);
             surface.schedule.Execute(Tick).Every(0);
             surface.RegisterCallback<DetachFromPanelEvent>(_ => Dispose());
@@ -117,10 +124,27 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             float scale = surface.panel != null ? surface.panel.scaledPixelsPerPoint : 1f;
             Vector2Int size = new Vector2Int(Mathf.RoundToInt(frame.width * scale), Mathf.RoundToInt(frame.height * scale));
-            if (size == lastSize && Time.unscaledTime - readyAt > SettleSeconds)
+            // Тот же размер: после готовности кадр догружается (не чаще 10 раз
+            // в секунду), дальше не перерисовывается.
+            if (size == lastSize && (Time.unscaledTime - readyAt > SettleSeconds || Time.unscaledTime - renderedAt < 0.1f))
                 return;
+            renderedAt = Time.unscaledTime;
             lastSize = size;
-            RenderTexture target = arena.Render(size.x, size.y);
+            // Сам кадр рисуется в LateUpdate (ArenaRenderPump), а не во время
+            // обновления панелей UI: на D3D12 рендер камеры посреди обновления
+            // панели, которая рисует ту же текстуру, вешал устройство.
+            requestedSize = size;
+            ArenaRenderPump.Request(this);
+        }
+
+        private Vector2Int requestedSize;
+
+        // Из LateUpdate: нарисовать запрошенный кадр и показать его.
+        internal void RenderRequested()
+        {
+            if (disposed || !arena.Ready || requestedSize.x < 8)
+                return;
+            RenderTexture target = arena.Render(requestedSize.x, requestedSize.y);
             if (target != null && shown != target)
             {
                 shown = target;
@@ -134,6 +158,8 @@ namespace KingdomSurvival.BattleSandbox
             if (disposed)
                 return;
             disposed = true;
+            if (current == this)
+                current = null;
             if (surface.Relief == this)
                 surface.Relief = null;
             if (board.Relief == this)

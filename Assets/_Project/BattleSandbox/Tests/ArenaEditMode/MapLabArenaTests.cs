@@ -209,6 +209,8 @@ namespace KingdomSurvival.BattleSandbox.Tests
         {
             RenderTexture rt = arena.Render((int)frame.width, (int)frame.height);
             Assert.That(rt, Is.Not.Null, "Кадр арены не нарисован");
+            // Текстура кадра — 16:9 своего размера: сетка — в её пикселях.
+            frame = new Rect(0f, 0f, rt.width, rt.height);
             RenderTexture previous = RenderTexture.active;
             RenderTexture.active = rt;
             Texture2D image = new Texture2D(rt.width, rt.height, TextureFormat.RGBA32, false);

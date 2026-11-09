@@ -81,11 +81,13 @@ namespace KingdomSurvival.MapLabBridge
         private System.Diagnostics.Stopwatch watch;
         private float k, depth, zBottom, mean, sin, cos, pitch;
         private bool disposed;
+        private static readonly List<MapLabArena> liveArenas = new List<MapLabArena>();
         // Рисунки Базы ассетов для арены (по назначению) и их роли в декоре.
         private MapLabArtSet decorSet;
         private readonly List<MapLabDecorArt> decorArt = new List<MapLabDecorArt>();
         public int DecorFeatures { get; private set; }
         public bool UsesAssetDatabase { get; private set; }
+        private bool UsesAssetDatabaseHint => decorArt.FindAll(art => art.Role == MapLabDecorRole.Tree).Count >= 3;
 
         private MapLabArena(MapLabArenaSpec spec)
         {
@@ -104,7 +106,9 @@ namespace KingdomSurvival.MapLabBridge
         // Начать пошаговую сборку (тяжёлые расчёты — в фоне, см. MapLabView.GenerateStepwise).
         public static MapLabArena Begin(MapLabArenaSpec spec)
         {
+            PurgeReleased();
             MapLabArena arena = new MapLabArena(spec ?? throw new ArgumentNullException(nameof(spec)));
+            liveArenas.Add(arena);
             arena.Start();
             return arena;
         }
@@ -135,9 +139,9 @@ namespace KingdomSurvival.MapLabBridge
                 settings = Object.Instantiate(assets.Profile);
                 settings.name = "MapLab Arena Profile";
                 settings.hideFlags = HideFlags.HideAndDontSave;
-                ConfigureSettings(settings);
                 float scale = Spec.AssetScale > 0f ? Spec.AssetScale : assets.ArenaAssetScale;
                 decorSet = MapLabArtAssets.BuildSet(true, scale, decorArt);
+                ConfigureSettings(settings);
                 float side = settings.General.MapSize;
                 zBottom = (side - depth) * 0.5f;
                 settings.RegionPlan = BuildComposition(side);
@@ -225,6 +229,9 @@ namespace KingdomSurvival.MapLabBridge
                 count++;
             }
             mean = count > 0 ? sum / count : 0f;
+            // До активации мира: чужие камеры (сцена боя, URP 2D) слой арены не
+            // рисуют — иначе террейн и шейдеры MapLab попадали в кадр сцены.
+            StripOtherCameras();
             camera.backgroundColor = view.Palette.Paper;
             view.gameObject.SetActive(true);
             BuildMs = watch.Elapsed.TotalMilliseconds;
@@ -242,7 +249,10 @@ namespace KingdomSurvival.MapLabBridge
             s.Stage05.FrameWidth = 0f;
             s.Stage05.PaintStreaming = MapLabPaintStreaming.Off;
             // Крупный план: покраска плотнее, чем на карте мира.
-            s.Stage03.PaintTexelsPerUnit = 30f;
+            s.Stage03.PaintTexelsPerUnit = 24f;
+            // Без alpha-to-coverage: на D3D12 (GTX 1070) рендер арены с ним ронял
+            // редактор и игру при выходе — и с MSAA, и без. Края — по порогу альфы.
+            s.Stage05.AlphaToCoverage = false;
             s.Relief.Source = MapLabHeightSource.Procedural;
             s.Relief.HeightRange = Mathf.Max(0.2f, Spec.HillLiftHexes * Spec.HexWorld / Mathf.Max(0.2f, cos));
             s.Relief.FineNoise = 0.05f;
@@ -252,6 +262,16 @@ namespace KingdomSurvival.MapLabBridge
             s.Settlement.HousesMax = 0;
             s.Vegetation.ForestDensity = Mathf.Max(0.5f, s.Vegetation.ForestDensity);
             s.Vegetation.SingleTrees = 0f;
+            // Трава, камыш, камни и сено MapLab на арене не нужны: декор арены —
+            // рисунки Базы ассетов. Меньше работы GPU на кадр.
+            if (UsesAssetDatabaseHint)
+            {
+                s.Stage05.GrassDensity = 0f;
+                s.Stage05.InkGrassDensity = 0f;
+                s.Stage05.ReedDensity = 0f;
+                s.Stage05.RockDensity = 0f;
+                s.Stage05.HayDensity = 0f;
+            }
         }
 
         // Кадр поля (доли высоты кадра, Y вниз) → мир MapLab (x, z) на земле.
@@ -379,20 +399,36 @@ namespace KingdomSurvival.MapLabBridge
             return (height - mean) * cos / k;
         }
 
-        // Нарисовать кадр поля в текстуру pixelWidth × pixelHeight.
+        // Нарисовать кадр поля для области экрана pixelWidth × pixelHeight.
+        // Кадр поля всегда 16:9, UI растягивает текстуру на кадр: текстура
+        // заводится под высоту с запасом (кратно 128) и пересоздаётся, только
+        // если область заметно выросла. Уменьшение окна её не трогает —
+        // на D3D12 частое пересоздание текстуры кадра роняло устройство.
         public RenderTexture Render(int pixelWidth, int pixelHeight)
         {
+            PurgeReleased();
             if (!Ready || pixelWidth < 8 || pixelHeight < 8)
                 return null;
-            pixelWidth = Mathf.Min(pixelWidth, 4096);
-            pixelHeight = Mathf.Min(pixelHeight, 4096);
+            int wantHeight = Mathf.Clamp(pixelHeight, 64, 2304);
+            if (target == null || target.height < wantHeight * 0.85f)
+            {
+                pixelHeight = Mathf.Min(2304, (wantHeight + 127) / 128 * 128);
+                pixelWidth = Mathf.RoundToInt(pixelHeight * Spec.Aspect);
+            }
+            else
+            {
+                pixelWidth = target.width;
+                pixelHeight = target.height;
+            }
             if (target == null || target.width != pixelWidth || target.height != pixelHeight)
             {
                 ReleaseTarget();
+                // Показываемая текстура — без MSAA: её читает UI Toolkit (MSAA-
+                // текстура, которую читает панель, на D3D12 вешала устройство).
                 target = new RenderTexture(pixelWidth, pixelHeight, 24, GraphicsFormat.R8G8B8A8_SRGB)
                 {
                     name = "MapLab Arena",
-                    antiAliasing = Mathf.Clamp(QualitySettings.antiAliasing > 1 ? QualitySettings.antiAliasing : 4, 1, 8),
+                    antiAliasing = 1,
                     hideFlags = HideFlags.DontSave,
                 };
                 target.Create();
@@ -410,13 +446,27 @@ namespace KingdomSurvival.MapLabBridge
             rig.Target = focus;
             view.OnCameraChanged();
             view.PumpStreaming(false);
-            foreach (Camera other in Camera.allCameras)
-                if (other != camera && (other.cullingMask & (1 << Layer)) != 0)
-                    other.cullingMask &= ~(1 << Layer);
-            camera.targetTexture = target;
+            StripOtherCameras();
             Shader.SetGlobalFloat("_MapLabPixelScale", 1f);
-            camera.Render();
-            camera.targetTexture = null;
+            if (EffectiveFrameMsaa > 1)
+            {
+                // MSAA-кадр камеры — временный (пул Unity), в показываемую
+                // текстуру он сводится; UI читает только текстуру без MSAA.
+                // MSAA-кадр камеры — временный (пул Unity), сводится в показываемую.
+                RenderTextureDescriptor descriptor = new RenderTextureDescriptor(target.width, target.height, GraphicsFormat.R8G8B8A8_SRGB, 24) { msaaSamples = EffectiveFrameMsaa };
+                RenderTexture frame = RenderTexture.GetTemporary(descriptor);
+                camera.targetTexture = frame;
+                camera.Render();
+                camera.targetTexture = null;
+                Graphics.Blit(frame, target);
+                RenderTexture.ReleaseTemporary(frame);
+            }
+            else
+            {
+                camera.targetTexture = target;
+                camera.Render();
+                camera.targetTexture = null;
+            }
             return target;
         }
 
@@ -427,13 +477,69 @@ namespace KingdomSurvival.MapLabBridge
                 SetLayer(t.GetChild(i));
         }
 
+        // Кадр арены показывает UI Toolkit: старую текстуру нельзя освобождать
+        // в том же кадре, где её ещё рисует панель (GPU обратится к удалённому
+        // ресурсу — зависание устройства). Освобождение — через несколько кадров.
+        private const int ReleaseDelayFrames = 4;
+        private static readonly List<(RenderTexture Texture, int Frame)> released = new List<(RenderTexture, int)>();
+
         private void ReleaseTarget()
         {
             if (target == null)
                 return;
-            target.Release();
-            Object.DestroyImmediate(target);
+            released.Add((target, Time.frameCount + ReleaseDelayFrames));
             target = null;
+        }
+
+        // Освободить отложенные текстуры, чей срок прошёл (all — все сразу).
+        public static void PurgeReleased(bool all = false)
+        {
+            for (int i = released.Count - 1; i >= 0; i--)
+            {
+                if (!all && released[i].Frame > Time.frameCount)
+                    continue;
+                RenderTexture texture = released[i].Texture;
+                released.RemoveAt(i);
+                if (texture == null)
+                    continue;
+                texture.Release();
+                Object.DestroyImmediate(texture);
+            }
+        }
+
+        public static int PendingReleases => released.Count;
+
+        // Выборок MSAA у кадра камеры. 4 — кадр рисуется во временную MSAA-
+        // текстуру и сводится в показываемую (без MSAA). На D3D12 рендер MapLab
+        // прямо в текстуру без MSAA ронял игру при выходе, а MSAA-текстура,
+        // которую читает UI, вешала устройство. 1 — без MSAA (для проверок).
+        public static int FrameMsaa = 0;
+
+        // 0 — по месту: в редакторе 1 (MSAA-рендер MapLab в Play Mode на D3D12
+        // ронял устройство даже без alpha-to-coverage), в сборке 4 (там MSAA
+        // стабилен и сглаживает края геометрии). Обход наблюдений 09.11.2026
+        // (GTX 1070, D3D12; на D3D11 оба варианта чистые), не первопричина.
+        public static int EffectiveFrameMsaa => FrameMsaa > 0 ? FrameMsaa : Application.isEditor ? 1 : 4;
+
+        // Слой арены видит только камера арены (в том числе камеры сцены,
+        // появившиеся позже; вызывается каждый кадр, пока арена жива).
+        public static void StripOtherCameras()
+        {
+            foreach (Camera other in Camera.allCameras)
+                if (!liveArenas.Exists(arena => arena.camera == other) && (other.cullingMask & (1 << Layer)) != 0)
+                    other.cullingMask &= ~(1 << Layer);
+        }
+
+        public static bool HasLive => liveArenas.Count > 0;
+
+        // Выход из игры или Play Mode: освободить живую арену и отложенные
+        // текстуры, пока устройство ещё работает (объекты HideAndDontSave
+        // иначе переживают Play Mode).
+        public static void ShutdownAll()
+        {
+            foreach (MapLabArena arena in liveArenas.ToArray())
+                arena.Dispose();
+            PurgeReleased(true);
         }
 
         public void Dispose()
@@ -441,6 +547,7 @@ namespace KingdomSurvival.MapLabBridge
             if (disposed)
                 return;
             disposed = true;
+            liveArenas.Remove(this);
             pending = null;
             if (view != null)
             {
@@ -454,7 +561,16 @@ namespace KingdomSurvival.MapLabBridge
                 Object.DestroyImmediate(settings);
             if (decorSet != null)
                 Object.DestroyImmediate(decorSet);
-            ReleaseTarget();
+            // Поле уже отвязано от кадра (драйвер снимает текстуру до Dispose):
+            // освобождается сразу, вместе с отложенными с прошлых кадров.
+            if (target != null)
+            {
+                target.Release();
+                Object.DestroyImmediate(target);
+                target = null;
+            }
+            if (liveArenas.Count == 0)
+                PurgeReleased(true);
         }
     }
 }

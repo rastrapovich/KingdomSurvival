@@ -151,6 +151,10 @@ namespace KingdomSurvival.MapLab
         public float Height;
         public float Width;
         public Vector2 Pivot;
+        // Видимая часть рисунка (мир) и постройка ли это — для единой тени.
+        public float SolidWidth;
+        public float SolidHeight;
+        public bool Building;
     }
 
     public struct MapLabServiceBuilding

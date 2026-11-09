@@ -527,7 +527,12 @@ namespace KingdomSurvival.MapLab
                             partScale = fixedScale.Value;
                         MapLabArtInstance part = Make(e, at - Vector3.up * 0.03f, partScale, rng.Range(0.96f, 1.03f), 0f, 0.85f, -1);
                         plan.Add(e, part);
-                        data.FeatureSprites.Add(new MapLabFeatureSprite { Point = p, Kind = kind, ArtId = id, Base = at, Height = part.Height, Width = part.Width, Pivot = part.Pivot });
+                        data.FeatureSprites.Add(new MapLabFeatureSprite
+                        {
+                            Point = p, Kind = kind, ArtId = id, Base = at, Height = part.Height, Width = part.Width, Pivot = part.Pivot,
+                            SolidWidth = part.Width * e.SolidRect.width, SolidHeight = part.Height * e.SolidRect.height,
+                            Building = e.Category == MapLabArtCategory.Building,
+                        });
                         any = true;
                         LastFeatureParts++;
                     }

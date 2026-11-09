@@ -478,10 +478,21 @@ namespace KingdomSurvival.MapLab.Editor
                 GUI.Label(new Rect(rect.x + 12f, rect.y + 12f, rect.width - 24f, 60f), "Поле ассетов ещё не построено — «Построить поле» слева.\nВсе показанные фильтром ассеты встанут на ровную землю карты рядом с рекой.", EditorStyles.whiteLabel);
                 return;
             }
-            Rect image = new Rect(rect.x, rect.y, rect.width, rect.height - 22f);
+            // Те же размеры картинки, что у DrawPreview; камера поля — в её
+            // пропорциях (иначе экранные рамки ассетов уезжали вбок).
+            Rect image = new Rect(rect.x, rect.y, Mathf.Max(64, Mathf.RoundToInt(rect.width)), Mathf.Max(64, Mathf.RoundToInt(rect.height - 22f)));
+            Camera fieldCam = fieldView.CameraRig != null ? fieldView.CameraRig.Camera : null;
+            if (fieldCam != null)
+                fieldCam.aspect = image.width / image.height;
             HandleFieldDrag(image);
             DrawPreview(rect, fieldView);
-            Camera cam = fieldView.CameraRig != null ? fieldView.CameraRig.Camera : null;
+            // Новый размер ассета — на поле, как только отпущен регулятор.
+            if (objectsPending && GUIUtility.hotControl == 0 && Event.current.type == EventType.Repaint)
+            {
+                objectsPending = false;
+                EditorApplication.delayCall += RefreshFieldObjects;
+            }
+            Camera cam = fieldCam;
             if (cam == null)
                 return;
             List<(Rect R, FieldItem Item)> marks = FieldScreenRects(image, cam);
@@ -492,14 +503,20 @@ namespace KingdomSurvival.MapLab.Editor
                 bool isHover = fieldHover >= 0 && fieldHover < fieldItems.Count && fieldItems[fieldHover] == item;
                 if (isFocus || isDrag || isHover)
                 {
-                    Color frameColor = isDrag ? new Color(1f, 0.85f, 0.3f, 0.9f) : isFocus ? new Color(0.35f, 0.6f, 1f, 0.9f) : new Color(1f, 0.96f, 0.82f, 0.85f);
+                    // Как в игре: светлый контур по силуэту рисунка (выбранный —
+                    // голубой, перетаскиваемый — жёлтый).
+                    Color glow = isDrag ? new Color(1f, 0.85f, 0.3f, 1f) : isFocus ? new Color(0.55f, 0.78f, 1f, 1f) : new Color(1f, 0.95f, 0.75f, 1f);
                     Rect shown = r;
                     if (isDrag && fieldDragMoved)
                         shown.position += fieldDragAt - fieldDragStart;
-                    EditorGUI.DrawRect(new Rect(shown.x, shown.yMax, shown.width, 2f), frameColor);
-                    EditorGUI.DrawRect(new Rect(shown.x, shown.y, shown.width, 1f), frameColor);
-                    EditorGUI.DrawRect(new Rect(shown.x, shown.y, 1f, shown.height), frameColor);
-                    EditorGUI.DrawRect(new Rect(shown.xMax - 1f, shown.y, 1f, shown.height), frameColor);
+                    Texture2D ring = SilhouetteGlow(item.Entry.Texture);
+                    if (ring != null)
+                    {
+                        Color keep = GUI.color;
+                        GUI.color = glow;
+                        GUI.DrawTexture(shown, ring, ScaleMode.StretchToFill, true);
+                        GUI.color = keep;
+                    }
                 }
                 if (isHover && !fieldLabels)
                     GUI.Label(new Rect(r.center.x - 60f, r.yMax + 1f, 120f, 14f), item.Title, LabelStyle);
@@ -509,6 +526,67 @@ namespace KingdomSurvival.MapLab.Editor
                     GUI.Label(new Rect(r.center.x - 60f, r.yMax + 13f, 120f, 14f), item.Height.ToString("0.0") + " ед.", LabelStyle);
                 }
             }
+        }
+
+        // Контур силуэта рисунка (белый, снаружи) и лёгкая заливка внутри —
+        // подсветка наведения, как у зданий на карте игры. Кэш по текстуре.
+        private static readonly Dictionary<Texture2D, Texture2D> silhouetteGlows = new Dictionary<Texture2D, Texture2D>();
+
+        private static Texture2D SilhouetteGlow(Texture2D source)
+        {
+            if (source == null)
+                return null;
+            if (silhouetteGlows.TryGetValue(source, out Texture2D cached) && cached != null)
+                return cached;
+            int w = Mathf.Min(source.width, 256), h = Mathf.Max(1, Mathf.RoundToInt(source.height * (w / (float)source.width)));
+            RenderTexture rt = RenderTexture.GetTemporary(w, h, 0, RenderTextureFormat.ARGB32);
+            RenderTexture keep = RenderTexture.active;
+            Graphics.Blit(source, rt);
+            RenderTexture.active = rt;
+            Texture2D readable = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            readable.ReadPixels(new Rect(0, 0, w, h), 0, 0);
+            readable.Apply();
+            RenderTexture.active = keep;
+            RenderTexture.ReleaseTemporary(rt);
+            Color32[] pixels = readable.GetPixels32();
+            DestroyImmediate(readable);
+            bool[] mask = new bool[w * h];
+            for (int i = 0; i < mask.Length; i++)
+                mask[i] = pixels[i].a > 90;
+            int r = Mathf.Max(2, Mathf.RoundToInt(Mathf.Max(w, h) * 0.02f));
+            Color32[] result = new Color32[w * h];
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                {
+                    int i = y * w + x;
+                    if (mask[i])
+                    {
+                        result[i] = new Color32(255, 255, 255, 46);
+                        continue;
+                    }
+                    bool near = false;
+                    for (int dy = -r; dy <= r && !near; dy++)
+                    {
+                        int yy = y + dy;
+                        if (yy < 0 || yy >= h)
+                            continue;
+                        for (int dx = -r; dx <= r; dx++)
+                        {
+                            int xx = x + dx;
+                            if (xx >= 0 && xx < w && dx * dx + dy * dy <= r * r && mask[yy * w + xx])
+                            {
+                                near = true;
+                                break;
+                            }
+                        }
+                    }
+                    result[i] = near ? new Color32(255, 255, 255, 255) : new Color32(0, 0, 0, 0);
+                }
+            Texture2D glow = new Texture2D(w, h, TextureFormat.RGBA32, false) { hideFlags = HideFlags.DontSave, wrapMode = TextureWrapMode.Clamp };
+            glow.SetPixels32(result);
+            glow.Apply(false, true);
+            silhouetteGlows[source] = glow;
+            return glow;
         }
 
         private static GUIStyle labelStyle;

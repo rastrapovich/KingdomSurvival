@@ -1165,6 +1165,11 @@ namespace KingdomSurvival.MapLab
                 return false;
             casters = new List<MapLabObjectShadows.Caster>();
             HashSet<MapLabObjectKind> replaced = artPlan != null ? artPlan.Replaced : new HashSet<MapLabObjectKind>();
+            // Детали мест (любой категории) — одно правило тени по основанию
+            // рисунка ниже; их карточки в общем цикле пропускаются.
+            HashSet<Vector2Int> featureBases = new HashSet<Vector2Int>();
+            foreach (MapLabFeatureSprite f in data.FeatureSprites)
+                featureBases.Add(new Vector2Int(Mathf.RoundToInt(f.Base.x * 50f), Mathf.RoundToInt(f.Base.z * 50f)));
             if (artPlan != null)
             {
                 foreach (KeyValuePair<MapLabArtEntry, List<MapLabArtInstance>> pair in artPlan.Cards)
@@ -1178,6 +1183,8 @@ namespace KingdomSurvival.MapLab
                     bool bush = e.Kind == MapLabObjectKind.Bush || e.Category == MapLabArtCategory.Rock || e.Category == MapLabArtCategory.Prop;
                     foreach (MapLabArtInstance inst in pair.Value)
                     {
+                        if (featureBases.Contains(new Vector2Int(Mathf.RoundToInt(inst.Base.x * 50f), Mathf.RoundToInt(inst.Base.z * 50f))))
+                            continue;
                         float w = inst.Width * e.SolidRect.width, h = inst.Height * e.SolidRect.height;
                         casters.Add(new MapLabObjectShadows.Caster
                         {
@@ -1187,6 +1194,21 @@ namespace KingdomSurvival.MapLab
                             ContactRadius = w * (bush ? 0.38f : 0.2f),
                         });
                     }
+                }
+            }
+            foreach (MapLabFeatureSprite f in data.FeatureSprites)
+            {
+                float w = Mathf.Max(0.2f, f.SolidWidth > 0f ? f.SolidWidth : f.Width * 0.7f);
+                float h = Mathf.Max(0.2f, f.SolidHeight > 0f ? f.SolidHeight : f.Height * 0.8f);
+                Vector3 at = f.Base + Vector3.up * 0.03f;
+                if (f.Building)
+                    casters.Add(new MapLabObjectShadows.Caster { Base = at, Building = true, Size = new Vector2(w * 0.75f, w * 0.5f), Yaw = 0f, Height = h * 0.75f });
+                else
+                {
+                    // Основание — не шире 0,3 ширины рисунка; высота центра — по
+                    // росту, но тень от высокого узкого столба не длиннее ширины ×2.
+                    float radius = Mathf.Clamp(w * 0.3f, 0.12f, 4f);
+                    casters.Add(new MapLabObjectShadows.Caster { Base = at, Radius = radius, CenterHeight = Mathf.Min(h * 0.5f, Mathf.Max(radius * 4f, 0.4f)), ContactRadius = radius });
                 }
             }
             foreach (MapLabPlacement o in data.Objects)

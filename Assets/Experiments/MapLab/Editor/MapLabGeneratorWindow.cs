@@ -1096,6 +1096,9 @@ namespace KingdomSurvival.MapLab.Editor
             foreach (MapLabArtSet set in ActiveSets())
                 EditorUtility.SetDirty(set);
             view.ApplyMaterialSettings();
+            // Поле ассетов — та же правка сразу (цвет; размер — по отпусканию).
+            if (fieldView != null)
+                fieldView.ApplyMaterialSettings();
             previewDirty = true;
             Repaint();
         }

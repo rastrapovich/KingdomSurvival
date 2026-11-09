@@ -156,7 +156,7 @@ namespace KingdomSurvival.ArtAssets.Editor
         private void BuildCanvasLayout()
         {
             List<ArtAssetDefinition> items = Visible();
-            (ArtAssetView, ArtAssetCanvasScale, int) key = (state.View, state.Scale, Mathf.RoundToInt(state.Zoom));
+            (ArtAssetView, ArtAssetCanvasScale, int) key = (ArtAssetView.Front, state.Scale, Mathf.RoundToInt(state.Zoom));
             if (!layoutDirty && key == layoutKey) return;
             layoutKey = key;
             layoutDirty = false;
@@ -169,7 +169,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             List<(ArtAssetDefinition asset, Rect bounds, float scale)> measured = new List<(ArtAssetDefinition, Rect, float)>();
             foreach (ArtAssetDefinition asset in items)
             {
-                Rect bounds = ArtAssetDrawing.Resolve(catalog, asset, state.View).Bounds;
+                Rect bounds = ArtAssetDrawing.Resolve(catalog, asset, asset.PrimaryView).Bounds;
                 float scale = game ? 1 : FitCell / Mathf.Max(.01f, Mathf.Max(bounds.width, bounds.height));
                 measured.Add((asset, bounds, scale));
                 widest = Mathf.Max(widest, bounds.width * scale);
@@ -295,7 +295,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             {
                 GUIStyle empty = new GUIStyle(EditorStyles.wordWrappedLabel) { alignment = TextAnchor.MiddleCenter, normal = { textColor = TextColor } };
                 GUI.Label(area, catalog.assets.Count == 0
-                    ? "Каталог пуст. Перетащите сюда папку с рисунками (6 ракурсов и нормали) или нажмите «Ещё → Создать технический набор»."
+                    ? "Каталог пуст. Перетащите сюда PNG или папку с рисунками (один PNG — один ассет) или нажмите «Ещё → Создать технический набор»."
                     : "Ничего не найдено — измените поиск, категорию или фильтры.", empty);
                 return;
             }
@@ -323,10 +323,10 @@ namespace KingdomSurvival.ArtAssets.Editor
             {
                 if (!item.Rect.Overlaps(visibleRect)) continue;
                 ArtAssetDefinition asset = item.Asset;
-                ArtAssetDrawing.Layout layout = ArtAssetDrawing.Resolve(catalog, asset, state.View);
+                ArtAssetDrawing.Layout layout = ArtAssetDrawing.Resolve(catalog, asset, asset.PrimaryView);
                 bool fallback = layout.Resolved.ViewFallback;
                 Vector2 anchor = CanvasToGui(area, item.Anchor);
-                ArtAssetDrawing.DrawAsset(catalog, asset, state.View, anchor, state.Zoom * item.Scale, ArtAssetDrawMode.Color, fallback ? new Color(1, 1, 1, .45f) : (Color?)null);
+                ArtAssetDrawing.DrawAsset(catalog, asset, asset.PrimaryView, anchor, state.Zoom * item.Scale, ArtAssetDrawMode.Color, fallback ? new Color(1, 1, 1, .45f) : (Color?)null);
                 Vector2 artMin = CanvasToGui(area, item.ArtRect.min), artMax = CanvasToGui(area, item.ArtRect.max);
                 Rect art = Rect.MinMaxRect(artMin.x, artMin.y, artMax.x, artMax.y);
                 if (asset.Id == state.SelectedId)
@@ -336,9 +336,8 @@ namespace KingdomSurvival.ArtAssets.Editor
                 GUI.Label(new Rect(art.x, labelY, width, 14), (asset.Favorite ? "★ " : "") + asset.Name, name);
                 string line = ArtAssetDrawing.Completeness(asset);
                 GUI.Label(new Rect(art.x, labelY + 12, width, 14), line, small);
-                if (fallback) GUI.Label(new Rect(art.x, labelY + 24, width + 60, 14), "нет «" + ArtAssetLabels.ViewTitle(state.View) + "» → показан «" + ArtAssetLabels.ViewTitle(layout.Resolved.ShownView) + "»", warning);
-                else if (layout.Resolved.NoArt) GUI.Label(new Rect(art.x, labelY + 24, width, 14), "нет рисунков", warning);
-                else if (asset.NormalCount < asset.ViewCount) GUI.Label(new Rect(art.x, labelY + 24, width, 14), "⚠ нормали не у всех ракурсов", warning);
+                if (layout.Resolved.NoArt) GUI.Label(new Rect(art.x, labelY + 24, width, 14), "нет рисунков", warning);
+                else GUI.Label(new Rect(art.x, labelY + 24, width, 14), ArtAssetLabels.PurposeTitle(asset.Purpose), small);
             }
         }
 
@@ -464,15 +463,13 @@ namespace KingdomSurvival.ArtAssets.Editor
                 bool selected = asset.Id == state.SelectedId;
                 EditorGUI.DrawRect(card, selected ? new Color(.95f, .75f, .3f, .3f) : new Color(0, 0, 0, .18f));
                 Rect image = new Rect(card.x + 4, card.y + 4, card.width - 8, state.CardSize - 8);
-                ArtAssetDrawing.Layout layout = ArtAssetDrawing.Resolve(catalog, asset, state.View);
-                ArtAssetDrawing.DrawFitted(catalog, asset, state.View, image, ArtAssetDrawMode.Color, layout.Resolved.ViewFallback ? new Color(1, 1, 1, .45f) : (Color?)null);
+                ArtAssetDrawing.Layout layout = ArtAssetDrawing.Resolve(catalog, asset, asset.PrimaryView);
+                ArtAssetDrawing.DrawFitted(catalog, asset, asset.PrimaryView, image, ArtAssetDrawMode.Color, layout.Resolved.ViewFallback ? new Color(1, 1, 1, .45f) : (Color?)null);
                 float y = card.y + state.CardSize - 2;
                 GUI.Label(new Rect(card.x + 4, y, card.width - 8, 14), (asset.Favorite ? "★ " : "") + asset.Name, name);
-                GUI.Label(new Rect(card.x + 4, y + 13, card.width - 8, 14), "Ракурсы: " + asset.ViewCount + "/6", small);
-                GUI.Label(new Rect(card.x + 4, y + 26, card.width - 8, 14), "Нормали: " + asset.NormalCount + "/6", asset.NormalCount < asset.ViewCount ? warning : small);
-                string note = layout.Resolved.NoArt ? "нет рисунков"
-                    : layout.Resolved.ViewFallback ? "нет «" + ArtAssetLabels.ViewTitle(state.View) + "»"
-                    : asset.NormalCount < asset.ViewCount ? "⚠ не все нормали" : UsageCount(asset.Id) > 0 ? "в местах: " + UsageCount(asset.Id) : "не используется";
+                GUI.Label(new Rect(card.x + 4, y + 13, card.width - 8, 14), ArtAssetLabels.CategoryTitle(asset.Category), small);
+                GUI.Label(new Rect(card.x + 4, y + 26, card.width - 8, 14), ArtAssetLabels.PurposeTitle(asset.Purpose), small);
+                string note = layout.Resolved.NoArt ? "нет рисунка" : UsageCount(asset.Id) > 0 ? "в местах: " + UsageCount(asset.Id) : "не используется";
                 GUI.Label(new Rect(card.x + 4, y + 39, card.width - 8, 14), note, note.StartsWith("в местах") || note == "не используется" ? small : warning);
             }
         }

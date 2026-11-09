@@ -203,12 +203,12 @@ namespace KingdomSurvival.ArtAssets.Editor
             if (asset == null)
             {
                 Heading("Ассет не выбран");
-                Note("Выберите объект в галерее или на холсте. Новые ассеты — «Загрузить папку…»: всё подхватится само — ракурсы, кадры и нормали.");
-                Help("Папка объекта, как у Базы анимаций:\n" +
-                     "• Трава/Front/…png, Трава/Back/…png — ракурсы папками;\n" +
-                     "• Трава/Idle/Front/Idle_Front_0001.png — рендер KS Sprite Renderer (номера — кадры);\n" +
-                     "• трава_Front.png, трава__Front__20261009-142811-641.png — ракурс в имени (из нескольких рендеров берётся самый свежий).\n" +
-                     "Нормаль — рядом с рисунком: …_n.png, …_normal.png или папка Normal. Ракурсы: Front, Front_Right, Back_Right, Back, Back_Left, Front_Left (или по-русски).",
+                Note("Выберите объект в галерее или на холсте. Новые ассеты — «Загрузить папку…» или перетаскиванием PNG: один PNG — один ассет.");
+                Help("Один вид на ассет, без нормалей и настройки света:\n" +
+                     "• Дуб.png, Берёза.png — папка набора: каждый PNG — отдельный ассет;\n" +
+                     "• Трава_frame_0001.png, Трава_frame_0002.png… — кадры анимации (или несколько PNG в карточку ассета);\n" +
+                     "• Дом/Основа.png, Дом/Крыша.png — части одного рисунка (через «Части объекта»).\n" +
+                     "Файлы нормалей (…_n.png, …_normal.png, папка Normals) пропускаются.",
                     HelpBoxMessageType.None);
                 return;
             }
@@ -225,10 +225,19 @@ namespace KingdomSurvival.ArtAssets.Editor
                 value => { asset.Category = value; visibleDirty = true; BuildCategories(); BuildCanvasBar(); });
             TextProperty("Теги (через запятую)", asset.TagsText, value => { asset.TagsText = value; visibleDirty = true; });
             BoolProperty("Избранное", asset.Favorite, value => { asset.Favorite = value; visibleDirty = true; });
+            ChoiceProperty("Назначение", ArtAssetLabels.Purposes, ArtAssetLabels.PurposeTitle, asset.Purpose,
+                value => { asset.Purpose = value; visibleDirty = true; });
+            // Старая запись с несколькими ракурсами: основной вид — явный выбор.
+            if (asset.ViewCount > 1)
+            {
+                List<ArtAssetView> present = ArtAssetLabels.Views.Where(asset.HasView).ToList();
+                ChoiceProperty("Основной вид (старая запись)", present.ToArray(), ArtAssetLabels.ViewTitle, asset.PrimaryView,
+                    value => { asset.MainView = value; visibleDirty = true; layoutDirty = true; });
+            }
             bool hasReference = asset.TryReferenceView(out ArtAssetView reference);
             if (hasReference)
                 FloatProperty("Высота, ед. мира", asset.Height, value => asset.Height = Mathf.Max(.05f, value),
-                    "Высота ракурса «" + ArtAssetLabels.ViewTitle(reference) + "». Масштаб общий для всех ракурсов и частей. Человек в месте ≈ " +
+                    "Высота рисунка. Масштаб общий для всех частей. Человек в месте ≈ " +
                     PersonHeight().ToString("0.##") + " ед.; 108 пикселей рисунка места = 1 ед.", true);
             FloatProperty("Пикселей на ед. мира", asset.PixelsPerUnit, value => asset.PixelsPerUnit = Mathf.Max(.5f, value),
                 "Чем больше, тем меньше объект в месте. Прозрачные поля PNG масштаб не меняют.", true);
@@ -250,18 +259,12 @@ namespace KingdomSurvival.ArtAssets.Editor
                 "Поперечник круга просвечивания: 3 — примерно три человека в ширину (ширина человека — половина роста фигуры).");
             FloatProperty("Непрозрачность в круге", asset.SeeThroughAlpha, value => asset.SeeThroughAlpha = Mathf.Clamp01(value),
                 "0 — в круге предмета не видно совсем, 1 — не просвечивает. Обычно 0,2–0,4.");
-            BoolProperty("Освещается солнцем (смена суток)", asset.LitBySun, value => asset.LitBySun = value,
-                "Выключено — рисунок не темнеет ночью и не меняет цвет со временем суток: всегда как днём (светящийся гриб, огонь, вывеска). " +
-                "На слоях «Земля» и «Деталь земли» не действует: детали земли освещаются как земля под ними.");
-            BoolProperty("Освещается огнём (местные источники)", asset.LitByFire, value => asset.LitByFire = value,
-                "Выключено — костёр, факел и другие местные источники рисунок не освещают (и его нормали не работают). " +
-                "На слоях «Земля» и «Деталь земли» не действует: детали земли освещаются как земля под ними.");
             EndSection();
 
             ArtAssetView view = CardView;
             BuildAnimationProperties(asset, view);
 
-            Section("Ракурс «" + ArtAssetLabels.ViewTitle(view) + "»", true, "view");
+            Section("Опора и основание", true, "view");
             ArtAssetViewSettings settings = asset.Settings(view);
             // Ползунки — в пределах рисунка ракурса (единицы мира); в поле
             // справа можно ввести и больше.
@@ -288,20 +291,9 @@ namespace KingdomSurvival.ArtAssets.Editor
             SliderProperty("Сдвиг вглубь, ед.", settings.FootprintOffset.y, -Mathf.Max(.5f, picture.x * .5f), Mathf.Max(.5f, picture.x * .5f),
                 value => settings.FootprintOffset = new Vector2(settings.FootprintOffset.x, value), "Центр основания от опоры: плюс — вглубь (вверх на рисунке).");
             BuildFootprintBrush(asset, view, settings);
-            Row(("Опору и основание — во все ракурсы", () => Edit("Опора во все ракурсы", () =>
-            {
-                foreach (ArtAssetView other in ArtAssetLabels.Views)
-                {
-                    if (other == view) continue;
-                    ArtAssetViewSettings target = asset.Settings(other);
-                    target.Pivot = settings.Pivot; target.FootprintSize = settings.FootprintSize; target.FootprintOffset = settings.FootprintOffset;
-                    target.FootprintMask = settings.FootprintMask != null ? settings.FootprintMask.Clone() : new ArtAssetFootprintMask();
-                }
-            })));
             EndSection();
 
             BuildPartProperties(asset, view);
-            if (state.Mode == ArtAssetCenterMode.Card && state.CardDisplay == ArtAssetCardDisplay.Lit) BuildLightProperties();
 
             Section("Подпись и источник", false);
             VisualElement idRow = new VisualElement { style = { flexDirection = FlexDirection.Row } };
@@ -318,27 +310,6 @@ namespace KingdomSurvival.ArtAssets.Editor
             if (issues.Count == 0) Note("Замечаний нет.");
             foreach (ArtAssetIssue issue in issues.Take(20))
                 Help(issue.Text, issue.Level == ArtAssetIssueLevel.Error ? HelpBoxMessageType.Error : issue.Level == ArtAssetIssueLevel.Warning ? HelpBoxMessageType.Warning : HelpBoxMessageType.Info);
-            Row(("Исправить подключения нормалей", () =>
-            {
-                int count = 0;
-                Edit("Исправить подключения нормалей", () => count = ArtAssetValidator.RepairNormals(asset));
-                status.text = count > 0 ? "Исправлено подключений нормалей: " + count + "." : "Все нормали уже подключены.";
-                litDirty = true;
-                BuildProperties();
-            }));
-            if (issues.Any(issue => issue.Text.Contains("гамма-коррекцией")))
-                Row(("Исправить гамму нормалей", () =>
-                {
-                    if (!EditorUtility.DisplayDialog("Исправить гамму нормалей?",
-                            "Карты нормалей этого ассета в проекте будут пересчитаны из sRGB в линейные числа (файлы переписываются, GUID сохраняется). " +
-                            "Ваши исходные файлы вне проекта не меняются. Для новых рендеров лучше поставить в Blender View Transform = Raw.", "Исправить", "Отмена"))
-                        return;
-                    int count = ArtAssetValidator.FixNormalGamma(asset);
-                    status.text = "Исправлено карт нормалей: " + count + ".";
-                    litDirty = true;
-                    catalog.MarkChanged();
-                    BuildProperties();
-                }));
             EndSection();
 
             List<ArtAssetUsage> usages = ArtAssetUsages.Find(asset.Id);
@@ -421,13 +392,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                 if (string.IsNullOrEmpty(folder)) return;
                 LastFolder = Path.GetDirectoryName(folder) ?? string.Empty;
                 ImportPaths(new List<string> { folder }, asset, cardView);
-            }) { text = known ? "Другая папка…" : "Загрузить из папки…", tooltip = "Все файлы папки — в этот ассет: ракурсы, кадры и нормали по именам." });
-            row.Add(new Button(() => PickNormalFolder(asset))
-            {
-                text = "Нормали папкой…",
-                tooltip = "Как в Базе анимаций: папка нормалей с теми же ракурсами (Front, Back… — папками или в имени) и кадрами; имена любые, суффикс «_normal» не нужен. " +
-                          "Можно бросить папку на правую половину ячейки ракурса в карточке."
-            });
+            }) { text = known ? "Другая папка…" : "Загрузить из папки…", tooltip = "Все файлы папки — в этот ассет: кадры и части по именам; нормали пропускаются." });
             Add(row);
         }
 
@@ -522,7 +487,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                 "Для травы и мелочи в сотнях лучше выключить — дорого.");
             ArtAssetPartView slot = part.View(view);
             if (cardPart > 0)
-                VectorProperty("Смещение в ракурсе «" + ArtAssetLabels.ViewTitle(view) + "»", slot.Offset, value => slot.Offset = value,
+                VectorProperty("Смещение", slot.Offset, value => slot.Offset = value,
                     "Левый нижний угол рисунка части от угла рисунка основы, единицы мира. Слои одного кадра — 0.");
             ObjectField shadow = new ObjectField("Свой силуэт тени («" + ArtAssetLabels.ViewTitle(view) + "»)") { objectType = typeof(Sprite), allowSceneObjects = false, value = slot.ShadowSprite };
             shadow.RegisterValueChangedCallback(evt => Edit("Силуэт тени", () => slot.ShadowSprite = evt.newValue as Sprite));

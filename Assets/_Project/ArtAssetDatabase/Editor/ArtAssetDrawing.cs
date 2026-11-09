@@ -258,6 +258,6 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         // Строка состояния ассета: «Ракурсы 6/6 · Нормали 6/6».
         public static string Completeness(ArtAssetDefinition asset) =>
-            "Ракурсы: " + asset.ViewCount + "/6 · Нормали: " + asset.NormalCount + "/6" + (asset.IsAnimated ? " · анимация" : "");
+            ArtAssetLabels.CategoryTitle(asset.Category) + (asset.IsAnimated ? " · анимация" : "") + (asset.Parts != null && asset.Parts.Count > 1 ? " · частей: " + asset.Parts.Count : "");
     }
 }

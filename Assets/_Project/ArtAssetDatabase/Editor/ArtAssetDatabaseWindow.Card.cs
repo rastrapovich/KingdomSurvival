@@ -53,10 +53,14 @@ namespace KingdomSurvival.ArtAssets.Editor
                     GUI.Label(area, "Выберите ассет на холсте или в галерее.", new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleCenter, normal = { textColor = TextColor } });
                 return;
             }
+            // Один вид: карточка показывает основной рисунок записи, без
+            // ракурсов, нормалей и светового предпросмотра.
+            if (cardView != asset.PrimaryView) { cardView = asset.PrimaryView; litDirty = true; }
+            state.CardDisplay = ArtAssetCardDisplay.Color;
+            if (cardTool == CardTool.Light) cardTool = CardTool.Pivot;
             CardLayout(area, out Rect preview, out Rect slots);
             if (DrawSlots(slots, asset, evt)) return;
-            if (state.AllViews) DrawAllViews(preview, asset, evt);
-            else DrawBigPreview(preview, asset, evt);
+            DrawBigPreview(preview, asset, evt);
         }
 
         private CardFrame Frame(Rect preview, ArtAssetDefinition asset)
@@ -143,13 +147,9 @@ namespace KingdomSurvival.ArtAssets.Editor
             EditorGUI.DrawRect(new Rect(anchor.x - 1, anchor.y - 9, 2, 18), Color.yellow);
             Handles.EndGUI();
             GUIStyle title = new GUIStyle(EditorStyles.boldLabel) { normal = { textColor = new Color(1, .85f, .45f) }, fontSize = 13 };
-            GUI.Label(new Rect(clip.x + 10, clip.y + 6, clip.width - 20, 20), ArtAssetLabels.ViewTitle(cardView) + " · " +
-                (state.CardDisplay == ArtAssetCardDisplay.Normal ? "нормали" : state.CardDisplay == ArtAssetCardDisplay.Lit ? "под светом" : "рисунок"), title);
+            GUI.Label(new Rect(clip.x + 10, clip.y + 6, clip.width - 20, 20), asset.Name + " · " + ArtAssetLabels.PurposeTitle(asset.Purpose), title);
             GUIStyle note = new GUIStyle(EditorStyles.miniLabel) { normal = { textColor = new Color(1, .62f, .3f) } };
-            if (layout.Resolved.NoArt) GUI.Label(new Rect(clip.x + 10, clip.y + 26, clip.width, 16), "Рисунков нет — перетащите PNG в ячейки справа.", note);
-            else if (layout.Resolved.ViewFallback)
-                GUI.Label(new Rect(clip.x + 10, clip.y + 26, clip.width, 16), "Ракурса «" + ArtAssetLabels.ViewTitle(cardView) + "» нет — в месте будет показан «" +
-                                                                                 ArtAssetLabels.ViewTitle(layout.Resolved.ShownView) + "» (ближайший по кругу).", note);
+            if (layout.Resolved.NoArt) GUI.Label(new Rect(clip.x + 10, clip.y + 26, clip.width, 16), "Рисунка нет — перетащите PNG в ячейку справа.", note);
             if (state.CardDisplay == ArtAssetCardDisplay.Lit && cardTool == CardTool.Light && litLocation != null)
             {
                 // Контрольный источник.
@@ -315,118 +315,63 @@ namespace KingdomSurvival.ArtAssets.Editor
             status.text = "Опора «" + ArtAssetLabels.ViewTitle(cardView) + "»: " + pivot.x.ToString("0.###") + "; " + pivot.y.ToString("0.###") + ".";
         }
 
-        private void DrawAllViews(Rect preview, ArtAssetDefinition asset, Event evt)
-        {
-            float width = preview.width / 3, height = preview.height / 2;
-            for (int i = 0; i < ArtAssetLabels.ViewCount; i++)
-            {
-                ArtAssetView view = ArtAssetLabels.Views[i];
-                Rect cell = new Rect(preview.x + (i % 3) * width, preview.y + (i / 3) * height, width, height);
-                if (evt.type == EventType.MouseDown && evt.button == 0 && cell.Contains(evt.mousePosition))
-                {
-                    cardView = view; litDirty = true; state.AllViews = evt.clickCount >= 2 ? false : state.AllViews;
-                    BuildProperties(); BuildCanvasBar(); evt.Use(); center.MarkDirtyRepaint(); return;
-                }
-                if (evt.type != EventType.Repaint) continue;
-                if (view == cardView) EditorGUI.DrawRect(cell, new Color(.95f, .75f, .3f, .14f));
-                Rect image = new Rect(cell.x + 8, cell.y + 22, cell.width - 16, cell.height - 30);
-                bool has = asset.HasView(view);
-                if (has) ArtAssetDrawing.DrawFitted(catalog, asset, view, image, state.CardDisplay == ArtAssetCardDisplay.Normal ? ArtAssetDrawMode.Normal : ArtAssetDrawMode.Color);
-                GUIStyle style = new GUIStyle(EditorStyles.boldLabel) { normal = { textColor = has ? TextColor : new Color(1, .55f, .3f) } };
-                GUI.Label(new Rect(cell.x + 8, cell.y + 3, cell.width, 18), ArtAssetLabels.ViewTitle(view) + (has ? "" : " — нет рисунка") +
-                                                                            (has && !asset.HasNormal(view) ? " · без нормали" : ""), style);
-            }
-        }
-
         // ------------------------------------------------------------------
         // Ячейки ракурсов
         // ------------------------------------------------------------------
 
-        // Раскладка карточки: слева предпросмотр, справа ячейки ракурсов.
+        // Раскладка карточки: слева предпросмотр, справа — ячейка рисунка.
         private static void CardLayout(Rect area, out Rect preview, out Rect slots)
         {
-            float slotsWidth = Mathf.Clamp(area.width * .42f, 300, 560);
+            float slotsWidth = Mathf.Clamp(area.width * .3f, 220, 380);
             preview = new Rect(area.x, area.y, area.width - slotsWidth - 6, area.height);
             slots = new Rect(preview.xMax + 6, area.y, slotsWidth, area.height);
         }
 
-        // Ячейка ракурса: левая половина — рисунок, правая — нормаль.
-        private static void SlotHalves(Rect cell, out Rect color, out Rect normal)
-        {
-            color = new Rect(cell.x + 4, cell.y + 22, cell.width / 2 - 6, cell.height - 62);
-            normal = new Rect(cell.center.x + 2, cell.y + 22, cell.width / 2 - 6, cell.height - 62);
-        }
-
-        private Rect SlotRect(Rect slots, int index)
+        // Ячейка рисунка (один вид записи).
+        private static Rect PictureCell(Rect slots)
         {
             const float header = 20;
-            float width = (slots.width - 6) / 2, height = (slots.height - header - 12) / 3;
-            return new Rect(slots.x + (index % 2) * (width + 6), slots.y + header + (index / 2) * (height + 6), width, height);
+            float height = Mathf.Min(slots.height - header - 12, slots.width * 1.4f);
+            return new Rect(slots.x, slots.y + header, slots.width, height);
         }
+
+        private static Rect PictureArea(Rect cell) => new Rect(cell.x + 4, cell.y + 22, cell.width - 8, cell.height - 62);
 
         private bool DrawSlots(Rect slots, ArtAssetDefinition asset, Event evt)
         {
             cardPart = Mathf.Clamp(cardPart, 0, asset.Parts.Count - 1);
             ArtAssetPart part = asset.Parts[cardPart];
-            for (int i = 0; i < ArtAssetLabels.ViewCount; i++)
-            {
-                ArtAssetView view = ArtAssetLabels.Views[i];
-                Rect cell = SlotRect(slots, i);
-                SlotHalves(cell, out Rect colorRect, out Rect normalRect);
-                ArtAssetPartView slot = part.View(view);
-                Rect clearColor = new Rect(colorRect.x, cell.yMax - 20, colorRect.width, 16);
-                Rect clearNormal = new Rect(normalRect.x, cell.yMax - 20, normalRect.width, 16);
-                if (evt.type == EventType.MouseDown && evt.button == 0 && cell.Contains(evt.mousePosition) &&
-                    !clearColor.Contains(evt.mousePosition) && !clearNormal.Contains(evt.mousePosition))
-                {
-                    cardView = view; litDirty = true;
-                    BuildProperties(); evt.Use(); center.MarkDirtyRepaint(); return true;
-                }
-                bool selected = view == cardView;
-                if (evt.type == EventType.Repaint)
-                {
-                    EditorGUI.DrawRect(cell, selected ? new Color(.95f, .75f, .3f, .2f) : new Color(0, 0, 0, .25f));
-                    ArtAssetDrawing.Checker(colorRect, 8);
-                    EditorGUI.DrawRect(normalRect, new Color(.5f, .5f, 1f, .12f));
-                    if (slot.Sprite != null)
-                    {
-                        Rect fit = Fit(colorRect, slot.Sprite.rect.size);
-                        ArtAssetDrawing.DrawSprite(fit, slot.Sprite);
-                    }
-                    else GUI.Label(colorRect, "рисунок\n(PNG сюда)", new GUIStyle(EditorStyles.centeredGreyMiniLabel) { wordWrap = true });
-                    if (slot.NormalMap != null)
-                        GUI.DrawTexture(Fit(normalRect, new Vector2(slot.NormalMap.width, slot.NormalMap.height)), ArtAssetDrawing.NormalPreview(slot.NormalMap), ScaleMode.StretchToFill, true);
-                    else GUI.Label(normalRect, "нормаль\n(PNG сюда)", new GUIStyle(EditorStyles.centeredGreyMiniLabel) { wordWrap = true });
-                    GUIStyle head = new GUIStyle(EditorStyles.boldLabel) { normal = { textColor = selected ? new Color(1, .85f, .45f) : new Color(.85f, .87f, .82f) } };
-                    int frames = slot.FrameCount;
-                    GUI.Label(new Rect(cell.x + 4, cell.y + 2, cell.width - 8, 18), ArtAssetLabels.ViewTitle(view) + "  " +
-                                                                                (slot.Sprite != null ? "✓" : "—") + (slot.NormalMap != null ? " · N" : "") +
-                                                                                (frames > 1 ? " · кадров: " + frames : ""), head);
-                    string info = slot.Sprite != null ? SizeText(SpriteNormalMaps.SourceSize(slot.Sprite.texture)) : "";
-                    if (slot.Sprite != null && slot.NormalMap != null && SpriteNormalMaps.SourceSize(slot.Sprite.texture) != SpriteNormalMaps.SourceSize(slot.NormalMap))
-                        info += " ⚠ размер нормали " + SizeText(SpriteNormalMaps.SourceSize(slot.NormalMap));
-                    else if (slot.Sprite != null && slot.NormalMap == null) info += " · без нормали";
-                    GUIStyle infoStyle = new GUIStyle(EditorStyles.miniLabel) { normal = { textColor = info.Contains("⚠") ? new Color(1, .6f, .3f) : new Color(.75f, .78f, .74f) }, clipping = TextClipping.Clip };
-                    GUI.Label(new Rect(cell.x + 4, cell.yMax - 38, cell.width - 8, 16), info, infoStyle);
-                }
-                if (slot.Sprite != null && GUI.Button(clearColor, "✕ рисунок", EditorStyles.miniButton))
-                {
-                    ArtAssetImporter.ClearColor(catalog, part, view);
-                    status.text = "Рисунок «" + ArtAssetLabels.ViewTitle(view) + "» снят (файл не удалён).";
-                    BuildProperties(); return true;
-                }
-                if (slot.NormalMap != null && GUI.Button(clearNormal, "✕ нормаль", EditorStyles.miniButton))
-                {
-                    ArtAssetImporter.ClearNormal(catalog, part, view);
-                    status.text = "Нормаль «" + ArtAssetLabels.ViewTitle(view) + "» снята, назначение _NormalMap у рисунка удалено.";
-                    BuildProperties(); return true;
-                }
-            }
+            ArtAssetView view = cardView;
+            Rect cell = PictureCell(slots);
+            Rect colorRect = PictureArea(cell);
+            ArtAssetPartView slot = part.View(view);
+            Rect clearColor = new Rect(colorRect.x, cell.yMax - 20, Mathf.Min(140, colorRect.width), 16);
             if (evt.type == EventType.Repaint)
             {
+                EditorGUI.DrawRect(cell, new Color(.95f, .75f, .3f, .14f));
+                ArtAssetDrawing.Checker(colorRect, 8);
+                if (slot.Sprite != null)
+                {
+                    Rect fit = Fit(colorRect, slot.Sprite.rect.size);
+                    ArtAssetDrawing.DrawSprite(fit, slot.Sprite);
+                }
+                else GUI.Label(colorRect, "рисунок\n(PNG сюда)", new GUIStyle(EditorStyles.centeredGreyMiniLabel) { wordWrap = true });
+                GUIStyle head = new GUIStyle(EditorStyles.boldLabel) { normal = { textColor = new Color(1, .85f, .45f) } };
+                int frames = slot.FrameCount;
+                GUI.Label(new Rect(cell.x + 4, cell.y + 2, cell.width - 8, 18), "Рисунок" + (slot.Sprite != null ? "  ✓" : "  —") +
+                                                                            (frames > 1 ? " · кадров: " + frames : ""), head);
+                string info = slot.Sprite != null ? SizeText(SpriteNormalMaps.SourceSize(slot.Sprite.texture)) : "";
+                GUIStyle infoStyle = new GUIStyle(EditorStyles.miniLabel) { normal = { textColor = new Color(.75f, .78f, .74f) }, clipping = TextClipping.Clip };
+                GUI.Label(new Rect(cell.x + 4, cell.yMax - 38, cell.width - 8, 16), info, infoStyle);
                 GUIStyle note = new GUIStyle(EditorStyles.miniBoldLabel) { normal = { textColor = new Color(1, .85f, .45f) } };
-                GUI.Label(new Rect(slots.x + 2, slots.y + 2, slots.width - 4, 16), "Ракурсы · часть «" + part.Name + "»" +
-                                                                                    (asset.Parts.Count > 1 ? " (другая часть — справа, «Части объекта»)" : ""), note);
+                GUI.Label(new Rect(slots.x + 2, slots.y + 2, slots.width - 4, 16), "Часть «" + part.Name + "»" +
+                                                                                    (asset.Parts.Count > 1 ? " (другая — справа, «Части объекта»)" : ""), note);
+            }
+            if (slot.Sprite != null && GUI.Button(clearColor, "✕ рисунок", EditorStyles.miniButton))
+            {
+                ArtAssetImporter.ClearColor(catalog, part, view);
+                status.text = "Рисунок снят (файл не удалён).";
+                BuildProperties(); return true;
             }
             return false;
         }

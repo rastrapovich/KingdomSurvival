@@ -28,6 +28,16 @@ namespace KingdomSurvival.ArtAssets
         Parts
     }
 
+    // Назначение записи окружения: кто из генераторов может её выбрать.
+    // Один ID и один PNG; размер экземпляра задаёт потребитель. Значения
+    // сериализуются — новые только в конец.
+    public enum ArtAssetPurpose
+    {
+        Both,
+        MapOnly,
+        ArenaOnly
+    }
+
     // Слои места: тот же порядок, что LocationVisualBand.
     public enum ArtAssetLayer
     {
@@ -145,6 +155,18 @@ namespace KingdomSurvival.ArtAssets
                 case ArtAssetCategory.Ground: return "Земля и поверхности";
                 case ArtAssetCategory.Parts: return "Части объектов";
                 default: return "Без категории";
+            }
+        }
+
+        public static readonly ArtAssetPurpose[] Purposes = { ArtAssetPurpose.Both, ArtAssetPurpose.MapOnly, ArtAssetPurpose.ArenaOnly };
+
+        public static string PurposeTitle(ArtAssetPurpose purpose)
+        {
+            switch (purpose)
+            {
+                case ArtAssetPurpose.MapOnly: return "Только карта";
+                case ArtAssetPurpose.ArenaOnly: return "Только арена";
+                default: return "Карта и арена";
             }
         }
 

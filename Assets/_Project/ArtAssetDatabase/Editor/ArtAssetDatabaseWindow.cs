@@ -152,21 +152,15 @@ namespace KingdomSurvival.ArtAssets.Editor
             toolbar.Add(new ToolbarButton(LoadFolder)
             {
                 text = "Загрузить папку…",
-                tooltip = "Как в Базе анимаций: папка объекта (или папка с несколькими объектами) — ракурсы, кадры и нормали (…_n.png) подхватываются сами. " +
+                tooltip = "Как в Базе анимаций: папка объекта (или папка с несколькими объектами) — один PNG — один ассет, кадры анимации — по номерам; нормали не используются и пропускаются. " +
                           "Выбрана категория — новые ассеты попадут в неё."
             });
-            toolbar.Add(new ToolbarButton(LoadFiles) { text = "Загрузить файлы…", tooltip = "PNG рисунков и нормалей; без ракурса в имени — в выбранную ячейку карточки" });
-            toolbar.Add(new ToolbarButton(AddEmptyAsset) { text = "+ Пустой ассет", tooltip = "Пустая запись; рисунки — перетаскиванием в ячейки ракурсов" });
+            toolbar.Add(new ToolbarButton(LoadFiles) { text = "Загрузить файлы…", tooltip = "PNG рисунка: новый ассет или замена рисунка выбранного (в карточке)" });
+            toolbar.Add(new ToolbarButton(AddEmptyAsset) { text = "+ Пустой ассет", tooltip = "Пустая запись; рисунок — перетаскиванием в карточку" });
             toolbar.Add(new ToolbarSpacer());
             modeBar = new VisualElement { style = { flexDirection = FlexDirection.Row } };
             toolbar.Add(modeBar);
             toolbar.Add(new ToolbarSpacer());
-            viewField = new PopupField<string>("Ракурс", ArtAssetLabels.Views.Select(ArtAssetLabels.ViewTitle).ToList(), (int)state.View)
-            { tooltip = "Общий ракурс: все объекты холста и галереи показывают его" };
-            viewField.style.width = 210;
-            viewField.labelElement.style.minWidth = 50;
-            viewField.RegisterValueChangedCallback(evt => { state.View = (ArtAssetView)viewField.index; ScheduleStateSave(); center?.MarkDirtyRepaint(); });
-            toolbar.Add(viewField);
             toolbar.Add(new ToolbarSpacer { flex = true });
             toolbar.Add(new ToolbarButton(ValidateAll) { text = "Проверить" });
             toolbar.Add(new ToolbarButton(() => { SaveAll(); status.text = "Сохранено."; }) { text = "Сохранить" });
@@ -283,10 +277,10 @@ namespace KingdomSurvival.ArtAssets.Editor
                 categoryLabel = new Label(title) { style = { unityFontStyleAndWeight = FontStyle.Bold, color = new Color(.95f, .82f, .5f), unityTextAlign = TextAnchor.MiddleLeft, marginLeft = 6, marginRight = 6 } };
                 canvasBar.Add(categoryLabel);
                 string into = CurrentCategory.HasValue ? " в «" + title + "»" : "";
-                Button("+ Добавить" + into + "…", LoadFolder, "Папка объекта или папка с несколькими объектами — ракурсы, кадры и нормали подхватятся сами" +
+                Button("+ Добавить" + into + "…", LoadFolder, "Папка с рисунками: один PNG — один ассет, кадры — по номерам; нормали пропускаются" +
                                                          (CurrentCategory.HasValue ? "; новые ассеты попадут в «" + title + "»." : "."));
-                Button("+ Файлы…", LoadFiles, "Отдельные PNG (рисунки и нормали)");
-                Button("+ Пустой", AddEmptyAsset, "Пустая запись" + into + "; рисунки — перетаскиванием в ячейки ракурсов карточки");
+                Button("+ Файлы…", LoadFiles, "Отдельный PNG рисунка");
+                Button("+ Пустой", AddEmptyAsset, "Пустая запись" + into + "; рисунок — перетаскиванием в карточку");
                 canvasBar.Add(new VisualElement { style = { width = 12 } });
             }
             switch (state.Mode)
@@ -312,31 +306,23 @@ namespace KingdomSurvival.ArtAssets.Editor
                     hint.text = "Колесо — прокрутка · ЛКМ — выбор · двойной клик — карточка · перетащить карточку — в Базу локаций · перетащить файлы — загрузить";
                     break;
                 default:
-                    foreach ((ArtAssetCardDisplay display, string title) in new[]
-                             { (ArtAssetCardDisplay.Color, "Рисунок"), (ArtAssetCardDisplay.Normal, "Нормали"), (ArtAssetCardDisplay.Lit, "Под светом") })
-                    {
-                        ToolbarToggle toggle = new ToolbarToggle { text = title, value = state.CardDisplay == display };
-                        toggle.RegisterValueChangedCallback(evt => { state.CardDisplay = display; ScheduleStateSave(); litDirty = true; BuildCanvasBar(); BuildProperties(); center.MarkDirtyRepaint(); });
-                        canvasBar.Add(toggle);
-                    }
-                    ToolbarToggle all = new ToolbarToggle { text = "Все шесть рядом", value = state.AllViews };
-                    all.RegisterValueChangedCallback(evt => { state.AllViews = evt.newValue; ScheduleStateSave(); center.MarkDirtyRepaint(); });
-                    canvasBar.Add(all);
+                    // Один вид без нормалей и света: показ — только рисунок.
+                    state.CardDisplay = ArtAssetCardDisplay.Color;
+                    state.AllViews = false;
                     canvasBar.Add(new Label("  Инструмент:") { style = { unityTextAlign = TextAnchor.MiddleLeft } });
                     foreach ((CardTool tool, string title, string tip) in new[]
                              {
                                  (CardTool.Pivot, "Опора", "Клик по точке касания земли на рисунке"),
                                  (CardTool.Footprint, "Основание", "Протянуть прямоугольник занятой земли или перетащить его"),
                                  (CardTool.FootprintBrush, "Кисть основания", "Закрасить занятую землю кистью (Shift — стереть, [ ] — радиус): для камней, коряг, частоколов"),
-                                 (CardTool.PartOffset, "Сдвиг части", "Перетащить выбранную часть (её смещение в этом ракурсе)"),
-                                 (CardTool.Light, "Свет", "Перетащить контрольный источник (режим «Под светом»)")
+                                 (CardTool.PartOffset, "Сдвиг части", "Перетащить выбранную часть (её смещение)")
                              })
                     {
                         ToolbarToggle toggle = new ToolbarToggle { text = title, tooltip = tip, value = cardTool == tool };
                         toggle.RegisterValueChangedCallback(evt => { cardTool = tool; BuildCanvasBar(); });
                         canvasBar.Add(toggle);
                     }
-                    hint.text = "Ячейки ракурсов: перетащите PNG на левую половину — рисунок, на правую — нормаль; несколько файлов — разбор по именам · " +
+                    hint.text = "Рисунок справа: перетащите PNG — заменить рисунок; несколько файлов — кадры или части по именам · " +
                                 "Колесо — масштаб предпросмотра · ПКМ — панорама";
                     break;
             }
@@ -445,8 +431,8 @@ namespace KingdomSurvival.ArtAssets.Editor
                 filterPanel.Add(toggle);
             }
             Filter("Избранное", () => state.Favorites, value => state.Favorites = value);
-            Filter("Неполные ракурсы", () => state.IncompleteViews, value => state.IncompleteViews = value);
-            Filter("Без нормалей", () => state.MissingNormals, value => state.MissingNormals = value, "Есть ракурсы без карты нормалей");
+            Filter("Для арены", () => state.ForArena, value => state.ForArena = value, "Назначение «Карта и арена» или «Только арена»");
+            Filter("Для карты", () => state.ForMap, value => state.ForMap = value, "Назначение «Карта и арена» или «Только карта»");
             Filter("Используемые", () => state.Used, value => state.Used = value, "Стоят хотя бы в одном месте");
             Filter("Неиспользуемые", () => state.Unused, value => state.Unused = value);
             filterPanel.Add(new Button(() => { RefreshUsage(); visibleDirty = true; center.MarkDirtyRepaint(); }) { text = "Пересчитать использование" });
@@ -466,8 +452,8 @@ namespace KingdomSurvival.ArtAssets.Editor
                 if (asset == null || !asset.MatchesQuery(query)) continue;
                 if (state.Category >= 0 && asset.Category != ArtAssetLabels.Categories[state.Category]) continue;
                 if (state.Favorites && !asset.Favorite) continue;
-                if (state.IncompleteViews && asset.ViewCount >= ArtAssetLabels.ViewCount) continue;
-                if (state.MissingNormals && asset.NormalCount >= asset.ViewCount && asset.ViewCount > 0) continue;
+                if (state.ForArena && !asset.UsableOnArena) continue;
+                if (state.ForMap && !asset.UsableOnMap) continue;
                 int used = UsageCount(asset.Id);
                 if (state.Used && !state.Unused && used == 0) continue;
                 if (state.Unused && !state.Used && used > 0) continue;

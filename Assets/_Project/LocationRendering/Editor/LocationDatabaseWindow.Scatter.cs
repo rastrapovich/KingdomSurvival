@@ -473,11 +473,9 @@ namespace KingdomSurvival.LocationRendering.Editor
             List<LocationScatterFlip> flips = new List<LocationScatterFlip> { LocationScatterFlip.Never, LocationScatterFlip.Random, LocationScatterFlip.Always };
             BrushChoice("Отражение", flips, flip => flip == LocationScatterFlip.Random ? "Случайно" : flip == LocationScatterFlip.Always ? "Всегда" : "Никогда",
                 brush.Flip, value => brush.Flip = value);
-            List<LocationScatterViewMode> viewModes = new List<LocationScatterViewMode> { LocationScatterViewMode.Fixed, LocationScatterViewMode.Random };
-            BrushChoice("Ракурс", viewModes, mode => mode == LocationScatterViewMode.Random ? "Случайный из имеющихся у ассета" : "Заданный",
-                brush.ViewMode, value => brush.ViewMode = value, true);
-            if (brush.ViewMode == LocationScatterViewMode.Fixed)
-                BrushChoice("Заданный ракурс", ArtAssetLabels.Views.ToList(), ArtAssetLabels.ViewTitle, brush.View, value => brush.View = value, true);
+            // Один вид (09.11.2026): у кисти нет выбора ракурса — ассет
+            // показывается в своём основном виде (у старых многоракурсных записей
+            // прежний режим слоя сохраняется в данных).
         }
 
         private void BuildScatterColor(LocationScatterLayer layer)

@@ -211,6 +211,53 @@ namespace KingdomSurvival.ArtAssets.Editor
             if (!asset.TryReferenceView(out ArtAssetView view)) return;
             float pixels = asset.MainSprite(view).rect.height;
             asset.PixelsPerUnit = Mathf.Max(ArtAssetDefinition.DefaultPixelsPerUnit, pixels / 6f);
+            InitializePivot(asset);
+        }
+
+        // Опора нового рисунка — низ непрозрачной части по центру нижнего
+        // края силуэта (дно ствола, низ камня), а не доли прозрачного холста.
+        public static void InitializePivot(ArtAssetDefinition asset)
+        {
+            ArtAssetView view = asset.PrimaryView;
+            Sprite sprite = asset.MainSprite(view);
+            if (sprite == null) return;
+            string path = AssetDatabase.GetAssetPath(sprite.texture);
+            if (string.IsNullOrEmpty(path) || !File.Exists(path)) return;
+            Texture2D image = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            try
+            {
+                if (!image.LoadImage(File.ReadAllBytes(path))) return;
+                if (OpaqueBottom(image, out float x, out float y))
+                    asset.Settings(view).Pivot = new Vector2(x, y);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(image);
+            }
+        }
+
+        // Нижний центр силуэта (доли картинки, Y вверх): нижняя строка с
+        // заметной альфой, центр — по непрозрачным пикселям нижних 3 % силуэта.
+        public static bool OpaqueBottom(Texture2D image, out float x, out float y)
+        {
+            x = .5f; y = .1f;
+            Color32[] pixels = image.GetPixels32();
+            int w = image.width, h = image.height, bottom = -1, top = -1;
+            for (int row = 0; row < h && bottom < 0; row++)
+                for (int col = 0; col < w; col++)
+                    if (pixels[row * w + col].a > 128) { bottom = row; break; }
+            for (int row = h - 1; row >= 0 && top < 0; row--)
+                for (int col = 0; col < w; col++)
+                    if (pixels[row * w + col].a > 128) { top = row; break; }
+            if (bottom < 0) return false;
+            int band = Mathf.Max(1, Mathf.RoundToInt((top - bottom + 1) * .03f));
+            double sum = 0; int count = 0;
+            for (int row = bottom; row < Mathf.Min(h, bottom + band); row++)
+                for (int col = 0; col < w; col++)
+                    if (pixels[row * w + col].a > 128) { sum += col; count++; }
+            x = count > 0 ? (float)(sum / count + .5) / w : .5f;
+            y = (bottom + .5f) / h;
+            return true;
         }
 
         // Прежний разбор принимал имя объекта в имени кадра за часть: у основы

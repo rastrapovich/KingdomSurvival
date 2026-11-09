@@ -35,56 +35,19 @@ namespace KingdomSurvival.ArtAssets.Editor
             if (asset.PixelsPerUnit <= .01f) Add(ArtAssetIssueLevel.Error, "неверный масштаб (пикселей на единицу мира).");
             string density = ArtAssetDensity.Problem(asset);
             if (density != null) Add(ArtAssetIssueLevel.Warning, density);
-            if (asset.IsEmpty) Add(ArtAssetIssueLevel.Warning, "нет ни одного рисунка — в месте будет заглушка.");
-            else
-            {
-                List<string> missing = ArtAssetLabels.Views.Where(view => !asset.HasView(view)).Select(ArtAssetLabels.ViewTitle).ToList();
-                if (missing.Count > 0) Add(ArtAssetIssueLevel.Info, "не хватает ракурсов: " + string.Join(", ", missing) + ".");
-                int normals = asset.NormalCount, views = asset.ViewCount;
-                if (normals < views) Add(ArtAssetIssueLevel.Info, "нормали: " + normals + "/" + views + " (не обязательны, улучшают свет).");
-            }
+            if (asset.IsEmpty) Add(ArtAssetIssueLevel.Warning, "нет рисунка — в месте будет заглушка.");
 
-            Dictionary<Texture2D, Texture2D> sheetNormals = new Dictionary<Texture2D, Texture2D>();
+            // Один вид без нормалей и света (09.11.2026): проверяется основной
+            // вид; ракурсы и нормали не требуются и не проверяются.
+            ArtAssetView main = asset.PrimaryView;
             foreach (ArtAssetPart part in asset.Parts.Where(item => item != null))
             {
-                string partName = asset.Parts.Count > 1 ? "«" + part.Name + "» · " : string.Empty;
-                foreach (ArtAssetView view in ArtAssetLabels.Views)
-                {
-                    ArtAssetPartView slot = part.FindView(view);
-                    if (slot == null) continue;
-                    string where = partName + ArtAssetLabels.ViewTitle(view) + ": ";
-                    ValidateFrames(slot, where, view, Add);
-                    if (slot.Sprite != null && part != asset.MainPart && !asset.HasView(view))
-                        Add(ArtAssetIssueLevel.Info, where + "есть часть, но нет рисунка основы — ракурс не показывается.", view);
-                    if (slot.NormalMap == null)
-                    {
-                        if (slot.Sprite != null && SpriteNormalMaps.Find(slot.Sprite) != null)
-                            Add(ArtAssetIssueLevel.Warning, where + "нормаль подключена к рисунку, но не записана в карточке — нажмите «Исправить подключения».", view);
-                        continue;
-                    }
-                    if (slot.Sprite == null)
-                    {
-                        Add(ArtAssetIssueLevel.Warning, where + "нормаль без рисунка.", view);
-                        continue;
-                    }
-                    Vector2Int color = SpriteNormalMaps.SourceSize(slot.Sprite.texture), normal = SpriteNormalMaps.SourceSize(slot.NormalMap);
-                    bool sheet = SpriteNormalMaps.IsSheet(slot.Sprite);
-                    if (color != normal)
-                        Add(ArtAssetIssueLevel.Warning, where + "размер нормали " + normal.x + "×" + normal.y + " не совпадает с рисунком " + color.x + "×" + color.y +
-                                                        (sheet ? " (для листа нормаль — на весь лист)." : "."), view);
-                    if (!SpriteNormalMaps.IsNormalMapImport(slot.NormalMap))
-                        Add(ArtAssetIssueLevel.Warning, where + "нормаль импортирована как цветная картинка (sRGB) — нажмите «Исправить подключения».", view);
-                    if (SpriteNormalMaps.Find(slot.Sprite) != slot.NormalMap)
-                        Add(ArtAssetIssueLevel.Warning, where + "нормаль не подключена к рисунку (_NormalMap) — нажмите «Исправить подключения».", view);
-                    if (sheet) Add(ArtAssetIssueLevel.Info, where + "рисунок из листа: нормаль назначается всему листу.", view);
-                    // Гамма и «не те» нормали — по доле единичных векторов, а не по средней длине.
-                    string problem = ArtAssetNormalCheck.Problem(ArtAssetNormalCheck.Measure(slot.NormalMap));
-                    if (problem != null) Add(ArtAssetIssueLevel.Warning, where + problem, view);
-                    Texture2D texture = slot.Sprite.texture;
-                    if (sheetNormals.TryGetValue(texture, out Texture2D other) && other != slot.NormalMap)
-                        Add(ArtAssetIssueLevel.Warning, where + "один лист рисунков — разные нормали: у листа может быть только одна.", view);
-                    sheetNormals[texture] = slot.NormalMap;
-                }
+                ArtAssetPartView slot = part.FindView(main);
+                if (slot == null) continue;
+                string where = asset.Parts.Count > 1 ? "«" + part.Name + "»: " : string.Empty;
+                ValidateFrames(slot, where, main, Add);
+                if (slot.Sprite != null && part != asset.MainPart && !asset.HasView(main))
+                    Add(ArtAssetIssueLevel.Info, where + "есть часть, но нет рисунка основы — не показывается.", main);
             }
             issues.AddRange(LostReferences(catalog, asset));
             return issues;

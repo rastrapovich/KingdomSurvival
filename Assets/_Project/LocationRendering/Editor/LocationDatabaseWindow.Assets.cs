@@ -27,7 +27,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             ArtAssetDefinition asset = ArtAssetDatabaseAsset.FindCurrent(assetId);
             if (asset == null || Visual == null) { status.text = "Ассет не найден в Базе ассетов."; return; }
             LocalLocationDefinition location = Location;
-            ArtAssetView view = asset.TryResolveView(ArtAssetView.Front, out ArtAssetView shown) ? shown : ArtAssetView.Front;
+            // Один вид (09.11.2026): новый экземпляр — в основном виде записи.
+            ArtAssetView view = asset.PrimaryView;
             Change(() =>
             {
                 ArtAssetPart main = asset.MainPart;
@@ -135,9 +136,13 @@ namespace KingdomSurvival.LocationRendering.Editor
             AddButton(actions, "Заменить ассет…", () => ArtAssetPicker.Show("Заменить ассет", id => ReplaceAsset(selected, id), selected.AssetId));
             settings.Add(actions);
 
-            if (asset != null)
+            // Один вид: выбор ракурса — только у старой записи с несколькими
+            // ракурсами (прежние размещения читаются как раньше).
+            if (asset != null && asset.ViewCount <= 1 && resolved.NoArt)
+                settings.Add(new HelpBox("У ассета нет рисунка — показана розовая заглушка.", HelpBoxMessageType.Warning));
+            if (asset != null && asset.ViewCount > 1)
             {
-                Label viewTitle = new Label("Ракурс экземпляра (камера и герой ракурс не меняют)");
+                Label viewTitle = new Label("Ракурс экземпляра (старая запись с несколькими ракурсами)");
                 viewTitle.style.whiteSpace = WhiteSpace.Normal;
                 viewTitle.style.marginTop = 6;
                 settings.Add(viewTitle);

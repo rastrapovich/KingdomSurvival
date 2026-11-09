@@ -125,6 +125,9 @@ namespace KingdomSurvival.ArtAssets.Editor
                     cardView = target.View;
                     AttachNormalFolder(target.Asset, paths);
                     break;
+                case DropKind.Slot when target.Single && LooksLikeNormal(paths[0]):
+                    status.text = "Нормали не используются (один вид без света) — файл пропущен.";
+                    break;
                 case DropKind.Slot when target.Single:
                     AssignSingle(target.Asset, target.Part, target.View, paths[0], projectObject, target.Normal ? ArtAssetFileKind.Normal : ArtAssetFileKind.Color);
                     break;
@@ -162,44 +165,34 @@ namespace KingdomSurvival.ArtAssets.Editor
                 CardLayout(area, out Rect preview, out Rect slots);
                 cardPart = Mathf.Clamp(cardPart, 0, selected.Parts.Count - 1);
                 ArtAssetPart part = selected.Parts[cardPart];
-                for (int i = 0; i < ArtAssetLabels.ViewCount; i++)
+                Rect cell = PictureCell(slots);
+                if (cell.Contains(mouse))
                 {
-                    Rect cell = SlotRect(slots, i);
-                    if (!cell.Contains(mouse)) continue;
-                    SlotHalves(cell, out Rect colorRect, out Rect normalRect);
-                    ArtAssetView view = ArtAssetLabels.Views[i];
-                    bool normal = mouse.x >= normalRect.x - 2 || (single && LooksLikeNormal(paths[0]));
+                    ArtAssetView view = cardView;
                     string partNote = selected.Parts.Count > 1 ? " · " + part.Name : "";
-                    // Папка на половину нормали — нормали папкой, как в Базе анимаций.
-                    if (normal && paths.Any(Directory.Exists))
-                        return new DropTarget
-                        {
-                            Kind = DropKind.Normals, Asset = selected, View = view, Rect = cell,
-                            Hint = "Нормали папкой → «" + selected.Name + "» (ракурсы по папкам или именам, без ракурса — «" + ArtAssetLabels.ViewTitle(view) + "»)"
-                        };
                     return new DropTarget
                     {
-                        Kind = DropKind.Slot, Asset = selected, Part = part, View = view, Normal = normal, Single = single, DefaultView = view,
-                        Rect = single ? (normal ? normalRect : colorRect) : cell,
-                        Hint = single ? (normal ? "Заменить нормаль: " : "Заменить рисунок: ") + ArtAssetLabels.ViewTitle(view) + partNote
-                            : "Добавить файлы в «" + selected.Name + "»" + partNote + " (без ракурса в имени — в «" + ArtAssetLabels.ViewTitle(view) + "»)"
+                        Kind = DropKind.Slot, Asset = selected, Part = part, View = view, Normal = false, Single = single, DefaultView = view,
+                        Rect = single ? PictureArea(cell) : cell,
+                        Hint = single ? "Заменить рисунок" + partNote
+                            : "Добавить файлы в «" + selected.Name + "»" + partNote + " (кадры или части по именам)"
                     };
                 }
                 return new DropTarget
                 {
                     Kind = DropKind.AddToAsset, Asset = selected, Part = part, DefaultView = cardView, Rect = preview,
                     Hint = "Добавить в «" + selected.Name + "»" + (selected.Parts.Count > 1 ? " · " + part.Name : "") +
-                           " (без ракурса в имени — в «" + ArtAssetLabels.ViewTitle(cardView) + "»)"
+                           " (кадры или части по именам)"
                 };
             }
             ArtAssetDefinition hit = state.Mode == ArtAssetCenterMode.Gallery ? GalleryHit(area, mouse)
                 : state.Mode == ArtAssetCenterMode.Canvas ? CanvasHit(area, mouse)?.Asset : null;
             if (hit != null)
-                return new DropTarget { Kind = DropKind.AddToAsset, Asset = hit, Rect = area, Hint = "Добавить ракурсы в «" + hit.Name + "»" };
+                return new DropTarget { Kind = DropKind.AddToAsset, Asset = hit, Rect = area, Hint = "Добавить в «" + hit.Name + "» (кадры или части)" };
             return new DropTarget
             {
                 Kind = DropKind.Create, Rect = area,
-                Hint = single ? "Создать ассет (без ракурса в имени — «Спереди»)" : "Создать ассеты из пакета (" + paths.Count + ")"
+                Hint = single ? "Создать ассет" : "Создать ассеты (один PNG — один ассет; " + paths.Count + ")"
             };
         }
 
@@ -261,6 +254,9 @@ namespace KingdomSurvival.ArtAssets.Editor
         {
             if (target == null && category == null) category = CurrentCategory;
             ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(paths, target?.Name, defaultView);
+            // Один вид без нормалей: нормали пакета не подключаются (файлы на
+            // диске не трогаются), сводка их считает.
+            int normalsSkipped = ArtAssetImportParser.DropNormals(plan);
             if (plan.IsEmpty)
             {
                 status.text = "Ничего не распознано: " + string.Join("; ", plan.Unresolved.Take(4).Select(item => Path.GetFileName(item.Path) + " — " + item.Reason)) +
@@ -302,6 +298,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             if (target != null && result.Updated.Count > 0 && partIndex > 0) { cardPart = partIndex; BuildProperties(); }
             int older = plan.Groups.Sum(group => group.SkippedOlder);
             status.text = result.Summary + (into != null ? " Часть: «" + into.Name + "»." : "") + (category.HasValue && result.Created.Count > 0 ? " Категория: «" + ArtAssetLabels.CategoryTitle(category.Value) + "»." : "") +
+                          (normalsSkipped > 0 ? " Нормалей пропущено: " + normalsSkipped + " (не используются)." : "") +
                           (older > 0 ? " Старых рендеров пропущено: " + older + " (взяты самые свежие)." : "") +
                           (result.Warnings.Count > 0 ? " ⚠ " + string.Join(" ", result.Warnings.Take(3)) : "") +
                           (result.Errors.Count > 0 ? " Ошибки: " + string.Join("; ", result.Errors.Take(3)) : "") +

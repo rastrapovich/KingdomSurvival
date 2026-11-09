@@ -457,6 +457,15 @@ namespace KingdomSurvival.ArtAssets
         public ArtAssetPlayback Playback = ArtAssetPlayback.Loop;
         public bool RandomPhase = true;
 
+        // Один ракурс (решение пользователя 09.11.2026): у записи окружения
+        // один основной вид. MainView — явный выбор; у старой записи без
+        // рисунка в нём — эталонный ракурс (PrimaryView). Прочие ракурсы
+        // старых записей хранятся для чтения прежних размещений, окно их не
+        // показывает и новым не требует.
+        public ArtAssetView MainView = ArtAssetView.Front;
+        // Назначение: общий для карты и арены, только карта или только арена.
+        public ArtAssetPurpose Purpose = ArtAssetPurpose.Both;
+
         public List<ArtAssetViewSettings> ViewSettings = new List<ArtAssetViewSettings>();
         public List<ArtAssetPart> Parts = new List<ArtAssetPart> { new ArtAssetPart() };
 
@@ -568,6 +577,12 @@ namespace KingdomSurvival.ArtAssets
 
         // Эталонный ракурс размера: «Спереди», при его отсутствии — первый имеющийся.
         public bool TryReferenceView(out ArtAssetView view) => TryResolveView(ArtAssetView.Front, out view);
+
+        // Основной (единственный показываемый) вид записи.
+        public ArtAssetView PrimaryView => HasView(MainView) ? MainView : TryReferenceView(out ArtAssetView view) ? view : MainView;
+
+        public bool UsableOnMap => Purpose != ArtAssetPurpose.ArenaOnly;
+        public bool UsableOnArena => Purpose != ArtAssetPurpose.MapOnly;
 
         public float SafePixelsPerUnit => PixelsPerUnit > .01f ? PixelsPerUnit : DefaultPixelsPerUnit;
 

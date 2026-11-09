@@ -72,7 +72,7 @@ namespace KingdomSurvival.ArtAssets.Tests
         }
 
         [UnityTest]
-        public IEnumerator DroppingLoosePngIntoTheWindow_CreatesAnAssetWithItsNormal()
+        public IEnumerator DroppingLoosePngIntoTheWindow_CreatesOneViewAsset_AndSkipsItsNormal()
         {
             string color = Png("сарай.png", new Color(.6f, .4f, .2f, 1));
             string normal = Png("сарай_normal.png", new Color(.5f, .5f, 1, 1));
@@ -90,7 +90,7 @@ namespace KingdomSurvival.ArtAssets.Tests
             ArtAssetDefinition shed = catalog.assets[0];
             Assert.That(shed.Name, Is.EqualTo("сарай"));
             Assert.That(shed.HasView(ArtAssetView.Front), Is.True);
-            Assert.That(shed.HasNormal(ArtAssetView.Front), Is.True, "Пара *_normal стала нормалью ракурса.");
+            Assert.That(shed.HasNormal(ArtAssetView.Front), Is.False, "Один вид без света: пара *_normal пропущена, отдельным ассетом не стала.");
             Assert.That(ArtAssetPicker.DraggedAssetId(), Is.Null);
 
             // В открытой карточке файл с ракурсом в имени добавляется в этот же ассет.

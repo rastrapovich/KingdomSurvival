@@ -124,6 +124,33 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         public const string NoViewProblem = "не удалось определить ракурс";
 
+        // Один вид без света (09.11.2026): снять нормали с плана импорта —
+        // ни отдельными ассетами, ни цветными кадрами они не становятся.
+        // Нормали без своего рисунка парсер и так не делает предметами.
+        public static int DropNormals(ArtAssetImportPlan plan)
+        {
+            int count = 0;
+            if (plan == null) return count;
+            foreach (ArtAssetImportGroup group in plan.Groups)
+            foreach (ArtAssetImportSlot slot in group.Slots)
+            {
+                if (slot.NormalPath != null) { slot.NormalPath = null; count++; }
+                foreach (ArtAssetImportFrame frame in slot.Frames)
+                    if (frame.NormalPath != null) { frame.NormalPath = null; count++; }
+            }
+            count += plan.Unresolved.RemoveAll(issue => issue.Path != null && LooksLikeNormalPath(issue.Path));
+            return count;
+        }
+
+        public static bool LooksLikeNormalPath(string path)
+        {
+            List<string> tokens = Tokens(Path.GetFileNameWithoutExtension(path));
+            if (tokens.Any(NormalTokens.Contains) || (tokens.Count > 1 && tokens[tokens.Count - 1] == "n")) return true;
+            string folder = Path.GetFileName(Path.GetDirectoryName(path) ?? string.Empty);
+            List<string> folderTokens = Tokens(folder);
+            return folderTokens.Count > 0 && folderTokens.All(NormalTokens.Contains);
+        }
+
         public static bool IsImage(string path) =>
             ImageExtensions.Contains(Path.GetExtension(path ?? string.Empty).ToLowerInvariant());
 

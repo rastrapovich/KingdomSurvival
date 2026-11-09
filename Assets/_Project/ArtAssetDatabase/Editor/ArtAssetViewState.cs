@@ -30,6 +30,8 @@ namespace KingdomSurvival.ArtAssets.Editor
         public string SelectedId = "";
         public int Category = -1;
         public bool Favorites, IncompleteViews, MissingNormals, Used, Unused;
+        // Фильтры назначения (один ракурс, 09.11.2026).
+        public bool ForArena, ForMap;
         public List<string> Order = new List<string>();
         public bool AllViews;
         public float LightIntensity = 1.4f, LightHeight = 1.2f, LightNormalDistance = 1.5f;

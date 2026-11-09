@@ -190,7 +190,7 @@ namespace KingdomSurvival.ArtAssets.Tests
             Png("кривая_нормаль.png", 16, 16, Normal);
             string warning = ArtAssetImporter.AssignFile(catalog, updated, updated.MainPart, ArtAssetView.Back, source + "/кривая_нормаль.png", ArtAssetFileKind.Normal);
             StringAssert.Contains("не совпадает", warning);
-            Assert.That(ArtAssetValidator.Validate(catalog, updated).Any(issue => issue.Level == ArtAssetIssueLevel.Warning && issue.Text.Contains("размер нормали")), Is.True);
+            Assert.That(ArtAssetValidator.Validate(catalog, updated).Any(issue => issue.Level == ArtAssetIssueLevel.Warning && issue.Text.Contains("размер нормали")), Is.False, "Один вид: нормали не проверяются.");
 
             // Снятие нормали снимает и вторую текстуру импорта.
             Sprite backSprite = updated.MainPart.FindView(ArtAssetView.Back).Sprite;
@@ -225,7 +225,7 @@ namespace KingdomSurvival.ArtAssets.Tests
             File.WriteAllBytes(path, original);
             AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
             Assert.That(ArtAssetNormalCheck.Measure(slot.NormalMap).Encoding, Is.EqualTo(ArtAssetNormalEncoding.Gamma));
-            Assert.That(ArtAssetValidator.Validate(catalog, cart).Any(issue => issue.Text.Contains("гамма-коррекцией")), Is.True);
+            Assert.That(ArtAssetValidator.Validate(catalog, cart).Any(issue => issue.Text.Contains("гамма-коррекцией")), Is.False, "Один вид: нормали не проверяются.");
             Assert.That(ArtAssetValidator.FixNormalGamma(cart), Is.EqualTo(1));
             Assert.That(ArtAssetDrawing.NormalLength(slot.NormalMap), Is.EqualTo(1f).Within(.03f));
             Assert.That(ArtAssetValidator.Validate(catalog, cart).Any(issue => issue.Text.Contains("гамма-коррекцией")), Is.False);
@@ -234,7 +234,7 @@ namespace KingdomSurvival.ArtAssets.Tests
             // Запись нормали потеряна (например, Undo импорта), а к рисунку она подключена.
             Texture2D normal = slot.NormalMap;
             slot.NormalMap = null;
-            Assert.That(ArtAssetValidator.Validate(catalog, cart).Any(issue => issue.Text.Contains("не записана в карточке")), Is.True);
+            Assert.That(ArtAssetValidator.Validate(catalog, cart).Any(issue => issue.Text.Contains("не записана в карточке")), Is.False, "Один вид: нормали не проверяются.");
             Assert.That(ArtAssetValidator.RepairNormals(cart), Is.EqualTo(1));
             Assert.That(slot.NormalMap == normal, Is.True);
         }
@@ -256,7 +256,7 @@ namespace KingdomSurvival.ArtAssets.Tests
             Assert.That(File.ReadAllBytes(AssetDatabase.GetAssetPath(slot.NormalMap)), Is.EqualTo(original), "Копия не пересчитана.");
             Assert.That(result.Warnings, Has.No.Member(ArtAssetImporter.GammaFixedNote));
             List<ArtAssetIssue> issues = ArtAssetValidator.Validate(catalog, cart);
-            Assert.That(issues.Any(issue => issue.Text.Contains("не похоже на карту нормалей")), Is.True);
+            Assert.That(issues.Any(issue => issue.Text.Contains("не похоже на карту нормалей")), Is.False, "Один вид: нормали не проверяются.");
             Assert.That(issues.Any(issue => issue.Text.Contains("гамма-коррекцией")), Is.False);
             Assert.That(ArtAssetValidator.FixNormalGamma(cart), Is.EqualTo(0));
 

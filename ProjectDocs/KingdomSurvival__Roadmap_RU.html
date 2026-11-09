@@ -1,0 +1,3376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark"><title>Kingdom Survival — карта разработки</title>
+<style>
+:root{--bg:#101411;--panel:#171d18;--panel2:#1d251e;--line:#30392f;--ink:#eeeede;--muted:#a2ad9c;--soft:#71836f;--accent:#dcf08b;--gold:#e7c88b;--blue:#a8c7d7;--red:#e9aaa0;--radius:16px}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif;font-size:14px;line-height:1.5}button,input,textarea,select{font:inherit}button,a,input,textarea,select{-webkit-tap-highlight-color:transparent}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.4}a{color:var(--accent);text-underline-offset:3px}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}button{color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:9px;padding:9px 13px;line-height:1.35}button:hover{background:#ffffff09;border-color:#64705b}.primary{background:var(--accent);border-color:var(--accent);color:#1a2514;font-weight:650}.primary:hover{background:#e7f6b0;border-color:#e7f6b0}.ghost{border-color:transparent}.danger{color:var(--red)}.small{font-size:12px;padding:6px 10px}.iconbtn{padding:8px;min-width:35px;display:inline-flex;justify-content:center;align-items:center}.icon{width:18px;height:18px;display:inline-block;vertical-align:middle;flex-shrink:0}.muted{color:var(--muted)}.eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:650;color:var(--muted)}.topbar{height:76px;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line);background:#101411ee;backdrop-filter:blur(16px);display:flex;align-items:center;padding:0 30px;gap:16px}.brandmark{width:34px;height:38px;display:grid;place-items:center;border:1px solid #7f9065;border-radius:2px 2px 12px 12px;color:var(--accent);font-family:Georgia,serif;font-size:23px}.brand{display:flex;align-items:center;gap:11px;min-width:228px}.brandname{font-size:12px;font-weight:700;letter-spacing:.08em}.brandmeta{font-size:10px;color:var(--soft);letter-spacing:.13em;margin-top:1px}.topactions{margin-left:auto;display:flex;align-items:center;gap:8px}.save-state{font-size:11px;color:var(--muted);margin-right:12px;display:flex;align-items:center;gap:7px}.dot{width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--accent)}.save-state.error .dot{background:var(--red)}.shell{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:calc(100vh - 76px)}.sidebar{position:sticky;top:76px;height:calc(100vh - 76px);overflow:auto;border-right:1px solid var(--line);padding:27px 18px 22px;display:flex;flex-direction:column;gap:23px;scrollbar-width:thin}.navitem{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;padding:10px 13px;color:var(--muted);border-radius:8px;margin-bottom:3px}.navitem.active{background:#dcee8b12;color:var(--accent)}.navcount{margin-left:auto;font-size:10px;padding:1px 6px;border:1px solid var(--line);border-radius:5px}.phase-nav{display:flex;gap:10px;text-align:left;border:0;border-radius:6px;padding:6px 10px;width:100%;color:var(--muted);font-size:11px;align-items:start}.phase-nav .phase-index{color:#73816b;min-width:19px;font-size:10px;padding-top:2px}.phase-nav.active{background:#ffffff06;color:var(--ink)}.phase-nav:hover{background:#ffffff05}.navblock .eyebrow{margin:0 12px 10px}.sidefoot{margin-top:auto;padding:15px 12px 0;border-top:1px solid var(--line);font-size:11px;color:var(--soft)}.sidefoot strong{color:var(--muted);font-weight:500}.main{min-width:0;max-width:1280px;width:100%;padding:40px 46px 70px}.hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:35px;padding-bottom:32px;border-bottom:1px solid var(--line)}.hero h1{font-size:48px;line-height:1.08;letter-spacing:-.055em;margin:15px 0 17px;font-weight:550;max-width:720px}.hero h1 em{font-style:normal;color:var(--accent)}.hero-description{max-width:610px;color:var(--muted);font-size:14px;line-height:1.7;margin:0}.hero-side{align-self:end;padding-left:24px;border-left:1px solid var(--line)}.big-number{font-size:47px;letter-spacing:-.06em;line-height:1;margin:11px 0}.big-number span{font-size:18px;letter-spacing:-.02em;color:var(--muted)}.progressbar{height:4px;background:#30382b;border-radius:5px;overflow:hidden}.progressbar>i{display:block;height:100%;background:var(--accent);border-radius:inherit}.stat-caption{font-size:11px;color:var(--muted);margin-top:10px}.hero-tags{display:flex;gap:9px;flex-wrap:wrap;margin-top:21px}.tag{font-size:10px;border:1px solid var(--line);border-radius:5px;padding:3px 7px;color:var(--muted);line-height:1.4}.tag.green{color:var(--accent);border-color:#53613a}.tag.gold{color:var(--gold);border-color:#62583f}.tag.blue{color:var(--blue);border-color:#405761}.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:28px 0 13px}.section-head h2{font-size:16px;font-weight:550;margin:0;letter-spacing:-.015em}.section-head p{font-size:12px;color:var(--muted);margin:3px 0 0}.next-card{margin:22px 0 0;background:linear-gradient(110deg,#26301d,#1b231b 70%);border:1px solid #4b5936;border-radius:var(--radius);padding:21px 23px;display:flex;gap:20px;align-items:center}.next-card .eyebrow{color:#bed18d}.next-card h3{font-size:18px;font-weight:550;letter-spacing:-.02em;margin:6px 0}.next-card p{font-size:12px;color:var(--muted);margin:0}.next-card .next-content{flex:1}.next-card button{flex-shrink:0}.step-index{width:43px;height:43px;display:grid;place-items:center;border:1px solid #66754a;border-radius:50%;color:var(--accent);font-size:12px;font-family:Georgia,serif}.toolbar{display:flex;align-items:center;gap:9px;margin:21px 0 19px;flex-wrap:wrap}.search{flex:1;min-width:190px;position:relative}.search .icon{position:absolute;left:12px;top:11px;color:var(--soft)}.search input{width:100%;padding:10px 12px 10px 39px}.toolbar select{font-size:11px;max-width:164px}.field,input,textarea,select{color:var(--ink);background:#151b16;border:1px solid var(--line);border-radius:8px;padding:10px 11px;min-width:0}.toolbar input::placeholder{color:#82917c}textarea{resize:vertical;min-height:85px}.countline{font-size:11px;color:var(--soft);display:flex;justify-content:space-between;gap:10px;align-items:center;margin:0 0 15px}.phase{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin:0 0 12px;background:var(--panel)}.phase.current{border-color:#5a6545}.phase-head{display:flex;align-items:center;gap:16px;padding:20px 22px}.phase-toggle{flex:1;min-width:0;display:flex;align-items:center;gap:16px;text-align:left;border:0;padding:0;border-radius:0}.phase-toggle:hover{background:none;border-color:transparent}.phase-no{font-family:Georgia,serif;font-size:22px;font-weight:400;color:var(--soft);width:34px;flex-shrink:0}.phase.current .phase-no{color:var(--accent)}.phase-title{font-size:16px;font-weight:550;letter-spacing:-.02em;display:block}.phase-subtitle{font-size:11px;color:var(--muted);margin-top:4px;display:block}.phase-stats{width:72px;flex-shrink:0}.phase-stats span{display:block;text-align:right;color:var(--muted);font-size:10px;margin-bottom:6px}.phase-head .chevron{width:16px;color:var(--soft);transform:rotate(0);transition:transform .15s}.phase-head.expanded .chevron{transform:rotate(90deg)}.phase-body{border-top:1px solid var(--line)}.phase-intro{padding:17px 23px 18px;display:grid;grid-template-columns:1fr 1fr;gap:30px;font-size:12px;color:var(--muted);background:#12191270}.phase-intro strong{display:block;color:var(--ink);font-size:11px;font-weight:500;margin-bottom:5px}.phase-intro p{margin:0}.phase-foot{padding:13px 22px;display:flex;gap:9px;align-items:center;flex-wrap:wrap;background:#13191380}.phase-foot .legacy{margin-left:auto;font-size:10px;color:var(--soft);max-width:55%;text-align:right}.task-row{display:flex;gap:12px;align-items:center;padding:14px 22px;border-bottom:1px solid #30392f88;min-height:77px}.task-row:hover{background:#ffffff02}.task-row:last-of-type{border-bottom:0}.task-row.is-done .task-title{color:var(--soft);text-decoration:line-through;text-decoration-color:#65705b}.task-row.is-cancelled{opacity:.58}.task-row.is-cancelled .task-title{text-decoration:line-through}.task-row.is-milestone{background:#d6e78c05}.checkbtn{width:23px;height:23px;padding:0;border:1px solid #5c6855;border-radius:7px;flex-shrink:0;display:grid;place-items:center}.checkbtn.checked{background:var(--accent);border-color:var(--accent);color:#172510}.checkbtn .icon{width:15px;height:15px}.task-main{flex:1;min-width:0}.task-title-button{font-size:13px;font-weight:500;display:block;text-align:left;line-height:1.45;border:0;padding:0;border-radius:2px;width:100%}.task-title-button:hover{background:none;color:var(--accent)}.task-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px;font-size:10px;color:var(--soft)}.task-code{font-variant-numeric:tabular-nums;letter-spacing:.03em;color:#96a68a}.status-select{font-size:10px;padding:7px 8px;width:125px;border-radius:6px;color:var(--muted);background:#131a14}.status-select.done{color:var(--accent)}.status-select.verify{color:var(--blue)}.status-select.doing{color:var(--gold)}.blocked-label{color:#b8a581}.task-chevron{color:var(--soft);padding:6px;border:0}.printdetail{display:none}.empty{padding:36px 24px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:var(--radius)}.empty h3{color:var(--ink);margin:0 0 10px;font-size:17px}.notice{padding:15px 18px;border:1px solid var(--line);background:#ffffff03;border-radius:11px;color:var(--muted);font-size:12px;margin:17px 0}.notice strong{color:var(--ink)}.notice.warn{border-color:#5f543c;background:#e7c88b07}.cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}.info-card{padding:22px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)}.info-card h3{font-size:17px;line-height:1.3;margin:8px 0 12px;font-weight:550}.info-card p,.info-card li{font-size:12px;color:var(--muted);line-height:1.75}.info-card ul{padding-left:19px;margin-bottom:0}.source-row{padding:15px 0;border-bottom:1px solid var(--line)}.source-row p{font-size:12px;color:var(--muted);margin:4px 0}.source-row a{font-size:13px}.glossary dt{font-size:13px;color:var(--ink);margin-top:17px}.glossary dd{margin:4px 0;font-size:12px;color:var(--muted)}.read-width{max-width:920px}.page-intro{color:var(--muted);max-width:690px;font-size:14px;line-height:1.8;margin:14px 0 24px}.view-title{font-size:37px;letter-spacing:-.045em;font-weight:550;line-height:1.12;margin:13px 0 0}.guide-rule{padding:18px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:35px 1fr;gap:12px}.guide-rule b{font-family:Georgia,serif;color:var(--accent);font-size:19px;font-weight:400}.guide-rule h3{font-size:14px;margin:0 0 5px;font-weight:550}.guide-rule p{font-size:12px;color:var(--muted);margin:0;line-height:1.75}.footer-note{margin-top:27px;font-size:11px;color:var(--soft);padding-top:19px;border-top:1px solid var(--line)}dialog{color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:18px;width:680px;max-width:calc(100vw - 24px);max-height:calc(100svh - 32px);padding:0;box-shadow:0 30px 90px #0009}dialog::backdrop{background:#030704bb;backdrop-filter:blur(3px)}dialog.details{margin:0 0 0 auto;height:100svh;max-height:100svh;width:575px;border-radius:18px 0 0 18px;border-right:0}dialog .modal-head{display:flex;justify-content:space-between;align-items:start;gap:12px;padding:24px 25px 17px;border-bottom:1px solid var(--line)}dialog h2{font-size:24px;letter-spacing:-.035em;line-height:1.23;margin:8px 0 0;font-weight:550}.modal-body{padding:23px 25px}.modal-footer{padding:17px 25px;border-top:1px solid var(--line);display:flex;gap:9px;align-items:center;flex-wrap:wrap}.modal-scroll{overflow:auto;max-height:calc(100svh - 180px)}dialog.details .modal-scroll{max-height:calc(100svh - 170px)}.detail-block{margin-bottom:23px}.detail-block h3{font-size:10px;color:var(--soft);letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin:0 0 8px}.detail-block p{font-size:14px;line-height:1.75;margin:0;white-space:pre-wrap}.acceptance{padding:17px 18px;background:#d7ee8a0b;border-left:2px solid var(--accent);border-radius:0 10px 10px 0}.acceptance h3{color:var(--accent)}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:25px}.detail-grid label{font-size:11px;color:var(--muted)}.detail-grid select{display:block;width:100%;margin-top:6px;font-size:12px}.dep-row{display:flex;gap:9px;padding:8px 0;align-items:start;font-size:12px}.dep-row>span{color:var(--soft);padding-top:2px}.dep-row button{padding:0;border:0;text-align:left;color:var(--muted)}.dep-row button:hover{background:none;color:var(--accent)}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.form-grid label{display:flex;flex-direction:column;font-size:11px;color:var(--muted);gap:7px}.full{grid-column:1/-1}.form-grid input,.form-grid textarea,.form-grid select{width:100%;font-size:13px}.form-grid .inline-check{flex-direction:row;align-items:center}.inline-check input{width:auto;accent-color:var(--accent)}.dep-picker{border:1px solid var(--line);border-radius:8px;padding:10px}.dep-picker input[type=search]{font-size:11px}.dep-list{max-height:155px;overflow:auto;margin-top:9px}.dep-list label{display:flex;flex-direction:row;align-items:start;gap:9px;padding:6px 2px;font-size:11px}.dep-list input{width:auto;accent-color:var(--accent);margin-top:3px}.helptext{font-size:10px;color:var(--soft);line-height:1.6}.error-text{color:var(--red);font-size:12px;margin:10px 0}.form-actions{margin-left:auto;display:flex;gap:8px}.toast{position:fixed;bottom:25px;right:25px;z-index:100;max-width:420px;padding:14px 18px;border:1px solid #596945;border-radius:11px;background:#20291e;box-shadow:0 8px 30px #0005;font-size:12px;color:var(--ink);display:flex;gap:13px;align-items:center}.toast.error{border-color:#86615b}.toast button{padding:3px 8px;font-size:11px}.menu-wrap{position:relative}.menu{position:absolute;right:0;top:calc(100% + 9px);width:240px;padding:7px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;box-shadow:0 15px 45px #0008;z-index:30}.menu button{display:block;text-align:left;width:100%;border:0;padding:10px;font-size:12px}.menu small{display:block;color:var(--soft);font-size:10px;margin-top:2px}.mobile-menu{display:none}.sidebar-overlay{display:none}.ready-list .phase{margin-bottom:14px}.ready-list .task-row{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:10px}.barline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.progress-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:26px 0}.metric{padding:18px;border:1px solid var(--line);border-radius:12px}.metric strong{font-size:30px;letter-spacing:-.04em;font-weight:500;display:block}.metric span{font-size:11px;color:var(--muted)}.hide{display:none!important}.storage-warning{margin:0;background:#e7c88b12;color:var(--gold);padding:10px 25px;font-size:12px;border-bottom:1px solid #665e3b}.arrow-group{display:flex;gap:4px;margin-left:auto}.field-source{font-size:11px;color:var(--muted)}.field-source a{display:inline-block;margin:4px 7px 0 0;font-size:11px}
+@media(min-width:1700px){.main{padding-left:65px;padding-right:65px}}@media(max-width:1190px){.main{padding:30px 28px 60px}.hero{grid-template-columns:1fr 170px;gap:20px}.hero h1{font-size:42px}.shell{grid-template-columns:225px 1fr}.sidebar{padding-left:12px;padding-right:12px}.brand{min-width:200px}.topbar{padding:0 22px}.save-state{display:none}.phase-head{padding:18px}.task-row{padding-left:18px;padding-right:18px}}@media(max-width:900px){.shell{grid-template-columns:1fr}.sidebar{position:fixed;left:0;top:66px;bottom:0;height:calc(100svh - 66px);width:265px;background:var(--bg);z-index:25;transform:translateX(-100%);transition:transform .18s}.sidebar.open{transform:translateX(0)}.sidebar-overlay.open{display:block;position:fixed;inset:66px 0 0;background:#0009;z-index:24}.mobile-menu{display:inline-flex}.topbar{height:66px;padding:0 16px;gap:10px}.brand{min-width:0}.brandmark{display:none}.brandmeta{font-size:9px}.brandname{font-size:11px}.main{padding:30px}.topactions{gap:6px}.topactions .export-json{display:none}.hero h1{font-size:44px}.cards-grid{gap:12px}}@media(max-width:600px){.main{padding:25px 16px 48px}.topbar{padding:0 10px}.brandname{font-size:10px;letter-spacing:.04em}.brandmeta{font-size:8px;letter-spacing:.05em}.topactions .primary{font-size:11px;padding:8px 10px}.topactions{gap:4px}.hero{display:block;padding-bottom:24px}.hero h1{font-size:39px;max-width:340px}.hero-description{font-size:12px}.hero-side{padding:16px 0 0;margin-top:22px;border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:8px 20px}.hero-side .eyebrow{grid-column:1/-1}.big-number{font-size:34px;margin:0;align-self:center}.hero-side .progressbar{align-self:center}.stat-caption{grid-column:1/-1;margin-top:0;font-size:10px}.hero-tags{margin-top:16px}.next-card{padding:17px;gap:12px;align-items:start;flex-wrap:wrap}.next-card h3{font-size:16px}.next-card .step-index{display:none}.next-card button{font-size:11px;padding:7px 10px}.next-card .next-content{min-width:210px}.toolbar{gap:7px}.search{min-width:100%;flex-basis:100%}.toolbar select{flex:1;max-width:none}.toolbar .small{padding:8px}.phase-head{gap:7px;padding:16px 12px}.phase-toggle{gap:9px}.phase-title{font-size:14px}.phase-no{font-size:20px;width:27px}.phase-subtitle{font-size:10px}.phase-stats{width:47px}.phase-stats span{font-size:9px}.phase-intro{grid-template-columns:1fr;gap:14px;padding:16px}.task-row{padding:13px 12px;gap:10px;align-items:start;flex-wrap:wrap}.task-main{min-width:calc(100% - 65px)}.task-title-button{font-size:12px}.task-row .checkbtn{margin-top:2px}.task-row .status-select{margin-left:33px;font-size:10px;padding:5px 7px;width:126px}.task-row .task-chevron{margin-left:auto;margin-top:-30px}.task-meta{gap:6px;font-size:9px}.task-meta .owner-tag{display:none}.phase-foot{padding:12px;gap:6px}.phase-foot .legacy{display:none}.cards-grid{grid-template-columns:1fr}.progress-overview{grid-template-columns:1fr 1fr;gap:10px}.view-title{font-size:32px}.info-card{padding:18px}.hero .eyebrow{font-size:9px}.section-head{margin-top:23px}.countline{font-size:10px}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}dialog{max-width:calc(100vw - 14px);max-height:calc(100svh - 14px);border-radius:12px}dialog.details{width:100%;max-width:100%;border-radius:0}dialog h2{font-size:22px}dialog .modal-head{padding:20px 18px 15px}.modal-body{padding:20px 18px}.modal-footer{padding:14px 18px}.modal-scroll{max-height:calc(100svh - 180px)}.toast{bottom:14px;right:12px;left:12px;max-width:none}.footer-note{font-size:10px}.detail-grid{gap:10px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media print{body{background:white!important;color:#151515!important;font-size:10px}.topbar,.sidebar,.sidebar-overlay,.toolbar,.topactions,.phase-foot,.next-card,.countline,.task-chevron,.checkbtn,.status-select,.toast,dialog,.footer-note,.section-head button,.hero-tags{display:none!important}.shell{display:block}.main{padding:0;max-width:none}.hero{display:block;padding-bottom:15px;border-color:#ccc}.hero h1{font-size:28px;color:#111}.hero h1 em{color:#333}.hero-description,.muted,.phase-subtitle,.task-meta,.phase-no,.eyebrow,.phase-intro,.phase-intro strong{color:#444!important}.hero-side{display:none}.phase{break-inside:auto;background:white!important;border-color:#bbb;border-radius:0;margin-bottom:10px}.phase-head{padding:12px;background:#f4f4f0}.phase-body{border-color:#ccc}.phase-toggle,.task-title-button{color:#111!important}.phase-intro{background:white;padding:12px}.task-row{display:block;padding:10px 13px;break-inside:avoid;border-color:#ddd}.task-title-button{font-size:11px}.task-meta{font-size:8px}.printdetail{display:block;font-size:9px;color:#333;margin-top:6px}.phase-stats span{color:#444}.progressbar{background:#ddd}.progressbar>i{background:#666}.notice{background:white;color:#333;border-color:#bbb}.notice strong{color:#111}.info-card{background:white;color:#111;border-color:#bbb}.info-card p,.info-card li{color:#333}.tag{color:#333}.source-row a,a{color:#222}.is-done .task-title{text-decoration:none!important}.view-title{font-size:26px}@page{size:A4;margin:13mm}}
+</style>
+</head>
+<body>
+<div id="app"><div style="padding:50px;color:#dcf08b">Загружаем карту разработки…</div></div>
+<noscript><p>Для работы карты включи JavaScript и открой HTML в браузере.</p></noscript>
+<dialog id="dialog" aria-labelledby="modal-title"></dialog><div id="toast-root" aria-live="polite"></div>
+<input id="import-file" type="file" accept=".json,.html,application/json,text/html" hidden>
+<script id="embedded-state" type="application/json">{
+  "schemaVersion": 1,
+  "planId": "kingdom-survival-release-roadmap-2026-11-05",
+  "revision": 1,
+  "savedAt": "2026-11-09T01:39:16.809Z",
+  "lastExportedAt": null,
+  "meta": {
+    "title": "Карта разработки",
+    "project": "Kingdom Survival",
+    "subtitle": "От рабочей основы до релиза",
+    "snapshot": "9 ноября 2026 · снимок main 2ab4146c · канон v1.66",
+    "goal": "Закончить компактную сюжетную 2D-RPG с героем, отрядом, исследованием, решениями и последствиями.",
+    "notes": "Рабочая дорожная карта для обсуждения и отслеживания. Она не заменяет канон и не утверждает новые механики. Перед реализацией сверять текущие ProjectDocs и состояние кода.",
+    "assumptions": "Одна первая платформа: рабочий ориентир Windows по существующей сборке. Способ распространения, языки и календарь выпуска требуют решения. Дом — под вопросом; выбираемые мировые кризисы отменены."
+  },
+  "phases": [
+    {
+      "id": "p00",
+      "title": "Надёжная отправная точка",
+      "subtitle": "Понять, что уже есть",
+      "outcome": "Есть воспроизводимая рабочая сборка и список реальных проблем.",
+      "why": "Проект уже далеко от пустой папки. Начни с проверки опоры: это защищает рисунки, сохранения и время от случайной повторной работы.",
+      "lane": "main",
+      "legacy": "ПР-00 / ПР-04",
+      "sources": [
+        "project",
+        "B07",
+        "B25"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p01",
+      "title": "Границы версии 1.0",
+      "subtitle": "Решить, какую игру заканчиваем",
+      "outcome": "Зафиксирован посильный состав первого релиза.",
+      "why": "Без границ каждое улучшение создаёт ещё работу. Решения здесь принимает Саша; Claude помогает сравнить варианты и оценить цену.",
+      "lane": "main",
+      "legacy": "Новый выпускной уровень над планом ПР",
+      "sources": [
+        "S08",
+        "S09",
+        "B07",
+        "S31"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p02",
+      "title": "Ранние проверки рисков",
+      "subtitle": "Дёшево ответить на опасные вопросы",
+      "outcome": "Основные действия интересны и технически осуществимы.",
+      "why": "Прототип — короткая проверка вопроса. До дорогой отделки нужно понять, интересны ли дорога, бой, решение и последствия.",
+      "lane": "main",
+      "legacy": "Ранний бой ПР-03 и игровые проверки ПР-12",
+      "sources": [
+        "S08",
+        "S27",
+        "B09",
+        "B10"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p03",
+      "title": "Сюжетный каркас",
+      "subtitle": "Знать начало, развитие и завершение",
+      "outcome": "Есть связная основа истории и проект первого региона.",
+      "why": "Для сюжетной RPG сначала нужен небольшой причинный каркас. Полную финальную прозу всех диалогов сейчас писать дорого.",
+      "lane": "main",
+      "legacy": "Канон §6, §17–18; NARRATIVE.md §26.4",
+      "sources": [
+        "project",
+        "S17",
+        "S20",
+        "B07"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p04",
+      "title": "Один полный игровой поход",
+      "subtitle": "Склеить существующие части",
+      "outcome": "Игрок проходит связный фрагмент от старта до последствия.",
+      "why": "Это главный следующий содержательный рубеж. Одна работающая цепочка покажет, какие системы действительно нужны и чего им не хватает.",
+      "lane": "main",
+      "legacy": "Новый сюжетный пилот на действующих системах; старую главу не восстанавливать",
+      "sources": [
+        "S08",
+        "S15",
+        "S17",
+        "S27",
+        "B07",
+        "B10"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p05",
+      "title": "MapLab в основной игре",
+      "subtitle": "Завершить текущий переход",
+      "outcome": "Та же игровая карта получает принятый рисунок и реальные подходы.",
+      "why": "Эту ветку можно продолжать параллельно подготовке сюжета. Важен работающий путь в основной игре; законченный красивый экспорт ещё не завершает интеграцию.",
+      "lane": "parallel",
+      "legacy": "ПР-12 / 12У-A…H",
+      "sources": [
+        "map",
+        "spatial",
+        "S21",
+        "B12",
+        "project"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p06",
+      "title": "Аудитория и будущий выпуск",
+      "subtitle": "Параллельная ветка",
+      "outcome": "Игру можно понятно показать и есть выбранный путь распространения.",
+      "why": "Начать можно рано, когда ясна идея. Хорошие финальные материалы и точную дату готовят позже. Публикация и отправка людям требуют отдельного решения Саши.",
+      "lane": "parallel",
+      "legacy": "Параллельно производству; не ждать беты для первого знакомства с аудиторией",
+      "sources": [
+        "S09",
+        "S30",
+        "S31",
+        "B15"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p07",
+      "title": "Укрепить системы пилота",
+      "subtitle": "Развивать только нужное",
+      "outcome": "Системы выдерживают содержание вертикального среза.",
+      "why": "Здесь проверяем и улучшаем существующее. Расширение оправдано сценой или задачей игрока; количество пунктов не означает, что каждая система пишется заново.",
+      "lane": "main",
+      "legacy": "Точечное развитие существующих ПР-08…ПР-12 и BattleSandbox",
+      "sources": [
+        "S12",
+        "S13",
+        "S15",
+        "B11",
+        "B25",
+        "project"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p08",
+      "title": "Поток создания контента",
+      "subtitle": "Научиться делать повторяемо",
+      "outcome": "Однотипный контент проходит понятный путь до рабочей игры.",
+      "why": "Массовая работа начинается после проверки одного полного примера. Мастерские и базы должны экономить время автора и сохранять его изменения.",
+      "lane": "main",
+      "legacy": "Существующие базы, мастерские и ART_PIPELINE_GUIDE.md",
+      "sources": [
+        "B07",
+        "B14",
+        "S26",
+        "project"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p09",
+      "title": "Вертикальный срез",
+      "subtitle": "Небольшая часть почти как в релизе",
+      "outcome": "Есть представительный фрагмент будущего качества.",
+      "why": "Сквозной прототип доказывает цепочку действий. Вертикальный срез дополнительно доказывает качество подачи и стоимость производства.",
+      "lane": "main",
+      "legacy": "Эталон качества перед расширением игры",
+      "sources": [
+        "B07",
+        "S08",
+        "S15",
+        "S22",
+        "S27"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p10",
+      "title": "Производство всей игры",
+      "subtitle": "Делать содержание готовыми порциями",
+      "outcome": "Вся выбранная история собрана по утверждённому эталону.",
+      "why": "Каждая порция должна запускаться и проверяться. Не делай сначала все тексты, затем все рисунки, а проверку всей игры в самом конце.",
+      "lane": "main",
+      "legacy": "Производственная часть после эталона; не автоматическая замена этапов ПР",
+      "sources": [
+        "B07",
+        "B14",
+        "S26",
+        "project"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p11",
+      "title": "Альфа: вся игра от начала до конца",
+      "subtitle": "Проверить полноту и целостность",
+      "outcome": "Все обязательные функции и содержание присутствуют.",
+      "why": "В этой карте альфа означает полную проходимость и согласованный набор функций. Оставшиеся проблемы собраны в явную очередь.",
+      "lane": "main",
+      "legacy": "Выпускной рубеж полноты",
+      "sources": [
+        "B07",
+        "B10",
+        "S13",
+        "S27"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p12",
+      "title": "Бета: качество и удобство",
+      "subtitle": "Подготовить игру для незнакомых людей",
+      "outcome": "Игра устойчива, понятна и соответствует заявленному качеству.",
+      "why": "На этом этапе приоритет получают воспроизводимые ошибки, удобство и стабильность. Каждое исправление проверяется подходящим сценарием.",
+      "lane": "main",
+      "legacy": "Выпускной рубеж качества",
+      "sources": [
+        "B07",
+        "B10",
+        "B25",
+        "S15",
+        "S27",
+        "S28"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p13",
+      "title": "Кандидат на релиз",
+      "subtitle": "Подготовить точную выпускаемую версию",
+      "outcome": "Есть конкретная проверенная сборка и план безопасного выпуска.",
+      "why": "Кандидат на релиз — точная версия, которую можно выпустить, если проверки не находят блокеров. Любое последующее изменение требует подходящей перепроверки.",
+      "lane": "main",
+      "legacy": "Требования площадки проверяются на дату выпуска",
+      "sources": [
+        "B07",
+        "S28",
+        "S31",
+        "project"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p14",
+      "title": "Релиз",
+      "subtitle": "Выпустить выбранную версию",
+      "outcome": "Версия 1.0 доступна игрокам и проверена после публикации.",
+      "why": "Выпуск — отдельная операция с проверкой результата. Запись «готово» появляется после реального доступа к правильной сборке.",
+      "lane": "main",
+      "legacy": "Реальное действие после решения о выпуске",
+      "sources": [
+        "B07",
+        "S31",
+        "project"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p15",
+      "title": "После выпуска",
+      "subtitle": "Стабилизировать и решить, что дальше",
+      "outcome": "Игроки получают нужные исправления, проект имеет устойчивую точку завершения.",
+      "why": "Поддержка сначала закрывает реальные проблемы. Новые системы и дополнения получают собственную оценку объёма и цикл проверки.",
+      "lane": "main",
+      "legacy": "Поддержка и отдельное решение о расширении",
+      "sources": [
+        "B07",
+        "S26",
+        "S27",
+        "project"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    },
+    {
+      "id": "p16",
+      "title": "Парковка идей",
+      "subtitle": "Не мешает выпуску 1.0",
+      "outcome": "Банк идей, не входящий в обязательный маршрут.",
+      "why": "Эти пункты можно вернуть только отдельным решением после оценки пользы и стоимости. Отмена задачи не означает, что зависимые задачи автоматически готовы.",
+      "lane": "later",
+      "legacy": "Отложенное и отменённое; не входит в прогресс обязательного маршрута",
+      "sources": [
+        "project"
+      ],
+      "updatedAt": "2026-11-05T00:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "p00-01",
+      "phaseId": "p00",
+      "title": "Собрать текущий снимок проекта",
+      "action": "Записать ветку и коммит, версию Unity, актуальный канон и незавершённые изменения. Сверить журнал с рабочим проектом.",
+      "accept": "Есть короткая запись: что запускается, что сломано, что сейчас делает Claude.",
+      "status": "done",
+      "owner": "Вместе",
+      "area": "Проект",
+      "size": "S",
+      "deps": [],
+      "note": "Готово 09.11.2026. Claude закончил. За пределами снимка: 31 локальная правка — 10 изменённых файлов и 21 удалённая .meta. В сохранённом логе есть успешная компиляция и открытие MapLab; сборка игры датирована 08.11.2026. Свежий запуск снимка и повторный прогон тестов не выполнялись. Остались ручная проверка выбора/подсветки/перетаскивания и возможного сдвига контура, а также проход сборки «новая игра → деревня → лавка». Пункты запуска и сборки ниже остаются открытыми.",
+      "evidence": "Снимок исходников: main 2ab4146ce11f79c43a08f6b49c66297b950c4ecd; Unity 6000.5.10f1 (3bd4f66ad299); канон v1.66. Запись и результаты сверки: ProjectDocs/DEVELOPMENT_STATUS.md, раздел «Текущий снимок проекта: надёжная отправная точка (09.11.2026)», коммит f2e3d29d в origin/main. Сверены Git/GitHub, версии, точки входа, код тестов и сохранённый лог Unity.",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-09T01:39:16.809Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p00-02",
+      "phaseId": "p00",
+      "title": "Проверить резервную копию рисунков",
+      "action": "Убедиться, что PNG, PSD, исходники Blender и другие не попавшие в Git файлы сохранены отдельно. Восстановить один тестовый ассет из копии.",
+      "accept": "Понятно, где лежат исходники и как восстановить проект вместе с артом.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p00-03",
+      "phaseId": "p00",
+      "title": "Запустить игру из основного проекта",
+      "action": "Открыть установленную Unity. Проверить новую партию, карту, поселение, исследование и бой; записать воспроизводимые ошибки.",
+      "accept": "Пройден короткий маршрут без потери управления; блокирующие ошибки выписаны.",
+      "status": "verify",
+      "owner": "Саша",
+      "area": "Проверка",
+      "size": "M",
+      "deps": [],
+      "note": "",
+      "evidence": "В журнале есть реализованные свободная игра, места, бой и торговля. Это требуется перепроверить в текущем проекте.",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p00-04",
+      "phaseId": "p00",
+      "title": "Получить самостоятельную сборку",
+      "action": "Собрать основную Windows-версию действующим меню. Запустить её из отдельной папки без Unity Editor.",
+      "accept": "Игра стартует, принимает ввод и создаёт новую партию вне редактора.",
+      "status": "todo",
+      "owner": "Claude",
+      "area": "Техника",
+      "size": "M",
+      "deps": [
+        "p00-01",
+        "p00-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p00-05",
+      "phaseId": "p00",
+      "title": "Проверить сохранение и продолжение",
+      "action": "Сохраниться в разных контекстах, закрыть игру, запустить сборку и продолжить. Работать с тестовыми слотами.",
+      "accept": "Положение, люди, вещи, задания и последствия восстанавливаются без дублей.",
+      "status": "verify",
+      "owner": "Вместе",
+      "area": "Проверка",
+      "size": "M",
+      "deps": [
+        "p00-04"
+      ],
+      "note": "",
+      "evidence": "Система сохранений уже есть; выпускная надёжность заново не подтверждалась.",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p00-06",
+      "phaseId": "p00",
+      "title": "Вести один список ошибок и один журнал",
+      "action": "Для ошибки записывать шаги, ожидаемое и фактическое поведение, важность, коммит и способ проверки исправления.",
+      "accept": "Новая ошибка воспроизводится по записи; история работы находится в DEVELOPMENT_STATUS.md.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Проект",
+      "size": "S",
+      "deps": [],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p00-07",
+      "phaseId": "p00",
+      "title": "Зафиксировать техническую основу",
+      "action": "Сохранить действующие решения: Unity 6000.5.10f1, URP 2D, UI Toolkit и сохранение GUID. Использовать имеющиеся базы.",
+      "accept": "Точки входа и технические ограничения записаны в инструкциях проекта.",
+      "status": "done",
+      "owner": "Вместе",
+      "area": "Проект",
+      "size": "S",
+      "deps": [],
+      "note": "",
+      "evidence": "Версии и ограничения уже записаны в AGENTS.md, CLAUDE.md и ProjectSettings.",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p00-08",
+      "phaseId": "p00",
+      "title": "Рубеж: рабочая опора",
+      "action": "Устранить блокеры запуска и проверить восстановление. Остальные замечания оставить отдельными задачами.",
+      "accept": "Есть сборка, тестовый save и понятный способ вернуться к этому состоянию.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p00-01",
+        "p00-02",
+        "p00-03",
+        "p00-04",
+        "p00-05",
+        "p00-06",
+        "p00-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p01-01",
+      "phaseId": "p01",
+      "title": "Описать обещание игры в одном абзаце",
+      "action": "Сформулировать, кто игрок, что делает чаще всего и почему ему хочется продолжения. Сверить с текущим славянским пограничьем.",
+      "accept": "Описание понятно человеку, который не видел проект; оно не возвращает отменённую тему Дома.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p00-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p01-02",
+      "phaseId": "p01",
+      "title": "Выбрать первую платформу и управление",
+      "action": "Рабочий ориентир — имеющаяся Windows-сборка и мышь с клавиатурой. Отдельно решить, нужны ли другие ОС и геймпад в 1.0.",
+      "accept": "Утверждены платформа, основной ввод и базовые варианты экрана.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p00-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p01-03",
+      "phaseId": "p01",
+      "title": "Определить аудиторию и сравнимые игры",
+      "action": "Выбрать близких игроков и несколько сравнений по опыту. Записать, чем Kingdom Survival будет им интересна.",
+      "accept": "Есть понятное описание аудитории и отличий без списка десятков референсов.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p00-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p01-04",
+      "phaseId": "p01",
+      "title": "Составить три списка содержания",
+      "action": "Разделить обязательное для 1.0, желательное после доказательства пользы и отложенное. Учесть существующие системы.",
+      "accept": "Каждая крупная система отнесена к одному списку; отложенное не мешает релизу.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "M",
+      "deps": [
+        "p00-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p01-05",
+      "phaseId": "p01",
+      "title": "Оценить объём мира и истории",
+      "action": "Определить пилотный регион и ориентир объёма всей истории. Большую карту оценивать отдельно от числа наполненных мест.",
+      "accept": "Принят измеримый рабочий бюджет регионов, историй, NPC, врагов и артов; это ещё не обещание даты.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Проект",
+      "size": "M",
+      "deps": [
+        "p01-01",
+        "p01-04"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p01-06",
+      "phaseId": "p01",
+      "title": "Решить открытые вопросы героя и партии",
+      "action": "Уточнить старт, профиль героя, обязательный состав развития и поддержанный объём свиты. Сохранить действующие ограничения отряда.",
+      "accept": "Открытые решения перечислены и утверждаются отдельно; в контент не попали случайные новые системы.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "M",
+      "deps": [
+        "p01-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p01-07",
+      "phaseId": "p01",
+      "title": "Оценить ресурсы и рабочий ритм",
+      "action": "Записать доступные часы, регулярные расходы проекта и внешнюю помощь. Оставить запас на исправления и отдых.",
+      "accept": "План помещается в реальную жизнь; календарные оценки считаются после пилота.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p00-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p01-08",
+      "phaseId": "p01",
+      "title": "Рубеж: версия 1.0 имеет границы",
+      "action": "Согласовать короткую карточку релиза и правила добавления новых идей. Новое обязательство заменяет работу либо меняет бюджет явно.",
+      "accept": "Понятно, что входит в игру, что отложено и кто утверждает расширение объёма.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p00-01",
+        "p01-01",
+        "p01-02",
+        "p01-03",
+        "p01-04",
+        "p01-05",
+        "p01-06",
+        "p01-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p02-01",
+      "phaseId": "p02",
+      "title": "Выбрать три главных риска",
+      "action": "Составить список сомнений: например, интерес путешествия, понятность тактики, история с последствиями. Для каждого назначить признак успеха.",
+      "accept": "У каждого риска есть маленький эксперимент и наблюдаемый результат.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p01-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p02-02",
+      "phaseId": "p02",
+      "title": "Проверить короткий тактический бой",
+      "action": "Использовать BattleSandbox и минимум бойцов. Проверить движение, удар, порядок хода и различимые решения.",
+      "accept": "Игрок понимает ход и причины результата; бой не сводится к одной очевидной кнопке.",
+      "status": "verify",
+      "owner": "Вместе",
+      "area": "Бой",
+      "size": "M",
+      "deps": [
+        "p02-01",
+        "p00-03"
+      ],
+      "note": "",
+      "evidence": "BattleSandbox и тактический фундамент существуют. Требуется проверка игрового опыта.",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p02-03",
+      "phaseId": "p02",
+      "title": "Проверить путешествие на маленьком участке",
+      "action": "Пройти целевой путь, добровольный крюк и возвращение. Использовать поддержанные туман, припасы и время.",
+      "accept": "Есть причина выбирать путь и продолжать исследование; стоимость дороги понятна.",
+      "status": "verify",
+      "owner": "Вместе",
+      "area": "Карта",
+      "size": "M",
+      "deps": [
+        "p02-01",
+        "p00-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p02-04",
+      "phaseId": "p02",
+      "title": "Проверить короткую ситуацию с выбором",
+      "action": "Взять совместимый авторский эпизод или рабочую схему. Сравнить варианты, исход и последующий видимый след.",
+      "accept": "Игрок может объяснить, что сделал и как это повлияло на ситуацию.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p02-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p02-05",
+      "phaseId": "p02",
+      "title": "Проверить художественный конвейер",
+      "action": "Провести один репрезентативный ассет через исходник, импорт и реальную сцену. Отдельно сверить стиль карты и концептов.",
+      "accept": "Известны время, формат, масштаб, ссылки и цена исправления одного ассета.",
+      "status": "verify",
+      "owner": "Саша",
+      "area": "Арт",
+      "size": "M",
+      "deps": [
+        "p02-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p02-06",
+      "phaseId": "p02",
+      "title": "Провести техническую пробу MapLab",
+      "action": "Измерить текущий путь генерации и показ выбранного масштаба. Повторить движение камеры и возврат к ранее загруженному участку.",
+      "accept": "Есть измерения памяти, времени старта и кадра; недоказанные размеры обозначены.",
+      "status": "verify",
+      "owner": "Claude",
+      "area": "Техника",
+      "size": "M",
+      "deps": [
+        "p02-01"
+      ],
+      "note": "",
+      "evidence": "Подгрузка и начальные замеры есть в журнале; 2048² полностью не подтверждён на проверенном снимке.",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p02-07",
+      "phaseId": "p02",
+      "title": "Наблюдать незнакомого с игрой человека",
+      "action": "Дать короткие задания без объяснения решения. Записать непонятные места и фактические действия.",
+      "accept": "Есть наблюдения по целям экспериментов, а не только общий отзыв «нравится».",
+      "status": "todo",
+      "owner": "Внешний тест",
+      "area": "Проверка",
+      "size": "M",
+      "deps": [
+        "p02-02",
+        "p02-03",
+        "p02-04"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p02-08",
+      "phaseId": "p02",
+      "title": "Рубеж: риски имеют ответы",
+      "action": "Исправить существенные проблемы и повторить только затронутые проверки. Решить, что стоит развивать дальше.",
+      "accept": "Есть основания вкладываться в следующий фрагмент; нерешённые риски явно записаны.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p01-01",
+        "p02-01",
+        "p02-02",
+        "p02-03",
+        "p02-04",
+        "p02-05",
+        "p02-06",
+        "p02-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p03-01",
+      "phaseId": "p03",
+      "title": "Сформулировать личную причину путешествия",
+      "action": "Определить начальную роль героя и понятную первую цель. Согласовать с утверждённой основой «Мир на пороге войны».",
+      "accept": "Можно ответить: кто герой, почему он действует и чего хочет добиться в начале.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p01-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p03-02",
+      "phaseId": "p03",
+      "title": "Определить тайну и действующие силы",
+      "action": "Подготовить варианты причины порталов, целей иных и позиций человеческих сил. Отдельно утвердить мировые факты.",
+      "accept": "Есть выбранная причинная основа; открытые гипотезы не выданы за канон.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p03-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p03-03",
+      "phaseId": "p03",
+      "title": "Разложить историю на четыре части",
+      "action": "Уточнить события и переходы четырёх утверждённых частей PDF. Сохранить факт: большая человеческая война в первой игре не начинается.",
+      "accept": "У каждой части есть движение ситуации и переход к следующей; система выбираемых мировых кризисов не вводится.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p03-01",
+        "p03-02"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p03-04",
+      "phaseId": "p03",
+      "title": "Наметить финальное решение и последствия",
+      "action": "Определить, что завершает текущую историю и какие существенные действия на это влияют. Выбрать посильные устойчивые результаты.",
+      "accept": "У истории есть развязка; не требуется отдельный финал на каждую реплику.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p03-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p03-05",
+      "phaseId": "p03",
+      "title": "Спроектировать первый регион",
+      "action": "Связать центральную проблему, ключевых людей, места и несколько связанных историй. Опираться на §17 канона.",
+      "accept": "Есть схема причин и информации, а не только список точек на карте.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p03-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p03-06",
+      "phaseId": "p03",
+      "title": "Определить минимальных ключевых NPC",
+      "action": "Для важных людей записать желания, отношения, знание и функцию в историях. Повторно использовать их осмысленно.",
+      "accept": "Понятно, зачем каждый нужен и как он действует без героя.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p03-05"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p03-07",
+      "phaseId": "p03",
+      "title": "Проверить знания, варианты и память",
+      "action": "Предусмотреть поддержанные каналы важных сведений, иной порядок посещения и последствия раннего решения.",
+      "accept": "Критическое продолжение достижимо; память мира имеет конкретных носителей.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p03-05",
+        "p03-06"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p03-08",
+      "phaseId": "p03",
+      "title": "Рубеж: каркас готов для пилота",
+      "action": "Утвердить личную завязку, ключевые мировые факты и схему первого фрагмента. Детали остальных историй оставить рабочими.",
+      "accept": "Можно реализовать первый поход без придумывания фундаментального лора по ходу кода.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p01-01",
+        "p03-01",
+        "p03-02",
+        "p03-03",
+        "p03-04",
+        "p03-05",
+        "p03-06",
+        "p03-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p04-01",
+      "phaseId": "p04",
+      "title": "Выбрать содержание пилота",
+      "action": "Взять один небольшой совместимый эпизод первого региона. Записать старт, действия, результат и нужные существующие системы.",
+      "accept": "Есть ограниченная схема фрагмента и список проверок без заказа всей игры.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p00-08",
+        "p02-08",
+        "p03-08"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p04-02",
+      "phaseId": "p04",
+      "title": "Связать старт с первой целью",
+      "action": "Новая партия даёт понятный повод действовать. Игрок получает первое направление и необходимую информацию.",
+      "accept": "Без устного объяснения понятно, зачем выходить на карту.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p04-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p04-03",
+      "phaseId": "p04",
+      "title": "Связать карту и открытие места",
+      "action": "Из цели или слуха попасть в нужную область; проверить фактическое движение, обнаружение и вход.",
+      "accept": "Игрок добирается до места, не включая отладочные команды.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Карта",
+      "size": "M",
+      "deps": [
+        "p04-02"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p04-04",
+      "phaseId": "p04",
+      "title": "Собрать исследование и разговор",
+      "action": "Использовать действующие базы, локальное движение и диалоговую подачу. Поддержать нужный порядок действий.",
+      "accept": "Ключевые действия доступны, тексты читаемы, продолжение не застревает.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p04-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p04-05",
+      "phaseId": "p04",
+      "title": "Связать возможный бой с результатом",
+      "action": "Проверить вход в BattleSandbox или бой на месте, присутствующих участников и возврат результата в ту же партию.",
+      "accept": "HP, потери и сюжетное состояние возвращаются корректно, исследование продолжается.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Бой",
+      "size": "M",
+      "deps": [
+        "p04-04",
+        "p02-02"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p04-06",
+      "phaseId": "p04",
+      "title": "Показать последствие и полезную награду",
+      "action": "Использовать знания, отношения, путь, предмет или другой поддержанный результат. Дать заметный отклик знакомого человека или места.",
+      "accept": "Игрок замечает хотя бы одно следствие собственного действия.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p04-04"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p04-07",
+      "phaseId": "p04",
+      "title": "Проверить повтор и сохранение",
+      "action": "Посетить раньше слуха, вернуться позже, загрузиться в середине. Проверить, что награды и опыт не выдаются повторно.",
+      "accept": "Пилот устойчив к поддержанным порядкам и повторным входам.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Проверка",
+      "size": "M",
+      "deps": [
+        "p04-05",
+        "p04-06",
+        "p00-05"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p04-08",
+      "phaseId": "p04",
+      "title": "Пройти фрагмент внешним игроком",
+      "action": "Посмотреть, где теряется цель, темп или смысл. Уточнить условия и тексты до расширения наполнения.",
+      "accept": "Игрок доходит до результата и может объяснить, что произошло.",
+      "status": "todo",
+      "owner": "Внешний тест",
+      "area": "Проверка",
+      "size": "M",
+      "deps": [
+        "p04-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p04-09",
+      "phaseId": "p04",
+      "title": "Рубеж: целый игровой цикл работает",
+      "action": "Исправить блокеры и главные непонятные места; сохранить проверенную сборку и запись результата.",
+      "accept": "Есть цель → путь → действие → результат → продолжение, а не только отдельные окна.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p00-08",
+        "p02-08",
+        "p03-08",
+        "p04-01",
+        "p04-02",
+        "p04-03",
+        "p04-04",
+        "p04-05",
+        "p04-06",
+        "p04-07",
+        "p04-08"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p05-01",
+      "phaseId": "p05",
+      "title": "Сверить оставшиеся этапы перехода",
+      "action": "Сопоставить мастер-бриф, аудит и текущий код. Учесть незакоммиченную работу; не откатывать более свежую реализацию.",
+      "accept": "Есть список оставшихся задач 12У, согласованный с фактическим состоянием.",
+      "status": "verify",
+      "owner": "Вместе",
+      "area": "Карта",
+      "size": "S",
+      "deps": [
+        "p00-08",
+        "p02-03",
+        "p02-06"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p05-02",
+      "phaseId": "p05",
+      "title": "Проверить единую географию",
+      "action": "План WorldMapGenerator и рисунок MapLab должны описывать одни и те же дороги, леса, воду и места.",
+      "accept": "Рисунок и проходимость не спорят; нет второго независимого генератора мира.",
+      "status": "verify",
+      "owner": "Claude",
+      "area": "Техника",
+      "size": "M",
+      "deps": [
+        "p05-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p05-03",
+      "phaseId": "p05",
+      "title": "Перенести показ в основную игру",
+      "action": "Проверить runtime-сборку, координаты, ввод, слой UI и запуск новой партии на показанных настройках.",
+      "accept": "Картой можно пользоваться в основной сборке, включая сохранение и продолжение.",
+      "status": "todo",
+      "owner": "Claude",
+      "area": "Техника",
+      "size": "M",
+      "deps": [
+        "p05-02"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p05-04",
+      "phaseId": "p05",
+      "title": "Довести маршруты и обнаружение",
+      "action": "Использовать бриф пространственного дизайна: направления, альтернативы, ориентиры, туман и реальные срезы.",
+      "accept": "Проверены целевой путь, отклонение, исследование и возврат.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Карта",
+      "size": "M",
+      "deps": [
+        "p05-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p05-05",
+      "phaseId": "p05",
+      "title": "Сделать посещаемые здания и входы",
+      "action": "Связать подход к зданию с существующей услугой, NPC и состоянием поселения. Сохранить функции торговли, корчмы и других объектов.",
+      "accept": "Дверь ведёт к нужному действию; услуга не исчезла при переносе.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Карта",
+      "size": "M",
+      "deps": [
+        "p05-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p05-06",
+      "phaseId": "p05",
+      "title": "Довести деревни, поля и природные края",
+      "action": "Применить согласованные семейства планировок, группы полей и свободный запас под полный кадр камеры.",
+      "accept": "Поселения читаются, проходы открыты, края и углы карты завершены.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Арт",
+      "size": "M",
+      "deps": [
+        "p05-02"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p05-07",
+      "phaseId": "p05",
+      "title": "Проверить пополнение каталогов",
+      "action": "Добавить тестовую категорию, иконку и совместимый тип места. Сохранить ID, настройки и старую партию.",
+      "accept": "Совместимый новый контент подключается через данные; неподдержанные функции показывают понятную ошибку.",
+      "status": "todo",
+      "owner": "Claude",
+      "area": "Инструменты",
+      "size": "M",
+      "deps": [
+        "p05-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p05-08",
+      "phaseId": "p05",
+      "title": "Подтвердить большие размеры замерами",
+      "action": "Измерить ступени масштаба, память, подгрузку и камеру. Полное богатое наполнение проверять на ограниченном фрагменте.",
+      "accept": "Различаются проверенные размеры и экспериментальные; качество вблизи не снижено молча.",
+      "status": "todo",
+      "owner": "Claude",
+      "area": "Техника",
+      "size": "M",
+      "deps": [
+        "p05-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p05-09",
+      "phaseId": "p05",
+      "title": "Рубеж: новая карта работает в партии",
+      "action": "Пройти сборку: путь → вход → действие → бой/место → возвращение → сохранение. Зафиксировать ограничения масштаба.",
+      "accept": "Переход завершён проверкой основной игры и не сломал её состояние.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p00-08",
+        "p02-03",
+        "p02-06",
+        "p05-01",
+        "p05-02",
+        "p05-03",
+        "p05-04",
+        "p05-05",
+        "p05-06",
+        "p05-07",
+        "p05-08"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p06-01",
+      "phaseId": "p06",
+      "title": "Выбрать способ распространения",
+      "action": "Сравнить подходящие магазины или иной канал. Проверить актуальные официальные условия на момент решения.",
+      "accept": "Выбран первый канал; платный или бесплатный выпуск решён явно.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p01-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p06-02",
+      "phaseId": "p06",
+      "title": "Написать короткое представление игры",
+      "action": "Собрать название, жанр, обещание и главные действия. Проверить формулировки на человеке из аудитории.",
+      "accept": "Из текста понятно, во что играть; обещания соответствуют плану версии 1.0.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p01-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p06-03",
+      "phaseId": "p06",
+      "title": "Собрать правила публичного показа",
+      "action": "Определить, какие скриншоты и фрагменты уже честно представляют игру. Выбрать удобный темп публикаций.",
+      "accept": "Есть небольшой план показа без превращения продвижения в отдельную бесконечную работу.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p01-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p06-04",
+      "phaseId": "p06",
+      "title": "Подготовить раннюю страницу и материалы",
+      "action": "После достаточно представительного показа сделать описание, изображения и черновик страницы выбранной площадки.",
+      "accept": "Страница подготовлена к решению о публикации; временная графика не выдаётся за финальную.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Арт",
+      "size": "M",
+      "deps": [
+        "p06-01",
+        "p06-02",
+        "p09-04"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p06-05",
+      "phaseId": "p06",
+      "title": "Настроить сбор отзывов",
+      "action": "Выбрать один понятный канал для обратной связи, шаблон ошибки и правила доступа к тестовой сборке.",
+      "accept": "Есть способ получить полезный отзыв без лишних аккаунтов и инструментов.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p01-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p06-06",
+      "phaseId": "p06",
+      "title": "Решить вопрос публичного демо",
+      "action": "Оценить пользу, стоимость поддержки, границу демо и сохранения. Демо и ранний доступ не считать обязательными.",
+      "accept": "Есть решение: делать, отложить или отказаться; при выборе описан отдельный объём.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p09-09"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p06-07",
+      "phaseId": "p06",
+      "title": "Подготовить финальное описание и трейлер",
+      "action": "Показать реальный игровой цикл, читаемую карту и существенные отличия. Использовать текущую финальную сборку.",
+      "accept": "Материалы показывают поддержанные возможности и понятны целевому игроку.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Арт",
+      "size": "M",
+      "deps": [
+        "p11-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p06-08",
+      "phaseId": "p06",
+      "title": "Рубеж: путь выпуска подготовлен",
+      "action": "Проверить актуальные требования площадки, доступы и материалы. Сроки проверок учитывать в графике; публикацию согласовать отдельно.",
+      "accept": "Есть рабочий план выхода и готовые материалы; факт публикации записан только после неё.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p01-03",
+        "p06-01",
+        "p06-02",
+        "p06-03",
+        "p06-04",
+        "p06-05",
+        "p06-06",
+        "p06-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p07-01",
+      "phaseId": "p07",
+      "title": "Составить карту пробелов систем",
+      "action": "По результату первого похода сопоставить нужные действия и существующие сервисы. Отделить ошибку, настройку данных и новую функцию.",
+      "accept": "Каждый пробел связан с конкретным сценарием и согласованным объёмом.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p04-09"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p07-02",
+      "phaseId": "p07",
+      "title": "Довести диалоги и память последствий",
+      "action": "Проверить условия, знание и источник, однократность, возврат и изменившееся состояние. Использовать действующие ограничения реактивности.",
+      "accept": "Срез не теряет обязательную информацию и помнит значимые решения.",
+      "status": "verify",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p07-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p07-03",
+      "phaseId": "p07",
+      "title": "Довести бой и понятные эффекты",
+      "action": "Проверить 1 героя + 0–4 бойца, инициативу, движение, действия, урон и результат. Нужные эффекты подбирать из банка.",
+      "accept": "Небольшой набор эффектов даёт различимые решения и понятен на экране.",
+      "status": "verify",
+      "owner": "Вместе",
+      "area": "Бой",
+      "size": "M",
+      "deps": [
+        "p07-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p07-04",
+      "phaseId": "p07",
+      "title": "Проверить свиту и команды героя",
+      "action": "Уточнить утверждённое направление активных действий свиты в бою. Выбрать необходимый срезу пример и цену реализации.",
+      "accept": "Есть согласованный объём и проверенный пример либо явное решение о сроке; полный каталог не обязателен.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Бой",
+      "size": "M",
+      "deps": [
+        "p07-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p07-05",
+      "phaseId": "p07",
+      "title": "Довести вещи, сумку и торговлю",
+      "action": "Проверить экипировку, применение, свойства, цены, корзину и однократную выдачу. Исправить ошибки, влияющие на срез.",
+      "accept": "Игрок понимает операции; вещи и деньги сохраняются без дублей и залипших бонусов.",
+      "status": "verify",
+      "owner": "Вместе",
+      "area": "Системы",
+      "size": "M",
+      "deps": [
+        "p07-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p07-06",
+      "phaseId": "p07",
+      "title": "Довести отряд, ранения и развитие",
+      "action": "Проверить людей, присутствие, потери, общий опыт, компетенции и выбор особенностей. Не расширять числа ради заполнения каталога.",
+      "accept": "Изменения человека имеют понятные причины, сохраняются и работают в следующем походе.",
+      "status": "verify",
+      "owner": "Вместе",
+      "area": "Системы",
+      "size": "M",
+      "deps": [
+        "p07-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p07-07",
+      "phaseId": "p07",
+      "title": "Довести время, припасы и отдых",
+      "action": "Проверить течение времени в действии и паузах, ночь, расход, голод и восстановление. Убрать обязательное однообразное обслуживание.",
+      "accept": "Игрок понимает цену продолжения и может восстановиться после обычной неудачи.",
+      "status": "verify",
+      "owner": "Вместе",
+      "area": "Системы",
+      "size": "M",
+      "deps": [
+        "p07-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p07-08",
+      "phaseId": "p07",
+      "title": "Проверить местных союзников по сюжету",
+      "action": "Уточнить необходимый пример союза с местным правителем. Выразить его существующими отношениями и авторскими состояниями, где возможно.",
+      "accept": "Выбран поддержанный сценарий; большая дипломатическая симуляция не появилась автоматически.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p07-01",
+        "p03-06"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p07-09",
+      "phaseId": "p07",
+      "title": "Довести сохранения и переходы среза",
+      "action": "Проверить бой, диалог, исследование, поселение и карту при выходе и загрузке. Использовать тестовые слоты и нужные поведенческие тесты.",
+      "accept": "Срез проходит после перезапуска игры; повтор не ломает людей, вещи и задания.",
+      "status": "todo",
+      "owner": "Claude",
+      "area": "Техника",
+      "size": "M",
+      "deps": [
+        "p07-02",
+        "p07-03",
+        "p07-05",
+        "p07-06",
+        "p07-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p07-10",
+      "phaseId": "p07",
+      "title": "Рубеж: основы выдерживают срез",
+      "action": "Закрыть блокеры и существенные несовпадения правил с фактом. Подготовить перечень поддержанных функций.",
+      "accept": "Можно производить следующий контент по понятным контрактам без копирования систем.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p04-09",
+        "p07-01",
+        "p07-02",
+        "p07-03",
+        "p07-04",
+        "p07-05",
+        "p07-06",
+        "p07-07",
+        "p07-08",
+        "p07-09"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p08-01",
+      "phaseId": "p08",
+      "title": "Составить матрицу нужного контента",
+      "action": "Из версии 1.0 и первого региона вывести NPC, места, встречи, врагов, вещи, VFX и UI. Отделить финальное от временного.",
+      "accept": "Каждому нужному материалу соответствует функция и приоритет; нет заказа на тысячу обязательных вариантов.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Контент",
+      "size": "M",
+      "deps": [
+        "p03-08",
+        "p02-05"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p08-02",
+      "phaseId": "p08",
+      "title": "Проверить один квест через мастерскую",
+      "action": "Пройти авторскую схему, данные, импорт, Unity, сохранение и повторную выгрузку. Учитывать ограничения локальных HTML.",
+      "accept": "Правки и ID сохраняются; обмен проверен в обе стороны, если он предусмотрен текущим инструментом.",
+      "status": "verify",
+      "owner": "Вместе",
+      "area": "Инструменты",
+      "size": "M",
+      "deps": [
+        "p08-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p08-03",
+      "phaseId": "p08",
+      "title": "Проверить один предмет и одно существо",
+      "action": "Провести определения, изображения и эффекты через действующие базы и игровую сцену. Исключить дубли каталогов.",
+      "accept": "Новый совместимый экземпляр создаётся понятным способом и работает в сборке.",
+      "status": "verify",
+      "owner": "Вместе",
+      "area": "Инструменты",
+      "size": "M",
+      "deps": [
+        "p08-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p08-04",
+      "phaseId": "p08",
+      "title": "Закрепить производственный арт-конвейер",
+      "action": "Уточнить форматы, ракурсы, масштаб, имена, нормали и сохранность масок. Измерить время одного полного комплекта.",
+      "accept": "Есть образец и короткая инструкция от исходника до готовой сцены.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Арт",
+      "size": "M",
+      "deps": [
+        "p02-05"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p08-05",
+      "phaseId": "p08",
+      "title": "Подготовить рабочие пакеты для анимации и VFX",
+      "action": "Проверить один цикл движения, один удар, реакцию и цифры. Важны читаемость и согласованность; работать по художественным правилам.",
+      "accept": "Полный пример корректно импортируется и воспроизводится; последовательности не повреждены.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Арт",
+      "size": "M",
+      "deps": [
+        "p08-04"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p08-06",
+      "phaseId": "p08",
+      "title": "Встроить проверки данных в авторский процесс",
+      "action": "Использовать доступную валидацию ID, ссылок, условий, обязательных полей и повторных наград. Добавлять только нужные проверки.",
+      "accept": "Ошибка обнаруживается до длинного прохождения; сообщение указывает на конкретную запись.",
+      "status": "todo",
+      "owner": "Claude",
+      "area": "Инструменты",
+      "size": "M",
+      "deps": [
+        "p08-02",
+        "p08-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p08-07",
+      "phaseId": "p08",
+      "title": "Измерить цену одной единицы контента",
+      "action": "Записать время схемы, текста, графики, импорта и проверки. Пересчитать рабочий бюджет версии 1.0 по реальному темпу.",
+      "accept": "Объём опирается на выполненный пример; перегрузка решается приоритетами и согласованием.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p08-02",
+        "p08-03",
+        "p08-04"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p08-08",
+      "phaseId": "p08",
+      "title": "Рубеж: контент можно производить",
+      "action": "Проверить полный пример каждого реально нужного типа. Записать зависимости и резервирование исходников.",
+      "accept": "Нет массовой партии непроверенных ассетов; автор знает, как выпускать следующую единицу.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p03-08",
+        "p02-05",
+        "p08-01",
+        "p08-02",
+        "p08-03",
+        "p08-04",
+        "p08-05",
+        "p08-06",
+        "p08-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p09-01",
+      "phaseId": "p09",
+      "title": "Выбрать границу представительного фрагмента",
+      "action": "Назначить понятное начало и завершение, нужные механики, характер места и главные моменты. Не увеличивать пилот ради всех идей.",
+      "accept": "Срез представляет будущую игру и имеет проверяемую границу.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "M",
+      "deps": [
+        "p04-09",
+        "p05-09",
+        "p07-10",
+        "p08-08"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p09-02",
+      "phaseId": "p09",
+      "title": "Довести тексты и последствия среза",
+      "action": "Отредактировать подачу, мотивы NPC, условия и отклик. Проверить разнообразие конструкций и источники методов.",
+      "accept": "История понятна, сохраняет причинность и вызывает интерес к продолжению.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p09-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p09-03",
+      "phaseId": "p09",
+      "title": "Собрать целостный UI под новый стиль",
+      "action": "Для нужных экранов согласовать Map Style Guide, иерархию информации, подсказки, навигацию и обратную связь.",
+      "accept": "Цели, стоимость и результат действий понятны; окна не мешают прохождению.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "UI",
+      "size": "M",
+      "deps": [
+        "p09-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p09-04",
+      "phaseId": "p09",
+      "title": "Довести репрезентативную графику",
+      "action": "Заменить существенные временные материалы среза. Согласовать карту, персонажей, портреты, свет и VFX по их назначениям.",
+      "accept": "Фрагмент можно честно показывать как ориентир финального качества.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Арт",
+      "size": "M",
+      "deps": [
+        "p09-01",
+        "p08-04",
+        "p08-05"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p09-05",
+      "phaseId": "p09",
+      "title": "Добавить необходимый звук и музыку",
+      "action": "Подобрать ограниченный набор атмосферы, действий и музыкальных состояний. Проверить права использования и настройки громкости.",
+      "accept": "Звук помогает восприятию, не перекрывает речь и соответствует подаче.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Звук",
+      "size": "M",
+      "deps": [
+        "p09-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p09-06",
+      "phaseId": "p09",
+      "title": "Сделать первое понятное обучение",
+      "action": "Показать новые действия в месте применения. Проверить первые минуты, подсказки, ошибки и возвращение к игре.",
+      "accept": "Новый игрок начинает без личного инструктажа разработчика.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "UI",
+      "size": "M",
+      "deps": [
+        "p09-02",
+        "p09-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p09-07",
+      "phaseId": "p09",
+      "title": "Проверить срез в основной сборке",
+      "action": "Пройти на заявленных режимах экрана и слабом целевом устройстве, если оно доступно. Проверить время старта и сохранение.",
+      "accept": "Срез работает вне Editor; проблемы производительности имеют измерения.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Проверка",
+      "size": "M",
+      "deps": [
+        "p09-02",
+        "p09-03",
+        "p09-04",
+        "p09-05",
+        "p09-06"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p09-08",
+      "phaseId": "p09",
+      "title": "Провести внешний плейтест и исправить главное",
+      "action": "Наблюдать самостоятельное прохождение и повторить затронутые проверки после исправлений.",
+      "accept": "Есть конкретные основания считать начало понятным и фрагмент увлекательным.",
+      "status": "todo",
+      "owner": "Внешний тест",
+      "area": "Проверка",
+      "size": "M",
+      "deps": [
+        "p09-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p09-09",
+      "phaseId": "p09",
+      "title": "Рубеж: образец качества принят",
+      "action": "Сравнить опыт, объём и стоимость с границами 1.0. Утвердить эталон, затем масштабировать производство.",
+      "accept": "Понятно, что повторять в остальных частях и сколько это стоит.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p04-09",
+        "p05-09",
+        "p07-10",
+        "p08-08",
+        "p09-01",
+        "p09-02",
+        "p09-03",
+        "p09-04",
+        "p09-05",
+        "p09-06",
+        "p09-07",
+        "p09-08"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p10-01",
+      "phaseId": "p10",
+      "title": "Разбить оставшуюся работу на порции",
+      "action": "Разделить утверждённую историю и регионы на маленькие поставки с результатом и проверкой. Указать критические зависимости.",
+      "accept": "Есть очередь законченных фрагментов вместо одного огромного задания.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p09-09",
+        "p01-08"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p10-02",
+      "phaseId": "p10",
+      "title": "Собрать содержание первой части",
+      "action": "Довести утверждённые человеческие заботы пограничья, знакомства и первые сюжетные связи. Переиспользовать работающий срез.",
+      "accept": "Часть проходит в сборке и готовит следующую; все важные действия поддержаны.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p10-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p10-03",
+      "phaseId": "p10",
+      "title": "Собрать содержание второй части",
+      "action": "Постепенно раскрыть связанные странности и проходы в другой мир по согласованному каркасу. Не сводить всю мифологию к одному врагу.",
+      "accept": "Продолжение причинно связано с первой частью и понятно при поддержанных выборах.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p10-02"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p10-04",
+      "phaseId": "p10",
+      "title": "Собрать содержание третьей части",
+      "action": "Реализовать утверждённое обострение общей ситуации, позиции сил и последствия прежних действий.",
+      "accept": "Предфинальная часть ведёт к нужному решению и учитывает существенное прошлое.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p10-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p10-05",
+      "phaseId": "p10",
+      "title": "Собрать развязку и завершение партии",
+      "action": "Реализовать выбранную разгадку, решение и посильные итоговые состояния. Проверить представление результата.",
+      "accept": "История имеет завершение и итог, соответствующий действиям игрока.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p10-04",
+        "p03-04"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p10-06",
+      "phaseId": "p10",
+      "title": "Довести необходимый побочный контент",
+      "action": "Выбрать из банка только содержание с функцией для мира, героя и пути. Проверить повторы, ритм и причины возвращения.",
+      "accept": "Побочные истории поддерживают игру; заполнение карты не требует бесконечного копирования.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Контент",
+      "size": "M",
+      "deps": [
+        "p10-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p10-07",
+      "phaseId": "p10",
+      "title": "Произвести финальные материалы по очереди",
+      "action": "Делать арт, анимации, VFX, звук и тексты законченными пакетами. Использовать матрицу и эталон среза.",
+      "accept": "Нужное содержание имеет проверенные материалы; временные места отмечены явно.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Арт",
+      "size": "M",
+      "deps": [
+        "p10-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p10-08",
+      "phaseId": "p10",
+      "title": "Пересчитывать объём после каждой порции",
+      "action": "Сопоставлять фактическое время и оставшуюся работу. Новые идеи отправлять в отложенное либо согласовывать замену объёма.",
+      "accept": "План обновлён реальными результатами; нет скрытого бесконечного расширения.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p10-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p10-09",
+      "phaseId": "p10",
+      "title": "Рубеж: всё запланированное можно пройти",
+      "action": "Собрать непрерывный маршрут от нового старта до финала, включая обязательные варианты и сохранение.",
+      "accept": "Вся версия 1.0 существует в игре; впереди проверка и доведение.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p09-09",
+        "p01-08",
+        "p10-01",
+        "p10-02",
+        "p10-03",
+        "p10-04",
+        "p10-05",
+        "p10-06",
+        "p10-07",
+        "p10-08"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p11-01",
+      "phaseId": "p11",
+      "title": "Пройти историю целиком и записать разрывы",
+      "action": "Начать новую партию, пройти до финала и проверить цель каждого участка. Записать блокеры, провисания и недостающие связи.",
+      "accept": "Есть полный отчёт прохождения с коммитом и воспроизводимыми проблемами.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Проверка",
+      "size": "M",
+      "deps": [
+        "p10-09"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p11-02",
+      "phaseId": "p11",
+      "title": "Проверить поддержанные существенные варианты",
+      "action": "Составить небольшую матрицу важных решений и порядков. Не перемножать все реплики и настройки в тысячи прохождений.",
+      "accept": "Критические ветви достижимы, взаимно согласованы и имеют корректный результат.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Проверка",
+      "size": "M",
+      "deps": [
+        "p10-09"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p11-03",
+      "phaseId": "p11",
+      "title": "Проверить сохранения на длинной партии",
+      "action": "Проверить старые поддерживаемые форматы, промежуточные состояния, повторные входы и восстановление после завершения процесса.",
+      "accept": "Прогресс не дублируется и не теряется; ограничения совместимости описаны.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Техника",
+      "size": "M",
+      "deps": [
+        "p10-09"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p11-04",
+      "phaseId": "p11",
+      "title": "Проверить весь состав данных",
+      "action": "Найти дубли ID, отсутствующие материалы, неиспользуемые обязательные ссылки и временные заглушки. Отделить архив от активного содержания.",
+      "accept": "Каждое необходимое определение связано с рабочим содержимым.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Контент",
+      "size": "M",
+      "deps": [
+        "p10-09"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p11-05",
+      "phaseId": "p11",
+      "title": "Проверить темп развития и экономики",
+      "action": "Пройти раннюю, среднюю и позднюю части. Оценить нужность наград, припасы, цены, опыт и сочетания эффектов.",
+      "accept": "Нет обязательного фарма и очевидной неразрешимой цепочки обычных потерь.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Баланс",
+      "size": "M",
+      "deps": [
+        "p10-09"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p11-06",
+      "phaseId": "p11",
+      "title": "Согласовать окончательный состав функций",
+      "action": "Закрыть список обязательных систем 1.0. Крупное новое решение возвращается на оценку цены и проверок, а не добавляется незаметно.",
+      "accept": "Известно, что именно доводим до выпуска; пожелания отделены от ошибок.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p10-09"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p11-07",
+      "phaseId": "p11",
+      "title": "Рубеж: альфа пройдена",
+      "action": "Подтвердить полную проходимость и состав функций; распределить оставшиеся ошибки по важности.",
+      "accept": "В игре есть всё обязательное, а критические проблемы имеют владельца и способ проверки.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p10-09",
+        "p11-01",
+        "p11-02",
+        "p11-03",
+        "p11-04",
+        "p11-05",
+        "p11-06"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p12-01",
+      "phaseId": "p12",
+      "title": "Устранить критические ошибки",
+      "action": "Сначала закрыть потерю прогресса, зависания, непроходимость и серьёзные нарушения состояния. Не выключать проверки ради результата.",
+      "accept": "Нет известных блокеров в поддержанном пути; исправления воспроизводимо проверены.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Техника",
+      "size": "M",
+      "deps": [
+        "p11-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p12-02",
+      "phaseId": "p12",
+      "title": "Проверить интерфейс и управление",
+      "action": "Пройти все нужные экраны, клавиши, подсказки, отмену, возврат, длинные тексты и разные размеры окна.",
+      "accept": "Основные действия доступны и понятны на заявленных конфигурациях.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "UI",
+      "size": "M",
+      "deps": [
+        "p11-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p12-03",
+      "phaseId": "p12",
+      "title": "Довести настройки доступности",
+      "action": "Проверить читаемость текста, контраст, громкость, интенсивность эффектов и переназначение ввода в утверждённом объёме.",
+      "accept": "Выбранные возможности работают в сборке; важная информация не зависит только от цвета.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "UI",
+      "size": "M",
+      "deps": [
+        "p11-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p12-04",
+      "phaseId": "p12",
+      "title": "Сделать редактуру всех игровых текстов",
+      "action": "Проверить термины, грамматику, лор, длину реплик и соответствие выборов результатам. Локализацию делать только в принятом объёме.",
+      "accept": "Единая терминология, исправленные ошибки и финальный список языков.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Нарратив",
+      "size": "M",
+      "deps": [
+        "p11-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p12-05",
+      "phaseId": "p12",
+      "title": "Проверить производительность и долгую сессию",
+      "action": "Измерить слабую целевую конфигурацию, загрузки, память, карту, переходы и длительную игру. Исправлять найденные причины.",
+      "accept": "Есть подтверждённые параметры запуска и стабильная работа выбранного масштаба.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Техника",
+      "size": "M",
+      "deps": [
+        "p11-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p12-06",
+      "phaseId": "p12",
+      "title": "Проверить устанавливаемую сборку снаружи",
+      "action": "Дать выбранным тестировщикам сборку, инструкции запуска и канал ошибок. Передачу организует Саша.",
+      "accept": "Есть отчёты с другого компьютера; недостатки не скрыты знанием разработчика.",
+      "status": "todo",
+      "owner": "Внешний тест",
+      "area": "Проверка",
+      "size": "M",
+      "deps": [
+        "p11-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p12-07",
+      "phaseId": "p12",
+      "title": "Провести финальную художественную проверку",
+      "action": "Проверить важные сцены, персонажей, карту, свет, анимации, VFX и звук в движении. Не менять утверждённый дизайн без задачи.",
+      "accept": "Нет мешающих чтению визуальных ошибок, обрывов кадров и чужеродных материалов.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Арт",
+      "size": "M",
+      "deps": [
+        "p11-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p12-08",
+      "phaseId": "p12",
+      "title": "Рубеж: бета пройдена",
+      "action": "Повторить критические сценарии на нужной сборке, оценить оставшиеся некритические замечания и план исправлений.",
+      "accept": "Качество достаточно для кандидата на релиз; ограничения честно известны.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p11-07",
+        "p12-01",
+        "p12-02",
+        "p12-03",
+        "p12-04",
+        "p12-05",
+        "p12-06",
+        "p12-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p13-01",
+      "phaseId": "p13",
+      "title": "Проверить материалы и разрешения",
+      "action": "Собрать список сторонних ассетов, шрифтов, звука и лицензий; проверить разрешения на используемые материалы и титры.",
+      "accept": "У нужных материалов понятное происхождение; нерешённые вопросы закрыты до выпуска.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "M",
+      "deps": [
+        "p12-08",
+        "p06-08"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p13-02",
+      "phaseId": "p13",
+      "title": "Проверить условия выбранной площадки",
+      "action": "По актуальным официальным инструкциям проверить учётную запись, документы, материалы, требования к сборке и сроки рассмотрения.",
+      "accept": "Есть список требований для фактического способа выпуска и выполненные необходимые действия.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "M",
+      "deps": [
+        "p12-08",
+        "p06-08"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p13-03",
+      "phaseId": "p13",
+      "title": "Собрать чистый кандидат",
+      "action": "Создать версию из известного коммита. Исключить отладочные подарки, тестовые кнопки и неподходящие временные материалы.",
+      "accept": "Номер версии, коммит и содержимое пакета однозначно известны.",
+      "status": "todo",
+      "owner": "Claude",
+      "area": "Техника",
+      "size": "M",
+      "deps": [
+        "p12-08",
+        "p06-08"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p13-04",
+      "phaseId": "p13",
+      "title": "Проверить установку и обновление",
+      "action": "На чистом тестовом окружении проверить запуск, первый save, обновление прежней поддерживаемой версии и удаление игры без потери оговорённых данных.",
+      "accept": "Установка и обновление работают в согласованных сценариях.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Проверка",
+      "size": "M",
+      "deps": [
+        "p13-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p13-05",
+      "phaseId": "p13",
+      "title": "Проверить пакет на площадке",
+      "action": "Загрузить через штатный процесс после разрешения. Проверить ветку, запуск, нужные функции магазина и скачивание тестовой версии.",
+      "accept": "Проверен фактически распространяемый пакет, а не только локальная папка.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проверка",
+      "size": "M",
+      "deps": [
+        "p13-02",
+        "p13-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p13-06",
+      "phaseId": "p13",
+      "title": "Зафиксировать дату и план поддержки",
+      "action": "Выбрать дату после учёта проверок площадки и готовности. Подготовить канал ошибок, резерв времени и порядок горячего исправления.",
+      "accept": "Есть выполнимый план дня выпуска и первых дней поддержки.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p13-04",
+        "p13-05"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p13-07",
+      "phaseId": "p13",
+      "title": "Подготовить возможность возврата к рабочей версии",
+      "action": "Сохранить исходники, материалы, известный рабочий пакет и порядок обратимого восстановления публикации по правилам площадки.",
+      "accept": "Понятно, как исправить проблему выпуска без потери проекта и поддержанных сохранений.",
+      "status": "todo",
+      "owner": "Claude",
+      "area": "Техника",
+      "size": "M",
+      "deps": [
+        "p13-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p13-08",
+      "phaseId": "p13",
+      "title": "Рубеж: разрешение на выпуск",
+      "action": "Пройти финальный короткий сценарий: старт, продолжение, основные действия и завершение. Саша принимает решение о публикации.",
+      "accept": "Точный кандидат проверен и выпуск явно разрешён владельцем проекта.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p12-08",
+        "p06-08",
+        "p13-01",
+        "p13-02",
+        "p13-03",
+        "p13-04",
+        "p13-05",
+        "p13-06",
+        "p13-07"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p14-01",
+      "phaseId": "p14",
+      "title": "Провести проверку перед нажатием «выпустить»",
+      "action": "Сверить пакет, описание, поддержанные языки и конфигурации, дату и доступы. Остановиться при неожиданной проблеме.",
+      "accept": "Публикуется проверенный кандидат с согласованным описанием.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p13-08"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p14-02",
+      "phaseId": "p14",
+      "title": "Опубликовать версию 1.0",
+      "action": "Выполнить согласованные действия на выбранной площадке. Не заменять пакет непроверенной новой сборкой в последний момент.",
+      "accept": "Подтверждена публикация нужной версии.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p14-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p14-03",
+      "phaseId": "p14",
+      "title": "Проверить результат глазами игрока",
+      "action": "Проверить доступность страницы, скачивание, установку, первый запуск и продолжение на распространяемой версии.",
+      "accept": "У игрока открывается правильная игра; процесс получения работает.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Проверка",
+      "size": "M",
+      "deps": [
+        "p14-02"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p14-04",
+      "phaseId": "p14",
+      "title": "Сообщить о выпуске по согласованному плану",
+      "action": "Подготовить короткое сообщение и ссылки. Отправки и публикации делает Саша либо отдельно уполномочивает помощника.",
+      "accept": "Анонсы содержат рабочие ссылки и соответствуют фактической версии.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p14-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p14-05",
+      "phaseId": "p14",
+      "title": "Сохранить выпускной архив",
+      "action": "Зафиксировать коммит, пакет, версии инструментов, исходники и итоговую запись журнала. Сохранить материалы вне Git, где нужно.",
+      "accept": "Версию 1.0 можно воспроизвести и поддерживать.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Техника",
+      "size": "M",
+      "deps": [
+        "p14-03"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p14-06",
+      "phaseId": "p14",
+      "title": "Рубеж: релиз состоялся",
+      "action": "Подтвердить доступность и работу выпуска, зафиксировать известные ограничения и перейти к поддержке.",
+      "accept": "Выпущенная игра доступна, проверена и имеет понятный канал обратной связи.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p13-08",
+        "p14-01",
+        "p14-02",
+        "p14-03",
+        "p14-04",
+        "p14-05"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p15-01",
+      "phaseId": "p15",
+      "title": "Разобрать поступившие ошибки",
+      "action": "Объединить повторы, уточнить шаги, разделить блокеры, неудобства и пожелания. Не принимать каждую просьбу за обязательство.",
+      "accept": "Есть ранжированная очередь реальных проблем.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "S",
+      "deps": [
+        "p14-06"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p15-02",
+      "phaseId": "p15",
+      "title": "Подготовить нужное горячее исправление",
+      "action": "Исправить подтверждённый блокер минимальным пакетом, проверить сохранения и целевые сценарии, затем выпустить по согласованию.",
+      "accept": "Обновление решает проблему и не создаёт известной критической регрессии.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Техника",
+      "size": "M",
+      "deps": [
+        "p15-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p15-03",
+      "phaseId": "p15",
+      "title": "Сделать устойчивую поддерживаемую версию",
+      "action": "Собрать накопленные нужные исправления в проверенный пакет. Описать изменения понятным языком.",
+      "accept": "Есть версия, на которой можно безопасно оставить игру игрокам.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Проверка",
+      "size": "M",
+      "deps": [
+        "p15-01"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p15-04",
+      "phaseId": "p15",
+      "title": "Оценить результат разработки",
+      "action": "Сравнить цель, фактический объём, время, затраты, отзывы и личный опыт. Записать несколько конкретных выводов.",
+      "accept": "Понятно, что получилось и какие процессы стоит изменить в следующей работе.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "M",
+      "deps": [
+        "p14-06"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p15-05",
+      "phaseId": "p15",
+      "title": "Решить судьбу отложенных идей",
+      "action": "Выбрать: завершить поддержку, сделать небольшое обновление либо отдельное дополнение. Сначала оценить пользу и цену.",
+      "accept": "Есть явное решение; развитие игры не превращается в бессрочную обязанность.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Проект",
+      "size": "M",
+      "deps": [
+        "p15-03",
+        "p15-04"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p15-06",
+      "phaseId": "p15",
+      "title": "Рубеж: проект устойчиво завершён",
+      "action": "Архивировать необходимые материалы, определить доступный объём поддержки и освободить время для следующей цели.",
+      "accept": "Игра выпущена, основные проблемы закрыты, дальнейшая работа выбрана осознанно.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Рубеж",
+      "size": "M",
+      "deps": [
+        "p14-06",
+        "p15-01",
+        "p15-02",
+        "p15-03",
+        "p15-04",
+        "p15-05"
+      ],
+      "note": "",
+      "evidence": "",
+      "milestone": true,
+      "optional": false,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p16-01",
+      "phaseId": "p16",
+      "title": "Собственный Дом и его развитие",
+      "action": "Хранить как направление под вопросом в архиве. Не возвращать старый лор и обязательную тему в новый сюжет.",
+      "accept": "Есть отдельное решение, если система когда-нибудь понадобится.",
+      "status": "todo",
+      "owner": "Саша",
+      "area": "Идеи",
+      "size": "M",
+      "deps": [],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": true,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p16-02",
+      "phaseId": "p16",
+      "title": "Полноценная дипломатическая симуляция",
+      "action": "Отделить от уже разрешённых авторских союзов с местными правителями. Оценивать только при доказанной необходимости.",
+      "accept": "Новая большая система отдельно согласована либо остаётся отложенной.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Идеи",
+      "size": "M",
+      "deps": [],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": true,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p16-03",
+      "phaseId": "p16",
+      "title": "Новые платформы и дополнительный ввод",
+      "action": "Возвращаться после проверки первой платформы. Оценить портирование, управление, UI и поддержку.",
+      "accept": "Есть отдельный бюджет и проверки каждой выбранной платформы.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Идеи",
+      "size": "M",
+      "deps": [],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": true,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p16-04",
+      "phaseId": "p16",
+      "title": "Полная озвучка",
+      "action": "Оценить запись, монтаж, права, изменения текстов и стоимость обновлений. Не задерживать принятую версию ради идеи.",
+      "accept": "Принято отдельное решение о масштабе и ресурсе озвучки.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Идеи",
+      "size": "M",
+      "deps": [],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": true,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p16-05",
+      "phaseId": "p16",
+      "title": "Большие дополнительные каталоги и регионы",
+      "action": "Сохранить банк идей, не считая каждый тег, предмет и место обязательным для релиза.",
+      "accept": "Новый пакет имеет назначение, поддержку данными и отдельную проверку.",
+      "status": "todo",
+      "owner": "Вместе",
+      "area": "Идеи",
+      "size": "M",
+      "deps": [],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": true,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "p16-06",
+      "phaseId": "p16",
+      "title": "Выбираемые кампании мировых кризисов",
+      "action": "Направление отменено пользователем. Не возвращать его по старым документам и именам классов.",
+      "accept": "Отменённое направление исключено из активного объёма.",
+      "status": "cancelled",
+      "owner": "Саша",
+      "area": "Идеи",
+      "size": "M",
+      "deps": [],
+      "note": "",
+      "evidence": "",
+      "milestone": false,
+      "optional": true,
+      "updatedAt": "2026-11-05T00:00:00.000Z",
+      "deletedAt": null
+    }
+  ],
+  "sources": {
+    "project": {
+      "title": "Текущий проект и последние решения",
+      "detail": "Канон v1.66, DEVELOPMENT_STATUS.md, NARRATIVE.md, план ПР и карта репозитория. Снимок исходников main 2ab4146c от 09.11.2026; документальная сверка записана коммитом f2e3d29d. Свежий запуск всего снимка не подтверждён. Различать код, документальное решение и новое предложение.",
+      "url": "https://github.com/rastrapovich/KingdomSurvival/blob/f2e3d29de6dcf2fa45fa2bce007b50cba030f085/ProjectDocs/DEVELOPMENT_STATUS.md#текущий-снимок-проекта-надёжная-отправная-точка-09112026"
+    },
+    "map": {
+      "title": "Мастер-бриф MapLab v1.3",
+      "detail": "Переход основной карты, данные, здания, большие размеры, подгрузка, сохранения и этапы 12У.",
+      "url": "https://chatgpt.com/library?file_id=libfile_2c1a5c87847481918d71b7448d940d2b&account_id=personal"
+    },
+    "spatial": {
+      "title": "Дополнение о пространстве и расширяемости",
+      "detail": "Маршруты, ориентиры, структура районов, будущие категории, иконки и места.",
+      "url": "https://chatgpt.com/library?file_id=libfile_95e637af330c8191b28aa026708e9713&account_id=personal"
+    },
+    "B07": {
+      "title": "Бонд · глава 7",
+      "detail": "Итерации, ограничение объёма, производство, альфа, бета и выпуск",
+      "url": "https://chatgpt.com/library?file_id=libfile_19404db122e881918d33d27f5cb6d7e8&account_id=personal"
+    },
+    "B09": {
+      "title": "Бонд · глава 9",
+      "detail": "Бумажные прототипы",
+      "url": "https://chatgpt.com/library?file_id=libfile_19404db122e881918d33d27f5cb6d7e8&account_id=personal"
+    },
+    "B10": {
+      "title": "Бонд · глава 10",
+      "detail": "Тестирование и наблюдение",
+      "url": "https://chatgpt.com/library?file_id=libfile_19404db122e881918d33d27f5cb6d7e8&account_id=personal"
+    },
+    "B11": {
+      "title": "Бонд · глава 11",
+      "detail": "Математика и баланс",
+      "url": "https://chatgpt.com/library?file_id=libfile_19404db122e881918d33d27f5cb6d7e8&account_id=personal"
+    },
+    "B12": {
+      "title": "Бонд · глава 12",
+      "detail": "Направление и обучение игрока",
+      "url": "https://chatgpt.com/library?file_id=libfile_19404db122e881918d33d27f5cb6d7e8&account_id=personal"
+    },
+    "B14": {
+      "title": "Бонд · глава 14",
+      "detail": "Короткие поставки, оценка и отслеживание работы",
+      "url": "https://chatgpt.com/library?file_id=libfile_19404db122e881918d33d27f5cb6d7e8&account_id=personal"
+    },
+    "B15": {
+      "title": "Бонд · глава 15",
+      "detail": "Контекст игровой индустрии",
+      "url": "https://chatgpt.com/library?file_id=libfile_19404db122e881918d33d27f5cb6d7e8&account_id=personal"
+    },
+    "B25": {
+      "title": "Бонд · глава 25",
+      "detail": "Отладка",
+      "url": "https://chatgpt.com/library?file_id=libfile_19404db122e881918d33d27f5cb6d7e8&account_id=personal"
+    },
+    "S08": {
+      "title": "Шелл · глава 8",
+      "detail": "Риски, прототипирование и итерации",
+      "url": "https://chatgpt.com/library?file_id=libfile_db0c6948a9608191a4bf042167f5856c&account_id=personal"
+    },
+    "S09": {
+      "title": "Шелл · глава 9",
+      "detail": "Игрок и аудитория",
+      "url": "https://chatgpt.com/library?file_id=libfile_db0c6948a9608191a4bf042167f5856c&account_id=personal"
+    },
+    "S12": {
+      "title": "Шелл · глава 12",
+      "detail": "Игровые механики",
+      "url": "https://chatgpt.com/library?file_id=libfile_db0c6948a9608191a4bf042167f5856c&account_id=personal"
+    },
+    "S13": {
+      "title": "Шелл · глава 13",
+      "detail": "Выбор и баланс",
+      "url": "https://chatgpt.com/library?file_id=libfile_db0c6948a9608191a4bf042167f5856c&account_id=personal"
+    },
+    "S15": {
+      "title": "Шелл · глава 15",
+      "detail": "Интерфейс и обратная связь",
+      "url": "https://chatgpt.com/library?file_id=libfile_db0c6948a9608191a4bf042167f5856c&account_id=personal"
+    },
+    "S17": {
+      "title": "Шелл · глава 17",
+      "detail": "История и управляемая вариативность",
+      "url": "https://chatgpt.com/library?file_id=libfile_db0c6948a9608191a4bf042167f5856c&account_id=personal"
+    },
+    "S20": {
+      "title": "Шелл · глава 20",
+      "detail": "Персонажи и отношения",
+      "url": "https://chatgpt.com/library?file_id=libfile_db0c6948a9608191a4bf042167f5856c&account_id=personal"
+    },
+    "S21": {
+      "title": "Шелл · глава 21",
+      "detail": "Организация пространства",
+      "url": "https://chatgpt.com/library?file_id=libfile_db0c6948a9608191a4bf042167f5856c&account_id=personal"
+    },
+    "S22": {
+      "title": "Шелл · глава 22",
+      "detail": "Эстетика и согласованная подача",
+      "url": "https://chatgpt.com/library?file_id=libfile_db0c6948a9608191a4bf042167f5856c&account_id=personal"
+    },
+    "S26": {
+      "title": "Шелл · глава 26",
+      "detail": "Живые документы",
+      "url": "https://chatgpt.com/library?file_id=libfile_db0c6948a9608191a4bf042167f5856c&account_id=personal"
+    },
+    "S27": {
+      "title": "Шелл · глава 27",
+      "detail": "Плейтесты",
+      "url": "https://chatgpt.com/library?file_id=libfile_db0c6948a9608191a4bf042167f5856c&account_id=personal"
+    },
+    "S28": {
+      "title": "Шелл · глава 28",
+      "detail": "Технология и риски",
+      "url": "https://chatgpt.com/library?file_id=libfile_db0c6948a9608191a4bf042167f5856c&account_id=personal"
+    },
+    "S30": {
+      "title": "Шелл · глава 30",
+      "detail": "Понятное представление игры",
+      "url": "https://chatgpt.com/library?file_id=libfile_db0c6948a9608191a4bf042167f5856c&account_id=personal"
+    },
+    "S31": {
+      "title": "Шелл · глава 31",
+      "detail": "Бизнес-модель и аудитория",
+      "url": "https://chatgpt.com/library?file_id=libfile_db0c6948a9608191a4bf042167f5856c&account_id=personal"
+    }
+  }
+}</script>
+<script>
+'use strict';
+(()=>{
+const $=s=>document.querySelector(s), clone=x=>JSON.parse(JSON.stringify(x));
+const INITIAL=JSON.parse($('#embedded-state').textContent), KEY='ks-roadmap-v1:'+INITIAL.planId, UNDO_KEY=KEY+':undo';
+const STATUS={todo:'В очереди',verify:'Проверить',doing:'В работе',done:'Сделано',cancelled:'Отменено'};
+const AREA=['Проект','Техника','Нарратив','Карта','Бой','Системы','Инструменты','Арт','Контент','UI','Звук','Баланс','Проверка','Рубеж','Идеи'];
+const ICONS={menu:'M4 6h16M4 12h16M4 18h16',route:'M5 5h10a4 4 0 0 1 0 8H9a4 4 0 0 0 0 8h10M5 2v6M19 18v5',arrow:'m9 5 7 7-7 7',check:'m5 12 4 4L19 6',search:'M21 21l-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0',plus:'M12 5v14M5 12h14',more:'M5 12h.01M12 12h.01M19 12h.01',close:'m6 6 12 12M6 18 18 6',book:'M4 4h7l1 2 1-2h7v16h-7l-1 2-1-2H4V4ZM12 6v16',clock:'M12 7v5l3 2M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',trash:'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7',download:'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',undo:'M4 10h10a6 6 0 0 1 0 12M4 10l5-5M4 10l5 5',edit:'m15 4 5 5M4 20l5-1L21 7a2 2 0 0 0-5-5L4 14v6Z',flag:'M5 22V3m0 0c4-3 8 3 14 0v10c-6 3-10-3-14 0',up:'m6 15 6-6 6 6',down:'m6 9 6 6 6-6',info:'M12 11v6M12 7h.01M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',copy:'M9 9h12v12H9ZM15 9V3H3v12h6'};
+const icon=n=>`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${ICONS[n]||ICONS.info}"/></svg>`;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeJSON=x=>JSON.stringify(x,null,2).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
+const safeURL=s=>{try{const u=new URL(s);return /^https?:$/.test(u.protocol)?u.href:'#'}catch{return '#'}};
+let state=clone(INITIAL), undo=[], storageOK=true, toastTimer, modal=null, restorePrint=null, bootMessage='';
+let ui={view:'route',search:'',status:'all',area:'all',owner:'all',expanded:new Set(['p00']),nav:false,menu:false};
+function validate(s){
+ if(!s||s.schemaVersion!==1||s.planId!==INITIAL.planId||!Array.isArray(s.tasks)||!Array.isArray(s.phases)||!s.meta||!s.sources)throw Error('Это не совместимая карта Kingdom Survival версии 1.');
+ if(s.tasks.length>5000||s.phases.length>120)throw Error('План превышает допустимый размер.');
+ const walkKeys=x=>{if(x&&typeof x==='object')for(const k of Object.keys(x)){if(['__proto__','constructor','prototype'].includes(k))throw Error('Некорректная структура файла.');walkKeys(x[k])}};walkKeys(s);
+ for(const k of ['title','project','subtitle','snapshot','goal','notes','assumptions'])if(typeof s.meta[k]!=='string')throw Error('Некорректная карточка проекта.');
+ if(!s.sources||typeof s.sources!=='object'||Array.isArray(s.sources))throw Error('Некорректные источники.');
+ for(const source of Object.values(s.sources))if(!source||['title','detail','url'].some(k=>typeof source[k]!=='string'))throw Error('Некорректная ссылка источника.');
+ const pids=new Set(),ids=new Set();
+ for(const p of s.phases){if(typeof p.id!=='string'||pids.has(p.id)||typeof p.title!=='string'||!Array.isArray(p.sources)||p.sources.some(x=>!Object.hasOwn(s.sources,x))||['subtitle','outcome','why','legacy'].some(k=>typeof p[k]!=='string')||!['main','parallel','later'].includes(p.lane))throw Error('Ошибка в этапах или повторяющийся ID.');pids.add(p.id);}
+ for(const t of s.tasks){if(typeof t.id!=='string'||ids.has(t.id)||!pids.has(t.phaseId)||!Object.hasOwn(STATUS,t.status)||typeof t.title!=='string'||!Array.isArray(t.deps))throw Error('Ошибка в задачах, статусах или связях с этапом.');ids.add(t.id);for(const k of ['action','accept','note','owner','area','size'])if(typeof t[k]!=='string')throw Error('Некорректное текстовое поле задачи.');}
+ const map=new Map(s.tasks.map(t=>[t.id,t])),active=new Set(),done=new Set();
+ function visit(id){if(active.has(id))throw Error('Обнаружен круг зависимостей. Убери одну из взаимных связей.');if(done.has(id))return;active.add(id);for(const dep of map.get(id).deps){if(!ids.has(dep)||dep===id)throw Error('Есть ссылка на отсутствующую задачу или на себя.');visit(dep)}active.delete(id);done.add(id)};
+ for(const id of ids)visit(id);
+ return s;
+}
+try{const raw=localStorage.getItem(KEY);if(raw){try{const saved=JSON.parse(raw);validate(saved);if(String(saved.savedAt)>String(state.savedAt)||(String(saved.savedAt)===String(state.savedAt)&&Number(saved.revision)>Number(state.revision))){state=saved;bootMessage='Восстановлены более свежие правки из этого браузера. Копия из самого HTML доступна в меню «Ещё».'}}catch{bootMessage='Локальную копию не удалось прочитать. Открыта сохранённая версия HTML; файл и импорт JSON доступны.'}}try{undo=JSON.parse(localStorage.getItem(UNDO_KEY)||'[]');if(!Array.isArray(undo))undo=[];undo=undo.slice(-8)}catch{undo=[]}}catch{storageOK=false}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));storageOK=true;try{localStorage.setItem(UNDO_KEY,JSON.stringify(undo.slice(-8)))}catch{}}catch{storageOK=false}}
+function commit(mutator,msg){const previous=clone(state),next=clone(state);try{mutator(next);validate(next)}catch(e){toast(e.message,true);return false}undo.push(previous);undo=undo.slice(-8);next.revision=Math.max(Number(state.revision)||0,Number(next.revision)||0)+1;next.savedAt=new Date().toISOString();state=next;persist();render();if(msg)toast(msg);return true}
+function undoAction(){if(!undo.length)return;const rev=Number(state.revision)||0;let previous=undo.pop();try{validate(previous)}catch(e){toast(e.message,true);return}state=previous;state.revision=rev+1;state.savedAt=new Date().toISOString();persist();closeModal();render();toast('Предыдущее состояние восстановлено.')}
+const byId=id=>state.tasks.find(t=>t.id===id), phaseById=id=>state.phases.find(p=>p.id===id), visibleTasks=()=>state.tasks.filter(t=>!t.deletedAt), displayId=t=>t.id.startsWith('p')?t.id.toUpperCase().replace('P','РМ '):t.id.slice(0,12);
+const isLater=t=>!!t.optional||phaseById(t.phaseId)?.lane==='later';
+function blockers(t){return t.deps.map(byId).filter(d=>!d||d.deletedAt||d.status!=='done')}
+function ready(t){return !t.deletedAt&&!isLater(t)&&!['done','cancelled'].includes(t.status)&&blockers(t).length===0}
+function nextTasks(){return visibleTasks().filter(ready).sort((a,b)=>(a.status==='doing'?-1:0)-(b.status==='doing'?-1:0)||state.phases.findIndex(p=>p.id===a.phaseId)-state.phases.findIndex(p=>p.id===b.phaseId)||state.tasks.indexOf(a)-state.tasks.indexOf(b))}
+function stats(list){const live=list.filter(t=>!t.deletedAt&&t.status!=='cancelled'),done=live.filter(t=>t.status==='done').length;return {all:live.length,done,pct:live.length?Math.round(done/live.length*100):0}}
+function currentPhase(){return state.phases.find(p=>p.lane!=='later'&&visibleTasks().some(t=>t.phaseId===p.id&&t.status!=='done'&&t.status!=='cancelled'))}
+function filterTask(t){const q=ui.search.toLocaleLowerCase('ru');return (!q||[t.title,t.action,t.accept,t.note,t.area,t.id].join(' ').toLocaleLowerCase('ru').includes(q))&&(ui.status==='all'||ui.status==='ready'&&ready(t)||ui.status==='blocked'&&!['done','cancelled'].includes(t.status)&&blockers(t).length>0||ui.status===t.status)&&(ui.area==='all'||t.area===ui.area)&&(ui.owner==='all'||t.owner===ui.owner)}
+function progress(s){return `<div class="progressbar" role="progressbar" aria-label="Выполненные пункты" aria-valuenow="${s.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${s.pct}%"></i></div>`}
+function statusOptions(value){return Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${k===value?'selected':''}>${v}</option>`).join('')}
+function sourceLinks(ids){return ids.map(id=>state.sources[id]).filter(Boolean).map(s=>`<a href="${esc(safeURL(s.url))}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>`).join('')}
+function taskRow(t,trash=false){const blocked=blockers(t).length;return `<article class="task-row ${t.status==='done'?'is-done':''} ${t.status==='cancelled'?'is-cancelled':''} ${t.milestone?'is-milestone':''}" data-task-row="${esc(t.id)}">
+${trash?`<button class="iconbtn" data-action="restore" data-id="${esc(t.id)}" aria-label="Восстановить задачу">${icon('undo')}</button>`:`<button class="checkbtn ${t.status==='done'?'checked':''}" data-action="check" data-id="${esc(t.id)}" aria-label="${t.status==='done'?'Вернуть в очередь':'Отметить выполненной'}: ${esc(t.title)}" aria-pressed="${t.status==='done'}">${t.status==='done'?icon('check'):''}</button>`}
+<div class="task-main"><button class="task-title-button" data-action="detail" data-id="${esc(t.id)}"><span class="task-title">${t.milestone?'◇ ':''}${esc(t.title)}</span></button><div class="task-meta"><span class="task-code">${esc(displayId(t))}</span><span>${esc(t.area)}</span><span class="owner-tag">${esc(t.owner)}</span>${t.status==='done'&&blocked?'<span class="blocked-label">Связи требуют сверки</span>':blocked&&!['done','cancelled'].includes(t.status)?`<span class="blocked-label">Сначала: ${blocked}</span>`:ready(t)?'<span style="color:var(--accent)">Можно начать</span>':''}${t.evidence?'<span style="color:var(--blue)">Есть основа</span>':''}</div><div class="printdetail">${esc(t.action)}<br><strong>Готово, когда:</strong> ${esc(t.accept)}${t.note?'<br>Заметка: '+esc(t.note):''}</div></div>
+${trash?'':`<select class="status-select ${esc(t.status)}" data-status-id="${esc(t.id)}" aria-label="Статус: ${esc(t.title)}">${statusOptions(t.status)}</select>`}<button class="task-chevron iconbtn" data-action="detail" data-id="${esc(t.id)}" aria-label="Открыть задачу">${icon('arrow')}</button></article>`}
+function phaseCard(p,list){const expanded=ui.expanded.has(p.id)||!!ui.search||ui.status!=='all'||ui.area!=='all'||ui.owner!=='all',all=visibleTasks().filter(t=>t.phaseId===p.id&&(ui.view==='later'?isLater(t):!isLater(t))),s=stats(all),idx=state.phases.indexOf(p),isCurrent=currentPhase()?.id===p.id;return `<section class="phase ${isCurrent?'current':''}" id="phase-${esc(p.id)}"><header class="phase-head ${expanded?'expanded':''}"><button class="phase-toggle" data-action="toggle-phase" data-id="${esc(p.id)}" aria-expanded="${expanded}"><span class="phase-no">${String(idx).padStart(2,'0')}</span><span style="flex:1;min-width:0"><span class="phase-title">${esc(p.title)}</span><span class="phase-subtitle">${esc(p.subtitle)}${p.lane==='parallel'?' · параллельно':p.lane==='later'?' · вне обязательного маршрута':''}</span></span></button><div class="phase-stats"><span>${s.done} / ${s.all}</span>${progress(s)}</div><button class="iconbtn ghost chevron" data-action="toggle-phase" data-id="${esc(p.id)}" aria-label="${expanded?'Свернуть':'Развернуть'} этап">${icon('arrow')}</button></header>${expanded?`<div class="phase-body"><div class="phase-intro"><div><strong>Зачем этот этап</strong><p>${esc(p.why)}</p></div><div><strong>Результат этапа</strong><p>${esc(p.outcome)}</p></div></div>${list.map(t=>taskRow(t)).join('')}<div class="phase-foot"><button class="small ghost" data-action="add-task" data-id="${esc(p.id)}">+ Добавить пункт</button><button class="small ghost" data-action="edit-phase" data-id="${esc(p.id)}">Изменить этап</button><span class="legacy">${esc(p.legacy)}</span></div></div>`:''}</section>`}
+function nav(){const later=visibleTasks().filter(isLater).length,trash=state.tasks.filter(t=>t.deletedAt).length;return `<aside class="sidebar ${ui.nav?'open':''}"><div><div class="eyebrow" style="margin:0 13px 15px">Рабочая тетрадь</div>${[['route','route','Весь маршрут',''],['next','flag','С чего начать',nextTasks().length],['later','clock','Отложенные идеи',later],['guide','book','Как работать с планом',''],['sources','info','Основа и источники',''],['trash','trash','Корзина',trash]].map(([v,ic,label,n])=>`<button class="navitem ${ui.view===v?'active':''}" data-action="view" data-view="${v}">${icon(ic)}<span>${label}</span>${n!==''?`<span class="navcount">${n}</span>`:''}</button>`).join('')}</div><div class="navblock"><div class="eyebrow">Этапы разработки</div>${state.phases.filter(p=>p.lane!=='later').map(p=>`<button class="phase-nav ${currentPhase()?.id===p.id?'active':''}" data-action="jump" data-id="${esc(p.id)}"><span class="phase-index">${String(state.phases.indexOf(p)).padStart(2,'0')}</span><span>${esc(p.title)}${p.lane==='parallel'?' ↗':''}</span></button>`).join('')}</div><div class="sidefoot"><strong>Один законченный шаг за раз.</strong><br>План можно менять. Новый пункт не становится каноном автоматически.<br><br>Автосохранение — в этом браузере. Для переноса скачай обновлённый HTML или JSON.</div></aside>`}
+function toolbar(){const areas=[...new Set(visibleTasks().map(t=>t.area))].sort(),owners=[...new Set(visibleTasks().map(t=>t.owner))].sort();return `<div class="toolbar"><label class="search">${icon('search')}<input id="search" type="search" value="${esc(ui.search)}" placeholder="Найти задачу, результат или заметку" aria-label="Поиск по плану"></label><select id="filter-status" aria-label="Фильтр статуса"><option value="all">Все статусы</option>${[['ready','Можно начать'],['blocked','Ждёт других шагов'],...Object.entries(STATUS)].map(([v,l])=>`<option value="${v}" ${ui.status===v?'selected':''}>${l}</option>`).join('')}</select><select id="filter-area" aria-label="Фильтр направления"><option value="all">Все направления</option>${areas.map(v=>`<option ${ui.area===v?'selected':''}>${esc(v)}</option>`).join('')}</select><select id="filter-owner" aria-label="Фильтр ответственного"><option value="all">Все участники</option>${owners.map(v=>`<option ${ui.owner===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div>`}
+function routePage(later=false){const active=visibleTasks().filter(t=>later?isLater(t):!isLater(t)),s=stats(active),next=nextTasks()[0];const phaseList=state.phases.filter(p=>later?(p.lane==='later'||active.some(t=>t.phaseId===p.id)):p.lane!=='later'),filtered=active.filter(filterTask);return `${later?`<div class="eyebrow">Банк идей</div><h1 class="view-title">Оставить на потом.</h1><p class="page-intro">Эти идеи не входят в обязательный путь к версии 1.0. Вернуть задачу можно через редактирование: перенеси её в рабочий этап и сними отметку «Отложенная».</p>`:`<header class="hero"><div><div class="eyebrow">Kingdom Survival / путь к версии 1.0</div><h1>От идеи<br>к <em>выпущенной игре.</em></h1><p class="hero-description">Понятный порядок для одного разработчика. Проверяй основу, собирай цельные фрагменты и расширяй то, что уже работает.</p><div class="hero-tags"><span class="tag green">${state.phases.filter(p=>p.lane!=='later').length} этапов до завершения</span><span class="tag">${active.length} пунктов маршрута</span><span class="tag gold">С учётом текущего проекта</span></div></div><div class="hero-side"><div class="eyebrow">Выполненные пункты</div><div class="big-number">${s.done}<span> / ${s.all}</span></div>${progress(s)}<div class="stat-caption">${s.pct}% пунктов плана.<br>Это не процент готовности игры.</div></div></header>${next?`<section class="next-card"><div class="step-index">${String(state.phases.findIndex(p=>p.id===next.phaseId)).padStart(2,'0')}</div><div class="next-content"><div class="eyebrow">Ближайший доступный шаг</div><h3>${esc(next.title)}</h3><p>${esc(phaseById(next.phaseId).title)} · ${esc(next.owner)}</p></div><button class="primary small" data-action="detail" data-id="${esc(next.id)}">Открыть шаг ${icon('arrow')}</button></section>`:''}`}
+<div class="section-head"><div><h2>${later?'Идеи и отменённые направления':'Последовательность разработки'}</h2><p>${later?'Возвращай только то, что усиливает выбранную версию.':'Этапы раскрываются. Связи показывают, что нужно закончить раньше.'}</p></div><button class="small" data-action="add-phase">+ Этап</button></div>${toolbar()}<div class="countline"><span>Найдено: ${filtered.length} ${ui.search||ui.status!=='all'||ui.area!=='all'||ui.owner!=='all'?'<button class="small ghost" data-action="reset-filters">Сбросить фильтры</button>':''}</span><span><button class="small ghost" data-action="expand-all">Развернуть</button><button class="small ghost" data-action="collapse-all">Свернуть</button></span></div>${phaseList.map(p=>{const list=filtered.filter(t=>t.phaseId===p.id);return list.length||(!ui.search&&ui.status==='all'&&ui.area==='all'&&ui.owner==='all'&&!active.some(t=>t.phaseId===p.id))?phaseCard(p,list):''}).join('')||'<div class="empty"><h3>Ничего не найдено</h3>Измени запрос или сбрось фильтры.</div>'}<div class="footer-note">${esc(state.meta.snapshot)} · Рабочая дорожная карта, а не новая версия канона. При противоречии действуют последние решения Саши и актуальные документы проекта.</div>`}
+function nextPage(){const all=nextTasks(),doing=visibleTasks().filter(t=>t.status==='doing'),needs=visibleTasks().filter(t=>t.status==='verify'&&!isLater(t)),blocked=visibleTasks().filter(t=>!isLater(t)&&!['done','cancelled'].includes(t.status)&&blockers(t).length);return `<div class="eyebrow">Ближайшая работа</div><h1 class="view-title">С чего начать сейчас.</h1><p class="page-intro">Выбери один понятный шаг и доведи его до критерия готовности. Первые этапы возвращают контроль над уже существующим проектом — они не требуют начинать игру заново.</p><div class="progress-overview"><div class="metric"><strong>${all.length}</strong><span>можно начать</span></div><div class="metric"><strong>${doing.length}</strong><span>в работе</span></div><div class="metric"><strong>${needs.length}</strong><span>нужно проверить</span></div><div class="metric"><strong>${blocked.length}</strong><span>ждут других шагов</span></div></div><div class="notice"><strong>Рабочий ритм:</strong> выбери 1 основной пункт; запиши вопрос и результат; после работы проверь критерий и оставь заметку. Срок всего проекта уточняй по реальной скорости готового фрагмента.</div><div class="section-head"><h2>Первые доступные пункты</h2><button class="small" data-action="add-task" data-id="${esc(currentPhase()?.id||state.phases[0]?.id||'')}">+ Свой пункт</button></div><div class="ready-list">${all.slice(0,8).map(t=>taskRow(t)).join('')||'<div class="empty"><h3>Доступных пунктов пока нет</h3>Проверь зависимости, отменённые задачи и контрольные рубежи. Или весь обязательный маршрут уже завершён.</div>'}</div>${all.length>8?`<p class="helptext">Показаны первые 8 из ${all.length}. Остальные доступны через фильтр «Можно начать» в полном маршруте.</p>`:''}<div class="notice warn"><strong>Отменённая зависимость не считается выполненной.</strong> Если решение изменилось, открой зависимый пункт и явно измени его связи. Отмена большого этапа сама по себе не доказывает готовность релиза.</div>`}
+function guidePage(){const rules=[['Выбери один ближайший вопрос','Открой «С чего начать». В задачах есть действие и результат. Большой пункт разбей на меньшие, если его трудно закончить одной понятной поставкой.'],['Сверь то, что уже есть','Статус «Проверить» означает: в документах есть основа, но актуальное поведение нужно перепроверить. Не заказывай новую систему, пока не посмотрели существующую.'],['Проверяй результат, затем отмечай готовность','«Сделано» подтверждает критерий задачи. Компиляция проверяет код; внешний плейтест — понимание и интерес. Один вид проверки не заменяет другой.'],['Поддерживай порядок, сохраняя свободу','Пункты связаны зависимостями. Карта и аудитория выделены как параллельные ветки. Можно менять порядок, но важные зависимости должны оставаться осмысленными.'],['Сохраняй изменения переносимым способом','Автосохранение работает в этом браузере. «Скачать HTML» создаёт новую копию с текущими отметками и текстами. JSON — резервная копия и перенос между устройствами.'],['Обновляй фактический журнал проекта','Реализация в Unity и этот трекер — разные вещи. После проверенного пакета обновляйте DEVELOPMENT_STATUS.md, создавайте commit и push по AGENTS.md. Отметка здесь сама файлы проекта не меняет.']];return `<div class="read-width"><div class="eyebrow">Как пользоваться тетрадью</div><h1 class="view-title">Весь путь виден.<br>Сегодня — один шаг.</h1><p class="page-intro">Полный список нужен, чтобы понимать направление и не потерять выпускные работы. Он не требует держать весь список в голове одновременно.</p>${rules.map(([t,d],i)=>`<div class="guide-rule"><b>${String(i+1).padStart(2,'0')}</b><div><h3>${t}</h3><p>${d}</p></div></div>`).join('')}<div class="cards-grid"><section class="info-card"><div class="eyebrow">Статусы</div><h3>От очереди до результата</h3><ul><li><strong>В очереди</strong> — работа ещё не начата.</li><li><strong>Проверить</strong> — есть основа в проекте, требуется сверка.</li><li><strong>В работе</strong> — выбран текущий фокус.</li><li><strong>Сделано</strong> — выполнен критерий.</li><li><strong>Отменено</strong> — решение снято; зависимые пункты требуют пересмотра.</li></ul></section><section class="info-card"><div class="eyebrow">Перенос и резервирование</div><h3>Один актуальный файл</h3><p>Яндекс Диск переносит файлы, но не память браузера. Перед другим устройством скачай обновлённый HTML и используй эту копию. При независимых правках на двух устройствах импорт объединяет их с выбором спорной версии.</p><p>Через меню «Ещё» можно экспортировать и импортировать JSON, отменить последнее изменение и распечатать план.</p></section></div><section class="info-card" style="margin-top:16px"><div class="eyebrow">Словарь</div><dl class="glossary"><dt>Прототип</dt><dd>Дешёвая проверка конкретного вопроса: схема, карточки или работающий фрагмент.</dd><dt>Сквозной прототип</dt><dd>Цельная цепочка от начала до результата, даже с временной графикой.</dd><dt>Вертикальный срез</dt><dd>Небольшой представительный фрагмент почти финального качества, показывающий и опыт, и цену производства.</dd><dt>Альфа в этой карте</dt><dd>Вся выбранная игра проходима, обязательный набор функций собран.</dd><dt>Бета в этой карте</dt><dd>Содержание собрано, основной фокус — ошибки, удобство и стабильность.</dd><dt>Кандидат на релиз</dt><dd>Точная сборка, которую можно выпустить после финальных проверок.</dd><dt>Размер пункта S / M / L</dt><dd>Небольшой / средний / крупный объём. Это рабочая оценка, не обещание количества часов. L стоит разбивать после первого знакомства.</dd></dl></section></div>`}
+function sourcesPage(){const active=visibleTasks().filter(t=>!isLater(t));return `<div class="read-width"><div class="eyebrow">Основание плана</div><h1 class="view-title">Методы из книг.<br>Порядок для нашей игры.</h1><p class="page-intro">План собран по производственным и геймдизайнерским разделам двух книг, актуальным документам и последним решениям проекта. Конкретная последовательность и выпускные задачи — адаптация для Kingdom Survival.</p><section class="info-card"><h3>Что уже есть в проекте</h3><p>Свободная игра, герой и отряд, BattleSandbox, исследуемые места, предметы, торговля, корчма, задания, прогрессия, журнал, сохранения и базы. MapLab имеет рабочие части, подгрузку и мост к плану региона; завершение интеграции основной игры требуется проверить.</p><p>Поэтому существующие основы отмечены «Проверить», а не объявлены автоматически законченными. Полное прохождение Unity и внешний плейтест при создании этого файла не выполнялись.</p></section><div class="notice warn"><strong>Границы актуальности.</strong> ${esc(state.meta.snapshot)}. Рабочий HTML не меняет канон и не заменяет технический план ПР. Старые требования Дома и выбираемых мировых кризисов не возвращаются из исторических разделов.</div><div class="cards-grid"><section class="info-card"><div class="eyebrow">Карточка проекта</div><h3>${esc(state.meta.project)}</h3><p>${esc(state.meta.goal)}</p><p>${esc(state.meta.assumptions)}</p><button class="small" data-action="edit-meta">Изменить рабочие заметки</button></section><section class="info-card"><div class="eyebrow">Как читать источники</div><h3>Без буквального переноса</h3><p>Шелл: опыт, риски, итерации, интерфейс, история, плейтесты и аудитория. Бонд: объём, рабочие прототипы, проверки, короткие поставки и этапы выпуска.</p><p>Учебные Unity API и рыночные примеры из изданий 2019 года не считаются актуальными инструкциями. Условия площадок проверяются перед действиями. Указанные разделы использованы; постраничная проверка всех листингов не заявляется.</p></section></div><p class="page-intro" style="font-size:12px;margin-top:22px">${esc(state.meta.notes)}</p><div class="section-head"><h2>Источники и проектные документы</h2></div>${Object.values(state.sources).map(s=>`<div class="source-row"><a href="${esc(safeURL(s.url))}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a><p>${esc(s.detail)}</p></div>`).join('')}<div class="footer-note">Рекомендации по порядку работы не обещают срок и не гарантируют коммерческий результат. Следующую оценку объёма делайте после измеренного вертикального среза.</div></div>`}
+function trashPage(){const list=state.tasks.filter(t=>t.deletedAt).filter(filterTask);return `<div class="eyebrow">Обратимые изменения</div><h1 class="view-title">Корзина.</h1><p class="page-intro">Удалённые пункты можно восстановить вместе с заметками и связями. Пока пункт в корзине, зависимые задачи не считают его выполненным.</p>${toolbar()}<div class="ready-list">${list.map(t=>taskRow(t,true)).join('')||'<div class="empty"><h3>Корзина пуста</h3>Удалённые задачи появятся здесь.</div>'}</div>`}
+function render(focus){const active=visibleTasks().filter(t=>!isLater(t)),s=stats(active);$('#app').innerHTML=`<header class="topbar"><button class="iconbtn ghost mobile-menu" data-action="mobile-menu" aria-label="Открыть навигацию">${icon('menu')}</button><div class="brand"><div class="brandmark">K</div><div><div class="brandname">KINGDOM SURVIVAL</div><div class="brandmeta">DEVELOPMENT FIELDNOTES</div></div></div><div class="topactions"><span class="save-state ${storageOK?'':'error'}"><i class="dot"></i>${storageOK?'Сохранено в браузере':'Нужна копия файла'}</span><button class="small export-json" data-action="export-json">JSON</button><button class="primary small" data-action="export-html">${icon('download')} Скачать HTML</button><div class="menu-wrap"><button class="iconbtn" data-action="menu" aria-label="Ещё действия" aria-expanded="${ui.menu}">${icon('more')}</button>${ui.menu?`<div class="menu"><button data-action="export-json">Резервная копия JSON<small>Все задачи, отметки и заметки</small></button><button data-action="import">Импорт HTML или JSON<small>Перенести или объединить изменения</small></button><button data-action="file-version">Версия из этого HTML<small>Открыть импорт сохранённой копии</small></button><button data-action="undo" ${undo.length?'':'disabled'}>Отменить последнее изменение</button><button data-action="print">Печать всего плана</button><button data-action="edit-meta">Рабочие заметки проекта</button></div>`:''}</div></div></header>${storageOK?'':'<div class="storage-warning">Браузер не разрешил автосохранение. Скачивай обновлённый HTML или JSON после изменений.</div>'}<div class="sidebar-overlay ${ui.nav?'open':''}" data-action="close-nav"></div><div class="shell">${nav()}<main class="main" id="main">${ui.view==='route'?routePage():ui.view==='later'?routePage(true):ui.view==='next'?nextPage():ui.view==='guide'?guidePage():ui.view==='sources'?sourcesPage():trashPage()}</main></div>`;if(focus){const input=$(focus.selector);if(input){input.focus();if(focus.pos!=null&&input.setSelectionRange)input.setSelectionRange(focus.pos,focus.pos)}}if(modal?.type==='detail')showDetail(modal.id,false)}
+function openModal(type,html,cls=''){modal={type,...modal};$('#dialog').className=cls;$('#dialog').innerHTML=html;if(!$('#dialog').open)$('#dialog').showModal();}
+function closeModal(){modal=null;if($('#dialog').open)$('#dialog').close()}
+function modalHead(label,title){return `<header class="modal-head"><div><div class="eyebrow">${esc(label)}</div><h2 id="modal-title">${esc(title)}</h2></div><button class="iconbtn ghost" data-action="close-modal" aria-label="Закрыть">${icon('close')}</button></header>`}
+function showDetail(id,focus=true){const t=byId(id);if(!t)return;const p=phaseById(t.phaseId),b=blockers(t),dependents=state.tasks.filter(x=>!x.deletedAt&&x.deps.includes(id));modal={type:'detail',id};const html=modalHead(displayId(t),t.title)+`<div class="modal-scroll"><div class="modal-body"><div class="detail-grid"><label>Статус<select data-status-id="${esc(t.id)}">${statusOptions(t.status)}</select></label><label>Этап<div style="margin-top:10px;color:var(--ink)">${esc(p.title)}</div></label></div><div class="detail-block"><h3>Что сделать</h3><p>${esc(t.action)}</p></div><div class="detail-block acceptance"><h3>Критерий готовности</h3><p>${esc(t.accept)}</p></div>${t.evidence?`<div class="detail-block"><h3>Что уже есть · требуется сверка</h3><p style="font-size:12px;color:var(--blue)">${esc(t.evidence)}</p></div>`:''}<div class="barline" style="margin-bottom:24px"><span class="tag">${esc(t.owner)}</span><span class="tag">${esc(t.area)}</span><span class="tag">Объём ${esc(t.size)}</span>${t.optional?'<span class="tag gold">Отложенная идея</span>':''}</div><div class="detail-block"><h3>Сначала завершить ${b.length?'· осталось '+b.length:''}</h3>${t.deps.length?t.deps.map(d=>{const x=byId(d);return `<div class="dep-row"><span style="color:${x?.status==='done'&&!x.deletedAt?'var(--accent)':'var(--gold)'}">${x?.status==='done'&&!x.deletedAt?'✓':'○'}</span><button data-action="detail" data-id="${esc(d)}">${esc(x?.title||d)}${x?.deletedAt?' · в корзине':x?.status==='cancelled'?' · отменено':''}</button></div>`}).join(''):'<p class="muted" style="font-size:12px">Предварительных шагов нет.</p>'}</div>${dependents.length?`<div class="detail-block"><h3>Открывает следующие шаги</h3>${dependents.map(x=>`<div class="dep-row"><span>→</span><button data-action="detail" data-id="${esc(x.id)}">${esc(x.title)}</button></div>`).join('')}</div>`:''}<div class="detail-block"><h3>Твои заметки</h3><p class="muted" style="font-size:12px">${esc(t.note||'Можно записать результат проверки, ссылку на коммит или следующее действие через «Изменить».')}</p></div><div class="detail-block field-source"><h3>Основа этапа</h3>${sourceLinks(p.sources||[])}</div></div></div><footer class="modal-footer"><button class="primary small" data-action="edit-task" data-id="${esc(id)}">${icon('edit')} Изменить</button><button class="small" data-action="copy-task" data-id="${esc(id)}">${icon('copy')} Для Claude</button>${t.deletedAt?`<button class="small" data-action="restore" data-id="${esc(id)}">Восстановить</button>`:`<button class="small ghost danger" data-action="delete-task" data-id="${esc(id)}">В корзину</button>`}<div class="arrow-group"><button class="iconbtn small" data-action="move-task-up" data-id="${esc(id)}" aria-label="Выше в этапе">${icon('up')}</button><button class="iconbtn small" data-action="move-task-down" data-id="${esc(id)}" aria-label="Ниже в этапе">${icon('down')}</button></div></footer>`;$('#dialog').className='details';$('#dialog').innerHTML=html;if(!$('#dialog').open)$('#dialog').showModal();if(focus)$('#dialog').querySelector('button')?.focus()}
+function editTask(id,phaseId){const existing=id?byId(id):null;if(existing?.deletedAt){toast('Сначала восстанови задачу из корзины.');return}const t=existing||{id:'',phaseId:phaseId||currentPhase()?.id||state.phases[0]?.id,title:'',action:'',accept:'',status:'todo',owner:'Вместе',area:'Проект',size:'M',note:'',evidence:'',deps:[],milestone:false,optional:ui.view==='later'||phaseById(phaseId)?.lane==='later'};modal={type:'edit',id};openModal('edit',modalHead(existing?'Редактирование пункта':'Новый пункт',existing?t.title:'Добавить свой шаг')+`<form id="task-form" data-edit-id="${esc(id||'')}"><div class="modal-scroll"><div class="modal-body"><div class="form-grid"><label class="full">Название<input name="title" required maxlength="220" value="${esc(t.title)}" placeholder="Какое действие нужно закончить?"></label><label class="full">Что сделать<textarea name="action" required>${esc(t.action)}</textarea></label><label class="full">Когда считать готовым<textarea name="accept" required>${esc(t.accept)}</textarea></label><label>Этап<select name="phaseId">${state.phases.map(p=>`<option value="${esc(p.id)}" ${p.id===t.phaseId?'selected':''}>${esc(p.title)}</option>`).join('')}</select></label><label>Статус<select name="status">${statusOptions(t.status)}</select></label><label>Кто делает<input name="owner" list="owners" value="${esc(t.owner)}" required><datalist id="owners"><option>Саша</option><option>Claude</option><option>Вместе</option><option>Внешний тест</option></datalist></label><label>Направление<input name="area" list="areas" value="${esc(t.area)}" required><datalist id="areas">${AREA.map(x=>`<option>${x}</option>`).join('')}</datalist></label><label>Рабочий объём<select name="size">${['S','M','L'].map(x=>`<option ${t.size===x?'selected':''}>${x}</option>`).join('')}</select></label><div><p class="helptext">S — небольшой · M — средний · L — стоит разбить. Это не часы и не дата.</p></div><label class="full">Заметки и результат<textarea name="note">${esc(t.note)}</textarea></label><label class="full">Основа в проекте / источник проверки<textarea name="evidence">${esc(t.evidence)}</textarea></label><label class="inline-check"><input type="checkbox" name="milestone" ${t.milestone?'checked':''}>Контрольный рубеж</label><label class="inline-check"><input type="checkbox" name="optional" ${t.optional?'checked':''}>Отложенная идея</label><div class="full"><div class="eyebrow" style="margin:8px 0">Сначала должны быть сделаны</div><div class="dep-picker"><input type="search" id="dep-search" placeholder="Поиск по другим задачам" aria-label="Поиск зависимостей"><div class="dep-list">${state.tasks.filter(x=>x.id!==id&&!x.deletedAt||t.deps.includes(x.id)).map(x=>`<label data-dep-text="${esc((x.title+' '+x.id).toLocaleLowerCase('ru'))}"><input type="checkbox" name="deps" value="${esc(x.id)}" ${t.deps.includes(x.id)?'checked':''}><span>${esc(displayId(x))} · ${esc(x.title)}${x.deletedAt?' (корзина)':''}</span></label>`).join('')}</div></div><p class="helptext">Круговые зависимости не сохраняются. Отменённый пункт не выполняет зависимость автоматически.</p></div></div><p id="form-error" class="error-text" role="alert"></p></div></div><footer class="modal-footer"><button type="button" class="ghost" data-action="close-modal">Отмена</button><button type="submit" class="primary" style="margin-left:auto">Сохранить пункт</button></footer></form>`);}
+function editPhase(id){const p=phaseById(id)||{id:'',title:'',subtitle:'',outcome:'',why:'',lane:'main',legacy:'',sources:[]};modal={type:'phase',id};openModal('phase',modalHead(id?'Редактирование этапа':'Новый этап',id?p.title:'Добавить этап')+`<form id="phase-form" data-edit-id="${esc(id||'')}"><div class="modal-scroll"><div class="modal-body"><div class="form-grid"><label class="full">Название<input name="title" required maxlength="150" value="${esc(p.title)}"></label><label class="full">Короткая подпись<input name="subtitle" value="${esc(p.subtitle)}"></label><label class="full">Зачем нужен этап<textarea name="why">${esc(p.why)}</textarea></label><label class="full">Результат этапа<textarea name="outcome">${esc(p.outcome)}</textarea></label><label>Направление<select name="lane"><option value="main" ${p.lane==='main'?'selected':''}>Основной маршрут</option><option value="parallel" ${p.lane==='parallel'?'selected':''}>Параллельная ветка</option><option value="later" ${p.lane==='later'?'selected':''}>Отложенное</option></select></label><label>Связь с техническим планом<input name="legacy" value="${esc(p.legacy)}"></label></div><p id="form-error" class="error-text"></p></div></div><footer class="modal-footer">${id?`<button type="button" class="iconbtn" data-action="move-phase-up" data-id="${esc(id)}" aria-label="Этап выше">${icon('up')}</button><button type="button" class="iconbtn" data-action="move-phase-down" data-id="${esc(id)}" aria-label="Этап ниже">${icon('down')}</button>`:''}<button type="button" class="ghost" data-action="close-modal">Отмена</button><button type="submit" class="primary" style="margin-left:auto">Сохранить этап</button></footer></form>`)}
+function editMeta(){modal={type:'meta'};openModal('meta',modalHead('Рабочие решения','Карточка проекта')+`<form id="meta-form"><div class="modal-body form-grid"><label class="full">Название проекта<input name="project" required value="${esc(state.meta.project)}"></label><label class="full">Цель<textarea name="goal">${esc(state.meta.goal)}</textarea></label><label class="full">Предположения и открытые решения<textarea name="assumptions">${esc(state.meta.assumptions)}</textarea></label><label class="full">Рабочие заметки<textarea name="notes">${esc(state.meta.notes)}</textarea></label><p class="helptext full">Изменения этой карточки не утверждают игровой канон и не меняют файлы Unity.</p></div><footer class="modal-footer"><button type="button" class="ghost" data-action="close-modal">Отмена</button><button class="primary" type="submit" style="margin-left:auto">Сохранить</button></footer></form>`)}
+function changeStatus(id,value){const t=byId(id);if(!t||t.deletedAt||!STATUS[value])return;const b=blockers(t);if(value==='done'&&b.length&&!confirm('У этого пункта ещё '+b.length+' незавершённых зависимостей. Отметить готовым после собственной проверки?')){render();return}commit(s=>{const x=s.tasks.find(t=>t.id===id);x.status=value;x.updatedAt=new Date().toISOString();x.completedAt=value==='done'?x.updatedAt:null},value==='done'?'Пункт отмечен выполненным.':'Статус изменён.')}
+function deleteTask(id){const t=byId(id);if(!t)return;closeModal();commit(s=>{const x=s.tasks.find(t=>t.id===id);x.deletedAt=new Date().toISOString();x.updatedAt=x.deletedAt},'Пункт в корзине. Его можно восстановить.')}
+function restoreTask(id){closeModal();commit(s=>{const x=s.tasks.find(t=>t.id===id);x.deletedAt=null;x.updatedAt=new Date().toISOString()},'Пункт восстановлен.')}
+function moveTask(id,dir){const t=byId(id);const peers=state.tasks.filter(x=>x.phaseId===t.phaseId&&!x.deletedAt);const k=peers.findIndex(x=>x.id===id),other=peers[k+dir];if(!other)return;commit(s=>{const a=s.tasks.findIndex(x=>x.id===id),b=s.tasks.findIndex(x=>x.id===other.id);[s.tasks[a],s.tasks[b]]=[s.tasks[b],s.tasks[a]];s.tasks[a].updatedAt=s.tasks[b].updatedAt=new Date().toISOString()},'Порядок пунктов изменён.')}
+function movePhase(id,dir){const i=state.phases.findIndex(p=>p.id===id);if(i+dir<0||i+dir>=state.phases.length)return;closeModal();commit(s=>{[s.phases[i],s.phases[i+dir]]=[s.phases[i+dir],s.phases[i]];s.phases[i].updatedAt=s.phases[i+dir].updatedAt=new Date().toISOString()},'Порядок этапов изменён.')}
+function download(name,content,type){const url=URL.createObjectURL(new Blob([content],{type})),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),15000)}
+function exportJSON(){download('KingdomSurvival_Roadmap_Progress.json',safeJSON(state),'application/json;charset=utf-8');toast('JSON с текущим планом и прогрессом подготовлен к скачиванию.')}
+function exportHTML(){state.lastExportedAt=new Date().toISOString();persist();const doc=document.documentElement.cloneNode(true);doc.querySelector('#embedded-state').textContent=safeJSON(state);doc.querySelector('#app').innerHTML='<div style="padding:50px;color:#dcf08b">Загружаем карту разработки…</div>';doc.querySelector('#dialog').innerHTML='';doc.querySelector('#dialog').removeAttribute('open');doc.querySelector('#toast-root').innerHTML='';doc.querySelector('#import-file').removeAttribute('value');download('KingdomSurvival_Development_Roadmap_RU.html','<!DOCTYPE html>\n'+doc.outerHTML,'text/html;charset=utf-8');toast('Скачивается HTML с текущими правками. На другом устройстве открой новую копию.')}
+let pendingImport=null;
+function previewImport(data){validate(data);pendingImport=data;const local=new Map(state.tasks.map(t=>[t.id,t])),conflicts=data.tasks.filter(t=>local.has(t.id)&&JSON.stringify(t)!==JSON.stringify(local.get(t.id))),added=data.tasks.filter(t=>!local.has(t.id));modal={type:'import'};openModal('import',modalHead('Перенос прогресса','Импорт плана')+`<div class="modal-body"><p class="muted" style="font-size:13px">В файле: ${data.phases.length} этапов и ${data.tasks.length} задач. Новых задач: ${added.length}. Отличаются от текущих: ${conflicts.length}.</p><div class="notice">Перед импортом текущее состояние попадёт в историю отмены. Экспорт JSON даст отдельную резервную копию.</div><label style="display:block;font-size:12px;margin:15px 0;color:var(--muted)">При объединении отличающихся записей<select id="merge-choice" style="display:block;width:100%;margin-top:7px"><option value="incoming">Брать версию из импортируемого файла</option><option value="local">Сохранить мою текущую версию</option></select></label><p class="helptext">«Объединить» сохраняет задачи, которых нет в другом файле, и применяет выбранную версию при совпадении ID. Одна версия записи выбирается целиком, вместе с заметкой и статусом. Автоматической облачной синхронизации нет.</p><p id="form-error" class="error-text"></p></div><footer class="modal-footer"><button class="small" data-action="export-json">Резервная копия</button><button class="small" data-action="replace-import">Заменить целиком</button><button class="primary small" data-action="merge-import">Объединить</button></footer>`)}
+function applyImport(merge){if(!pendingImport)return;const incoming=clone(pendingImport),choice=$('#merge-choice')?.value||'incoming';let next=incoming;if(merge){next=clone(state);for(const key of ['phases','tasks']){const map=new Map(next[key].map(x=>[x.id,x]));for(const x of incoming[key])if(!map.has(x.id)||choice==='incoming')map.set(x.id,x);next[key]=[...map.values()]}next.sources={...next.sources,...incoming.sources};if(choice==='incoming')next.meta=incoming.meta}try{validate(next)}catch(e){$('#form-error').textContent='Импорт не выполнен: '+e.message;return}closeModal();pendingImport=null;commit(s=>{const revision=s.revision;Object.keys(s).forEach(k=>delete s[k]);Object.assign(s,next);s.revision=revision},merge?'Изменения объединены.':'Импортированная версия восстановлена.');}
+async function copyTask(id){const t=byId(id),p=phaseById(t.phaseId);const text=`Kingdom Survival. Задача: ${t.title}\nЭтап: ${p.title}\n\nЧто сделать:\n${t.action}\n\nКритерий готовности:\n${t.accept}\n\nКонтекст и заметки:\n${t.evidence||''}\n${t.note||''}\n\nПеред реализацией прочитай актуальные AGENTS.md/CLAUDE.md, канон и нужные ProjectDocs. Проверь существующий код и чужие изменения. Сначала покажи маленький этап, проверку и противоречия. Не объявляй работу выполненной без фактической проверки.`;try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(text)}else throw Error()}catch{const area=document.createElement('textarea');area.value=text;area.style.cssText='position:fixed;opacity:0';$('#dialog').append(area);area.select();const ok=document.execCommand('copy');area.remove();if(!ok){toast('Копирование недоступно. Текст задачи можно выделить в карточке.',true);return}}toast('Задача для Claude скопирована.')}
+function toast(msg,error=false){clearTimeout(toastTimer);$('#toast-root').innerHTML=`<div class="toast ${error?'error':''}" role="status"><span>${esc(msg)}</span>${undo.length?'<button data-action="undo">Отменить</button>':''}</div>`;toastTimer=setTimeout(()=>$('#toast-root').innerHTML='',6500)}
+document.addEventListener('click',e=>{const btn=e.target.closest('[data-action]');if(!btn){if(ui.menu&&!e.target.closest('.menu-wrap')){ui.menu=false;render()}return}const a=btn.dataset.action,id=btn.dataset.id;switch(a){case'menu':ui.menu=!ui.menu;render();break;case'mobile-menu':ui.nav=!ui.nav;render();break;case'close-nav':ui.nav=false;render();break;case'view':closeModal();ui.view=btn.dataset.view;ui.nav=false;ui.menu=false;ui.search='';ui.status=ui.area=ui.owner='all';render();window.scrollTo({top:0});break;case'jump':ui.view=phaseById(id)?.lane==='later'?'later':'route';ui.nav=false;ui.expanded.add(id);ui.search='';ui.status=ui.area=ui.owner='all';render();setTimeout(()=>$('#phase-'+CSS.escape(id))?.scrollIntoView({block:'start',behavior:'smooth'}),10);break;case'toggle-phase':ui.expanded.has(id)?ui.expanded.delete(id):ui.expanded.add(id);render();break;case'detail':showDetail(id);break;case'close-modal':closeModal();break;case'edit-task':editTask(id);break;case'add-task':editTask(null,id);break;case'edit-phase':editPhase(id);break;case'add-phase':editPhase(null);break;case'check':changeStatus(id,byId(id).status==='done'?'todo':'done');break;case'delete-task':deleteTask(id);break;case'restore':restoreTask(id);break;case'move-task-up':moveTask(id,-1);break;case'move-task-down':moveTask(id,1);break;case'move-phase-up':movePhase(id,-1);break;case'move-phase-down':movePhase(id,1);break;case'copy-task':copyTask(id);break;case'export-html':ui.menu=false;exportHTML();render();break;case'export-json':exportJSON();break;case'import':ui.menu=false;render();$('#import-file').click();break;case'file-version':ui.menu=false;render();previewImport(clone(INITIAL));break;case'replace-import':applyImport(false);break;case'merge-import':applyImport(true);break;case'undo':undoAction();break;case'edit-meta':editMeta();break;case'reset-filters':ui.search='';ui.status=ui.area=ui.owner='all';render();break;case'expand-all':state.phases.forEach(p=>ui.expanded.add(p.id));render();break;case'collapse-all':ui.expanded.clear();render();break;case'print':ui.menu=false;window.print();break}});
+document.addEventListener('input',e=>{if(e.target.id==='search'){ui.search=e.target.value;render({selector:'#search',pos:e.target.selectionStart})}if(e.target.id==='dep-search'){const q=e.target.value.toLocaleLowerCase('ru');document.querySelectorAll('[data-dep-text]').forEach(x=>x.hidden=!x.dataset.depText.includes(q))}});
+document.addEventListener('change',e=>{if(e.target.dataset.statusId)changeStatus(e.target.dataset.statusId,e.target.value);for(const [id,k]of [['filter-status','status'],['filter-area','area'],['filter-owner','owner']])if(e.target.id===id){ui[k]=e.target.value;render()}});
+document.addEventListener('submit',e=>{if(!['task-form','phase-form','meta-form'].includes(e.target.id))return;e.preventDefault();const f=e.target,fd=new FormData(f),value=k=>String(fd.get(k)||'').trim(),now=new Date().toISOString();if(f.id==='task-form'){const id=f.dataset.editId,old=id?byId(id):null;const candidate={...(old||{}),id:id||'custom-'+(crypto.randomUUID?.()||Date.now()+'-'+Math.random().toString(16).slice(2)),phaseId:value('phaseId'),title:value('title'),action:value('action'),accept:value('accept'),status:value('status'),owner:value('owner'),area:value('area'),size:value('size'),note:value('note'),evidence:value('evidence'),deps:[...new Set(fd.getAll('deps'))],milestone:fd.has('milestone'),optional:fd.has('optional'),updatedAt:now,deletedAt:null};if(!candidate.title||!candidate.action||!candidate.accept){$('#form-error').textContent='Заполни название, действие и критерий готовности.';return}const probe=clone(state);if(id)probe.tasks[probe.tasks.findIndex(t=>t.id===id)]=candidate;else probe.tasks.push(candidate);try{validate(probe)}catch(err){$('#form-error').textContent=err.message;return}if(candidate.status==='done'&&candidate.deps.some(d=>byId(d)?.status!=='done'||byId(d)?.deletedAt)&&!confirm('Есть незавершённые зависимости. Сохранить статус «Сделано» после собственной проверки?'))return;closeModal();ui.expanded.add(candidate.phaseId);commit(s=>{if(id)s.tasks[s.tasks.findIndex(t=>t.id===id)]=candidate;else s.tasks.push(candidate)},id?'Пункт сохранён.':'Новый пункт добавлен.');showDetail(candidate.id)}else if(f.id==='phase-form'){const id=f.dataset.editId,p=phaseById(id),candidate={...(p||{sources:[]}),id:id||'phase-'+(crypto.randomUUID?.()||Date.now()),title:value('title'),subtitle:value('subtitle'),outcome:value('outcome'),why:value('why'),lane:value('lane'),legacy:value('legacy'),updatedAt:now};closeModal();ui.expanded.add(candidate.id);commit(s=>{if(id)s.phases[s.phases.findIndex(p=>p.id===id)]=candidate;else s.phases.push(candidate)},'Этап сохранён.')}else{closeModal();commit(s=>{for(const k of ['project','goal','assumptions','notes'])s.meta[k]=value(k)},'Рабочие заметки сохранены.')}});
+$('#dialog').addEventListener('close',()=>{if(!$('#dialog').open)modal=null});$('#dialog').addEventListener('click',e=>{if(e.target===$('#dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeModal()}});
+$('#import-file').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(f.size>8*1024*1024){toast('Файл слишком большой: предел 8 МБ.',true);return}try{const text=await f.text();let data;if(text.trim().startsWith('<')){const parsed=new DOMParser().parseFromString(text,'text/html'),node=parsed.querySelector('#embedded-state');if(!node)throw Error('В HTML не найден сохранённый план.');data=JSON.parse(node.textContent)}else data=JSON.parse(text);previewImport(data)}catch(err){toast('Не удалось импортировать: '+err.message,true)}});
+window.addEventListener('beforeprint',()=>{restorePrint={...ui,expanded:new Set(ui.expanded)};ui.view='route';ui.search='';ui.status=ui.area=ui.owner='all';state.phases.forEach(p=>ui.expanded.add(p.id));render()});window.addEventListener('afterprint',()=>{if(restorePrint){ui=restorePrint;restorePrint=null;render()}});
+window.addEventListener('storage',e=>{if(e.key===KEY&&e.newValue){try{const incoming=JSON.parse(e.newValue);validate(incoming);if(Number(incoming.revision)>Number(state.revision)){toast('План изменён в другой вкладке. Закрой лишнюю вкладку и импортируй нужную версию, чтобы объединить правки.',true)}}catch{}}});
+window.ROADMAP_APP={getState:()=>clone(state),validate,exportHTML,exportJSON,previewImport,ready:id=>ready(byId(id)),getStats:()=>stats(visibleTasks().filter(t=>!isLater(t)))};
+render();
+if(bootMessage)toast(bootMessage);
+})();
+</script>
+</body>
+</html>

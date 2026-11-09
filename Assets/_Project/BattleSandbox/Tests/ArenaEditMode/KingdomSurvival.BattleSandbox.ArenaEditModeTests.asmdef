@@ -1,0 +1,25 @@
+{
+  "name": "KingdomSurvival.BattleSandbox.ArenaEditModeTests",
+  "rootNamespace": "KingdomSurvival.BattleSandbox.Tests",
+  "references": [
+    "KingdomSurvival.BattleSandbox.Runtime",
+    "KingdomSurvival.BattleSandbox.UI",
+    "KingdomSurvival.BattlefieldDatabase",
+    "KingdomSurvival.MapLabBridge",
+    "KingdomSurvival.MapLab"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

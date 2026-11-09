@@ -28,6 +28,20 @@ namespace KingdomSurvival.BattleSandbox
         // прямоугольнике поля (весь элемент — рисунок места).
         private LocationBattleGrid? locationGrid;
 
+        // Рельеф арены MapLab: центры клеток, гексы, путь и фигуры поднимаются
+        // по земле, выбор мышью — по видимому гексу. null — плоское поле.
+        private IBattlefieldRelief relief;
+
+        public IBattlefieldRelief Relief
+        {
+            get => relief;
+            set
+            {
+                relief = value;
+                MarkDirtyRepaint();
+            }
+        }
+
         public void SetLocationGrid(LocationBattleGrid? grid)
         {
             locationGrid = grid;
@@ -521,6 +535,25 @@ namespace KingdomSurvival.BattleSandbox
                 return false;
 
             HexLayout layout = CalculateLayout();
+            // Рельеф: видимый гекс под курсором, передние ряды заслоняют задние
+            // (вершина холма выбирает свою клетку, а не ту, что за ней).
+            if (layout.Relief != null)
+            {
+                for (int r = battle.Height - 1; r >= 0; r--)
+                {
+                    for (int q = 0; q < battle.Width; q++)
+                    {
+                        HexCoord coord = new HexCoord(q, r);
+                        if (IsBoardCell(coord) && BattlefieldReliefMath.DrapedHexContains(layout.Relief, layout.Frame,
+                                layout.GetFlatCenter(coord), layout.Size, layout.VerticalScale, pointerPosition))
+                        {
+                            best = coord;
+                            return true;
+                        }
+                    }
+                }
+            }
+
             float bestDistance = float.MaxValue;
             bool found = false;
             for (int r = 0; r < battle.Height; r++)
@@ -555,6 +588,7 @@ namespace KingdomSurvival.BattleSandbox
             Painter2D painter = context.painter2D;
             HexLayout layout = CalculateLayout();
             SandboxUnitState current = battle.CurrentUnit;
+            paintLayout = layout;
             IReadOnlyDictionary<HexCoord, int> reachable =
                 !IsAnimating && current != null && current.Team == SandboxTeam.Player
                     ? battle.GetReachable(current.Id)
@@ -652,6 +686,9 @@ namespace KingdomSurvival.BattleSandbox
                 hoverAttackDirection);
         }
 
+        // Раскладка текущей отрисовки доски (рельеф для гексов).
+        private HexLayout paintLayout;
+
         // Гекс клетки: при MarksDrawnBelow — отметкой для мира под фигурами,
         // иначе — сразу на поле.
         private void PaintHex(
@@ -666,6 +703,20 @@ namespace KingdomSurvival.BattleSandbox
         {
             if (!marksDrawnBelow)
             {
+                if (paintLayout.Relief != null)
+                {
+                    // Гекс лежит на земле: центр — видимый, контур — по склону.
+                    Vector2 flat = BattlefieldReliefMath.Lower(paintLayout.Relief, paintLayout.Frame, center);
+                    painter.fillColor = fill;
+                    painter.strokeColor = stroke;
+                    painter.lineWidth = lineWidth;
+                    BattlefieldReliefMath.DrapedHexPath(painter, paintLayout.Relief, paintLayout.Frame, flat, radius, verticalScale);
+                    if (fillShape)
+                        painter.Fill();
+                    if (lineWidth > 0.01f && stroke.a > 0.001f)
+                        painter.Stroke();
+                    return;
+                }
                 DrawHex(painter, center, radius, fill, stroke, lineWidth, fillShape, verticalScale);
                 return;
             }
@@ -1370,7 +1421,7 @@ namespace KingdomSurvival.BattleSandbox
                 Rect gridArea = BattlefieldFrame.GetGridArea(battlefield);
                 Rect frame = BattlefieldFrame.FitFrame(contentRect, gridArea, true);
                 BattlefieldGridLayout grid = BattlefieldFrame.ComputeLayout(frame, gridArea);
-                return new HexLayout(grid.Size, grid.Origin, grid.VerticalScale);
+                return new HexLayout(grid.Size, grid.Origin, grid.VerticalScale, relief, frame);
             }
 
             float availableWidth = Mathf.Max(100f, contentRect.width - 36f);
@@ -1397,14 +1448,26 @@ namespace KingdomSurvival.BattleSandbox
             public float VerticalScale { get; }
             private Vector2 Origin { get; }
 
-            public HexLayout(float size, Vector2 origin, float verticalScale)
+            public IBattlefieldRelief Relief { get; }
+            public Rect Frame { get; }
+
+            public HexLayout(float size, Vector2 origin, float verticalScale, IBattlefieldRelief relief = null, Rect frame = default)
             {
                 Size = size;
                 Origin = origin;
                 VerticalScale = Mathf.Max(0.01f, verticalScale);
+                Relief = relief;
+                Frame = frame;
             }
 
+            // Видимый центр клетки — на земле (с подъёмом рельефа).
             public Vector2 GetCenter(HexCoord coord)
+            {
+                return BattlefieldReliefMath.Raise(Relief, Frame, GetFlatCenter(coord));
+            }
+
+            // Центр клетки на плоском поле (без рельефа).
+            public Vector2 GetFlatCenter(HexCoord coord)
             {
                 float rowOffset = (coord.R & 1) == 0 ? 0f : 0.5f;
                 float x = Size * Mathf.Sqrt(3f) * (coord.Q + rowOffset);

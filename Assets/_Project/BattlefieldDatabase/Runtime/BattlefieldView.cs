@@ -41,6 +41,22 @@ namespace KingdomSurvival.BattlefieldDatabase
         public BattlefieldHexStyle HexStyle => hexStyle;
         public event Action LayoutChanged;
 
+        // Рельеф под полем (арена MapLab): заливка, линии и картинки гексов
+        // ложатся на землю. null — плоское поле.
+        private IBattlefieldRelief relief;
+
+        public IBattlefieldRelief Relief
+        {
+            get => relief;
+            set
+            {
+                relief = value;
+                SyncImages();
+                fillLayer.MarkDirtyRepaint();
+                lineLayer.MarkDirtyRepaint();
+            }
+        }
+
         // ПР-12К (канон v1.54 §28.3): бой на месте рисуется поверх рисунка
         // места — кадр прозрачный, без фона и заглушки поля; сетка — все
         // клетки арены (стены боя задаёт место, а не отключённые гексы поля).
@@ -282,7 +298,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                 if (image.parent != imageLayer)
                     imageLayer.Add(image);
                 Vector2 box = Layout.GetHexBox(HexRadius) * hexStyle.ImageScale;
-                Vector2 center = Layout.GetCenter(activeCells[i].Q, activeCells[i].R);
+                Vector2 center = BattlefieldReliefMath.Raise(relief, FrameRect, Layout.GetCenter(activeCells[i].Q, activeCells[i].R));
                 image.sprite = sprite;
                 image.tintColor = hexStyle.Fade(tint);
                 image.style.left = center.x - box.x * 0.5f;
@@ -324,7 +340,7 @@ namespace KingdomSurvival.BattlefieldDatabase
             painter.fillColor = fill;
             foreach (HexCoord cell in activeCells)
             {
-                BattlefieldFrame.FillHexPath(painter, Layout.GetCenter(cell.Q, cell.R), HexRadius, Layout.VerticalScale);
+                HexPath(painter, Layout.GetCenter(cell.Q, cell.R), HexRadius);
                 painter.Fill();
             }
         }
@@ -340,9 +356,17 @@ namespace KingdomSurvival.BattlefieldDatabase
             painter.lineWidth = hexStyle.LineWidth;
             foreach (HexCoord cell in activeCells)
             {
-                BattlefieldFrame.FillHexPath(painter, Layout.GetCenter(cell.Q, cell.R), HexRadius, Layout.VerticalScale);
+                HexPath(painter, Layout.GetCenter(cell.Q, cell.R), HexRadius);
                 painter.Stroke();
             }
+        }
+
+        private void HexPath(Painter2D painter, Vector2 flatCenter, float radius)
+        {
+            if (relief != null)
+                BattlefieldReliefMath.DrapedHexPath(painter, relief, FrameRect, flatCenter, radius, Layout.VerticalScale);
+            else
+                BattlefieldFrame.FillHexPath(painter, flatCenter, radius, Layout.VerticalScale);
         }
 
         private VisualElement CreateLayer(string layerName, Action<MeshGenerationContext> draw)

@@ -1,0 +1,432 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using KingdomSurvival.MapLab;
+using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using Object = UnityEngine.Object;
+
+namespace KingdomSurvival.MapLabBridge
+{
+    public enum MapLabArenaCellKind
+    {
+        Open,
+        Hill,
+        Blocked,
+    }
+
+    // Принятая тактическая раскладка обычной арены в координатах кадра поля:
+    // высота кадра — 1, ширина — Aspect, Y вниз (как BattlefieldFrame).
+    // Рисунок строится по этим данным, а не по своему случайному рельефу.
+    public sealed class MapLabArenaSpec
+    {
+        public int Seed;
+        public float Aspect = 16f / 9f;
+        // Сжатие гекса по высоте на экране (BattlefieldFrame.VerticalScale):
+        // камера арены смотрит под углом asin(VerticalScale), и плоские гексы
+        // доски ложатся на землю без искажения.
+        public float VerticalScale = 0.75f;
+        // Радиус гекса в долях высоты кадра.
+        public float HexNominal = 0.08f;
+        // Единиц мира MapLab на радиус гекса (масштаб деревьев и мазков).
+        public float HexWorld = 3f;
+        // Подъём вершины холма на экране, в радиусах гекса.
+        public float HillLiftHexes = 0.3f;
+        public readonly List<(Vector2 Center, MapLabArenaCellKind Kind)> Cells = new List<(Vector2, MapLabArenaCellKind)>();
+    }
+
+    // Боевая арена в стиле карты: маленький мир MapLab по раскладке боя.
+    // Высота задана явно (PlanHeight композиции): холм — ровно на клетках,
+    // где правила боя дают холм (Difficult), соседние холмы сливаются в гряду.
+    // Деревья — массами по краям кадра, не заслоняя клеток; на непроходимых
+    // клетках — камни. Камера ортографическая под наклоном asin(VerticalScale)
+    // снимает ровно кадр поля 16:9 в RenderTexture. Тактическая модель от
+    // рисунка не зависит: рисунок только читает её.
+    public sealed class MapLabArena : IDisposable
+    {
+        // Свой слой (карта партии — 31, поле ассетов окна — 30).
+        public const int Layer = 29;
+        // Мир арены — в начале координат, как карта партии (шейдеры MapLab
+        // берут координаты покраски из мировых); их разделяет слой камеры.
+        private static readonly Vector3 WorldOffset = Vector3.zero;
+        private const float Margin = 10f;
+        private const float TallestTree = 6.5f;
+        private const string BlockKind = "arena-block";
+        private static readonly string[] BlockArt = { "Map05_Rock_Outcrop_D", "Map05_Rock_Angular_B", "Forked_Boulder_A", "Map05_Rock_Round_A" };
+
+        public MapLabArenaSpec Spec { get; }
+        public string Error { get; private set; } = string.Empty;
+        public double BuildMs { get; private set; }
+        public bool Ready => view != null && view.Data != null && pending == null && string.IsNullOrEmpty(Error);
+        public bool Building => pending != null;
+        public float Progress => Ready ? 1f : view != null ? view.BuildProgress : 0f;
+        public MapLabView View => view;
+        public float Mean => mean;
+
+        private MapLabView view;
+        private MapLabSettings settings;
+        private Camera camera;
+        private MapLabCameraRig rig;
+        private RenderTexture target;
+        private IEnumerator pending;
+        private System.Diagnostics.Stopwatch watch;
+        private float k, depth, zBottom, mean, sin, cos, pitch;
+        private bool disposed;
+
+        private MapLabArena(MapLabArenaSpec spec)
+        {
+            Spec = spec;
+        }
+
+        public static bool Available
+        {
+            get
+            {
+                MapLabGameAssets assets = MapLabGameAssets.Load();
+                return assets != null && assets.Profile != null && assets.ArenaInBattle;
+            }
+        }
+
+        // Начать пошаговую сборку (тяжёлые расчёты — в фоне, см. MapLabView.GenerateStepwise).
+        public static MapLabArena Begin(MapLabArenaSpec spec)
+        {
+            MapLabArena arena = new MapLabArena(spec ?? throw new ArgumentNullException(nameof(spec)));
+            arena.Start();
+            return arena;
+        }
+
+        // Собрать сразу (проверки, пакетный режим).
+        public static MapLabArena Build(MapLabArenaSpec spec)
+        {
+            MapLabArena arena = Begin(spec);
+            while (!arena.Advance())
+                System.Threading.Thread.Sleep(1);
+            return arena;
+        }
+
+        private void Start()
+        {
+            watch = System.Diagnostics.Stopwatch.StartNew();
+            try
+            {
+                MapLabGameAssets assets = MapLabGameAssets.Load();
+                if (assets == null || assets.Profile == null)
+                    throw new InvalidOperationException("нет MapLabGameAssets (Генератор карты → Сервис → Подготовить рисунок карты для игры)");
+                pitch = Mathf.Asin(Mathf.Clamp(Spec.VerticalScale, 0.2f, 0.98f)) * Mathf.Rad2Deg;
+                sin = Mathf.Sin(pitch * Mathf.Deg2Rad);
+                cos = Mathf.Cos(pitch * Mathf.Deg2Rad);
+                k = Spec.HexWorld / Mathf.Max(1e-4f, Spec.HexNominal);
+                depth = k / sin;
+
+                settings = Object.Instantiate(assets.Profile);
+                settings.name = "MapLab Arena Profile";
+                settings.hideFlags = HideFlags.HideAndDontSave;
+                ConfigureSettings(settings);
+                float side = settings.General.MapSize;
+                zBottom = (side - depth) * 0.5f;
+                settings.RegionPlan = BuildComposition(side);
+
+                GameObject cameraObject = new GameObject("MapLab Arena Camera") { hideFlags = HideFlags.HideAndDontSave, layer = Layer };
+                camera = cameraObject.AddComponent<Camera>();
+                camera.enabled = false;
+                camera.orthographic = true;
+                camera.allowMSAA = true;
+                camera.allowHDR = false;
+                camera.clearFlags = CameraClearFlags.SolidColor;
+                camera.cullingMask = 1 << Layer;
+                rig = cameraObject.AddComponent<MapLabCameraRig>();
+                rig.enabled = false;
+
+                GameObject mapObject = new GameObject("MapLab Arena") { hideFlags = HideFlags.HideAndDontSave, layer = Layer };
+                mapObject.transform.position = WorldOffset;
+                mapObject.SetActive(false);
+                view = mapObject.AddComponent<MapLabView>();
+                view.GenerateOnLoad = false;
+                MapLabMarker marker = mapObject.AddComponent<MapLabMarker>();
+                marker.AutoPlace = false;
+                marker.enabled = false;
+                assets.ApplyTo(view);
+                view.CameraRig = rig;
+                view.Settings = settings;
+                view.FeatureExtraSets = new List<MapLabArtSet>();
+                if (assets.ArtSet05 != null) view.FeatureExtraSets.Add(assets.ArtSet05);
+                if (assets.ArtSetPoi != null) view.FeatureExtraSets.Add(assets.ArtSetPoi);
+                pending = view.GenerateStepwise();
+            }
+            catch (Exception exception)
+            {
+                Fail(exception);
+            }
+        }
+
+        // Продвинуть сборку на шаг; true — закончена (готово или ошибка).
+        public bool Advance()
+        {
+            if (pending == null)
+                return true;
+            try
+            {
+                if (pending.MoveNext())
+                    return false;
+                pending = null;
+                Finish();
+            }
+            catch (Exception exception)
+            {
+                Fail(exception);
+            }
+            return true;
+        }
+
+        private void Fail(Exception exception)
+        {
+            pending = null;
+            Error = "Арена MapLab: " + exception.Message;
+            Debug.LogException(exception);
+            if (watch != null)
+                BuildMs = watch.Elapsed.TotalMilliseconds;
+        }
+
+        private void Finish()
+        {
+            if (view == null || view.Data == null)
+                throw new InvalidOperationException("генерация не выполнена — " + view?.LastError);
+            Transform markerRoot = view.transform.Find(MapLabMarker.RootName);
+            if (markerRoot != null)
+                markerRoot.gameObject.SetActive(false);
+            SetLayer(view.transform);
+            // Опорная высота — ровная земля открытых клеток: на них подъём 0,
+            // и сетка там лежит как прежде.
+            float sum = 0f;
+            int count = 0;
+            foreach ((Vector2 center, MapLabArenaCellKind kind) in Spec.Cells)
+            {
+                if (kind != MapLabArenaCellKind.Open)
+                    continue;
+                Vector2 w = ToWorld(center);
+                sum += view.Data.SampleHeight(w.x, w.y);
+                count++;
+            }
+            mean = count > 0 ? sum / count : 0f;
+            camera.backgroundColor = view.Palette.Paper;
+            view.gameObject.SetActive(true);
+            BuildMs = watch.Elapsed.TotalMilliseconds;
+            Debug.Log($"MapLab: арена построена за {BuildMs / 1000.0:0.0} с.");
+        }
+
+        private void ConfigureSettings(MapLabSettings s)
+        {
+            float width = Spec.Aspect * k;
+            float side = width + 2f * Margin;
+            s.General.MapSize = side;
+            s.General.Seed = Spec.Seed;
+            s.General.Quality = MapLabQuality.Samples257;
+            s.Stage05.WideFrame = false;
+            s.Stage05.FrameWidth = 0f;
+            s.Stage05.PaintStreaming = MapLabPaintStreaming.Off;
+            // Крупный план: покраска плотнее, чем на карте мира.
+            s.Stage03.PaintTexelsPerUnit = 30f;
+            s.Relief.Source = MapLabHeightSource.Procedural;
+            s.Relief.HeightRange = Mathf.Max(0.2f, Spec.HillLiftHexes * Spec.HexWorld / Mathf.Max(0.2f, cos));
+            s.Relief.FineNoise = 0.05f;
+            s.Relief.Smoothing = 1;
+            s.RoadsAndFields.FieldDensity = 0f;
+            s.Settlement.HousesMin = 0;
+            s.Settlement.HousesMax = 0;
+            s.Vegetation.ForestDensity = Mathf.Max(0.5f, s.Vegetation.ForestDensity);
+            s.Vegetation.SingleTrees = 0f;
+        }
+
+        // Кадр поля (доли высоты кадра, Y вниз) → мир MapLab (x, z) на земле.
+        public Vector2 ToWorld(Vector2 nominal) =>
+            new Vector2(Margin + nominal.x * k, zBottom + (1f - nominal.y) * depth);
+
+        private MapLabComposition BuildComposition(float side)
+        {
+            MapLabComposition c = new MapLabComposition
+            {
+                FromPlan = true,
+                // Без случайных одиночных деревьев, кустов и валунов посреди поля.
+                AssetField = true,
+                PlayRect = new Rect(Margin, zBottom, Spec.Aspect * k, depth),
+                MapEdgeForest = 0f,
+                LakeLevelFraction = 0f,
+            };
+            float step = Spec.HexWorld * 0.2f;
+            int cols = Mathf.Max(2, Mathf.CeilToInt(side / step) + 1);
+            c.PlanCols = cols;
+            c.PlanRows = cols;
+            c.PlanRect = new Rect(0f, 0f, side, side);
+            c.PlanHeight = new float[cols * cols];
+            c.PlanForest = new float[cols * cols];
+            c.PlanField = new float[cols * cols];
+
+            List<Vector2> hills = new List<Vector2>();
+            List<Vector2> cells = new List<Vector2>();
+            foreach ((Vector2 center, MapLabArenaCellKind kind) in Spec.Cells)
+            {
+                Vector2 w = ToWorld(center);
+                cells.Add(w);
+                if (kind == MapLabArenaCellKind.Hill)
+                    hills.Add(w);
+            }
+            float h = Spec.HexWorld;
+            // Деревья не выше TallestTree: дерево в точке p заслоняет на экране
+            // клетки позади себя на глубину T·cos/sin — там деревьям не место.
+            float shadowDepth = TallestTree * cos / sin;
+            Vector2 frameCenter = new Vector2(Margin + Spec.Aspect * k * 0.5f, zBottom + depth * 0.5f);
+            for (int z = 0; z < cols; z++)
+            {
+                for (int x = 0; x < cols; x++)
+                {
+                    Vector2 p = new Vector2(x / (float)(cols - 1) * side, z / (float)(cols - 1) * side);
+                    int i = z * cols + x;
+                    c.PlanHeight[i] = HillHeight(hills, p, h);
+                    c.PlanForest[i] = Forest(cells, p, h, shadowDepth, frameCenter);
+                }
+            }
+
+            // Непроходимые клетки — камнем (вид по клетке, устойчив к seed).
+            int index = 0;
+            foreach ((Vector2 center, MapLabArenaCellKind kind) in Spec.Cells)
+            {
+                index++;
+                if (kind != MapLabArenaCellKind.Blocked)
+                    continue;
+                int pick = (int)(MapLabRandom.StreamSeed(Spec.Seed, "arena-block-" + index, MapLabData.AlgorithmVersion) % (ulong)BlockArt.Length);
+                c.Features.Add((ToWorld(center), BlockArt[pick], BlockKind));
+            }
+            return c;
+        }
+
+        // Объединение мягких куполов клеток холма: плато над клеткой, склон
+        // уходит в соседние клетки, но их центр остаётся у подножия.
+        public static float HillHeight(List<Vector2> hills, Vector2 p, float hex)
+        {
+            float rest = 1f;
+            foreach (Vector2 c in hills)
+            {
+                float d = Vector2.Distance(p, c) / hex;
+                if (d >= 1.65f)
+                    continue;
+                float bump = 1f - Smooth(0.35f, 1.65f, d);
+                rest *= 1f - bump;
+            }
+            return 1f - rest;
+        }
+
+        private float Forest(List<Vector2> cells, Vector2 p, float hex, float shadowDepth, Vector2 frameCenter)
+        {
+            float nearest = float.MaxValue;
+            bool coversCell = false;
+            foreach (Vector2 c in cells)
+            {
+                float d = Vector2.Distance(p, c);
+                nearest = Mathf.Min(nearest, d);
+                // Клетка позади точки на экране под деревом.
+                if (Mathf.Abs(c.x - p.x) < hex * 1.7f && c.y > p.y && c.y - p.y < shadowDepth + hex)
+                    coversCell = true;
+            }
+            if (coversCell)
+                return 0f;
+            float away = Smooth(hex * 1.6f, hex * 3.2f, nearest);
+            // Углы кадра гуще краёв: игровая середина остаётся открытой.
+            Vector2 offset = p - frameCenter;
+            float corner = Mathf.Clamp01(Mathf.Abs(offset.x) / (Spec.Aspect * k * 0.5f)) * Mathf.Clamp01(Mathf.Abs(offset.y) / (depth * 0.5f));
+            return away * Mathf.Lerp(0.75f, 1f, corner);
+        }
+
+        private static float Smooth(float a, float b, float x)
+        {
+            float t = Mathf.Clamp01((x - a) / (b - a));
+            return t * t * (3f - 2f * t);
+        }
+
+        // Подъём земли в точке кадра (доли кадра 0..1, Y вниз) — в долях высоты
+        // кадра, вверх положительный. Та же высота, что у нарисованной земли.
+        public float LiftShare(Vector2 frameShare)
+        {
+            if (!Ready)
+                return 0f;
+            Vector2 w = ToWorld(new Vector2(frameShare.x * Spec.Aspect, frameShare.y));
+            float height = view.Data.SampleHeight(w.x, w.y);
+            return (height - mean) * cos / k;
+        }
+
+        // Нарисовать кадр поля в текстуру pixelWidth × pixelHeight.
+        public RenderTexture Render(int pixelWidth, int pixelHeight)
+        {
+            if (!Ready || pixelWidth < 8 || pixelHeight < 8)
+                return null;
+            pixelWidth = Mathf.Min(pixelWidth, 4096);
+            pixelHeight = Mathf.Min(pixelHeight, 4096);
+            if (target == null || target.width != pixelWidth || target.height != pixelHeight)
+            {
+                ReleaseTarget();
+                target = new RenderTexture(pixelWidth, pixelHeight, 24, GraphicsFormat.R8G8B8A8_SRGB)
+                {
+                    name = "MapLab Arena",
+                    antiAliasing = Mathf.Clamp(QualitySettings.antiAliasing > 1 ? QualitySettings.antiAliasing : 4, 1, 8),
+                    hideFlags = HideFlags.DontSave,
+                };
+                target.Create();
+            }
+            Vector2 centerWorld = ToWorld(new Vector2(Spec.Aspect * 0.5f, 0.5f));
+            Vector3 focus = WorldOffset + new Vector3(centerWorld.x, mean, centerWorld.y);
+            Quaternion rotation = Quaternion.Euler(pitch, 0f, 0f);
+            float size = view.Data.Size;
+            float distance = size * 2f + 200f;
+            camera.orthographicSize = k * 0.5f;
+            camera.aspect = pixelWidth / (float)pixelHeight;
+            camera.nearClipPlane = Mathf.Max(0.3f, distance - size * 1.6f - 60f);
+            camera.farClipPlane = distance + size * 1.6f + 60f;
+            camera.transform.SetPositionAndRotation(focus - rotation * Vector3.forward * distance, rotation);
+            rig.Target = focus;
+            view.OnCameraChanged();
+            view.PumpStreaming(false);
+            foreach (Camera other in Camera.allCameras)
+                if (other != camera && (other.cullingMask & (1 << Layer)) != 0)
+                    other.cullingMask &= ~(1 << Layer);
+            camera.targetTexture = target;
+            Shader.SetGlobalFloat("_MapLabPixelScale", 1f);
+            camera.Render();
+            camera.targetTexture = null;
+            return target;
+        }
+
+        private static void SetLayer(Transform t)
+        {
+            t.gameObject.layer = Layer;
+            for (int i = 0; i < t.childCount; i++)
+                SetLayer(t.GetChild(i));
+        }
+
+        private void ReleaseTarget()
+        {
+            if (target == null)
+                return;
+            target.Release();
+            Object.DestroyImmediate(target);
+            target = null;
+        }
+
+        public void Dispose()
+        {
+            if (disposed)
+                return;
+            disposed = true;
+            pending = null;
+            if (view != null)
+            {
+                view.Clear();
+                Object.DestroyImmediate(view.gameObject);
+                view = null;
+            }
+            if (camera != null)
+                Object.DestroyImmediate(camera.gameObject);
+            if (settings != null)
+                Object.DestroyImmediate(settings);
+            ReleaseTarget();
+        }
+    }
+}

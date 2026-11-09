@@ -7,7 +7,9 @@
         "KingdomSurvival.AnimationDatabase",
         "KingdomSurvival.Core",
         "KingdomSurvival.BattlefieldDatabase",
-        "KingdomSurvival.LocationRendering"
+        "KingdomSurvival.LocationRendering",
+        "KingdomSurvival.MapLabBridge",
+        "KingdomSurvival.MapLab"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

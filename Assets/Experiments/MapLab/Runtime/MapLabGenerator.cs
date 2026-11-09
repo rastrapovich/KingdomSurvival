@@ -149,6 +149,12 @@ namespace KingdomSurvival.MapLab
                             continue;
                         }
                         Vector2 p = World(x, z);
+                        if (composition.PlanHeight != null)
+                        {
+                            float planned = composition.SamplePlan(composition.PlanHeight, p);
+                            data.Heights[data.Index(x, z)] = Mathf.Max(0f, planned + relief.FineNoise * 0.06f * fine.Fbm(p.x / 7f, p.y / 7f, 2)) * range;
+                            continue;
+                        }
                         float hills = 0f;
                         for (int i = 0; i < composition.Hills.Count; i++)
                         {

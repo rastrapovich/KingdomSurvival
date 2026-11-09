@@ -105,6 +105,11 @@ namespace KingdomSurvival.MapLab
         public bool AssetField;
         public Rect PlayRect;
         public float[] PlanForest, PlanField;
+        // Боевая арена: рельеф задан явно — высота 0..1 (доля диапазона высот)
+        // на той же сетке PlanRect × PlanCols × PlanRows. Задана — шумовой
+        // рельеф и холмы композиции не строятся: видимый холм совпадает с
+        // клетками, где правила боя дают холм.
+        public float[] PlanHeight;
         public int PlanCols, PlanRows;
         public Rect PlanRect;
         // Приметные места плана: позиция и вид (рисуются знаком мест, этап D).

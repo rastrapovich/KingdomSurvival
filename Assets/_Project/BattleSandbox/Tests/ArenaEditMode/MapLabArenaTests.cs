@@ -63,7 +63,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
                 try
                 {
                     Assert.That(arena.Ready, Is.True, arena.Error);
-                    Debug.Log($"Арена MapLab seed {seed}: сборка {arena.BuildMs:0} мс.");
+                    Debug.Log($"Арена MapLab seed {seed}: сборка {arena.BuildMs:0} мс, декор Базы ассетов: {arena.UsesAssetDatabase}, элементов {arena.DecorFeatures}.");
                     Rect frame = new Rect(0f, 0f, 1920f, 1080f);
                     float expected = spec.HillLiftHexes * spec.HexNominal;
                     List<HexCoord> cells = BattlefieldFrame.ActiveCells(null).ToList();
@@ -94,12 +94,92 @@ namespace KingdomSurvival.BattleSandbox.Tests
                         Assert.That(Vector2.Distance(back, flat), Is.LessThan(1f), "Обратное преобразование");
                     }
 
+                    AssertDecorLeavesCellsVisible(arena, spec);
                     SavePreview(arena, spec, cells, battle, frame, seed);
                 }
                 finally
                 {
                     arena.Dispose();
                 }
+            }
+        }
+
+        // Деревья и крупный декор не закрывают клетки на экране: центр клетки
+        // позади рисунка не попадает в его середину (без прозрачных полей).
+        private static void AssertDecorLeavesCellsVisible(MapLabArena arena, MapLabArenaSpec spec)
+        {
+            if (!arena.UsesAssetDatabase)
+                return;
+            Assert.That(arena.DecorFeatures, Is.GreaterThan(10), "Декор из Базы ассетов поставлен.");
+            float cos = Mathf.Sqrt(1f - spec.VerticalScale * spec.VerticalScale), sin = spec.VerticalScale;
+            foreach (KingdomSurvival.MapLab.MapLabFeatureSprite sprite in arena.View.Data.FeatureSprites)
+            {
+                if (sprite.Kind != "arena-decor" || sprite.Height < spec.HexWorld)
+                    continue;
+                float baseV = sprite.Base.y * cos + sprite.Base.z * sin;
+                foreach ((Vector2 Center, MapLabArenaCellKind Kind) cell in spec.Cells)
+                {
+                    Vector2 center = cell.Center;
+                    Vector2 w = arena.ToWorld(center);
+                    float h = arena.View.Data.SampleHeight(w.x, w.y);
+                    float v = h * cos + w.y * sin;
+                    bool middle = Mathf.Abs(w.x - sprite.Base.x) < sprite.Width * 0.3f;
+                    bool covered = w.y > sprite.Base.z && v > baseV + sprite.Height * cos * 0.15f && v < baseV + sprite.Height * cos * 0.9f;
+                    Assert.That(middle && covered, Is.False, $"Рисунок {sprite.ArtId} закрывает клетку {center}");
+                }
+            }
+        }
+
+        [Test]
+        public void ArtAssetSets_FollowPurpose_AndDecorDensityDoesNotChangeRelief()
+        {
+            if (!MapLabArena.Available)
+                Assert.Ignore("Нет MapLabGameAssets с профилем — арена MapLab выключена.");
+            KingdomSurvival.ArtAssets.ArtAssetDatabaseAsset catalog = KingdomSurvival.ArtAssets.ArtAssetDatabaseAsset.Current;
+            List<MapLabDecorArt> arenaDecor = new List<MapLabDecorArt>(), mapDecor = new List<MapLabDecorArt>();
+            KingdomSurvival.MapLab.MapLabArtSet arenaSet = MapLabArtAssets.BuildSet(true, 1.8f, arenaDecor);
+            KingdomSurvival.MapLab.MapLabArtSet mapSet = MapLabArtAssets.BuildSet(false, 1.8f, mapDecor);
+            try
+            {
+                foreach (KingdomSurvival.MapLab.MapLabArtEntry entry in arenaSet.Entries)
+                    Assert.That(catalog.Find(entry.Id.Substring(MapLabArtAssets.IdPrefix.Length)).UsableOnArena, Is.True, entry.Id);
+                foreach (KingdomSurvival.MapLab.MapLabArtEntry entry in mapSet.Entries)
+                    Assert.That(catalog.Find(entry.Id.Substring(MapLabArtAssets.IdPrefix.Length)).UsableOnMap, Is.True, entry.Id);
+                // Общий объект — один ID и одна текстура у карты и арены.
+                foreach (KingdomSurvival.MapLab.MapLabArtEntry entry in arenaSet.Entries)
+                {
+                    KingdomSurvival.MapLab.MapLabArtEntry shared = mapSet.Find(entry.Id);
+                    if (shared != null)
+                        Assert.That(shared.Texture, Is.SameAs(entry.Texture), entry.Id);
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(arenaSet);
+                Object.DestroyImmediate(mapSet);
+            }
+
+            SandboxBattle battle = Battle(5);
+            MapLabArenaSpec sparse = MapLabArenaDriver.BuildSpec(null, battle);
+            sparse.DecorDensity = 0.3f;
+            MapLabArenaSpec dense = MapLabArenaDriver.BuildSpec(null, battle);
+            dense.DecorDensity = 2f;
+            MapLabArena first = MapLabArena.Build(sparse), second = MapLabArena.Build(dense);
+            try
+            {
+                Assert.That(first.Ready && second.Ready, Is.True, first.Error + second.Error);
+                if (first.UsesAssetDatabase)
+                    Assert.That(second.DecorFeatures, Is.GreaterThan(first.DecorFeatures), "Плотность меняет только декор.");
+                for (int i = 0; i < sparse.Cells.Count; i++)
+                {
+                    Vector2 share = new Vector2(sparse.Cells[i].Center.x / sparse.Aspect, sparse.Cells[i].Center.y);
+                    Assert.That(second.LiftShare(share), Is.EqualTo(first.LiftShare(share)).Within(1e-5f), "Рельеф не зависит от декора.");
+                }
+            }
+            finally
+            {
+                first.Dispose();
+                second.Dispose();
             }
         }
 
@@ -134,7 +214,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
             Texture2D image = new Texture2D(rt.width, rt.height, TextureFormat.RGBA32, false);
             image.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
             RenderTexture.active = previous;
-            string directory = Path.Combine(Directory.GetCurrentDirectory(), "Temp", "MapLabArena");
+            string directory = Path.Combine(Directory.GetCurrentDirectory(), "Logs", "MapLabArena");
             Directory.CreateDirectory(directory);
             File.WriteAllBytes(Path.Combine(directory, $"arena_seed{seed}.png"), image.EncodeToPNG());
             Relief relief = new Relief(arena);

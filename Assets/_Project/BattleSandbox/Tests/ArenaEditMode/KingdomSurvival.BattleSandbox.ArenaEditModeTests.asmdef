@@ -6,7 +6,8 @@
     "KingdomSurvival.BattleSandbox.UI",
     "KingdomSurvival.BattlefieldDatabase",
     "KingdomSurvival.MapLabBridge",
-    "KingdomSurvival.MapLab"
+    "KingdomSurvival.MapLab",
+    "KingdomSurvival.ArtAssetDatabase"
   ],
   "includePlatforms": [
     "Editor"

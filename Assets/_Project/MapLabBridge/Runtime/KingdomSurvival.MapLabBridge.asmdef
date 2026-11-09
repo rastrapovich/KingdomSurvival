@@ -3,7 +3,8 @@
   "rootNamespace": "KingdomSurvival.MapLabBridge",
   "references": [
     "KingdomSurvival.Core",
-    "KingdomSurvival.MapLab"
+    "KingdomSurvival.MapLab",
+    "KingdomSurvival.ArtAssetDatabase"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

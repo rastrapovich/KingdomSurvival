@@ -60,6 +60,10 @@ namespace KingdomSurvival.BattleSandbox
                 spec.Cells.Add((layout.GetCenter(cell.Q, cell.R), kind));
                 key.Append((int)kind);
             }
+            // Стартовые клетки бойцов — без травы и мелочи поверх.
+            foreach (SandboxUnitState unit in battle.Units)
+                if (unit != null)
+                    spec.KeepClear.Add(layout.GetCenter(unit.Position.Q, unit.Position.R));
             spec.Seed = StableHash(key.ToString());
             return spec;
         }

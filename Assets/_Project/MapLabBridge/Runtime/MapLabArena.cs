@@ -33,6 +33,15 @@ namespace KingdomSurvival.MapLabBridge
         // Подъём вершины холма на экране, в радиусах гекса.
         public float HillLiftHexes = 0.3f;
         public readonly List<(Vector2 Center, MapLabArenaCellKind Kind)> Cells = new List<(Vector2, MapLabArenaCellKind)>();
+        // Стартовые клетки бойцов (центры, доли кадра): трава и мелочь их не
+        // закрывают.
+        public readonly List<Vector2> KeepClear = new List<Vector2>();
+        // Плотность декора (трава, мелочь, число групп деревьев): 1 — обычная.
+        // Свой поток случайности: рельеф, клетки и бонусы от неё не зависят.
+        public float DecorDensity = 1f;
+        // Единиц мира MapLab на единицу мира мест (размер рисунков Базы
+        // ассетов на арене). 0 — из MapLabGameAssets.
+        public float AssetScale;
     }
 
     // Боевая арена в стиле карты: маленький мир MapLab по раскладке боя.
@@ -42,7 +51,7 @@ namespace KingdomSurvival.MapLabBridge
     // клетках — камни. Камера ортографическая под наклоном asin(VerticalScale)
     // снимает ровно кадр поля 16:9 в RenderTexture. Тактическая модель от
     // рисунка не зависит: рисунок только читает её.
-    public sealed class MapLabArena : IDisposable
+    public sealed partial class MapLabArena : IDisposable
     {
         // Свой слой (карта партии — 31, поле ассетов окна — 30).
         public const int Layer = 29;
@@ -72,6 +81,11 @@ namespace KingdomSurvival.MapLabBridge
         private System.Diagnostics.Stopwatch watch;
         private float k, depth, zBottom, mean, sin, cos, pitch;
         private bool disposed;
+        // Рисунки Базы ассетов для арены (по назначению) и их роли в декоре.
+        private MapLabArtSet decorSet;
+        private readonly List<MapLabDecorArt> decorArt = new List<MapLabDecorArt>();
+        public int DecorFeatures { get; private set; }
+        public bool UsesAssetDatabase { get; private set; }
 
         private MapLabArena(MapLabArenaSpec spec)
         {
@@ -122,6 +136,8 @@ namespace KingdomSurvival.MapLabBridge
                 settings.name = "MapLab Arena Profile";
                 settings.hideFlags = HideFlags.HideAndDontSave;
                 ConfigureSettings(settings);
+                float scale = Spec.AssetScale > 0f ? Spec.AssetScale : assets.ArenaAssetScale;
+                decorSet = MapLabArtAssets.BuildSet(true, scale, decorArt);
                 float side = settings.General.MapSize;
                 zBottom = (side - depth) * 0.5f;
                 settings.RegionPlan = BuildComposition(side);
@@ -149,6 +165,7 @@ namespace KingdomSurvival.MapLabBridge
                 view.CameraRig = rig;
                 view.Settings = settings;
                 view.FeatureExtraSets = new List<MapLabArtSet>();
+                if (decorSet != null) view.FeatureExtraSets.Add(decorSet);
                 if (assets.ArtSet05 != null) view.FeatureExtraSets.Add(assets.ArtSet05);
                 if (assets.ArtSetPoi != null) view.FeatureExtraSets.Add(assets.ArtSetPoi);
                 pending = view.GenerateStepwise();
@@ -275,6 +292,9 @@ namespace KingdomSurvival.MapLabBridge
             // клетки позади себя на глубину T·cos/sin — там деревьям не место.
             float shadowDepth = TallestTree * cos / sin;
             Vector2 frameCenter = new Vector2(Margin + Spec.Aspect * k * 0.5f, zBottom + depth * 0.5f);
+            // Рисунки Базы ассетов для арены есть — деревья, трава и камни
+            // ставятся явно (MapLabArena.Decor.cs); иначе прежний лес MapLab.
+            UsesAssetDatabase = decorArt.FindAll(art => art.Role == MapLabDecorRole.Tree).Count >= 3;
             for (int z = 0; z < cols; z++)
             {
                 for (int x = 0; x < cols; x++)
@@ -282,8 +302,14 @@ namespace KingdomSurvival.MapLabBridge
                     Vector2 p = new Vector2(x / (float)(cols - 1) * side, z / (float)(cols - 1) * side);
                     int i = z * cols + x;
                     c.PlanHeight[i] = HillHeight(hills, p, h);
-                    c.PlanForest[i] = Forest(cells, p, h, shadowDepth, frameCenter);
+                    c.PlanForest[i] = UsesAssetDatabase ? 0f : Forest(cells, p, h, shadowDepth, frameCenter);
                 }
+            }
+
+            if (UsesAssetDatabase)
+            {
+                PlaceDecor(c, cells, frameCenter);
+                return c;
             }
 
             // Непроходимые клетки — камнем (вид по клетке, устойчив к seed).
@@ -426,6 +452,8 @@ namespace KingdomSurvival.MapLabBridge
                 Object.DestroyImmediate(camera.gameObject);
             if (settings != null)
                 Object.DestroyImmediate(settings);
+            if (decorSet != null)
+                Object.DestroyImmediate(decorSet);
             ReleaseTarget();
         }
     }

@@ -17,6 +17,8 @@ namespace KingdomSurvival.MapLabBridge
         public MapLabSettings Profile;
         [Tooltip("Обычная арена боя (дорожный бой, полигон) — рисунок MapLab по раскладке боя: холмы на клетках холма, лес по краям. Выключено — прежняя картинка поля.")]
         public bool ArenaInBattle = true;
+        [Tooltip("Размер рисунков Базы ассетов на арене: единиц мира арены на единицу мира мест (человек в месте ≈ 1,7). Радиус гекса арены — 3 ед.")]
+        [Range(0.5f, 4f)] public float ArenaAssetScale = 1.8f;
         [Tooltip("Текселей на единицу мира в снимке карты (больше — чётче вблизи, дольше и тяжелее).")]
         [Range(2f, 12f)] public float TexelsPerUnit = 6f;
         [Tooltip("Наклон камеры снимка, градусов (рабочий наклон рисунков — 50°).")]

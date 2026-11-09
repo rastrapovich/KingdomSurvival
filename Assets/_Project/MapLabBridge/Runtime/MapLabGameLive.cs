@@ -75,6 +75,7 @@ namespace KingdomSurvival.MapLabBridge
         public static void Clear()
         {
             WorldMapObstacles.Clear();
+            MapLabLiveFigures.ClearAll();
             if (current == null)
                 return;
             MapLabView view = current.View != null ? current.View : current.PendingView;

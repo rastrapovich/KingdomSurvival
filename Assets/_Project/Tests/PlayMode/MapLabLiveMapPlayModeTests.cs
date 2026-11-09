@@ -229,6 +229,64 @@ public sealed class MapLabLiveMapPlayModeTests
         Assert.Greater(Hours() - p0, 0.0001, "Снятие паузы пускает время.");
     }
 
+    // Герой — фигура в сцене карты: за домом (дальше от зрителя) дом его
+    // закрывает, видна контурная часть; перед домом — герой поверх дома.
+    // Картинка героя поверх карты при этом скрыта. Кадры — для просмотра.
+    [UnityTest]
+    public IEnumerator HeroFigure_InScene_BehindAndInFrontOfHouse()
+    {
+        SceneManager.LoadScene(MainScene);
+        for (int i = 0; i < 600 && SceneManager.GetActiveScene().name != MainScene; i++)
+            yield return null;
+        yield return Frames(20);
+        MonoBehaviour main = FindBehaviour("PrototypeUIController");
+        Invoke(main, "StartNewGameFromMenu");
+        float started = Time.realtimeSinceStartup;
+        while ((MapLabGameLive.Current == null || !MapLabGameLive.Current.Ready) && Time.realtimeSinceStartup - started < 300f)
+            yield return null;
+        Assert.IsTrue(MapLabGameLive.Current != null && MapLabGameLive.Current.Ready);
+        yield return Frames(60);
+        GameState campaign = CampaignSession.Current;
+        TestPeople.AdmitAll(campaign);
+        ContinuousSimulationSystem.SetSpeedMultiplier(campaign, ContinuousSimulationSystem.MaximumSpeedMultiplier);
+        Assert.Greater(WorldMapObstacles.Count, 0, "У построек есть основания-препятствия.");
+        // Ближайшее к старту одиночное дерево на открытой земле: встать за
+        // его стволом (дальше от зрителя) и перед ним.
+        MapLabGameLive.World live = MapLabGameLive.Current;
+        Vector2 start = new Vector2(WorldMapNavigation.CapitalXPercent, WorldMapNavigation.CapitalYPercent);
+        Vector2 tree = live.View.Data.Objects
+            .Where(o => o.Kind == KingdomSurvival.MapLab.MapLabObjectKind.Deciduous)
+            .Select(o => MapLabGameLive.NavPercent(live, o.Position.x, o.Position.z))
+            .Where(p => WorldMapNavigation.GetTerrainAtPercent(p.x, p.y) != WorldMapGameplayTerrainType.Forest && Vector2.Distance(p, start) > 1.5f)
+            .OrderBy(p => Vector2.Distance(p, start))
+            .First();
+        WorldMapObstacle house = new WorldMapObstacle(tree.x - 0.05f, tree.y - 0.02f, tree.x + 0.05f, tree.y + 0.02f);
+        float cx = tree.x;
+        VisualElement root = main.GetComponent<UIDocument>().rootVisualElement;
+        foreach ((string name, float y) in new[] { ("behind", tree.y - 0.3f), ("front", tree.y + 0.3f) })
+        {
+            Invoke(main, "GoToWorldMapPoint", cx, y);
+            float t0 = Time.realtimeSinceStartup;
+            yield return Frames(10);
+            while (ContinuousSimulationSystem.HasMovementOrActivityInProgress(campaign) && Time.realtimeSinceStartup - t0 < 120f)
+                yield return null;
+            if (Get<bool>(main, "IsLocationInteractionActive"))
+                Invoke(main, "CloseLocationInteraction");
+            ExpeditionData he = campaign.ActiveExpedition;
+            yield return ZoomTo(main, he != null ? he.CurrentMapXPercent : cx, he != null ? he.CurrentMapYPercent : house.YMax, 0.75f);
+            Image heroUi = root.Q<Image>("world-map-hero-figure");
+            Assert.IsTrue(heroUi == null || heroUi.resolvedStyle.display == DisplayStyle.None, "Картинка героя поверх карты скрыта — герой в сцене.");
+            Transform figure = MapLabGameLive.Current.View.transform.Find("MapLab Figure hero");
+            Assert.IsNotNull(figure, "Фигура героя стоит в сцене карты.");
+            Assert.IsTrue(figure.gameObject.activeSelf, "Фигура героя видна.");
+            ExpeditionData e = campaign.ActiveExpedition;
+            Debug.Log($"Герой {name}: точка ({e?.CurrentMapXPercent:0.00}, {e?.CurrentMapYPercent:0.00}), дом y {house.YMin:0.00}..{house.YMax:0.00}");
+            foreach (Renderer r in figure.GetComponentsInChildren<Renderer>(true))
+                Debug.Log($"Герой {name}: {r.name} слой {r.gameObject.layer} активен {r.gameObject.activeInHierarchy} шейдер {r.sharedMaterial?.shader?.name} поддержан {r.sharedMaterial?.shader?.isSupported} очередь {r.sharedMaterial?.renderQueue} текстура {r.sharedMaterial?.mainTexture?.name} границы {r.bounds} позиция {r.transform.position}; камера {MapLabGameLive.Current.Camera.transform.position} маска {MapLabGameLive.Current.Camera.cullingMask}");
+            yield return Capture(main, "hero_" + name + "_tree");
+        }
+    }
+
     [UnityTest]
     public IEnumerator RealTravel_ClickEachServiceBuilding_OpensItsWindow()
     {
@@ -443,7 +501,10 @@ public sealed class MapLabLiveMapPlayModeTests
         Assert.IsNotNull(hero);
         Assert.IsTrue(MapLabGameLive.HeroFrame(0, out Texture2D frame, out _, out _, out _), "Есть кадры фишки MapLab.");
         yield return Frames(30);
-        Assert.IsNotNull(hero.image, "Герой нарисован кадром фишки MapLab.");
+        // Герой — фигура в сцене карты (кадр фишки MapLab), не картинка поверх.
+        Transform heroFigure = MapLabGameLive.Current.View.transform.Find("MapLab Figure hero");
+        Assert.IsNotNull(heroFigure, "Герой нарисован кадром фишки MapLab в сцене карты.");
+        Assert.IsTrue(heroFigure.gameObject.activeSelf, "Фигура героя видна.");
         yield return Capture(main, "live_04_walking");
         // Дорогу пропускаем: отряд у двери, прибытие — вход и окно лавки.
         expedition.CurrentMapXPercent = target.XPercent;

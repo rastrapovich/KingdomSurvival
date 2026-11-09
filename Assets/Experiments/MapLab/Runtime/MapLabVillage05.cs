@@ -481,11 +481,11 @@ namespace KingdomSurvival.MapLab
             // Дворы (и их ограды) не заходят друг на друга нигде — точная
             // проверка повёрнутых прямоугольников; касание стороной допустимо.
             foreach (MapLabYardRect other in yards)
-                if (rect.Overlaps(other, 0.15f))
+                if (rect.Overlaps(other, 0.05f))
                     return;
             // И с дворами соседних поселений.
             foreach (MapLabYardRect other in data.YardRects)
-                if (rect.Overlaps(other, 0.15f))
+                if (rect.Overlaps(other, 0.05f))
                     return;
             if (data.Plaza.z > 0f && Vector2.Distance(center, new Vector2(data.Plaza.x, data.Plaza.y)) < data.Plaza.z + Mathf.Max(width, depth) * 0.5f)
                 return;

@@ -239,12 +239,16 @@ public partial class PrototypeUIController
         {
             worldMapHeroImage.style.display = DisplayStyle.None;
             HideHeroFigureLook();
+            MapLabLiveFigures.Hide("hero");
             if (worldMapHeroFallback != null)
                 worldMapHeroFallback.style.display = DisplayStyle.None;
             return true;
         }
         if (worldMapMapLab == null || world == null || !world.Ready)
+        {
+            MapLabLiveFigures.Hide("hero");
             return false;
+        }
         ExpeditionData expedition = gameState.ActiveExpedition;
         Vector2 percent = expedition != null
             ? new Vector2(expedition.CurrentMapXPercent, expedition.CurrentMapYPercent)
@@ -308,6 +312,18 @@ public partial class PrototypeUIController
         Vector2 ground2 = MapPercentToWorldMapViewport(percent.x, percent.y + shift);
         worldMapHeroBob = running ? worldMapHeroBob + dt * 9f : 0f;
         float bob = running ? Mathf.Abs(Mathf.Sin(worldMapHeroBob)) * height * 0.03f : 0f;
+
+        // Фигура — в сцене карты: деревья и дома перед ней по опоре её
+        // закрывают (закрытая часть — контуром), за ней — нет. Картинка
+        // поверх карты тогда не нужна.
+        if (MapLabLiveFigures.Place(world, "hero", texture, FigureOutline(texture), percent, worldHeight, aspect, pivot, bob / Mathf.Max(0.0001f, pxPerUnit), true))
+        {
+            worldMapHeroImage.style.display = DisplayStyle.None;
+            HideHeroFigureLook();
+            if (worldMapHeroFallback != null)
+                worldMapHeroFallback.style.display = DisplayStyle.None;
+            return true;
+        }
 
         if (worldMapHeroFallback != null && worldMapHeroFallback.style.display != DisplayStyle.None)
             worldMapHeroFallback.style.display = DisplayStyle.None;

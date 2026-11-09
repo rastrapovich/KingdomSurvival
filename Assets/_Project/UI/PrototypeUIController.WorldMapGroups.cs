@@ -47,6 +47,8 @@ public partial class PrototypeUIController
                 worldMapGroupLayer.style.display = DisplayStyle.None;
             foreach (Label l in worldMapGroupLabels.Values)
                 l.style.display = DisplayStyle.None;
+            foreach (string id in worldMapGroupMarkers.Keys)
+                MapLabLiveFigures.Hide("group-" + id);
             return;
         }
         if (worldMapGroupLayer == null)
@@ -74,8 +76,12 @@ public partial class PrototypeUIController
         // Рост фигуры группы — как у фигурки героя (одинаковый масштаб людей).
         float figureHeight = hexPx * 1.1f;
         MapLabGameLive.World live = MapLabGameLive.Current;
+        float sceneFigureHeight = 0f;
         if (live != null && live.Ready && MapLabGameLive.HeroFrame(0, out Texture2D _, out float heroWorldHeight, out float _, out Vector2 _))
+        {
             figureHeight = heroWorldHeight * live.CanvasPixelsPerUnit(worldMapCanvasWidth);
+            sceneFigureHeight = heroWorldHeight;
+        }
         foreach (GeneratedMapActor actor in map.Actors)
         {
             if (actor == null || string.IsNullOrEmpty(actor.FigureSet))
@@ -91,6 +97,7 @@ public partial class PrototypeUIController
                 if (hoverLabel != null)
                     hoverLabel.style.display = DisplayStyle.None;
                 PlaceGroupShadow(actor.ActorId, 0f, 0f, figureHeight, false);
+                MapLabLiveFigures.Hide("group-" + actor.ActorId);
                 continue;
             }
             int direction = waiting && entry.Marker != null ? entry.Direction : WorldMapActorMotion.DirectionIndex(dx, dy);
@@ -138,7 +145,14 @@ public partial class PrototypeUIController
             entry.Marker.style.height = figureHeight;
             entry.Marker.style.left = at.XPercent / 100f * worldMapCanvasWidth - figureHeight * 0.5f;
             entry.Marker.style.top = at.YPercent / 100f * worldMapCanvasHeight - figureHeight * 0.97f;
-            PlaceGroupShadow(actor.ActorId, at.XPercent / 100f * worldMapCanvasWidth - figureHeight * 0.5f, at.YPercent / 100f * worldMapCanvasHeight - figureHeight * 0.97f, figureHeight, true);
+            // Фигура группы — в сцене карты (сортировка с деревьями и домами,
+            // закрытая часть — контуром); элемент UI остаётся прозрачной
+            // целью наведения и клика.
+            Texture2D sceneTexture = sceneFigureHeight > 0f ? MapLabGameMap.FigureTexture(actor.FigureSet, direction) : null;
+            bool inScene = sceneTexture != null && MapLabLiveFigures.Place(live, "group-" + actor.ActorId, sceneTexture, FigureOutline(sceneTexture),
+                new Vector2(at.XPercent, at.YPercent), sceneFigureHeight, sceneTexture.width / (float)Mathf.Max(1, sceneTexture.height), new Vector2(0.5f, 0.03f), 0f, true);
+            entry.Marker.style.unityBackgroundImageTintColor = inScene ? new Color(1f, 1f, 1f, 0f) : Color.white;
+            PlaceGroupShadow(actor.ActorId, at.XPercent / 100f * worldMapCanvasWidth - figureHeight * 0.5f, at.YPercent / 100f * worldMapCanvasHeight - figureHeight * 0.97f, figureHeight, !inScene);
             worldMapGroupMarkers[actor.ActorId] = entry;
             if (hoverLabel != null && hoverLabel.style.display == DisplayStyle.Flex)
             {

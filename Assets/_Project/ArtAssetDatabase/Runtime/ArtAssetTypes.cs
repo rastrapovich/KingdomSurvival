@@ -35,7 +35,10 @@ namespace KingdomSurvival.ArtAssets
     {
         Both,
         MapOnly,
-        ArenaOnly
+        ArenaOnly,
+        // Только места Базы локаций: генераторы карты и арены запись не берут
+        // (прежние записи до одного вида, 09.11.2026).
+        LocationsOnly
     }
 
     // Слои места: тот же порядок, что LocationVisualBand.
@@ -158,7 +161,7 @@ namespace KingdomSurvival.ArtAssets
             }
         }
 
-        public static readonly ArtAssetPurpose[] Purposes = { ArtAssetPurpose.Both, ArtAssetPurpose.MapOnly, ArtAssetPurpose.ArenaOnly };
+        public static readonly ArtAssetPurpose[] Purposes = { ArtAssetPurpose.Both, ArtAssetPurpose.MapOnly, ArtAssetPurpose.ArenaOnly, ArtAssetPurpose.LocationsOnly };
 
         public static string PurposeTitle(ArtAssetPurpose purpose)
         {
@@ -166,6 +169,7 @@ namespace KingdomSurvival.ArtAssets
             {
                 case ArtAssetPurpose.MapOnly: return "Только карта";
                 case ArtAssetPurpose.ArenaOnly: return "Только арена";
+                case ArtAssetPurpose.LocationsOnly: return "Только места";
                 default: return "Карта и арена";
             }
         }

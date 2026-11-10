@@ -581,8 +581,8 @@ namespace KingdomSurvival.ArtAssets
         // Основной (единственный показываемый) вид записи.
         public ArtAssetView PrimaryView => HasView(MainView) ? MainView : TryReferenceView(out ArtAssetView view) ? view : MainView;
 
-        public bool UsableOnMap => Purpose != ArtAssetPurpose.ArenaOnly;
-        public bool UsableOnArena => Purpose != ArtAssetPurpose.MapOnly;
+        public bool UsableOnMap => Purpose == ArtAssetPurpose.Both || Purpose == ArtAssetPurpose.MapOnly;
+        public bool UsableOnArena => Purpose == ArtAssetPurpose.Both || Purpose == ArtAssetPurpose.ArenaOnly;
 
         public float SafePixelsPerUnit => PixelsPerUnit > .01f ? PixelsPerUnit : DefaultPixelsPerUnit;
 

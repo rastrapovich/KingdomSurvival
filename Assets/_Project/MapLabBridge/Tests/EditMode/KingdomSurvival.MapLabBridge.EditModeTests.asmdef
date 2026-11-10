@@ -5,7 +5,8 @@
     "KingdomSurvival.MapLabBridge",
     "KingdomSurvival.Core",
     "KingdomSurvival.MapLab",
-    "KingdomSurvival.MapLabBridge.Editor"
+    "KingdomSurvival.MapLabBridge.Editor",
+    "KingdomSurvival.ArtAssetDatabase"
   ],
   "includePlatforms": [
     "Editor"

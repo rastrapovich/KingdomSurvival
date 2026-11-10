@@ -81,9 +81,9 @@ namespace KingdomSurvival.ArtAssets.Tests
             ArtAssetDefinition oak = catalog.assets.Single(item => item.Name == "Дуб");
             ArtAssetDefinition grass = catalog.assets.Single(item => item.Name == "Модуль низкой травы");
             Assert.That(oak.Category, Is.EqualTo(ArtAssetCategory.Trees));
-            Assert.That(oak.Purpose, Is.EqualTo(ArtAssetPurpose.Both));
+            Assert.That(oak.Purpose, Is.EqualTo(ArtAssetPurpose.ArenaOnly), "Пакет арены — «Только арена»; на карту автор подключает сам.");
             Assert.That(grass.Purpose, Is.EqualTo(ArtAssetPurpose.ArenaOnly));
-            Assert.That(oak.UsableOnArena && oak.UsableOnMap && grass.UsableOnArena && !grass.UsableOnMap, Is.True);
+            Assert.That(oak.UsableOnArena && !oak.UsableOnMap && grass.UsableOnArena && !grass.UsableOnMap, Is.True);
             Assert.That(oak.ViewCount, Is.EqualTo(1), "Один вид.");
             Assert.That(oak.PrimaryView, Is.EqualTo(ArtAssetView.Front));
             Assert.That(oak.HasNormal(ArtAssetView.Front), Is.False, "Нормаль пакета не подключается.");

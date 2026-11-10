@@ -38,7 +38,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.5, y: 0.1}
       FootprintSize: {x: 0.6, y: 0.3}
@@ -177,7 +177,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.5, y: 0.06}
       FootprintSize: {x: 2.4, y: 0.9}
@@ -366,7 +366,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.503023, y: 0.30987567}
       FootprintSize: {x: 0.28, y: 0.15}
@@ -500,7 +500,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.51911896, y: 0.30478314}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -637,7 +637,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 0
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.49635825, y: 0.3520555}
       FootprintSize: {x: 4.22, y: 1.93}
@@ -1415,7 +1415,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.54363054, y: 0.35555702}
       FootprintSize: {x: 3.81, y: 1.21}
@@ -1552,7 +1552,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.48805594, y: 0.29808313}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -2332,7 +2332,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.3920304, y: 0.22047336}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -3111,7 +3111,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.49594846, y: 0.07183134}
       FootprintSize: {x: 0.008602142, y: 0}
@@ -3777,7 +3777,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.52094144, y: 0.3204452}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -4509,7 +4509,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.5173682, y: 0.36606196}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -4650,7 +4650,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.4315778, y: 0.3117865}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -4790,7 +4790,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.47009593, y: 0.3100357}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -4928,7 +4928,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.51211566, y: 0.317039}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -5066,7 +5066,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.4928566, y: 0.33629802}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -5204,7 +5204,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.5156174, y: 0.33804885}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -5344,7 +5344,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.4735976, y: 0.32229137}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -6078,7 +6078,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.47184676, y: 0.33804882}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -6816,7 +6816,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.50686324, y: 0.33454722}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -8240,7 +8240,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.5214062, y: 0.36346307}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -8380,7 +8380,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 3
     ViewSettings:
     - Pivot: {x: 0.51040983, y: 0.31123093}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -11736,7 +11736,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.67319363, y: 0.1670654}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -11873,7 +11873,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.4276089, y: 0.13038278}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -12010,7 +12010,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.36486635, y: 0.12719299}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -12147,7 +12147,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.6518659, y: 0.1423445}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -12284,7 +12284,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.35330206, y: 0.16228071}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -12421,7 +12421,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.4771525, y: 0.2515949}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -12558,7 +12558,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.50860226, y: 0.2069378}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -12696,7 +12696,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.51077235, y: 0.2914673}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -12833,7 +12833,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.45640132, y: 0.017192785}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -12970,7 +12970,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.4603974, y: 0.008737316}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -13107,7 +13107,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.4837964, y: 0.07695375}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -13244,7 +13244,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.37370092, y: 0.081738435}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -13382,7 +13382,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.4537972, y: 0.017192785}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -13519,7 +13519,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.4522015, y: 0.0047914316}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -13656,7 +13656,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.46083495, y: 0.013810597}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -13793,7 +13793,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.48763612, y: 0.03692221}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -13930,7 +13930,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.4898862, y: 0.014374295}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -14067,7 +14067,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.46313152, y: 0.011555806}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -14204,7 +14204,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.47064587, y: 0.003664036}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -14341,7 +14341,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.45760244, y: 0.007609921}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -14478,7 +14478,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.44177446, y: 0.020574972}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -14615,7 +14615,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.43172857, y: 0.011555806}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -14752,7 +14752,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.46268466, y: 0.009864712}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -14889,7 +14889,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.49255747, y: 0.016629087}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -15026,7 +15026,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.44521996, y: 0.0053551295}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -15163,7 +15163,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.46391714, y: 0.027903045}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -15300,7 +15300,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.47626007, y: 0.01832018}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -15437,7 +15437,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.47302157, y: 0.011555806}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -15574,7 +15574,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.48085082, y: 0.013810597}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -15711,7 +15711,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.43793735, y: 0.012119504}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -15849,7 +15849,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.44574133, y: 0.012119504}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -15986,7 +15986,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.45657697, y: 0.014374295}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -16123,7 +16123,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.4803936, y: 0.009864712}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -16260,7 +16260,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.4718322, y: 0.025648253}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -16398,7 +16398,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.46940354, y: 0.053833146}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -16536,7 +16536,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.46149763, y: 0.100877196}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -16674,7 +16674,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.4471647, y: 0.04106858}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -16812,7 +16812,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.46115914, y: 0.06259968}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -16950,7 +16950,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.4524447, y: 0.08014354}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -17088,7 +17088,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.48603085, y: 0.10326954}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -17226,7 +17226,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.4424287, y: 0.100079745}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -17364,7 +17364,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.45578542, y: 0.099282295}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -17501,7 +17501,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.48856363, y: 0.014937993}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -17638,7 +17638,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.46362433, y: 0.011555806}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -17775,7 +17775,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.46320695, y: 0.007046223}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -17912,7 +17912,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.45281738, y: 0.009301014}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -18050,7 +18050,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.46904093, y: 0.009301014}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -18187,7 +18187,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.4359104, y: 0.013810597}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -18325,7 +18325,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.4498955, y: 0.008173619}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -18463,7 +18463,7 @@ MonoBehaviour:
     Playback: 0
     RandomPhase: 1
     MainView: 0
-    Purpose: 0
+    Purpose: 2
     ViewSettings:
     - Pivot: {x: 0.48122737, y: 0.034688994}
       FootprintSize: {x: 1.2, y: 0.55}

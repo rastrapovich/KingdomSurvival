@@ -39,6 +39,9 @@ namespace KingdomSurvival.MapLabBridge
             public IEnumerator Pending;
             public System.Diagnostics.Stopwatch Watch;
             public MapLabAssetsSnapshot Assets;
+            // Лес из Базы ассетов (набор пород карты), освобождается с миром.
+            public MapLabArtSet ForestSet;
+            public int ForestDeciduous, ForestConifers;
             public bool Building => Pending != null;
             // Что сейчас строится (для подписи «Рисуем карту…»).
             public string Stage => PendingView != null ? PendingView.BuildStage : string.Empty;
@@ -89,6 +92,8 @@ namespace KingdomSurvival.MapLabBridge
                 Object.DestroyImmediate(current.Camera.gameObject);
             if (current.Settings != null)
                 Object.DestroyImmediate(current.Settings);
+            if (current.ForestSet != null)
+                Object.DestroyImmediate(current.ForestSet);
             if (current.Target != null)
             {
                 current.Target.Release();
@@ -153,6 +158,12 @@ namespace KingdomSurvival.MapLabBridge
                 marker.AutoPlace = false;
                 marker.enabled = false;
                 assets.ApplyTo(view);
+                if (assets.MapForestFromAssets && view.ArtSet03 != null)
+                {
+                    w.ForestSet = MapLabArtAssets.BuildMapForestSet(view.ArtSet03, assets.MapAssetScale, out w.ForestDeciduous, out w.ForestConifers);
+                    if (w.ForestSet != null)
+                        view.ArtSet03 = w.ForestSet;
+                }
                 view.CameraRig = w.Rig;
                 view.Settings = w.Settings;
                 w.PendingView = view;

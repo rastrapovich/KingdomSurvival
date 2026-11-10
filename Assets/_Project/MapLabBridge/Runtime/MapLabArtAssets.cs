@@ -77,6 +77,66 @@ namespace KingdomSurvival.MapLabBridge
             return set;
         }
 
+        // Лес карты мира: прежние породы набора baseSet остаются, к ним
+        // добавляются деревья Базы ассетов с назначением «Карта и арена» или
+        // «Только карта» — автор подключает нужные, меняя назначение в
+        // карточке. scale — единиц мира карты на единицу мира мест (взрослое
+        // дерево ≈ избе). Таких деревьев нет — null (набор карты как был).
+        public static MapLabArtSet BuildMapForestSet(MapLabArtSet baseSet, float scale, out int deciduous, out int conifers)
+        {
+            deciduous = conifers = 0;
+            if (baseSet == null)
+                return null;
+            List<MapLabDecorArt> decor = new List<MapLabDecorArt>();
+            MapLabArtSet art = BuildSet(false, scale, decor);
+            if (art == null)
+                return null;
+            List<MapLabArtEntry> trees = new List<MapLabArtEntry>();
+            foreach (MapLabDecorArt item in decor)
+            {
+                if (item.Role != MapLabDecorRole.Tree)
+                    continue;
+                MapLabArtEntry entry = art.Find(item.Id);
+                ArtAssetDefinition asset = ArtAssetDatabaseAsset.FindCurrent(item.AssetId);
+                if (entry == null || asset == null)
+                    continue;
+                bool conifer = IsConifer(asset);
+                entry.Kind = conifer ? MapLabObjectKind.Conifer : MapLabObjectKind.Deciduous;
+                entry.Category = MapLabArtCategory.Vegetation;
+                // Тот же разброс размера, что у прежних пород карты.
+                entry.ScaleRange = new Vector2(0.85f, 1.12f);
+                trees.Add(entry);
+                if (conifer) conifers++; else deciduous++;
+            }
+            if (trees.Count == 0)
+            {
+                Object.DestroyImmediate(art);
+                deciduous = conifers = 0;
+                return null;
+            }
+            MapLabArtSet set = ScriptableObject.CreateInstance<MapLabArtSet>();
+            set.name = "Карта · лес с деревьями Базы ассетов";
+            set.hideFlags = HideFlags.HideAndDontSave;
+            foreach (MapLabArtEntry entry in baseSet.Entries)
+                if (entry != null)
+                    set.Entries.Add(entry);
+            set.Entries.AddRange(trees);
+            Object.DestroyImmediate(art);
+            return set;
+        }
+
+        private static readonly string[] ConiferWords = { "Spruce", "Pine", "Fir", "Ель", "ель", "Сосн", "сосн", "Пихт", "пихт" };
+
+        public static bool IsConifer(ArtAssetDefinition asset)
+        {
+            foreach (string word in ConiferWords)
+            {
+                if (!string.IsNullOrEmpty(asset.Name) && asset.Name.Contains(word)) return true;
+                if (asset.Tags != null && asset.Tags.Exists(tag => tag != null && tag.Contains(word))) return true;
+            }
+            return false;
+        }
+
         // Копия рисунка с заданной высотой карточки (валун на клетке — во всю клетку).
         public static MapLabArtEntry AddSized(MapLabArtSet set, MapLabDecorArt art, string suffix, float height)
         {
@@ -135,6 +195,13 @@ namespace KingdomSurvival.MapLabBridge
                 {
                     if (string.IsNullOrEmpty(tag)) continue;
                     if (tag.EndsWith("Stump")) return MapLabDecorRole.Stump;
+                }
+            if (!string.IsNullOrEmpty(asset.Name) && (asset.Name.Contains("пень") || asset.Name.Contains("Пень")))
+                return MapLabDecorRole.Stump;
+            if (asset.Tags != null)
+                foreach (string tag in asset.Tags)
+                {
+                    if (string.IsNullOrEmpty(tag)) continue;
                     if (TallPlants.Contains(tag)) return MapLabDecorRole.TallPlant;
                     if (SmallRocks.Contains(tag)) return MapLabDecorRole.SmallRock;
                 }

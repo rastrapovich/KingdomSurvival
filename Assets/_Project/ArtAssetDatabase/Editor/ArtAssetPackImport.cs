@@ -68,10 +68,9 @@ namespace KingdomSurvival.ArtAssets.Editor
             }
         }
 
-        // Деревья, пни и камни — общие для карты и арены; низкие растения
-        // пакета нарисованы для крупного плана арены.
-        public static ArtAssetPurpose PurposeOf(Entry entry) =>
-            entry.Category == "Vegetation" ? ArtAssetPurpose.ArenaOnly : ArtAssetPurpose.Both;
+        // Пакет арены: всё «Только арена». На карту автор подключает нужные
+        // деревья сам, меняя назначение в карточке.
+        public static ArtAssetPurpose PurposeOf(Entry entry) => ArtAssetPurpose.ArenaOnly;
 
         public static float HeightOf(Entry entry) =>
             entry.TreeRatio > 0 ? entry.TreeRatio * YoungTreeHeight : Heights.TryGetValue(entry.Id, out float height) ? height : 1f;

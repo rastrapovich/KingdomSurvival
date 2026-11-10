@@ -49,6 +49,36 @@ namespace KingdomSurvival.BattleSandbox
             if (index >= 0 && index + 1 < args.Length)
                 int.TryParse(args[index + 1], out rounds);
             Log($"start, graphics {SystemInfo.graphicsDeviceType}, {SystemInfo.graphicsDeviceName}, screen {Screen.width}x{Screen.height}");
+            if (args.Contains("-mapSmoke"))
+            {
+                // Карта партии MapLab (лес из Базы ассетов): собрать, нарисовать кадр, освободить.
+                WorldMapGenerationSettings planSettings = WorldMapGenerationSettings.CreateDefault();
+                planSettings.HexesAcross = 24;
+                GeneratedWorldMap plan = WorldMapGenerator.Generate(planSettings, 7);
+                KingdomSurvival.MapLabBridge.MapLabGameLive.World world = KingdomSurvival.MapLabBridge.MapLabGameLive.Begin(plan, null);
+                float mapStarted = Time.realtimeSinceStartup, nextReport = 5f;
+                while (!KingdomSurvival.MapLabBridge.MapLabGameLive.Advance(world))
+                {
+                    if (Time.realtimeSinceStartup - mapStarted > nextReport)
+                    {
+                        nextReport += 5f;
+                        Log($"map building {Time.realtimeSinceStartup - mapStarted:0} s: stage «{world.Stage}», progress {world.Progress:0.00}, error «{world.Error}»");
+                    }
+                    yield return null;
+                }
+                Log($"map ready {world.Ready}, forest from asset database {world.ForestSet != null} ({world.ForestDeciduous} deciduous, {world.ForestConifers} conifers), build {world.BuildMs:0} ms");
+                for (int i = 0; i < 30; i++)
+                {
+                    KingdomSurvival.MapLabBridge.MapLabGameLive.Render(world, new Rect(30f, 30f, 40f, 40f), 1600, 900);
+                    yield return null;
+                }
+                bool mapReady = world.Ready;
+                KingdomSurvival.MapLabBridge.MapLabGameLive.Clear();
+                for (int i = 0; i < 10; i++) yield return null;
+                Log(mapReady ? "PASS" : "FAIL");
+                Application.Quit(mapReady ? 0 : 1);
+                yield break;
+            }
             if (args.Contains("-arenaMsaa"))
                 KingdomSurvival.MapLabBridge.MapLabArena.FrameMsaa = 4;
             if (args.Contains("-arenaBuildOnly") || args.Contains("-arenaRenderOnly"))

@@ -93,6 +93,11 @@ namespace KingdomSurvival.BattleSandbox
             KingdomSurvival.MapLabBridge.MapLabGameAssets assets = KingdomSurvival.MapLabBridge.MapLabGameAssets.Load();
             if (arenaOff && assets != null)
                 assets.ArenaInBattle = false;
+            // Как у игрока: до первого боя — время в меню, арена прогревается.
+            float warmStart = Time.realtimeSinceStartup;
+            while (!arenaOff && !KingdomSurvival.MapLabBridge.MapLabArenaPrewarm.Done && Time.realtimeSinceStartup - warmStart < 60f)
+                yield return null;
+            Log($"prewarm done {KingdomSurvival.MapLabBridge.MapLabArenaPrewarm.Done} after {(Time.realtimeSinceStartup - warmStart) * 1000f:0} ms");
             Invoke(sandbox, "ChangeCount", false, "guard", 1);
             Invoke(sandbox, "ChangeCount", false, "archer", 1);
             Invoke(sandbox, "ChangeCount", true, "wolf", 1);
@@ -101,10 +106,19 @@ namespace KingdomSurvival.BattleSandbox
             {
                 float started = Time.realtimeSinceStartup;
                 Invoke(sandbox, "StartBattle");
+                float invokeMs = (Time.realtimeSinceStartup - started) * 1000f;
                 MapLabArenaDriver driver = null;
                 BattlefieldView surface = null;
+                bool loadingShot = round > 0 || arenaOff;
                 while (Time.realtimeSinceStartup - started < 90f)
                 {
+                    if (!loadingShot && Time.realtimeSinceStartup - started > 0.6f)
+                    {
+                        loadingShot = true;
+                        string shotPath = System.IO.Path.Combine(Application.persistentDataPath, "arena-loading.png");
+                        ScreenCapture.CaptureScreenshot(shotPath);
+                        Log("loading screen " + (MapLabArenaDriver.Loading ? "shown" : "not shown") + ", saved " + shotPath);
+                    }
                     surface = sandbox.BattlefieldSurface;
                     driver = surface?.Relief as MapLabArenaDriver;
                     if (driver != null && surface.HasSceneTexture)
@@ -113,6 +127,7 @@ namespace KingdomSurvival.BattleSandbox
                         break;
                     yield return null;
                 }
+                float readyMs = (Time.realtimeSinceStartup - started) * 1000f;
                 if (arenaOff)
                 {
                     for (int i = 0; i < 30; i++) yield return null;
@@ -133,7 +148,7 @@ namespace KingdomSurvival.BattleSandbox
                     yield return null;
                     frameMs += Time.unscaledDeltaTime * 1000f;
                 }
-                Log($"round {round + 1}: ready in {(Time.realtimeSinceStartup - started) * 1000f:0} ms (build {driver.Arena.BuildMs:0} ms), " +
+                Log($"round {round + 1}: ready in {readyMs:0} ms (battle screen {invokeMs:0} ms, build {driver.Arena.BuildMs:0} ms), " +
                     $"decor from asset database {driver.Arena.UsesAssetDatabase} ({driver.Arena.DecorFeatures}), frame {frameMs / 90f:0.0} ms, " +
                     $"memory {UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong() / 1048576f:0} MB");
                 if (round == 0)

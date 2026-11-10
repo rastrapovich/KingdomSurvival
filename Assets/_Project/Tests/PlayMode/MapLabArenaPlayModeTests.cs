@@ -54,17 +54,23 @@ public sealed class MapLabArenaPlayModeTests
     {
         Invoke(sandbox, "StartBattle");
         MapLabArenaDriver driver = null;
+        bool loadingSeen = false;
         // Сборка идёт по шагам в фоне: ждать по времени, а не по числу кадров.
         float until = Time.realtimeSinceStartup + 90f;
         while (Time.realtimeSinceStartup < until)
         {
             BattlefieldView surface = (BattlefieldView)Member(sandbox, "BattlefieldSurface");
+            loadingSeen |= surface?.Q("arena-loading") != null;
             driver = surface?.Relief as MapLabArenaDriver;
             if (driver != null && surface.HasSceneTexture)
                 break;
             yield return null;
         }
         Assert.IsNotNull(driver, "Арена MapLab подключилась к полю.");
+        Assert.IsTrue(loadingSeen, "Пока арена строится, поле закрыто экраном загрузки.");
+        BattlefieldView shownSurface = (BattlefieldView)Member(sandbox, "BattlefieldSurface");
+        Assert.IsNull(shownSurface.Q("arena-loading"), "Арена показана — экран загрузки снят.");
+        Assert.IsFalse(MapLabArenaDriver.Loading);
         result.Add(driver);
     }
 
@@ -213,6 +219,9 @@ public sealed class MapLabArenaPlayModeTests
         int Count() => Resources.FindObjectsOfTypeAll<GameObject>().Count(item => item.name == "MapLab Arena" || item.name == "MapLab Arena Camera");
         int Textures() => Resources.FindObjectsOfTypeAll<RenderTexture>().Count(item => item.name == "MapLab Arena");
         int Sets() => Resources.FindObjectsOfTypeAll<KingdomSurvival.MapLab.MapLabArtSet>().Count(item => item.name.StartsWith("Арена"));
+        // Прогрев из меню полигона (своя арена) — не часть серии боёв.
+        MapLabArenaPrewarm.Cancel();
+        for (int i = 0; i < 3; i++) yield return null;
         int objectsBefore = Count(), texturesBefore = Textures(), setsBefore = Sets();
         long memoryBefore = UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong();
         List<double> builds = new List<double>();

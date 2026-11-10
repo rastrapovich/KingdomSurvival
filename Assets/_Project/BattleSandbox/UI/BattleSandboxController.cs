@@ -74,6 +74,8 @@ namespace KingdomSurvival.BattleSandbox
 
             initialized = true;
             LoadContent();
+            // Меню полигона: пока выбирают бойцов, арена прогревается.
+            KingdomSurvival.MapLabBridge.MapLabArenaPrewarm.Begin();
 
             root.style.flexGrow = 1f;
             root.style.backgroundColor = new Color(0.035f, 0.043f, 0.050f, 1f);
@@ -1028,7 +1030,7 @@ namespace KingdomSurvival.BattleSandbox
             // Обычная арена — рисунок MapLab по раскладке боя (холмы на клетках
             // холма); выключен в MapLabGameAssets или ошибка — прежний путь.
             if (!IsWorldUnderlayBattle && (campaignBattle == null || !campaignBattle.UsesLocationGrid)
-                && MapLabArenaDriver.TryCreate(field, surface, boardElement, battle) == null)
+                && MapLabArenaDriver.TryCreate(field, surface, boardElement, battle, QueueEnemyStepIfNeeded) == null)
                 BattlefieldSceneDriver.TryCreate(field, surface, boardElement);
             // В редакторе правки окна базы видны в идущем бою.
             if (Application.isEditor)
@@ -1679,6 +1681,10 @@ namespace KingdomSurvival.BattleSandbox
 
         private void QueueEnemyStepIfNeeded()
         {
+            // Пока строится арена (экран загрузки), противник не ходит: драйвер
+            // арены вызовет этот метод, когда поле будет показано.
+            if (MapLabArenaDriver.Loading)
+                return;
             if (enemyStepScheduled || combatAnimationRunning || battle == null ||
                 battle.Phase != SandboxBattlePhase.InProgress ||
                 battle.CurrentUnit == null || battle.CurrentUnit.Team != SandboxTeam.Enemy)
@@ -1693,6 +1699,11 @@ namespace KingdomSurvival.BattleSandbox
                 // Отложенный ход прежнего боя в новом не выполняется.
                 if (generation != battleGeneration)
                     return;
+                if (MapLabArenaDriver.Loading)
+                {
+                    enemyStepScheduled = false;
+                    return;
+                }
                 if (battle == null || battle.Phase != SandboxBattlePhase.InProgress ||
                     battle.CurrentUnit == null || battle.CurrentUnit.Team != SandboxTeam.Enemy)
                 {

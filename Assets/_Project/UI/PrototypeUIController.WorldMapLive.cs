@@ -115,6 +115,9 @@ public partial class PrototypeUIController
         worldMapMapLab = LiveResult(world);
         RecalculateWorldMapMaxZoom();
         RefreshWorldMapPanel();
+        // Карта готова: заранее прогреть арену боя (первая сборка в сеансе
+        // иначе в 2–3 раза дольше и пришлась бы на начало первого боя).
+        MapLabArenaPrewarm.Begin();
     }
 
     // Совместимость с кодом зданий и групп: те же поля, что у снимка.

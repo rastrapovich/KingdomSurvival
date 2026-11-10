@@ -81,6 +81,7 @@ namespace KingdomSurvival.MapLabBridge
         private System.Diagnostics.Stopwatch watch;
         private float k, depth, zBottom, mean, sin, cos, pitch;
         private bool disposed;
+        private double artMs, planMs;
         private static readonly List<MapLabArena> liveArenas = new List<MapLabArena>();
         // Рисунки Базы ассетов для арены (по назначению) и их роли в декоре.
         private MapLabArtSet decorSet;
@@ -105,6 +106,16 @@ namespace KingdomSurvival.MapLabBridge
 
         // Начать пошаговую сборку (тяжёлые расчёты — в фоне, см. MapLabView.GenerateStepwise).
         public static MapLabArena Begin(MapLabArenaSpec spec)
+        {
+            // Настоящая арена: незаконченный прогрев не отнимает у неё время.
+            MapLabArenaPrewarm.Cancel();
+            return Create(spec);
+        }
+
+        // Сборка для прогрева (MapLabArenaPrewarm), без отмены прогрева.
+        internal static MapLabArena BeginWarmup(MapLabArenaSpec spec) => Create(spec);
+
+        private static MapLabArena Create(MapLabArenaSpec spec)
         {
             PurgeReleased();
             MapLabArena arena = new MapLabArena(spec ?? throw new ArgumentNullException(nameof(spec)));
@@ -141,10 +152,12 @@ namespace KingdomSurvival.MapLabBridge
                 settings.hideFlags = HideFlags.HideAndDontSave;
                 float scale = Spec.AssetScale > 0f ? Spec.AssetScale : assets.ArenaAssetScale;
                 decorSet = MapLabArtAssets.BuildSet(true, scale, decorArt);
+                artMs = watch.Elapsed.TotalMilliseconds;
                 ConfigureSettings(settings);
                 float side = settings.General.MapSize;
                 zBottom = (side - depth) * 0.5f;
                 settings.RegionPlan = BuildComposition(side);
+                planMs = watch.Elapsed.TotalMilliseconds - artMs;
 
                 GameObject cameraObject = new GameObject("MapLab Arena Camera") { hideFlags = HideFlags.HideAndDontSave, layer = Layer };
                 camera = cameraObject.AddComponent<Camera>();
@@ -235,7 +248,7 @@ namespace KingdomSurvival.MapLabBridge
             camera.backgroundColor = view.Palette.Paper;
             view.gameObject.SetActive(true);
             BuildMs = watch.Elapsed.TotalMilliseconds;
-            Debug.Log($"MapLab: арена построена за {BuildMs / 1000.0:0.0} с.");
+            Debug.Log($"MapLab: арена построена за {BuildMs / 1000.0:0.0} с (рисунки Базы ассетов {artMs:0} мс, план {planMs:0} мс, генерация и сборка {BuildMs - artMs - planMs:0} мс).");
         }
 
         private void ConfigureSettings(MapLabSettings s)

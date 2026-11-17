@@ -108,7 +108,7 @@ Shader "Kingdom Survival/MapLab/Card"
                 c *= 1.0 + (p.a - 0.5) * _Paper * 0.15;
                 c = lerp(c, ink, saturate(atlas.g * _Outline * 1.1));
                 c = MapLabSaturate(c, _Saturation);
-                return float4(c, 1);
+                return float4(MapLabViewGrade(c), 1);
             }
             ENDHLSL
         }

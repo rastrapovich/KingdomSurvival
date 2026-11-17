@@ -253,10 +253,37 @@ namespace KingdomSurvival.MapLab
         public string LastError { get; private set; }
         public MapLabStats LastStats { get; private set; }
 
+        // Вид карты (MapLabMapViews): своя палитра и свои рисунки по ID ассета.
+        // Не сохраняется со сценой: игра и окно генератора ставят его перед сборкой.
+        [System.NonSerialized] public MapLabMapView Look;
+
+        // Рисунок ассета с учётом вида: свой PNG вида или основной.
+        public Texture2D ArtTexture(MapLabArtEntry entry)
+        {
+            if (entry == null)
+                return null;
+            Texture2D own = Look != null ? Look.FindTexture(entry.Id) : null;
+            return own != null ? own : entry.Texture;
+        }
+
+        // Сменить вид: следующая сборка (или пересборка объектов) возьмёт его
+        // палитру и рисунки; пятна-декали перечитываются.
+        // Свой рисунок вида нарисован уже в гамме вида — цветокоррекция его не трогает.
+        public bool OwnArtUngraded(MapLabArtEntry entry) =>
+            entry != null && Look != null && Look.OwnArtUngraded && Look.FindTexture(entry.Id) != null;
+
+        public void SetLook(MapLabMapView look)
+        {
+            Look = look;
+            washSources = null;
+        }
+
         public MapLabPalette Palette
         {
             get
             {
+                if (Look != null && Look.Palette != null)
+                    return Look.Palette;
                 if (Settings != null && Settings.PainterlyStyle.Palette != null)
                     return Settings.PainterlyStyle.Palette;
                 if (fallbackPalette == null)
@@ -884,9 +911,10 @@ namespace KingdomSurvival.MapLab
                 washSources = new List<MapLabWash.Source>();
                 foreach (MapLabArtEntry e in set.Entries)
                 {
-                    if (e == null || !e.HasTexture || e.Category != MapLabArtCategory.Decal || !e.Texture.isReadable)
+                    Texture2D wt = ArtTexture(e);
+                    if (e == null || !e.HasTexture || e.Category != MapLabArtCategory.Decal || wt == null || !wt.isReadable)
                         continue;
-                    washSources.Add(MapLabWash.FromPixels(e.Id, e.Texture.GetPixels32(), e.Texture.width, e.Texture.height, e.OpacityRange));
+                    washSources.Add(MapLabWash.FromPixels(e.Id, wt.GetPixels32(), wt.width, wt.height, e.OpacityRange));
                 }
             }
         }
@@ -999,7 +1027,8 @@ namespace KingdomSurvival.MapLab
 
         private void ConfigureCliffMaterial(Material m, MapLabArtEntry entry)
         {
-            m.SetTexture("_MainTex", entry.Texture);
+            m.SetTexture("_MainTex", ArtTexture(entry));
+            m.SetFloat("_ViewGradeSkip", OwnArtUngraded(entry) ? 1f : 0f);
             m.SetVector("_ColorAdjust", entry.ColorAdjust);
             m.SetTexture("_ShadeTex", shadeTexture != null ? shadeTexture : Texture2D.whiteTexture);
             m.SetFloat("_MapSize", data != null ? data.Size : Settings.General.MapSize);
@@ -1331,7 +1360,8 @@ namespace KingdomSurvival.MapLab
                 return;
             MapLabPalette palette = Palette;
             MapLabArtSettings art = Settings.Art;
-            m.SetTexture("_MainTex", entry.Texture);
+            m.SetTexture("_MainTex", ArtTexture(entry));
+            m.SetFloat("_ViewGradeSkip", OwnArtUngraded(entry) ? 1f : 0f);
             m.SetVector("_ColorAdjust", entry.ColorAdjust);
             m.SetFloat("_Cutoff", entry.Cutoff);
             m.SetFloat("_CardLean", art.CardLean);
@@ -1416,7 +1446,8 @@ namespace KingdomSurvival.MapLab
         private void ConfigureModuleMaterial(Material m, MapLabArtEntry entry)
         {
             MapLabStage05Settings s5 = Settings.Stage05;
-            m.SetTexture("_MainTex", entry.Texture);
+            m.SetTexture("_MainTex", ArtTexture(entry));
+            m.SetFloat("_ViewGradeSkip", OwnArtUngraded(entry) ? 1f : 0f);
             m.SetVector("_ColorAdjust", entry.ColorAdjust);
             m.SetFloat("_Cutoff", entry.Cutoff);
             m.SetTexture("_ShadeTex", shadeTexture != null ? shadeTexture : Texture2D.whiteTexture);
@@ -1743,9 +1774,9 @@ namespace KingdomSurvival.MapLab
             terrain.SetVector("_GroundScales", new Vector4(art.GrassScale, art.EarthScale, art.RockScale, 0f));
             if (on)
             {
-                terrain.SetTexture("_GrassTex", grass.Texture);
-                terrain.SetTexture("_EarthTex", earth.Texture);
-                terrain.SetTexture("_RockTex", rock.Texture);
+                terrain.SetTexture("_GrassTex", ArtTexture(grass));
+                terrain.SetTexture("_EarthTex", ArtTexture(earth));
+                terrain.SetTexture("_RockTex", ArtTexture(rock));
                 terrain.SetColor("_GrassMean", grass.MeanColor.linear);
                 terrain.SetColor("_EarthMean", earth.MeanColor.linear);
                 terrain.SetColor("_RockMean", rock.MeanColor.linear);
@@ -1754,7 +1785,7 @@ namespace KingdomSurvival.MapLab
             solid.SetFloat("_RockStrength", rockOn ? art.RockColorStrength : 0f);
             if (rockOn)
             {
-                solid.SetTexture("_RockTex", rock.Texture);
+                solid.SetTexture("_RockTex", ArtTexture(rock));
                 solid.SetColor("_RockMean", rock.MeanColor.linear);
                 solid.SetFloat("_RockScale", art.RockScale * 0.5f);
             }

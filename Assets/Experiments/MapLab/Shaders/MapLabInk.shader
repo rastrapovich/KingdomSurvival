@@ -128,7 +128,7 @@ Shader "Kingdom Survival/MapLab/Ink"
                 a *= 1.0 - _Drift.x * 0.35 * ValueNoise(i.world * _Drift.y * 2.7 + 17.0);
                 clip(a - 0.004);
                 float3 color = _Split > 0.5 ? lerp(_Color2.rgb, _Color.rgb, saturate(i.uv.x * 0.5 + 0.5)) : _Color.rgb;
-                return float4(color, a);
+                return float4(MapLabViewGrade(color), a);
             }
             ENDHLSL
         }

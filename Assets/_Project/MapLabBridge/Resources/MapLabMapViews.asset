@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dc7ffdc1d90201469095da150dcf5b8, type: 3}
+  m_Name: MapLabMapViews
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabMapViews
+  Views:
+  - Id: classic
+    Name: "\u041E\u0431\u044B\u0447\u043D\u044B\u0439"
+    Note: "\u041F\u0440\u0435\u0436\u043D\u0438\u0439 \u043E\u0431\u043B\u0438\u043A
+      \u043A\u0430\u0440\u0442\u044B: \u0436\u0438\u0432\u043E\u043F\u0438\u0441\u043D\u0430\u044F
+      \u0430\u043A\u0432\u0430\u0440\u0435\u043B\u044C \u0441 \u0442\u0443\u0448\u044C\u044E,
+      \u043F\u0430\u043B\u0438\u0442\u0440\u0430 \u043F\u0440\u043E\u0444\u0438\u043B\u044F
+      MapLab."
+    Enabled: 1
+    Grade:
+      Strength: 0
+      Brightness: 1
+      Contrast: 1
+      Saturation: 1
+      GradientMix: 0
+      Shadows: {r: 0, g: 0, b: 0, a: 1}
+      Midtones: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+      Highlights: {r: 1, g: 1, b: 1, a: 1}
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+      TintStrength: 0
+      KeepWarmLights: 0
+      ShadowLift: 0
+    Palette: {fileID: 0}
+    OverrideFog: 0
+    FogColor: {r: 0.055, g: 0.06, b: 0.07, a: 0.86}
+    UiTint: {r: 1, g: 1, b: 1, a: 1}
+    Background: {r: 0.86, g: 0.82, b: 0.72, a: 1}
+    Art: []
+  - Id: gloom
+    Name: "\u041C\u0440\u0430\u0447\u043D\u044B\u0439"
+    Note: "\u0421\u0443\u043C\u0435\u0440\u043A\u0438 \u0442\u0451\u043C\u043D\u043E\u0433\u043E
+      \u0444\u044D\u043D\u0442\u0435\u0437\u0438: \u043F\u0440\u0438\u0433\u043B\u0443\u0448\u0451\u043D\u043D\u044B\u0435
+      \u0441\u0438\u0437\u043E-\u043B\u0438\u043B\u043E\u0432\u044B\u0435 \u0442\u0435\u043D\u0438,
+      \u043E\u043B\u0438\u0432\u043A\u043E\u0432\u043E-\u0431\u0443\u0440\u0430\u044F
+      \u0437\u0435\u043C\u043B\u044F, \u0442\u0451\u043F\u043B\u044B\u0435 \u043E\u0433\u043D\u0438
+      \u043E\u043A\u043E\u043D \u0438 \u0444\u043E\u043D\u0430\u0440\u0435\u0439."
+    Enabled: 1
+    Grade:
+      Strength: 1
+      Brightness: 0.42
+      Contrast: 1.2
+      Saturation: 0.7
+      GradientMix: 0.55
+      Shadows: {r: 0.047058824, g: 0.039215688, b: 0.07058824, a: 1}
+      Midtones: {r: 0.21568628, g: 0.1882353, b: 0.18039216, a: 1}
+      Highlights: {r: 0.5568628, g: 0.47058824, b: 0.39215687, a: 1}
+      Tint: {r: 0.6627451, g: 0.60784316, b: 0.7607843, a: 1}
+      TintStrength: 0.5
+      KeepWarmLights: 0.8
+      ShadowLift: 0.1
+    Palette: {fileID: 0}
+    OverrideFog: 1
+    FogColor: {r: 0.07, g: 0.06, b: 0.09, a: 0.9}
+    UiTint: {r: 0.62, g: 0.58, b: 0.62, a: 1}
+    Background: {r: 0.11764706, g: 0.105882354, b: 0.13333334, a: 1}
+    Art: []
+  - Id: sepia
+    Name: "\u0421\u0435\u043F\u0438\u044F"
+    Note: "\u0420\u0438\u0441\u043E\u0432\u0430\u043D\u043D\u0430\u044F \u043A\u0430\u0440\u0442\u0430
+      \u043D\u0430 \u043F\u0435\u0440\u0433\u0430\u043C\u0435\u043D\u0442\u0435:
+      \u0432\u0441\u044F \u0433\u0430\u043C\u043C\u0430 \u2014 \u043E\u0442\u0442\u0435\u043D\u043A\u0438
+      \u0441\u0435\u043F\u0438\u0438, \u043A\u043E\u0440\u0438\u0447\u043D\u0435\u0432\u0430\u044F
+      \u0442\u0443\u0448\u044C, \u0441\u0432\u0435\u0442\u043B\u0430\u044F \u0431\u0443\u043C\u0430\u0433\u0430."
+    Enabled: 1
+    Grade:
+      Strength: 1
+      Brightness: 1
+      Contrast: 1.3
+      Saturation: 0
+      GradientMix: 1
+      Shadows: {r: 0.16862746, g: 0.08627451, b: 0.039215688, a: 1}
+      Midtones: {r: 0.63529414, g: 0.47843137, b: 0.30588236, a: 1}
+      Highlights: {r: 0.9411765, g: 0.8784314, b: 0.74509805, a: 1}
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+      TintStrength: 0
+      KeepWarmLights: 0
+      ShadowLift: 0.05
+    Palette: {fileID: 0}
+    OverrideFog: 1
+    FogColor: {r: 0.36, g: 0.27, b: 0.18, a: 0.88}
+    UiTint: {r: 0.86, g: 0.74, b: 0.56, a: 1}
+    Background: {r: 0.9137255, g: 0.8509804, b: 0.72156864, a: 1}
+    Art: []
+  builtInVersion: 1

@@ -1,0 +1,414 @@
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+
+namespace KingdomSurvival.MapLab.Editor
+{
+    // Виды карты в окне «Генератор карты» (17.11.2026): переключатель «Вид»
+    // в верхней строке — тот же выбор, что кнопка «Вид: …» в игре (общая
+    // настройка, видна и в Play Mode). Цветокоррекция вида — сразу в
+    // предпросмотре; своя палитра или свои рисунки вида — пересборка карты
+    // тем же seed. Раздел «Виды карты» на вкладке «Карта» правит выбранный
+    // вид, создаёт новые (заложено сколько угодно видов) и собирает свои
+    // рисунки вида из папки Assets/_Project/Art/MapViews/<ID вида>/.
+    public sealed partial class MapLabGeneratorWindow
+    {
+        private bool viewsOpen = true;
+        private string lookBuiltKey;
+        private string lookShownId;
+
+        // Ассет видов в Resources; нет — создаётся из встроенных видов.
+        private static MapLabMapViews ViewsAsset(bool create)
+        {
+            MapLabMapViews asset = AssetDatabase.LoadAssetAtPath<MapLabMapViews>(MapLabMapViews.AssetPath);
+            if (asset != null || !create)
+                return asset;
+            string folder = Path.GetDirectoryName(MapLabMapViews.AssetPath)?.Replace('\\', '/');
+            if (!string.IsNullOrEmpty(folder) && !AssetDatabase.IsValidFolder(folder))
+                Directory.CreateDirectory(folder);
+            asset = CreateInstance<MapLabMapViews>();
+            asset.EnsureBuiltIn();
+            AssetDatabase.CreateAsset(asset, MapLabMapViews.AssetPath);
+            AssetDatabase.SaveAssets();
+            MapLabMapViews.ResetCache();
+            return asset;
+        }
+
+        // Пакетное создание ассета видов (Unity -batchmode -executeMethod).
+        public static void CreateViewsAssetBatch()
+        {
+            MapLabMapViews asset = ViewsAsset(true);
+            Debug.Log("Виды карты: " + AssetDatabase.GetAssetPath(asset) + " — " + asset.Views.Count + " вид(а).");
+        }
+
+        // Вид в предпросмотре: вид окна совпадает с выбранным; если у вида
+        // другая палитра или другие рисунки, чем у собранной карты, — пересборка.
+        private void SyncLook()
+        {
+            if (view == null)
+                return;
+            MapLabMapView active = MapLabMapViews.Active;
+            string id = active != null ? active.Id : string.Empty;
+            if (id == lookShownId && ReferenceEquals(view.Look, active))
+                return;
+            lookShownId = id;
+            view.SetLook(active);
+            previewDirty = true;
+            if (view.Data != null && lookBuiltKey != null && lookBuiltKey != MapLabMapViews.BuildKey(active))
+            {
+                status = "Вид «" + active?.Name + "»: своя палитра или рисунки — карта пересобирается тем же seed.";
+                EditorApplication.delayCall += () =>
+                {
+                    if (this != null && view != null)
+                        Generate();
+                };
+            }
+            else
+                status = "Вид карты: " + active?.Name + ".";
+            Repaint();
+        }
+
+        // Перед генерацией: собрать в текущем виде.
+        private void PrepareLookForGenerate()
+        {
+            MapLabMapView active = MapLabMapViews.Active;
+            view.SetLook(active);
+            lookShownId = active != null ? active.Id : string.Empty;
+            lookBuiltKey = MapLabMapViews.BuildKey(active);
+        }
+
+        // Верхняя строка: выпадающий выбор вида.
+        private void DrawViewPopup()
+        {
+            List<MapLabMapView> views = MapLabMapViews.Load().EnabledViews();
+            if (views.Count == 0)
+                return;
+            MapLabMapView active = MapLabMapViews.Active;
+            string[] names = new string[views.Count];
+            int index = 0;
+            for (int i = 0; i < views.Count; i++)
+            {
+                names[i] = views[i].Name;
+                if (views[i] == active)
+                    index = i;
+            }
+            GUILayout.Label(new GUIContent("Вид", "Облик карты: тот же мир, другая гамма и рисунки. Тот же выбор, что кнопка «Вид: …» в игре."), EditorStyles.miniLabel, GUILayout.Width(26f));
+            int next = EditorGUILayout.Popup(index, names, EditorStyles.toolbarPopup, GUILayout.Width(120f));
+            if (next != index)
+                MapLabMapViews.ActiveId = views[next].Id;
+            SyncLook();
+        }
+
+        // Вкладка «Карта»: правка выбранного вида.
+        private void DrawViewsGroup()
+        {
+            viewsOpen = EditorGUILayout.BeginFoldoutHeaderGroup(viewsOpen, "Виды карты · облик поверх того же мира");
+            if (viewsOpen)
+            {
+                MapLabMapViews asset = ViewsAsset(false);
+                if (asset == null)
+                {
+                    EditorGUILayout.HelpBox("Виды работают встроенными (Обычный, Мрачный, Сепия). Чтобы править их и добавлять свои — создайте ассет видов.", MessageType.Info);
+                    if (GUILayout.Button("Создать ассет видов"))
+                        Guard(() =>
+                        {
+                            ViewsAsset(true);
+                            lookShownId = null;
+                        });
+                    EditorGUILayout.EndFoldoutHeaderGroup();
+                    return;
+                }
+                asset.EnsureBuiltIn();
+                MapLabMapView v = asset.Find(MapLabMapViews.ActiveId) ?? MapLabMapViews.Active;
+                if (v == null)
+                {
+                    EditorGUILayout.EndFoldoutHeaderGroup();
+                    return;
+                }
+                bool grade = false;
+                EditorGUI.BeginChangeCheck();
+                string name = EditorGUILayout.TextField("Название", v.Name);
+                bool enabled = EditorGUILayout.Toggle(new GUIContent("Доступен", "Вид есть в переключателе игры и окна."), v.Enabled);
+                string note = EditorGUILayout.TextField("Описание", v.Note);
+                EditorGUILayout.LabelField("ID: " + v.Id + " · папка рисунков: " + v.ArtFolder, EditorStyles.miniLabel);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    Undo.RecordObject(asset, "Виды карты: вид");
+                    v.Name = name;
+                    v.Enabled = enabled || v.Id == MapLabMapViews.ClassicId;
+                    v.Note = note;
+                    EditorUtility.SetDirty(asset);
+                }
+
+                EditorGUILayout.Space(4);
+                EditorGUILayout.LabelField("Цветокоррекция (сразу)", EditorStyles.boldLabel);
+                MapLabViewGrade g = v.Grade ??= MapLabViewGrade.Neutral();
+                EditorGUI.BeginChangeCheck();
+                float strength = EditorGUILayout.Slider(new GUIContent("Сила вида", "0 — исходный рисунок."), g.Strength, 0f, 1f);
+                float brightness = EditorGUILayout.Slider("Яркость", g.Brightness, 0.2f, 2f);
+                float contrast = EditorGUILayout.Slider("Контраст", g.Contrast, 0.3f, 2f);
+                float saturation = EditorGUILayout.Slider("Насыщенность", g.Saturation, 0f, 2f);
+                float gradient = EditorGUILayout.Slider(new GUIContent("Тонирование", "Доля градиентной карты: светлота → тень / середина / свет (1 — чистая сепия)."), g.GradientMix, 0f, 1f);
+                Color shadows = EditorGUILayout.ColorField("Тень", g.Shadows);
+                Color mids = EditorGUILayout.ColorField("Середина", g.Midtones);
+                Color lights = EditorGUILayout.ColorField("Свет", g.Highlights);
+                Color tint = EditorGUILayout.ColorField(new GUIContent("Подкраска", "Умножение на цвет."), g.Tint);
+                float tintStrength = EditorGUILayout.Slider("Сила подкраски", g.TintStrength, 0f, 1f);
+                float warm = EditorGUILayout.Slider(new GUIContent("Тёплые огни", "Окна, фонари, огонь сохраняют свой цвет."), g.KeepWarmLights, 0f, 1f);
+                float lift = EditorGUILayout.Slider(new GUIContent("Подъём тени", "Самые тёмные тона не проваливаются в черноту."), g.ShadowLift, 0f, 1f);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    Undo.RecordObject(asset, "Виды карты: цветокоррекция");
+                    g.Strength = strength;
+                    g.Brightness = brightness;
+                    g.Contrast = contrast;
+                    g.Saturation = saturation;
+                    g.GradientMix = gradient;
+                    g.Shadows = shadows;
+                    g.Midtones = mids;
+                    g.Highlights = lights;
+                    g.Tint = tint;
+                    g.TintStrength = tintStrength;
+                    g.KeepWarmLights = warm;
+                    g.ShadowLift = lift;
+                    EditorUtility.SetDirty(asset);
+                    grade = true;
+                }
+
+                EditorGUILayout.Space(4);
+                EditorGUILayout.LabelField("Игра: туман, фон, картинки интерфейса", EditorStyles.boldLabel);
+                EditorGUI.BeginChangeCheck();
+                bool fog = EditorGUILayout.Toggle("Свой цвет тумана", v.OverrideFog);
+                Color fogColor = v.FogColor;
+                using (new EditorGUI.DisabledScope(!fog))
+                    fogColor = EditorGUILayout.ColorField("Туман", v.FogColor);
+                Color background = EditorGUILayout.ColorField(new GUIContent("Фон под картой", "Пока карта рисуется и за краем полотна."), v.Background);
+                Color uiTint = EditorGUILayout.ColorField(new GUIContent("Подкраска значков", "Картинки скрытых мест, которые игра рисует интерфейсом поверх карты."), v.UiTint);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    Undo.RecordObject(asset, "Виды карты: игра");
+                    v.OverrideFog = fog;
+                    v.FogColor = fogColor;
+                    v.Background = background;
+                    v.UiTint = uiTint;
+                    EditorUtility.SetDirty(asset);
+                }
+
+                EditorGUILayout.Space(4);
+                EditorGUILayout.LabelField("Пересборка: палитра и свои рисунки", EditorStyles.boldLabel);
+                EditorGUI.BeginChangeCheck();
+                MapLabPalette palette = (MapLabPalette)EditorGUILayout.ObjectField(new GUIContent("Своя палитра", "Пусто — палитра профиля."), v.Palette, typeof(MapLabPalette), false);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    Undo.RecordObject(asset, "Виды карты: палитра");
+                    v.Palette = palette;
+                    EditorUtility.SetDirty(asset);
+                    lookShownId = null;
+                }
+                EditorGUI.BeginChangeCheck();
+                bool ungraded = EditorGUILayout.ToggleLeft(new GUIContent("Свои рисунки — без цветокоррекции", "Свои PNG вида нарисованы уже в его гамме: коррекция их не трогает (земля, мазки, тушь — под коррекцией)."), v.OwnArtUngraded);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    Undo.RecordObject(asset, "Виды карты: свои рисунки");
+                    v.OwnArtUngraded = ungraded;
+                    EditorUtility.SetDirty(asset);
+                    lookShownId = null;
+                    lookBuiltKey = string.Empty;
+                }
+                EditorGUILayout.LabelField("Свои рисунки вида: " + v.ArtCount + " из " + CountKnownArt() + " ассетов карты", EditorStyles.miniLabel);
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button(new GUIContent("Собрать из папки", "PNG в " + v.ArtFolder + " с именем = ID ассета карты (House_Thatch_A_P35.png…). Импорт — как у основного рисунка.")))
+                        Guard(() =>
+                        {
+                            status = CollectViewArt(asset, v);
+                            lookShownId = null;
+                        });
+                    if (GUILayout.Button("Открыть папку"))
+                        Guard(() =>
+                        {
+                            EnsureFolder(v.ArtFolder);
+                            EditorUtility.RevealInFinder(v.ArtFolder);
+                        });
+                    if (GUILayout.Button(new GUIContent("Список ID", "Записать в папку вида список ID всех ассетов карты с размерами холста (для художника).")))
+                        Guard(() => status = WriteArtList(v));
+                }
+
+                EditorGUILayout.Space(4);
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button(new GUIContent("Новый вид", "Копия выбранного вида с новым ID — дальше правится отдельно.")))
+                        Guard(() =>
+                        {
+                            Undo.RecordObject(asset, "Виды карты: новый вид");
+                            MapLabMapView copy = v.Clone();
+                            copy.Id = "view" + (asset.Views.Count + 1);
+                            while (asset.Find(copy.Id) != null)
+                                copy.Id += "b";
+                            copy.Name = v.Name + " (копия)";
+                            copy.Art.Clear();
+                            copy.Enabled = true;
+                            asset.Views.Add(copy);
+                            EditorUtility.SetDirty(asset);
+                            MapLabMapViews.ActiveId = copy.Id;
+                        });
+                    using (new EditorGUI.DisabledScope(v.Id == MapLabMapViews.ClassicId))
+                    {
+                        if (GUILayout.Button(new GUIContent("Удалить вид", "Прежний облик (Обычный) не удаляется. Папка рисунков остаётся.")) &&
+                            EditorUtility.DisplayDialog("Виды карты", "Удалить вид «" + v.Name + "»? Папка его рисунков останется.", "Удалить", "Отмена"))
+                            Guard(() =>
+                            {
+                                Undo.RecordObject(asset, "Виды карты: удалить вид");
+                                asset.Views.Remove(v);
+                                EditorUtility.SetDirty(asset);
+                                MapLabMapViews.ActiveId = MapLabMapViews.ClassicId;
+                            });
+                    }
+                    if (GUILayout.Button("Сохранить виды"))
+                        Guard(() =>
+                        {
+                            EditorUtility.SetDirty(asset);
+                            AssetDatabase.SaveAssetIfDirty(asset);
+                            status = "Виды карты сохранены.";
+                        });
+                }
+                if (grade)
+                    previewDirty = true;
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
+        }
+
+        // Все записи наборов карты по ID (для сборки своих рисунков).
+        private Dictionary<string, MapLabArtEntry> KnownArt()
+        {
+            Dictionary<string, MapLabArtEntry> known = new Dictionary<string, MapLabArtEntry>();
+            if (view == null)
+                return known;
+            foreach (MapLabArtSet set in ActiveSets())
+                foreach (MapLabArtEntry e in set.Entries)
+                    if (e != null && !string.IsNullOrEmpty(e.Id) && !known.ContainsKey(e.Id))
+                        known[e.Id] = e;
+            return known;
+        }
+
+        private int knownArtCount = -1;
+
+        private int CountKnownArt()
+        {
+            if (knownArtCount < 0)
+                knownArtCount = KnownArt().Count;
+            return knownArtCount;
+        }
+
+        private static void EnsureFolder(string folder)
+        {
+            if (!AssetDatabase.IsValidFolder(folder))
+            {
+                Directory.CreateDirectory(folder);
+                AssetDatabase.Refresh();
+            }
+        }
+
+        // PNG папки вида → свои рисунки вида; импорт — как у основного рисунка
+        // (прозрачность, читаемость для пятен, размер, сжатие).
+        private string CollectViewArt(MapLabMapViews asset, MapLabMapView v)
+        {
+            EnsureFolder(v.ArtFolder);
+            Dictionary<string, MapLabArtEntry> known = KnownArt();
+            Dictionary<string, bool> wasEnabled = new Dictionary<string, bool>();
+            foreach (MapLabViewArtOverride o in v.Art)
+                if (o != null && !string.IsNullOrEmpty(o.ArtId))
+                    wasEnabled[o.ArtId] = o.Enabled;
+            List<MapLabViewArtOverride> next = new List<MapLabViewArtOverride>();
+            List<string> unknown = new List<string>();
+            List<string> skewed = new List<string>();
+            int reimported = 0;
+            foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { v.ArtFolder }))
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                string id = Path.GetFileNameWithoutExtension(path);
+                if (!known.TryGetValue(id, out MapLabArtEntry entry))
+                {
+                    unknown.Add(id);
+                    continue;
+                }
+                if (MatchImport(path, entry))
+                    reimported++;
+                Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+                if (texture == null)
+                    continue;
+                // Пропорции холста — как у исходника (опора и рост берутся из него).
+                if (entry.Width > 0 && entry.Height > 0 && Mathf.Abs(texture.width / (float)texture.height - entry.Width / (float)entry.Height) > 0.02f * entry.Width / entry.Height)
+                    skewed.Add($"{id} ({texture.width}×{texture.height}, нужно {entry.Width}×{entry.Height})");
+                next.Add(new MapLabViewArtOverride { ArtId = id, Texture = texture, Enabled = !wasEnabled.TryGetValue(id, out bool on) || on });
+            }
+            next.Sort((a, b) => string.CompareOrdinal(a.ArtId, b.ArtId));
+            Undo.RecordObject(asset, "Виды карты: свои рисунки");
+            v.Art = next;
+            v.InvalidateIndex();
+            EditorUtility.SetDirty(asset);
+            AssetDatabase.SaveAssetIfDirty(asset);
+            string message = $"Вид «{v.Name}»: своих рисунков {next.Count}" + (reimported > 0 ? $", импорт выровнен у {reimported}" : string.Empty) + ".";
+            if (skewed.Count > 0)
+                message += " Пропорции холста не совпадают с исходником (рисунок встанет искажённым): " + string.Join(", ", skewed) + ".";
+            if (unknown.Count > 0)
+            {
+                message += " Не найдены ID (имя файла не совпало с ассетом карты): " + string.Join(", ", unknown) + ".";
+                Debug.LogWarning(message);
+            }
+            return message;
+        }
+
+        // Настройки импорта своего рисунка — как у основного; true — переимпортирован.
+        private static bool MatchImport(string path, MapLabArtEntry entry)
+        {
+            TextureImporter dst = AssetImporter.GetAtPath(path) as TextureImporter;
+            TextureImporter src = entry.Texture != null ? AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(entry.Texture)) as TextureImporter : null;
+            if (dst == null)
+                return false;
+            TextureImporterSettings want = new TextureImporterSettings();
+            if (src != null)
+                src.ReadTextureSettings(want);
+            else
+            {
+                dst.ReadTextureSettings(want);
+                want.alphaIsTransparency = true;
+                want.mipmapEnabled = true;
+            }
+            TextureImporterSettings have = new TextureImporterSettings();
+            dst.ReadTextureSettings(have);
+            bool same = EditorJsonUtility.ToJson(want) == EditorJsonUtility.ToJson(have)
+                        && (src == null || (dst.maxTextureSize == src.maxTextureSize && dst.textureCompression == src.textureCompression));
+            if (same)
+                return false;
+            dst.SetTextureSettings(want);
+            if (src != null)
+            {
+                dst.maxTextureSize = src.maxTextureSize;
+                dst.textureCompression = src.textureCompression;
+            }
+            dst.SaveAndReimport();
+            return true;
+        }
+
+        // Список ID ассетов карты с размерами холста — художнику вида.
+        private string WriteArtList(MapLabMapView v)
+        {
+            EnsureFolder(v.ArtFolder);
+            List<string> lines = new List<string>
+            {
+                "# Ассеты карты для вида «" + v.Name + "» (" + v.Id + ")",
+                "# Своя версия рисунка: PNG с прозрачностью, ТОТ ЖЕ размер холста и та же опора (основание) — имя файла = ID.",
+                "# ID\tкатегория\tроль\tхолст, px\tесть своя",
+            };
+            List<MapLabArtEntry> entries = new List<MapLabArtEntry>(KnownArt().Values);
+            entries.Sort((a, b) => a.Category != b.Category ? a.Category.CompareTo(b.Category) : string.CompareOrdinal(a.Id, b.Id));
+            foreach (MapLabArtEntry e in entries)
+                lines.Add($"{e.Id}\t{e.Category}\t{e.Role}\t{e.Width}x{e.Height}\t{(v.FindTexture(e.Id) != null ? "да" : "—")}");
+            string file = Path.Combine(v.ArtFolder, "_ASSET_LIST.txt");
+            File.WriteAllLines(file, lines);
+            return "Список ID (" + entries.Count + ") записан: " + file;
+        }
+    }
+}

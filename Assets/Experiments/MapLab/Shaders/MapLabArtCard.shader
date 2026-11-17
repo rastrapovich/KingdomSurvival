@@ -12,6 +12,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
     Properties
     {
         _ColorAdjust ("Коррекция автора: яркость, тон°, насыщенность", Vector) = (1, 0, 1, 0)
+        _ViewGradeSkip ("Свой рисунок вида: без цветокоррекции вида", Float) = 0
         _MainTex ("Рисунок (RGBA)", 2D) = "white" {}
         _ShadeTex ("Shade (R свет, G затенение)", 2D) = "white" {}
         _Cutoff ("Alpha cutoff", Range(0.05, 0.95)) = 0.5
@@ -115,6 +116,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float4 _StrokeDry;
                 float4 _StrokeLush;
                 float4 _ColorAdjust;
+                float _ViewGradeSkip;
             CBUFFER_END
 
             float StrokeHash(float2 p)
@@ -387,7 +389,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 if (diag == 13)
                     return float4(lerp(lerp(float3(0.82, 0.82, 0.78), float3(0.95, 0.85, 0.2), bandMask), float3(0.75, 0.1, 0.05), edgeMask), 1);
                 c = MapLabSaturate(c, _Saturation);
-                return float4(c, outAlpha);
+                return float4(lerp(MapLabViewGrade(c), c, _ViewGradeSkip), outAlpha);
             }
             ENDHLSL
         }

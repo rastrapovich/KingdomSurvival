@@ -116,7 +116,7 @@ public partial class PrototypeUIController
     private void RedrawWorldMapFog(WorldMapHexGrid grid)
     {
         WorldMapMovementSettingsAsset settings = WorldMapVisualRuntime.LoadMovementSettings();
-        Color fogColor = settings != null ? settings.FogColor : new Color(0.055f, 0.06f, 0.07f, 0.86f);
+        Color fogColor = WorldMapViewFogColor();
         float softness = settings != null ? settings.FogEdgeSoftness : 0.45f;
         byte full = (byte)Mathf.RoundToInt(Mathf.Clamp01(fogColor.a) * 255f);
         byte edge = (byte)Mathf.RoundToInt(full * (1f - softness));

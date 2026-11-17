@@ -8,6 +8,7 @@ Shader "Kingdom Survival/MapLab/Module"
     Properties
     {
         _ColorAdjust ("Коррекция автора: яркость, тон°, насыщенность", Vector) = (1, 0, 1, 0)
+        _ViewGradeSkip ("Свой рисунок вида: без цветокоррекции вида", Float) = 0
         _MainTex ("Модуль (RGBA)", 2D) = "white" {}
         _ShadeTex ("Shade (R свет, G затенение)", 2D) = "white" {}
         _Cutoff ("Alpha cutoff", Range(0.05, 0.95)) = 0.5
@@ -67,6 +68,7 @@ Shader "Kingdom Survival/MapLab/Module"
                 float _Saturation;
                 float _AlphaToMask;
                 float4 _ColorAdjust;
+                float _ViewGradeSkip;
             CBUFFER_END
 
             Varyings Vert(Attributes input)
@@ -108,7 +110,7 @@ Shader "Kingdom Survival/MapLab/Module"
                 c *= side;
                 c = MapLabShadow(c, i.shade * _GroundShade, _ShadowTint.rgb);
                 c = MapLabSaturate(c, _Saturation);
-                return float4(c, a);
+                return float4(lerp(MapLabViewGrade(c), c, _ViewGradeSkip), a);
             }
             ENDHLSL
         }

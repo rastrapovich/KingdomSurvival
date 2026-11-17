@@ -105,6 +105,7 @@ public partial class PrototypeUIController
         mapSendButton = root.Q<Button>("map-send-button");
         worldMapFocusHeroButton = root.Q<Button>("world-map-focus-hero-button");
         worldMapFitButton = root.Q<Button>("world-map-fit-button");
+        worldMapViewButton = root.Q<Button>("world-map-view-button");
         worldMapZoomInButton = root.Q<Button>("world-map-zoom-in-button");
         worldMapZoomOutButton = root.Q<Button>("world-map-zoom-out-button");
         worldMapZoomIndicatorLabel = root.Q<Label>("world-map-zoom-indicator");
@@ -218,6 +219,7 @@ public partial class PrototypeUIController
             worldMapFocusHeroButton.clicked += OnWorldMapFocusHeroButtonClicked;
         if (worldMapFitButton != null)
             worldMapFitButton.clicked += OnWorldMapFitButtonClicked;
+        RegisterWorldMapViewButton();
         if (worldMapZoomInButton != null)
             worldMapZoomInButton.clicked += OnWorldMapZoomInButtonClicked;
         if (worldMapZoomOutButton != null)
@@ -237,6 +239,7 @@ public partial class PrototypeUIController
             worldMapFocusHeroButton.clicked -= OnWorldMapFocusHeroButtonClicked;
         if (worldMapFitButton != null)
             worldMapFitButton.clicked -= OnWorldMapFitButtonClicked;
+        UnregisterWorldMapViewButton();
         if (worldMapZoomInButton != null)
             worldMapZoomInButton.clicked -= OnWorldMapZoomInButtonClicked;
         if (worldMapZoomOutButton != null)

@@ -277,7 +277,7 @@ Shader "Kingdom Survival/MapLab/Terrain"
                 c = MapLabSaturate(c, _Saturation);
                 if (mode == 9)
                     c = lerp(float3(0.62, 0.62, 0.6), c, 0.25);
-                return float4(c, 1);
+                return float4(MapLabViewGrade(c), 1);
             }
             ENDHLSL
         }

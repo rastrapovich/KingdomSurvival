@@ -5,6 +5,7 @@
 #define MAPLAB_COMMON_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "MapLabGrade.hlsl"
 
 // Тон 0..1 по нормали с мягким переходом и необязательными диапазонами.
 float MapLabTone(float3 normalWS, float3 lightDir, float softness, float bands)

@@ -135,6 +135,7 @@ namespace KingdomSurvival.MapLab.Editor
         private void OnDisable()
         {
             Undo.undoRedoPerformed -= OnUndoRedo;
+            MapLabViewGradeShader.Neutral();
             DestroyFieldView();
             if (preview != null)
             {
@@ -248,6 +249,8 @@ namespace KingdomSurvival.MapLab.Editor
                 }
                 bool dirty = view.Settings != null && EditorUtility.IsDirty(view.Settings);
                 GUILayout.Label(dirty ? "● есть несохранённые изменения" : "сохранено", dirty ? EditorStyles.boldLabel : EditorStyles.miniLabel);
+                GUILayout.Space(12f);
+                DrawViewPopup();
                 GUILayout.FlexibleSpace();
                 GUIContent service = new GUIContent("Сервис ▾", "Подключить пакеты арта, калибровка, подробные настройки, правила генератора игры, подготовка рисунка для игры.");
                 Rect serviceRect = GUILayoutUtility.GetRect(service, EditorStyles.toolbarDropDown);
@@ -381,6 +384,7 @@ namespace KingdomSurvival.MapLab.Editor
 
             EditorGUILayout.Space(6);
             look |= DrawLookGroup(s, a);
+            DrawViewsGroup();
 
             fineOpen = EditorGUILayout.BeginFoldoutHeaderGroup(fineOpen, "Точная настройка · переопределения");
             if (fineOpen)
@@ -533,6 +537,7 @@ namespace KingdomSurvival.MapLab.Editor
                     s.RegionPlan = null;
                     planReport = null;
                 }
+                PrepareLookForGenerate();
                 bool ok = view.Generate((stage, fraction) => EditorUtility.DisplayCancelableProgressBar("Генератор карты", stage, fraction));
                 if (!ok)
                     throw new Exception("генерация не выполнена (проверьте профиль и шейдеры)");
@@ -596,7 +601,16 @@ namespace KingdomSurvival.MapLab.Editor
                 Camera cam = rig.Camera;
                 RenderTexture keep = cam.targetTexture;
                 cam.targetTexture = preview;
-                cam.Render();
+                // Вид карты: цветокоррекция только на время этого рендера.
+                MapLabViewGradeShader.Apply(MapLabMapViews.Active);
+                try
+                {
+                    cam.Render();
+                }
+                finally
+                {
+                    MapLabViewGradeShader.Neutral();
+                }
                 cam.targetTexture = keep;
                 previewDirty = false;
             }

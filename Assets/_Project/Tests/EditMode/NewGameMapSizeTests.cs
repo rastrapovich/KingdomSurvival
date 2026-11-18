@@ -2,8 +2,8 @@ using KingdomSurvival.WorldMapVisual;
 using NUnit.Framework;
 using UnityEngine;
 
-// Размер карты новой партии (просьба пользователя 01.11.2026): маленькая —
-// 50 клеток по ширине, средняя — 100; генератор берёт остальное из ассета.
+// Размер карты новой партии (просьба пользователя 01.11.2026, 12У-H):
+// 50, 100, 140 или 180 клеток по ширине; генератор берёт остальное из ассета.
 public sealed class NewGameMapSizeTests
 {
     [Test]
@@ -12,9 +12,12 @@ public sealed class NewGameMapSizeTests
         CampaignSetup setup = new CampaignSetup();
         Assert.AreEqual(CampaignStartOptions.MediumMapHexesAcross, setup.MapHexesAcross);
         Assert.IsTrue(setup.Validate(out string reason), reason);
-        Assert.AreEqual(2, CampaignStartOptions.MapSizes.Count);
+        // 12У-H: четыре размера — маленькая, средняя, большая, очень большая.
+        Assert.AreEqual(4, CampaignStartOptions.MapSizes.Count);
         Assert.AreEqual(50, CampaignStartOptions.SmallMapHexesAcross);
         Assert.AreEqual(100, CampaignStartOptions.MediumMapHexesAcross);
+        Assert.AreEqual(140, CampaignStartOptions.LargeMapHexesAcross);
+        Assert.AreEqual(180, CampaignStartOptions.HugeMapHexesAcross);
 
         setup.MapHexesAcross = 77;
         Assert.IsFalse(setup.Validate(out reason));

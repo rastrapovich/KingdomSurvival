@@ -102,3 +102,6 @@ __pycache__/
 
 # MapLab (эксперимент): выгрузки PNG/JSON
 /MapLabExports/
+
+# Логи драйвера видеокарты (umdlogs) в корне проекта
+/NVIDIA Corporation/

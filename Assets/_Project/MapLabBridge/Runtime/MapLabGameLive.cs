@@ -75,6 +75,24 @@ namespace KingdomSurvival.MapLabBridge
             }
         }
 
+        // Готовая живая карта переходит на выбранный вид без пересборки, если
+        // у видов одна палитра (свои рисунки — подмена текстур). true — карта уже
+        // в выбранном виде.
+        public static bool TryApplyActiveView()
+        {
+            World w = current;
+            if (w == null || !w.Ready)
+                return false;
+            MapLabMapView look = MapLabMapViews.Active;
+            string key = MapLabMapViews.BuildKey(look);
+            if (w.ViewKey == key)
+                return true;
+            if (!w.View.SwapLook(look))
+                return false;
+            w.ViewKey = key;
+            return true;
+        }
+
         public static bool Matches(GeneratedWorldMap plan, string servicesKey) =>
             current != null && ReferenceEquals(current.Plan, plan) && current.ServicesKey == servicesKey
             && current.ViewKey == MapLabMapViews.BuildKey(MapLabMapViews.Active);
@@ -424,9 +442,10 @@ namespace KingdomSurvival.MapLabBridge
             w.View.OnCameraChanged();
             w.View.PumpStreaming(false);
             // Свой слой видит только эта камера.
-            foreach (Camera other in Camera.allCameras)
-                if (other != w.Camera && (other.cullingMask & (1 << Layer)) != 0)
-                    other.cullingMask &= ~(1 << Layer);
+            int cameraCount = MapLabArena.AllCameras(out Camera[] cameras);
+            for (int i = 0; i < cameraCount; i++)
+                if (cameras[i] != w.Camera && (cameras[i].cullingMask & (1 << Layer)) != 0)
+                    cameras[i].cullingMask &= ~(1 << Layer);
             w.Camera.targetTexture = w.Target;
             // Цветокоррекция выбранного вида — только на время этого рендера.
             MapLabMapView active = MapLabMapViews.Active;

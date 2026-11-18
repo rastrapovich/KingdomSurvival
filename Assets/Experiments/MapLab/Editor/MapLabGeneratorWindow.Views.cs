@@ -53,11 +53,16 @@ namespace KingdomSurvival.MapLab.Editor
             if (id == lookShownId && ReferenceEquals(view.Look, active))
                 return;
             lookShownId = id;
-            view.SetLook(active);
             previewDirty = true;
-            if (view.Data != null && lookBuiltKey != null && lookBuiltKey != MapLabMapViews.BuildKey(active))
+            string key = MapLabMapViews.BuildKey(active);
+            // Та же палитра — свои рисунки подменяются в готовой карте сразу.
+            if (view.Data != null && view.SwapLook(active))
+                lookBuiltKey = key;
+            else if (view.Data == null)
+                view.SetLook(active);
+            if (view.Data != null && lookBuiltKey != key)
             {
-                status = "Вид «" + active?.Name + "»: своя палитра или рисунки — карта пересобирается тем же seed.";
+                status = "Вид «" + active?.Name + "»: своя палитра — карта пересобирается тем же seed.";
                 EditorApplication.delayCall += () =>
                 {
                     if (this != null && view != null)
@@ -222,7 +227,7 @@ namespace KingdomSurvival.MapLab.Editor
                     if (GUILayout.Button(new GUIContent("Собрать из папки", "PNG в " + v.ArtFolder + " с именем = ID ассета карты (House_Thatch_A_P35.png…). Импорт — как у основного рисунка.")))
                         Guard(() =>
                         {
-                            status = CollectViewArt(asset, v);
+                            status = CollectViewArt(asset, v, KnownArt());
                             lookShownId = null;
                         });
                     if (GUILayout.Button("Открыть папку"))
@@ -283,13 +288,42 @@ namespace KingdomSurvival.MapLab.Editor
         private Dictionary<string, MapLabArtEntry> KnownArt()
         {
             Dictionary<string, MapLabArtEntry> known = new Dictionary<string, MapLabArtEntry>();
-            if (view == null)
-                return known;
-            foreach (MapLabArtSet set in ActiveSets())
-                foreach (MapLabArtEntry e in set.Entries)
-                    if (e != null && !string.IsNullOrEmpty(e.Id) && !known.ContainsKey(e.Id))
-                        known[e.Id] = e;
+            if (view != null)
+                AddKnown(known, ActiveSets());
+            AddKnown(known, AllArtSets());
             return known;
+        }
+
+        // Все наборы арта MapLab проекта (сцена генератора может держать не все).
+        private static IEnumerable<MapLabArtSet> AllArtSets()
+        {
+            foreach (string guid in AssetDatabase.FindAssets("t:MapLabArtSet"))
+            {
+                MapLabArtSet set = AssetDatabase.LoadAssetAtPath<MapLabArtSet>(AssetDatabase.GUIDToAssetPath(guid));
+                if (set != null)
+                    yield return set;
+            }
+        }
+
+        private static void AddKnown(Dictionary<string, MapLabArtEntry> known, IEnumerable<MapLabArtSet> sets)
+        {
+            foreach (MapLabArtSet set in sets)
+                foreach (MapLabArtEntry e in set.Entries)
+                    if (e != null && e.HasTexture && !string.IsNullOrEmpty(e.Id) && !known.ContainsKey(e.Id))
+                        known[e.Id] = e;
+        }
+
+        // Пакетно: «Собрать из папки» для всех видов, у которых есть папка рисунков.
+        //   -executeMethod KingdomSurvival.MapLab.Editor.MapLabGeneratorWindow.CollectViewArtBatch
+        public static void CollectViewArtBatch()
+        {
+            MapLabMapViews asset = ViewsAsset(true);
+            Dictionary<string, MapLabArtEntry> known = new Dictionary<string, MapLabArtEntry>();
+            AddKnown(known, AllArtSets());
+            foreach (MapLabMapView v in asset.Views)
+                if (v != null && AssetDatabase.IsValidFolder(v.ArtFolder))
+                    Debug.Log("MAP_VIEW_ART: " + CollectViewArt(asset, v, known));
+            MapLabMapViews.ResetCache();
         }
 
         private int knownArtCount = -1;
@@ -312,10 +346,9 @@ namespace KingdomSurvival.MapLab.Editor
 
         // PNG папки вида → свои рисунки вида; импорт — как у основного рисунка
         // (прозрачность, читаемость для пятен, размер, сжатие).
-        private string CollectViewArt(MapLabMapViews asset, MapLabMapView v)
+        private static string CollectViewArt(MapLabMapViews asset, MapLabMapView v, Dictionary<string, MapLabArtEntry> known)
         {
             EnsureFolder(v.ArtFolder);
-            Dictionary<string, MapLabArtEntry> known = KnownArt();
             Dictionary<string, bool> wasEnabled = new Dictionary<string, bool>();
             foreach (MapLabViewArtOverride o in v.Art)
                 if (o != null && !string.IsNullOrEmpty(o.ArtId))

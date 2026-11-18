@@ -1,0 +1,715 @@
+fileFormatVersion: 2
+guid: 96fc02f5ed2936948a2547bb1acdfe26
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7391504285595749765
+    second: Map05_Rock_Outcrop_D_0
+  - first:
+      213: -1693512410041633080
+    second: Map05_Rock_Outcrop_D_1
+  - first:
+      213: -2712138675861395097
+    second: Map05_Rock_Outcrop_D_2
+  - first:
+      213: -6054463733912508344
+    second: Map05_Rock_Outcrop_D_3
+  - first:
+      213: -495523853222434345
+    second: Map05_Rock_Outcrop_D_4
+  - first:
+      213: 535749614533531303
+    second: Map05_Rock_Outcrop_D_5
+  - first:
+      213: 6601210282906250445
+    second: Map05_Rock_Outcrop_D_6
+  - first:
+      213: -8081474674865594788
+    second: Map05_Rock_Outcrop_D_7
+  - first:
+      213: -8576404865276299910
+    second: Map05_Rock_Outcrop_D_8
+  - first:
+      213: 4240692304906658493
+    second: Map05_Rock_Outcrop_D_9
+  - first:
+      213: -7100810795740562616
+    second: Map05_Rock_Outcrop_D_10
+  - first:
+      213: 218563580694974315
+    second: Map05_Rock_Outcrop_D_11
+  - first:
+      213: -4607909010610624632
+    second: Map05_Rock_Outcrop_D_12
+  - first:
+      213: -4668174656194148957
+    second: Map05_Rock_Outcrop_D_13
+  - first:
+      213: -1866061043237408818
+    second: Map05_Rock_Outcrop_D_14
+  - first:
+      213: 3806235049823359177
+    second: Map05_Rock_Outcrop_D_15
+  - first:
+      213: 5881294279808368059
+    second: Map05_Rock_Outcrop_D_16
+  - first:
+      213: 4642066788601406553
+    second: Map05_Rock_Outcrop_D_17
+  - first:
+      213: -5112529725799146102
+    second: Map05_Rock_Outcrop_D_18
+  - first:
+      213: 7584346902437252814
+    second: Map05_Rock_Outcrop_D_19
+  - first:
+      213: 6113862155077506765
+    second: Map05_Rock_Outcrop_D_20
+  - first:
+      213: -8486423546300078096
+    second: Map05_Rock_Outcrop_D_21
+  - first:
+      213: 6493266257544516772
+    second: Map05_Rock_Outcrop_D_22
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_0
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 557
+        width: 38
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b72b94d930a1c6990800000000000000
+      internalID: -7391504285595749765
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_1
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 0
+        width: 1317
+        height: 1042
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c6b0c88f6f6f78e0800000000000000
+      internalID: -1693512410041633080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_2
+      rect:
+        serializedVersion: 2
+        x: 455
+        y: 80
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 769eeab6e3c8c5ad0800000000000000
+      internalID: -2712138675861395097
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_3
+      rect:
+        serializedVersion: 2
+        x: 763
+        y: 55
+        width: 19
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 848e8aadf493afba0800000000000000
+      internalID: -6054463733912508344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_4
+      rect:
+        serializedVersion: 2
+        x: 1230
+        y: 67
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d9a1fe4eab8f19f0800000000000000
+      internalID: -495523853222434345
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_5
+      rect:
+        serializedVersion: 2
+        x: 735
+        y: 59
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a6d2d69f6d5f6700800000000000000
+      internalID: 535749614533531303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_6
+      rect:
+        serializedVersion: 2
+        x: 739
+        y: 55
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dcc684017c53c9b50800000000000000
+      internalID: 6601210282906250445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_7
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 53
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5e1257c995d8df80800000000000000
+      internalID: -8081474674865594788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_8
+      rect:
+        serializedVersion: 2
+        x: 985
+        y: 53
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a75364bf63d7af880800000000000000
+      internalID: -8576404865276299910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_9
+      rect:
+        serializedVersion: 2
+        x: 989
+        y: 53
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db2a1b3ee27f9da30800000000000000
+      internalID: 4240692304906658493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_10
+      rect:
+        serializedVersion: 2
+        x: 997
+        y: 47
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 84bff96f33ad47d90800000000000000
+      internalID: -7100810795740562616
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_11
+      rect:
+        serializedVersion: 2
+        x: 1214
+        y: 47
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b6f492c2b6e780300800000000000000
+      internalID: 218563580694974315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_12
+      rect:
+        serializedVersion: 2
+        x: 759
+        y: 35
+        width: 21
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8876b392b2b6d00c0800000000000000
+      internalID: -4607909010610624632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_13
+      rect:
+        serializedVersion: 2
+        x: 991
+        y: 47
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a5011c12ef473fb0800000000000000
+      internalID: -4668174656194148957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_14
+      rect:
+        serializedVersion: 2
+        x: 1007
+        y: 48
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecfa3a43e5b6a16e0800000000000000
+      internalID: -1866061043237408818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_15
+      rect:
+        serializedVersion: 2
+        x: 652
+        y: 31
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c0dc5c8c9672d430800000000000000
+      internalID: 3806235049823359177
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_16
+      rect:
+        serializedVersion: 2
+        x: 745
+        y: 27
+        width: 11
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bbdb38facfd8e9150800000000000000
+      internalID: 5881294279808368059
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_17
+      rect:
+        serializedVersion: 2
+        x: 773
+        y: 17
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 954a936462feb6040800000000000000
+      internalID: 4642066788601406553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_18
+      rect:
+        serializedVersion: 2
+        x: 878
+        y: 15
+        width: 15
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a8ddd1e3d45ac09b0800000000000000
+      internalID: -5112529725799146102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_19
+      rect:
+        serializedVersion: 2
+        x: 671
+        y: 21
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ece4b1df253014960800000000000000
+      internalID: 7584346902437252814
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_20
+      rect:
+        serializedVersion: 2
+        x: 813
+        y: 24
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc65917cc3dc8d450800000000000000
+      internalID: 6113862155077506765
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_21
+      rect:
+        serializedVersion: 2
+        x: 910
+        y: 15
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f7e5456fba2a3a80800000000000000
+      internalID: -8486423546300078096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Rock_Outcrop_D_22
+      rect:
+        serializedVersion: 2
+        x: 1184
+        y: 15
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a498f82247bc1a50800000000000000
+      internalID: 6493266257544516772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Map05_Rock_Outcrop_D_0: -7391504285595749765
+      Map05_Rock_Outcrop_D_1: -1693512410041633080
+      Map05_Rock_Outcrop_D_10: -7100810795740562616
+      Map05_Rock_Outcrop_D_11: 218563580694974315
+      Map05_Rock_Outcrop_D_12: -4607909010610624632
+      Map05_Rock_Outcrop_D_13: -4668174656194148957
+      Map05_Rock_Outcrop_D_14: -1866061043237408818
+      Map05_Rock_Outcrop_D_15: 3806235049823359177
+      Map05_Rock_Outcrop_D_16: 5881294279808368059
+      Map05_Rock_Outcrop_D_17: 4642066788601406553
+      Map05_Rock_Outcrop_D_18: -5112529725799146102
+      Map05_Rock_Outcrop_D_19: 7584346902437252814
+      Map05_Rock_Outcrop_D_2: -2712138675861395097
+      Map05_Rock_Outcrop_D_20: 6113862155077506765
+      Map05_Rock_Outcrop_D_21: -8486423546300078096
+      Map05_Rock_Outcrop_D_22: 6493266257544516772
+      Map05_Rock_Outcrop_D_3: -6054463733912508344
+      Map05_Rock_Outcrop_D_4: -495523853222434345
+      Map05_Rock_Outcrop_D_5: 535749614533531303
+      Map05_Rock_Outcrop_D_6: 6601210282906250445
+      Map05_Rock_Outcrop_D_7: -8081474674865594788
+      Map05_Rock_Outcrop_D_8: -8576404865276299910
+      Map05_Rock_Outcrop_D_9: 4240692304906658493
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

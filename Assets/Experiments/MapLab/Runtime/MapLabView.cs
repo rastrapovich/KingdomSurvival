@@ -262,7 +262,7 @@ namespace KingdomSurvival.MapLab
         {
             if (entry == null)
                 return null;
-            Texture2D own = Look != null ? Look.FindTexture(entry.Id) : null;
+            Texture2D own = Look != null ? Look.FindTexture(entry, out _) : null;
             return own != null ? own : entry.Texture;
         }
 
@@ -270,7 +270,26 @@ namespace KingdomSurvival.MapLab
         // палитру и рисунки; пятна-декали перечитываются.
         // Свой рисунок вида нарисован уже в гамме вида — цветокоррекция его не трогает.
         public bool OwnArtUngraded(MapLabArtEntry entry) =>
-            entry != null && Look != null && Look.OwnArtUngraded && Look.FindTexture(entry.Id) != null;
+            entry != null && Look != null && Look.OwnArtUngraded && Look.FindTexture(entry, out _) != null;
+
+        // Сменить вид у готовой карты без пересборки: свои рисунки вида —
+        // только текстуры тех же карточек (размер и опора — из каталога), поэтому
+        // хватает перенастроить материалы. Нельзя, если меняется палитра (нужна
+        // перекраска земли) — тогда false и нужна пересборка. Пятна-декали,
+        // впечённые в покраску земли, остаются прежними до пересборки.
+        public bool SwapLook(MapLabMapView look)
+        {
+            if (data == null || Settings == null)
+                return false;
+            MapLabPalette basePalette = Settings.PainterlyStyle.Palette;
+            MapLabPalette now = Look != null && Look.Palette != null ? Look.Palette : basePalette;
+            MapLabPalette next = look != null && look.Palette != null ? look.Palette : basePalette;
+            if (now != next)
+                return false;
+            Look = look;
+            ApplyMaterialSettings();
+            return true;
+        }
 
         public void SetLook(MapLabMapView look)
         {
@@ -1380,7 +1399,9 @@ namespace KingdomSurvival.MapLab
                     break;
             }
             m.SetColor("_TintColor", tone);
-            m.SetFloat("_TintStrength", entry.Category == MapLabArtCategory.Figure || entry.Category == MapLabArtCategory.FigureCalibration || entry.Category == MapLabArtCategory.Building ? 0f : 1f);
+            // Свой рисунок вида уже в гамме вида: без подмеса тона палитры и кромки крон.
+            bool own = OwnArtUngraded(entry);
+            m.SetFloat("_TintStrength", own || entry.Category == MapLabArtCategory.Figure || entry.Category == MapLabArtCategory.FigureCalibration || entry.Category == MapLabArtCategory.Building ? 0f : 1f);
             m.SetColor("_ShadowTint", palette.ShadowTint);
             m.SetFloat("_GroundShade", Settings.Diagnostics.ShowReliefLight ? art.GroundShade : 0f);
             m.SetFloat("_MapSize", data != null ? data.Size : Settings.General.MapSize);
@@ -1393,7 +1414,7 @@ namespace KingdomSurvival.MapLab
             m.SetColor("_AccentLight", Color.Lerp(palette.TreeMoss, palette.GrassDry, 0.45f));
             m.SetFloat("_AccentLightStrength", s3.AccentHighlightStrength);
             m.SetFloat("_AccentHighlight", s3.AccentHighlight);
-            m.SetFloat("_AccentOn", Settings.IsStage03 && s3.ForestAccents ? 1f : 0f);
+            m.SetFloat("_AccentOn", !own && Settings.IsStage03 && s3.ForestAccents ? 1f : 0f);
             m.SetFloat("_DiagMode", (float)Settings.Diagnostics.Mode);
             MapLabStage05Settings s5 = Settings.Stage05;
             bool stage05 = Settings.IsStage05;
@@ -1456,7 +1477,7 @@ namespace KingdomSurvival.MapLab
             m.SetFloat("_GroundShade", Settings.Diagnostics.ShowReliefLight ? 0.5f : 0f);
             bool stone = entry.Id == MapLabModules05.Abutment;
             m.SetColor("_Tint", stone ? s5.CliffColor : s5.WoodColor);
-            m.SetFloat("_TintStrength", 0.15f);
+            m.SetFloat("_TintStrength", OwnArtUngraded(entry) ? 0f : 0.15f);
             m.SetVector("_LightDir", Settings.LightDirection);
             m.SetFloat("_Saturation", Settings.PainterlyStyle.Saturation);
             m.SetFloat("_AlphaToMask", s5.AlphaToCoverage ? 1f : 0f);

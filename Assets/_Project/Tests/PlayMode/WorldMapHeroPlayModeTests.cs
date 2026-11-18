@@ -99,7 +99,10 @@ public sealed class WorldMapHeroPlayModeTests
             "Траектория не рисуется.");
         Assert.AreEqual(0, root.Q<VisualElement>("world-map").Query<VisualElement>(className: "world-map-route-dot").ToList().Count);
 
-        until = Time.realtimeSinceStartup + 20f;
+        // 20 с рассчитаны на скорость бега 0,8 гекса/с; медленнее в настройках
+        // движения (рабочая настройка автора) — пропорционально дольше.
+        float runSpeed = Mathf.Max(0.05f, WorldMapMovementRules.Current.HeroRunSpeedHexesPerSecond);
+        until = Time.realtimeSinceStartup + 20f * Mathf.Max(1f, 0.8f / runSpeed);
         while (Time.realtimeSinceStartup < until && campaign.ActiveExpedition.Phase == CommanderState.TravellingToLocation)
             yield return null;
 

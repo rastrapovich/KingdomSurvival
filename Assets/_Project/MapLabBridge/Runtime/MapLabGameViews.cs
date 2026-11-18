@@ -64,14 +64,14 @@ namespace KingdomSurvival.MapLabBridge
             return v != null && v.Grade != null && !v.Grade.IsNeutral ? v.Background : fallback;
         }
 
-        // Живая карта собрана с другой палитрой или другими рисунками вида —
-        // нужна пересборка (одной цветокоррекции хватает без неё).
+        // Живая карта собрана с другой палитрой — нужна пересборка. Другие свои
+        // рисунки при той же палитре подменяются сразу (TryApplyActiveView).
         public static bool LiveNeedsRebuild
         {
             get
             {
                 MapLabGameLive.World w = MapLabGameLive.Current;
-                return w != null && w.ViewKey != MapLabMapViews.BuildKey(MapLabMapViews.Active);
+                return w != null && w.ViewKey != MapLabMapViews.BuildKey(MapLabMapViews.Active) && !MapLabGameLive.TryApplyActiveView();
             }
         }
     }

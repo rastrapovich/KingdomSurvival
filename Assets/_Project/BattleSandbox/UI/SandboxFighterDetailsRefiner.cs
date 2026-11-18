@@ -47,10 +47,18 @@ namespace KingdomSurvival.BattleSandbox
             database = Resources.Load<UnitDatabaseAsset>(UnitDatabaseAsset.ResourcesPath);
         }
 
+        // Объект живёт всю игру: вне боя (карта, поселения) окна бойца нет, и
+        // поиск по всем документам каждый кадр шёл впустую — там раз в 0,5 с.
+        private const float IdleSearchIntervalSeconds = 0.5f;
+        private float nextSearchAt;
+
         private void Update()
         {
             if (window == null || window.panel == null)
             {
+                if (!BattleSandboxController.IsBattleContextActive && Time.unscaledTime < nextSearchAt)
+                    return;
+                nextSearchAt = Time.unscaledTime + IdleSearchIntervalSeconds;
                 FindAndPrepareWindow();
                 return;
             }

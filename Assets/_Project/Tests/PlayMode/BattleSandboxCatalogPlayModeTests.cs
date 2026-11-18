@@ -133,6 +133,13 @@ public sealed class BattleSandboxCatalogPlayModeTests
         Invoke(sandbox, "StartBattle");
         Assert.IsFalse((bool)GetMember(sandbox, "combatAnimationRunning"), "Флаг показа прежнего боя сброшен.");
 
+        // Бой ждёт готовности арены (экран «Готовим поле боя…»): первая сборка
+        // арены в редакторе с компиляцией шейдеров — несколько секунд.
+        float arenaDeadline = Time.realtimeSinceStartup + 60f;
+        while (KingdomSurvival.BattleSandbox.MapLabArenaDriver.Loading && Time.realtimeSinceStartup < arenaDeadline)
+            yield return null;
+        Assert.IsFalse(KingdomSurvival.BattleSandbox.MapLabArenaDriver.Loading, "Арена собрана.");
+
         // Новый бой идёт: ходы сменяются (рысь быстрее гвардейца и ходит сама).
         object battle = GetMember(sandbox, "battle");
         int startLog = ((IList)GetMember(sandbox, "battleLog")).Count;

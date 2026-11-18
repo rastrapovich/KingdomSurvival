@@ -51,9 +51,20 @@ namespace KingdomSurvival.BattleSandbox
 
         private VisualElement styledScreen;
         private VisualElement styledSurface;
+        // Оформленное поле: пока оно на панели и на прежнем месте, поиск
+        // документов и обход дерева каждый кадр не нужен.
+        private VisualElement styledBoard;
+        private VisualElement styledBoardParent;
 
         private void Update()
         {
+            if (styledBoard != null && styledBoard.panel != null && styledBoard.parent == styledBoardParent
+                && styledScreen != null && styledScreen.panel != null)
+            {
+                TrimRoundLabel(FindRoundLabel(styledScreen));
+                return;
+            }
+            styledBoard = null;
             UIDocument[] documents = Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
             for (int i = 0; i < documents.Length; i++)
             {
@@ -92,6 +103,8 @@ namespace KingdomSurvival.BattleSandbox
                 // Опору миниатюр и анимаций считает само поле (HexBoardElement):
                 // покадровая подгонка по границам картинки здесь больше не нужна.
                 TrimRoundLabel(FindRoundLabel(screen));
+                styledBoard = board;
+                styledBoardParent = board.parent;
                 return;
             }
         }

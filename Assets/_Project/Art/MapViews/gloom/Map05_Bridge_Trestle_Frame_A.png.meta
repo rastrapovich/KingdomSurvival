@@ -1,0 +1,481 @@
+fileFormatVersion: 2
+guid: e6f05766542f496408411269f05dba12
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3075117697465007058
+    second: Map05_Bridge_Trestle_Frame_A_0
+  - first:
+      213: -3717055308563666386
+    second: Map05_Bridge_Trestle_Frame_A_1
+  - first:
+      213: -1478692654946742752
+    second: Map05_Bridge_Trestle_Frame_A_2
+  - first:
+      213: 4452474413316204436
+    second: Map05_Bridge_Trestle_Frame_A_3
+  - first:
+      213: 8697097540705937606
+    second: Map05_Bridge_Trestle_Frame_A_4
+  - first:
+      213: -7116710471008105998
+    second: Map05_Bridge_Trestle_Frame_A_5
+  - first:
+      213: -8718586362220592949
+    second: Map05_Bridge_Trestle_Frame_A_6
+  - first:
+      213: 4393586087399046636
+    second: Map05_Bridge_Trestle_Frame_A_7
+  - first:
+      213: 5269751187635375013
+    second: Map05_Bridge_Trestle_Frame_A_8
+  - first:
+      213: -7026450559448596578
+    second: Map05_Bridge_Trestle_Frame_A_9
+  - first:
+      213: 6444792589651188500
+    second: Map05_Bridge_Trestle_Frame_A_10
+  - first:
+      213: 2629486451390622545
+    second: Map05_Bridge_Trestle_Frame_A_11
+  - first:
+      213: -1617545142964245273
+    second: Map05_Bridge_Trestle_Frame_A_12
+  - first:
+      213: -7343756259741385880
+    second: Map05_Bridge_Trestle_Frame_A_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 8
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Map05_Bridge_Trestle_Frame_A_0
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 582
+        width: 565
+        height: 597
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e24c4103fbcf255d0800000000000000
+      internalID: -3075117697465007058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Bridge_Trestle_Frame_A_1
+      rect:
+        serializedVersion: 2
+        x: 574
+        y: 1133
+        width: 35
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2a259204ed5a6cc0800000000000000
+      internalID: -3717055308563666386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Bridge_Trestle_Frame_A_2
+      rect:
+        serializedVersion: 2
+        x: 696
+        y: 1034
+        width: 209
+        height: 147
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02e8be16dd0aa7be0800000000000000
+      internalID: -1478692654946742752
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Bridge_Trestle_Frame_A_3
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 1165
+        width: 17
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4976a3183ed5acd30800000000000000
+      internalID: 4452474413316204436
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Bridge_Trestle_Frame_A_4
+      rect:
+        serializedVersion: 2
+        x: 988
+        y: 1026
+        width: 207
+        height: 157
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c863b2522c42b870800000000000000
+      internalID: 8697097540705937606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Bridge_Trestle_Frame_A_5
+      rect:
+        serializedVersion: 2
+        x: 630
+        y: 1044
+        width: 61
+        height: 84
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f94246588d5c3d90800000000000000
+      internalID: -7116710471008105998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Bridge_Trestle_Frame_A_6
+      rect:
+        serializedVersion: 2
+        x: 902
+        y: 1117
+        width: 25
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc0c64885eb510780800000000000000
+      internalID: -8718586362220592949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Bridge_Trestle_Frame_A_7
+      rect:
+        serializedVersion: 2
+        x: 910
+        y: 1028
+        width: 59
+        height: 108
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cedb48da44729fc30800000000000000
+      internalID: 4393586087399046636
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Bridge_Trestle_Frame_A_8
+      rect:
+        serializedVersion: 2
+        x: 582
+        y: 1078
+        width: 45
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ab03b9e8cae12940800000000000000
+      internalID: 5269751187635375013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Bridge_Trestle_Frame_A_9
+      rect:
+        serializedVersion: 2
+        x: 680
+        y: 1052
+        width: 17
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9fb834a1780d7e90800000000000000
+      internalID: -7026450559448596578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Bridge_Trestle_Frame_A_10
+      rect:
+        serializedVersion: 2
+        x: 766
+        y: 1031
+        width: 9
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41b9a3dd6b0807950800000000000000
+      internalID: 6444792589651188500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Bridge_Trestle_Frame_A_11
+      rect:
+        serializedVersion: 2
+        x: 881
+        y: 1041
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15b27d4feffcd7420800000000000000
+      internalID: 2629486451390622545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Bridge_Trestle_Frame_A_12
+      rect:
+        serializedVersion: 2
+        x: 902
+        y: 1036
+        width: 13
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ec257933435d89e0800000000000000
+      internalID: -1617545142964245273
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Bridge_Trestle_Frame_A_13
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 15
+        width: 1235
+        height: 981
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86b3015379cb51a90800000000000000
+      internalID: -7343756259741385880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Map05_Bridge_Trestle_Frame_A_0: -3075117697465007058
+      Map05_Bridge_Trestle_Frame_A_1: -3717055308563666386
+      Map05_Bridge_Trestle_Frame_A_10: 6444792589651188500
+      Map05_Bridge_Trestle_Frame_A_11: 2629486451390622545
+      Map05_Bridge_Trestle_Frame_A_12: -1617545142964245273
+      Map05_Bridge_Trestle_Frame_A_13: -7343756259741385880
+      Map05_Bridge_Trestle_Frame_A_2: -1478692654946742752
+      Map05_Bridge_Trestle_Frame_A_3: 4452474413316204436
+      Map05_Bridge_Trestle_Frame_A_4: 8697097540705937606
+      Map05_Bridge_Trestle_Frame_A_5: -7116710471008105998
+      Map05_Bridge_Trestle_Frame_A_6: -8718586362220592949
+      Map05_Bridge_Trestle_Frame_A_7: 4393586087399046636
+      Map05_Bridge_Trestle_Frame_A_8: 5269751187635375013
+      Map05_Bridge_Trestle_Frame_A_9: -7026450559448596578
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

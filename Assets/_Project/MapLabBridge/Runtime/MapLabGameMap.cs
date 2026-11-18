@@ -189,7 +189,7 @@ namespace KingdomSurvival.MapLabBridge
             if (entry == null)
                 return null;
             MapLabMapView look = MapLabMapViews.Active;
-            Texture2D own = look != null ? look.FindTexture(entry.Id) : null;
+            Texture2D own = look != null ? look.FindTexture(entry, out _) : null;
             return own != null ? own : entry.Texture;
         }
 

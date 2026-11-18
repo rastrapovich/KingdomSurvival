@@ -530,11 +530,11 @@ public sealed class MapLabLiveMapPlayModeTests
     }
 
     // Виды карты (17.11.2026): кнопка «Вид: …» на экране карты. Вид с одной
-    // цветокоррекцией меняется без пересборки живой карты; вид со своим
-    // рисунком ассета пересобирает её и снова готов. Кадры каждого вида — при
+    // цветокоррекцией или своими рисунками при той же палитре меняется без
+    // пересборки живой карты. Кадры каждого вида — при
     // заданной KS_SCREENSHOT_DIR.
     [UnityTest]
-    public IEnumerator MapViews_ButtonCyclesViews_GradeInstant_ArtRebuilds()
+    public IEnumerator MapViews_ButtonCyclesViews_GradeAndArtWithoutRebuild()
     {
         string savedView = KingdomSurvival.MapLab.MapLabMapViews.ActiveId;
         KingdomSurvival.MapLab.MapLabMapViews.ActiveId = KingdomSurvival.MapLab.MapLabMapViews.ClassicId;
@@ -576,23 +576,21 @@ public sealed class MapLabLiveMapPlayModeTests
             yield return Capture(main, "map_view_sepia");
             Assert.AreEqual(0f, Shader.GetGlobalVector("_MapLabGrade").x, "Коррекция вида снята после рендера карты (арена её не получает).");
 
-            // Свой рисунок вида → пересборка живой карты в этом виде.
+            // Свой рисунок вида при той же палитре — подмена текстур без
+            // пересборки: тот же мир, готов сразу, ключ вида обновлён.
             sepia.Art.Add(new KingdomSurvival.MapLab.MapLabViewArtOverride { ArtId = "House_Thatch_A_P35", Texture = probe });
             sepia.InvalidateIndex();
             KingdomSurvival.MapLab.MapLabMapViews.ActiveId = KingdomSurvival.MapLab.MapLabMapViews.ClassicId;
             yield return Frames(5);
             KingdomSurvival.MapLab.MapLabMapViews.ActiveId = KingdomSurvival.MapLab.MapLabMapViews.SepiaId;
-            yield return Frames(5);
-            Assert.IsTrue(MapLabGameViews.LiveNeedsRebuild || !ReferenceEquals(world, MapLabGameLive.Current), "Свой рисунок вида требует пересборки.");
-            started = Time.realtimeSinceStartup;
-            while ((MapLabGameLive.Current == null || ReferenceEquals(world, MapLabGameLive.Current) || !MapLabGameLive.Current.Ready) && Time.realtimeSinceStartup - started < 300f)
-                yield return null;
-            Assert.IsFalse(ReferenceEquals(world, MapLabGameLive.Current), "Карта пересобрана.");
-            Assert.IsTrue(MapLabGameLive.Current.Ready, "Пересобранная карта готова.");
-            Assert.IsFalse(MapLabGameViews.LiveNeedsRebuild);
-            yield return Frames(20);
+            yield return Frames(10);
+            Assert.AreSame(world, MapLabGameLive.Current, "Свой рисунок вида — без пересборки карты.");
+            Assert.IsTrue(world.Ready);
+            Assert.IsFalse(MapLabGameViews.LiveNeedsRebuild, "Карта уже в выбранном виде.");
+            Assert.AreEqual(KingdomSurvival.MapLab.MapLabMapViews.BuildKey(sepia), world.ViewKey);
+            yield return Frames(10);
 
-            // По кругу — обратно к обычному виду (свой рисунок у сепии — снова пересборка).
+            // По кругу — обратно к обычному виду.
             sepia.Art.RemoveRange(sepiaArt, sepia.Art.Count - sepiaArt);
             sepia.InvalidateIndex();
             Invoke(main, "OnWorldMapViewButtonClicked");

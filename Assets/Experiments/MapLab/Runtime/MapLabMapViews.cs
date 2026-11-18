@@ -288,6 +288,20 @@ namespace KingdomSurvival.MapLab
             return index.TryGetValue(artId, out Texture2D t) ? t : null;
         }
 
+        // Свой рисунок для записи каталога — только при тех же пропорциях холста
+        // (±3 %): у одного ID бывают записи с разными холстами (этапы 03 и 05),
+        // и рисунок, нарисованный под другой холст, встал бы искажённым.
+        public Texture2D FindTexture(MapLabArtEntry entry, out bool skewed)
+        {
+            skewed = false;
+            Texture2D t = entry != null ? FindTexture(entry.Id) : null;
+            if (t == null || entry.Width <= 0 || entry.Height <= 0 || t.height <= 0)
+                return t;
+            float want = entry.Width / (float)entry.Height, have = t.width / (float)t.height;
+            skewed = Mathf.Abs(have - want) > want * 0.03f;
+            return skewed ? null : t;
+        }
+
         // Сбросить индекс после правки списка (окно генератора).
         public void InvalidateIndex() => index = null;
 
@@ -317,6 +331,9 @@ namespace KingdomSurvival.MapLab
                 }
                 Mix(Palette != null ? Palette.name : "-");
                 Mix(OwnArtUngraded ? "u" : "g");
+                // Одинаковые имена PNG у разных видов — разные рисунки: ID вида в ключе.
+                if (Palette != null || ArtCount > 0)
+                    Mix("#" + Id);
                 if (Art != null)
                     foreach (MapLabViewArtOverride o in Art)
                         if (o != null && o.Enabled && o.Texture != null)

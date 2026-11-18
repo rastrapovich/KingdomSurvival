@@ -1,0 +1,689 @@
+fileFormatVersion: 2
+guid: 08d40549d1a133c4c84a30a66a9f6443
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1854378107250060524
+    second: House_Thatch_A_P35_0
+  - first:
+      213: 2600641448916149917
+    second: House_Thatch_A_P35_1
+  - first:
+      213: 645777389625786438
+    second: House_Thatch_A_P35_2
+  - first:
+      213: 4556482380100117884
+    second: House_Thatch_A_P35_3
+  - first:
+      213: 2495150176577632578
+    second: House_Thatch_A_P35_4
+  - first:
+      213: 391445762667406960
+    second: House_Thatch_A_P35_5
+  - first:
+      213: 7271157449860426294
+    second: House_Thatch_A_P35_6
+  - first:
+      213: -3549492408564558192
+    second: House_Thatch_A_P35_7
+  - first:
+      213: -7698629953208060155
+    second: House_Thatch_A_P35_8
+  - first:
+      213: -1315709972479157107
+    second: House_Thatch_A_P35_9
+  - first:
+      213: -6909856622237469825
+    second: House_Thatch_A_P35_10
+  - first:
+      213: -2818076073753263137
+    second: House_Thatch_A_P35_11
+  - first:
+      213: 7140881655631576014
+    second: House_Thatch_A_P35_12
+  - first:
+      213: -633724435509496122
+    second: House_Thatch_A_P35_13
+  - first:
+      213: 1781251444617994436
+    second: House_Thatch_A_P35_14
+  - first:
+      213: -7134650553371125223
+    second: House_Thatch_A_P35_15
+  - first:
+      213: -142220840288921450
+    second: House_Thatch_A_P35_16
+  - first:
+      213: 4151095140253027510
+    second: House_Thatch_A_P35_17
+  - first:
+      213: -3207316581575086388
+    second: House_Thatch_A_P35_18
+  - first:
+      213: 5191322592341043489
+    second: House_Thatch_A_P35_19
+  - first:
+      213: -1915378435476461084
+    second: House_Thatch_A_P35_20
+  - first:
+      213: -135954210953650995
+    second: House_Thatch_A_P35_21
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_0
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 31
+        width: 389
+        height: 973
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ceca6e940131cb910800000000000000
+      internalID: 1854378107250060524
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_1
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 815
+        width: 217
+        height: 177
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d96edc67e95571420800000000000000
+      internalID: 2600641448916149917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_2
+      rect:
+        serializedVersion: 2
+        x: 616
+        y: 839
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 640cf984d1346f800800000000000000
+      internalID: 645777389625786438
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_3
+      rect:
+        serializedVersion: 2
+        x: 710
+        y: 817
+        width: 421
+        height: 188
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c75a13b5590eb3f30800000000000000
+      internalID: 4556482380100117884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_4
+      rect:
+        serializedVersion: 2
+        x: 1112
+        y: 807
+        width: 67
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 249b920addd80a220800000000000000
+      internalID: 2495150176577632578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_5
+      rect:
+        serializedVersion: 2
+        x: 1126
+        y: 79
+        width: 405
+        height: 927
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0766f90e8d1be6500800000000000000
+      internalID: 391445762667406960
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_6
+      rect:
+        serializedVersion: 2
+        x: 1172
+        y: 773
+        width: 41
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 63aadd82d2758e460800000000000000
+      internalID: 7271157449860426294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_7
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 759
+        width: 33
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 096509ed57badbec0800000000000000
+      internalID: -3549492408564558192
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_8
+      rect:
+        serializedVersion: 2
+        x: 342
+        y: 799
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 507f9ddb8d8f82590800000000000000
+      internalID: -7698629953208060155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_9
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 583
+        width: 18
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8cd0fe30c8adbde0800000000000000
+      internalID: -1315709972479157107
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_10
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 23
+        width: 855
+        height: 761
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f73b7a613024b10a0800000000000000
+      internalID: -6909856622237469825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_11
+      rect:
+        serializedVersion: 2
+        x: 1054
+        y: 181
+        width: 15
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd3c8e1edbe24e8d0800000000000000
+      internalID: -2818076073753263137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_12
+      rect:
+        serializedVersion: 2
+        x: 1208
+        y: 191
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecbf5032802891360800000000000000
+      internalID: 7140881655631576014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_13
+      rect:
+        serializedVersion: 2
+        x: 1270
+        y: 185
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c6b8f7cbfe8437f0800000000000000
+      internalID: -633724435509496122
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_14
+      rect:
+        serializedVersion: 2
+        x: 1054
+        y: 135
+        width: 29
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c06b1c50c648b810800000000000000
+      internalID: 1781251444617994436
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_15
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 94
+        width: 33
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91a15c96f11acfc90800000000000000
+      internalID: -7134650553371125223
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_16
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 83
+        width: 15
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 698dbe636eab60ef0800000000000000
+      internalID: -142220840288921450
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_17
+      rect:
+        serializedVersion: 2
+        x: 568
+        y: 75
+        width: 21
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6bcc1af5907ab9930800000000000000
+      internalID: 4151095140253027510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_18
+      rect:
+        serializedVersion: 2
+        x: 852
+        y: 87
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cce2ff8ef825d73d0800000000000000
+      internalID: -3207316581575086388
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_19
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 59
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 129a2f694684b0840800000000000000
+      internalID: 5191322592341043489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_20
+      rect:
+        serializedVersion: 2
+        x: 646
+        y: 63
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e96bf606753b65e0800000000000000
+      internalID: -1915378435476461084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Thatch_A_P35_21
+      rect:
+        serializedVersion: 2
+        x: 454
+        y: 21
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dcc936e8d5efc1ef0800000000000000
+      internalID: -135954210953650995
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      House_Thatch_A_P35_0: 1854378107250060524
+      House_Thatch_A_P35_1: 2600641448916149917
+      House_Thatch_A_P35_10: -6909856622237469825
+      House_Thatch_A_P35_11: -2818076073753263137
+      House_Thatch_A_P35_12: 7140881655631576014
+      House_Thatch_A_P35_13: -633724435509496122
+      House_Thatch_A_P35_14: 1781251444617994436
+      House_Thatch_A_P35_15: -7134650553371125223
+      House_Thatch_A_P35_16: -142220840288921450
+      House_Thatch_A_P35_17: 4151095140253027510
+      House_Thatch_A_P35_18: -3207316581575086388
+      House_Thatch_A_P35_19: 5191322592341043489
+      House_Thatch_A_P35_2: 645777389625786438
+      House_Thatch_A_P35_20: -1915378435476461084
+      House_Thatch_A_P35_21: -135954210953650995
+      House_Thatch_A_P35_3: 4556482380100117884
+      House_Thatch_A_P35_4: 2495150176577632578
+      House_Thatch_A_P35_5: 391445762667406960
+      House_Thatch_A_P35_6: 7271157449860426294
+      House_Thatch_A_P35_7: -3549492408564558192
+      House_Thatch_A_P35_8: -7698629953208060155
+      House_Thatch_A_P35_9: -1315709972479157107
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

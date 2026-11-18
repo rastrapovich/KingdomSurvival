@@ -1,0 +1,637 @@
+fileFormatVersion: 2
+guid: 14336aa4bac31e44eb6e364c238c76de
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -292745469907085425
+    second: House_Shingle_A_P35_0
+  - first:
+      213: 7487021442878914962
+    second: House_Shingle_A_P35_1
+  - first:
+      213: -9057610522073067768
+    second: House_Shingle_A_P35_2
+  - first:
+      213: -2052438797859127992
+    second: House_Shingle_A_P35_3
+  - first:
+      213: -5731429585134508045
+    second: House_Shingle_A_P35_4
+  - first:
+      213: 1483371791164603668
+    second: House_Shingle_A_P35_5
+  - first:
+      213: 7054652664959811372
+    second: House_Shingle_A_P35_6
+  - first:
+      213: -697041831498455807
+    second: House_Shingle_A_P35_7
+  - first:
+      213: 5196003265192965925
+    second: House_Shingle_A_P35_8
+  - first:
+      213: 851922849932596183
+    second: House_Shingle_A_P35_9
+  - first:
+      213: 9002409258701990249
+    second: House_Shingle_A_P35_10
+  - first:
+      213: 4711400510758376779
+    second: House_Shingle_A_P35_11
+  - first:
+      213: 2025581765589278738
+    second: House_Shingle_A_P35_12
+  - first:
+      213: 5223499000284336593
+    second: House_Shingle_A_P35_13
+  - first:
+      213: 265354122201148541
+    second: House_Shingle_A_P35_14
+  - first:
+      213: 7106825968432469373
+    second: House_Shingle_A_P35_15
+  - first:
+      213: 6683393023531481370
+    second: House_Shingle_A_P35_16
+  - first:
+      213: 3118189025166503041
+    second: House_Shingle_A_P35_17
+  - first:
+      213: -5436543153622349915
+    second: House_Shingle_A_P35_18
+  - first:
+      213: 7621804680640959059
+    second: House_Shingle_A_P35_19
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1514
+        height: 1008
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f875590db85ffebf0800000000000000
+      internalID: -292745469907085425
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_1
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 954
+        width: 117
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 291c788955e37e760800000000000000
+      internalID: 7487021442878914962
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_2
+      rect:
+        serializedVersion: 2
+        x: 878
+        y: 991
+        width: 11
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80f8efd2837ec4280800000000000000
+      internalID: -9057610522073067768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_3
+      rect:
+        serializedVersion: 2
+        x: 840
+        y: 967
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 84d7062a9c54483e0800000000000000
+      internalID: -2052438797859127992
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_4
+      rect:
+        serializedVersion: 2
+        x: 846
+        y: 966
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f7a4e2a82fd570b0800000000000000
+      internalID: -5731429585134508045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_5
+      rect:
+        serializedVersion: 2
+        x: 944
+        y: 958
+        width: 15
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41d733ae8cef59410800000000000000
+      internalID: 1483371791164603668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_6
+      rect:
+        serializedVersion: 2
+        x: 1160
+        y: 943
+        width: 15
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2f31bcb83927e160800000000000000
+      internalID: 7054652664959811372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_7
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 906
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10562f7b52c9356f0800000000000000
+      internalID: -697041831498455807
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_8
+      rect:
+        serializedVersion: 2
+        x: 1182
+        y: 918
+        width: 13
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 527b899a079eb1840800000000000000
+      internalID: 5196003265192965925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_9
+      rect:
+        serializedVersion: 2
+        x: 800
+        y: 873
+        width: 12
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d3554e7153a2db00800000000000000
+      internalID: 851922849932596183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_10
+      rect:
+        serializedVersion: 2
+        x: 850
+        y: 895
+        width: 19
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 969ae93268bfeec70800000000000000
+      internalID: 9002409258701990249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_11
+      rect:
+        serializedVersion: 2
+        x: 1424
+        y: 487
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b45d85e6dc1426140800000000000000
+      internalID: 4711400510758376779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_12
+      rect:
+        serializedVersion: 2
+        x: 1062
+        y: 95
+        width: 9
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 210257142ef4c1c10800000000000000
+      internalID: 2025581765589278738
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_13
+      rect:
+        serializedVersion: 2
+        x: 1070
+        y: 97
+        width: 11
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1d15e8c5aa89d7840800000000000000
+      internalID: 5223499000284336593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_14
+      rect:
+        serializedVersion: 2
+        x: 1088
+        y: 109
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7c2c711b2abea300800000000000000
+      internalID: 265354122201148541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_15
+      rect:
+        serializedVersion: 2
+        x: 976
+        y: 71
+        width: 18
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7550f0909480a260800000000000000
+      internalID: 7106825968432469373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_16
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 47
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a19fae57b8e20cc50800000000000000
+      internalID: 6683393023531481370
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_17
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 41
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18c2293c568064b20800000000000000
+      internalID: 3118189025166503041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_18
+      rect:
+        serializedVersion: 2
+        x: 818
+        y: 33
+        width: 13
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a7024a4ec48d84b0800000000000000
+      internalID: -5436543153622349915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: House_Shingle_A_P35_19
+      rect:
+        serializedVersion: 2
+        x: 1048
+        y: 49
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 352930999f616c960800000000000000
+      internalID: 7621804680640959059
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      House_Shingle_A_P35_0: -292745469907085425
+      House_Shingle_A_P35_1: 7487021442878914962
+      House_Shingle_A_P35_10: 9002409258701990249
+      House_Shingle_A_P35_11: 4711400510758376779
+      House_Shingle_A_P35_12: 2025581765589278738
+      House_Shingle_A_P35_13: 5223499000284336593
+      House_Shingle_A_P35_14: 265354122201148541
+      House_Shingle_A_P35_15: 7106825968432469373
+      House_Shingle_A_P35_16: 6683393023531481370
+      House_Shingle_A_P35_17: 3118189025166503041
+      House_Shingle_A_P35_18: -5436543153622349915
+      House_Shingle_A_P35_19: 7621804680640959059
+      House_Shingle_A_P35_2: -9057610522073067768
+      House_Shingle_A_P35_3: -2052438797859127992
+      House_Shingle_A_P35_4: -5731429585134508045
+      House_Shingle_A_P35_5: 1483371791164603668
+      House_Shingle_A_P35_6: 7054652664959811372
+      House_Shingle_A_P35_7: -697041831498455807
+      House_Shingle_A_P35_8: 5196003265192965925
+      House_Shingle_A_P35_9: 851922849932596183
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

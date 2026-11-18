@@ -1,0 +1,429 @@
+fileFormatVersion: 2
+guid: ad9c58c94f50f164a9215fa6becd9d4e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2957420941982419279
+    second: Road_Shelter_A_0
+  - first:
+      213: -6742797412578130330
+    second: Road_Shelter_A_1
+  - first:
+      213: -4783559751670742845
+    second: Road_Shelter_A_2
+  - first:
+      213: 7414075494602213794
+    second: Road_Shelter_A_3
+  - first:
+      213: 7337345163305221743
+    second: Road_Shelter_A_4
+  - first:
+      213: 428246863073233093
+    second: Road_Shelter_A_5
+  - first:
+      213: -1321275729866130276
+    second: Road_Shelter_A_6
+  - first:
+      213: -7030378904101959189
+    second: Road_Shelter_A_7
+  - first:
+      213: -5671437062886791058
+    second: Road_Shelter_A_8
+  - first:
+      213: -1127653455729461573
+    second: Road_Shelter_A_9
+  - first:
+      213: -8417986714415389068
+    second: Road_Shelter_A_10
+  - first:
+      213: -8272230980516607339
+    second: Road_Shelter_A_11
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Road_Shelter_A_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1466
+        height: 1047
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b636d5825125f6d0800000000000000
+      internalID: -2957420941982419279
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Road_Shelter_A_1
+      rect:
+        serializedVersion: 2
+        x: 842
+        y: 1025
+        width: 18
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6668bd66a75cc62a0800000000000000
+      internalID: -6742797412578130330
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Road_Shelter_A_2
+      rect:
+        serializedVersion: 2
+        x: 968
+        y: 1047
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c04fcf00c16d9db0800000000000000
+      internalID: -4783559751670742845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Road_Shelter_A_3
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 1037
+        width: 26
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a981b1816614e660800000000000000
+      internalID: 7414075494602213794
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Road_Shelter_A_4
+      rect:
+        serializedVersion: 2
+        x: 612
+        y: 969
+        width: 38
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6efc351d8c73d560800000000000000
+      internalID: 7337345163305221743
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Road_Shelter_A_5
+      rect:
+        serializedVersion: 2
+        x: 657
+        y: 1013
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c8c7a5c04071f500800000000000000
+      internalID: 428246863073233093
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Road_Shelter_A_6
+      rect:
+        serializedVersion: 2
+        x: 662
+        y: 1009
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c9cfbfe59b2e9ade0800000000000000
+      internalID: -1321275729866130276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Road_Shelter_A_7
+      rect:
+        serializedVersion: 2
+        x: 669
+        y: 997
+        width: 15
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be94a90a2a31f6e90800000000000000
+      internalID: -7030378904101959189
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Road_Shelter_A_8
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 774
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e68e5a43a020b41b0800000000000000
+      internalID: -5671437062886791058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Road_Shelter_A_9
+      rect:
+        serializedVersion: 2
+        x: 1253
+        y: 680
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb6f0851825c950f0800000000000000
+      internalID: -1127653455729461573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Road_Shelter_A_10
+      rect:
+        serializedVersion: 2
+        x: 1323
+        y: 658
+        width: 18
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47620530fad4d2b80800000000000000
+      internalID: -8417986714415389068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Road_Shelter_A_11
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 54
+        width: 12
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59a835a50c1233d80800000000000000
+      internalID: -8272230980516607339
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Road_Shelter_A_0: -2957420941982419279
+      Road_Shelter_A_1: -6742797412578130330
+      Road_Shelter_A_10: -8417986714415389068
+      Road_Shelter_A_11: -8272230980516607339
+      Road_Shelter_A_2: -4783559751670742845
+      Road_Shelter_A_3: 7414075494602213794
+      Road_Shelter_A_4: 7337345163305221743
+      Road_Shelter_A_5: 428246863073233093
+      Road_Shelter_A_6: -1321275729866130276
+      Road_Shelter_A_7: -7030378904101959189
+      Road_Shelter_A_8: -5671437062886791058
+      Road_Shelter_A_9: -1127653455729461573
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

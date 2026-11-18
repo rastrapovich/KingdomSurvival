@@ -98,6 +98,11 @@ namespace KingdomSurvival.MapLab.Tests
                 v.Art[0].Enabled = false;
                 v.InvalidateIndex();
                 Assert.IsNull(v.FindTexture("House_Thatch_A_P35"), "Выключенный свой рисунок не берётся.");
+                v.Art[0].Enabled = true;
+                v.InvalidateIndex();
+                MapLabMapView other = v.Clone();
+                other.Id = "other";
+                Assert.AreNotEqual(v.BuildKey, other.BuildKey, "Те же имена PNG у другого вида — другой ключ пересборки.");
             }
             finally
             {

@@ -80,6 +80,7 @@ namespace KingdomSurvival.MapLabBridge
         private IEnumerator pending;
         private System.Diagnostics.Stopwatch watch;
         private float k, depth, zBottom, mean, sin, cos, pitch;
+        private Color paper = Color.white;
         private bool disposed;
         private double artMs, planMs;
         private static readonly List<MapLabArena> liveArenas = new List<MapLabArena>();
@@ -179,6 +180,9 @@ namespace KingdomSurvival.MapLabBridge
                 marker.AutoPlace = false;
                 marker.enabled = false;
                 assets.ApplyTo(view);
+                // Вид карты: своя палитра и свои рисунки вида для общих ассетов
+                // (трава, камни, реквизит); цветокоррекция — при каждом кадре.
+                view.SetLook(MapLabMapViews.Active);
                 view.CameraRig = rig;
                 view.Settings = settings;
                 view.FeatureExtraSets = new List<MapLabArtSet>();
@@ -245,7 +249,8 @@ namespace KingdomSurvival.MapLabBridge
             // До активации мира: чужие камеры (сцена боя, URP 2D) слой арены не
             // рисуют — иначе террейн и шейдеры MapLab попадали в кадр сцены.
             StripOtherCameras();
-            camera.backgroundColor = view.Palette.Paper;
+            paper = view.Palette.Paper;
+            camera.backgroundColor = paper;
             view.gameObject.SetActive(true);
             BuildMs = watch.Elapsed.TotalMilliseconds;
             Debug.Log($"MapLab: арена построена за {BuildMs / 1000.0:0.0} с (рисунки Базы ассетов {artMs:0} мс, план {planMs:0} мс, генерация и сборка {BuildMs - artMs - planMs:0} мс).");
@@ -461,24 +466,34 @@ namespace KingdomSurvival.MapLabBridge
             view.PumpStreaming(false);
             StripOtherCameras();
             Shader.SetGlobalFloat("_MapLabPixelScale", 1f);
-            if (EffectiveFrameMsaa > 1)
+            // Цветокоррекция выбранного вида карты — только на время кадра поля.
+            MapLabMapView look = MapLabMapViews.Active;
+            camera.backgroundColor = look != null && look.Grade != null && !look.Grade.IsNeutral ? look.Background : paper;
+            MapLabViewGradeShader.Apply(look);
+            try
             {
-                // MSAA-кадр камеры — временный (пул Unity), в показываемую
-                // текстуру он сводится; UI читает только текстуру без MSAA.
-                // MSAA-кадр камеры — временный (пул Unity), сводится в показываемую.
-                RenderTextureDescriptor descriptor = new RenderTextureDescriptor(target.width, target.height, GraphicsFormat.R8G8B8A8_SRGB, 24) { msaaSamples = EffectiveFrameMsaa };
-                RenderTexture frame = RenderTexture.GetTemporary(descriptor);
-                camera.targetTexture = frame;
-                camera.Render();
-                camera.targetTexture = null;
-                Graphics.Blit(frame, target);
-                RenderTexture.ReleaseTemporary(frame);
+                if (EffectiveFrameMsaa > 1)
+                {
+                    // MSAA-кадр камеры — временный (пул Unity), в показываемую
+                    // текстуру он сводится; UI читает только текстуру без MSAA.
+                    RenderTextureDescriptor descriptor = new RenderTextureDescriptor(target.width, target.height, GraphicsFormat.R8G8B8A8_SRGB, 24) { msaaSamples = EffectiveFrameMsaa };
+                    RenderTexture frame = RenderTexture.GetTemporary(descriptor);
+                    camera.targetTexture = frame;
+                    camera.Render();
+                    camera.targetTexture = null;
+                    Graphics.Blit(frame, target);
+                    RenderTexture.ReleaseTemporary(frame);
+                }
+                else
+                {
+                    camera.targetTexture = target;
+                    camera.Render();
+                    camera.targetTexture = null;
+                }
             }
-            else
+            finally
             {
-                camera.targetTexture = target;
-                camera.Render();
-                camera.targetTexture = null;
+                MapLabViewGradeShader.Neutral();
             }
             return target;
         }
@@ -538,9 +553,34 @@ namespace KingdomSurvival.MapLabBridge
         // появившиеся позже; вызывается каждый кадр, пока арена жива).
         public static void StripOtherCameras()
         {
-            foreach (Camera other in Camera.allCameras)
-                if (!liveArenas.Exists(arena => arena.camera == other) && (other.cullingMask & (1 << Layer)) != 0)
-                    other.cullingMask &= ~(1 << Layer);
+            int count = AllCameras(out Camera[] cameras);
+            for (int i = 0; i < count; i++)
+            {
+                Camera other = cameras[i];
+                if ((other.cullingMask & (1 << Layer)) == 0 || IsArenaCamera(other))
+                    continue;
+                other.cullingMask &= ~(1 << Layer);
+            }
+        }
+
+        private static bool IsArenaCamera(Camera camera)
+        {
+            for (int i = 0; i < liveArenas.Count; i++)
+                if (liveArenas[i].camera == camera)
+                    return true;
+            return false;
+        }
+
+        // Все камеры сцены в переиспользуемый буфер (Camera.allCameras каждый
+        // кадр создавал новый массив).
+        private static Camera[] cameraBuffer = new Camera[8];
+
+        internal static int AllCameras(out Camera[] cameras)
+        {
+            if (cameraBuffer.Length < Camera.allCamerasCount)
+                cameraBuffer = new Camera[Camera.allCamerasCount * 2];
+            cameras = cameraBuffer;
+            return Camera.GetAllCameras(cameraBuffer);
         }
 
         public static bool HasLive => liveArenas.Count > 0;

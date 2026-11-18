@@ -1,0 +1,559 @@
+fileFormatVersion: 2
+guid: 9586411fcbcec6942bdb47147f683d5e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5041230821243364776
+    second: Map05_Well_Roofed_A_0
+  - first:
+      213: -833878233460486443
+    second: Map05_Well_Roofed_A_1
+  - first:
+      213: 3586159467743747932
+    second: Map05_Well_Roofed_A_2
+  - first:
+      213: 8311737521785187377
+    second: Map05_Well_Roofed_A_3
+  - first:
+      213: -199145307084017065
+    second: Map05_Well_Roofed_A_4
+  - first:
+      213: 1783555798929905078
+    second: Map05_Well_Roofed_A_5
+  - first:
+      213: -4710035151828884159
+    second: Map05_Well_Roofed_A_6
+  - first:
+      213: 466853826200661853
+    second: Map05_Well_Roofed_A_7
+  - first:
+      213: 856035591261260171
+    second: Map05_Well_Roofed_A_8
+  - first:
+      213: -6503380815848507467
+    second: Map05_Well_Roofed_A_9
+  - first:
+      213: 1015840371472559295
+    second: Map05_Well_Roofed_A_10
+  - first:
+      213: -3359299103494785537
+    second: Map05_Well_Roofed_A_11
+  - first:
+      213: 8379562591256618435
+    second: Map05_Well_Roofed_A_12
+  - first:
+      213: 344372733755666538
+    second: Map05_Well_Roofed_A_13
+  - first:
+      213: 2270245706226295530
+    second: Map05_Well_Roofed_A_14
+  - first:
+      213: 6836211948512932265
+    second: Map05_Well_Roofed_A_15
+  - first:
+      213: 4931130367318867197
+    second: Map05_Well_Roofed_A_16
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_0
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 0
+        width: 1229
+        height: 1152
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a526fae8bc06f540800000000000000
+      internalID: 5041230821243364776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_1
+      rect:
+        serializedVersion: 2
+        x: 878
+        y: 1149
+        width: 35
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5de48ac2a287d64f0800000000000000
+      internalID: -833878233460486443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_2
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 1149
+        width: 17
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5f15ce190994c130800000000000000
+      internalID: 3586159467743747932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_3
+      rect:
+        serializedVersion: 2
+        x: 952
+        y: 1149
+        width: 17
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13caa441d39395370800000000000000
+      internalID: 8311737521785187377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_4
+      rect:
+        serializedVersion: 2
+        x: 904
+        y: 1076
+        width: 7
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7523298f56e7c3df0800000000000000
+      internalID: -199145307084017065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_5
+      rect:
+        serializedVersion: 2
+        x: 976
+        y: 1067
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b51e48ac8670c810800000000000000
+      internalID: 1783555798929905078
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_6
+      rect:
+        serializedVersion: 2
+        x: 922
+        y: 1014
+        width: 41
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 145e2a7fbf792aeb0800000000000000
+      internalID: -4710035151828884159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_7
+      rect:
+        serializedVersion: 2
+        x: 946
+        y: 1061
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5fe8b8d4199a7600800000000000000
+      internalID: 466853826200661853
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_8
+      rect:
+        serializedVersion: 2
+        x: 952
+        y: 1060
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b890834b5df31eb00800000000000000
+      internalID: 856035591261260171
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_9
+      rect:
+        serializedVersion: 2
+        x: 1022
+        y: 897
+        width: 19
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b77248ba995fb5a0800000000000000
+      internalID: -6503380815848507467
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_10
+      rect:
+        serializedVersion: 2
+        x: 1032
+        y: 823
+        width: 19
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fbc6f1a8f6df81e00800000000000000
+      internalID: 1015840371472559295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_11
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 704
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff5b7e1834f5161d0800000000000000
+      internalID: -3359299103494785537
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_12
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 623
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c5a009a7cf2a4470800000000000000
+      internalID: 8379562591256618435
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_13
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 574
+        width: 49
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6036d14d2577c400800000000000000
+      internalID: 344372733755666538
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_14
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 574
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae269780178818f10800000000000000
+      internalID: 2270245706226295530
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_15
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 96
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a1f4602c8a1fde50800000000000000
+      internalID: 6836211948512932265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Well_Roofed_A_16
+      rect:
+        serializedVersion: 2
+        x: 596
+        y: 27
+        width: 11
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dfcbe2d51f4ee6440800000000000000
+      internalID: 4931130367318867197
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Map05_Well_Roofed_A_0: 5041230821243364776
+      Map05_Well_Roofed_A_1: -833878233460486443
+      Map05_Well_Roofed_A_10: 1015840371472559295
+      Map05_Well_Roofed_A_11: -3359299103494785537
+      Map05_Well_Roofed_A_12: 8379562591256618435
+      Map05_Well_Roofed_A_13: 344372733755666538
+      Map05_Well_Roofed_A_14: 2270245706226295530
+      Map05_Well_Roofed_A_15: 6836211948512932265
+      Map05_Well_Roofed_A_16: 4931130367318867197
+      Map05_Well_Roofed_A_2: 3586159467743747932
+      Map05_Well_Roofed_A_3: 8311737521785187377
+      Map05_Well_Roofed_A_4: -199145307084017065
+      Map05_Well_Roofed_A_5: 1783555798929905078
+      Map05_Well_Roofed_A_6: -4710035151828884159
+      Map05_Well_Roofed_A_7: 466853826200661853
+      Map05_Well_Roofed_A_8: 856035591261260171
+      Map05_Well_Roofed_A_9: -6503380815848507467
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

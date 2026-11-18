@@ -43,7 +43,7 @@ namespace KingdomSurvival.MapLabBridge.Editor
                 {
                     MapLabMapViews.ActiveId = v.Id;
                     System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
-                    MapLabGameLive.World world = MapLabGameLive.Matches(plan, string.Empty) ? MapLabGameLive.Current : MapLabGameLive.Build(plan, null);
+                    MapLabGameLive.World world = MapLabGameLive.Matches(plan, string.Empty) || (MapLabGameLive.Current != null && ReferenceEquals(MapLabGameLive.Current.Plan, plan) && MapLabGameLive.TryApplyActiveView()) ? MapLabGameLive.Current : MapLabGameLive.Build(plan, null);
                     if (world == null || !world.Ready)
                         throw new Exception("живая карта не собрана: " + world?.Error);
                     double buildMs = watch.Elapsed.TotalMilliseconds;

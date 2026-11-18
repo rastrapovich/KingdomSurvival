@@ -1,0 +1,429 @@
+fileFormatVersion: 2
+guid: 7e152ca937a9be946a7cd7fedd2b0143
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6510071800036575947
+    second: Map05_Fence_Gate_Panel_A_0
+  - first:
+      213: 3819927758065438829
+    second: Map05_Fence_Gate_Panel_A_1
+  - first:
+      213: 4233314021892609149
+    second: Map05_Fence_Gate_Panel_A_2
+  - first:
+      213: 3725344414525545089
+    second: Map05_Fence_Gate_Panel_A_3
+  - first:
+      213: 8340289887846488987
+    second: Map05_Fence_Gate_Panel_A_4
+  - first:
+      213: 1745720155015670474
+    second: Map05_Fence_Gate_Panel_A_5
+  - first:
+      213: -5943171767474152512
+    second: Map05_Fence_Gate_Panel_A_6
+  - first:
+      213: -5819958285692516482
+    second: Map05_Fence_Gate_Panel_A_7
+  - first:
+      213: -3858665297989345388
+    second: Map05_Fence_Gate_Panel_A_8
+  - first:
+      213: 821370892259337570
+    second: Map05_Fence_Gate_Panel_A_9
+  - first:
+      213: 3370567256148267635
+    second: Map05_Fence_Gate_Panel_A_10
+  - first:
+      213: -8079970222870173295
+    second: Map05_Fence_Gate_Panel_A_11
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 8
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Map05_Fence_Gate_Panel_A_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 17
+        width: 1299
+        height: 1182
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5353880903497a5a0800000000000000
+      internalID: -6510071800036575947
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Fence_Gate_Panel_A_1
+      rect:
+        serializedVersion: 2
+        x: 872
+        y: 1068
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d60152f9e0c130530800000000000000
+      internalID: 3819927758065438829
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Fence_Gate_Panel_A_2
+      rect:
+        serializedVersion: 2
+        x: 968
+        y: 1036
+        width: 13
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d74d6918ca0cfba30800000000000000
+      internalID: 4233314021892609149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Fence_Gate_Panel_A_3
+      rect:
+        serializedVersion: 2
+        x: 1091
+        y: 888
+        width: 22
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18ad7cdd10513b330800000000000000
+      internalID: 3725344414525545089
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Fence_Gate_Panel_A_4
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 704
+        width: 15
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9b5fd8d679aeb370800000000000000
+      internalID: 8340289887846488987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Fence_Gate_Panel_A_5
+      rect:
+        serializedVersion: 2
+        x: 1136
+        y: 297
+        width: 15
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: acae2f45b3b0a3810800000000000000
+      internalID: 1745720155015670474
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Fence_Gate_Panel_A_6
+      rect:
+        serializedVersion: 2
+        x: 1142
+        y: 315
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0cb929804cc958da0800000000000000
+      internalID: -5943171767474152512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Fence_Gate_Panel_A_7
+      rect:
+        serializedVersion: 2
+        x: 1008
+        y: 52
+        width: 11
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e77c4bd46ca5b3fa0800000000000000
+      internalID: -5819958285692516482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Fence_Gate_Panel_A_8
+      rect:
+        serializedVersion: 2
+        x: 1012
+        y: 38
+        width: 9
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49fd7360b54437ac0800000000000000
+      internalID: -3858665297989345388
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Fence_Gate_Panel_A_9
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 31
+        width: 7
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 265a6f58978166b00800000000000000
+      internalID: 821370892259337570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Fence_Gate_Panel_A_10
+      rect:
+        serializedVersion: 2
+        x: 984
+        y: 31
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 372d74abf09a6ce20800000000000000
+      internalID: 3370567256148267635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Fence_Gate_Panel_A_11
+      rect:
+        serializedVersion: 2
+        x: 1032
+        y: 15
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 199e61e44ed2edf80800000000000000
+      internalID: -8079970222870173295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Map05_Fence_Gate_Panel_A_0: -6510071800036575947
+      Map05_Fence_Gate_Panel_A_1: 3819927758065438829
+      Map05_Fence_Gate_Panel_A_10: 3370567256148267635
+      Map05_Fence_Gate_Panel_A_11: -8079970222870173295
+      Map05_Fence_Gate_Panel_A_2: 4233314021892609149
+      Map05_Fence_Gate_Panel_A_3: 3725344414525545089
+      Map05_Fence_Gate_Panel_A_4: 8340289887846488987
+      Map05_Fence_Gate_Panel_A_5: 1745720155015670474
+      Map05_Fence_Gate_Panel_A_6: -5943171767474152512
+      Map05_Fence_Gate_Panel_A_7: -5819958285692516482
+      Map05_Fence_Gate_Panel_A_8: -3858665297989345388
+      Map05_Fence_Gate_Panel_A_9: 821370892259337570
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

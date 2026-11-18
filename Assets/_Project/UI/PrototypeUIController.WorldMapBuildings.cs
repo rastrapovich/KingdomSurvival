@@ -315,10 +315,32 @@ public partial class PrototypeUIController
     }
 
     // Поселения с зданиями на рисунке, которые видны на карте (известны).
+    // Ключ пересчитывается раз в 0,2 с (и сразу при смене рисунка или партии):
+    // обход зданий с проверкой тумана и сборка строки каждый кадр не нужны —
+    // видимость поселений меняется вместе с разведкой, не каждый кадр.
+    private const float BuildingsKeyIntervalSeconds = 0.2f;
+    private string worldMapBuildingsKeyCache = string.Empty;
+    private float worldMapBuildingsKeyAt = -1f;
+    private object worldMapBuildingsKeyFor;
+    private GameState worldMapBuildingsKeyState;
+    private int worldMapBuildingsKeyFog = -1;
+
     private string VisibleBuildingSettlementsKey()
     {
         if (worldMapMapLab == null || gameState == null)
             return string.Empty;
+        if (ReferenceEquals(worldMapBuildingsKeyFor, worldMapMapLab) && ReferenceEquals(worldMapBuildingsKeyState, gameState)
+            && worldMapBuildingsKeyFog == WorldMapFog.Version && Time.unscaledTime - worldMapBuildingsKeyAt < BuildingsKeyIntervalSeconds)
+            return worldMapBuildingsKeyCache;
+        worldMapBuildingsKeyFor = worldMapMapLab;
+        worldMapBuildingsKeyState = gameState;
+        worldMapBuildingsKeyAt = Time.unscaledTime;
+        worldMapBuildingsKeyFog = WorldMapFog.Version;
+        return worldMapBuildingsKeyCache = ComputeVisibleBuildingSettlementsKey();
+    }
+
+    private string ComputeVisibleBuildingSettlementsKey()
+    {
         List<string> ids = new List<string>();
         foreach ((string id, string _, Rect _) in worldMapMapLab.Buildings)
         {

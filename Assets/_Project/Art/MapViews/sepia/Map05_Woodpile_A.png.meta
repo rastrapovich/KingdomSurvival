@@ -1,0 +1,923 @@
+fileFormatVersion: 2
+guid: c7a6a6a83625bff40b05e8d8a4a3b5f7
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4996216958680230241
+    second: Map05_Woodpile_A_0
+  - first:
+      213: 8462219385348056540
+    second: Map05_Woodpile_A_1
+  - first:
+      213: -5258340595947759091
+    second: Map05_Woodpile_A_2
+  - first:
+      213: 6584686274280634608
+    second: Map05_Woodpile_A_3
+  - first:
+      213: 6546400734894922207
+    second: Map05_Woodpile_A_4
+  - first:
+      213: -6315818262075160598
+    second: Map05_Woodpile_A_5
+  - first:
+      213: 8020985724292725175
+    second: Map05_Woodpile_A_6
+  - first:
+      213: -1026299175093992534
+    second: Map05_Woodpile_A_7
+  - first:
+      213: -4201760841640241937
+    second: Map05_Woodpile_A_8
+  - first:
+      213: 8126288994898923274
+    second: Map05_Woodpile_A_9
+  - first:
+      213: -2727973563038205011
+    second: Map05_Woodpile_A_10
+  - first:
+      213: -6489857536612388030
+    second: Map05_Woodpile_A_11
+  - first:
+      213: 5523672044080972205
+    second: Map05_Woodpile_A_12
+  - first:
+      213: 4568101333115138962
+    second: Map05_Woodpile_A_13
+  - first:
+      213: -4359329283492235125
+    second: Map05_Woodpile_A_14
+  - first:
+      213: 1879700504957625969
+    second: Map05_Woodpile_A_15
+  - first:
+      213: -7450085310950660094
+    second: Map05_Woodpile_A_16
+  - first:
+      213: 3217577583007661436
+    second: Map05_Woodpile_A_17
+  - first:
+      213: -2060365451176963454
+    second: Map05_Woodpile_A_18
+  - first:
+      213: 626937341601709276
+    second: Map05_Woodpile_A_19
+  - first:
+      213: 4157079696917862470
+    second: Map05_Woodpile_A_20
+  - first:
+      213: 3698113224841904167
+    second: Map05_Woodpile_A_21
+  - first:
+      213: -6561527815222901682
+    second: Map05_Woodpile_A_22
+  - first:
+      213: 7455852151869372024
+    second: Map05_Woodpile_A_23
+  - first:
+      213: 8486474196342200362
+    second: Map05_Woodpile_A_24
+  - first:
+      213: -8263591475286723980
+    second: Map05_Woodpile_A_25
+  - first:
+      213: 7738499375010822373
+    second: Map05_Woodpile_A_26
+  - first:
+      213: -8498722363032013545
+    second: Map05_Woodpile_A_27
+  - first:
+      213: -7841319056608562203
+    second: Map05_Woodpile_A_28
+  - first:
+      213: 760265319328590927
+    second: Map05_Woodpile_A_29
+  - first:
+      213: 4422902235970708999
+    second: Map05_Woodpile_A_30
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 1
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 1
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 2
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1331
+        height: 954
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f96151da52fd9aab0800000000000000
+      internalID: -4996216958680230241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_1
+      rect:
+        serializedVersion: 2
+        x: 832
+        y: 647
+        width: 677
+        height: 359
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd5681b32b7df6570800000000000000
+      internalID: 8462219385348056540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_2
+      rect:
+        serializedVersion: 2
+        x: 1034
+        y: 817
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0a948e761f9607b0800000000000000
+      internalID: -5258340595947759091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_3
+      rect:
+        serializedVersion: 2
+        x: 1070
+        y: 808
+        width: 13
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f833ef7741816b50800000000000000
+      internalID: 6584686274280634608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_4
+      rect:
+        serializedVersion: 2
+        x: 1310
+        y: 429
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd994c8b8cc79da50800000000000000
+      internalID: 6546400734894922207
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_5
+      rect:
+        serializedVersion: 2
+        x: 1314
+        y: 416
+        width: 13
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae7c517d0c4b958a0800000000000000
+      internalID: -6315818262075160598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_6
+      rect:
+        serializedVersion: 2
+        x: 1326
+        y: 344
+        width: 157
+        height: 132
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b972fce404405f60800000000000000
+      internalID: 8020985724292725175
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_7
+      rect:
+        serializedVersion: 2
+        x: 478
+        y: 43
+        width: 9
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa30f3b765ad1c1f0800000000000000
+      internalID: -1026299175093992534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_8
+      rect:
+        serializedVersion: 2
+        x: 495
+        y: 61
+        width: 16
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe413e2c6c850b5c0800000000000000
+      internalID: -4201760841640241937
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_9
+      rect:
+        serializedVersion: 2
+        x: 584
+        y: 47
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0fcd1339c066c070800000000000000
+      internalID: 8126288994898923274
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_10
+      rect:
+        serializedVersion: 2
+        x: 590
+        y: 37
+        width: 15
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dab73727f7a442ad0800000000000000
+      internalID: -2727973563038205011
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_11
+      rect:
+        serializedVersion: 2
+        x: 694
+        y: 89
+        width: 9
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 243b35784f46fe5a0800000000000000
+      internalID: -6489857536612388030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_12
+      rect:
+        serializedVersion: 2
+        x: 696
+        y: 49
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da1c33b557608ac40800000000000000
+      internalID: 5523672044080972205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_13
+      rect:
+        serializedVersion: 2
+        x: 746
+        y: 63
+        width: 29
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 293f05aa5f7256f30800000000000000
+      internalID: 4568101333115138962
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_14
+      rect:
+        serializedVersion: 2
+        x: 758
+        y: 47
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b88bc760d1d8083c0800000000000000
+      internalID: -4359329283492235125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_15
+      rect:
+        serializedVersion: 2
+        x: 774
+        y: 87
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1762f1276a9061a10800000000000000
+      internalID: 1879700504957625969
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_16
+      rect:
+        serializedVersion: 2
+        x: 774
+        y: 81
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2082e66c1eafb9890800000000000000
+      internalID: -7450085310950660094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_17
+      rect:
+        serializedVersion: 2
+        x: 856
+        y: 49
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7d7e68a3c127ac20800000000000000
+      internalID: 3217577583007661436
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_18
+      rect:
+        serializedVersion: 2
+        x: 862
+        y: 53
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2821c17d98c1863e0800000000000000
+      internalID: -2060365451176963454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_19
+      rect:
+        serializedVersion: 2
+        x: 884
+        y: 93
+        width: 31
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cdcf896c03453b800800000000000000
+      internalID: 626937341601709276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_20
+      rect:
+        serializedVersion: 2
+        x: 912
+        y: 53
+        width: 15
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64817cd85f9e0b930800000000000000
+      internalID: 4157079696917862470
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_21
+      rect:
+        serializedVersion: 2
+        x: 948
+        y: 55
+        width: 27
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72040e17266525330800000000000000
+      internalID: 3698113224841904167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_22
+      rect:
+        serializedVersion: 2
+        x: 974
+        y: 61
+        width: 11
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e444bcd6735c0f4a0800000000000000
+      internalID: -6561527815222901682
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_23
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 105
+        width: 25
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87671028702887760800000000000000
+      internalID: 7455852151869372024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_24
+      rect:
+        serializedVersion: 2
+        x: 1050
+        y: 125
+        width: 29
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a28de7c715306c570800000000000000
+      internalID: 8486474196342200362
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_25
+      rect:
+        serializedVersion: 2
+        x: 1064
+        y: 63
+        width: 15
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 472b69ae553d15d80800000000000000
+      internalID: -8263591475286723980
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_26
+      rect:
+        serializedVersion: 2
+        x: 1210
+        y: 99
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e83a166e2ca46b60800000000000000
+      internalID: 7738499375010822373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_27
+      rect:
+        serializedVersion: 2
+        x: 1216
+        y: 73
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 715fecaf9097e0a80800000000000000
+      internalID: -8498722363032013545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_28
+      rect:
+        serializedVersion: 2
+        x: 1222
+        y: 117
+        width: 37
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e37854fcd90e2390800000000000000
+      internalID: -7841319056608562203
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_29
+      rect:
+        serializedVersion: 2
+        x: 1360
+        y: 40
+        width: 153
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f4c21a5a7410d8a00800000000000000
+      internalID: 760265319328590927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Map05_Woodpile_A_30
+      rect:
+        serializedVersion: 2
+        x: 800
+        y: 15
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 706a05b662e416d30800000000000000
+      internalID: 4422902235970708999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Map05_Woodpile_A_0: -4996216958680230241
+      Map05_Woodpile_A_1: 8462219385348056540
+      Map05_Woodpile_A_10: -2727973563038205011
+      Map05_Woodpile_A_11: -6489857536612388030
+      Map05_Woodpile_A_12: 5523672044080972205
+      Map05_Woodpile_A_13: 4568101333115138962
+      Map05_Woodpile_A_14: -4359329283492235125
+      Map05_Woodpile_A_15: 1879700504957625969
+      Map05_Woodpile_A_16: -7450085310950660094
+      Map05_Woodpile_A_17: 3217577583007661436
+      Map05_Woodpile_A_18: -2060365451176963454
+      Map05_Woodpile_A_19: 626937341601709276
+      Map05_Woodpile_A_2: -5258340595947759091
+      Map05_Woodpile_A_20: 4157079696917862470
+      Map05_Woodpile_A_21: 3698113224841904167
+      Map05_Woodpile_A_22: -6561527815222901682
+      Map05_Woodpile_A_23: 7455852151869372024
+      Map05_Woodpile_A_24: 8486474196342200362
+      Map05_Woodpile_A_25: -8263591475286723980
+      Map05_Woodpile_A_26: 7738499375010822373
+      Map05_Woodpile_A_27: -8498722363032013545
+      Map05_Woodpile_A_28: -7841319056608562203
+      Map05_Woodpile_A_29: 760265319328590927
+      Map05_Woodpile_A_3: 6584686274280634608
+      Map05_Woodpile_A_30: 4422902235970708999
+      Map05_Woodpile_A_4: 6546400734894922207
+      Map05_Woodpile_A_5: -6315818262075160598
+      Map05_Woodpile_A_6: 8020985724292725175
+      Map05_Woodpile_A_7: -1026299175093992534
+      Map05_Woodpile_A_8: -4201760841640241937
+      Map05_Woodpile_A_9: 8126288994898923274
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -589,6 +589,7 @@ namespace KingdomSurvival.BattleSandbox
             HexLayout layout = CalculateLayout();
             SandboxUnitState current = battle.CurrentUnit;
             paintLayout = layout;
+            paintContext = context;
             IReadOnlyDictionary<HexCoord, int> reachable =
                 !IsAnimating && current != null && current.Team == SandboxTeam.Player
                     ? battle.GetReachable(current.Id)
@@ -597,6 +598,9 @@ namespace KingdomSurvival.BattleSandbox
             float radius = layout.Size * (1f - hexStyle.Gap);
             Color lineColor = hexStyle.Fade(hexStyle.LineColor);
             bool drawLine = hexStyle.LineWidth > 0.01f && lineColor.a > 0.001f;
+            // Своя сетка доски (без поля под ней) пером: общие рёбра — один раз,
+            // одной сеткой после подложки клеток, а не кольцом у каждой клетки.
+            bool inkBoardGrid = drawLine && hexStyle.InkLines && !baseGridDrawnBelow && !marksDrawnBelow;
             for (int r = 0; r < battle.Height; r++)
             {
                 for (int q = 0; q < battle.Width; q++)
@@ -615,7 +619,7 @@ namespace KingdomSurvival.BattleSandbox
                     // Без BattlefieldView под полем подложку и линию рисует поле.
                     if (!baseGridDrawnBelow)
                         PaintHex(painter, layout.GetCenter(coord), radius, hexStyle.Fade(hexStyle.FillColor),
-                            drawLine ? lineColor : Color.clear, drawLine ? hexStyle.LineWidth : 0f,
+                            drawLine && !inkBoardGrid ? lineColor : Color.clear, drawLine && !inkBoardGrid ? hexStyle.LineWidth : 0f,
                             true, layout.VerticalScale);
 
                     // Заливка местности и цели. Контур клетки при рисованной
@@ -627,6 +631,9 @@ namespace KingdomSurvival.BattleSandbox
                             true, layout.VerticalScale);
                 }
             }
+
+            if (inkBoardGrid)
+                PaintInkBoardGrid(layout);
 
             if (!IsAnimating && reachable.Count > 0)
             {
@@ -706,6 +713,15 @@ namespace KingdomSurvival.BattleSandbox
         {
             if (!marksDrawnBelow)
             {
+                // Контур клетки (ход, цель, наведение атаки) — пером дорог MapLab,
+                // как сетка; заливка — как прежде.
+                if (hexStyle.InkLines && lineWidth > 0.01f && stroke.a > 0.001f && paintContext != null)
+                {
+                    if (fillShape && fill.a > 0.001f)
+                        PaintHex(painter, center, radius, fill, Color.clear, 0f, true, verticalScale);
+                    PaintInkOutline(center, radius, stroke, lineWidth, verticalScale);
+                    return;
+                }
                 if (paintLayout.Relief != null)
                 {
                     // Гекс лежит на земле: центр — видимый, контур — по склону.
@@ -726,8 +742,65 @@ namespace KingdomSurvival.BattleSandbox
             marks.Add(new BoardMark
             {
                 Kind = BoardMarkKind.Hex, A = center, Radius = radius, VerticalScale = verticalScale,
-                Fill = fillShape ? fill : Color.clear, Line = stroke, LineWidth = lineWidth
+                Fill = fillShape ? fill : Color.clear, Line = stroke, LineWidth = lineWidth, Ink = hexStyle.InkLines
             });
+        }
+
+        // ---------- контуры пером (BattlefieldInkGrid) ----------
+
+        private MeshGenerationContext paintContext;
+        private readonly List<Vector2> inkCenters = new List<Vector2>();
+        private readonly List<Vector2> inkPositions = new List<Vector2>();
+        private readonly List<float> inkAlphas = new List<float>();
+        private readonly List<int> inkIndices = new List<int>();
+
+        private float InkPixels => panel != null ? panel.scaledPixelsPerPoint : 1f;
+
+        private Func<Vector2, Vector2> InkRaise()
+        {
+            IBattlefieldRelief relief = paintLayout.Relief;
+            Rect frame = paintLayout.Frame;
+            return relief != null ? p => BattlefieldReliefMath.Raise(relief, frame, p) : (Func<Vector2, Vector2>)null;
+        }
+
+        // Видимый центр → плоский (контур лежит на земле, по склону).
+        private Vector2 InkFlat(Vector2 center) =>
+            paintLayout.Relief != null ? BattlefieldReliefMath.Lower(paintLayout.Relief, paintLayout.Frame, center) : center;
+
+        private void PaintInkOutline(Vector2 center, float radius, Color stroke, float lineWidth, float verticalScale)
+        {
+            inkCenters.Clear();
+            inkCenters.Add(InkFlat(center));
+            float pixels = InkPixels;
+            // Разные отметки одной клетки (ход, атака) — разный рисунок.
+            uint salt = (uint)stroke.GetHashCode();
+            BattlefieldInkGrid.Result result = BattlefieldInkGrid.BuildOutlines(inkCenters, radius, verticalScale, InkRaise(),
+                BattlefieldInkPen.Current ?? new BattlefieldInkPen(), lineWidth, paintLayout.Frame.position, Mathf.Max(1f, paintLayout.Size), salt,
+                new BattlefieldInkGrid.Options { PixelScale = pixels, Endings = true, Calm = true });
+            BattlefieldInkGrid.Triangulate(result.Strokes, 1.1f / Mathf.Max(0.1f, pixels), inkPositions, inkAlphas, inkIndices);
+            BattlefieldView.WriteInkMesh(paintContext, stroke, inkPositions, inkAlphas, inkIndices);
+        }
+
+        private void PaintInkBoardGrid(HexLayout layout)
+        {
+            inkCenters.Clear();
+            for (int r = 0; r < battle.Height; r++)
+                for (int q = 0; q < battle.Width; q++)
+                {
+                    HexCoord coord = new HexCoord(q, r);
+                    if (IsBoardCell(coord))
+                        inkCenters.Add(InkFlat(layout.GetCenter(coord)));
+                }
+            BattlefieldInkPen pen = BattlefieldInkPen.Current ?? new BattlefieldInkPen();
+            float pixels = InkPixels;
+            BattlefieldInkGrid.Result result = BattlefieldInkGrid.Build(inkCenters, layout.Size, layout.VerticalScale, InkRaise(), pen,
+                new BattlefieldInkGrid.Options
+                {
+                    Opacity = hexStyle.InkOpacity * hexStyle.Opacity, PixelScale = pixels, Endings = true,
+                    UseAnchor = true, Anchor = layout.Frame.position
+                });
+            BattlefieldInkGrid.Triangulate(result.Strokes, 1.1f / Mathf.Max(0.1f, pixels), inkPositions, inkAlphas, inkIndices);
+            BattlefieldView.WriteInkMesh(paintContext, pen.Color, inkPositions, inkAlphas, inkIndices);
         }
 
         private void PaintCircle(

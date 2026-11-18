@@ -108,4 +108,56 @@ public sealed class BattlefieldInkGridTests
         foreach (int i in indices)
             Assert.That(i, Is.InRange(0, positions.Count - 1));
     }
+    [Test]
+    public void Outlines_SixEdgesPerCell_StableUnderZoom_DifferPerMark()
+    {
+        BattlefieldInkPen pen = new BattlefieldInkPen();
+        List<Vector2> cells = new List<Vector2> { new Vector2(100f, 100f), new Vector2(169.3f, 100f) };
+        BattlefieldInkGrid.Result a = BattlefieldInkGrid.BuildOutlines(cells, 38f, 0.75f, null, pen, 2.2f, Vector2.zero, 40f, 7u, Options());
+        Assert.AreEqual(12, a.Edges, "У каждой клетки своё кольцо из шести рёбер.");
+        // Тот же кадр в 2 раза крупнее: рисунок в долях радиуса тот же.
+        List<Vector2> big = new List<Vector2> { cells[0] * 2f, cells[1] * 2f };
+        BattlefieldInkGrid.Result b = BattlefieldInkGrid.BuildOutlines(big, 76f, 0.75f, null, pen, 4.4f, Vector2.zero, 80f, 7u, Options());
+        Assert.AreEqual(a.Gaps, b.Gaps);
+        Assert.AreEqual(a.Strokes.Count, b.Strokes.Count);
+        Assert.Less((a.Strokes[0].Points[3] * 2f - b.Strokes[0].Points[3]).magnitude, 0.01f, "Форма штриха не меняется при зуме.");
+        // Другая отметка на тех же клетках — другой рисунок (ход и атака не совпадают).
+        BattlefieldInkGrid.Result other = BattlefieldInkGrid.BuildOutlines(cells, 38f, 0.75f, null, pen, 2.2f, Vector2.zero, 40f, 99u, Options());
+        bool differs = other.Strokes.Count != a.Strokes.Count;
+        for (int i = 0; !differs && i < a.Strokes.Count; i++)
+            differs = Mathf.Abs(other.Strokes[i].HalfWidths[1] - a.Strokes[i].HalfWidths[1]) > 1e-4f;
+        Assert.IsTrue(differs);
+        // Тонкая отметка не тоньше нижнего предела пера на экране.
+        BattlefieldInkGrid.Result thin = BattlefieldInkGrid.BuildOutlines(cells, 38f, 0.75f, null, pen, 0.2f, Vector2.zero, 40f, 7u, Options());
+        float widest = 0f;
+        foreach (BattlefieldInkGrid.Stroke st in thin.Strokes)
+            foreach (float h in st.HalfWidths)
+                widest = Mathf.Max(widest, h * 2f);
+        Assert.GreaterOrEqual(widest, pen.MinPixels * 0.9f);
+    }
+
+    [Test]
+    public void Anchor_KeepsPattern_WhenVisibleWindowChanges()
+    {
+        BattlefieldInkPen pen = new BattlefieldInkPen();
+        List<Vector2> all = Grid(40f, Vector2.zero, 1f, 8, 6);
+        // Видимая часть — без первого ряда (как карта мира при панораме).
+        List<Vector2> part = all.GetRange(8, all.Count - 8);
+        BattlefieldInkGrid.Options options = Options();
+        options.UseAnchor = true;
+        options.Anchor = new Vector2(-17f, 5f);
+        BattlefieldInkGrid.Result full = BattlefieldInkGrid.Build(all, 40f, 1f, null, pen, options);
+        BattlefieldInkGrid.Result visible = BattlefieldInkGrid.Build(part, 40f, 1f, null, pen, options);
+        // Штрих ребра, общего для обеих сборок, — тот же: ищем по началу и концу.
+        int matched = 0;
+        foreach (BattlefieldInkGrid.Stroke s in visible.Strokes)
+            foreach (BattlefieldInkGrid.Stroke f in full.Strokes)
+                if (s.Points.Count == f.Points.Count && (s.Points[0] - f.Points[0]).sqrMagnitude < 1e-6f && (s.Points[s.Points.Count - 1] - f.Points[f.Points.Count - 1]).sqrMagnitude < 1e-6f)
+                {
+                    Assert.AreEqual(f.Alphas[f.Alphas.Count / 2], s.Alphas[s.Alphas.Count / 2], 1e-5f);
+                    matched++;
+                    break;
+                }
+        Assert.Greater(matched, visible.Strokes.Count * 0.8f, "Рисунок видимых рёбер тот же, что у полной сетки.");
+    }
 }

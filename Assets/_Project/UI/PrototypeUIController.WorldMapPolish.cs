@@ -203,6 +203,14 @@ public partial class PrototypeUIController
         Painter2D painter = context.painter2D;
         painter.lineWidth = 1f;
         painter.strokeColor = WorldMapGridLineColor;
+        // Линии — пером дорог MapLab (как сетка боя), пока видимых клеток
+        // немного (близкий масштаб — для него сетка и нужна); иначе — тонкие
+        // ровные линии. Рисунок привязан к углу полотна карты: панорама и зум
+        // его не меняют.
+        int visibleCells = (lastRow - firstRow + 1) * (lastColumn - firstColumn + 1);
+        bool ink = visibleCells <= WorldMapGridInkMaxCells;
+        if (ink)
+            worldMapGridInkCenters.Clear();
 
         for (int row = firstRow; row <= lastRow; row++)
         {
@@ -213,6 +221,8 @@ public partial class PrototypeUIController
                 Vector2 center = new Vector2(
                     worldMapPanOffsetX + (float)cx * scaleX,
                     worldMapPanOffsetY + (float)cy * scaleY);
+                if (ink)
+                    worldMapGridInkCenters.Add(center);
 
                 WorldMapGameplayTerrainType terrain = layer.Get(cell);
                 BuildWorldMapHexPath(painter, center, radiusScreen);
@@ -225,9 +235,46 @@ public partial class PrototypeUIController
                     painter.fillColor = fill;
                     painter.Fill();
                 }
-                painter.Stroke();
+                if (!ink)
+                    painter.Stroke();
             }
         }
+        if (ink)
+            DrawWorldMapInkGrid(context, radiusScreen, Mathf.Abs(scaleY / scaleX));
+    }
+
+    private const int WorldMapGridInkMaxCells = 900;
+    private readonly List<Vector2> worldMapGridInkCenters = new List<Vector2>();
+    private readonly List<Vector2> worldMapGridInkPositions = new List<Vector2>();
+    private readonly List<float> worldMapGridInkAlphas = new List<float>();
+    private readonly List<int> worldMapGridInkIndices = new List<int>();
+
+    private void DrawWorldMapInkGrid(MeshGenerationContext context, float radius, float verticalScale)
+    {
+        if (worldMapGridInkCenters.Count == 0)
+            return;
+        float pixels = worldMapViewport.panel != null ? worldMapViewport.panel.scaledPixelsPerPoint : 1f;
+        // Клетка карты много крупнее клетки арены: толщина пера от радиуса
+        // клетки здесь вышла бы толще дорог — предел по экрану как у туши дорог карты.
+        KingdomSurvival.BattlefieldDatabase.BattlefieldInkPen pen =
+            (KingdomSurvival.BattlefieldDatabase.BattlefieldInkPen.Current ?? new KingdomSurvival.BattlefieldDatabase.BattlefieldInkPen()).Clone();
+        pen.MinPixels = 1.2f;
+        pen.MaxPixels = 2.4f;
+        KingdomSurvival.BattlefieldDatabase.BattlefieldInkGrid.Result result = KingdomSurvival.BattlefieldDatabase.BattlefieldInkGrid.Build(
+            worldMapGridInkCenters, radius, 1f, null, pen,
+            new KingdomSurvival.BattlefieldDatabase.BattlefieldInkGrid.Options
+            {
+                Opacity = 1f, PixelScale = pixels, Endings = true, Steps = 6,
+                UseAnchor = true, Anchor = new Vector2(worldMapPanOffsetX, worldMapPanOffsetY)
+            });
+        KingdomSurvival.BattlefieldDatabase.BattlefieldInkGrid.Triangulate(result.Strokes, 1.1f / Mathf.Max(0.1f, pixels),
+            worldMapGridInkPositions, worldMapGridInkAlphas, worldMapGridInkIndices);
+        // Цвет и плотность сетки карты — прежние (WorldMapGridLineColor), характер линии — пера.
+        float norm = 1f / Mathf.Max(0.05f, pen.Density);
+        for (int i = 0; i < worldMapGridInkAlphas.Count; i++)
+            worldMapGridInkAlphas[i] = Mathf.Clamp01(worldMapGridInkAlphas[i] * norm);
+        KingdomSurvival.BattlefieldDatabase.BattlefieldView.WriteInkMesh(context, WorldMapGridLineColor,
+            worldMapGridInkPositions, worldMapGridInkAlphas, worldMapGridInkIndices);
     }
 
     // Острые вершины сверху, как у поля боя.

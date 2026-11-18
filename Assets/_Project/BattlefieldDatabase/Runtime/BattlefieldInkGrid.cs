@@ -65,9 +65,22 @@ namespace KingdomSurvival.BattlefieldDatabase
             public float Opacity;       // множитель плотности пера, 0..1
             public float PixelScale;    // пикселей экрана на единицу рисунка (для пределов толщины)
             public bool Endings;
+            // Неподвижная точка решётки (например, угол кадра поля или центр
+            // клетки 0,0): рисунок штрихов привязан к ней, а не к первой клетке
+            // списка — видимая часть сетки (карта мира) при панораме не меняет рисунок.
+            public bool UseAnchor;
+            public Vector2 Anchor;
+            // Шагов на ребро (0 — 10); меньше — легче для больших сеток.
+            public int Steps;
+            // Спокойная линия для интерактивных отметок (ход, цель, атака):
+            // характер пера (нажим, дрожь, окончания) без ослабленных участков,
+            // разрывов вдвое меньше — отметка читается лучше сетки.
+            public bool Calm;
         }
 
-        private const int Steps = 10;
+        private const int DefaultSteps = 10;
+        [ThreadStatic] private static int steps;
+        [ThreadStatic] private static bool calm;
 
         // centers — центры гексов (плоские, до подъёма рельефом); radius —
         // радиус клетки (используется, если клетка одна); verticalScale —
@@ -82,8 +95,10 @@ namespace KingdomSurvival.BattlefieldDatabase
             float lattice = LatticeRadius(centers, verticalScale, radius);
             if (lattice <= 0.01f)
                 return result;
-            Vector2 origin = centers[0];
+            Vector2 origin = options.UseAnchor ? options.Anchor : centers[0];
             float quantum = lattice * 0.125f;
+            steps = options.Steps > 1 ? options.Steps : DefaultSteps;
+            calm = options.Calm;
             HashSet<long> seen = new HashSet<long>();
             Vector2[] corners = new Vector2[6];
             float pixelScale = Mathf.Max(0.01f, options.PixelScale);
@@ -108,6 +123,43 @@ namespace KingdomSurvival.BattlefieldDatabase
                         (a, b) = (b, a);
                     result.Edges++;
                     DrawEdge(result, a, b, lattice, verticalScale, raise, pen, baseWidth, density, options.Endings && pen.Endings, (uint)(edgeKey ^ (edgeKey >> 29)));
+                }
+            }
+            return result;
+        }
+
+        // Отдельные контуры клеток тем же пером (клетки хода, цель, наведение
+        // атаки): у каждой клетки — своё кольцо из шести рёбер своим цветом и
+        // толщиной (lineWidth — толщина, как у прежней ровной линии; нажим,
+        // разрывы и окончания — пера). Рисунок привязан к положению клетки
+        // относительно anchor в радиусах (unit), salt разводит виды отметок.
+        public static Result BuildOutlines(IReadOnlyList<Vector2> centers, float radius, float verticalScale, Func<Vector2, Vector2> raise,
+            BattlefieldInkPen pen, float lineWidth, Vector2 anchor, float unit, uint salt, Options options)
+        {
+            Result result = new Result { Strokes = new List<Stroke>() };
+            if (centers == null || centers.Count == 0 || pen == null || radius <= 0.01f || lineWidth <= 0.001f)
+                return result;
+            verticalScale = Mathf.Max(0.05f, verticalScale);
+            unit = Mathf.Max(0.01f, unit);
+            steps = options.Steps > 1 ? options.Steps : DefaultSteps;
+            calm = options.Calm;
+            Vector2[] corners = new Vector2[6];
+            float pixelScale = Mathf.Max(0.01f, options.PixelScale);
+            // Не тоньше нижнего предела пера на экране — тонкая отметка не пропадает.
+            float baseWidth = Mathf.Max(lineWidth, pen.MinPixels / pixelScale);
+            foreach (Vector2 center in centers)
+            {
+                long cx = Mathf.RoundToInt((center.x - anchor.x) / unit * 4f), cy = Mathf.RoundToInt((center.y - anchor.y) / verticalScale / unit * 4f);
+                for (int i = 0; i < 6; i++)
+                {
+                    float angle = Mathf.Deg2Rad * (60f * i - 30f);
+                    corners[i] = center + new Vector2(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius * verticalScale);
+                }
+                for (int i = 0; i < 6; i++)
+                {
+                    uint seed = unchecked((uint)((cx * 73856093L) ^ (cy * 19349663L) ^ (i * 83492791L)) ^ salt * 0x27d4eb2du);
+                    result.Edges++;
+                    DrawEdge(result, corners[i], corners[(i + 1) % 6], radius, verticalScale, raise, pen, baseWidth, 1f, options.Endings && pen.Endings, seed);
                 }
             }
             return result;
@@ -151,6 +203,8 @@ namespace KingdomSurvival.BattlefieldDatabase
             float edgeShare = length / lattice;
             float gapChance = Mathf.Clamp01(edgeShare / Mathf.Max(0.5f, pen.BreakLength) * Mathf.Clamp01(pen.BreakShare * 10f));
             float g0 = -1f, g1 = -1f;
+            if (calm)
+                gapChance *= 0.5f;
             if (Hash01(seed, 1) < gapChance)
             {
                 float gapLength = Mathf.Clamp(pen.BreakShare * pen.BreakLength / edgeShare * Mathf.Lerp(0.6f, 1.4f, Hash01(seed, 2)), 0.1f, 0.26f);
@@ -160,7 +214,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                 result.Gaps++;
             }
             // Ослабленный участок пигмента (у части рёбер).
-            float fadeCenter = Hash01(seed, 4), fadeDepth = Hash01(seed, 5) < 0.45f ? Mathf.Lerp(0.45f, 0.8f, Hash01(seed, 6)) : 0f;
+            float fadeCenter = Hash01(seed, 4), fadeDepth = !calm && Hash01(seed, 5) < 0.45f ? Mathf.Lerp(0.45f, 0.8f, Hash01(seed, 6)) : 0f;
             // Нажим — плавная волна вдоль ребра со сдвигом по положению ребра:
             // соседние рёбра продолжают одну и ту же «руку», но не повторяют рисунок.
             float wave = lattice * Mathf.Max(0.5f, pen.DriftLength);
@@ -179,7 +233,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                 float press = 1f + pen.Drift * (Smooth(seed + 23u, s) * 2f - 1f);
                 // Сужение к углам: на стыке трёх рёбер не собирается клякса.
                 float corner = Mathf.Lerp(0.45f, 1f, Mathf.SmoothStep(0f, 1f, Mathf.Min(t, 1f - t) / 0.16f));
-                float grain = 1f - pen.Grain * 0.18f * Hash01(seed + (uint)Mathf.RoundToInt(t * 97f), 9);
+                float grain = 1f - (calm ? 0f : pen.Grain) * 0.18f * Hash01(seed + (uint)Mathf.RoundToInt(t * 97f), 9);
                 float fade = 1f - fadeDepth * Mathf.Exp(-Mathf.Pow((t - fadeCenter) / 0.18f, 2f));
                 current.Points.Add(p);
                 current.HalfWidths.Add(baseWidth * 0.5f * press * corner * widthMul);
@@ -191,10 +245,10 @@ namespace KingdomSurvival.BattlefieldDatabase
                 if (t1 - t0 < 0.01f)
                     return;
                 current = new Stroke();
-                int steps = Mathf.Max(2, Mathf.CeilToInt(Steps * (t1 - t0)));
-                for (int i = 0; i <= steps; i++)
+                int count = Mathf.Max(2, Mathf.CeilToInt(steps * (t1 - t0)));
+                for (int i = 0; i <= count; i++)
                 {
-                    float t = Mathf.Lerp(t0, t1, i / (float)steps);
+                    float t = Mathf.Lerp(t0, t1, i / (float)count);
                     // Заострение у разрыва: последняя доля — к нулю.
                     float w = 1f;
                     if (taper0 > 0f) w *= Mathf.Lerp(0.25f, 1f, Mathf.Clamp01((t - t0) / taper0));

@@ -606,4 +606,30 @@ public sealed class MapLabLiveMapPlayModeTests
             Object.Destroy(probe);
         }
     }
+    // Вспомогательная сетка карты мира («Сетка») на близком масштабе — пером
+    // дорог MapLab, как сетка боя. Кадр — при заданной KS_SCREENSHOT_DIR.
+    [UnityTest]
+    public IEnumerator WorldMapHelperGrid_InkLines()
+    {
+        SceneManager.LoadScene(MainScene);
+        for (int i = 0; i < 600 && SceneManager.GetActiveScene().name != MainScene; i++)
+            yield return null;
+        yield return Frames(20);
+        MonoBehaviour main = FindBehaviour("PrototypeUIController");
+        Invoke(main, "StartNewGameFromMenu");
+        float started = Time.realtimeSinceStartup;
+        while ((MapLabGameLive.Current == null || !MapLabGameLive.Current.Ready) && Time.realtimeSinceStartup - started < 300f)
+            yield return null;
+        Assert.IsTrue(MapLabGameLive.Current != null && MapLabGameLive.Current.Ready);
+        yield return Frames(20);
+        VisualElement root = main.GetComponent<UIDocument>().rootVisualElement;
+        Toggle grid = root.Q<Toggle>("world-map-grid-toggle");
+        Assert.IsNotNull(grid);
+        grid.value = true;
+        yield return ZoomTo(main, WorldMapNavigation.CapitalXPercent, WorldMapNavigation.CapitalYPercent, 0.85f);
+        List<Vector2> ink = Field<List<Vector2>>(main, "worldMapGridInkPositions");
+        Assert.Greater(ink.Count, 0, "Сетка карты на близком масштабе нарисована пером.");
+        yield return Capture(main, "world_map_grid_ink");
+        grid.value = false;
+    }
 }

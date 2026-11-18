@@ -265,6 +265,14 @@ public sealed class MapLabArenaPlayModeTests
         Assert.Greater(ink.Count, 0, "Сетка нарисована пером.");
         Assert.IsNotNull(BattlefieldInkPen.Current);
         yield return Capture("arena_grid_ink");
+        // Ход игрока: клетки хода — контурами тем же пером.
+        SandboxBattle battle = (SandboxBattle)Member(sandbox, "battle");
+        float until = Time.realtimeSinceStartup + 40f;
+        while (Time.realtimeSinceStartup < until && (battle.CurrentUnit == null || battle.CurrentUnit.Team != SandboxTeam.Player))
+            yield return null;
+        for (int i = 0; i < 30; i++) yield return null;
+        if (battle.CurrentUnit != null && battle.CurrentUnit.Team == SandboxTeam.Player)
+            yield return Capture("arena_reach_ink");
     }
 
     private static IEnumerator Capture(string name)

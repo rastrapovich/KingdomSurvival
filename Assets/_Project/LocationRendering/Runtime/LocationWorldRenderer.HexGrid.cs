@@ -171,6 +171,8 @@ namespace KingdomSurvival.LocationRendering
             public Vector2 A, B;
             public float Radius, VerticalScale, LineWidth;
             public Color Fill, Line;
+            // Контур гекса — пером дорог MapLab (BattlefieldInkGrid), как сетка.
+            public bool Ink;
         }
 
         private GameObject battleMarks;
@@ -205,6 +207,7 @@ namespace KingdomSurvival.LocationRendering
                     key = key * 31 + Mathf.RoundToInt(mark.LineWidth * 20);
                     key = key * 31 + mark.Fill.GetHashCode();
                     key = key * 31 + mark.Line.GetHashCode();
+                    key = key * 31 + (mark.Ink ? 1 : 0);
                 }
                 key = key * 31 + Mathf.RoundToInt(minimum * 20);
             }
@@ -239,6 +242,13 @@ namespace KingdomSurvival.LocationRendering
                         float start = mark.Kind == BattleMarkKind.Hex ? -30 : 0;
                         float vertical = mark.Kind == BattleMarkKind.Hex ? mark.VerticalScale : 1;
                         if (vertical <= 0) vertical = 1;
+                        if (mark.Kind == BattleMarkKind.Hex && mark.Ink && mark.Line.a > .001f && width > 0)
+                        {
+                            // Заливка — как прежде, контур — пером (как сетка боя).
+                            AddMarkShape(mark.A, mark.Radius, vertical, sides, start, mark.Fill, 0, Color.clear);
+                            AddInkMarkOutline(mark, vertical, width);
+                            break;
+                        }
                         AddMarkShape(mark.A, mark.Radius, vertical, sides, start, mark.Fill, width, mark.Line);
                         break;
                 }
@@ -248,6 +258,31 @@ namespace KingdomSurvival.LocationRendering
             battleMarksMesh.SetColors(markColors);
             battleMarksMesh.SetTriangles(markIndices, 0);
             battleMarksMesh.RecalculateBounds();
+        }
+
+        // Контур отметки-гекса пером: рисунок привязан к положению клетки на
+        // рисунке места (пиксели рисунка), при зуме камеры не меняется.
+        private readonly List<Vector2> markInkCenter = new List<Vector2>(1);
+
+        private void AddInkMarkOutline(BattleMark mark, float vertical, float width)
+        {
+            float frameScale = Target != null && Target.height > 0 && ViewHeight > 0 ? Target.height / ViewHeight : 1f;
+            markInkCenter.Clear();
+            markInkCenter.Add(mark.A);
+            BattlefieldInkGrid.Result result = BattlefieldInkGrid.BuildOutlines(markInkCenter, mark.Radius, vertical, null,
+                BattlefieldInkPen.Current ?? new BattlefieldInkPen(), width, Vector2.zero, Mathf.Max(1f, mark.Radius), (uint)mark.Line.GetHashCode(),
+                new BattlefieldInkGrid.Options { PixelScale = frameScale, Endings = true, Calm = true });
+            BattlefieldInkGrid.Triangulate(result.Strokes, 1.1f / Mathf.Max(0.01f, frameScale), inkPositions, inkAlphas, inkIndices);
+            int start = markVertices.Count;
+            for (int i = 0; i < inkPositions.Count; i++)
+            {
+                markVertices.Add(LocationVisualGeometry.PixelToWorld(Location, inkPositions[i]));
+                Color c = mark.Line;
+                c.a *= inkAlphas[i];
+                markColors.Add(c);
+            }
+            foreach (int index in inkIndices)
+                markIndices.Add(start + index);
         }
 
         // Многоугольник (гекс, круг): заливка веером и обводка — линия по
@@ -310,8 +345,34 @@ namespace KingdomSurvival.LocationRendering
             List<int> indices = new List<int>();
             HashSet<long> drawn = new HashSet<long>();
             Vector2[] corners = new Vector2[6];
+            Color gridColor = new Color(1, .95f, .8f, .28f);
+            List<Color> inkColors = null;
+            // Линии — пером дорог MapLab (как сетка боя): нажим, разрывы,
+            // окончания; цвет и плотность — свои (светлая сетка места).
+            if (BattlefieldInkPen.Current != null)
+            {
+                List<Vector2> centers = new List<Vector2>();
+                foreach (HexCoord cell in grid.Cells())
+                    if (!blocked.Contains(cell))
+                        centers.Add(layout.GetCenter(cell.Q, cell.R));
+                BattlefieldInkPen pen = BattlefieldInkPen.Current;
+                BattlefieldInkGrid.Result ink = BattlefieldInkGrid.Build(centers, size, BattlefieldFrame.VerticalScale, null, pen,
+                    new BattlefieldInkGrid.Options { Opacity = 1f, PixelScale = 1f, Endings = true, UseAnchor = true, Anchor = Vector2.zero });
+                BattlefieldInkGrid.Triangulate(ink.Strokes, 1.2f, inkPositions, inkAlphas, inkIndices);
+                inkColors = new List<Color>(inkPositions.Count);
+                float norm = 1f / Mathf.Max(0.05f, pen.Density);
+                for (int i = 0; i < inkPositions.Count; i++)
+                {
+                    vertices.Add(LocationVisualGeometry.PixelToWorld(Location, inkPositions[i]));
+                    Color c = gridColor;
+                    c.a *= Mathf.Clamp01(inkAlphas[i] * norm);
+                    inkColors.Add(c);
+                }
+                indices.AddRange(inkIndices);
+            }
             foreach (HexCoord cell in grid.Cells())
             {
+                if (inkColors != null) break;
                 if (blocked.Contains(cell)) continue;
                 Vector2 center = layout.GetCenter(cell.Q, cell.R);
                 for (int i = 0; i < 6; i++)
@@ -335,9 +396,14 @@ namespace KingdomSurvival.LocationRendering
             }
             Mesh mesh = Own(new Mesh { name = "Сетка гексов", indexFormat = vertices.Count > 65000 ? IndexFormat.UInt32 : IndexFormat.UInt16 });
             mesh.SetVertices(vertices);
-            Color[] colors = new Color[vertices.Count];
-            for (int i = 0; i < colors.Length; i++) colors[i] = new Color(1, .95f, .8f, .28f);
-            mesh.SetColors(colors);
+            if (inkColors != null)
+                mesh.SetColors(inkColors);
+            else
+            {
+                Color[] colors = new Color[vertices.Count];
+                for (int i = 0; i < colors.Length; i++) colors[i] = gridColor;
+                mesh.SetColors(colors);
+            }
             mesh.SetTriangles(indices, 0);
             mesh.RecalculateBounds();
             hexGrid.AddComponent<MeshFilter>().sharedMesh = mesh;

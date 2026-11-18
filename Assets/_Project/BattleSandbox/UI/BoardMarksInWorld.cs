@@ -29,7 +29,8 @@ namespace KingdomSurvival.BattleSandbox
                     VerticalScale = mark.VerticalScale,
                     LineWidth = mark.LineWidth * scale,
                     Fill = mark.Fill,
-                    Line = mark.Line
+                    Line = mark.Line,
+                    Ink = mark.Ink
                 });
             }
         }

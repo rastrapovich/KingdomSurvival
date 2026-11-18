@@ -31,6 +31,8 @@ namespace KingdomSurvival.BattleSandbox
         public Vector2 A, B;
         public float Radius, VerticalScale, LineWidth;
         public Color Fill, Line;
+        // Контур гекса — пером дорог MapLab (как сетка), а не ровной линией.
+        public bool Ink;
     }
 
     public enum BoardMarkKind { Hex, Circle, Segment }

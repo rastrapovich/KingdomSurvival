@@ -87,6 +87,10 @@ namespace KingdomSurvival.BattlefieldDatabase
 
         public bool HasLocationGrid => locationGrid.HasValue;
 
+        // Плотность рисованной линии сетки для рисунка места (SetBattleGrid);
+        // меньше нуля — у стиля ровная линия.
+        public float GridInkOpacity => hexStyle.InkLines ? hexStyle.InkOpacity * hexStyle.Opacity : -1f;
+
         // Сетку (заливку и линии гексов) рисует мир под доской — рендерер места
         // между землёй и предметами, — а не этот элемент поверх картинки: иначе
         // линии ложились бы на людей и предметы.
@@ -351,6 +355,11 @@ namespace KingdomSurvival.BattlefieldDatabase
             if (line.a <= 0.001f || hexStyle.LineWidth <= 0.01f || Layout.Size <= 0.01f)
                 return;
 
+            if (hexStyle.InkLines)
+            {
+                DrawInkLines(context);
+                return;
+            }
             Painter2D painter = context.painter2D;
             painter.strokeColor = line;
             painter.lineWidth = hexStyle.LineWidth;
@@ -358,6 +367,90 @@ namespace KingdomSurvival.BattlefieldDatabase
             {
                 HexPath(painter, Layout.GetCenter(cell.Q, cell.R), HexRadius);
                 painter.Stroke();
+            }
+        }
+
+        // Рисованная сетка (перо дорог MapLab, BattlefieldInkGrid): каждое
+        // ребро один раз, по рельефу; рисунок штрихов привязан к решётке и при
+        // зуме не меняется. Геометрия строится заново только при смене клеток,
+        // размера кадра или рельефа.
+        private readonly List<Vector2> inkCenters = new List<Vector2>();
+        private readonly List<Vector2> inkPositions = new List<Vector2>();
+        private readonly List<float> inkAlphas = new List<float>();
+        private readonly List<int> inkIndices = new List<int>();
+        private int inkKey;
+
+        private void DrawInkLines(MeshGenerationContext context)
+        {
+            BattlefieldInkPen pen = BattlefieldInkPen.Current ?? new BattlefieldInkPen();
+            float pixels = panel != null ? panel.scaledPixelsPerPoint : 1f;
+            Rect frame = FrameRect;
+            int key = 17;
+            unchecked
+            {
+                foreach (HexCoord cell in activeCells) key = key * 31 + cell.Q * 977 + cell.R;
+                key = key * 31 + Mathf.RoundToInt(Layout.Size * 100f);
+                key = key * 31 + Mathf.RoundToInt(frame.x * 10f) * 7 + Mathf.RoundToInt(frame.y * 10f);
+                key = key * 31 + Mathf.RoundToInt(frame.width * 10f) * 7 + Mathf.RoundToInt(frame.height * 10f);
+                key = key * 31 + Mathf.RoundToInt(Layout.VerticalScale * 1000f);
+                key = key * 31 + Mathf.RoundToInt(pixels * 100f);
+                key = key * 31 + Mathf.RoundToInt(hexStyle.InkOpacity * hexStyle.Opacity * 1000f);
+                key = key * 31 + (relief != null ? relief.GetHashCode() : 0);
+                key = key * 31 + pen.GetHashCode();
+            }
+            if (key != inkKey || inkPositions.Count == 0)
+            {
+                inkKey = key;
+                inkCenters.Clear();
+                foreach (HexCoord cell in activeCells)
+                    inkCenters.Add(Layout.GetCenter(cell.Q, cell.R));
+                IBattlefieldRelief shownRelief = relief;
+                Func<Vector2, Vector2> raise = shownRelief != null ? p => BattlefieldReliefMath.Raise(shownRelief, frame, p) : (Func<Vector2, Vector2>)null;
+                BattlefieldInkGrid.Result grid = BattlefieldInkGrid.Build(inkCenters, Layout.Size, Layout.VerticalScale, raise, pen,
+                    new BattlefieldInkGrid.Options { Opacity = hexStyle.InkOpacity * hexStyle.Opacity, PixelScale = pixels, Endings = true });
+                BattlefieldInkGrid.Triangulate(grid.Strokes, 1.1f / Mathf.Max(0.1f, pixels), inkPositions, inkAlphas, inkIndices);
+            }
+            WriteInkMesh(context, pen.Color);
+        }
+
+        // UI Toolkit: не больше 65535 вершин в одном куске сетки. Штрих —
+        // по 4 вершины на точку, куски режутся по границе штриха.
+        private void WriteInkMesh(MeshGenerationContext context, Color color)
+        {
+            WriteInkMesh(context, color, inkPositions, inkAlphas, inkIndices);
+        }
+
+        public static void WriteInkMesh(MeshGenerationContext context, Color color, List<Vector2> positions, List<float> alphas, List<int> indices)
+        {
+            const int chunkVertices = 60000;
+            int start = 0, index = 0;
+            while (start < positions.Count && index < indices.Count)
+            {
+                int indexStart = index;
+                int maxVertex = start;
+                // Берём треугольники, пока все их вершины укладываются в кусок.
+                while (index < indices.Count)
+                {
+                    int hi = Mathf.Max(indices[index], Mathf.Max(indices[index + 1], indices[index + 2]));
+                    if (hi - start >= chunkVertices)
+                        break;
+                    maxVertex = Mathf.Max(maxVertex, hi);
+                    index += 3;
+                }
+                int vertexCount = maxVertex - start + 1;
+                int triangles = index - indexStart;
+                if (triangles == 0)
+                    break;
+                MeshWriteData mesh = context.Allocate(vertexCount, triangles);
+                for (int v = start; v < start + vertexCount; v++)
+                {
+                    Color c = color;
+                    c.a = color.a * alphas[v];
+                    mesh.SetNextVertex(new Vertex { position = new Vector3(positions[v].x, positions[v].y, Vertex.nearZ), tint = c });
+                }
+                for (int i = indexStart; i < index; i++)
+                    mesh.SetNextIndex((ushort)(indices[i] - start));
+                start += vertexCount;
             }
         }
 

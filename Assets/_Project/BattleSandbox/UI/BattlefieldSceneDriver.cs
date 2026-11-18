@@ -78,7 +78,7 @@ namespace KingdomSurvival.BattleSandbox
             // Сетка поля — в мире, под людьми и предметами, а не поверх картинки.
             surface.GridDrawnBelow = true;
             if (surface.GridOnCanvas(frameOnCanvas, gridCenters, out float radius, out float verticalScale, out Color fill, out Color line, out float lineWidth))
-                renderer.SetBattleGrid(gridCenters, radius, verticalScale, fill, line, lineWidth);
+                renderer.SetBattleGrid(gridCenters, radius, verticalScale, fill, line, lineWidth, surface.GridInkOpacity);
             frames.Clear();
             foreach (BoardFigure figure in board.Figures)
             {

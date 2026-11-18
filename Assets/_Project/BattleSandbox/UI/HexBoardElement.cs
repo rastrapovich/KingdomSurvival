@@ -618,9 +618,12 @@ namespace KingdomSurvival.BattleSandbox
                             drawLine ? lineColor : Color.clear, drawLine ? hexStyle.LineWidth : 0f,
                             true, layout.VerticalScale);
 
+                    // Заливка местности и цели. Контур клетки при рисованной
+                    // сетке уже нарисован пером — ровная обводка его не дублирует.
+                    bool fillLine = drawLine && !(baseGridDrawnBelow && hexStyle.InkLines);
                     if (fill.a > 0.001f)
                         PaintHex(painter, layout.GetCenter(coord), radius, fill,
-                            drawLine ? lineColor : Color.clear, drawLine ? hexStyle.LineWidth : 0f,
+                            fillLine ? lineColor : Color.clear, fillLine ? hexStyle.LineWidth : 0f,
                             true, layout.VerticalScale);
                 }
             }

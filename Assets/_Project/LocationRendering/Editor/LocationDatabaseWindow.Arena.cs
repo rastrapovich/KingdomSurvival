@@ -103,7 +103,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             Rect canvasRect = new Rect(rect.x + frame.x / width * rect.width, rect.y + frame.y / height * rect.height,
                 frame.width / width * rect.width, frame.height / height * rect.height);
             if (arenaView.GridOnCanvas(canvasRect, arenaGridCenters, out float radius, out float verticalScale, out Color fill, out Color line, out float lineWidth))
-                renderer.SetBattleGrid(arenaGridCenters, radius, verticalScale, fill, line, lineWidth);
+                renderer.SetBattleGrid(arenaGridCenters, radius, verticalScale, fill, line, lineWidth, arenaView.GridInkOpacity);
         }
 
         private void SyncArenaLayers()

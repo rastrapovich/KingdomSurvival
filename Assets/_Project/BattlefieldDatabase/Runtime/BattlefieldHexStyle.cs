@@ -22,6 +22,12 @@ namespace KingdomSurvival.BattlefieldDatabase
         [SerializeField, Range(0f, 0.3f)] private float gap = 0.02f;
         [SerializeField, Range(0f, 1f)] private float opacity = 1f;
 
+        [Header("Рисованная линия (перо дорог MapLab)")]
+        [Tooltip("Линии сетки — тем же пером, что дороги и берега карты: нажим, дрожь руки, редкие разрывы и свободные окончания. Выключено — ровная линия цвета «Линия».")]
+        [SerializeField] private bool inkLines = true;
+        [Tooltip("Плотность туши сетки относительно пера дорог: сетка спокойнее фигур и отметок.")]
+        [SerializeField, Range(0f, 1f)] private float inkOpacity = 0.55f;
+
         [Header("Состояния")]
         [SerializeField] private Color difficultColor = new Color(0.29f, 0.25f, 0.17f, 0.80f);
         [SerializeField] private Color impassableColor = new Color(0.07f, 0.08f, 0.09f, 0.80f);
@@ -41,6 +47,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         // Подложка — заливка под картинками гекса.
         public Color FillColor => fillColor;
         public Color LineColor => lineColor;
+        public bool InkLines => inkLines;
+        public float InkOpacity => Mathf.Clamp01(inkOpacity);
         public float LineWidth => Mathf.Max(0f, lineWidth);
         // Зазор между гексами — доля радиуса.
         public float Gap => Mathf.Clamp(gap, 0f, 0.3f);

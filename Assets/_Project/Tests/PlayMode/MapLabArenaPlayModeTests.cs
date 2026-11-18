@@ -246,4 +246,53 @@ public sealed class MapLabArenaPlayModeTests
         Assert.LessOrEqual(MapLabArena.PendingReleases, 1, "Отложенных текстур не больше одной.");
         Assert.AreEqual(setsBefore, Sets(), "Наборы рисунков арены освобождены.");
     }
+    // Художественная сетка боя: линии клеток — пером дорог MapLab (нажим,
+    // разрывы, свободные окончания), каждое ребро один раз, по рельефу.
+    // Кадры боя — при заданной KS_SCREENSHOT_DIR (обычный размер и крупно).
+    [UnityTest]
+    public IEnumerator ArenaGrid_IsDrawnWithMapLabInk()
+    {
+        Assert.IsTrue(MapLabArena.Available);
+        List<MonoBehaviour> found = new List<MonoBehaviour>();
+        yield return LoadSandbox(found);
+        MonoBehaviour sandbox = found[0];
+        List<MapLabArenaDriver> drivers = new List<MapLabArenaDriver>();
+        yield return StartAndWait(sandbox, drivers);
+        for (int i = 0; i < 20; i++) yield return null;
+        BattlefieldView surface = (BattlefieldView)Member(sandbox, "BattlefieldSurface");
+        Assert.GreaterOrEqual(surface.GridInkOpacity, 0f, "Стиль сетки — рисованная линия.");
+        List<Vector2> ink = (List<Vector2>)Member(surface, "inkPositions");
+        Assert.Greater(ink.Count, 0, "Сетка нарисована пером.");
+        Assert.IsNotNull(BattlefieldInkPen.Current);
+        yield return Capture("arena_grid_ink");
+    }
+
+    private static IEnumerator Capture(string name)
+    {
+        string directory = System.Environment.GetEnvironmentVariable("KS_SCREENSHOT_DIR");
+        if (string.IsNullOrEmpty(directory))
+            yield break;
+        UIDocument document = Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None).FirstOrDefault(d => d.panelSettings != null);
+        if (document == null)
+            yield break;
+        const int width = 1920, height = 1080;
+        PanelSettings settings = document.panelSettings;
+        RenderTexture previous = settings.targetTexture;
+        RenderTexture texture = new RenderTexture(width, height, 24);
+        settings.targetTexture = texture;
+        for (int i = 0; i < 8; i++) yield return null;
+        RenderTexture active = RenderTexture.active;
+        RenderTexture.active = texture;
+        Texture2D image = new Texture2D(width, height, TextureFormat.RGB24, false);
+        image.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+        image.Apply();
+        RenderTexture.active = active;
+        settings.targetTexture = previous;
+        Directory.CreateDirectory(directory);
+        File.WriteAllBytes(Path.Combine(directory, name + ".png"), image.EncodeToPNG());
+        Object.Destroy(image);
+        texture.Release();
+        Object.Destroy(texture);
+        for (int i = 0; i < 2; i++) yield return null;
+    }
 }

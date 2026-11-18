@@ -558,7 +558,7 @@ public partial class PrototypeUIController
         // Сетка поля — в мире места, под людьми и предметами, а не поверх картинки.
         surface.GridDrawnBelow = true;
         if (surface.GridOnCanvas(canvasRect, localBattleGridCenters, out float radius, out float verticalScale, out Color fill, out Color line, out float lineWidth))
-            localRenderer.SetBattleGrid(localBattleGridCenters, radius, verticalScale, fill, line, lineWidth);
+            localRenderer.SetBattleGrid(localBattleGridCenters, radius, verticalScale, fill, line, lineWidth, surface.GridInkOpacity);
     }
 
     private readonly List<Vector2> localBattleGridCenters = new List<Vector2>();

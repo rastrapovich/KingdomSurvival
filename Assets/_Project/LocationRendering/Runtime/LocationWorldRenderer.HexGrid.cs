@@ -37,8 +37,12 @@ namespace KingdomSurvival.LocationRendering
         public bool BattleGridVisible => battleGrid != null && battleGrid.activeSelf;
 
         // centers — центры гексов в пикселях рисунка места; null или пусто — скрыть.
-        public void SetBattleGrid(IReadOnlyList<Vector2> centers, float radius, float verticalScale, Color fill, Color line, float lineWidth)
+        // inkOpacity ≥ 0 — линии рисованным пером дорог MapLab (BattlefieldInkGrid)
+        // с этой долей плотности; меньше нуля — ровные линии цвета line.
+        public void SetBattleGrid(IReadOnlyList<Vector2> centers, float radius, float verticalScale, Color fill, Color line, float lineWidth,
+            float inkOpacity = -1f)
         {
+            bool ink = inkOpacity >= 0f && line.a > .001f;
             bool fills = fill.a > .001f, lines = line.a > .001f && lineWidth > .01f;
             // Не тоньше пикселя кадра: у поля линия сглажена, здесь — нет, и
             // тонкая линия (меньше пикселя кадра) пропадала. Шаг — по приближению камеры.
@@ -61,6 +65,10 @@ namespace KingdomSurvival.LocationRendering
                 key = key * 31 + fill.GetHashCode();
                 key = key * 31 + line.GetHashCode();
                 key = key * 31 + Mathf.RoundToInt(lineWidth * 20);
+                key = key * 31 + Mathf.RoundToInt(inkOpacity * 1000);
+                // Рисованная линия: толщина в пикселях кадра — по приближению.
+                if (ink) key = key * 31 + Mathf.RoundToInt(ViewHeight * 4) + (Target != null ? Target.height : 0);
+                if (ink) key = key * 31 + (BattlefieldInkPen.Current != null ? BattlefieldInkPen.Current.GetHashCode() : 0);
             }
             if (battleGrid == null)
             {
@@ -98,7 +106,7 @@ namespace KingdomSurvival.LocationRendering
                     for (int i = 0; i < 6; i++) { vertices.Add(corners[i]); colors.Add(fill); }
                     for (int i = 0; i < 6; i++) { indices.Add(start); indices.Add(start + 1 + i); indices.Add(start + 1 + (i + 1) % 6); }
                 }
-                if (lines)
+                if (lines && !ink)
                     for (int i = 0; i < 6; i++)
                     {
                         Vector2 a = corners[i], b = corners[(i + 1) % 6];
@@ -110,11 +118,42 @@ namespace KingdomSurvival.LocationRendering
                         indices.Add(start); indices.Add(start + 2); indices.Add(start + 3);
                     }
             }
+            if (lines && ink)
+                AddInkGridLines(centers, radius, verticalScale, line, inkOpacity, vertices, colors, indices);
             battleGridMesh.Clear();
             battleGridMesh.SetVertices(vertices);
             battleGridMesh.SetColors(colors);
             battleGridMesh.SetTriangles(indices, 0);
             battleGridMesh.RecalculateBounds();
+        }
+
+        // Рисованная сетка: каждое общее ребро один раз, пером дорог MapLab
+        // (нажим, дрожь руки, редкие разрывы и свободные окончания). Толщина и
+        // растушёвка — в пикселях кадра; рисунок штрихов привязан к решётке.
+        private readonly List<Vector2> inkPositions = new List<Vector2>();
+        private readonly List<float> inkAlphas = new List<float>();
+        private readonly List<int> inkIndices = new List<int>();
+
+        private void AddInkGridLines(IReadOnlyList<Vector2> centers, float radius, float verticalScale, Color line, float inkOpacity,
+            List<Vector3> vertices, List<Color> colors, List<int> indices)
+        {
+            BattlefieldInkPen pen = BattlefieldInkPen.Current ?? new BattlefieldInkPen();
+            // Пикселей кадра на пиксель рисунка места.
+            float frameScale = Target != null && Target.height > 0 && ViewHeight > 0 ? Target.height / ViewHeight : 1f;
+            BattlefieldInkGrid.Result grid = BattlefieldInkGrid.Build(centers, radius, verticalScale, null, pen,
+                new BattlefieldInkGrid.Options { Opacity = inkOpacity, PixelScale = frameScale, Endings = true });
+            BattlefieldInkGrid.Triangulate(grid.Strokes, 1.1f / Mathf.Max(0.01f, frameScale), inkPositions, inkAlphas, inkIndices);
+            int start = vertices.Count;
+            Color color = pen.Color;
+            for (int i = 0; i < inkPositions.Count; i++)
+            {
+                vertices.Add(LocationVisualGeometry.PixelToWorld(Location, inkPositions[i]));
+                Color c = color;
+                c.a = color.a * inkAlphas[i];
+                colors.Add(c);
+            }
+            foreach (int index in inkIndices)
+                indices.Add(start + index);
         }
 
         // ------------------------------------------------------------------

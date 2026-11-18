@@ -162,6 +162,25 @@ namespace KingdomSurvival.ArtAssets.Editor
             toolbar.Add(modeBar);
             toolbar.Add(new ToolbarSpacer());
             toolbar.Add(new ToolbarSpacer { flex = true });
+            // Вид карты: тот же выбор, что в игре и в «Генераторе карты» — рисунки
+            // ассетов показываются в выбранном виде (если у вида есть свой).
+            if (ArtAssetViewSwitch.Available)
+            {
+                ToolbarMenu viewMenu = new ToolbarMenu { text = "Вид: " + ArtAssetViewSwitch.ActiveName(), tooltip = "Вид карты: Обычный, Мрачный, Сепия… Ассеты показываются в выбранном виде." };
+                foreach ((string id, string name) in ArtAssetViewSwitch.List())
+                {
+                    string captured = id;
+                    viewMenu.menu.AppendAction(name, _ =>
+                    {
+                        ArtAssetViewSwitch.Select(captured);
+                        viewMenu.text = "Вид: " + ArtAssetViewSwitch.ActiveName();
+                        litDirty = true;
+                        center?.MarkDirtyRepaint();
+                        BuildProperties();
+                    }, _ => ArtAssetViewSwitch.ActiveId() == captured ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
+                }
+                toolbar.Add(viewMenu);
+            }
             toolbar.Add(new ToolbarButton(ValidateAll) { text = "Проверить" });
             toolbar.Add(new ToolbarButton(() => { SaveAll(); status.text = "Сохранено."; }) { text = "Сохранить" });
             ToolbarMenu more = new ToolbarMenu { text = "Ещё" };

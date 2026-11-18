@@ -185,6 +185,8 @@ Shader "Kingdom Survival/MapLab/Terrain"
 
                 float3 albedo = _ShowPaint > 0.5 ? paint.rgb : float3(0.58, 0.58, 0.56);
                 float3 c = albedo;
+                // Вид карты: насколько склон повёрнут к свету (тёплый блик мрачного вида).
+                float relief = 0.0;
                 if (_ShowLight > 0.5)
                 {
                     float3 shapeNormal = normalize(float3(n.x * _Exaggeration, n.y, n.z * _Exaggeration));
@@ -192,6 +194,7 @@ Shader "Kingdom Survival/MapLab/Terrain"
                     // свет ровного луга (свет стены уже нарисован), без серой полосы.
                     shapeNormal = normalize(lerp(shapeNormal, float3(0, 1, 0), _DrawnCliffs * smoothstep(0.02, 0.3, maskA.a)));
                     c = MapLabLight(c, shapeNormal, L, _LightStrength, _ShadowSoftness, _ToneBands, _ShadowTint.rgb, _LightTint.rgb);
+                    relief = smoothstep(0.05, 0.6, (dot(shapeNormal, L) - L.y) * 2.0);
                     c = MapLabShadow(c, (1.0 - shade.r) * _CastShadow * 0.9, _ShadowTint.rgb);
                     c *= lerp(1.0, shade.g, _AO);
                 }
@@ -277,7 +280,22 @@ Shader "Kingdom Survival/MapLab/Terrain"
                 c = MapLabSaturate(c, _Saturation);
                 if (mode == 9)
                     c = lerp(float3(0.62, 0.62, 0.6), c, 0.25);
-                return float4(MapLabViewGrade(c), 1);
+                // Вид карты: цветокоррекция; тёплые блики на склонах к свету и на
+                // светлых мазках покраски (мазок светлее местного среднего — его
+                // ловит свет, как лопасти крон); контуры — цветом и плотностью туши вида.
+                float3 graded = MapLabViewGrade(c);
+                if (_MapLabGrade.x > 0.0)
+                {
+                    float earth = (1.0 - maskB.r) * (1.0 - saturate(maskA.b * 1.4)) * (1.0 - saturate(maskB.a * 1.2));
+                    float2 paintUv = (i.positionWS.xz - _PaintRect.xy) * _PaintRect.zw;
+                    float3 mean = SAMPLE_TEXTURE2D_BIAS(_PaintTex, sampler_PaintTex, paintUv, 4.0).rgb;
+                    const float3 lw = float3(0.299, 0.587, 0.114);
+                    float stroke = saturate((dot(paint.rgb, lw) - dot(mean, lw)) * 9.0);
+                    float outline = saturate(paint.a * _Outline);
+                    graded = MapLabViewGroundGlow(graded, relief * earth, stroke * earth * (1.0 - outline));
+                    graded = lerp(graded, MapLabViewInkColor(graded), MapLabViewInkAlpha(outline));
+                }
+                return float4(graded, 1);
             }
             ENDHLSL
         }

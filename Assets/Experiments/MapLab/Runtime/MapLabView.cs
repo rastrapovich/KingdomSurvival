@@ -284,10 +284,31 @@ namespace KingdomSurvival.MapLab
             MapLabPalette basePalette = Settings.PainterlyStyle.Palette;
             MapLabPalette now = Look != null && Look.Palette != null ? Look.Palette : basePalette;
             MapLabPalette next = look != null && look.Palette != null ? look.Palette : basePalette;
-            if (now != next)
+            if (now != next || !ArtMaterialsTracked())
                 return false;
             Look = look;
             ApplyMaterialSettings();
+            return true;
+        }
+
+        // Все материалы рисунков на карте известны виду (иначе подмена их не
+        // перенастроит и вид смешается — нужна пересборка).
+        private bool ArtMaterialsTracked()
+        {
+            if (root == null)
+                return true;
+            HashSet<Material> known = new HashSet<Material>(artMaterials.Values);
+            known.UnionWith(moduleMaterials.Values);
+            known.UnionWith(cliffMaterials.Values);
+            foreach (Renderer r in root.GetComponentsInChildren<Renderer>(true))
+            {
+                Material m = r.sharedMaterial;
+                if (m == null || known.Contains(m))
+                    continue;
+                Shader shader = m.shader;
+                if (shader == ArtCardShader || shader == ModuleShader || shader == CliffShader)
+                    return false;
+            }
             return true;
         }
 

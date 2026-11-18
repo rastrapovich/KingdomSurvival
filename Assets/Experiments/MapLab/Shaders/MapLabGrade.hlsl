@@ -16,6 +16,13 @@ float4 _MapLabGradeShadows;
 float4 _MapLabGradeMids;
 float4 _MapLabGradeLights;
 float4 _MapLabGradeTint;
+// Тёплый свет на земле (мрачный вид): rgb — цвет, a — сила;
+// x — вес склонов к свету, y — вес светлых мазков покраски.
+float4 _MapLabGroundGlow;
+float4 _MapLabGroundGlowShape;
+// Тушь вида (сепия): rgb — цвет контуров, a — сила замены; x — плотность.
+float4 _MapLabViewInk;
+float4 _MapLabViewInkShape;
 
 float3 MapLabViewGrade(float3 c)
 {
@@ -47,6 +54,34 @@ float3 MapLabViewGrade(float3 c)
     float warm = saturate((0.62 - src.g / rr) * 8.0) * saturate((0.25 - src.b / rr) * 8.0) * saturate((src.r - 0.5) * 4.0);
     g = lerp(g, src * 1.1, warm * _MapLabGradeMap.z);
     return lerp(src, g, saturate(_MapLabGrade.x));
+}
+
+// Тёплая подсветка земли после цветокоррекции — как блики на кронах
+// мрачного вида: relief — насколько склон повёрнут к свету (0..1),
+// stroke — насколько мазок светлее окружающей покраски (0..1).
+float3 MapLabViewGroundGlow(float3 c, float relief, float stroke)
+{
+    if (_MapLabGrade.x <= 0.0 || _MapLabGroundGlow.a <= 0.0)
+        return c;
+    float glow = saturate(relief * _MapLabGroundGlowShape.x + stroke * _MapLabGroundGlowShape.y) * _MapLabGroundGlow.a;
+    float l = dot(c, float3(0.299, 0.587, 0.114));
+    float3 lit = _MapLabGroundGlow.rgb * (0.35 + l * 1.6);
+    return lerp(c, max(c, lit), saturate(glow));
+}
+
+// Цвет и плотность контуров туши в виде (после цветокоррекции).
+float3 MapLabViewInkColor(float3 c)
+{
+    if (_MapLabGrade.x <= 0.0 || _MapLabViewInk.a <= 0.0)
+        return c;
+    return lerp(c, _MapLabViewInk.rgb, saturate(_MapLabViewInk.a));
+}
+
+float MapLabViewInkAlpha(float a)
+{
+    if (_MapLabGrade.x <= 0.0 || _MapLabViewInk.a <= 0.0)
+        return a;
+    return saturate(a * max(1.0, _MapLabViewInkShape.x));
 }
 
 #endif

@@ -155,7 +155,8 @@ namespace KingdomSurvival.MapLab
 
         // Версия набора встроенных видов: ассет, собранный раньше, получает
         // недостающие встроенные виды (правки автора не трогаются).
-        public const int CurrentBuiltInVersion = 1;
+        // 2 — тёплый свет земли (мрачный) и тушь вида (сепия).
+        public const int CurrentBuiltInVersion = 2;
         [SerializeField] private int builtInVersion;
 
         public bool EnsureBuiltIn()
@@ -164,8 +165,27 @@ namespace KingdomSurvival.MapLab
             if (builtInVersion >= CurrentBuiltInVersion && Views.Count > 0)
                 return false;
             foreach (MapLabMapView fallback in CreateBuiltIn())
-                if (Find(fallback.Id) == null)
+            {
+                MapLabMapView existing = Find(fallback.Id);
+                if (existing == null)
+                {
                     Views.Add(fallback);
+                    continue;
+                }
+                // Версия 2: новые поля встроенных видов (у сохранённых раньше —
+                // нули); остальные правки автора не трогаются.
+                if (builtInVersion < 2 && existing.Grade != null && fallback.Grade != null)
+                {
+                    MapLabViewGrade g = existing.Grade, d = fallback.Grade;
+                    g.GroundGlow = d.GroundGlow;
+                    g.GroundGlowColor = d.GroundGlowColor;
+                    g.GroundGlowRelief = d.GroundGlowRelief;
+                    g.GroundGlowStrokes = d.GroundGlowStrokes;
+                    g.InkStrength = d.InkStrength;
+                    g.InkColor = d.InkColor;
+                    g.InkDensity = d.InkDensity;
+                }
+            }
             builtInVersion = CurrentBuiltInVersion;
             return true;
         }
@@ -201,6 +221,10 @@ namespace KingdomSurvival.MapLab
                 TintStrength = 0.5f,
                 KeepWarmLights = 0.8f,
                 ShadowLift = 0.1f,
+                GroundGlow = 0.6f,
+                GroundGlowColor = MapLabPalette.Hex(0xD6A55E),
+                GroundGlowRelief = 0.35f,
+                GroundGlowStrokes = 1.3f,
             },
             OverrideFog = true,
             FogColor = new Color(0.07f, 0.06f, 0.09f, 0.9f),
@@ -228,6 +252,9 @@ namespace KingdomSurvival.MapLab
                 TintStrength = 0f,
                 KeepWarmLights = 0f,
                 ShadowLift = 0.05f,
+                InkStrength = 1f,
+                InkColor = MapLabPalette.Hex(0x3A2412),
+                InkDensity = 1.8f,
             },
             OverrideFog = true,
             FogColor = new Color(0.36f, 0.27f, 0.18f, 0.88f),
@@ -272,6 +299,12 @@ namespace KingdomSurvival.MapLab
 
         public string ArtFolder => MapLabMapViews.ArtRoot + "/" + Id;
 
+        // Имя PNG в папке вида ↔ ID ассета: у ассетов Базы ассетов ID «art:…»,
+        // двоеточие в имени файла Windows не допускает — в файле «art_…».
+        public static string FileNameOf(string artId) => artId != null && artId.StartsWith("art:") ? "art_" + artId.Substring(4) : artId;
+
+        public static string IdOfFile(string fileName) => fileName != null && fileName.StartsWith("art_") ? "art:" + fileName.Substring(4) : fileName;
+
         // Свой рисунок вида для ID ассета; null — своего нет.
         public Texture2D FindTexture(string artId)
         {
@@ -295,6 +328,10 @@ namespace KingdomSurvival.MapLab
         {
             skewed = false;
             Texture2D t = entry != null ? FindTexture(entry.Id) : null;
+            // Копия записи с другим размером ("art:…#block") — рисунок основной записи.
+            int hash = entry != null && t == null && entry.Id != null ? entry.Id.IndexOf('#') : -1;
+            if (hash > 0)
+                t = FindTexture(entry.Id.Substring(0, hash));
             if (t == null || entry.Width <= 0 || entry.Height <= 0 || t.height <= 0)
                 return t;
             float want = entry.Width / (float)entry.Height, have = t.width / (float)t.height;
@@ -388,6 +425,22 @@ namespace KingdomSurvival.MapLab
         [Tooltip("Подъём самых тёмных тонов (рисунок не проваливается в черноту).")]
         [Range(0f, 1f)] public float ShadowLift;
 
+        [Header("Тёплый свет на земле")]
+        [Tooltip("Сила тёплых бликов на земле — как подсветка крон мрачного вида. 0 — нет.")]
+        [Range(0f, 1f)] public float GroundGlow;
+        public Color GroundGlowColor = new Color(0.85f, 0.66f, 0.36f, 1f);
+        [Tooltip("Блики на склонах, повёрнутых к свету.")]
+        [Range(0f, 2f)] public float GroundGlowRelief = 1f;
+        [Tooltip("Блики на светлых мазках покраски.")]
+        [Range(0f, 2f)] public float GroundGlowStrokes = 0.7f;
+
+        [Header("Тушь вида")]
+        [Tooltip("Насколько контуры (дороги, берега, межи) берут цвет туши вида. 0 — как есть.")]
+        [Range(0f, 1f)] public float InkStrength;
+        public Color InkColor = new Color(0.23f, 0.14f, 0.07f, 1f);
+        [Tooltip("Плотность туши: 1 — как есть, больше — контуры темнее и плотнее.")]
+        [Range(1f, 3f)] public float InkDensity = 1f;
+
         public bool IsNeutral => Strength <= 0f;
 
         public MapLabViewGrade Clone() => (MapLabViewGrade)MemberwiseClone();
@@ -405,6 +458,10 @@ namespace KingdomSurvival.MapLab
         private static readonly int MidsId = Shader.PropertyToID("_MapLabGradeMids");
         private static readonly int LightsId = Shader.PropertyToID("_MapLabGradeLights");
         private static readonly int TintId = Shader.PropertyToID("_MapLabGradeTint");
+        private static readonly int GlowId = Shader.PropertyToID("_MapLabGroundGlow");
+        private static readonly int GlowShapeId = Shader.PropertyToID("_MapLabGroundGlowShape");
+        private static readonly int InkId = Shader.PropertyToID("_MapLabViewInk");
+        private static readonly int InkShapeId = Shader.PropertyToID("_MapLabViewInkShape");
 
         public static void Apply(MapLabMapView view) => Apply(view != null ? view.Grade : null);
 
@@ -422,6 +479,13 @@ namespace KingdomSurvival.MapLab
             Shader.SetGlobalColor(MidsId, g.Midtones);
             Shader.SetGlobalColor(LightsId, g.Highlights);
             Shader.SetGlobalColor(TintId, g.Tint);
+            // Цвет — в линейное пространство проекта, сила — как есть.
+            Color glow = g.GroundGlowColor.linear;
+            Shader.SetGlobalVector(GlowId, new Vector4(glow.r, glow.g, glow.b, Mathf.Clamp01(g.GroundGlow)));
+            Shader.SetGlobalVector(GlowShapeId, new Vector4(g.GroundGlowRelief, g.GroundGlowStrokes, 0f, 0f));
+            Color ink = g.InkColor.linear;
+            Shader.SetGlobalVector(InkId, new Vector4(ink.r, ink.g, ink.b, Mathf.Clamp01(g.InkStrength)));
+            Shader.SetGlobalVector(InkShapeId, new Vector4(Mathf.Max(1f, g.InkDensity), 0f, 0f, 0f));
         }
 
         public static void Neutral() => Shader.SetGlobalVector(GradeId, Vector4.zero);

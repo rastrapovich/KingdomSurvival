@@ -8,7 +8,9 @@
     "KingdomSurvival.MapLab.Editor",
     "KingdomSurvival.WorldMapVisual",
     "KingdomSurvival.FreePlay",
-    "KingdomSurvival.SettlementDatabase"
+    "KingdomSurvival.SettlementDatabase",
+    "KingdomSurvival.ArtAssetDatabase",
+    "KingdomSurvival.ArtAssetDatabase.Editor"
   ],
   "includePlatforms": [
     "Editor"

@@ -71,6 +71,97 @@ namespace KingdomSurvival.MapLabBridge.Editor
             EditorApplication.Exit(code);
         }
 
+        // Проверка смены вида в сцене генератора карты (как в окне): карта по
+        // плану игры, затем Обычный → Мрачный → Сепия → Мрачный → Обычный без
+        // пересборки. После каждого шага у всех объектов карты текстура должна
+        // быть из папки выбранного вида (или основная — если своей нет).
+        //   -executeMethod KingdomSurvival.MapLabBridge.Editor.MapLabViewsBatch.CheckGeneratorSwap
+        public static void CheckGeneratorSwap()
+        {
+            int code = 0;
+            string savedId = MapLabMapViews.ActiveId;
+            StringBuilder report = new StringBuilder();
+            try
+            {
+                UnityEditor.SceneManagement.EditorSceneManager.OpenScene(MapLabAssets.ScenePath, UnityEditor.SceneManagement.OpenSceneMode.Single);
+                MapLabView view = MapLabAssets.FindView();
+                if (view == null || view.Settings == null)
+                    throw new Exception("нет MapLabView со своим профилем в сцене генератора");
+                MapLabSettings s = view.Settings;
+                if (s.Author.UseGamePlan && MapLabPlanSource.Available)
+                    MapLabPlanSource.Build(s);
+                MapLabMapViews.ResetCache();
+                MapLabMapViews.ActiveId = MapLabMapViews.ClassicId;
+                view.SetLook(MapLabMapViews.Active);
+                if (!view.Generate(null))
+                    throw new Exception("генерация не выполнена: " + view.LastError);
+                string[] steps = { MapLabMapViews.GloomId, MapLabMapViews.SepiaId, MapLabMapViews.GloomId, MapLabMapViews.ClassicId };
+                report.AppendLine("Смена вида в сцене генератора: " + Count(view, MapLabMapViews.ClassicId, out _));
+                foreach (string id in steps)
+                {
+                    MapLabMapViews.ActiveId = id;
+                    bool swapped = view.SwapLook(MapLabMapViews.Active);
+                    int wrong = Mismatch(view, id, out string sample);
+                    report.AppendLine($"  {id}: подмена {(swapped ? "да" : "НЕТ")}, чужих текстур {wrong}{sample}; {Count(view, id, out _)}");
+                    if (!swapped || wrong > 0)
+                        code = 1;
+                }
+            }
+            catch (Exception exception)
+            {
+                code = 1;
+                report.AppendLine("ОШИБКА: " + exception);
+                Debug.LogException(exception);
+            }
+            finally
+            {
+                MapLabMapViews.ActiveId = savedId;
+            }
+            Debug.Log("MAP_VIEWS_SWAP: " + report);
+            EditorApplication.Exit(code);
+        }
+
+        // Текстуры объектов карты из папки другого вида.
+        private static int Mismatch(MapLabView view, string activeId, out string sample)
+        {
+            int wrong = 0;
+            sample = string.Empty;
+            foreach (Renderer r in view.GetComponentsInChildren<Renderer>(true))
+                foreach (Material m in r.sharedMaterials)
+                {
+                    if (m == null || !m.HasProperty("_MainTex"))
+                        continue;
+                    Texture t = m.GetTexture("_MainTex");
+                    string path = t != null ? AssetDatabase.GetAssetPath(t) : string.Empty;
+                    int at = path.IndexOf("/MapViews/", StringComparison.Ordinal);
+                    if (at < 0)
+                        continue;
+                    string folder = path.Substring(at + 10).Split('/')[0];
+                    if (folder == activeId)
+                        continue;
+                    wrong++;
+                    if (sample.Length == 0)
+                        sample = $" (например {m.name}: {folder})";
+                }
+            return wrong;
+        }
+
+        private static string Count(MapLabView view, string activeId, out int own)
+        {
+            own = 0;
+            int total = 0;
+            foreach (Renderer r in view.GetComponentsInChildren<Renderer>(true))
+                foreach (Material m in r.sharedMaterials)
+                {
+                    if (m == null || !m.HasProperty("_MainTex") || m.GetTexture("_MainTex") == null)
+                        continue;
+                    total++;
+                    if (AssetDatabase.GetAssetPath(m.GetTexture("_MainTex")).Contains("/MapViews/" + activeId + "/"))
+                        own++;
+                }
+            return $"материалов с текстурой {total}, из папки вида {own}";
+        }
+
         private static void Save(MapLabGameLive.World world, Rect visible, int width, int height, string path)
         {
             RenderTexture rt = null;

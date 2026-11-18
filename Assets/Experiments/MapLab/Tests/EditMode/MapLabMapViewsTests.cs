@@ -131,5 +131,70 @@ namespace KingdomSurvival.MapLab.Tests
             Assert.AreNotEqual(1.9f, v.Grade.Brightness);
             Assert.AreEqual(0, v.Art.Count);
         }
+        [Test]
+        public void ArtAssetIds_MapToFileNames_AndSizedCopiesUseBaseArt()
+        {
+            Assert.AreEqual("art_abc123", MapLabMapView.FileNameOf("art:abc123"));
+            Assert.AreEqual("art:abc123", MapLabMapView.IdOfFile("art_abc123"));
+            Assert.AreEqual("Tree_Conifer_A", MapLabMapView.FileNameOf("Tree_Conifer_A"));
+            Assert.AreEqual("Tree_Conifer_A", MapLabMapView.IdOfFile("Tree_Conifer_A"));
+            MapLabMapView v = MapLabMapViews.Gloom();
+            Texture2D texture = new Texture2D(20, 10) { name = "rock" };
+            try
+            {
+                v.Art.Add(new MapLabViewArtOverride { ArtId = "art:abc123", Texture = texture });
+                v.InvalidateIndex();
+                MapLabArtEntry block = new MapLabArtEntry { Id = "art:abc123#block", Width = 200, Height = 100 };
+                Assert.AreSame(texture, v.FindTexture(block, out bool skewed), "Копия «#block» берёт рисунок основной записи.");
+                Assert.IsFalse(skewed);
+                MapLabArtEntry other = new MapLabArtEntry { Id = "art:abc123", Width = 100, Height = 100 };
+                Assert.IsNull(v.FindTexture(other, out skewed), "Другой холст — рисунок вида не подставляется.");
+                Assert.IsTrue(skewed);
+            }
+            finally
+            {
+                Object.DestroyImmediate(texture);
+            }
+        }
+
+        [Test]
+        public void BuiltInUpgrade_AddsGroundGlowAndInk_ToSavedViews()
+        {
+            MapLabMapViews asset = ScriptableObject.CreateInstance<MapLabMapViews>();
+            try
+            {
+                // Ассет, сохранённый до версии 2: у видов новых полей нет (нули).
+                MapLabMapView gloom = MapLabMapViews.Gloom();
+                gloom.Grade.GroundGlow = 0f;
+                gloom.Grade.Brightness = 0.77f;
+                MapLabMapView sepia = MapLabMapViews.Sepia();
+                sepia.Grade.InkStrength = 0f;
+                asset.Views.Add(MapLabMapViews.Classic());
+                asset.Views.Add(gloom);
+                asset.Views.Add(sepia);
+                typeof(MapLabMapViews).GetField("builtInVersion", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(asset, 1);
+                Assert.IsTrue(asset.EnsureBuiltIn());
+                Assert.Greater(gloom.Grade.GroundGlow, 0f, "Мрачный получил тёплый свет на земле.");
+                Assert.Greater(sepia.Grade.InkStrength, 0f, "Сепия получила тушь вида.");
+                Assert.AreEqual(0.77f, gloom.Grade.Brightness, 1e-5f, "Правки автора сохранены.");
+                Assert.AreEqual(0f, asset.Find(MapLabMapViews.ClassicId).Grade.GroundGlow, "Обычный — без изменений.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(asset);
+            }
+        }
+
+        [Test]
+        public void GradeShader_SetsGroundGlowAndInk_ForView()
+        {
+            MapLabViewGradeShader.Apply(MapLabMapViews.Gloom());
+            Assert.Greater(Shader.GetGlobalVector("_MapLabGroundGlow").w, 0f);
+            MapLabViewGradeShader.Apply(MapLabMapViews.Sepia());
+            Assert.Greater(Shader.GetGlobalVector("_MapLabViewInk").w, 0f);
+            Assert.Greater(Shader.GetGlobalVector("_MapLabViewInkShape").x, 1f);
+            MapLabViewGradeShader.Neutral();
+            Assert.AreEqual(0f, Shader.GetGlobalVector("_MapLabGrade").x);
+        }
     }
 }

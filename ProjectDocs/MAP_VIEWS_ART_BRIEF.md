@@ -158,6 +158,10 @@ Kingdom Survival — компактная сюжетная 2D-RPG в славя�
 
 Ограды и мосты (`Fence`, `Bridge`) рисуются **плоско** — вид строго спереди или сверху, как исходник: их наклоняет игра.
 
+### Ассеты Базы ассетов (арена, лес карты)
+
+Своя версия ассета из окна «База ассетов» — файл `art_<ID ассета>.png` в папке вида (ID — из карточки ассета; двоеточие из `art:…` в имени файла Windows недопустимо). Полный список с холстами — кнопка «Список ID». Холст — как у основного рисунка ассета.
+
 ### Очередь 3 — места и детали (по мере сил)
 
 Скалы (`Cliff_Face_*`, `Cliff_End_*`, `Cliff_Buttress_A`, `Cliff_Scree_*` — 15 шт., вид спереди, плоско), знаки мест и реквизит (`Cave_Entrance_A`, `Mine_Entrance_A`, `Old_Shrine_A`, `Grave_Marker_A`, `Ruined_Wall_A`, `Charcoal_Mound_A`, `Tar_Kiln_A`, `Fishing_Dock_A`, `Broken_Cart_A`, `Camp_Tent_A`, `Fallen_Tree_A`, `Tree_Stump_A`, `Offering_Tree_A`, `Portal_Dormant_A`, `Portal_Open_A`… — около 40 шт., холсты 1487×1058 / 1312×1199 / 1774×887), растения (`Berry_Bush_A`, `Fruit_Tree_A`, `Herb_Clump_A`, `Mushroom_Clump_A`), акварельные пятна `Map05_Wash_*` (4 шт.).

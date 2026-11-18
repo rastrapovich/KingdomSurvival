@@ -63,6 +63,33 @@ namespace KingdomSurvival.MapLabBridge
 
         private static World current;
 
+        // Выход из игры или из Play Mode (Application.quitting срабатывает и при
+        // выходе из Play Mode в редакторе): мир живой карты, арены и прогрев —
+        // объекты HideAndDontSave, без очистки они остаются в редакторе и
+        // попадают в кадр других камер (сцена «Генератора карты» рисовала
+        // поверх своей карты лес оставшейся живой карты).
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void HookShutdown()
+        {
+            Application.quitting -= Shutdown;
+            Application.quitting += Shutdown;
+        }
+
+        public static void Shutdown()
+        {
+            try
+            {
+                Clear();
+                MapLabArenaPrewarm.Cancel();
+                MapLabArena.ShutdownAll();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+            }
+            MapLabViewGradeShader.Neutral();
+        }
+
         public static World Current => current;
 
         // Сжатие глубины по наклону из ресурсов (известно до построения мира).

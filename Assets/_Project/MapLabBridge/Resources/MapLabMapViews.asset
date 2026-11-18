@@ -34,6 +34,13 @@ MonoBehaviour:
       TintStrength: 0
       KeepWarmLights: 0
       ShadowLift: 0
+      GroundGlow: 0
+      GroundGlowColor: {r: 0.85, g: 0.66, b: 0.36, a: 1}
+      GroundGlowRelief: 1
+      GroundGlowStrokes: 0.7
+      InkStrength: 0
+      InkColor: {r: 0.23, g: 0.14, b: 0.07, a: 1}
+      InkDensity: 1
     Palette: {fileID: 0}
     OverrideFog: 0
     FogColor: {r: 0.055, g: 0.06, b: 0.07, a: 0.86}
@@ -63,6 +70,13 @@ MonoBehaviour:
       TintStrength: 0.5
       KeepWarmLights: 0.8
       ShadowLift: 0.1
+      GroundGlow: 0.6
+      GroundGlowColor: {r: 0.8392157, g: 0.64705884, b: 0.36862746, a: 1}
+      GroundGlowRelief: 0.35
+      GroundGlowStrokes: 1.3
+      InkStrength: 0
+      InkColor: {r: 0.23, g: 0.14, b: 0.07, a: 1}
+      InkDensity: 1
     Palette: {fileID: 0}
     OverrideFog: 1
     FogColor: {r: 0.07, g: 0.06, b: 0.09, a: 0.9}
@@ -484,6 +498,13 @@ MonoBehaviour:
       TintStrength: 0
       KeepWarmLights: 0
       ShadowLift: 0.05
+      GroundGlow: 0
+      GroundGlowColor: {r: 0.85, g: 0.66, b: 0.36, a: 1}
+      GroundGlowRelief: 1
+      GroundGlowStrokes: 0.7
+      InkStrength: 1
+      InkColor: {r: 0.22745098, g: 0.14117648, b: 0.07058824, a: 1}
+      InkDensity: 1.8
     Palette: {fileID: 0}
     OverrideFog: 1
     FogColor: {r: 0.36, g: 0.27, b: 0.18, a: 0.88}
@@ -884,4 +905,4 @@ MonoBehaviour:
     - ArtId: Wooden_Toy_Boat_A
       Texture: {fileID: 2800000, guid: 82fc6cac09ad96748a97ba4d2c98bb2c, type: 3}
       Enabled: 1
-  builtInVersion: 1
+  builtInVersion: 2

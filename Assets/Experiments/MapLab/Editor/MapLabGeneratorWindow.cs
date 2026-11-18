@@ -32,6 +32,10 @@ namespace KingdomSurvival.MapLab.Editor
         private static readonly string[] DiscoveryNames = { "Редко", "Обычно", "Насыщенно" };
         private static readonly string[] VillageNames = { "Авто (от освоенности)", "Малая · 3–6 дворов", "Средняя · 7–12", "Крупная · 12–18, с переулками" };
 
+        // Слои MapLabArena.Layer (29) и MapLabGameLive.Layer (31): сборка MapLab
+        // мост к игре не видит, поэтому номера — здесь.
+        private const int GameWorldLayers = (1 << 29) | (1 << 31);
+
         private Tab tab;
         private MapLabView view;
         private MapLabSettings snapshotOf;
@@ -469,7 +473,7 @@ namespace KingdomSurvival.MapLab.Editor
         private bool DrawLookGroup(MapLabSettings s, MapLabAuthorProfile a)
         {
             bool look = false;
-            lookOpen = EditorGUILayout.BeginFoldoutHeaderGroup(lookOpen, "Внешний вид · применяется сразу, мир не меняет");
+            lookOpen = EditorGUILayout.BeginFoldoutHeaderGroup(lookOpen, "Общие для всех видов · внешний вид, мир не меняет");
             if (lookOpen)
             {
                 EditorGUI.BeginChangeCheck();
@@ -599,6 +603,9 @@ namespace KingdomSurvival.MapLab.Editor
             if (previewDirty && e.type == EventType.Repaint)
             {
                 Camera cam = rig.Camera;
+                // Слои игровых миров (арена — 29, живая карта — 31) в предпросмотр
+                // не попадают, даже если после Play Mode что-то от игры осталось.
+                cam.cullingMask &= ~GameWorldLayers;
                 RenderTexture keep = cam.targetTexture;
                 cam.targetTexture = preview;
                 // Вид карты: цветокоррекция только на время этого рендера.
@@ -838,8 +845,8 @@ namespace KingdomSurvival.MapLab.Editor
                 MapLabArtEntry e = c.Views[0].Entry;
                 bool isFocus = focus == c, isSelected = c.Views.Any(v => selected.Contains(v.Entry));
                 EditorGUI.DrawRect(r, isFocus ? new Color(0.24f, 0.37f, 0.55f) : isSelected ? new Color(0.27f, 0.33f, 0.4f) : new Color(0.23f, 0.23f, 0.23f));
-                if (e.Texture != null)
-                    GUI.DrawTexture(new Rect(r.x + 4f, r.y + 4f, r.width - 8f, r.width - 14f), e.Texture, ScaleMode.ScaleToFit, true);
+                if (Shown(e) != null)
+                    GUI.DrawTexture(new Rect(r.x + 4f, r.y + 4f, r.width - 8f, r.width - 14f), Shown(e), ScaleMode.ScaleToFit, true);
                 bool off = c.Views.All(v => !v.Entry.Enabled);
                 bool missing = c.Views.Any(v => !v.Entry.HasTexture);
                 int used = c.Views.Sum(v => view.Usage.TryGetValue(v.Entry, out int n) ? n : 0);
@@ -967,7 +974,7 @@ namespace KingdomSurvival.MapLab.Editor
                             int index = row * perRow + k;
                             Rect cell = new Rect(line.x + k * (thumb + 4f), line.y + 2f, thumb, thumb);
                             EditorGUI.DrawRect(cell, index == focusView ? new Color(0.24f, 0.37f, 0.55f) : new Color(0.23f, 0.23f, 0.23f));
-                            Texture2D t = focus.Views[index].Entry.Texture;
+                            Texture2D t = Shown(focus.Views[index].Entry);
                             if (t != null)
                                 GUI.DrawTexture(cell, t, ScaleMode.ScaleToFit, true);
                             if (Event.current.type == EventType.MouseDown && cell.Contains(Event.current.mousePosition))
@@ -989,8 +996,11 @@ namespace KingdomSurvival.MapLab.Editor
             groundBackground = EditorGUILayout.ToggleLeft("Фон — цвет земли", groundBackground);
             Rect pr = GUILayoutUtility.GetRect(200f, 200f, GUILayout.ExpandWidth(true));
             EditorGUI.DrawRect(pr, groundBackground ? new Color(0.62f, 0.62f, 0.33f) : new Color(0.5f, 0.5f, 0.5f));
-            if (e.Texture != null)
-                GUI.DrawTexture(pr, e.Texture, ScaleMode.ScaleToFit, true);
+            if (Shown(e) != null)
+                GUI.DrawTexture(pr, Shown(e), ScaleMode.ScaleToFit, true);
+            MapLabMapView look = MapLabMapViews.Active;
+            if (look != null && look.Id != MapLabMapViews.ClassicId)
+                EditorGUILayout.LabelField(look.FindTexture(e, out bool skewed) != null ? "Рисунок вида «" + look.Name + "» (поля ниже — общие для всех видов)." : skewed ? "У вида «" + look.Name + "» рисунок другого холста — показан основной." : "У вида «" + look.Name + "» своего рисунка нет — показан основной.", EditorStyles.wordWrappedMiniLabel);
 
             EditorGUI.BeginChangeCheck();
             Texture2D texture = (Texture2D)EditorGUILayout.ObjectField(new GUIContent("Изображение", "«Заменить…»: выбрать другой PNG; ID, вес, цвет и калибровка сохраняются."), e.Texture, typeof(Texture2D), false);

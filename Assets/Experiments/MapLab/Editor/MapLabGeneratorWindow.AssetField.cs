@@ -370,6 +370,8 @@ namespace KingdomSurvival.MapLab.Editor
                 fieldView.CameraRig = cameraObject.AddComponent<MapLabCameraRig>();
             }
             fieldView.Settings = fieldSettings;
+            // Поле сравнения — в выбранном виде карты (те же рисунки, что на карте).
+            fieldView.SetLook(MapLabMapViews.Active);
             if (view.CameraRig != null && view.CameraRig.Camera != null)
                 view.CameraRig.Camera.cullingMask &= ~(1 << FieldLayer);
             return fieldView;
@@ -509,7 +511,7 @@ namespace KingdomSurvival.MapLab.Editor
                     Rect shown = r;
                     if (isDrag && fieldDragMoved)
                         shown.position += fieldDragAt - fieldDragStart;
-                    Texture2D ring = SilhouetteGlow(item.Entry.Texture);
+                    Texture2D ring = SilhouetteGlow(Shown(item.Entry));
                     if (ring != null)
                     {
                         Color keep = GUI.color;

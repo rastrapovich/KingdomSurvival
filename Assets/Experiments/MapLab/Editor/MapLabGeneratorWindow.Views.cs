@@ -39,6 +39,11 @@ namespace KingdomSurvival.MapLab.Editor
         public static void CreateViewsAssetBatch()
         {
             MapLabMapViews asset = ViewsAsset(true);
+            if (asset.EnsureBuiltIn())
+            {
+                EditorUtility.SetDirty(asset);
+                AssetDatabase.SaveAssetIfDirty(asset);
+            }
             Debug.Log("Виды карты: " + AssetDatabase.GetAssetPath(asset) + " — " + asset.Views.Count + " вид(а).");
         }
 
@@ -54,6 +59,12 @@ namespace KingdomSurvival.MapLab.Editor
                 return;
             lookShownId = id;
             previewDirty = true;
+            // Поле сравнения на вкладке «Ассеты» — тот же вид.
+            if (fieldView != null && fieldView.Data != null && !fieldView.SwapLook(active))
+            {
+                fieldView.SetLook(active);
+                BuildField();
+            }
             string key = MapLabMapViews.BuildKey(active);
             // Та же палитра — свои рисунки подменяются в готовой карте сразу.
             if (view.Data != null && view.SwapLook(active))
@@ -72,6 +83,17 @@ namespace KingdomSurvival.MapLab.Editor
             else
                 status = "Вид карты: " + active?.Name + ".";
             Repaint();
+        }
+
+        // Рисунок записи в выбранном виде (своя версия вида или основной) —
+        // для миниатюр каталога и свойств ассета.
+        private static Texture2D Shown(MapLabArtEntry e)
+        {
+            if (e == null)
+                return null;
+            MapLabMapView look = MapLabMapViews.Active;
+            Texture2D own = look != null ? look.FindTexture(e, out _) : null;
+            return own != null ? own : e.Texture;
         }
 
         // Перед генерацией: собрать в текущем виде.
@@ -108,7 +130,8 @@ namespace KingdomSurvival.MapLab.Editor
         // Вкладка «Карта»: правка выбранного вида.
         private void DrawViewsGroup()
         {
-            viewsOpen = EditorGUILayout.BeginFoldoutHeaderGroup(viewsOpen, "Виды карты · облик поверх того же мира");
+            MapLabMapView shown = MapLabMapViews.Active;
+            viewsOpen = EditorGUILayout.BeginFoldoutHeaderGroup(viewsOpen, "Только для вида «" + (shown != null ? shown.Name : "—") + "» · свои настройки");
             if (viewsOpen)
             {
                 MapLabMapViews asset = ViewsAsset(false);
@@ -124,7 +147,9 @@ namespace KingdomSurvival.MapLab.Editor
                     EditorGUILayout.EndFoldoutHeaderGroup();
                     return;
                 }
-                asset.EnsureBuiltIn();
+                if (asset.EnsureBuiltIn())
+                    EditorUtility.SetDirty(asset);
+                EditorGUILayout.HelpBox("Всё ниже относится только к выбранному виду. Общие для всех видов настройки — в разделе «Общие для всех видов» выше.", MessageType.None);
                 MapLabMapView v = asset.Find(MapLabMapViews.ActiveId) ?? MapLabMapViews.Active;
                 if (v == null)
                 {
@@ -177,6 +202,40 @@ namespace KingdomSurvival.MapLab.Editor
                     g.TintStrength = tintStrength;
                     g.KeepWarmLights = warm;
                     g.ShadowLift = lift;
+                    EditorUtility.SetDirty(asset);
+                    grade = true;
+                }
+
+                EditorGUILayout.Space(4);
+                EditorGUILayout.LabelField("Тёплый свет на земле (сразу)", EditorStyles.boldLabel);
+                EditorGUI.BeginChangeCheck();
+                float glow = EditorGUILayout.Slider(new GUIContent("Сила", "Тёплые блики на земле — как подсветка крон. 0 — нет."), g.GroundGlow, 0f, 1f);
+                Color glowColor = EditorGUILayout.ColorField("Цвет света", g.GroundGlowColor);
+                float glowRelief = EditorGUILayout.Slider(new GUIContent("Склоны к свету", "Блики на склонах, повёрнутых к свету."), g.GroundGlowRelief, 0f, 2f);
+                float glowStrokes = EditorGUILayout.Slider(new GUIContent("Светлые мазки", "Блики по светлым мазкам покраски земли."), g.GroundGlowStrokes, 0f, 2f);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    Undo.RecordObject(asset, "Виды карты: свет на земле");
+                    g.GroundGlow = glow;
+                    g.GroundGlowColor = glowColor;
+                    g.GroundGlowRelief = glowRelief;
+                    g.GroundGlowStrokes = glowStrokes;
+                    EditorUtility.SetDirty(asset);
+                    grade = true;
+                }
+
+                EditorGUILayout.Space(4);
+                EditorGUILayout.LabelField("Тушь контуров (сразу)", EditorStyles.boldLabel);
+                EditorGUI.BeginChangeCheck();
+                float inkStrength = EditorGUILayout.Slider(new GUIContent("Цвет туши вида", "Насколько контуры дорог, берегов и меж берут цвет туши вида. 0 — как есть."), g.InkStrength, 0f, 1f);
+                Color inkColor = EditorGUILayout.ColorField("Цвет туши", g.InkColor);
+                float inkDensity = EditorGUILayout.Slider(new GUIContent("Плотность", "1 — как есть; больше — контуры плотнее и темнее."), g.InkDensity, 1f, 3f);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    Undo.RecordObject(asset, "Виды карты: тушь");
+                    g.InkStrength = inkStrength;
+                    g.InkColor = inkColor;
+                    g.InkDensity = inkDensity;
                     EditorUtility.SetDirty(asset);
                     grade = true;
                 }
@@ -291,6 +350,7 @@ namespace KingdomSurvival.MapLab.Editor
             if (view != null)
                 AddKnown(known, ActiveSets());
             AddKnown(known, AllArtSets());
+            AddExtraKnown(known);
             return known;
         }
 
@@ -303,6 +363,19 @@ namespace KingdomSurvival.MapLab.Editor
                 if (set != null)
                     yield return set;
             }
+        }
+
+        // Записи вне наборов MapLab (ассеты Базы ассетов для арены и леса карты) —
+        // подключает мост к игре (KingdomSurvival.MapLabBridge.Editor).
+        public static System.Func<IEnumerable<MapLabArtEntry>> ExtraKnownArt;
+
+        private static void AddExtraKnown(Dictionary<string, MapLabArtEntry> known)
+        {
+            if (ExtraKnownArt == null)
+                return;
+            foreach (MapLabArtEntry e in ExtraKnownArt())
+                if (e != null && !string.IsNullOrEmpty(e.Id) && e.Id.IndexOf('#') < 0 && !known.ContainsKey(e.Id))
+                    known[e.Id] = e;
         }
 
         private static void AddKnown(Dictionary<string, MapLabArtEntry> known, IEnumerable<MapLabArtSet> sets)
@@ -320,6 +393,7 @@ namespace KingdomSurvival.MapLab.Editor
             MapLabMapViews asset = ViewsAsset(true);
             Dictionary<string, MapLabArtEntry> known = new Dictionary<string, MapLabArtEntry>();
             AddKnown(known, AllArtSets());
+            AddExtraKnown(known);
             foreach (MapLabMapView v in asset.Views)
                 if (v != null && AssetDatabase.IsValidFolder(v.ArtFolder))
                     Debug.Log("MAP_VIEW_ART: " + CollectViewArt(asset, v, known));
@@ -360,7 +434,7 @@ namespace KingdomSurvival.MapLab.Editor
             foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { v.ArtFolder }))
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
-                string id = Path.GetFileNameWithoutExtension(path);
+                string id = MapLabMapView.IdOfFile(Path.GetFileNameWithoutExtension(path));
                 if (!known.TryGetValue(id, out MapLabArtEntry entry))
                 {
                     unknown.Add(id);
@@ -433,12 +507,12 @@ namespace KingdomSurvival.MapLab.Editor
             {
                 "# Ассеты карты для вида «" + v.Name + "» (" + v.Id + ")",
                 "# Своя версия рисунка: PNG с прозрачностью, ТОТ ЖЕ размер холста и та же опора (основание) — имя файла = ID.",
-                "# ID\tкатегория\tроль\tхолст, px\tесть своя",
+                "# Имя файла без .png (= ID; у ассетов Базы ассетов — art_…)\tкатегория\tроль\tхолст, px\tесть своя",
             };
             List<MapLabArtEntry> entries = new List<MapLabArtEntry>(KnownArt().Values);
             entries.Sort((a, b) => a.Category != b.Category ? a.Category.CompareTo(b.Category) : string.CompareOrdinal(a.Id, b.Id));
             foreach (MapLabArtEntry e in entries)
-                lines.Add($"{e.Id}\t{e.Category}\t{e.Role}\t{e.Width}x{e.Height}\t{(v.FindTexture(e.Id) != null ? "да" : "—")}");
+                lines.Add($"{MapLabMapView.FileNameOf(e.Id)}\t{e.Category}\t{e.Role}\t{e.Width}x{e.Height}\t{(v.FindTexture(e.Id) != null ? "да" : "—")}");
             string file = Path.Combine(v.ArtFolder, "_ASSET_LIST.txt");
             File.WriteAllLines(file, lines);
             return "Список ID (" + entries.Count + ") записан: " + file;

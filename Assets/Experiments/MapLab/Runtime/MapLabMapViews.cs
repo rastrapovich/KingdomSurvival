@@ -24,6 +24,8 @@ namespace KingdomSurvival.MapLab
         public const string PrefsKey = "KingdomSurvival.MapView";
         // Папка своих рисунков вида: <ArtRoot>/<ID вида>/<ID ассета>.png.
         public const string ArtRoot = "Assets/_Project/Art/MapViews";
+        // Облака тумана войны вида: <FogCloudsRoot>/<ID вида>/*.png.
+        public const string FogCloudsRoot = "Assets/_Project/Art/MapFogClouds";
 
         public const string ClassicId = "classic";
         public const string GloomId = "gloom";
@@ -288,6 +290,9 @@ namespace KingdomSurvival.MapLab
         [Tooltip("Цвет фона под картой (пока карта рисуется и за краем полотна).")]
         public Color Background = new Color(0.86f, 0.82f, 0.72f, 1f);
 
+        [Tooltip("Облака тумана войны в манере вида: отдельные PNG с прозрачностью, рисуются над маской неисследованного без цветокоррекции. Пусто — облака вида «Обычный».")]
+        public List<Texture2D> FogClouds = new List<Texture2D>();
+
         [Tooltip("Свои рисунки вида нарисованы уже в его гамме: цветокоррекция вида их не трогает (земля, мазки и тушь — под коррекцией).")]
         public bool OwnArtUngraded = true;
 
@@ -298,6 +303,22 @@ namespace KingdomSurvival.MapLab
         [NonSerialized] private int indexCount = -1;
 
         public string ArtFolder => MapLabMapViews.ArtRoot + "/" + Id;
+
+        // Папка облаков тумана вида: <FogCloudsRoot>/<ID вида>/*.png.
+        public string FogCloudsFolder => MapLabMapViews.FogCloudsRoot + "/" + Id;
+
+        public int FogCloudCount
+        {
+            get
+            {
+                int n = 0;
+                if (FogClouds != null)
+                    foreach (Texture2D t in FogClouds)
+                        if (t != null)
+                            n++;
+                return n;
+            }
+        }
 
         // Имя PNG в папке вида ↔ ID ассета: у ассетов Базы ассетов ID «art:…»,
         // двоеточие в имени файла Windows не допускает — в файле «art_…».
@@ -388,6 +409,7 @@ namespace KingdomSurvival.MapLab
                 foreach (MapLabViewArtOverride o in Art)
                     if (o != null)
                         copy.Art.Add(new MapLabViewArtOverride { ArtId = o.ArtId, Texture = o.Texture, Enabled = o.Enabled });
+            copy.FogClouds = FogClouds != null ? new List<Texture2D>(FogClouds) : new List<Texture2D>();
             copy.index = null;
             return copy;
         }

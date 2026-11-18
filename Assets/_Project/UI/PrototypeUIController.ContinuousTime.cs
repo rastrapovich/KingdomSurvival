@@ -176,10 +176,12 @@ public partial class PrototypeUIController
         TickWorldMapBuildings();
         TickWorldMapGroups();
         TickWorldMapFeatures();
+        TickWorldMapQuestMarkers();
         TickWorldMapLive();
         TickLoadingScreen();
         TickWorldMapSearchAreas();
         TickWorldMapFog();
+        TickWorldMapFogClouds();
         TickRewardToasts();
         TickEventDialogue();
 

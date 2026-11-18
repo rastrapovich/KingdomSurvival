@@ -46,6 +46,9 @@ MonoBehaviour:
     FogColor: {r: 0.055, g: 0.06, b: 0.07, a: 0.86}
     UiTint: {r: 1, g: 1, b: 1, a: 1}
     Background: {r: 0.86, g: 0.82, b: 0.72, a: 1}
+    FogClouds:
+    - {fileID: 2800000, guid: 09f10f9e03f6b454c8e263b7c030e88c, type: 3}
+    - {fileID: 2800000, guid: c9c483c9aab5b00489959a2513a27a20, type: 3}
     OwnArtUngraded: 1
     Art: []
   - Id: gloom
@@ -82,6 +85,9 @@ MonoBehaviour:
     FogColor: {r: 0.07, g: 0.06, b: 0.09, a: 0.9}
     UiTint: {r: 0.62, g: 0.58, b: 0.62, a: 1}
     Background: {r: 0.11764706, g: 0.105882354, b: 0.13333334, a: 1}
+    FogClouds:
+    - {fileID: 2800000, guid: 0fcd6572caa436a43bb8289328bb2bff, type: 3}
+    - {fileID: 2800000, guid: d53d26d16034515429988a86317f04b9, type: 3}
     OwnArtUngraded: 1
     Art:
     - ArtId: Archery_Target_A
@@ -510,6 +516,9 @@ MonoBehaviour:
     FogColor: {r: 0.36, g: 0.27, b: 0.18, a: 0.88}
     UiTint: {r: 0.86, g: 0.74, b: 0.56, a: 1}
     Background: {r: 0.9137255, g: 0.8509804, b: 0.72156864, a: 1}
+    FogClouds:
+    - {fileID: 2800000, guid: 8dedd5a86acf90e41a1c742ce7b07ade, type: 3}
+    - {fileID: 2800000, guid: f3358ee9510e84a449eddf4b1547a931, type: 3}
     OwnArtUngraded: 1
     Art:
     - ArtId: Archery_Target_A

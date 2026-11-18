@@ -259,6 +259,8 @@ namespace KingdomSurvival.MapLab.Editor
                     EditorUtility.SetDirty(asset);
                 }
 
+                DrawViewFogClouds(asset, v);
+
                 EditorGUILayout.Space(4);
                 EditorGUILayout.LabelField("Пересборка: палитра и свои рисунки", EditorStyles.boldLabel);
                 EditorGUI.BeginChangeCheck();
@@ -397,6 +399,123 @@ namespace KingdomSurvival.MapLab.Editor
             foreach (MapLabMapView v in asset.Views)
                 if (v != null && AssetDatabase.IsValidFolder(v.ArtFolder))
                     Debug.Log("MAP_VIEW_ART: " + CollectViewArt(asset, v, known));
+            MapLabMapViews.ResetCache();
+        }
+
+        // ---------- облака тумана войны вида ----------
+
+        // Пункт «Облака тумана войны» выбранного вида: рисунки можно заменить
+        // по одному (перетащить PNG в поле), добавить, убрать или собрать из
+        // папки вида. Игра подхватывает замену сразу (и в Play Mode); числа
+        // облаков — ассет настроек движения, раздел «Облака тумана войны».
+        private void DrawViewFogClouds(MapLabMapViews asset, MapLabMapView v)
+        {
+            EditorGUILayout.Space(4);
+            EditorGUILayout.LabelField("Облака тумана войны (игра, сразу)", EditorStyles.boldLabel);
+            v.FogClouds ??= new List<Texture2D>();
+            int remove = -1;
+            for (int i = 0; i < v.FogClouds.Count; i++)
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUI.BeginChangeCheck();
+                    Texture2D t = (Texture2D)EditorGUILayout.ObjectField("Облако " + (i + 1), v.FogClouds[i], typeof(Texture2D), false);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        Undo.RecordObject(asset, "Виды карты: облако тумана");
+                        v.FogClouds[i] = t;
+                        EditorUtility.SetDirty(asset);
+                    }
+                    if (GUILayout.Button(new GUIContent("×", "Убрать это облако из вида (файл остаётся)."), GUILayout.Width(22)))
+                        remove = i;
+                }
+            }
+            if (remove >= 0)
+            {
+                Undo.RecordObject(asset, "Виды карты: убрать облако тумана");
+                v.FogClouds.RemoveAt(remove);
+                EditorUtility.SetDirty(asset);
+            }
+            if (v.FogCloudCount == 0)
+                EditorGUILayout.HelpBox(v.Id == MapLabMapViews.ClassicId
+                    ? "Нет облаков: в игре останется только маска тумана."
+                    : "Нет своих облаков: игра возьмёт облака вида «Обычный».", MessageType.Info);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button(new GUIContent("+ Облако", "Пустое поле — перетащите в него PNG облака.")))
+                    Guard(() =>
+                    {
+                        Undo.RecordObject(asset, "Виды карты: добавить облако тумана");
+                        v.FogClouds.Add(null);
+                        EditorUtility.SetDirty(asset);
+                    });
+                if (GUILayout.Button(new GUIContent("Собрать из папки", "Все PNG из " + v.FogCloudsFolder + " — облака вида (импорт: прозрачность, мип-карты, до 1024 px).")))
+                    Guard(() => status = CollectFogClouds(asset, v));
+                if (GUILayout.Button("Открыть папку"))
+                    Guard(() =>
+                    {
+                        EnsureFolder(v.FogCloudsFolder);
+                        EditorUtility.RevealInFinder(v.FogCloudsFolder);
+                    });
+            }
+        }
+
+        // PNG папки облаков вида → список облаков вида (по имени файла).
+        private static string CollectFogClouds(MapLabMapViews asset, MapLabMapView v)
+        {
+            EnsureFolder(v.FogCloudsFolder);
+            List<Texture2D> found = new List<Texture2D>();
+            foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { v.FogCloudsFolder }))
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (!path.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase) ||
+                    Path.GetDirectoryName(path)?.Replace('\\', '/') != v.FogCloudsFolder)
+                    continue;
+                ConfigureFogCloudImporter(path);
+                Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+                if (texture != null)
+                    found.Add(texture);
+            }
+            found.Sort((a, b) => string.CompareOrdinal(a.name, b.name));
+            Undo.RecordObject(asset, "Виды карты: облака тумана из папки");
+            v.FogClouds = found;
+            EditorUtility.SetDirty(asset);
+            AssetDatabase.SaveAssetIfDirty(asset);
+            return "Облака тумана «" + v.Name + "»: " + found.Count + " из " + v.FogCloudsFolder + ".";
+        }
+
+        // Импорт облака: прозрачность, мип-карты (карта отдаляется), без
+        // повторения на краях, до 1024 px, обычное сжатие.
+        private static void ConfigureFogCloudImporter(string path)
+        {
+            if (!(AssetImporter.GetAtPath(path) is TextureImporter importer))
+                return;
+            bool changed = importer.textureType != TextureImporterType.Default ||
+                           !importer.alphaIsTransparency || !importer.mipmapEnabled ||
+                           importer.wrapMode != TextureWrapMode.Clamp || importer.maxTextureSize != 1024 ||
+                           importer.textureCompression != TextureImporterCompression.Compressed;
+            if (!changed)
+                return;
+            importer.textureType = TextureImporterType.Default;
+            importer.alphaSource = TextureImporterAlphaSource.FromInput;
+            importer.alphaIsTransparency = true;
+            importer.mipmapEnabled = true;
+            importer.wrapMode = TextureWrapMode.Clamp;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.maxTextureSize = 1024;
+            importer.textureCompression = TextureImporterCompression.Compressed;
+            importer.SaveAndReimport();
+        }
+
+        // Пакетная сборка облаков всех видов (Unity -batchmode -executeMethod).
+        public static void CollectFogCloudsBatch()
+        {
+            MapLabMapViews asset = ViewsAsset(true);
+            asset.EnsureBuiltIn();
+            foreach (MapLabMapView v in asset.Views)
+                if (v != null && AssetDatabase.IsValidFolder(v.FogCloudsFolder))
+                    Debug.Log("MAP_FOG_CLOUDS: " + CollectFogClouds(asset, v));
+            AssetDatabase.SaveAssets();
             MapLabMapViews.ResetCache();
         }
 

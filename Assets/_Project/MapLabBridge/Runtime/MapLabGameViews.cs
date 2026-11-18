@@ -47,6 +47,37 @@ namespace KingdomSurvival.MapLabBridge
             return v != null && v.OverrideFog;
         }
 
+        // Облака тумана войны выбранного вида (рисунки без цветокоррекции —
+        // они уже в гамме вида). Нет своих — явный запасной набор вида
+        // «Обычный» (fallbackViewName). Пусто совсем — облаков нет, маска
+        // тумана скрывает местность как раньше.
+        public static List<Texture2D> FogClouds(out string fallbackViewName)
+        {
+            fallbackViewName = null;
+            List<Texture2D> result = new List<Texture2D>();
+            MapLabMapView v = MapLabMapViews.Active;
+            Collect(v, result);
+            if (result.Count > 0)
+                return result;
+            MapLabMapView classic = MapLabMapViews.Load().Find(MapLabMapViews.ClassicId);
+            if (classic != null && !ReferenceEquals(classic, v))
+            {
+                Collect(classic, result);
+                if (result.Count > 0)
+                    fallbackViewName = classic.Name;
+            }
+            return result;
+
+            static void Collect(MapLabMapView view, List<Texture2D> into)
+            {
+                if (view?.FogClouds == null)
+                    return;
+                foreach (Texture2D t in view.FogClouds)
+                    if (t != null)
+                        into.Add(t);
+            }
+        }
+
         // Подкраска картинок интерфейса поверх карты.
         public static Color UiTint
         {

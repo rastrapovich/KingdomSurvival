@@ -63,6 +63,43 @@ namespace KingdomSurvival.MapLabBridge.Editor
             }
             else
                 EditorGUILayout.HelpBox($"Прежняя модель: время идёт при движении; клетка — {asset.TravelHoursPerHex:0.##} ч.", MessageType.None);
+
+            DrawFogClouds(asset);
+        }
+
+        private static bool cloudsOpen;
+
+        // Числа облаков тумана войны (рисунки — у видов карты, раздел
+        // «Виды карты» → «Облака тумана войны»). Игра подхватывает сразу.
+        private static void DrawFogClouds(WorldMapMovementSettingsAsset asset)
+        {
+            cloudsOpen = EditorGUILayout.Foldout(cloudsOpen, "Облака тумана войны (игра)", true);
+            if (!cloudsOpen)
+                return;
+            SerializedObject so = new SerializedObject(asset);
+            so.Update();
+            foreach ((string name, string label) in new[]
+                     {
+                         ("fogCloudsEnabled", "Показывать облака"),
+                         ("fogCloudTriggerRadiusHexes", "Радиус запуска, кл."),
+                         ("fogCloudSpacingHexes", "Шаг между облаками, кл."),
+                         ("fogCloudJitter", "Разброс положения"),
+                         ("fogCloudWidthHexes", "Ширина облака, кл."),
+                         ("fogCloudSizeVariation", "Разброс размера"),
+                         ("fogCloudOpacity", "Непрозрачность"),
+                         ("fogCloudDriftHexes", "Отлёт, кл."),
+                         ("fogCloudDissolveSeconds", "Рассеивание, с"),
+                         ("fogCloudEase", "Плавность"),
+                         ("fogCloudMaxDissolving", "Тают одновременно, макс.")
+                     })
+            {
+                SerializedProperty property = so.FindProperty(name);
+                if (property != null)
+                    EditorGUILayout.PropertyField(property, new GUIContent(label, property.tooltip));
+            }
+            if (so.ApplyModifiedProperties())
+                AssetDatabase.SaveAssetIfDirty(asset);
+            EditorGUILayout.HelpBox($"Радиус открытия тумана — {asset.FogRevealRadiusHexes:0.##} кл.; радиус запуска облаков не бывает меньше. Рисунки облаков — у каждого вида: «Виды карты» → «Облака тумана войны».", MessageType.None);
         }
     }
 }

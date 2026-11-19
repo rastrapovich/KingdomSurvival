@@ -25,6 +25,13 @@ namespace KingdomSurvival.MapLabBridge.Editor
 
         private static void Draw()
         {
+            DrawMovement();
+            // Бриф «Живое население»: секция «Население и угрозы».
+            MapLabPopulationSection.Draw();
+        }
+
+        private static void DrawMovement()
+        {
             open = EditorGUILayout.Foldout(open, "Время и движение (игра)", true);
             if (!open)
                 return;

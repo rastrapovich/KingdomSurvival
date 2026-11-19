@@ -312,6 +312,11 @@ public class GameState
     // отдельно от известных объектов (WorldMapFog).
     public WorldMapFogData Fog;
 
+    // Бриф «Живое население» (19.11.2026): жизнь групп мира этой партии —
+    // составы и HP, занятия, контакты, источники, знание игрока
+    // (WorldPopulationService). null у партий до слоя — заводится один раз.
+    public WorldPopulationStateData Population;
+
     // Канонический поход: командир + от 0 до ExpeditionFighterSlots бойцов.
     // Без активной экспедиции возвращается расход на максимальный состав —
     // это оценка "худшего случая" для отображения запаса снабжения.
@@ -383,6 +388,7 @@ public class GameState
         WorldSeed = worldSeed ?? Guid.NewGuid().GetHashCode();
         GeneratedMap = null;
         Fog = null;
+        Population = null;
         // Канон v1.59: режим один — свободная игра. CampaignSetup дополняет
         // конфигурацию (ID партии, командир); партия, созданная напрямую
         // (тесты, инструменты), тоже остаётся свободной игрой.

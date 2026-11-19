@@ -123,6 +123,33 @@ namespace KingdomSurvival.MapLabBridge.Editor
                     Line(actor.Route, 1.4f, c, true);
                 }
             }
+            // Бриф «Живое население»: источники групп и их территории —
+            // голубой квадрат — деревня, оранжевый — обычная угроза, красный —
+            // сильная; кольцо — территория; серое кольцо — защита старта.
+            List<MapPointData> Circle(float xp, float yp, float hexes)
+            {
+                float rx = (float)(hexes * grid.HexWidth / grid.CanvasWidth * 100.0);
+                float ry = (float)(hexes * grid.HexWidth / grid.CanvasHeight * 100.0);
+                List<MapPointData> ring = new List<MapPointData>();
+                for (int k = 0; k <= 24; k++)
+                {
+                    float a = k / 24f * Mathf.PI * 2f;
+                    ring.Add(new MapPointData(xp + Mathf.Cos(a) * rx, yp + Mathf.Sin(a) * ry));
+                }
+                return ring;
+            }
+            if (plan.PopulationSources != null && plan.PopulationReport != null && plan.PopulationReport.Enabled)
+            {
+                Line(Circle(plan.StartXPercent, plan.StartYPercent, WorldPopulationRules.Current.StartSafeRadiusHexes), 1f, Color.gray, true);
+                foreach (GeneratedPopulationSource source in plan.PopulationSources)
+                {
+                    Color sc = source.Kind == GeneratedPopulationSource.Village ? new Color(0.2f, 0.5f, 0.9f)
+                        : source.Strong ? new Color(0.8f, 0.05f, 0.05f) : new Color(0.95f, 0.5f, 0.1f);
+                    if (source.Kind != GeneratedPopulationSource.Village)
+                        Line(Circle(source.XPercent, source.YPercent, source.RadiusHexes), 1f, sc, false);
+                    Dot(source.XPercent, source.YPercent, 3.5f, sc, square: true);
+                }
+            }
             foreach (MapPointData bridge in plan.Bridges)
                 Dot(bridge.XPercent, bridge.YPercent, 2.2f, Color.black, square: true);
             foreach (GeneratedMapSite site in plan.WorkSites)

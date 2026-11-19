@@ -72,6 +72,11 @@ public sealed class CampaignMapOptions
             foreach (WorldMapGroupRule g in p.Groups)
                 if (g != null && g.Role == WorldMapGroupRule.Band)
                     g.Count = Math.Max(Enemies <= Low ? 0 : 1, (int)Math.Round(g.Count * enemies * areaLinear));
+        // Бриф «Живое население» §18: «Враги» управляют только враждебной
+        // составляющей населения (бюджеты зверей и существ); обозы, дозоры
+        // и мирные встречи не сокращаются, статы не усиливаются.
+        if (p.Population != null)
+            p.Population.ThreatScale = (float)(p.Population.ThreatScale * enemies);
         if (p.Landmarks != null)
             foreach (WorldMapLandmarkRule rule in p.Landmarks)
                 if (rule != null && rule.Id == "lair")

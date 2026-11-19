@@ -347,6 +347,8 @@ public sealed class WorldMapRegionStructureTests
         WorldMapGenerationSettings none = Settings();
         none.ControllingPolities = 0;
         none.Groups.Clear();
+        // Звери и существа — отдельный слой населения, не группы сторон.
+        none.Population.Enabled = false;
         GeneratedWorldMap plain = WorldMapGenerator.Generate(none, 6);
         Assert.That(plain.Villages.All(v => string.IsNullOrEmpty(v.ControllerFactionId)), Is.True);
         Assert.That(plain.Actors, Is.Empty);
@@ -359,10 +361,12 @@ public sealed class WorldMapRegionStructureTests
         GeneratedWorldMap b = WorldMapGenerator.Generate(Settings(), 6);
         Assert.That(a.Actors.Select(x => x.ActorId), Is.EqualTo(b.Actors.Select(x => x.ActorId)));
         Assert.That(a.Actors.Select(x => x.ActorId).Distinct().Count(), Is.EqualTo(a.Actors.Count));
-        Assert.That(a.Actors.Select(x => x.Role).Distinct().Count(), Is.EqualTo(4));
+        // Группы сторон (звери и существа слоя населения — отдельно).
+        string[] factionRoles = { WorldMapGroupRule.Patrol, WorldMapGroupRule.Caravan, WorldMapGroupRule.Master, WorldMapGroupRule.Band };
+        Assert.That(a.Actors.Where(x => factionRoles.Contains(x.Role)).Select(x => x.Role).Distinct().Count(), Is.EqualTo(4));
         WorldMapTerrainLayer layer = a.CreateTerrainLayer();
         WorldMapMovementRules rules = WorldMapMovementRules.CreateDefault();
-        foreach (GeneratedMapActor actor in a.Actors.Where(x => x.State == "Travel"))
+        foreach (GeneratedMapActor actor in a.Actors.Where(x => x.State == "Travel" && factionRoles.Contains(x.Role)))
         {
             Assert.That(actor.RouteCells.Count, Is.GreaterThan(1), actor.ActorId);
             Assert.That(actor.RouteCells.All(c => rules.IsTraversable(layer.GetAtIndex(c))), Is.True, actor.ActorId + ": маршрут по проходимым клеткам");

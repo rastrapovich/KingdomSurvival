@@ -206,6 +206,10 @@ public sealed class WorldMapGenerationSettings
     public List<WorldMapGroupRule> Groups = WorldMapFactionCatalog.DefaultGroups();
     public int ControllingPolities = 2;
 
+    // Бриф «Живое население» (19.11.2026): слой населения и угроз —
+    // составы, биотопы, бюджеты, радиусы, ритм и восстановление.
+    public WorldPopulationSettings Population = WorldPopulationSettings.CreateDefault();
+
     public static WorldMapGenerationSettings CreateDefault() => new WorldMapGenerationSettings();
 
     // Типы мест взяты из утверждённых разделов источников (поле Source):
@@ -309,6 +313,7 @@ public sealed class WorldMapGenerationSettings
             foreach (WorldMapGroupRule g in Groups)
                 if (g != null)
                     copy.Groups.Add(g.Clone());
+        copy.Population = (Population ?? WorldPopulationSettings.CreateDefault()).Clone();
         copy.Features = new List<WorldMapLandmarkRule>();
         if (Features != null)
         {
@@ -442,6 +447,8 @@ public sealed class WorldMapGenerationSettings
         Factions ??= new List<WorldMapFactionDefinition>();
         Groups ??= new List<WorldMapGroupRule>();
         ControllingPolities = Math.Max(0, Math.Min(8, ControllingPolities));
+        Population ??= WorldPopulationSettings.CreateDefault();
+        Population.Sanitize();
         foreach (WorldMapGroupRule g in Groups)
             if (g != null)
                 g.Count = Math.Max(0, Math.Min(12, g.Count));
@@ -607,6 +614,11 @@ public sealed class GeneratedWorldMap
     public List<GeneratedMapSite> Features = new List<GeneratedMapSite>();
     // 12У-E: группы мира с назначенными маршрутами (PassiveRoutes).
     public List<GeneratedMapActor> Actors = new List<GeneratedMapActor>();
+    // Бриф «Живое население» (19.11.2026): источники групп (лагерь банды,
+    // территория зверя, деревня обоза/дозора) и отчёт слоя населения. Пусто
+    // у карт, созданных раньше.
+    public List<GeneratedPopulationSource> PopulationSources = new List<GeneratedPopulationSource>();
+    public GeneratedPopulationReport PopulationReport = new GeneratedPopulationReport();
     public GeneratedRegionReport Report = new GeneratedRegionReport();
     public float StartXPercent = WorldMapNavigation.CapitalXPercent;
     public float StartYPercent = WorldMapNavigation.CapitalYPercent;

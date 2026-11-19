@@ -290,12 +290,30 @@ public static partial class WorldMapGenerator
                     continue;
                 if (!NearHolds("forest-edge", i) || (villageCells.Count > 0 && NearestDistance(i, villageCells) < 7) || IsNear(i, taken, 3))
                     continue;
+                // Бриф «Живое население» §5: обычный враждебный источник не
+                // ставится у стартовой стоянки (отступ + радиус обнаружения).
+                if (settings.Population != null && settings.Population.Enabled &&
+                    Distance(i, startCell) < settings.Population.StartSafeRadiusHexes + 6)
+                    continue;
                 camps.Add(i);
             }
             if (camps.Count == 0)
             {
                 actor.BlockReason = "нет укромной опушки вдали от деревень";
                 return null;
+            }
+            // Бриф «Живое население» §5, §9.3: уязвимый отрезок — у торгового
+            // пути. Лагерь выбирается среди ближайших к дороге обоза опушек,
+            // чтобы у вылазки была цель на своём участке.
+            List<int> tradeCells = result.Actors.Where(a => a.Role == WorldMapGroupRule.Caravan && a.RouteCells != null)
+                .SelectMany(a => a.RouteCells).Distinct().ToList();
+            if (settings.Population != null && settings.Population.Enabled && tradeCells.Count > 0)
+            {
+                Dictionary<int, int> toTrade = camps.ToDictionary(c => c, c => NearestDistance(c, tradeCells));
+                int nearest = toTrade.Values.Min();
+                List<int> nearTrade = camps.Where(c => toTrade[c] <= Math.Max(3, nearest + 2)).ToList();
+                if (nearTrade.Count > 0)
+                    camps = nearTrade;
             }
             int camp = camps[random.Next(camps.Count)];
             taken.Add(camp);
@@ -317,6 +335,12 @@ public static partial class WorldMapGenerator
             for (int i = 0; i < count; i++)
                 if (terrain[i] == Road)
                     roads.Add(i);
+            if (settings.Population != null && settings.Population.Enabled && tradeCells.Count > 0)
+            {
+                HashSet<int> trade = new HashSet<int>(tradeCells.Where(c => terrain[c] == Road));
+                if (trade.Count > 0)
+                    roads = trade;
+            }
             List<int> path = FindPath(camp, roads, true);
             if (path.Count > 30)
                 path = path.GetRange(0, 30);

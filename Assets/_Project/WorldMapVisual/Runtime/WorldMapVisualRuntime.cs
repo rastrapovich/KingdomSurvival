@@ -61,6 +61,11 @@ namespace KingdomSurvival.WorldMapVisual
             WorldMapMovementSettingsAsset settings = LoadMovementSettings();
             if (settings != null)
                 settings.ApplyToCore();
+            // Бриф «Живое население»: радиусы, ритм и пресеты групп мира —
+            // из секции «Население и угрозы» ассета генератора.
+            WorldMapGeneratorAsset generator = LoadGenerator();
+            if (generator != null && generator.Settings != null)
+                WorldPopulationRules.Current = (generator.Settings.Population ?? WorldPopulationSettings.CreateDefault()).Clone();
         }
 
         // Для EditMode-тестов/Editor-превью, где кэш между сценариями мешает.

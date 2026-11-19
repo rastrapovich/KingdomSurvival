@@ -190,6 +190,15 @@ public static class CampaignSaveService
         // округа текущей точки героя; известные места остаются известными.
         WorldMapFog.EnsureInitialized(state);
 
+        // Бриф «Живое население»: у старой партии группы оборачиваются один
+        // раз (география не перегенерируется, новые звери не добавляются);
+        // начатый и не вернувшийся бой снова ждёт начала.
+        if (state.HasGeneratedMap)
+        {
+            WorldPopulationService.EnsureState(state, ContinuousSimulationSystem.GetAbsoluteHours(state));
+            WorldPopulationService.OnCampaignLoaded(state);
+        }
+
         return state;
     }
 

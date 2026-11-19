@@ -359,6 +359,9 @@ public static partial class ContinuousSimulationSystem
             double stepHours = Math.Min(
                 Math.Min(remainingGameHours, MaxHomeSubstepHours),
                 Math.Min(hoursToMidnight, hoursToCheck));
+            // Бриф «Живое население»: рядом с враждебной группой — мелкие
+            // шаги, контакт ловится у фактической точки сближения.
+            stepHours = Math.Min(stepHours, WorldPopulationService.MaxStepHours(state));
 
             if (stepHours <= Epsilon)
             {
@@ -380,6 +383,9 @@ public static partial class ContinuousSimulationSystem
                 break;
             }
 
+            double stepStartHour = GetAbsoluteHours(state);
+            HeroMapPosition(state, out float heroFromX, out float heroFromY);
+
             double advancedHours = AdvanceOngoingActivities(
                 state,
                 runtime,
@@ -392,6 +398,8 @@ public static partial class ContinuousSimulationSystem
             remainingGameHours -= advancedHours;
             batch.StateChanged = true;
             batch.EventHour = runtime.HourOfDay;
+
+            AdvancePopulation(state, stepStartHour, heroFromX, heroFromY, batch);
 
             if (batch.RequestAutoPause)
             {

@@ -46,6 +46,10 @@ public sealed class WorldMapGroupRule
     public const string Caravan = "caravan";
     public const string Master = "master";
     public const string Band = "band";
+    // Бриф «Живое население» (19.11.2026): звери и существа каталога —
+    // группы слоя населения, не правила групп сторон.
+    public const string Beast = "beast";
+    public const string Creature = "creature";
 
     public string Id = string.Empty;
     public string Role = Patrol;
@@ -84,6 +88,28 @@ public sealed class GeneratedMapActor
     public string BlockReason = string.Empty;
     // Сдвиг по времени, чтобы одинаковые группы не шли в ногу.
     public float PhaseHours;
+
+    // Бриф «Живое население» (19.11.2026): источник, пресет, поведение и
+    // состав по UnitTypeId Базы существ (устойчивые ID участников). Пусто у
+    // карт, созданных раньше, — состав назначает миграция по роли.
+    public string SourceId = string.Empty;
+    public string PresetId = string.Empty;
+    public string Behavior = string.Empty;
+    public List<GeneratedActorMember> Members = new List<GeneratedActorMember>();
+    // Центр и радиус территории (клетки) — для зверей и предела погони.
+    public float TerritoryXPercent;
+    public float TerritoryYPercent;
+    public float TerritoryRadiusHexes;
+    public bool Strong;
+    // Рисунок группы без набора ракурсов: UnitTypeId Базы существ.
+    public string UnitArtId = string.Empty;
+}
+
+[Serializable]
+public sealed class GeneratedActorMember
+{
+    public string MemberId = string.Empty;
+    public string UnitTypeId = string.Empty;
 }
 
 public static class WorldMapFactionCatalog
@@ -192,6 +218,8 @@ public static class WorldMapActorMotion
             case WorldMapGroupRule.Caravan: return 0.18f;
             case WorldMapGroupRule.Patrol: return 0.3f;
             case WorldMapGroupRule.Band: return 0.26f;
+            case WorldMapGroupRule.Beast: return 0.22f;
+            case WorldMapGroupRule.Creature: return 0.16f;
             default: return 0.24f;
         }
     }

@@ -191,6 +191,13 @@ public sealed class WorldMapPerformancePlayModeTests
             .OrderByDescending(l => Mathf.Abs(l.MapXPercent - WorldMapNavigation.CapitalXPercent) + Mathf.Abs(l.MapYPercent - WorldMapNavigation.CapitalYPercent))
             .First();
         Assert.IsTrue(campaign.TryStartExpedition(target.Id, new List<string>(), out string message), message);
+        // Замер смены суток на бегу: контакт с группой мира (штатная пауза
+        // до решения) здесь не проверяется — группы спокойны, лагеря молчат.
+        WorldPopulationService.EnsureState(campaign, ContinuousSimulationSystem.GetAbsoluteHours(campaign));
+        foreach (PopulationGroupState group in campaign.Population?.Groups ?? new List<PopulationGroupState>())
+            group.CalmUntilHour = 1e9;
+        foreach (PopulationSourceState source in campaign.Population?.Sources ?? new List<PopulationSourceState>())
+            source.CampCooldownUntil = 1e9;
         for (int i = 0; i < 30; i++)
             yield return null;
 

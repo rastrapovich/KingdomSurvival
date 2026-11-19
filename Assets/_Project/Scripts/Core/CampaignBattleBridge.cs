@@ -513,6 +513,10 @@ public static class CampaignBattleBridge
             // ПР-12К: бой на месте меняет и само место — тем же однократным
             // применением (противники по InstanceId, позиции выживших).
             LocalExplorationService.ApplyBattle(state, result);
+
+            // Бриф «Живое население»: бой с группой карты меняет ту же
+            // группу (состав, HP, гибель, источник) — тем же применением.
+            WorldPopulationService.ApplyBattle(state, result, notes);
         }
 
         List<string> battleRoster = new List<string>();

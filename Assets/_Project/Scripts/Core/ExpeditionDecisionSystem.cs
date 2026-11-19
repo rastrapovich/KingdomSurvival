@@ -148,6 +148,10 @@ public static class ExpeditionDecisionSystem
         GameState state,
         string optionId)
     {
+        // Бриф «Живое население»: контакт с группой мира.
+        if (WorldPopulationService.IsPopulationDecision(state))
+            return WorldPopulationService.CanChooseOption(state, optionId);
+
         if (IsLocationDiscoveryDecision(state))
         {
             if (optionId == ContinueInterruptedRouteOptionId)
@@ -189,6 +193,9 @@ public static class ExpeditionDecisionSystem
 
         if (!state.HasPendingExpeditionDecision)
             return false;
+
+        if (WorldPopulationService.IsPopulationDecision(state))
+            return WorldPopulationService.TryApplyChoice(state, optionId, out resultMessage);
 
         if (IsLocationDiscoveryDecision(state))
         {

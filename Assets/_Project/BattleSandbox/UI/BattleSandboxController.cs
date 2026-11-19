@@ -327,6 +327,19 @@ namespace KingdomSurvival.BattleSandbox
                 unit?.SetStartingHitPoints(hitPoints);
             }
 
+            // Бриф «Живое население»: дорожный бой с группой карты — те же
+            // участники (InstanceId) и их текущие HP; итог вернётся по ID.
+            List<SandboxUnitState> enemyUnits = battle.Units.Where(candidate => candidate.Team == SandboxTeam.Enemy).ToList();
+            for (int i = 0; i < roadEnemyInstances.Count && i < enemyUnits.Count; i++)
+            {
+                (string instanceId, int hitPoints) = roadEnemyInstances[i];
+                if (string.IsNullOrEmpty(instanceId))
+                    continue;
+                campaignEnemyInstances[enemyUnits[i].Id] = instanceId;
+                if (hitPoints > 0)
+                    enemyUnits[i].SetStartingHitPoints(hitPoints);
+            }
+
             battleLog.Clear();
             battleLog.Add("Бой начался. Отряд встречает засаду.");
             // 12Е-6: что особенности отряда дали ещё до первого удара.
@@ -448,6 +461,8 @@ namespace KingdomSurvival.BattleSandbox
         {
             List<SandboxUnitDefinition> enemies = new List<SandboxUnitDefinition>();
             campaignEnemyLevels.Clear();
+            roadEnemyInstances.Clear();
+            campaignEnemyInstances.Clear();
             if (campaignBattle.Enemies != null)
             {
                 foreach (CampaignBattleEnemy enemy in campaignBattle.Enemies)
@@ -464,6 +479,8 @@ namespace KingdomSurvival.BattleSandbox
                     {
                         enemies.Add(leveled);
                         campaignEnemyLevels.Add(level);
+                        // Конкретный экземпляр (группа карты) — один на запись.
+                        roadEnemyInstances.Add((i == 0 ? enemy.InstanceId ?? string.Empty : string.Empty, i == 0 ? enemy.CurrentHitPoints : 0));
                     }
                 }
             }
@@ -501,6 +518,8 @@ namespace KingdomSurvival.BattleSandbox
         }
 
         private readonly List<int> campaignEnemyLevels = new List<int>();
+        // Дорожный бой: экземпляр и HP каждого противника по порядку.
+        private readonly List<(string InstanceId, int HitPoints)> roadEnemyInstances = new List<(string, int)>();
 
         private bool campaignRetreated;
 

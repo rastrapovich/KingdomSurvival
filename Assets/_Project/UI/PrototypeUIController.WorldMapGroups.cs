@@ -3,13 +3,17 @@ using KingdomSurvival.MapLabBridge;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-// 12У-G, пакет «Фракции на карте»: постоянные группы мира (дозор, обоз,
-// мастер, ватага) на карте MapLab. Положение — функция игрового времени по
-// маршруту группы (WorldMapActorMotion), поэтому оно не зависит от экрана и
-// не плодит копий. Видна группа только вблизи отряда на разведанной земле;
-// подпись при наведении — только название группы (принадлежность наведением
-// не раскрывается). Своего действия у групп пока нет — клика нет (содержание
-// встреч — CONTENT_TODO пакета). Без рисунка MapLab групп на карте нет.
+// 12У-G, пакет «Фракции на карте»: постоянные группы мира на карте MapLab.
+// Бриф «Живое население» (19.11.2026): показ читает runtime-состояние партии
+// (WorldPopulationService) — уничтоженная группа не рисуется, группа вне
+// маршрута стоит в своей опорной точке, новые группы источника появляются
+// сами. Видна группа только вблизи отряда на разведанной земле (в тумане
+// фигуры живого положения нет). Звери и существа без набора ракурсов —
+// одиночный рисунок из Базы существ (без выдуманных направлений, вне
+// сортировки сцены). Подпись наведения — название, занятие и состав по
+// уровню знания; «!» над фигурой — группа идёт на отряд или следит за ним.
+// Клик: рядом с мирной группой — разговор, иначе карточка и «Идти сюда»
+// (обычный приказ движения, без телепорта и боя через всю карту).
 public partial class PrototypeUIController
 {
     private VisualElement worldMapGroupLayer;
@@ -18,6 +22,9 @@ public partial class PrototypeUIController
     private GeneratedWorldMap worldMapGroupsMap;
     private WorldMapHexGrid worldMapGroupsGrid;
     private readonly Dictionary<string, Label> worldMapGroupLabels = new Dictionary<string, Label>();
+    private readonly Dictionary<string, Label> worldMapGroupAlerts = new Dictionary<string, Label>();
+    private readonly Dictionary<string, Sprite> worldMapGroupSprites = new Dictionary<string, Sprite>();
+    private readonly HashSet<string> worldMapGroupSeen = new HashSet<string>();
 
     private void TickWorldMapGroups()
     {
@@ -38,6 +45,7 @@ public partial class PrototypeUIController
             foreach (Label l in worldMapGroupLabels.Values)
                 l.RemoveFromHierarchy();
             worldMapGroupLabels.Clear();
+            worldMapGroupAlerts.Clear();
             worldMapGroupsMap = map;
             worldMapGroupsGrid = map?.CreateGrid();
         }
@@ -68,6 +76,9 @@ public partial class PrototypeUIController
 
         WorldMapHexGrid grid = worldMapGroupsGrid ??= map.CreateGrid();
         double hour = ContinuousSimulationSystem.GetAbsoluteHours(gameState);
+        WorldPopulationStateData population = WorldPopulationService.EnsureState(gameState, hour);
+        if (population == null)
+            return;
         ExpeditionData expedition = gameState.ActiveExpedition;
         float heroX = expedition != null ? expedition.CurrentMapXPercent : WorldMapNavigation.CapitalXPercent;
         float heroY = expedition != null ? expedition.CurrentMapYPercent : WorldMapNavigation.CapitalYPercent;
@@ -82,36 +93,52 @@ public partial class PrototypeUIController
             figureHeight = heroWorldHeight * live.CanvasPixelsPerUnit(worldMapCanvasWidth);
             sceneFigureHeight = heroWorldHeight;
         }
-        foreach (GeneratedMapActor actor in map.Actors)
+
+        worldMapGroupSeen.Clear();
+        foreach (PopulationGroupState group in population.Groups)
         {
-            if (actor == null || string.IsNullOrEmpty(actor.FigureSet))
+            if (group == null)
                 continue;
-            MapPointData at = WorldMapActorMotion.PositionAt(actor, hour, grid, out float dx, out float dy, out bool waiting);
-            bool visible = grid.DistanceHexes(heroX, heroY, at.XPercent, at.YPercent) <= sight && WorldMapFog.IsExploredAtPercent(gameState, at.XPercent, at.YPercent);
-            worldMapGroupMarkers.TryGetValue(actor.ActorId, out (VisualElement Marker, int Direction) entry);
-            worldMapGroupLabels.TryGetValue(actor.ActorId, out Label hoverLabel);
+            GeneratedMapActor actor = WorldMapGroupDefinition(group);
+            string id = group.GroupId;
+            worldMapGroupSeen.Add(id);
+            worldMapGroupMarkers.TryGetValue(id, out (VisualElement Marker, int Direction) entry);
+            worldMapGroupLabels.TryGetValue(id, out Label hoverLabel);
+            worldMapGroupAlerts.TryGetValue(id, out Label alert);
+            bool drawable = group.IsActive && actor != null && (!string.IsNullOrEmpty(actor.FigureSet) || WorldMapGroupSprite(actor) != null);
+            float dx = group.DirX, dy = group.DirY;
+            bool waiting = false;
+            MapPointData at = drawable
+                ? WorldPopulationService.GroupPosition(gameState, group, hour, grid, out dx, out dy, out waiting)
+                : new MapPointData(0f, 0f);
+            double distance = grid.DistanceHexes(heroX, heroY, at.XPercent, at.YPercent);
+            bool visible = drawable && distance <= sight && WorldMapFog.IsExploredAtPercent(gameState, at.XPercent, at.YPercent);
             if (!visible)
             {
-                if (entry.Marker != null)
-                    entry.Marker.style.display = DisplayStyle.None;
-                if (hoverLabel != null)
-                    hoverLabel.style.display = DisplayStyle.None;
-                PlaceGroupShadow(actor.ActorId, 0f, 0f, figureHeight, false);
-                MapLabLiveFigures.Hide("group-" + actor.ActorId);
+                HideWorldMapGroup(id, entry.Marker, hoverLabel, alert, figureHeight);
                 continue;
             }
-            int direction = waiting && entry.Marker != null ? entry.Direction : WorldMapActorMotion.DirectionIndex(dx, dy);
+            bool sprite = string.IsNullOrEmpty(actor.FigureSet);
+            int direction = sprite ? 0 : waiting && entry.Marker != null ? entry.Direction : WorldMapActorMotion.DirectionIndex(dx, dy);
             if (entry.Marker == null)
             {
-                VisualElement marker = new VisualElement { name = "world-map-group-" + actor.ActorId, pickingMode = PickingMode.Position };
+                VisualElement marker = new VisualElement { name = "world-map-group-" + id, pickingMode = PickingMode.Position };
                 marker.style.position = Position.Absolute;
                 marker.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
-                marker.style.width = figureHeight;
-                marker.style.height = figureHeight;
-                Label label = MakeWorldMapHoverLabel(actor.Name);
-                worldMapGroupLabels[actor.ActorId] = label;
+                Label label = MakeWorldMapHoverLabel(group.Name);
+                worldMapGroupLabels[id] = label;
                 hoverLabel = label;
-                GeneratedMapActor captured = actor;
+                alert = new Label("!") { pickingMode = PickingMode.Ignore };
+                alert.style.position = Position.Absolute;
+                alert.style.left = new Length(50, LengthUnit.Percent);
+                alert.style.top = -18;
+                alert.style.fontSize = 18;
+                alert.style.unityFontStyleAndWeight = FontStyle.Bold;
+                alert.style.color = new Color(0.96f, 0.82f, 0.45f);
+                alert.style.display = DisplayStyle.None;
+                marker.Add(alert);
+                worldMapGroupAlerts[id] = alert;
+                string capturedId = id;
                 marker.RegisterCallback<PointerEnterEvent>(_ =>
                 {
                     marker.style.scale = new Scale(new Vector3(1.08f, 1.08f, 1f));
@@ -123,43 +150,125 @@ public partial class PrototypeUIController
                     label.style.display = DisplayStyle.None;
                 });
                 marker.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
-                // Клик — карточка группы: кто это видно со стороны; встречи
-                // и разговора пока нет (содержание — CONTENT_TODO).
                 marker.RegisterCallback<ClickEvent>(evt =>
                 {
                     evt.StopPropagation();
-                    ShowWorldMapInfoCard(captured.Name, captured.Description, null, null);
+                    OnWorldMapGroupClicked(capturedId);
                 });
                 worldMapGroupLayer.Add(marker);
                 entry = (marker, -1);
             }
             if (entry.Direction != direction)
             {
-                Texture2D texture = MapLabGameMap.FigureTexture(actor.FigureSet, direction);
-                entry.Marker.style.backgroundImage = texture != null ? new StyleBackground(Background.FromTexture2D(texture)) : new StyleBackground(StyleKeyword.None);
+                if (sprite)
+                {
+                    Sprite s = WorldMapGroupSprite(actor);
+                    entry.Marker.style.backgroundImage = s != null ? new StyleBackground(Background.FromSprite(s)) : new StyleBackground(StyleKeyword.None);
+                }
+                else
+                {
+                    Texture2D texture = MapLabGameMap.FigureTexture(actor.FigureSet, direction);
+                    entry.Marker.style.backgroundImage = texture != null ? new StyleBackground(Background.FromTexture2D(texture)) : new StyleBackground(StyleKeyword.None);
+                }
                 entry.Direction = direction;
             }
+            // Зверь/существо — немного ниже человека, рисунок вписан в квадрат.
+            float height = sprite ? figureHeight * 0.85f : figureHeight;
             entry.Marker.style.display = DisplayStyle.Flex;
-            // Опора фигуры — низ по центру, в точке маршрута.
-            entry.Marker.style.width = figureHeight;
-            entry.Marker.style.height = figureHeight;
-            entry.Marker.style.left = at.XPercent / 100f * worldMapCanvasWidth - figureHeight * 0.5f;
-            entry.Marker.style.top = at.YPercent / 100f * worldMapCanvasHeight - figureHeight * 0.97f;
-            // Фигура группы — в сцене карты (сортировка с деревьями и домами,
-            // закрытая часть — контуром); элемент UI остаётся прозрачной
-            // целью наведения и клика.
-            Texture2D sceneTexture = sceneFigureHeight > 0f ? MapLabGameMap.FigureTexture(actor.FigureSet, direction) : null;
-            bool inScene = sceneTexture != null && MapLabLiveFigures.Place(live, "group-" + actor.ActorId, sceneTexture, FigureOutline(sceneTexture),
+            // Опора фигуры — низ по центру, в точке группы.
+            entry.Marker.style.width = height;
+            entry.Marker.style.height = height;
+            entry.Marker.style.left = at.XPercent / 100f * worldMapCanvasWidth - height * 0.5f;
+            entry.Marker.style.top = at.YPercent / 100f * worldMapCanvasHeight - height * 0.97f;
+            // Фигура людей — в сцене карты (сортировка с деревьями и домами);
+            // элемент UI остаётся прозрачной целью наведения и клика.
+            Texture2D sceneTexture = !sprite && sceneFigureHeight > 0f ? MapLabGameMap.FigureTexture(actor.FigureSet, direction) : null;
+            bool inScene = sceneTexture != null && MapLabLiveFigures.Place(live, "group-" + id, sceneTexture, FigureOutline(sceneTexture),
                 new Vector2(at.XPercent, at.YPercent), sceneFigureHeight, sceneTexture.width / (float)Mathf.Max(1, sceneTexture.height), new Vector2(0.5f, 0.03f), 0f, true);
+            if (!inScene)
+                MapLabLiveFigures.Hide("group-" + id);
             entry.Marker.style.unityBackgroundImageTintColor = inScene ? new Color(1f, 1f, 1f, 0f) : Color.white;
-            PlaceGroupShadow(actor.ActorId, at.XPercent / 100f * worldMapCanvasWidth - figureHeight * 0.5f, at.YPercent / 100f * worldMapCanvasHeight - figureHeight * 0.97f, figureHeight, !inScene);
-            worldMapGroupMarkers[actor.ActorId] = entry;
-            if (hoverLabel != null && hoverLabel.style.display == DisplayStyle.Flex)
+            PlaceGroupShadow(id, at.XPercent / 100f * worldMapCanvasWidth - height * 0.5f, at.YPercent / 100f * worldMapCanvasHeight - height * 0.97f, height, !inScene);
+            worldMapGroupMarkers[id] = entry;
+
+            bool alerting = group.TargetId == WorldPopulationService.HeroTarget &&
+                            (group.Activity == PopulationGroupState.Chase || group.Activity == PopulationGroupState.Observe);
+            if (alert != null)
+                alert.style.display = alerting ? DisplayStyle.Flex : DisplayStyle.None;
+            if (hoverLabel != null)
             {
-                Vector2 head = MapPercentToWorldMapViewport(at.XPercent, at.YPercent);
-                float lw = float.IsNaN(hoverLabel.resolvedStyle.width) ? 0f : hoverLabel.resolvedStyle.width;
-                hoverLabel.style.translate = new Translate(head.x - lw * 0.5f, head.y - figureHeight * worldMapZoom - 22f);
+                hoverLabel.text = WorldPopulationService.HoverText(gameState, group, distance);
+                if (hoverLabel.style.display == DisplayStyle.Flex)
+                {
+                    Vector2 head = MapPercentToWorldMapViewport(at.XPercent, at.YPercent);
+                    float lw = float.IsNaN(hoverLabel.resolvedStyle.width) ? 0f : hoverLabel.resolvedStyle.width;
+                    hoverLabel.style.translate = new Translate(head.x - lw * 0.5f, head.y - height * worldMapZoom - 22f);
+                }
             }
         }
+
+        // Группы, которых больше нет в состоянии (новая карта и т. п.).
+        foreach (KeyValuePair<string, (VisualElement Marker, int Direction)> pair in worldMapGroupMarkers)
+        {
+            if (worldMapGroupSeen.Contains(pair.Key))
+                continue;
+            worldMapGroupLabels.TryGetValue(pair.Key, out Label label);
+            worldMapGroupAlerts.TryGetValue(pair.Key, out Label alert);
+            HideWorldMapGroup(pair.Key, pair.Value.Marker, label, alert, figureHeight);
+        }
+    }
+
+    private void HideWorldMapGroup(string id, VisualElement marker, Label hoverLabel, Label alert, float figureHeight)
+    {
+        if (marker != null)
+            marker.style.display = DisplayStyle.None;
+        if (hoverLabel != null)
+            hoverLabel.style.display = DisplayStyle.None;
+        if (alert != null)
+            alert.style.display = DisplayStyle.None;
+        PlaceGroupShadow(id, 0f, 0f, figureHeight, false);
+        MapLabLiveFigures.Hide("group-" + id);
+    }
+
+    private GeneratedMapActor WorldMapGroupDefinition(PopulationGroupState group) =>
+        WorldPopulationService.Definition(gameState, group.DefinitionId);
+
+    private Sprite WorldMapGroupSprite(GeneratedMapActor actor)
+    {
+        if (actor == null || string.IsNullOrEmpty(actor.UnitArtId))
+            return null;
+        if (worldMapGroupSprites.TryGetValue(actor.UnitArtId, out Sprite cached))
+            return cached;
+        Sprite sprite = (GameState.UnitStatsProvider as KingdomSurvival.UnitDatabase.UnitDatabaseStatsProvider)?.MapSprite(actor.UnitArtId);
+        worldMapGroupSprites[actor.UnitArtId] = sprite;
+        return sprite;
+    }
+
+    // Клик по группе: разговор рядом с мирной группой; иначе — карточка
+    // наблюдения и обычный приказ «Идти сюда».
+    private void OnWorldMapGroupClicked(string groupId)
+    {
+        PopulationGroupState group = WorldPopulationService.FindGroup(gameState, groupId);
+        if (group == null || gameState == null)
+            return;
+        ExpeditionData expedition = gameState.ActiveExpedition;
+        float heroX = expedition != null ? expedition.CurrentMapXPercent : WorldMapNavigation.CapitalXPercent;
+        float heroY = expedition != null ? expedition.CurrentMapYPercent : WorldMapNavigation.CapitalYPercent;
+        if (expedition != null && WorldPopulationService.TryTalk(gameState, groupId, heroX, heroY, out string title, out string text))
+        {
+            ShowWorldMapInfoCard(title, text, null, null);
+            return;
+        }
+        WorldMapHexGrid grid = worldMapGroupsGrid ?? gameState.GeneratedMap?.CreateGrid();
+        if (grid == null)
+            return;
+        double hour = ContinuousSimulationSystem.GetAbsoluteHours(gameState);
+        MapPointData at = WorldPopulationService.GroupPosition(gameState, group, hour, grid, out _, out _, out _);
+        GeneratedMapActor actor = WorldMapGroupDefinition(group);
+        string description = (actor?.Description ?? string.Empty) + "\n" +
+                             WorldPopulationService.HoverText(gameState, group, grid.DistanceHexes(heroX, heroY, at.XPercent, at.YPercent));
+        bool talkable = group.Behavior == WorldPopulationBehavior.Peaceful || group.Behavior == WorldPopulationBehavior.Patrol;
+        float x = at.XPercent, y = at.YPercent;
+        ShowWorldMapInfoCard(group.Name, description.Trim(), talkable ? "Подойти" : null, talkable ? () => GoToWorldMapPoint(x, y) : (System.Action)null);
     }
 }

@@ -187,6 +187,12 @@ public static class ExpeditionIncidentSystem
         if (string.IsNullOrWhiteSpace(commanderId))
             return;
 
+        // Бриф «Живое население» §13: атмосферный дорожный эпизод не
+        // накладывается на контакт с реальной группой и на передышку после
+        // боя; дорожный контент при этом не удаляется.
+        if (WorldPopulationService.SuppressesRoadEpisodes(state, finishedDay * 24.0))
+            return;
+
         // 12У-H: «врагов мало» — дорога предлагает встречу не каждый день.
         // Выбор дня детерминирован от партии и дня (загрузка его не меняет).
         double share = state.Configuration?.MapOptions?.RoadEncounterShare ?? 1.0;

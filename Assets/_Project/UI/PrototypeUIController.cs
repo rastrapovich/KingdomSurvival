@@ -149,6 +149,13 @@ public partial class PrototypeUIController : MonoBehaviour
         // читаются из UnitDatabase.
         if (GameState.UnitStatsProvider == null)
             GameState.UnitStatsProvider = new KingdomSurvival.UnitDatabase.UnitDatabaseStatsProvider();
+        // Бриф «Живое население»: проверка существ для новых групп и
+        // названия типов для подписей групп карты.
+        if (GameState.UnitStatsProvider is KingdomSurvival.UnitDatabase.UnitDatabaseStatsProvider unitProvider)
+        {
+            WorldPopulationCatalog.Availability ??= unitProvider;
+            WorldPopulationService.UnitLabelProvider ??= unitProvider.Label;
+        }
 
         CreateDecisionChoiceButtons();
         RegisterCallbacks();

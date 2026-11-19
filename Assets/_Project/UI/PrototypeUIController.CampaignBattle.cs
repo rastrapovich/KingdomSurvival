@@ -92,6 +92,27 @@ public partial class PrototypeUIController
             pendingStoryBattle = null;
             if (!TryStartPreparedCampaignBattle(request.BattleId, request, out string message))
                 AddReport(message);
+            return;
+        }
+
+        // Бриф «Живое население»: выбран бой с группой карты — тот же
+        // состав и HP, штатный дорожный бой; контакт помечается начатым.
+        if (gameState.Population != null && !IsNarrativeDialogueActive && !HasBlockingModalWork() && !IsLocalScreenOpen)
+        {
+            PopulationContactState contact = WorldPopulationService.BattleToStart(gameState);
+            if (contact == null)
+                return;
+            CampaignBattleRequest request = WorldPopulationService.CreateBattleRequest(gameState, contact);
+            if (request == null)
+                return;
+            if (TryStartPreparedCampaignBattle(request.BattleId, request, out string message))
+                WorldPopulationService.MarkBattleStarted(gameState, contact);
+            else
+            {
+                contact.Status = PopulationContactState.Resolved;
+                contact.Outcome = "battle-failed";
+                AddReport(message);
+            }
         }
     }
 

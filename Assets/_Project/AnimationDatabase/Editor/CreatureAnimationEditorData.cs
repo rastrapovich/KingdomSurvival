@@ -299,6 +299,13 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 {
                     if (unit != null && !string.IsNullOrWhiteSpace(unit.AnimationSetId) && database.FindSet(unit.AnimationSetId) == null)
                         errors.Add(unit.Id + ": ссылка на несуществующий набор анимаций «" + unit.AnimationSetId + "».");
+                    if (unit == null)
+                        continue;
+                    foreach (UnitViewArtData view in unit.ViewArt)
+                    {
+                        if (view != null && !string.IsNullOrWhiteSpace(view.AnimationSetId) && database.FindSet(view.AnimationSetId) == null)
+                            errors.Add(unit.Id + " (" + UnitArtViews.Title(view.ViewId) + "): ссылка на несуществующий набор анимаций «" + view.AnimationSetId + "».");
+                    }
                 }
             }
             return errors;

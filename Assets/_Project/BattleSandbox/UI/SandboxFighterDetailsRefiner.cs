@@ -363,7 +363,7 @@ namespace KingdomSurvival.BattleSandbox
 
                 if (labelFallback == null)
                     labelFallback = unit;
-                if (currentPortrait != null && unit.Portrait == currentPortrait)
+                if (currentPortrait != null && unit.UsesPortrait(currentPortrait))
                     return unit;
             }
 

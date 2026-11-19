@@ -84,7 +84,13 @@ namespace KingdomSurvival.UnitDatabase
             set => imageLayer.tintColor = value;
         }
 
+        // Портрет выбранного вида игры (пустой слот вида — «Обычный»).
         public void SetPortrait(UnitDefinitionData unit)
+        {
+            SetPortrait(unit, UnitArtViews.ActiveViewId);
+        }
+
+        public void SetPortrait(UnitDefinitionData unit, string viewId)
         {
             if (unit == null)
             {
@@ -93,7 +99,7 @@ namespace KingdomSurvival.UnitDatabase
             }
 
             SetPortrait(
-                unit.Portrait,
+                unit.PortraitFor(viewId),
                 unit.PortraitFitMode,
                 unit.PortraitScale,
                 unit.PortraitOffsetNormalized,

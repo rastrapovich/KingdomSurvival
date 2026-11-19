@@ -46,6 +46,13 @@ namespace KingdomSurvival.UnitDatabase.Editor
         // проект не изменён.
         public static Sprite ImportExternal(string sourcePath, string unitId, UnitArtKind kind, out string error)
         {
+            return ImportExternal(sourcePath, unitId, kind, UnitArtViews.ClassicId, out error);
+        }
+
+        // Рисунок вида: «существо__вид-рисунка__ID-вида__время» (у «Обычного»
+        // ID вида в имени нет, как раньше).
+        public static Sprite ImportExternal(string sourcePath, string unitId, UnitArtKind kind, string viewId, out string error)
+        {
             error = null;
             if (string.IsNullOrEmpty(sourcePath) || !File.Exists(sourcePath))
             {
@@ -85,8 +92,9 @@ namespace KingdomSurvival.UnitDatabase.Editor
             EnsureFolder(folder);
             string extension = Path.GetExtension(sourcePath).ToLowerInvariant();
             string stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss-fff");
+            string viewPart = UnitArtViews.IsClassic(viewId) ? string.Empty : Sanitize(viewId) + ManagedMarker;
             string assetPath = folder + "/" + Sanitize(unitId) + ManagedMarker + (kind == UnitArtKind.Portrait ? "portrait" : "field") +
-                               ManagedMarker + stamp + extension;
+                               ManagedMarker + viewPart + stamp + extension;
             File.WriteAllBytes(ToAbsolute(assetPath), bytes);
             AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceSynchronousImport);
 
@@ -155,6 +163,13 @@ namespace KingdomSurvival.UnitDatabase.Editor
                         used.Add(AssetDatabase.GetAssetPath(unit.Portrait));
                     if (unit.BattlefieldSprite != null)
                         used.Add(AssetDatabase.GetAssetPath(unit.BattlefieldSprite));
+                    foreach (UnitViewArtData view in unit.ViewArt)
+                    {
+                        if (view?.Portrait != null)
+                            used.Add(AssetDatabase.GetAssetPath(view.Portrait));
+                        if (view?.BattlefieldSprite != null)
+                            used.Add(AssetDatabase.GetAssetPath(view.BattlefieldSprite));
+                    }
                 }
             }
 

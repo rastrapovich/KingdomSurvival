@@ -254,6 +254,8 @@ MonoBehaviour:
     battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: militia
+    viewArt: []
+    staticFigureOnly: 1
     tagIds:
     - species.human
     size: 0

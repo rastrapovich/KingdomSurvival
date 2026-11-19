@@ -253,6 +253,14 @@ namespace KingdomSurvival.UnitDatabase
         // на поле статичная миниатюра или жетон, как раньше.
         [SerializeField] private string animationSetId = string.Empty;
 
+        // 19.11.2026: рисунки по видам (Мрачный, Сепия). «Обычный» — поля
+        // выше; пустой слот вида берёт рисунок «Обычного».
+        [SerializeField] private List<UnitViewArtData> viewArt = new List<UnitViewArtData>();
+        // Пока анимации не нужны: в игре статичная фигура, ссылки на наборы
+        // (animationSetId и наборы видов) сохраняются и вернутся, когда флажок
+        // снят.
+        [SerializeField] private bool staticFigureOnly;
+
         [Header("Теги")]
         [SerializeField] private List<string> tagIds = new List<string>();
 
@@ -323,7 +331,69 @@ namespace KingdomSurvival.UnitDatabase
         public Sprite BattlefieldSprite => battlefieldSprite;
         public float BattlefieldScale => Mathf.Max(0.1f, battlefieldScale);
         public Vector2 BattlefieldOffset => battlefieldOffset;
+        // Сырая ссылка на набор «Обычного» (редакторы, проверки). Игра берёт
+        // AnimationSetIdFor / ActiveAnimationSetId.
         public string AnimationSetId => animationSetId ?? string.Empty;
+        public IReadOnlyList<UnitViewArtData> ViewArt => viewArt;
+        public bool StaticFigureOnly => staticFigureOnly;
+
+        public void SetStaticFigureOnly(bool value) => staticFigureOnly = value;
+
+        public UnitViewArtData FindViewArt(string viewId)
+        {
+            if (UnitArtViews.IsClassic(viewId) || viewArt == null)
+                return null;
+            return viewArt.Find(item => item != null && string.Equals(item.ViewId, viewId, StringComparison.Ordinal));
+        }
+
+        public UnitViewArtData GetOrAddViewArt(string viewId)
+        {
+            if (UnitArtViews.IsClassic(viewId))
+                return null;
+            UnitViewArtData found = FindViewArt(viewId);
+            if (found != null)
+                return found;
+            if (viewArt == null)
+                viewArt = new List<UnitViewArtData>();
+            found = new UnitViewArtData(viewId);
+            viewArt.Add(found);
+            return found;
+        }
+
+        public Sprite PortraitFor(string viewId)
+        {
+            UnitViewArtData view = FindViewArt(viewId);
+            return view != null && view.Portrait != null ? view.Portrait : portrait;
+        }
+
+        public Sprite BattlefieldSpriteFor(string viewId)
+        {
+            UnitViewArtData view = FindViewArt(viewId);
+            return view != null && view.BattlefieldSprite != null ? view.BattlefieldSprite : battlefieldSprite;
+        }
+
+        // Пусто — статичная фигура (или жетон без рисунка).
+        public string AnimationSetIdFor(string viewId)
+        {
+            if (staticFigureOnly)
+                return string.Empty;
+            UnitViewArtData view = FindViewArt(viewId);
+            return view != null && !string.IsNullOrEmpty(view.AnimationSetId) ? view.AnimationSetId : AnimationSetId;
+        }
+
+        public Sprite ActivePortrait => PortraitFor(UnitArtViews.ActiveViewId);
+        public Sprite ActiveBattlefieldSprite => BattlefieldSpriteFor(UnitArtViews.ActiveViewId);
+        public string ActiveAnimationSetId => AnimationSetIdFor(UnitArtViews.ActiveViewId);
+
+        // Рисунок принадлежит существу в каком-либо виде.
+        public bool UsesPortrait(Sprite sprite)
+        {
+            if (sprite == null)
+                return false;
+            if (portrait == sprite)
+                return true;
+            return viewArt != null && viewArt.Exists(item => item != null && item.Portrait == sprite);
+        }
         public IReadOnlyList<string> TagIds => tagIds;
 
         // Существо каталога без рисунков: портрет и миниатюру назначает

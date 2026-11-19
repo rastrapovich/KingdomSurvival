@@ -321,7 +321,7 @@ namespace KingdomSurvival.BattleSandbox
             UnitDefinitionData data = portraitDatabase != null
                 ? portraitDatabase.FindById(typeId)
                 : null;
-            return data != null ? data.Portrait : null;
+            return data != null ? data.ActivePortrait : null;
         }
 
         internal static void ApplyPortraitFraming(
@@ -344,7 +344,7 @@ namespace KingdomSurvival.BattleSandbox
             if (data != null)
             {
                 image.SetPortrait(
-                    preferred != null ? preferred : data.Portrait,
+                    preferred != null ? preferred : data.ActivePortrait,
                     data.PortraitFitMode,
                     data.PortraitScale,
                     data.PortraitOffsetNormalized,

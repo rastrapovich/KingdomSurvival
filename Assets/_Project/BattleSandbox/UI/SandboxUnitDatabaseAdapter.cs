@@ -182,16 +182,19 @@ namespace KingdomSurvival.BattleSandbox
                     null,
                     ConvertAbilities(source));
 
+                // Рисунки выбранного вида (пустой слот — «Обычный»); у
+                // «статичной фигуры» набора анимаций нет, ссылка в базе цела.
+                string viewId = UnitArtViews.ActiveViewId;
                 visuals[source.Id] = new SandboxUnitVisual(
-                    source.Portrait,
-                    source.BattlefieldSprite,
+                    source.PortraitFor(viewId),
+                    source.BattlefieldSpriteFor(viewId),
                     source.BattlefieldScale,
                     source.BattlefieldOffset,
                     source.Category == UnitCategory.Creature
                         ? SandboxUnitVisual.MakeTokenText(source.DisplayLabel)
                         : string.Empty,
                     SandboxUnitVisual.TokenScaleFor(source.Size),
-                    animations != null ? animations.FindSet(source.AnimationSetId) : null);
+                    animations != null ? animations.FindSet(source.AnimationSetIdFor(viewId)) : null);
 
                 // ПР-16: выведенное из набора существо не предлагается в
                 // полигоне, но старые ссылки кампании его находят.

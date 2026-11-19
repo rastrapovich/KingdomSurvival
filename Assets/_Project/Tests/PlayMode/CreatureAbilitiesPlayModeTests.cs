@@ -81,6 +81,14 @@ public sealed class CreatureAbilitiesPlayModeTests
         Invoke(sandbox, "ChangeCount", false, "lynx", 1);
         Invoke(sandbox, "ChangeCount", false, "guard", 1);
         Invoke(sandbox, "ChangeCount", false, "elk_bull", 1);
+        Invoke(sandbox, "ChangeCount", false, "militia", 1);
+
+        // 19.11.2026: анимации ополченца временно заменены статичной фигурой,
+        // набор в базе остаётся привязанным.
+        object content = Get(sandbox, "unitContent");
+        object militia = Invoke(content, "GetVisual", "militia");
+        Assert.IsFalse((bool)Get(militia, "IsAnimated"), "ополченец — статичная фигура вместо анимаций");
+        Assert.IsNotNull(Get(militia, "BattlefieldSprite"), "у ополченца есть статичная фигура");
         foreach (string id in new[] { "blood_kleshchen", "zvonnik", "podkopen", "shipovik", "nitnik", "gnezdovaya_matka", "rechnoy_uzel", "wolf" })
             Invoke(sandbox, "ChangeCount", true, id, 1);
         Invoke(sandbox, "StartBattle");

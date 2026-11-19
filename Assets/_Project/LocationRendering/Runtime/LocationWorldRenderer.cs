@@ -753,9 +753,11 @@ namespace KingdomSurvival.LocationRendering
                 Unit = unit,
                 Facing = frame.Kind == ActorKind.Enemy ? HexFacing.West : HexFacing.East
             };
-            actor.Image = Image(imageObject, unit?.BattlefieldSprite != null ? unit.BattlefieldSprite : PlaceholderActor(), false);
+            // Рисунок и набор анимаций — выбранного вида (пустой слот вида —
+            // «Обычный»); «статичная фигура» у существа — без набора.
+            actor.Image = Image(imageObject, unit?.ActiveBattlefieldSprite != null ? unit.ActiveBattlefieldSprite : PlaceholderActor(), false);
             ApplyPersonStyle(actor.Image);
-            CreatureAnimationSetData set = animations != null && unit != null ? animations.FindSet(unit.AnimationSetId) : null;
+            CreatureAnimationSetData set = animations != null && unit != null ? animations.FindSet(unit.ActiveAnimationSetId) : null;
             if (set != null && set.HasAnyFrames)
             {
                 float phase = (frame.Id.GetHashCode() & 0x7fff) / 32767f * 2f;
@@ -789,14 +791,14 @@ namespace KingdomSurvival.LocationRendering
                 pivot = actor.Player.Set.Pivot;
                 offset = actor.Player.Clip?.Offset ?? Vector2.zero;
             }
-            else if (actor.Unit?.BattlefieldSprite == null)
+            else if (actor.Unit?.ActiveBattlefieldSprite == null)
             {
                 actor.Image.color = frame.Kind == ActorKind.Enemy ? new Color(.85f, .55f, .50f)
                     : frame.Kind == ActorKind.Retinue ? new Color(.70f, .76f, .85f) : Color.white;
             }
             Color tint = frame.Kind == ActorKind.Retinue ? new Color(.87f, .86f, .78f) : Color.white;
             if (frame.Wounded) tint *= new Color(.85f, .75f, .75f);
-            if (actor.Player != null || actor.Unit?.BattlefieldSprite != null) actor.Image.color = tint;
+            if (actor.Player != null || actor.Unit?.ActiveBattlefieldSprite != null) actor.Image.color = tint;
             // В тени деревьев и предметов фигура темнеет, как земля под ней (UpdateSunShade).
             actor.Image.color *= actor.Shade;
             Fit(actor.Image, height, pivot, mirrored, offset);

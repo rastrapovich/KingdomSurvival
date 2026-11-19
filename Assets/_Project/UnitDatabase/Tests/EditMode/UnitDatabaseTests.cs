@@ -16,7 +16,7 @@ namespace KingdomSurvival.UnitDatabase.Tests
                 UnitDatabaseAsset.ResourcesPath);
 
             Assert.That(database, Is.Not.Null);
-            Assert.That(database.Units.Count, Is.EqualTo(9 + 24 + 7), "9 исходных типов, 24 существа каталога ПР-12Ж и 7 существ второго эшелона ПР-16.");
+            Assert.That(database.Units.Count, Is.EqualTo(9 + 22 + 7), "9 исходных типов, 22 существа каталога ПР-12Ж (без Криволапа и Бивнестого громилы) и 7 существ второго эшелона ПР-16.");
             Assert.That(
                 database.Units.Select(unit => unit.Id).Distinct().Count(),
                 Is.EqualTo(database.Units.Count));

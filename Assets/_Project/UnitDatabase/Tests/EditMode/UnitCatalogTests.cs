@@ -19,11 +19,12 @@ namespace KingdomSurvival.UnitDatabase.Tests
         }
 
         [Test]
-        public void Catalog_Has24Creatures_WithCatalogStats()
+        public void Catalog_Has22Creatures_WithCatalogStats()
         {
             UnitDatabaseAsset database = Database();
             List<UnitDefinitionData> catalog = UnitCatalogSeed.Creatures();
-            Assert.AreEqual(24, catalog.Count);
+            // 24 существа ПР-12Ж без Криволапа и Бивнестого громилы (удалены 19.11.2026).
+            Assert.AreEqual(22, catalog.Count);
             foreach (UnitDefinitionData expected in catalog)
             {
                 UnitDefinitionData actual = database.FindById(expected.Id);
@@ -61,13 +62,14 @@ namespace KingdomSurvival.UnitDatabase.Tests
             Assert.AreEqual(UnitAbilityKind.Pounce, database.FindById("lynx").FindAbility("lynx.pounce").Kind);
             CollectionAssert.AreEquivalent(new[] { UnitAbilityKind.Attach, UnitAbilityKind.StunSpit },
                 database.FindById("blood_kleshchen").Abilities.Select(ability => ability.Kind));
-            foreach (string id in new[] { "krivolap.flank", "belorev.scatter", "chernolob.breakthrough", "chernolob.telegraph", "beregovik.pull", "beregovik.wet" })
+            foreach (string id in new[] { "belorev.scatter", "chernolob.breakthrough", "chernolob.telegraph", "beregovik.pull", "beregovik.wet" })
             {
                 UnitAbilityData disabled = abilities.Single(ability => ability.Id == id);
                 Assert.AreEqual(UnitAbilityStatus.Disabled, disabled.Status, id);
             }
             Assert.IsTrue(database.FindById("beregovik").ExcludedFromNewEncounters);
-            Assert.IsNotNull(database.FindById("krivolap"), "существо сохранено");
+            Assert.IsNull(database.FindById("krivolap"), "Криволап удалён пользователем 19.11.2026");
+            Assert.IsNull(database.FindById("bivnesty_gromila"), "Бивнестый громила удалён пользователем 19.11.2026");
             foreach (UnitDefinitionData creature in UnitAbilityMigration.SecondTier())
                 Assert.IsNotNull(database.FindById(creature.Id), creature.Id);
             Assert.IsNull(database.FindById("rzhavnik"), "Ржавник пока убран");

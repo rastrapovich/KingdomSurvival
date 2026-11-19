@@ -81,7 +81,6 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 changes.Add("zvonnik.toll: описание второй части «Метит» (своей кнопки нет)");
             }
 
-            Disable(database, changes, "krivolap", "krivolap.flank", "Решение 19.11.2026: способность убрана; существо сохранено, возможно, будет убрано позже.");
             Disable(database, changes, "belorev", "belorev.scatter", "Решение 19.11.2026: фирменные способности (натиск, рёв, устойчивость к контролю) отключены; обычная боевая запись сохранена.");
             Disable(database, changes, "chernolob", "chernolob.breakthrough", "Решение 19.11.2026: «Прорыв» отключён; обычный боец.");
             Disable(database, changes, "chernolob", "chernolob.telegraph", "Решение 19.11.2026: «Показанный рывок» отключён.");

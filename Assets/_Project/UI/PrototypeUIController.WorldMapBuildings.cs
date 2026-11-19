@@ -58,7 +58,9 @@ public partial class PrototypeUIController
             Vector2 top = MapPercentToWorldMapViewport(rect.center.x, rect.yMin);
             float width = float.IsNaN(label.resolvedStyle.width) ? 0f : label.resolvedStyle.width;
             float height = float.IsNaN(label.resolvedStyle.height) ? 0f : label.resolvedStyle.height;
-            label.style.translate = new Translate(top.x - width * 0.5f, top.y - height - 4f);
+            // Над зданием стоит «!» — подпись выше метки, чтобы не закрывать её.
+            float lift = WorldMapBuildingHasQuestMarker(rect) ? WorldMapQuestMarkerClearance() : 0f;
+            label.style.translate = new Translate(top.x - width * 0.5f, top.y - height - 4f - lift);
         }
     }
     private readonly Dictionary<string, (VisualElement Glow, Label Label)> worldMapBuildingGlows = new Dictionary<string, (VisualElement, Label)>();
@@ -558,8 +560,8 @@ public partial class PrototypeUIController
         if (worldMapViewport == null)
             return;
         // Подпись: герб стороны, которой подчиняется поселение (если есть), и название.
-        // На дальнем отдалении подпись — вход в поселение целиком (общий
-        // экран: люди, ночлег, все дела): отряд идёт туда, прибытие открывает.
+        // На дальнем отдалении клик по подписи ведёт отряд к поселению; окна
+        // при этом не открываются — внутрь входят через конкретное здание.
         VisualElement plate = new VisualElement { name = "world-map-village-plate-" + location.Id, pickingMode = PickingMode.Position };
         string plateId = location.Id;
         plate.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());

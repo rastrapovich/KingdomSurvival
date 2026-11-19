@@ -111,6 +111,21 @@ public sealed class WorldMapMarkerServiceTests
         StringAssert.Contains("(2)", info.Hint);
     }
 
+    // «!» над зданиями на живой карте: корчма и доска считаются по отдельности —
+    // метка встаёт только над тем зданием, где поручение действительно есть.
+    [Test]
+    public void OffersSplitByBuilding_TavernAndBoard()
+    {
+        post.Tavern.Offers.Add(new TavernOfferDefinition { Id = "offer.b", Label = "Коза", PersonId = "carter", ErrandId = ErrandB });
+        CollectionAssert.AreEquivalent(new[] { ErrandA, ErrandB }, WorldMapMarkerService.TavernQuestErrands(state, Village));
+        CollectionAssert.AreEquivalent(new[] { ErrandA }, WorldMapMarkerService.BoardQuestErrands(state, Village));
+        post.Board.Notices.RemoveAll(n => n.ErrandId == ErrandA);
+        Assert.AreEqual(0, WorldMapMarkerService.BoardQuestErrands(state, Village).Count, "Доска без поручений — без «!» над столбом.");
+        post.Tavern.Offers.Clear();
+        Assert.AreEqual(0, WorldMapMarkerService.TavernQuestErrands(state, Village).Count, "Корчма без поручений — без «!» над ней.");
+        Assert.AreEqual(0, WorldMapMarkerService.AvailableQuestOffers(state, Village));
+    }
+
     [Test]
     public void HiddenByConditionsOffer_IsNotRevealed()
     {

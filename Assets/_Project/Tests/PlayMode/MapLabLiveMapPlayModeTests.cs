@@ -668,8 +668,11 @@ public sealed class MapLabLiveMapPlayModeTests
             Assert.Greater(markers.Count, 0, "На карте есть метки известных мест.");
             foreach (VisualElement marker in markers)
             {
-                string id = marker.name.Substring("world-map-quest-marker-".Length);
+                string id = marker.userData as string;
                 Assert.IsTrue(campaign.FindLocation(id).IsVisibleOnMap, "Метка только у видимого места: " + id);
+                // Поселение зданиями: «!» только над зданием (корчма, доска), не в центре деревни.
+                if (campaign.FindLocation(id).IsSettlement && marker.ClassListContains("world-map-quest-marker--quest"))
+                    Assert.IsTrue(marker.ClassListContains("world-map-quest-marker--building"), "«!» поселения — над зданием: " + marker.name);
             }
             if (near != null)
             {

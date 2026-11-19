@@ -14,12 +14,17 @@ using UnityEngine.UIElements;
 // карты (открытие, загрузка, открытие и исследование мест, поручения, сутки),
 // а не каждый кадр; каждый кадр — только положение. Клик — то же, что клик по
 // месту: отряд идёт к нему (у места — вход). Задание не принимается и место не
-// исследуется кликом.
+// исследуется кликом. Поселение зданиями на живой карте (общего входа и экрана
+// поселения там нет): «!» — над конкретным зданием с поручением (корчма, столб
+// объявлений), клик по нему = клик по зданию; в точке деревни «!» не бывает.
 public partial class PrototypeUIController
 {
     private sealed class WorldMapQuestMarker
     {
         public string LocationId;
+        // Здание поселения на живой карте (tavern, board) — «!» над ним, клик =
+        // клик по зданию; null — метка места (точка или рисунок места).
+        public string Role;
         public WorldMapMarkerInfo Info;
         public VisualElement Element;
         // Якорь в процентах полотна; Lifted — якорь уже над рисунком места
@@ -61,19 +66,19 @@ public partial class PrototypeUIController
             WorldMapMarkerInfo info = WorldMapMarkerService.For(gameState, location);
             if (info.Kind == WorldMapMarkerKind.None)
                 continue;
-            alive.Add(location.Id);
-            if (!worldMapQuestMarkers.TryGetValue(location.Id, out WorldMapQuestMarker marker))
+            // Поселение зданиями на живой карте: общего входа нет — «!» только
+            // над зданием, где можно взять поручение (корчма, столб объявлений).
+            if (location.IsSettlement && SettlementMapMode(location.Id))
             {
-                marker = new WorldMapQuestMarker { LocationId = location.Id, Element = CreateWorldMapQuestMarkerElement(location.Id) };
-                worldMapQuestMarkers[location.Id] = marker;
-                worldMapQuestMarkerLayer.Add(marker.Element);
+                int shownOnBuildings = 0;
+                shownOnBuildings += AddWorldMapBuildingQuestMarker(alive, location, "tavern", WorldMapMarkerService.TavernQuestErrands(gameState, location.Id).Count, info.Unexplored);
+                shownOnBuildings += AddWorldMapBuildingQuestMarker(alive, location, "board", WorldMapMarkerService.BoardQuestErrands(gameState, location.Id).Count, info.Unexplored);
+                // «?» неизвестной деревни — в её точке, только без «!» на зданиях.
+                if (shownOnBuildings > 0 || !info.Unexplored)
+                    continue;
+                info = new WorldMapMarkerInfo(WorldMapMarkerKind.UnknownPlace, true, 0);
             }
-            if (marker.Info.Kind != info.Kind)
-                marker.StyleId = null;
-            marker.Info = info;
-            marker.Element.name = "world-map-quest-marker-" + location.Id;
-            marker.Element.EnableInClassList("world-map-quest-marker--quest", info.Kind == WorldMapMarkerKind.QuestAvailable);
-            marker.Element.EnableInClassList("world-map-quest-marker--unknown", info.Kind == WorldMapMarkerKind.UnknownPlace);
+            WorldMapQuestMarker marker = EnsureWorldMapQuestMarker(alive, location.Id, null, info);
             marker.Anchor = WorldMapQuestMarkerAnchor(location, out marker.Lifted);
         }
         List<string> gone = new List<string>();
@@ -91,11 +96,51 @@ public partial class PrototypeUIController
         worldMapQuestMarkerOrder.Sort((a, b) =>
         {
             int kind = (b.Info.Kind == WorldMapMarkerKind.QuestAvailable).CompareTo(a.Info.Kind == WorldMapMarkerKind.QuestAvailable);
-            return kind != 0 ? kind : string.CompareOrdinal(a.LocationId, b.LocationId);
+            int c = kind != 0 ? kind : string.CompareOrdinal(a.LocationId, b.LocationId);
+            return c != 0 ? c : string.CompareOrdinal(a.Role ?? string.Empty, b.Role ?? string.Empty);
         });
     }
 
-    private VisualElement CreateWorldMapQuestMarkerElement(string locationId)
+    // «!» над зданием поселения: есть поручения и здание стоит на рисунке.
+    private int AddWorldMapBuildingQuestMarker(HashSet<string> alive, LocationData location, string role, int offers, bool unexplored)
+    {
+        if (offers <= 0 || worldMapMapLab == null)
+            return 0;
+        foreach ((string id, string r, Rect rect) in worldMapMapLab.Buildings)
+        {
+            if (id != location.Id || r != role)
+                continue;
+            WorldMapQuestMarker marker = EnsureWorldMapQuestMarker(alive, location.Id, role,
+                new WorldMapMarkerInfo(WorldMapMarkerKind.QuestAvailable, unexplored, offers));
+            marker.Anchor = new Vector2(rect.center.x, rect.yMin);
+            marker.Lifted = true;
+            return 1;
+        }
+        return 0;
+    }
+
+    private WorldMapQuestMarker EnsureWorldMapQuestMarker(HashSet<string> alive, string locationId, string role, WorldMapMarkerInfo info)
+    {
+        string key = string.IsNullOrEmpty(role) ? locationId : locationId + "--" + role;
+        alive.Add(key);
+        if (!worldMapQuestMarkers.TryGetValue(key, out WorldMapQuestMarker marker))
+        {
+            marker = new WorldMapQuestMarker { LocationId = locationId, Role = role, Element = CreateWorldMapQuestMarkerElement(locationId, role) };
+            worldMapQuestMarkers[key] = marker;
+            worldMapQuestMarkerLayer.Add(marker.Element);
+        }
+        if (marker.Info.Kind != info.Kind)
+            marker.StyleId = null;
+        marker.Info = info;
+        marker.Element.name = "world-map-quest-marker-" + key;
+        marker.Element.userData = locationId;
+        marker.Element.EnableInClassList("world-map-quest-marker--quest", info.Kind == WorldMapMarkerKind.QuestAvailable);
+        marker.Element.EnableInClassList("world-map-quest-marker--unknown", info.Kind == WorldMapMarkerKind.UnknownPlace);
+        marker.Element.EnableInClassList("world-map-quest-marker--building", !string.IsNullOrEmpty(role));
+        return marker;
+    }
+
+    private VisualElement CreateWorldMapQuestMarkerElement(string locationId, string role)
     {
         VisualElement element = new VisualElement { pickingMode = PickingMode.Position };
         element.AddToClassList("world-map-quest-marker");
@@ -103,19 +148,59 @@ public partial class PrototypeUIController
         element.style.left = element.style.top = 0;
         element.style.unityBackgroundScaleMode = ScaleMode.StretchToFill;
         element.style.display = DisplayStyle.None;
-        element.RegisterCallback<PointerEnterEvent>(_ => ShowWorldMapNodeTooltip(element, locationId));
-        element.RegisterCallback<PointerLeaveEvent>(_ => HideWorldMapNodeTooltip(locationId));
-        element.RegisterCallback<DetachFromPanelEvent>(_ => HideWorldMapNodeTooltip(locationId));
+        if (string.IsNullOrEmpty(role))
+        {
+            element.RegisterCallback<PointerEnterEvent>(_ => ShowWorldMapNodeTooltip(element, locationId));
+            element.RegisterCallback<PointerLeaveEvent>(_ => HideWorldMapNodeTooltip(locationId));
+            element.RegisterCallback<DetachFromPanelEvent>(_ => HideWorldMapNodeTooltip(locationId));
+        }
+        else
+        {
+            // Над зданием — та же подсветка и подпись, что при наведении на здание.
+            element.RegisterCallback<PointerEnterEvent>(_ => SetWorldMapBuildingHover(locationId, role, true));
+            element.RegisterCallback<PointerLeaveEvent>(_ => SetWorldMapBuildingHover(locationId, role, false));
+        }
         element.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
         element.RegisterCallback<ClickEvent>(evt =>
         {
             evt.StopPropagation();
-            OnWorldMapQuestMarkerClicked(locationId);
+            if (string.IsNullOrEmpty(role))
+                OnWorldMapQuestMarkerClicked(locationId);
+            else if (gameState != null && !isGameOver && !IsSettlementScreenOpen)
+                OnWorldMapBuildingClicked(locationId, role);
         });
         return element;
     }
 
-    // То же, что клик по месту (значок, рисунок, подпись поселения).
+    private bool WorldMapBuildingHasQuestMarker(Rect rect)
+    {
+        foreach (WorldMapQuestMarker marker in worldMapQuestMarkerOrder)
+            if (!string.IsNullOrEmpty(marker.Role) && marker.Element.resolvedStyle.display != DisplayStyle.None &&
+                Mathf.Abs(marker.Anchor.x - rect.center.x) < 0.001f && Mathf.Abs(marker.Anchor.y - rect.yMin) < 0.001f)
+                return true;
+        return false;
+    }
+
+    // Высота метки с отступом — на сколько поднять подпись здания.
+    private static float WorldMapQuestMarkerClearance()
+    {
+        WorldMapMarkerArt art = WorldMapMarkerArt.Load();
+        return (art != null ? art.SymbolHeight + art.Gap : 40f) + 2f;
+    }
+
+    private void SetWorldMapBuildingHover(string settlementId, string role, bool on)
+    {
+        if (!worldMapBuildingGlows.TryGetValue(GlowKey(settlementId, role), out (VisualElement Glow, Label Label) ui))
+            return;
+        if (!on && worldMapApproachRole == role)
+            return;
+        ui.Glow.style.opacity = on ? 1f : 0f;
+        ui.Label.style.display = on ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
+    // Метка места (не здания): то же, что клик по месту (значок, рисунок,
+    // подпись поселения). У поселения зданиями — только путь к нему, окна
+    // открываются зданиями.
     private void OnWorldMapQuestMarkerClicked(string locationId)
     {
         if (gameState == null || isGameOver || IsSettlementScreenOpen)

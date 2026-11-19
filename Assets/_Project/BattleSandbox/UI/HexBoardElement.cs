@@ -284,6 +284,14 @@ namespace KingdomSurvival.BattleSandbox
             Vector2 pointerPosition = new Vector2(evt.localPosition.x, evt.localPosition.y);
             HexCoord best;
             if (!TryGetHexAt(pointerPosition, out best))
+            {
+                if (abilityTargeting != null && evt.button == 1)
+                    AbilityTargetingCancelled?.Invoke();
+                return;
+            }
+
+            // ПР-16: режим выбора цели способности перехватывает клики.
+            if (HandleAbilityPointerDown(evt, best))
                 return;
 
             if (evt.button == 1)
@@ -328,11 +336,22 @@ namespace KingdomSurvival.BattleSandbox
 
             HexCoord coord;
             if (!TryGetHexAt(pointerPosition, out coord))
+            {
+                UpdateAbilityHover(null);
+                return;
+            }
+
+            if (UpdateAbilityHover(coord))
                 return;
 
             SandboxUnitState attacker = battle.CurrentUnit;
+            string cellNote = DescribeCell(coord);
             if (attacker == null || attacker.Team != SandboxTeam.Player)
+            {
+                tooltip = cellNote;
                 return;
+            }
+            tooltip = cellNote;
 
             SandboxUnitState target = battle.GetUnitAt(coord);
             if (target != null && target.Team != attacker.Team)
@@ -591,7 +610,7 @@ namespace KingdomSurvival.BattleSandbox
             paintLayout = layout;
             paintContext = context;
             IReadOnlyDictionary<HexCoord, int> reachable =
-                !IsAnimating && current != null && current.Team == SandboxTeam.Player
+                !IsAnimating && abilityTargeting == null && current != null && current.Team == SandboxTeam.Player
                     ? battle.GetReachable(current.Id)
                     : new Dictionary<HexCoord, int>();
 
@@ -635,6 +654,8 @@ namespace KingdomSurvival.BattleSandbox
             if (inkBoardGrid)
                 PaintInkBoardGrid(layout);
 
+            DrawAbilityGround(painter, layout);
+
             if (!IsAnimating && reachable.Count > 0)
             {
                 foreach (KeyValuePair<HexCoord, int> pair in reachable)
@@ -665,6 +686,8 @@ namespace KingdomSurvival.BattleSandbox
                     continue;
                 DrawUnit(painter, layout, unit, current);
             }
+
+            DrawAbilityOverlay(painter, layout);
 
             if (attackCursorActive && !IsAnimating)
             {
@@ -885,12 +908,18 @@ namespace KingdomSurvival.BattleSandbox
                 center += targetOffset;
             }
 
-            bool hasBattlefieldSprite = HasBattlefieldSprite(unit.TypeId);
-            string tokenText = GetTokenText(unit.TypeId, out float tokenScale);
+            // ПР-16: скрытый Срубник виден подозрительным пнём без имени.
+            bool hasBattlefieldSprite = !unit.IsHidden && HasBattlefieldSprite(unit.TypeId);
+            string tokenText = unit.IsHidden ? "?" : GetTokenText(unit.TypeId, out _);
+            float tokenScale = 1f;
+            if (!unit.IsHidden)
+                GetTokenText(unit.TypeId, out tokenScale);
             float radius = layout.Size * 0.55f * (hasBattlefieldSprite ? 1f : tokenScale);
             if (!hasBattlefieldSprite)
             {
-                Color fill = unit.Team == SandboxTeam.Player
+                Color fill = unit.IsHidden
+                    ? new Color(0.36f, 0.27f, 0.17f, 1f)
+                    : unit.Team == SandboxTeam.Player
                     ? new Color(0.78f, 0.62f, 0.27f, 1f)
                     : new Color(0.70f, 0.25f, 0.22f, 1f);
                 if (IsAnimating && unit.Id == animationTargetId && targetFlash > 0f)
@@ -1077,7 +1106,7 @@ namespace KingdomSurvival.BattleSandbox
                 Vector2 healthCenter = unitCenter;
                 float healthTop = unitCenter.y + layout.Size * 0.34f;
 
-                SandboxUnitVisual visual = GetVisual(unit.TypeId);
+                SandboxUnitVisual visual = unit.IsHidden ? HiddenStumpVisual : GetVisual(unit.TypeId);
                 if (visual != null && visual.HasImage)
                 {
                     Image image;
@@ -1175,7 +1204,7 @@ namespace KingdomSurvival.BattleSandbox
                     depthEntries.Add((unit.Id, unitCenter.y, token));
                 }
 
-                if (shownAlive)
+                if (shownAlive && !unit.IsHidden)
                 {
                     visibleUnitIds.Add(unit.Id);
                     SyncHealthBar(unit, healthCenter, healthTop, layout.Size * HealthBarWidthScale);

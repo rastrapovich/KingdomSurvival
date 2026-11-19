@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using KingdomSurvival.UnitDatabase;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -1011,6 +1012,8 @@ namespace KingdomSurvival.BattleSandbox
                             : openedState.IsGuarding
                                 ? "Состояние: защитная стойка"
                                 : "Состояние: в бою";
+            stateValue.text += AbilityLines(openedDefinition, openedState);
+            stateValue.style.whiteSpace = WhiteSpace.Normal;
 
             float fraction = Mathf.Clamp01(
                 (float)hitPoints / Mathf.Max(1, openedDefinition.MaxHitPoints));
@@ -1020,6 +1023,38 @@ namespace KingdomSurvival.BattleSandbox
                 : fraction > 0.30f
                     ? new Color(0.72f, 0.57f, 0.25f, 1f)
                     : new Color(0.66f, 0.28f, 0.26f, 1f);
+        }
+
+        // ПР-16: способности в карточке — название, тип, эффект, цена, КД и
+        // текущие состояния способностей бойца.
+        private static string AbilityLines(SandboxUnitDefinition definition, SandboxUnitState state)
+        {
+            List<string> lines = new List<string>();
+            if (state != null && !state.IsDefeated)
+            {
+                List<string> flags = new List<string>();
+                if (state.IsStunned) flags.Add("ошеломлён");
+                if (state.IsNumbed) flags.Add("оцепенение");
+                if (state.NumbImmunity > 0) flags.Add("иммунитет к оцепенению");
+                if (state.IsAttached) flags.Add("сидит на жертве");
+                if (state.IsUnderground) flags.Add("под землёй");
+                if (state.IsStuckInTunnel) flags.Add("зажат в тоннеле");
+                if (state.AwaitingPlacement) flags.Add("ждёт места");
+                if (flags.Count > 0)
+                    lines.Add("Эффекты: " + string.Join(", ", flags));
+            }
+            if (definition.HasTag(SandboxCombatTagRules.Pack))
+                lines.Add("• Стая (тег): +" + SandboxCombatTagRules.PackAttackBonus + " Атака, если рядом с целью другой зверь стаи.");
+            foreach (SandboxAbilityDefinition ability in definition.Abilities)
+            {
+                int cooldownLeft = 0;
+                if (state != null && ability.IsActive && state.TryGetAbilityReadyAt(ability.Id, out int readyAt))
+                    cooldownLeft = Math.Max(0, readyAt - state.ActivationCount - 1);
+                lines.Add("• " + ability.Title + " (" + ability.TypeLabel +
+                          (ability.IsActive ? ", 1 действие" + (ability.Cooldown > 0 ? ", КД " + ability.Cooldown : string.Empty) : string.Empty) +
+                          (cooldownLeft > 0 ? ", ещё " + cooldownLeft : string.Empty) + "): " + SandboxAbilityDefaults.Explain(ability));
+            }
+            return lines.Count == 0 ? string.Empty : "\n" + string.Join("\n", lines);
         }
 
         private void PositionWindow(Vector2? anchorPosition)

@@ -178,7 +178,9 @@ namespace KingdomSurvival.BattleSandbox
                     source.Movement,
                     source.Initiative,
                     source.AttackRange,
-                    source.TagIds);
+                    source.TagIds,
+                    null,
+                    ConvertAbilities(source));
 
                 visuals[source.Id] = new SandboxUnitVisual(
                     source.Portrait,
@@ -191,7 +193,10 @@ namespace KingdomSurvival.BattleSandbox
                     SandboxUnitVisual.TokenScaleFor(source.Size),
                     animations != null ? animations.FindSet(source.AnimationSetId) : null);
 
-                options.Add(new SandboxUnitOption(definition, GroupLabel(source.Category)));
+                // ПР-16: выведенное из набора существо не предлагается в
+                // полигоне, но старые ссылки кампании его находят.
+                if (!source.ExcludedFromNewEncounters)
+                    options.Add(new SandboxUnitOption(definition, GroupLabel(source.Category)));
                 if (source.Category == UnitCategory.Fighter)
                     fighters.Add(definition);
                 else if (source.Category == UnitCategory.Creature)
@@ -209,6 +214,39 @@ namespace KingdomSurvival.BattleSandbox
             foreach (KeyValuePair<string, SandboxUnitDefinition> creature in creatures)
                 content.CreaturesById[creature.Key] = creature.Value;
             return content;
+        }
+
+        // ПР-16: в бой идут только активные способности с подключённой механикой.
+        internal static List<SandboxAbilityDefinition> ConvertAbilities(UnitDefinitionData source)
+        {
+            List<SandboxAbilityDefinition> result = new List<SandboxAbilityDefinition>();
+            if (source == null)
+                return result;
+            foreach (UnitAbilityData ability in source.Abilities)
+            {
+                if (ability == null || ability.Status != UnitAbilityStatus.Active || ability.Kind == UnitAbilityKind.None)
+                    continue;
+                if (!Enum.TryParse(ability.Kind.ToString(), out SandboxAbilityKind kind))
+                    continue;
+                result.Add(new SandboxAbilityDefinition(
+                    ability.Id,
+                    ability.Title,
+                    kind,
+                    ability.Cooldown,
+                    ability.RangeMin,
+                    ability.RangeMax,
+                    ability.PathMin,
+                    ability.PathMax,
+                    (decimal)Math.Round(ability.DamageMultiplier, 3),
+                    ability.Amount,
+                    ability.ObjectHitPoints,
+                    ability.Duration,
+                    ability.Limit,
+                    ability.Push,
+                    ability.Description,
+                    ability.SpawnUnitId));
+            }
+            return result;
         }
 
         private static string GroupLabel(UnitCategory category)

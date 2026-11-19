@@ -20,7 +20,7 @@ namespace KingdomSurvival.BattleSandbox
             float[] durations = new float[path.Count - 1];
             for (int i = 0; i < durations.Length; i++)
             {
-                bool difficult = battle != null && battle.GetTerrain(path[i + 1]) == SandboxTerrain.Difficult;
+                bool difficult = battle != null && battle.GetStepCost(path[i + 1]) > 1;
                 durations[i] = baseDuration * (difficult ? DifficultTerrainSlowdown : 1f);
             }
             return durations;

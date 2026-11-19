@@ -85,7 +85,8 @@ namespace KingdomSurvival.BattleSandbox
             IEnumerable<SandboxUnitDefinition> enemyEncounter,
             int? terrainSeed = null,
             int playerFirstRoundInitiativeBonus = 0,
-            IEnumerable<HexCoord> disabledCells = null)
+            IEnumerable<HexCoord> disabledCells = null,
+            bool hiddenUnitsScouted = false)
         {
             if (fighters == null)
                 throw new ArgumentNullException(nameof(fighters));
@@ -163,6 +164,7 @@ namespace KingdomSurvival.BattleSandbox
                 terrain,
                 blocked);
             battle.PlayerFirstRoundInitiativeBonus = playerFirstRoundInitiativeBonus;
+            battle.HiddenUnitsScouted = hiddenUnitsScouted;
             battle.Start();
             return battle;
         }

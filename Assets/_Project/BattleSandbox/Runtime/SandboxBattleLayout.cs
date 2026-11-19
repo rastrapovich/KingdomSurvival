@@ -108,6 +108,11 @@ namespace KingdomSurvival.BattleSandbox
             return errors;
         }
 
+        // ПР-16: разведка заметила скрытых существ (входной параметр встречи)
+        // и стартовая вода раскладки.
+        public bool HiddenUnitsScouted { get; set; }
+        public List<HexCoord> WaterCells { get; } = new List<HexCoord>();
+
         public SandboxBattle CreateBattle()
         {
             List<string> errors = Validate();
@@ -141,6 +146,8 @@ namespace KingdomSurvival.BattleSandbox
                 BlockedCells);
             battle.PlayerFirstRoundInitiativeBonus = PlayerFirstRoundInitiativeBonus;
             battle.LeaderUnitId = LeaderUnitId;
+            battle.HiddenUnitsScouted = HiddenUnitsScouted;
+            battle.SetInitialWater(WaterCells);
             battle.Start();
             return battle;
         }

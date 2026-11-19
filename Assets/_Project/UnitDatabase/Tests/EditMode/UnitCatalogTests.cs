@@ -43,18 +43,53 @@ namespace KingdomSurvival.UnitDatabase.Tests
         }
 
         [Test]
-        public void Abilities_WaitForMechanic_UntilPR16()
+        // ПР-16 (решения пользователя 19.11.2026): способности включены
+        // механикой, исключённые — отключены, Береговик выведен из набора.
+        public void Abilities_PR16_DecisionsApplied()
         {
             UnitDatabaseAsset database = Database();
+            Assert.AreEqual(UnitDatabaseAsset.CurrentSchemaVersion, database.SchemaVersion);
             List<UnitAbilityData> abilities = UnitCatalogSeed.Creatures()
                 .SelectMany(unit => database.FindById(unit.Id).Abilities)
                 .ToList();
-            Assert.Greater(abilities.Count, 15);
-            Assert.IsTrue(abilities.All(ability => ability.Status == UnitAbilityStatus.WaitsForMechanic));
-            Assert.AreEqual(UnitCombatBrick.AttachPersistent,
-                database.FindById("blood_kleshchen").Abilities.Single().Brick);
-            CollectionAssert.AreEquivalent(new[] { UnitCombatBrick.StatusMark, UnitCombatBrick.Telegraph },
-                database.FindById("zvonnik").Abilities.Select(ability => ability.Brick));
+            Assert.IsFalse(abilities.Any(ability => ability.Status == UnitAbilityStatus.WaitsForMechanic),
+                string.Join(", ", abilities.Where(ability => ability.Status == UnitAbilityStatus.WaitsForMechanic).Select(ability => ability.Id)));
+
+            UnitDefinitionData wolf = database.FindById("wolf");
+            Assert.IsTrue(wolf.HasTag("combat.pack"));
+            Assert.IsNull(wolf.FindAbility("wolf.pack"), "«Стая» — тег, не способность");
+            Assert.AreEqual(UnitAbilityKind.Pounce, database.FindById("lynx").FindAbility("lynx.pounce").Kind);
+            CollectionAssert.AreEquivalent(new[] { UnitAbilityKind.Attach, UnitAbilityKind.StunSpit },
+                database.FindById("blood_kleshchen").Abilities.Select(ability => ability.Kind));
+            foreach (string id in new[] { "krivolap.flank", "belorev.scatter", "chernolob.breakthrough", "chernolob.telegraph", "beregovik.pull", "beregovik.wet" })
+            {
+                UnitAbilityData disabled = abilities.Single(ability => ability.Id == id);
+                Assert.AreEqual(UnitAbilityStatus.Disabled, disabled.Status, id);
+            }
+            Assert.IsTrue(database.FindById("beregovik").ExcludedFromNewEncounters);
+            Assert.IsNotNull(database.FindById("krivolap"), "существо сохранено");
+            foreach (UnitDefinitionData creature in UnitAbilityMigration.SecondTier())
+                Assert.IsNotNull(database.FindById(creature.Id), creature.Id);
+            Assert.IsNull(database.FindById("rzhavnik"), "Ржавник пока убран");
+        }
+
+        [Test]
+        public void AbilityMigration_IsIdempotent_AndKeepsAuthorValues()
+        {
+            UnitDatabaseAsset copy = Object.Instantiate(Database());
+            try
+            {
+                int units = copy.Units.Count;
+                float lynxMultiplier = copy.FindById("lynx").FindAbility("lynx.pounce").DamageMultiplier;
+                Assert.IsEmpty(UnitAbilityMigration.Apply(copy), "повторный запуск ничего не меняет");
+                Assert.IsEmpty(UnitCatalogSeed.AddMissing(copy), "засев не возвращает исключённое");
+                Assert.AreEqual(units, copy.Units.Count);
+                Assert.AreEqual(lynxMultiplier, copy.FindById("lynx").FindAbility("lynx.pounce").DamageMultiplier);
+            }
+            finally
+            {
+                Object.DestroyImmediate(copy);
+            }
         }
 
         [Test]

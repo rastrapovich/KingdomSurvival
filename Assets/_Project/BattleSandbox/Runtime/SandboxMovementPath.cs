@@ -37,7 +37,7 @@ namespace KingdomSurvival.BattleSandbox
 
             while (current != unit.Position)
             {
-                int stepCost = battle.GetTerrain(current) == SandboxTerrain.Difficult ? 2 : 1;
+                int stepCost = battle.GetStepCost(current);
                 bool found = false;
                 HexCoord bestPredecessor = default;
                 int bestPredecessorCost = 0;
@@ -49,8 +49,10 @@ namespace KingdomSurvival.BattleSandbox
                     {
                         neighborCost = 0;
                     }
-                    else if (!reachable.TryGetValue(neighbor, out neighborCost))
+                    else if (!reachable.TryGetValue(neighbor, out neighborCost) ||
+                             battle.IsMovementStopCell(unit, neighbor))
                     {
+                        // Через гекс нити маршрут не продолжается.
                         continue;
                     }
 

@@ -11,6 +11,10 @@ namespace KingdomSurvival.BattleSandbox
         public const string Armored = "trait.armored";
         public const string BeastSlayer = "trait.beast_slayer";
         public const string HumanSlayer = "trait.human_slayer";
+        // ПР-16: тег «Стая» (Волк) — правило, не кнопка.
+        public const string Pack = "combat.pack";
+        // Рабочая настройка брифа 19.11.2026, не окончательный баланс.
+        public static int PackAttackBonus = SandboxBattle.PackBonusDefault;
 
         public const decimal SlayerAttackMultiplier = 1.50m;
         public const decimal RangedMeleeAttackMultiplier = 0.50m;

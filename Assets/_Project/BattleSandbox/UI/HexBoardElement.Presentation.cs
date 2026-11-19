@@ -242,6 +242,10 @@ namespace KingdomSurvival.BattleSandbox
         {
             if (unit == null)
                 return false;
+            // ПР-16: сидящий на бойце, ушедший под землю и ждущий места не
+            // занимают гекс — на поле их показывают метки, а не фигура.
+            if (!unit.IsDefeated && unit.IsOffBoard)
+                return false;
             if (vanishAfterStep.Contains(unit.Id))
                 return true;
             if (presentations.TryGetValue(unit.Id, out UnitPresentation presentation) &&

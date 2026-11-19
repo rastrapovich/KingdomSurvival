@@ -54,7 +54,40 @@ namespace KingdomSurvival.UnitDatabase
     {
         // Записана в базе, но не действует: её кирпича ещё нет.
         WaitsForMechanic,
-        Active
+        Active,
+        // ПР-16 (19.11.2026): выключена решением автора; запись и история
+        // сохранены, в бой не идёт и засевом не возвращается.
+        Disabled
+    }
+
+    // ПР-16: механика способности. Имена совпадают с SandboxAbilityKind боя —
+    // адаптер переносит их по имени. None — механики нет (запись-описание).
+    public enum UnitAbilityKind
+    {
+        None,
+        Pounce,
+        Charge,
+        BreakGuard,
+        Shove,
+        Attach,
+        StunSpit,
+        NumbBite,
+        Engulf,
+        VineGrab,
+        ChimeMark,
+        Burrow,
+        Call,
+        ConsumeCorpse,
+        WeaveThread,
+        TendrilGrab,
+        PitCycle,
+        LayEgg,
+        KiteAfterShot,
+        KeepDistance,
+        FeedOnNumbed,
+        RegenOnWater,
+        HiddenStart,
+        Flood
     }
 
     // Фирменная способность существа как данные: включается статусом в базе,
@@ -68,12 +101,86 @@ namespace KingdomSurvival.UnitDatabase
         [SerializeField] private UnitCombatBrick brick = UnitCombatBrick.Extension;
         [SerializeField] private UnitAbilityStatus status = UnitAbilityStatus.WaitsForMechanic;
 
+        // ПР-16: механика и её числа — рабочие настройки первой версии
+        // баланса (бриф 19.11.2026), правятся здесь, а не в коде.
+        [Header("Механика (ПР-16)")]
+        [SerializeField] private UnitAbilityKind kind = UnitAbilityKind.None;
+        [SerializeField, Min(0), Tooltip("Пропускаемых собственных активаций после применения.")] private int cooldown;
+        [SerializeField, Min(0)] private int rangeMin;
+        [SerializeField, Min(0)] private int rangeMax;
+        [SerializeField, Min(0), Tooltip("Длина прыжка/разгона/нити.")] private int pathMin;
+        [SerializeField, Min(0)] private int pathMax;
+        [SerializeField, Min(0f), Tooltip("Множитель базового Урона.")] private float damageMultiplier = 1f;
+        [SerializeField, Min(0), Tooltip("Тик урона, % лечения, число яиц/просадок/клеток разлива.")] private int amount;
+        [SerializeField, Min(0), Tooltip("HP объекта: лоза, нить, яйцо, жгут.")] private int objectHitPoints;
+        [SerializeField, Min(0), Tooltip("Срок в раундах или активациях.")] private int duration;
+        [SerializeField, Min(0), Tooltip("Лимит целей/объектов/длины связи.")] private int limit;
+        [SerializeField, Min(0), Tooltip("Отбрасывание/подтягивание, гексов.")] private int push;
+        [SerializeField, Tooltip("ID существа, которое порождает способность.")] private string spawnUnitId = string.Empty;
+
         public string Id => id;
         public string Title => title;
         public string Description => description;
         public UnitCombatBrick Brick => brick;
         public UnitAbilityStatus Status => status;
         public bool IsActive => status == UnitAbilityStatus.Active;
+        public UnitAbilityKind Kind => kind;
+        public int Cooldown => cooldown;
+        public int RangeMin => rangeMin;
+        public int RangeMax => rangeMax;
+        public int PathMin => pathMin;
+        public int PathMax => pathMax;
+        public float DamageMultiplier => damageMultiplier;
+        public int Amount => amount;
+        public int ObjectHitPoints => objectHitPoints;
+        public int Duration => duration;
+        public int Limit => limit;
+        public int Push => push;
+        public string SpawnUnitId => spawnUnitId ?? string.Empty;
+
+        // Миграция ПР-16: адресная установка механики и чисел.
+        public void SetMechanic(UnitAbilityKind newKind, int newCooldown, int newRangeMin, int newRangeMax, int newPathMin, int newPathMax,
+            float newDamageMultiplier, int newAmount, int newObjectHitPoints, int newDuration, int newLimit, int newPush, string newSpawnUnitId)
+        {
+            kind = newKind;
+            cooldown = newCooldown;
+            rangeMin = newRangeMin;
+            rangeMax = newRangeMax;
+            pathMin = newPathMin;
+            pathMax = newPathMax;
+            damageMultiplier = newDamageMultiplier;
+            amount = newAmount;
+            objectHitPoints = newObjectHitPoints;
+            duration = newDuration;
+            limit = newLimit;
+            push = newPush;
+            spawnUnitId = newSpawnUnitId ?? string.Empty;
+        }
+
+        public void SetStatus(UnitAbilityStatus value)
+        {
+            status = value;
+        }
+
+        public void SetText(string newTitle, string newDescription)
+        {
+            if (!string.IsNullOrWhiteSpace(newTitle))
+                title = newTitle;
+            if (newDescription != null)
+                description = newDescription;
+        }
+
+        public static UnitAbilityData Create(string id, string title, UnitCombatBrick brick, UnitAbilityStatus status, string description)
+        {
+            return new UnitAbilityData
+            {
+                id = id ?? string.Empty,
+                title = title ?? string.Empty,
+                brick = brick,
+                description = description ?? string.Empty,
+                status = status
+            };
+        }
 
         public static UnitAbilityData WaitingFor(string id, string title, UnitCombatBrick brick, string description)
         {
@@ -102,6 +209,11 @@ namespace KingdomSurvival.UnitDatabase
         public string Category => category;
         public Color Color => color;
         public string Description => description;
+
+        public static UnitTagDefinition Create(string id, string displayLabel, string category, Color color, string description)
+        {
+            return new UnitTagDefinition { id = id, displayLabel = displayLabel, category = category, color = color, description = description };
+        }
     }
 
     [Serializable]
@@ -147,6 +259,46 @@ namespace KingdomSurvival.UnitDatabase
         [Header("Существо")]
         [SerializeField] private UnitSize size = UnitSize.Medium;
         [SerializeField] private List<UnitAbilityData> abilities = new List<UnitAbilityData>();
+
+        // ПР-16 (19.11.2026): существо выведено из активного набора — не
+        // предлагается в полигоне и редакторе мест, засев его не вернёт. Старые
+        // ссылки (сохранения, места) по-прежнему находят запись.
+        [Header("Доступность")]
+        [SerializeField] private bool excludedFromNewEncounters;
+        [SerializeField, TextArea(1, 3)] private string exclusionNote = string.Empty;
+
+        public bool ExcludedFromNewEncounters => excludedFromNewEncounters;
+        public string ExclusionNote => exclusionNote ?? string.Empty;
+
+        public void Exclude(string note)
+        {
+            excludedFromNewEncounters = true;
+            exclusionNote = note ?? string.Empty;
+        }
+
+        public bool RemoveAbility(string abilityId)
+        {
+            return abilities.RemoveAll(item => item != null && item.Id == abilityId) > 0;
+        }
+
+        public void AddAbility(UnitAbilityData ability)
+        {
+            if (ability != null && abilities.TrueForAll(item => item == null || item.Id != ability.Id))
+                abilities.Add(ability);
+        }
+
+        public UnitAbilityData FindAbility(string abilityId)
+        {
+            return abilities.Find(item => item != null && item.Id == abilityId);
+        }
+
+        public bool AddTag(string tagId)
+        {
+            if (string.IsNullOrWhiteSpace(tagId) || HasTag(tagId))
+                return false;
+            tagIds.Add(tagId);
+            return true;
+        }
 
         public string Id => id;
         public UnitSize Size => size;
@@ -246,7 +398,9 @@ namespace KingdomSurvival.UnitDatabase
         // Схема 3 (ПР-12З): ссылка на набор анимаций; пустая у старых записей.
         // Схема 4 (01.10.2026): убраны готовые составы и засада тестового боя —
         // полигон собирает обе стороны сам; старые поля в файле игнорируются.
-        public const int CurrentSchemaVersion = 4;
+        // Схема 5 (ПР-16, 19.11.2026): механика способностей и доступность
+        // существ. Переход выполняет UnitAbilityMigration (Editor) адресно по ID.
+        public const int CurrentSchemaVersion = 5;
 
 
         [SerializeField, HideInInspector] private int schemaVersion;
@@ -275,6 +429,14 @@ namespace KingdomSurvival.UnitDatabase
             }
 
             schemaVersion = CurrentSchemaVersion;
+            return true;
+        }
+
+        public bool AddTagIfMissing(UnitTagDefinition tag)
+        {
+            if (tag == null || string.IsNullOrWhiteSpace(tag.Id) || FindTag(tag.Id) != null)
+                return false;
+            tags.Add(tag);
             return true;
         }
 
@@ -392,6 +554,8 @@ namespace KingdomSurvival.UnitDatabase
                         issues.Add(unit.Id + ": повторяющийся ID способности " + ability.Id + ".");
                     else if (string.IsNullOrWhiteSpace(ability.Title))
                         issues.Add(unit.Id + ": у способности " + ability.Id + " нет названия.");
+                    else if (ability.Kind == UnitAbilityKind.LayEgg && !string.IsNullOrEmpty(ability.SpawnUnitId) && FindById(ability.SpawnUnitId) == null)
+                        issues.Add(unit.Id + ": способность " + ability.Id + " порождает неизвестное существо " + ability.SpawnUnitId + ".");
                 }
             }
         }

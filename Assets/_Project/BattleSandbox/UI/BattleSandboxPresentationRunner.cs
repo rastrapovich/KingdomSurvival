@@ -369,6 +369,15 @@ namespace KingdomSurvival.BattleSandbox
             if (endTurn is Button endTurnButton)
                 StyleInteractiveButton(endTurnButton);
             // ПР-12К: отход написанного боя — рядом с действиями, не на поле.
+            // ПР-16: контекстные действия способностей — над кнопками хода.
+            VisualElement context = sidebar.Q<VisualElement>("battle-context-actions");
+            if (context != null)
+            {
+                context.RemoveFromHierarchy();
+                context.style.marginTop = 0f;
+                context.style.marginBottom = 6f;
+                actions.Insert(0, context);
+            }
             Button retreat = sidebar.Q<Button>("campaign-retreat-button");
             if (retreat != null)
             {

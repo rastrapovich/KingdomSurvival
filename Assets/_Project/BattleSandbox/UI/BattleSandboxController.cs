@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 namespace KingdomSurvival.BattleSandbox
 {
     [RequireComponent(typeof(UIDocument))]
-    public sealed class BattleSandboxController : MonoBehaviour
+    public sealed partial class BattleSandboxController : MonoBehaviour
     {
         private readonly List<string> battleLog = new List<string>();
 
@@ -47,6 +47,7 @@ namespace KingdomSurvival.BattleSandbox
             battleGeneration++;
             enemyStepScheduled = false;
             combatAnimationRunning = false;
+            ClearAbilitySelection();
         }
 
         private void OnEnable()
@@ -305,6 +306,7 @@ namespace KingdomSurvival.BattleSandbox
 
             battle = SandboxRoster.CreateBattle(fighters, BuildCampaignEnemies(), campaignBattle.Seed,
                 campaignBattle.PlayerFirstRoundInitiativeBonus, BattlefieldFrame.DisabledCells(ActiveBattlefield()));
+            ConfigureAbilityBattle();
 
             // ПР-10: пал герой — бой проигран.
             for (int i = 0; i < campaignParticipants.Count; i++)
@@ -436,6 +438,7 @@ namespace KingdomSurvival.BattleSandbox
                 return false;
             }
             battle = layout.CreateBattle();
+            ConfigureAbilityBattle();
             return true;
         }
 
@@ -486,18 +489,15 @@ namespace KingdomSurvival.BattleSandbox
             StatModifier bonus = ProgressionRules.Current.GetProfile(definition.Id).CumulativeBonus(level);
             if (bonus.IsZero)
                 return definition;
-            return new SandboxUnitDefinition(
-                definition.Id,
-                definition.RoleLabel,
-                definition.Role,
+            // ПР-16: способности сохраняются и у противника с уровнем.
+            return definition.WithStats(
                 Mathf.Max(1, definition.MaxHitPoints + bonus.MaxHitPoints),
                 Mathf.Max(0, definition.Attack + bonus.Attack),
                 Mathf.Max(0, definition.Defense + bonus.Defense),
                 Mathf.Max(1, definition.Damage + bonus.Damage),
                 Mathf.Max(1, definition.Movement + bonus.Movement),
                 Mathf.Max(0, definition.Initiative + bonus.Initiative),
-                Mathf.Max(1, definition.AttackRange + bonus.AttackRange),
-                definition.TagIds);
+                Mathf.Max(1, definition.AttackRange + bonus.AttackRange));
         }
 
         private readonly List<int> campaignEnemyLevels = new List<int>();
@@ -581,7 +581,10 @@ namespace KingdomSurvival.BattleSandbox
 
             // Противники боя — их «цена» составляет банк опыта (§27.2).
             int enemyIndex = 0;
-            foreach (SandboxUnitState enemy in battle.Units.Where(candidate => candidate.Team == SandboxTeam.Enemy))
+            // ПР-16: порождённые матки паразиты в награду не входят — их
+            // опыт уже учтён в цене самой матки (нет фермы опыта).
+            foreach (SandboxUnitState enemy in battle.Units.Where(candidate => candidate.Team == SandboxTeam.Enemy &&
+                                                                               string.IsNullOrEmpty(candidate.SpawnedBySourceId)))
             {
                 int level = enemyIndex < campaignEnemyLevels.Count ? campaignEnemyLevels[enemyIndex] : 1;
                 enemyIndex++;
@@ -967,6 +970,14 @@ namespace KingdomSurvival.BattleSandbox
             help.style.marginTop = 6f;
             help.style.unityTextAlign = TextAnchor.MiddleCenter;
             center.Add(help);
+
+            // ПР-16: тестовая настройка входного параметра встречи — разведка
+            // заметила скрытых (Срубник). Не мост путешествия.
+            Toggle scouted = new Toggle("Разведка заметила скрытых") { value = sandboxHiddenScouted, name = "sandbox-hidden-scouted" };
+            scouted.style.marginTop = 10f;
+            scouted.style.color = new Color(0.70f, 0.68f, 0.62f, 1f);
+            scouted.RegisterValueChangedCallback(evt => sandboxHiddenScouted = evt.newValue);
+            center.Add(scouted);
             return center;
         }
 
@@ -1068,7 +1079,9 @@ namespace KingdomSurvival.BattleSandbox
             // должен унаследовать его флаги.
             ResetCombatFlow();
             battle = SandboxRoster.CreateBattle(fighters, enemies,
-                disabledCells: BattlefieldFrame.DisabledCells(ActiveBattlefield()));
+                disabledCells: BattlefieldFrame.DisabledCells(ActiveBattlefield()),
+                hiddenUnitsScouted: sandboxHiddenScouted);
+            ConfigureAbilityBattle();
             battleLog.Clear();
             battleLog.Add("Бой начался. Противник: " + string.Join(", ", enemies.GroupBy(enemy => enemy.RoleLabel)
                 .Select(group => group.Count() > 1 ? group.Key + " ×" + group.Count() : group.Key)) + ".");
@@ -1135,6 +1148,8 @@ namespace KingdomSurvival.BattleSandbox
             board.HexClicked += OnBoardHexClicked;
             board.UnitDetailsRequested += OnBoardUnitDetailsRequested;
             board.AttackRequested += OnBoardAttackRequested;
+            board.AbilityCellClicked += OnAbilityCellClicked;
+            board.AbilityTargetingCancelled += CancelAbilityTargeting;
             body.Add(CreateBattlefieldSurface(board));
 
             VisualElement sidebar = CreatePanel();
@@ -1236,9 +1251,17 @@ namespace KingdomSurvival.BattleSandbox
                 sidebar.Add(retreatButton);
             }
 
+            // ПР-16: контекстные действия — снять клещня, вырваться, лоза.
+            // Последним ребёнком панели: оформление боя опирается на индексы
+            // первых девяти и переносит эту колонку к кнопкам действий.
+            contextPanel = new VisualElement { name = "battle-context-actions" };
+            contextPanel.style.marginTop = 6f;
+            sidebar.Add(contextPanel);
+
             body.Add(sidebar);
             screen.Add(body);
             screen.Add(BuildSpeedControl());
+            screen.Add(BuildAbilityBar());
         }
 
         // ПР-12З: общая скорость показа боя. Добавляется последним ребёнком
@@ -1291,7 +1314,9 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             }
 
-            SandboxUnitState occupant = battle.GetUnitAt(coord);
+            // ПР-16: на союзнике может сидеть паразит, а на маркере выхода —
+            // зажатый в тоннеле: их выбирают как цель.
+            SandboxUnitState occupant = battle.GetSelectableAt(coord, SandboxTeam.Player);
             if (occupant != null)
             {
                 if (occupant.Team == SandboxTeam.Enemy)
@@ -1351,6 +1376,12 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState unit = battle.GetUnit(unitId);
             if (unit == null)
                 return;
+            if (unit.IsHidden)
+            {
+                AddBattleLog("Подозрительный пень. Что это — отсюда не разглядеть.");
+                RefreshBattleScreen();
+                return;
+            }
 
             Vector2 rootPosition = root.WorldToLocal(panelPosition);
             fighterDetailsView.Open(
@@ -1541,6 +1572,8 @@ namespace KingdomSurvival.BattleSandbox
             if (battle == null || board == null)
                 return;
 
+            foreach (string entry in battle.TakeEventLog())
+                AddBattleLog(entry);
             board.SetBattle(battle, selectedTargetId);
             fighterDetailsView.Refresh(battle);
             roundLabel.text = "Раунд " + battle.Round + " · движение + одно боевое действие";
@@ -1631,6 +1664,7 @@ namespace KingdomSurvival.BattleSandbox
                             : "Бой окончен. Вернитесь в кампанию — итог боя перейдёт в отряд."
                         : "Можно повторить бой тем же составом или вернуться к выбору бойцов.";
 
+            RefreshAbilityUi(playerInteractionAvailable, current);
             logLabel.text = string.Join("\n", battleLog.Skip(Math.Max(0, battleLog.Count - 9)));
             RefreshResultBanner();
             QueueEnemyStepIfNeeded();
@@ -1647,6 +1681,19 @@ namespace KingdomSurvival.BattleSandbox
                     continue;
 
                 bool active = battle.CurrentUnit != null && battle.CurrentUnit.Id == unit.Id;
+                if (unit.IsHidden)
+                {
+                    // Порядок хода понятен, имя и HP — нет.
+                    Button unknown = new Button { text = "?\nУГРОЗА", tooltip = "Неизвестная угроза: разведка её не заметила." };
+                    unknown.style.width = active ? 64f : 58f;
+                    unknown.style.height = active ? 86f : 78f;
+                    unknown.style.marginRight = 6f;
+                    unknown.style.fontSize = 11f;
+                    unknown.style.backgroundColor = new Color(0.20f, 0.15f, 0.10f, 1f);
+                    unknown.style.color = new Color(0.88f, 0.76f, 0.56f, 1f);
+                    initiativeRow.Add(unknown);
+                    continue;
+                }
                 SandboxUnitState captured = unit;
                 SandboxUnitVisual visual = unitContent.GetVisual(captured.TypeId);
                 Button card = SandboxFighterCardFactory.CreateInitiativeCard(
@@ -1711,33 +1758,8 @@ namespace KingdomSurvival.BattleSandbox
                     return;
                 }
 
-                SandboxUnitState enemy = battle.CurrentUnit;
-                SandboxUnitState target = SelectEnemyAttackTarget(enemy);
-                if (target != null)
-                {
-                    BeginEnemyAttack(enemy, target);
-                    return;
-                }
-
-                SandboxUnitState closest = battle.FindClosestOpponent(enemy);
-                if (closest != null)
-                {
-                    HexCoord destination = battle.FindBestMoveToward(enemy, closest.Position);
-                    if (destination != enemy.Position)
-                    {
-                        string enemyId = enemy.Id;
-                        if (BeginMoveAnimation(
-                                enemyId,
-                                destination,
-                                _ => ContinueEnemyAfterMovement(enemyId)))
-                        {
-                            return;
-                        }
-                    }
-                }
-
-                CompleteEnemyActivation(enemy.Id);
-                RefreshBattleScreen();
+                // ПР-16: единый планировщик ИИ (способности, профили, стая).
+                RunEnemyDecision(battle.CurrentUnit, 0);
             }).ExecuteLater((long)(420f / BattlePresentationSpeed.Multiplier));
         }
 
@@ -1858,7 +1880,7 @@ namespace KingdomSurvival.BattleSandbox
                 battle.CurrentUnit != null && battle.CurrentUnit.Id == enemyId)
             {
                 SandboxUnitState enemy = battle.CurrentUnit;
-                if (enemy.ActionPoints > 0 && !enemy.IsGuarding)
+                if (enemy.ActionPoints > 0 && !enemy.IsGuarding && !enemy.IsHidden && !enemy.IsOffBoard)
                 {
                     string guardMessage;
                     if (battle.TryGuard(enemy.Id, out guardMessage))

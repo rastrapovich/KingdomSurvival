@@ -32,6 +32,9 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
             bool migrated = database.MigrateIfNeeded();
             List<string> added = AddMissing(database);
+            // ПР-16: механика способностей и решения 19.11.2026 — засев не
+            // возвращает отключённое.
+            added.AddRange(UnitAbilityMigration.Apply(database));
             if (migrated || added.Count > 0)
             {
                 EditorUtility.SetDirty(database);

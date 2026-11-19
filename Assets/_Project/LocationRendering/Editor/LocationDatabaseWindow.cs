@@ -711,7 +711,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             {
                 Text("ID экземпляра", selectedEnemy.InstanceId, value => { selectedEnemy.InstanceId = value; selectedElementId = value; });
                 UnitDatabaseAsset units = Resources.Load<UnitDatabaseAsset>(UnitDatabaseAsset.ResourcesPath);
-                List<UnitDefinitionData> options = units != null ? units.Units.Where(item => item != null).ToList() : new List<UnitDefinitionData>();
+                List<UnitDefinitionData> options = units != null ? units.Units.Where(item => item != null && (!item.ExcludedFromNewEncounters || item.Id == selectedEnemy.UnitTypeId)).ToList() : new List<UnitDefinitionData>();
                 if (options.Count > 0)
                     Choice("Существо", options, item => item.DisplayLabel + " (" + item.Id + ")", options.Find(item => item.Id == selectedEnemy.UnitTypeId),
                         item => selectedEnemy.UnitTypeId = item.Id);

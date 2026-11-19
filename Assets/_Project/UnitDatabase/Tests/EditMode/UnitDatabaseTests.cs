@@ -16,7 +16,7 @@ namespace KingdomSurvival.UnitDatabase.Tests
                 UnitDatabaseAsset.ResourcesPath);
 
             Assert.That(database, Is.Not.Null);
-            Assert.That(database.Units.Count, Is.EqualTo(9 + 24), "9 исходных типов и 24 существа каталога ПР-12Ж.");
+            Assert.That(database.Units.Count, Is.EqualTo(9 + 24 + 7), "9 исходных типов, 24 существа каталога ПР-12Ж и 7 существ второго эшелона ПР-16.");
             Assert.That(
                 database.Units.Select(unit => unit.Id).Distinct().Count(),
                 Is.EqualTo(database.Units.Count));
@@ -45,7 +45,8 @@ namespace KingdomSurvival.UnitDatabase.Tests
         }
 
         private static readonly HashSet<string> UnitCatalogIds = new HashSet<string>(
-            KingdomSurvival.UnitDatabase.Editor.UnitCatalogSeed.Creatures().Select(unit => unit.Id));
+            KingdomSurvival.UnitDatabase.Editor.UnitCatalogSeed.Creatures().Select(unit => unit.Id)
+                .Concat(KingdomSurvival.UnitDatabase.Editor.UnitAbilityMigration.SecondTier().Select(unit => unit.Id)));
 
         [Test]
         public void DefaultDatabaseDoesNotUseRedundantMeleeTag()
@@ -176,7 +177,7 @@ namespace KingdomSurvival.UnitDatabase.Tests
 
                 Assert.That(database.MigrateIfNeeded(), Is.True);
                 Assert.That(database.SchemaVersion, Is.EqualTo(UnitDatabaseAsset.CurrentSchemaVersion));
-                Assert.That(database.SchemaVersion, Is.EqualTo(4));
+                Assert.That(database.SchemaVersion, Is.EqualTo(5));
                 Assert.That(unit.PortraitOffsetNormalized.x, Is.EqualTo(0.3f).Within(0.0001f));
                 Assert.That(unit.Size, Is.EqualTo(UnitSize.Medium));
                 Assert.That(unit.Abilities, Is.Empty);

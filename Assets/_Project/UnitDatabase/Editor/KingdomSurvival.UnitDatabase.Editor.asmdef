@@ -4,6 +4,7 @@
   "references": [
     "KingdomSurvival.Core",
     "KingdomSurvival.UnitDatabase",
+    "KingdomSurvival.BattleSandbox.Runtime",
     "KingdomSurvival.AnimationDatabase",
     "KingdomSurvival.AnimationDatabase.Editor"
   ],

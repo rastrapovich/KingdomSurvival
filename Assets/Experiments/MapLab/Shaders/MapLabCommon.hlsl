@@ -69,4 +69,19 @@ float3 MapLabColorAdjust(float3 c, float4 a)
     return max(0.0, rgb * a.x);
 }
 
+// Уровни, как в Photoshop (19.11.2026), в sRGB поверх MapLabColorAdjust.
+// Кодировка — ноль без изменений: l = (вход чёрная, 1 − вход белая,
+// гамма − 1, выход чёрная), lo.x = 1 − выход белая (доли 0..1).
+float3 MapLabLevels(float3 c, float4 l, float4 lo)
+{
+    if (dot(abs(l), float4(1, 1, 1, 1)) + abs(lo.x) < 1e-5)
+        return c;
+    float inB = l.x, inW = 1.0 - l.y, g = max(0.01, 1.0 + l.z), outB = l.w, outW = 1.0 - lo.x;
+    float3 s = pow(max(c, 0.0), 1.0 / 2.2);
+    s = saturate((s - inB) / max(inW - inB, 1e-3));
+    s = pow(s, 1.0 / g);
+    s = lerp(outB.xxx, outW.xxx, s);
+    return pow(saturate(s), 2.2);
+}
+
 #endif

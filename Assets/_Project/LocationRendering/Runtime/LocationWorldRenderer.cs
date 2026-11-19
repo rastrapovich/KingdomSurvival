@@ -121,6 +121,8 @@ namespace KingdomSurvival.LocationRendering
         private readonly Material adjustGround;
         private readonly MaterialPropertyBlock adjustBlock = new MaterialPropertyBlock();
         private static readonly int HsvId = Shader.PropertyToID("_KsHsv");
+        private static readonly int LevelsId = Shader.PropertyToID("_KsLevels");
+        private static readonly int LevelsOutId = Shader.PropertyToID("_KsLevelsOut");
         private static readonly int LightShareId = Shader.PropertyToID("_KsLight");
         private readonly CreatureAnimationDatabaseAsset animations;
         private readonly UnitDatabaseAsset units;
@@ -874,7 +876,7 @@ namespace KingdomSurvival.LocationRendering
             bool identity = adjust == null || adjust.IsIdentity;
             bool lighting = resolved != null && !resolved.DefaultLighting && !groundLit;
             if (!identity) image.color = adjust.Tint;
-            bool hsv = !identity && adjust.HasHsv;
+            bool hsv = !identity && (adjust.HasHsv || adjust.HasLevels);
             if (adjustLit == null) return;
             if (!hsv && !lighting && !bends)
             {
@@ -885,6 +887,8 @@ namespace KingdomSurvival.LocationRendering
             image.sharedMaterial = adjustLit;
             image.GetPropertyBlock(adjustBlock);
             adjustBlock.SetVector(HsvId, hsv ? adjust.ShaderHsv : new Vector4(0, 1, 1, 0));
+            adjustBlock.SetVector(LevelsId, hsv ? adjust.ShaderLevels : Vector4.zero);
+            adjustBlock.SetVector(LevelsOutId, hsv ? adjust.ShaderLevelsOut : Vector4.zero);
             adjustBlock.SetVector(LightShareId, LightShare(resolved, groundLit));
             // Ветер и роль рисунка (эффекты рисунков «Обработки кадра»).
             adjustBlock.SetVector(StyleId, StyleFor(resolved, groundLit));

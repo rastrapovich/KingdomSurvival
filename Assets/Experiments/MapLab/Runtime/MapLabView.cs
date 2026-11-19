@@ -1070,6 +1070,8 @@ namespace KingdomSurvival.MapLab
             m.SetTexture("_MainTex", ArtTexture(entry));
             m.SetFloat("_ViewGradeSkip", OwnArtUngraded(entry) ? 1f : 0f);
             m.SetVector("_ColorAdjust", entry.ColorAdjust);
+            m.SetVector("_ColorLevels", entry.ColorLevels);
+            m.SetVector("_ColorLevelsOut", entry.ColorLevelsOut);
             m.SetTexture("_ShadeTex", shadeTexture != null ? shadeTexture : Texture2D.whiteTexture);
             m.SetFloat("_MapSize", data != null ? data.Size : Settings.General.MapSize);
             m.SetFloat("_GroundShade", Settings.Diagnostics.ShowReliefLight ? 0.45f : 0f);
@@ -1403,6 +1405,8 @@ namespace KingdomSurvival.MapLab
             m.SetTexture("_MainTex", ArtTexture(entry));
             m.SetFloat("_ViewGradeSkip", OwnArtUngraded(entry) ? 1f : 0f);
             m.SetVector("_ColorAdjust", entry.ColorAdjust);
+            m.SetVector("_ColorLevels", entry.ColorLevels);
+            m.SetVector("_ColorLevelsOut", entry.ColorLevelsOut);
             m.SetFloat("_Cutoff", entry.Cutoff);
             m.SetFloat("_CardLean", art.CardLean);
             Color tone;
@@ -1491,6 +1495,8 @@ namespace KingdomSurvival.MapLab
             m.SetTexture("_MainTex", ArtTexture(entry));
             m.SetFloat("_ViewGradeSkip", OwnArtUngraded(entry) ? 1f : 0f);
             m.SetVector("_ColorAdjust", entry.ColorAdjust);
+            m.SetVector("_ColorLevels", entry.ColorLevels);
+            m.SetVector("_ColorLevelsOut", entry.ColorLevelsOut);
             m.SetFloat("_Cutoff", entry.Cutoff);
             m.SetTexture("_ShadeTex", shadeTexture != null ? shadeTexture : Texture2D.whiteTexture);
             m.SetFloat("_MapSize", data != null ? data.Size : Settings.General.MapSize);

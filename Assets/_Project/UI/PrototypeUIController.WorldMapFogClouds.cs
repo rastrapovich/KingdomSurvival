@@ -223,8 +223,8 @@ public partial class PrototypeUIController
     // раскладка, рассеянные облака и данные исследования не трогаются.
     private void ApplyWorldMapFogCloudTextures(WorldMapMovementSettingsAsset settings)
     {
-        List<Texture2D> textures = MapLabGameViews.FogClouds(out string fallback);
-        string key = MapLabGameViews.ActiveId + ":";
+        List<Texture2D> textures = MapLabGameViews.FogCloudsAdjusted(out string fallback, out string adjustKey);
+        string key = adjustKey + ":";
         foreach (Texture2D t in textures)
             key += t.GetHashCode() + ",";
         if (key == worldMapFogCloudsTextureKey)

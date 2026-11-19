@@ -468,8 +468,18 @@ namespace KingdomSurvival.BattlefieldDatabase
         // Доля солнца (общего света суток) и огня: 0 — не темнеет ночью / не освещается огнём.
         public float SunLight = 1;
         public float FireLight = 1;
+        // Уровни, как в Photoshop (0–255; гамма 1 — без изменений).
+        public float LevelsInBlack;
+        public float LevelsInWhite = 255;
+        public float LevelsGamma = 1;
+        public float LevelsOutBlack;
+        public float LevelsOutWhite = 255;
 
-        public bool IsIdentity =>
+        public bool HasLevels => LevelsInBlack > .01f || LevelsInWhite < 254.99f || Mathf.Abs(LevelsGamma - 1) > .001f || LevelsOutBlack > .01f || LevelsOutWhite < 254.99f;
+        public Vector4 ShaderLevels => HasLevels ? new Vector4(LevelsInBlack / 255f, 1 - LevelsInWhite / 255f, LevelsGamma - 1, LevelsOutBlack / 255f) : Vector4.zero;
+        public Vector4 ShaderLevelsOut => HasLevels ? new Vector4(1 - LevelsOutWhite / 255f, 0, 0, 0) : Vector4.zero;
+
+        public bool IsIdentity => !HasLevels &&
             Mathf.Abs(Mathf.DeltaAngle(0, Hue)) < .01f && Mathf.Abs(Saturation - 1) < .001f && Mathf.Abs(Brightness - 1) < .001f &&
             Mathf.Abs(Contrast) < .001f && Tint == Color.white && Mathf.Abs(SunLight - 1) < .001f && Mathf.Abs(FireLight - 1) < .001f;
 
@@ -480,6 +490,13 @@ namespace KingdomSurvival.BattlefieldDatabase
         {
             Hue = other.Hue; Saturation = other.Saturation; Brightness = other.Brightness; Contrast = other.Contrast;
             Tint = other.Tint; SunLight = other.SunLight; FireLight = other.FireLight;
+            CopyLevels(other);
+        }
+
+        private void CopyLevels(LocationCreatureLook other)
+        {
+            LevelsInBlack = other.LevelsInBlack; LevelsInWhite = other.LevelsInWhite; LevelsGamma = other.LevelsGamma;
+            LevelsOutBlack = other.LevelsOutBlack; LevelsOutWhite = other.LevelsOutWhite;
         }
 
         public static LocationCreatureLook Combine(LocationCreatureLook all, LocationCreatureLook own)
@@ -495,6 +512,8 @@ namespace KingdomSurvival.BattlefieldDatabase
             result.Tint *= own.Tint;
             result.SunLight *= own.SunLight;
             result.FireLight *= own.FireLight;
+            // Уровни не складываются: свои у типа заменяют общие.
+            if (own.HasLevels) result.CopyLevels(own);
             return result;
         }
     }

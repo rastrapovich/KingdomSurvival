@@ -292,6 +292,19 @@ namespace KingdomSurvival.MapLab
 
         [Tooltip("Облака тумана войны в манере вида: отдельные PNG с прозрачностью, рисуются над маской неисследованного без цветокоррекции. Пусто — облака вида «Обычный».")]
         public List<Texture2D> FogClouds = new List<Texture2D>();
+        [Tooltip("Коррекция облаков вида: яркость (1 — без изменений).")]
+        [Range(0.3f, 2f)] public float FogCloudBrightness = 1f;
+        [Tooltip("Поворот цветового тона облаков, градусов.")]
+        [Range(-180f, 180f)] public float FogCloudHue;
+        [Tooltip("Насыщенность облаков (1 — без изменений).")]
+        [Range(0f, 2f)] public float FogCloudSaturation = 1f;
+        [Tooltip("Уровни облаков, как в Photoshop.")]
+        public MapLabLevels FogCloudLevels = new MapLabLevels();
+
+        public bool FogCloudAdjustNeutral => MapLabColorMath.IsNeutral(FogCloudBrightness, FogCloudHue, FogCloudSaturation, FogCloudLevels);
+
+        public string FogCloudAdjustKey => FogCloudAdjustNeutral ? "-" :
+            FogCloudBrightness.ToString("0.###") + "/" + FogCloudHue.ToString("0.##") + "/" + FogCloudSaturation.ToString("0.###") + "/" + (FogCloudLevels != null ? FogCloudLevels.Key : "-");
 
         [Tooltip("Свои рисунки вида нарисованы уже в его гамме: цветокоррекция вида их не трогает (земля, мазки и тушь — под коррекцией).")]
         public bool OwnArtUngraded = true;
@@ -410,6 +423,7 @@ namespace KingdomSurvival.MapLab
                     if (o != null)
                         copy.Art.Add(new MapLabViewArtOverride { ArtId = o.ArtId, Texture = o.Texture, Enabled = o.Enabled });
             copy.FogClouds = FogClouds != null ? new List<Texture2D>(FogClouds) : new List<Texture2D>();
+            copy.FogCloudLevels = FogCloudLevels != null ? FogCloudLevels.Clone() : new MapLabLevels();
             copy.index = null;
             return copy;
         }

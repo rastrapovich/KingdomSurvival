@@ -8,6 +8,8 @@ Shader "Kingdom Survival/MapLab/Module"
     Properties
     {
         _ColorAdjust ("Коррекция автора: яркость, тон°, насыщенность", Vector) = (1, 0, 1, 0)
+        _ColorLevels ("Уровни: вход чёрная, 1−вход белая, гамма−1, выход чёрная", Vector) = (0, 0, 0, 0)
+        _ColorLevelsOut ("Уровни: 1−выход белая", Vector) = (0, 0, 0, 0)
         _ViewGradeSkip ("Свой рисунок вида: без цветокоррекции вида", Float) = 0
         _MainTex ("Модуль (RGBA)", 2D) = "white" {}
         _ShadeTex ("Shade (R свет, G затенение)", 2D) = "white" {}
@@ -68,6 +70,8 @@ Shader "Kingdom Survival/MapLab/Module"
                 float _Saturation;
                 float _AlphaToMask;
                 float4 _ColorAdjust;
+                float4 _ColorLevels;
+                float4 _ColorLevelsOut;
                 float _ViewGradeSkip;
             CBUFFER_END
 
@@ -99,7 +103,7 @@ Shader "Kingdom Survival/MapLab/Module"
                     a = 1;
                 }
                 float3 c = tex.rgb;
-                c = MapLabColorAdjust(c, _ColorAdjust);
+                c = MapLabLevels(MapLabColorAdjust(c, _ColorAdjust), _ColorLevels, _ColorLevelsOut);
                 const float3 w = float3(0.299, 0.587, 0.114);
                 float3 toned = _Tint.rgb * (dot(c, w) / max(1e-3, dot(_Tint.rgb, w)));
                 c = lerp(c, toned, _TintStrength);

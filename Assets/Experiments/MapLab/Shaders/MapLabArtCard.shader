@@ -12,6 +12,8 @@ Shader "Kingdom Survival/MapLab/Art Card"
     Properties
     {
         _ColorAdjust ("Коррекция автора: яркость, тон°, насыщенность", Vector) = (1, 0, 1, 0)
+        _ColorLevels ("Уровни: вход чёрная, 1−вход белая, гамма−1, выход чёрная", Vector) = (0, 0, 0, 0)
+        _ColorLevelsOut ("Уровни: 1−выход белая", Vector) = (0, 0, 0, 0)
         _ViewGradeSkip ("Свой рисунок вида: без цветокоррекции вида", Float) = 0
         _MainTex ("Рисунок (RGBA)", 2D) = "white" {}
         _ShadeTex ("Shade (R свет, G затенение)", 2D) = "white" {}
@@ -116,6 +118,8 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float4 _StrokeDry;
                 float4 _StrokeLush;
                 float4 _ColorAdjust;
+                float4 _ColorLevels;
+                float4 _ColorLevelsOut;
                 float _ViewGradeSkip;
             CBUFFER_END
 
@@ -347,7 +351,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 if (_Ghost > 0.5)
                     return _GhostColor;
                 float3 c = tex.rgb;
-                c = MapLabColorAdjust(c, _ColorAdjust);
+                c = MapLabLevels(MapLabColorAdjust(c, _ColorAdjust), _ColorLevels, _ColorLevelsOut);
                 const float3 w = float3(0.299, 0.587, 0.114);
                 float tint = saturate(_TintStrength * i.color.g * 2.0);
                 float3 toned = _TintColor.rgb * (dot(c, w) / max(1e-3, dot(_TintColor.rgb, w)));

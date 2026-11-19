@@ -62,6 +62,8 @@ namespace KingdomSurvival.MapLab.Editor
         private Card focus;
         private int focusView;
         private float groupScale = 1f, groupBrightness = 1f, groupHue, groupSaturation = 1f;
+        private bool groupSetLevels;
+        private MapLabLevels groupLevels = new MapLabLevels();
         private bool groundBackground;
 
         private sealed class Card
@@ -769,6 +771,9 @@ namespace KingdomSurvival.MapLab.Editor
                 groupBrightness = EditorGUILayout.Slider(new GUIContent("Яркость ×"), groupBrightness, 0.5f, 1.5f);
                 groupHue = EditorGUILayout.Slider(new GUIContent("Тон +°"), groupHue, -60f, 60f);
                 groupSaturation = EditorGUILayout.Slider(new GUIContent("Насыщенность ×"), groupSaturation, 0.3f, 1.7f);
+                groupSetLevels = EditorGUILayout.ToggleLeft(new GUIContent("Задать уровни выбранным", "Уровни ниже заменят уровни каждого выбранного ассета."), groupSetLevels);
+                if (groupSetLevels)
+                    groupLevels = MapLabLevelsGUI.Draw(groupLevels);
                 if (GUILayout.Button("Применить к выбранным"))
                 {
                     RecordSets("Генератор карты: групповая правка");
@@ -778,6 +783,8 @@ namespace KingdomSurvival.MapLab.Editor
                         e.Brightness = Mathf.Clamp(e.Brightness * groupBrightness, 0.3f, 2f);
                         e.HueShift = Mathf.Repeat(e.HueShift + groupHue + 180f, 360f) - 180f;
                         e.Saturation = Mathf.Clamp(e.Saturation * groupSaturation, 0f, 2f);
+                        if (groupSetLevels)
+                            (e.Levels ??= new MapLabLevels()).CopyFrom(groupLevels);
                     }
                     if (Mathf.Abs(groupScale - 1f) > 1e-4f)
                         objectsPending = true;
@@ -1011,6 +1018,7 @@ namespace KingdomSurvival.MapLab.Editor
             float brightness = EditorGUILayout.Slider(new GUIContent("Яркость", "1 — без изменений"), e.Brightness, 0.3f, 2f);
             float hue = EditorGUILayout.Slider(new GUIContent("Цветовой тон, °", "0 — без изменений; альфа не меняется"), e.HueShift, -180f, 180f);
             float saturation = EditorGUILayout.Slider(new GUIContent("Насыщенность", "1 — без изменений"), e.Saturation, 0f, 2f);
+            MapLabLevels levels = MapLabLevelsGUI.Draw(e.Levels);
             if (EditorGUI.EndChangeCheck())
             {
                 if (!enabled && e.Enabled && IsLastEnabled(set, e))
@@ -1026,6 +1034,7 @@ namespace KingdomSurvival.MapLab.Editor
                 e.Brightness = brightness;
                 e.HueShift = hue;
                 e.Saturation = saturation;
+                (e.Levels ??= new MapLabLevels()).CopyFrom(levels);
                 // Размер и цвет фигуры — общие для всех её ракурсов.
                 if (focus.Figure)
                     foreach ((MapLabArtSet viewSet, MapLabArtEntry other) in focus.Views)
@@ -1035,6 +1044,7 @@ namespace KingdomSurvival.MapLab.Editor
                         other.Brightness = brightness;
                         other.HueShift = hue;
                         other.Saturation = saturation;
+                        (other.Levels ??= new MapLabLevels()).CopyFrom(levels);
                         EditorUtility.SetDirty(viewSet);
                     }
                 EditorUtility.SetDirty(set);
@@ -1046,13 +1056,14 @@ namespace KingdomSurvival.MapLab.Editor
             {
                 if (GUILayout.Button("Показать источник"))
                     EditorGUIUtility.PingObject(e.Texture != null ? (UnityEngine.Object)e.Texture : set);
-                if (GUILayout.Button(new GUIContent("Сбросить коррекцию", "Яркость, тон, насыщенность и размер — к нейтральным; PNG не меняется.")))
+                if (GUILayout.Button(new GUIContent("Сбросить коррекцию", "Яркость, тон, насыщенность, уровни и размер — к нейтральным; PNG не меняется.")))
                 {
                     Undo.RecordObject(set, "Генератор карты: сброс коррекции");
                     if (Mathf.Abs(e.SizeScale - 1f) > 1e-5f)
                         objectsPending = true;
                     e.SizeScale = e.Brightness = e.Saturation = 1f;
                     e.HueShift = 0f;
+                    (e.Levels ??= new MapLabLevels()).Reset();
                     EditorUtility.SetDirty(set);
                     AfterAssetEdit();
                 }

@@ -716,6 +716,12 @@ namespace KingdomSurvival.LocationRendering.Editor
             Number("Насыщенность", color.Saturation, 0, 2, value => color.Saturation = Mathf.Max(0, value));
             Number("Яркость", color.Brightness, 0, 2, value => color.Brightness = Mathf.Max(0, value));
             ColorField("Подкраска", color.Tint, value => color.Tint = value);
+            // Уровни, как в Photoshop: 0 / 1,00 / 255 и 0 / 255 — без изменений.
+            Number("Уровни: вход, чёрная", color.LevelsInBlack, 0, 253, value => color.LevelsInBlack = Mathf.Clamp(value, 0, Mathf.Min(253, color.LevelsInWhite - 2)), "Всё темнее — чёрное. 0 — без изменений.");
+            Number("Уровни: средние тона (гамма)", color.LevelsGamma, .1f, 9.99f, value => color.LevelsGamma = Mathf.Clamp(value, .1f, 9.99f), "1 — без изменений; больше — светлее.");
+            Number("Уровни: вход, белая", color.LevelsInWhite, 2, 255, value => color.LevelsInWhite = Mathf.Clamp(value, Mathf.Max(2, color.LevelsInBlack + 2), 255), "Всё светлее — белое. 255 — без изменений.");
+            Number("Уровни: выход, чёрная", color.LevelsOutBlack, 0, 255, value => color.LevelsOutBlack = Mathf.Clamp(value, 0, 255), "Самый тёмный тон. 0 — без изменений.");
+            Number("Уровни: выход, белая", color.LevelsOutWhite, 0, 255, value => color.LevelsOutWhite = Mathf.Clamp(value, 0, 255), "Самый светлый тон. 255 — без изменений.");
         }
 
         // ------------------------------------------------------------------

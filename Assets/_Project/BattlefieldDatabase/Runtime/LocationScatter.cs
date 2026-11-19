@@ -14,14 +14,31 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float Saturation = 1;
         public float Brightness = 1;
         public Color Tint = Color.white;
+        // Уровни, как в Photoshop (0–255; гамма 1 — без изменений).
+        public float LevelsInBlack;
+        public float LevelsInWhite = 255;
+        public float LevelsGamma = 1;
+        public float LevelsOutBlack;
+        public float LevelsOutWhite = 255;
 
         public bool HasHsv => Mathf.Abs(Mathf.DeltaAngle(0, Hue)) > .01f || Mathf.Abs(Saturation - 1) > .001f || Mathf.Abs(Brightness - 1) > .001f;
-        public bool IsIdentity => !HasHsv && Tint == Color.white;
+        public bool HasLevels => LevelsInBlack > .01f || LevelsInWhite < 254.99f || Mathf.Abs(LevelsGamma - 1) > .001f || LevelsOutBlack > .01f || LevelsOutWhite < 254.99f;
+        public bool IsIdentity => !HasHsv && !HasLevels && Tint == Color.white;
+
+        // Для шейдера (ноль — без изменений): вход чёрная, 1 − вход белая,
+        // гамма − 1, выход чёрная; второй вектор — 1 − выход белая.
+        public Vector4 ShaderLevels => HasLevels ? new Vector4(LevelsInBlack / 255f, 1 - LevelsInWhite / 255f, LevelsGamma - 1, LevelsOutBlack / 255f) : Vector4.zero;
+        public Vector4 ShaderLevelsOut => HasLevels ? new Vector4(1 - LevelsOutWhite / 255f, 0, 0, 0) : Vector4.zero;
 
         // Для шейдера: тон в оборотах, насыщенность, яркость.
         public Vector4 ShaderHsv => new Vector4(Mathf.DeltaAngle(0, Hue) / 360f, Mathf.Max(0, Saturation), Mathf.Max(0, Brightness), 0);
 
-        public LocationColorAdjust Clone() => new LocationColorAdjust { Hue = Hue, Saturation = Saturation, Brightness = Brightness, Tint = Tint };
+        public LocationColorAdjust Clone() => new LocationColorAdjust
+        {
+            Hue = Hue, Saturation = Saturation, Brightness = Brightness, Tint = Tint,
+            LevelsInBlack = LevelsInBlack, LevelsInWhite = LevelsInWhite, LevelsGamma = LevelsGamma,
+            LevelsOutBlack = LevelsOutBlack, LevelsOutWhite = LevelsOutWhite
+        };
     }
 
     // Как слой рисуется. Объекты — каждый экземпляр как предмет места:

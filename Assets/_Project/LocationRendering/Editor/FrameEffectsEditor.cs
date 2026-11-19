@@ -902,6 +902,12 @@ namespace KingdomSurvival.LocationRendering.Editor
             Slider("Яркость", look.Brightness, 0, 2, value => write().Brightness = value);
             Slider("Контраст", look.Contrast, -1, 1, value => write().Contrast = value, "Меньше нуля — мягче, больше — резче.");
             ColorField("Подкраска", look.Tint, value => write().Tint = value, "Умножение цвета: белый — без подкраски.");
+            // Уровни, как в Photoshop: вход 0 / 1,00 / 255, выход 0 / 255 — без изменений.
+            Slider("Уровни: вход, чёрная", look.LevelsInBlack, 0, 253, value => write().LevelsInBlack = value, "Всё темнее — чёрное. 0 — без изменений.");
+            Slider("Уровни: средние тона", look.LevelsGamma, .1f, 3f, value => write().LevelsGamma = value, "Гамма: 1 — без изменений, больше — светлее.");
+            Slider("Уровни: вход, белая", look.LevelsInWhite, 2, 255, value => write().LevelsInWhite = value, "Всё светлее — белое. 255 — без изменений.");
+            Slider("Уровни: выход, чёрная", look.LevelsOutBlack, 0, 255, value => write().LevelsOutBlack = value, "Самый тёмный тон. 0 — без изменений.");
+            Slider("Уровни: выход, белая", look.LevelsOutWhite, 0, 255, value => write().LevelsOutWhite = value, "Самый светлый тон. 255 — без изменений.");
             Slider("Свет солнца (доля)", look.SunLight, 0, 1.5f, value => write().SunLight = value, "Насколько фигура подчиняется свету суток: 0 — не темнеет ночью.");
             Slider("Свет огня (доля)", look.FireLight, 0, 1.5f, value => write().FireLight = value, "Насколько фигуру освещают костры и факелы.");
         }

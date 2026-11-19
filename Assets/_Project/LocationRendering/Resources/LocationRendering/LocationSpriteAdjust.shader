@@ -30,6 +30,8 @@ Shader "Kingdom Survival/Location Sprite Adjust"
         _MaskTex("Mask", 2D) = "white" {}
         _NormalMap("Normal Map", 2D) = "bump" {}
         _KsHsv("Hue (turns), Saturation, Brightness, Contrast", Vector) = (0, 1, 1, 0)
+        _KsLevels("Levels: in black, 1-in white, gamma-1, out black", Vector) = (0, 0, 0, 0)
+        _KsLevelsOut("Levels: 1-out white", Vector) = (0, 0, 0, 0)
         _KsUvRect("Particle UV rect (offset, scale)", Vector) = (0, 0, 1, 1)
         _KsLight("Sun, fire light share, ground-lit", Vector) = (1, 1, 0, 0)
         _KsBend("Bend: top offset xy (world), drop (world)", Vector) = (0, 0, 0, 0)
@@ -50,6 +52,8 @@ Shader "Kingdom Survival/Location Sprite Adjust"
     CBUFFER_START(UnityPerMaterial)
         half4 _Color;
         float4 _KsHsv;
+        float4 _KsLevels;
+        float4 _KsLevelsOut;
         float4 _KsUvRect;
         float4 _KsLight;
         float4 _KsBend;
@@ -266,6 +270,28 @@ Shader "Kingdom Survival/Location Sprite Adjust"
         const half pivot = 0.214; // средний серый (sRGB 0.5) в линейном цвете
     #endif
         return saturate((rgb - pivot) * (1 + _KsHsv.w) + pivot);
+    }
+
+    // Уровни экземпляра, как в Photoshop (19.11.2026), в sRGB после тона и
+    // контраста. Ноль — без изменений: _KsLevels = (вход чёрная, 1 − вход
+    // белая, гамма − 1, выход чёрная), _KsLevelsOut.x = 1 − выход белая.
+    half3 KsLevels(half3 rgb)
+    {
+        if (dot(abs(_KsLevels), float4(1, 1, 1, 1)) + abs(_KsLevelsOut.x) < 1e-5)
+            return rgb;
+        float inB = _KsLevels.x, inW = 1.0 - _KsLevels.y, g = max(0.01, 1.0 + _KsLevels.z);
+        float outB = _KsLevels.w, outW = 1.0 - _KsLevelsOut.x;
+        float3 s = rgb;
+    #if !defined(UNITY_COLORSPACE_GAMMA)
+        s = pow(max(s, 0.0), 1.0 / 2.2);
+    #endif
+        s = saturate((s - inB) / max(inW - inB, 1e-3));
+        s = pow(s, 1.0 / g);
+        s = lerp(outB.xxx, outW.xxx, s);
+    #if !defined(UNITY_COLORSPACE_GAMMA)
+        s = pow(saturate(s), 2.2);
+    #endif
+        return (half3)s;
     }
 
     half3 KsAdjust(half3 rgb, float3 hsv)
@@ -497,7 +523,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
             half4 LitFragment(Varyings input) : SV_Target
             {
                 half4 texel = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
-                texel.rgb = KsContrast(KsAdjust(texel.rgb, input.adjust.xyz));
+                texel.rgb = KsLevels(KsContrast(KsAdjust(texel.rgb, input.adjust.xyz)));
                 half4 main = input.color * texel;
                 main.a *= KsHoleKeep(input.ksWorld);
                 main.rgb = KsShade(main.rgb, input.ksWorld);
@@ -681,7 +707,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
             half4 UnlitFragment(Varyings input) : SV_Target
             {
                 half4 texel = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
-                texel.rgb = KsContrast(KsAdjust(texel.rgb, input.adjust.xyz));
+                texel.rgb = KsLevels(KsContrast(KsAdjust(texel.rgb, input.adjust.xyz)));
                 half4 color = input.color * texel;
                 color.a *= KsHoleKeep(input.ksWorld);
                 color.rgb = KsShade(color.rgb, input.ksWorld);

@@ -436,6 +436,30 @@ namespace KingdomSurvival.MapLab.Editor
                 v.FogClouds.RemoveAt(remove);
                 EditorUtility.SetDirty(asset);
             }
+            // Цвет облаков вида: как у ассетов карты — яркость, тон,
+            // насыщенность и уровни (PNG не меняется; игра пересчитывает копии).
+            EditorGUI.BeginChangeCheck();
+            float cloudBrightness = EditorGUILayout.Slider(new GUIContent("Яркость облаков", "1 — без изменений"), v.FogCloudBrightness, 0.3f, 2f);
+            float cloudHue = EditorGUILayout.Slider(new GUIContent("Цветовой тон облаков, °", "0 — без изменений"), v.FogCloudHue, -180f, 180f);
+            float cloudSaturation = EditorGUILayout.Slider(new GUIContent("Насыщенность облаков", "1 — без изменений"), v.FogCloudSaturation, 0f, 2f);
+            MapLabLevels cloudLevels = MapLabLevelsGUI.Draw(v.FogCloudLevels, "Уровни облаков");
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(asset, "Виды карты: цвет облаков тумана");
+                v.FogCloudBrightness = cloudBrightness;
+                v.FogCloudHue = cloudHue;
+                v.FogCloudSaturation = cloudSaturation;
+                (v.FogCloudLevels ??= new MapLabLevels()).CopyFrom(cloudLevels);
+                EditorUtility.SetDirty(asset);
+            }
+            if (!v.FogCloudAdjustNeutral && GUILayout.Button(new GUIContent("Сбросить цвет облаков", "Яркость, тон, насыщенность и уровни облаков — к нейтральным.")))
+            {
+                Undo.RecordObject(asset, "Виды карты: сброс цвета облаков");
+                v.FogCloudBrightness = v.FogCloudSaturation = 1f;
+                v.FogCloudHue = 0f;
+                (v.FogCloudLevels ??= new MapLabLevels()).Reset();
+                EditorUtility.SetDirty(asset);
+            }
             if (v.FogCloudCount == 0)
                 EditorGUILayout.HelpBox(v.Id == MapLabMapViews.ClassicId
                     ? "Нет облаков: в игре останется только маска тумана."

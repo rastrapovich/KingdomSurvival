@@ -84,6 +84,8 @@ namespace KingdomSurvival.MapLab
         [Range(-180f, 180f)] public float HueShift = 0f;
         [Tooltip("Насыщенность, 1 — без изменений.")]
         [Range(0f, 2f)] public float Saturation = 1f;
+        [Tooltip("Уровни, как в Photoshop: вход (чёрная, гамма, белая) и выход (чёрная, белая).")]
+        public MapLabLevels Levels = new MapLabLevels();
 
         // Вес выбора с учётом «Использовать в генерации».
         public float EffectiveWeight => Enabled ? Weight : 0f;
@@ -91,7 +93,11 @@ namespace KingdomSurvival.MapLab
         // Коррекция цвета для шейдеров: x — яркость, y — тон (град.), z — насыщенность.
         public Vector4 ColorAdjust => new Vector4(Brightness, HueShift, Saturation, 0f);
 
-        public bool HasColorAdjust => Mathf.Abs(Brightness - 1f) > 1e-4f || Mathf.Abs(HueShift) > 1e-3f || Mathf.Abs(Saturation - 1f) > 1e-4f;
+        public bool HasColorAdjust => Mathf.Abs(Brightness - 1f) > 1e-4f || Mathf.Abs(HueShift) > 1e-3f || Mathf.Abs(Saturation - 1f) > 1e-4f || (Levels != null && !Levels.IsIdentity);
+
+        // Уровни для шейдеров (ноль — без изменений).
+        public Vector4 ColorLevels => Levels != null ? Levels.Shader : Vector4.zero;
+        public Vector4 ColorLevelsOut => Levels != null ? Levels.ShaderOut : Vector4.zero;
 
         [Header("Источник (обновляет импорт)")]
         public string SourcePath;

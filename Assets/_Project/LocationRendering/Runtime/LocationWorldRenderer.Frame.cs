@@ -269,6 +269,8 @@ namespace KingdomSurvival.LocationRendering
             LocationCreatureLook look = characters?.Resolve(unitTypeId);
             image.GetPropertyBlock(frameBlock);
             frameBlock.SetVector(HsvId, look != null ? look.ShaderHsv : new Vector4(0, 1, 1, 0));
+            frameBlock.SetVector(LevelsId, look != null ? look.ShaderLevels : Vector4.zero);
+            frameBlock.SetVector(LevelsOutId, look != null ? look.ShaderLevelsOut : Vector4.zero);
             frameBlock.SetVector(LightShareId, look != null ? new Vector4(Mathf.Max(0, look.SunLight), Mathf.Max(0, look.FireLight), 0, 0) : new Vector4(1, 1, 0, 0));
             frameBlock.SetColor(ColorId, look != null ? look.Tint : Color.white);
             image.SetPropertyBlock(frameBlock);

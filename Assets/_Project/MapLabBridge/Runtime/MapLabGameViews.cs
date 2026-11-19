@@ -78,6 +78,52 @@ namespace KingdomSurvival.MapLabBridge
             }
         }
 
+        // Облака с коррекцией вида (яркость, тон, насыщенность, уровни).
+        // Коррекции нет — те же текстуры. Готовые копии хранятся, пока не
+        // сменится коррекция; adjustKey — для проверки, что пора обновить.
+        private static readonly Dictionary<Texture2D, Texture2D> adjustedClouds = new Dictionary<Texture2D, Texture2D>();
+        private static string adjustedCloudsKey;
+
+        public static List<Texture2D> FogCloudsAdjusted(out string fallbackViewName, out string adjustKey)
+        {
+            List<Texture2D> textures = FogClouds(out fallbackViewName);
+            MapLabMapView v = MapLabMapViews.Active;
+            adjustKey = v != null ? v.Id + ":" + v.FogCloudAdjustKey : "-";
+            if (v == null || v.FogCloudAdjustNeutral)
+                return textures;
+            if (adjustKey != adjustedCloudsKey)
+            {
+                ClearAdjustedClouds();
+                adjustedCloudsKey = adjustKey;
+            }
+            for (int i = 0; i < textures.Count; i++)
+            {
+                Texture2D source = textures[i];
+                if (!adjustedClouds.TryGetValue(source, out Texture2D adjusted) || adjusted == null)
+                {
+                    adjusted = MapLabColorMath.CreateAdjusted(source, v.FogCloudBrightness, v.FogCloudHue, v.FogCloudSaturation, v.FogCloudLevels);
+                    adjustedClouds[source] = adjusted;
+                }
+                if (adjusted != null)
+                    textures[i] = adjusted;
+            }
+            return textures;
+        }
+
+        private static void ClearAdjustedClouds()
+        {
+            foreach (Texture2D t in adjustedClouds.Values)
+                if (t != null)
+                {
+                    if (Application.isPlaying)
+                        UnityEngine.Object.Destroy(t);
+                    else
+                        UnityEngine.Object.DestroyImmediate(t);
+                }
+            adjustedClouds.Clear();
+            adjustedCloudsKey = null;
+        }
+
         // Подкраска картинок интерфейса поверх карты.
         public static Color UiTint
         {

@@ -632,4 +632,62 @@ public sealed class MapLabLiveMapPlayModeTests
         yield return Capture(main, "world_map_grid_ink");
         grid.value = false;
     }
+    // Метки карты «?» и «!» (WorldMapMarkerService): на живой карте только у
+    // видимых мест, по стилю вида; смена вида меняет картинку, не набор меток.
+    // Кадры трёх видов — при заданной KS_SCREENSHOT_DIR.
+    [UnityTest]
+    public IEnumerator WorldMapQuestMarkers_ShownForKnownPlaces_InAllViews()
+    {
+        string savedView = KingdomSurvival.MapLab.MapLabMapViews.ActiveId;
+        try
+        {
+            KingdomSurvival.MapLab.MapLabMapViews.ActiveId = KingdomSurvival.MapLab.MapLabMapViews.ClassicId;
+            SceneManager.LoadScene(MainScene);
+            for (int i = 0; i < 600 && SceneManager.GetActiveScene().name != MainScene; i++)
+                yield return null;
+            yield return Frames(20);
+            MonoBehaviour main = FindBehaviour("PrototypeUIController");
+            Invoke(main, "StartNewGameFromMenu");
+            float started = Time.realtimeSinceStartup;
+            while ((MapLabGameLive.Current == null || !MapLabGameLive.Current.Ready) && Time.realtimeSinceStartup - started < 300f)
+                yield return null;
+            Assert.IsTrue(MapLabGameLive.Current != null && MapLabGameLive.Current.Ready);
+            GameState campaign = CampaignSession.Current;
+            // Известное, но не исследованное место рядом со стартом — «?».
+            LocationData near = campaign.Locations.Where(l => l != null && !l.IsWaypoint && !l.IsSettlement && l.ExplorationHours > 0)
+                .OrderBy(l => Mathf.Abs(l.MapXPercent - WorldMapNavigation.CapitalXPercent) + Mathf.Abs(l.MapYPercent - WorldMapNavigation.CapitalYPercent)).FirstOrDefault();
+            if (near != null)
+            {
+                near.IsVisibleOnMap = true;
+                near.IsDiscovered = true;
+            }
+            Invoke(main, "RefreshWorldMapPanel");
+            yield return Frames(10);
+            VisualElement root = main.GetComponent<UIDocument>().rootVisualElement;
+            List<VisualElement> markers = root.Query<VisualElement>(className: "world-map-quest-marker").ToList();
+            Assert.Greater(markers.Count, 0, "На карте есть метки известных мест.");
+            foreach (VisualElement marker in markers)
+            {
+                string id = marker.name.Substring("world-map-quest-marker-".Length);
+                Assert.IsTrue(campaign.FindLocation(id).IsVisibleOnMap, "Метка только у видимого места: " + id);
+            }
+            if (near != null)
+            {
+                Assert.IsNotNull(root.Q<VisualElement>("world-map-quest-marker-" + near.Id), "Найденное не исследованное место — «?».");
+                yield return ZoomTo(main, near.MapXPercent, near.MapYPercent, 0.55f);
+            }
+            int count = markers.Count;
+            foreach (string view in new[] { KingdomSurvival.MapLab.MapLabMapViews.ClassicId, KingdomSurvival.MapLab.MapLabMapViews.GloomId, KingdomSurvival.MapLab.MapLabMapViews.SepiaId })
+            {
+                KingdomSurvival.MapLab.MapLabMapViews.ActiveId = view;
+                yield return Frames(15);
+                Assert.AreEqual(count, root.Query<VisualElement>(className: "world-map-quest-marker").ToList().Count, "Смена вида не меняет набор меток.");
+                yield return Capture(main, "map_markers_" + view);
+            }
+        }
+        finally
+        {
+            KingdomSurvival.MapLab.MapLabMapViews.ActiveId = savedView;
+        }
+    }
 }

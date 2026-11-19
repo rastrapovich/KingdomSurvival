@@ -82,8 +82,10 @@ public static class NoticeBoardService
 
     // Висит ли объявление сейчас. Первый показ отмечает начало размещения
     // (это и есть «вывесили, когда отряд увидел»), дальше — только часы.
+    // readOnly — только узнать, будет ли висеть (метки карты): первое
+    // размещение и новое размещение не отмечаются, состояние не меняется.
     private static bool IsPosted(GameState state, string locationId, NoticeDefinition notice, double now,
-        NarrativeEvaluationContext context, out double hoursLeft)
+        NarrativeEvaluationContext context, out double hoursLeft, bool readOnly = false)
     {
         hoursLeft = -1.0;
         if (!(notice.ShowConditions?.Evaluate(context) ?? true))
@@ -94,7 +96,13 @@ public static class NoticeBoardService
         if (notice.LifetimeHours <= 0)
             return true;
 
-        NoticeStateData record = Record(state, locationId, notice.Id, true);
+        NoticeStateData record = Record(state, locationId, notice.Id, !readOnly);
+        if (readOnly && (record == null || record.PostedHour < 0))
+        {
+            // Ещё не вывешено: вывесят, когда отряд увидит доску.
+            hoursLeft = notice.LifetimeHours;
+            return true;
+        }
         if (record.PostedHour < 0)
         {
             record.PostedHour = now;
@@ -108,6 +116,11 @@ public static class NoticeBoardService
         }
         if (notice.RepostAfterHours > 0 && now >= end + notice.RepostAfterHours)
         {
+            if (readOnly)
+            {
+                hoursLeft = notice.LifetimeHours;
+                return true;
+            }
             // Новое размещение: прежнее прочитанное — уже другое объявление.
             record.PostedHour = now;
             record.Postings++;
@@ -118,7 +131,8 @@ public static class NoticeBoardService
         return false;
     }
 
-    public static List<NoticeView> Notices(GameState state, string locationId)
+    // readOnly — для меток карты: ничего не вывешивает и не меняет состояние.
+    public static List<NoticeView> Notices(GameState state, string locationId, bool readOnly = false)
     {
         List<NoticeView> result = new List<NoticeView>();
         NoticeBoardDefinition board = Board(state, locationId);
@@ -131,7 +145,7 @@ public static class NoticeBoardService
         {
             if (notice == null || string.IsNullOrEmpty(notice.Id))
                 continue;
-            if (!IsPosted(state, locationId, notice, now, context, out double hoursLeft))
+            if (!IsPosted(state, locationId, notice, now, context, out double hoursLeft, readOnly))
                 continue;
             // Бриф правок пп. 16, 22: объявление поручения — только там, где
             // оно закреплено, и пока поручение не выполнено и не провалено.

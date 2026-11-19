@@ -338,6 +338,8 @@ public partial class PrototypeUIController
 
             CreateWorldMapNode(location);
         }
+        // Метки «?» и «!» — после значков и рисунков мест (якорь — их верх).
+        RebuildWorldMapQuestMarkers();
 
         RefreshWorldMapArmyMarker();
         EnsureMapScreenOpen();

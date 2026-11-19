@@ -76,9 +76,12 @@ public static class TavernService
         return result;
     }
 
-    public static bool CanTake(GameState state, string locationId, TavernOfferDefinition offer, out string reason)
+    // ignorePresence — для меток карты: те же условия, кроме «отряд внутри
+    // поселения» (метка видна издалека; само действие по-прежнему внутри).
+    public static bool CanTake(GameState state, string locationId, TavernOfferDefinition offer, out string reason, bool ignorePresence = false)
     {
-        if (!SettlementService.CanActInside(state, locationId, out reason))
+        reason = string.Empty;
+        if (!ignorePresence && !SettlementService.CanActInside(state, locationId, out reason))
             return false;
         if (offer == null)
         {

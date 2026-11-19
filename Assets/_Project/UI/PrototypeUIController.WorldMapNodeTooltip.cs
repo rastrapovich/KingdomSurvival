@@ -112,6 +112,10 @@ public partial class PrototypeUIController
     private string DescribeMapPlaceOffer(LocationData location)
     {
         List<string> lines = new List<string>();
+        // Метка «!» (WorldMapMarkerService): сколько новых заданий можно взять.
+        int offers = WorldMapMarkerService.AvailableQuestOffers(gameState, location.Id);
+        if (offers > 0)
+            lines.Add(offers > 1 ? "Можно взять задание (" + offers + ")." : "Можно взять задание.");
         if (location.IsSettlement)
         {
             SettlementInstanceData instance = SettlementService.FindInstance(gameState, location.Id);

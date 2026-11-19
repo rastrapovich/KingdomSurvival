@@ -56,6 +56,24 @@ public partial class PrototypeUIController
     private string worldMapFogCloudsWarned;
     // Облака на месте и закрывают неизвестное — маску тумана можно не рисовать.
     private bool worldMapFogCloudsCovering;
+    // Свет суток (PrototypeUIController.DayNight): множитель цвета рисунка
+    // облаков, как у живой карты. Применяется к живым облакам только при
+    // заметной смене (не каждый кадр), новые облака берут его сразу.
+    private Color worldMapFogCloudsLight = Color.white;
+    private const float FogCloudsLightStep = 0.01f;
+
+    private void SetWorldMapFogCloudsLight(Color light)
+    {
+        light.a = 1f;
+        if (Mathf.Abs(light.r - worldMapFogCloudsLight.r) < FogCloudsLightStep &&
+            Mathf.Abs(light.g - worldMapFogCloudsLight.g) < FogCloudsLightStep &&
+            Mathf.Abs(light.b - worldMapFogCloudsLight.b) < FogCloudsLightStep)
+            return;
+        worldMapFogCloudsLight = light;
+        foreach (WorldMapFogCloud cloud in worldMapFogCloudList)
+            if (!cloud.Gone && cloud.Element != null)
+                cloud.Element.style.unityBackgroundImageTintColor = light;
+    }
 
     private void TickWorldMapFogClouds()
     {
@@ -157,7 +175,7 @@ public partial class PrototypeUIController
         float rowSpacing = settings != null ? settings.FogCloudRowSpacingHexes : 1.2f;
         float jitter = settings != null ? settings.FogCloudJitter : 0.45f;
         float width = settings != null ? settings.FogCloudWidthHexes : 8f;
-        float variation = settings != null ? settings.FogCloudSizeVariation : 0.35f;
+        float variation = settings != null ? settings.FogCloudSizeVariation : 0.25f;
 
         worldMapFogCloudBucketSize = Mathf.Max(1f, spacing) * grid.HexWidth;
         worldMapFogCloudBucketColumns = Mathf.Max(1, Mathf.CeilToInt((float)(grid.CanvasWidth / worldMapFogCloudBucketSize)) + 1);
@@ -250,6 +268,7 @@ public partial class PrototypeUIController
                 cloud.HeightPx = heightPx;
                 VisualElement element = cloud.Element;
                 element.style.backgroundImage = background;
+                element.style.unityBackgroundImageTintColor = worldMapFogCloudsLight;
                 element.style.height = Length.Percent((float)(heightPx / grid.CanvasHeight * 100.0));
                 element.style.top = Length.Percent((float)((cloud.Anchor.Y - heightPx * 0.5) / grid.CanvasHeight * 100.0));
                 worldMapFogClouds.Add(element);

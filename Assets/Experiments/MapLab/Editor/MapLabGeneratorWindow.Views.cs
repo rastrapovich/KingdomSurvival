@@ -449,7 +449,7 @@ namespace KingdomSurvival.MapLab.Editor
                         v.FogClouds.Add(null);
                         EditorUtility.SetDirty(asset);
                     });
-                if (GUILayout.Button(new GUIContent("Собрать из папки", "Все PNG из " + v.FogCloudsFolder + " — облака вида (импорт: прозрачность, мип-карты, до 1024 px).")))
+                if (GUILayout.Button(new GUIContent("Собрать из папки", "Все PNG из " + v.FogCloudsFolder + " — облака вида (импорт: прозрачность, мип-карты, до 2048 px, высокое качество).")))
                     Guard(() => status = CollectFogClouds(asset, v));
                 if (GUILayout.Button("Открыть папку"))
                     Guard(() =>
@@ -485,15 +485,16 @@ namespace KingdomSurvival.MapLab.Editor
         }
 
         // Импорт облака: прозрачность, мип-карты (карта отдаляется), без
-        // повторения на краях, до 1024 px, обычное сжатие.
+        // повторения на краях, полный размер до 2048 px, сжатие высокого качества.
         private static void ConfigureFogCloudImporter(string path)
         {
             if (!(AssetImporter.GetAtPath(path) is TextureImporter importer))
                 return;
             bool changed = importer.textureType != TextureImporterType.Default ||
                            !importer.alphaIsTransparency || !importer.mipmapEnabled ||
-                           importer.wrapMode != TextureWrapMode.Clamp || importer.maxTextureSize != 1024 ||
-                           importer.textureCompression != TextureImporterCompression.Compressed;
+                           importer.wrapMode != TextureWrapMode.Clamp || importer.maxTextureSize != 2048 ||
+                           importer.textureCompression != TextureImporterCompression.CompressedHQ ||
+                           importer.filterMode != FilterMode.Trilinear || importer.anisoLevel != 4;
             if (!changed)
                 return;
             importer.textureType = TextureImporterType.Default;
@@ -501,9 +502,13 @@ namespace KingdomSurvival.MapLab.Editor
             importer.alphaIsTransparency = true;
             importer.mipmapEnabled = true;
             importer.wrapMode = TextureWrapMode.Clamp;
-            importer.filterMode = FilterMode.Bilinear;
-            importer.maxTextureSize = 1024;
-            importer.textureCompression = TextureImporterCompression.Compressed;
+            // Чёткость: облако на экране бывает шире 1000 px — полный размер
+            // рисунка (2048), сжатие высокого качества (BC7, без «грязи» на
+            // туши), трилинейная выборка между мип-уровнями при отдалении.
+            importer.filterMode = FilterMode.Trilinear;
+            importer.anisoLevel = 4;
+            importer.maxTextureSize = 2048;
+            importer.textureCompression = TextureImporterCompression.CompressedHQ;
             importer.SaveAndReimport();
         }
 

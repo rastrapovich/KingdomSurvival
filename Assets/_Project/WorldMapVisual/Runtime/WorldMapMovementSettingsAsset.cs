@@ -55,7 +55,7 @@ namespace KingdomSurvival.WorldMapVisual
         [Tooltip("Ширина облака (клетки).")]
         [SerializeField, Range(1f, 30f)] private float fogCloudWidthHexes = 8f;
         [Tooltip("Разброс размера облаков (±доля).")]
-        [SerializeField, Range(0f, 0.6f)] private float fogCloudSizeVariation = 0.35f;
+        [SerializeField, Range(0f, 0.6f)] private float fogCloudSizeVariation = 0.25f;
         [Tooltip("Непрозрачность облаков.")]
         [SerializeField, Range(0.05f, 1f)] private float fogCloudOpacity = 1f;
         [Tooltip("На сколько клеток облако отплывает от героя, пока тает.")]

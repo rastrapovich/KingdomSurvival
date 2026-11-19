@@ -107,11 +107,15 @@ public partial class PrototypeUIController
 
     private void ApplyWorldMapDayNightLight(double hourOfDay)
     {
+        DayNightLight light = DayNightCycle.GetLight(hourOfDay);
+        Color tint = new Color(light.R, light.G, light.B, 1f);
+        // Облака тумана лежат над картой — тот же свет суток, иначе они
+        // светятся днём посреди ночной карты.
+        SetWorldMapFogCloudsLight(tint);
+
         if (worldMapLiveImage == null)
             return;
 
-        DayNightLight light = DayNightCycle.GetLight(hourOfDay);
-        Color tint = new Color(light.R, light.G, light.B, 1f);
         if (ReferenceEquals(dayNightTintedElement, worldMapLiveImage) &&
             Mathf.Abs(tint.r - dayNightShownTint.r) < 0.002f &&
             Mathf.Abs(tint.g - dayNightShownTint.g) < 0.002f &&

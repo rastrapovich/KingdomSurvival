@@ -231,7 +231,7 @@ public partial class PrototypeUIController
     }
 
     private GeneratedMapActor WorldMapGroupDefinition(PopulationGroupState group) =>
-        WorldPopulationService.Definition(gameState, group.DefinitionId);
+        WorldPopulationService.DefinitionOf(gameState, group);
 
     private Sprite WorldMapGroupSprite(GeneratedMapActor actor)
     {

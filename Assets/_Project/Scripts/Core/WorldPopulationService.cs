@@ -189,11 +189,12 @@ public static partial class WorldPopulationService
         dirX = group.DirX;
         dirY = group.DirY;
         waiting = true;
-        GeneratedMapActor def = Definition(state, group.DefinitionId);
+        GeneratedMapActor def = DefinitionOf(state, group);
         if (group.Activity == PopulationGroupState.Route && def != null && def.State == "Travel")
             return WorldMapActorMotion.PositionAt(def, hour, grid, out dirX, out dirY, out waiting);
         waiting = group.Activity != PopulationGroupState.Chase && group.Activity != PopulationGroupState.Return &&
-                  group.Activity != PopulationGroupState.Avoid;
+                  group.Activity != PopulationGroupState.Avoid &&
+                  group.Activity != PopulationGroupState.Leave;
         return new MapPointData(group.X, group.Y);
     }
 
@@ -213,7 +214,8 @@ public static partial class WorldPopulationService
             case PopulationGroupState.Wait: activity = group.Role == WorldMapGroupRule.Caravan ? "встал и выжидает" : "стоит"; break;
             case PopulationGroupState.Conflict: activity = "схватка"; break;
             case PopulationGroupState.Return: activity = "возвращается"; break;
-            default: activity = group.Role == WorldMapGroupRule.Beast || group.Role == WorldMapGroupRule.Creature ? "на своём участке" : "в пути"; break;
+            case PopulationGroupState.Leave: activity = "уходит прочь"; break;
+            default: activity = group.Temporary && !string.IsNullOrEmpty(group.TempReason) ? group.TempReason : group.Role == WorldMapGroupRule.Beast || group.Role == WorldMapGroupRule.Creature ? "на своём участке" : "в пути"; break;
         }
         int alive = group.Members.Count(m => m.Alive);
         string composition;

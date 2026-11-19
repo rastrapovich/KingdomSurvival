@@ -166,12 +166,35 @@ public sealed class WorldPopulationSettings
     public float DemandShare = 0.2f;
     public List<WorldPopulationPreset> Presets = WorldPopulationCatalog.DefaultPresets();
 
+    // Временные необязательные встречи (просьба пользователя 19.11.2026).
+    public bool TemporaryEnabled = true;
+    // Как часто (игровые часы) проверяется появление и с какой вероятностью.
+    public float TemporaryCheckHours = 2f;
+    public float TemporaryChance = 0.3f;
+    public int TemporaryMaxActive = 2;
+    // Срок занятия, часов.
+    public float TemporaryMinHours = 4f;
+    public float TemporaryMaxHours = 9f;
+    // Появление — вне обзора отряда: дальше радиуса обзора на столько клеток.
+    public float TemporarySpawnMinExtraHexes = 1.5f;
+    public float TemporarySpawnMaxExtraHexes = 5f;
+    // Тот же вид встречи — не чаще; зачищенный участок — не наполняется.
+    public float TemporaryRepeatKindHours = 12f;
+    public float TemporaryClearedHours = 48f;
+    public float TemporaryClearedHexes = 8f;
+    // Враждебных групп рядом (10 клеток) не больше — общий бюджет угроз.
+    public int TemporaryNearbyThreatLimit = 2;
+    // «Недавняя находка» — исследованное место не старше, часов.
+    public float TemporaryFindHours = 48f;
+    public List<WorldTemporaryEncounterKind> TemporaryKinds = WorldPopulationCatalog.DefaultTemporaryKinds();
+
     public static WorldPopulationSettings CreateDefault() => new WorldPopulationSettings();
 
     public WorldPopulationSettings Clone()
     {
         WorldPopulationSettings copy = (WorldPopulationSettings)MemberwiseClone();
         copy.Presets = (Presets ?? new List<WorldPopulationPreset>()).Where(p => p != null).Select(p => p.Clone()).ToList();
+        copy.TemporaryKinds = (TemporaryKinds ?? new List<WorldTemporaryEncounterKind>()).Where(k => k != null).Select(k => k.Clone()).ToList();
         return copy;
     }
 
@@ -208,6 +231,15 @@ public sealed class WorldPopulationSettings
         ServiceSafeRadiusHexes = Math.Max(0, ServiceSafeRadiusHexes);
         MinSourceDistanceHexes = Math.Max(0, MinSourceDistanceHexes);
         ChaseMaxHours = Math.Max(0.25f, ChaseMaxHours);
+        TemporaryKinds ??= WorldPopulationCatalog.DefaultTemporaryKinds();
+        TemporaryKinds.RemoveAll(k => k == null || string.IsNullOrWhiteSpace(k.Id));
+        TemporaryCheckHours = Math.Max(0.25f, TemporaryCheckHours);
+        TemporaryChance = Math.Max(0f, Math.Min(1f, TemporaryChance));
+        TemporaryMaxActive = Math.Max(0, TemporaryMaxActive);
+        TemporaryMinHours = Math.Max(0.5f, TemporaryMinHours);
+        TemporaryMaxHours = Math.Max(TemporaryMinHours, TemporaryMaxHours);
+        TemporarySpawnMinExtraHexes = Math.Max(0.5f, TemporarySpawnMinExtraHexes);
+        TemporarySpawnMaxExtraHexes = Math.Max(TemporarySpawnMinExtraHexes + 0.5f, TemporarySpawnMaxExtraHexes);
         ConflictWindowHours = Math.Max(0.1f, ConflictWindowHours);
         BandReserve = Math.Max(0, BandReserve);
     }
@@ -225,9 +257,93 @@ public interface IUnitCatalogAvailability
     bool IsAvailableForNewGroups(string unitTypeId, out string reason);
 }
 
+// Вид временной встречи. Поведение и состав берутся из пресета BasePresetId;
+// Kind задаёт занятие (как появляется и что делает до ухода).
+[Serializable]
+public sealed class WorldTemporaryEncounterKind
+{
+    // Проходит через округу: входит с одного края обзора, уходит за другой.
+    public const string Passing = "passing";
+    // Охотится: петляет вокруг места появления.
+    public const string Hunting = "hunting";
+    // Стоит у дороги: держится места появления.
+    public const string Roadside = "roadside";
+    // Чужая стычка: две группы уже в схватке.
+    public const string Skirmish = "skirmish";
+    // Существа у недавней находки отряда.
+    public const string AtFind = "at-find";
+
+    public string Id = string.Empty;
+    public string Name = string.Empty;
+    public bool Enabled = true;
+    public string Kind = Passing;
+    public string BasePresetId = string.Empty;
+    // Для стычки — вторая сторона.
+    public string SecondPresetId = string.Empty;
+    public string SecondName = string.Empty;
+    public int Weight = 1;
+    // Множитель веса ночью (20:00–05:00); 0 — только днём.
+    public float NightWeight = 1f;
+    // Допустимая местность места появления (пусто — любая проходимая суша).
+    public List<WorldMapGameplayTerrainType> Terrains = new List<WorldMapGameplayTerrainType>();
+    // Причина присутствия (подпись наведения) и признак при появлении рядом.
+    public string Reason = string.Empty;
+    public string Hint = string.Empty;
+    public string Status = "[РАБОЧЕЕ — ПРОТОТИП]";
+
+    public WorldTemporaryEncounterKind Clone()
+    {
+        WorldTemporaryEncounterKind copy = (WorldTemporaryEncounterKind)MemberwiseClone();
+        copy.Terrains = new List<WorldMapGameplayTerrainType>(Terrains ?? new List<WorldMapGameplayTerrainType>());
+        return copy;
+    }
+}
+
 public static class WorldPopulationCatalog
 {
     public static IUnitCatalogAvailability Availability { get; set; }
+
+    public static List<WorldTemporaryEncounterKind> DefaultTemporaryKinds()
+    {
+        List<WorldMapGameplayTerrainType> T(params WorldMapGameplayTerrainType[] t) => t.ToList();
+        return new List<WorldTemporaryEncounterKind>
+        {
+            new WorldTemporaryEncounterKind
+            {
+                Id = "temp-passing-band", Name = "Проходящая ватага", Kind = WorldTemporaryEncounterKind.Passing, BasePresetId = "band-small",
+                Weight = 3, NightWeight = 0.5f, Reason = "идут через округу",
+                Terrains = T(WorldMapGameplayTerrainType.Road, WorldMapGameplayTerrainType.Trail, WorldMapGameplayTerrainType.OpenGround, WorldMapGameplayTerrainType.Field),
+                Hint = "По дороге прошли люди с оружием — следы свежие, идут не спеша."
+            },
+            new WorldTemporaryEncounterKind
+            {
+                Id = "temp-hunting-pack", Name = "Охотящаяся стая", Kind = WorldTemporaryEncounterKind.Hunting, BasePresetId = "wolf-pack",
+                Weight = 2, NightWeight = 2f, Reason = "охотятся",
+                Terrains = T(WorldMapGameplayTerrainType.Forest, WorldMapGameplayTerrainType.OpenGround, WorldMapGameplayTerrainType.Field),
+                Hint = "Где-то за деревьями перекликаются волки — стая вышла на охоту."
+            },
+            new WorldTemporaryEncounterKind
+            {
+                Id = "temp-roadside-boar", Name = "Кабан у дороги", Kind = WorldTemporaryEncounterKind.Roadside, BasePresetId = "boar",
+                Weight = 2, NightWeight = 1f, Reason = "роет землю у обочины",
+                Terrains = T(WorldMapGameplayTerrainType.OpenGround, WorldMapGameplayTerrainType.Forest, WorldMapGameplayTerrainType.Field),
+                Hint = "Обочина впереди перерыта — кабан кормится у самой дороги."
+            },
+            new WorldTemporaryEncounterKind
+            {
+                Id = "temp-skirmish", Name = "Чужая стычка", Kind = WorldTemporaryEncounterKind.Skirmish, BasePresetId = "band-small",
+                SecondPresetId = "caravan-common", SecondName = "Путники", Weight = 1, NightWeight = 0f, Reason = "схватились с путниками",
+                Terrains = T(WorldMapGameplayTerrainType.Road, WorldMapGameplayTerrainType.Trail, WorldMapGameplayTerrainType.OpenGround),
+                Hint = "Со стороны дороги доносятся крики и звон железа."
+            },
+            new WorldTemporaryEncounterKind
+            {
+                Id = "temp-at-find", Name = "Падальщики у находки", Kind = WorldTemporaryEncounterKind.AtFind, BasePresetId = "padalny-mnogonog",
+                Weight = 2, NightWeight = 1.5f, Reason = "копошатся у места, где вы были",
+                Hint = "К месту недавней находки потянулись падальщики."
+            },
+        };
+    }
 
     // Стартовый рабочий набор брифа §7 (составы — реальные ID Базы существ;
     // характеристики берутся из базы, а не отсюда).

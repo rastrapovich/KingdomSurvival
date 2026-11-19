@@ -67,6 +67,19 @@ namespace KingdomSurvival.MapLabBridge.Editor
                 ("NpcConflicts", "Столкновения групп без героя"),
                 ("DemandMinimum", "Плата банде, минимум"),
                 ("DemandShare", "Плата банде, доля серебра"),
+                ("TemporaryEnabled", "Временные встречи"),
+                ("TemporaryCheckHours", "Временные: проверка раз в, ч"),
+                ("TemporaryChance", "Временные: вероятность"),
+                ("TemporaryMaxActive", "Временные: одновременно, не больше"),
+                ("TemporaryMinHours", "Временные: занятие от, ч"),
+                ("TemporaryMaxHours", "Временные: занятие до, ч"),
+                ("TemporarySpawnMinExtraHexes", "Появление за обзором от, кл."),
+                ("TemporarySpawnMaxExtraHexes", "Появление за обзором до, кл."),
+                ("TemporaryRepeatKindHours", "Тот же вид — не чаще, ч"),
+                ("TemporaryClearedHours", "Зачищенный участок молчит, ч"),
+                ("TemporaryClearedHexes", "Зачищенный участок, кл."),
+                ("TemporaryNearbyThreatLimit", "Угроз рядом, не больше"),
+                ("TemporaryFindHours", "Недавняя находка, ч"),
             };
             foreach ((string name, string label) in fields)
             {
@@ -80,6 +93,9 @@ namespace KingdomSurvival.MapLabBridge.Editor
                 EditorGUILayout.HelpBox("Роль: patrol / caravan / band / beast / creature. Поведение: " + string.Join(", ", WorldPopulationBehavior.All) +
                                         ". Биотоп: " + string.Join(", ", WorldPopulationBiome.All) + ". Бюджет: peaceful / ordinary / strong / creature.", MessageType.None);
                 EditorGUILayout.PropertyField(population.FindPropertyRelative("Presets"), new GUIContent("Пресеты"), true);
+                EditorGUILayout.HelpBox("Виды временных встреч: passing — проходит через округу, hunting — охотится, roadside — у дороги, " +
+                                        "skirmish — чужая стычка (вторая сторона — SecondPresetId), at-find — у недавней находки отряда.", MessageType.None);
+                EditorGUILayout.PropertyField(population.FindPropertyRelative("TemporaryKinds"), new GUIContent("Временные встречи"), true);
             }
             if (so.ApplyModifiedProperties())
             {

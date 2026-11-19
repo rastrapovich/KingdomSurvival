@@ -80,7 +80,31 @@ public sealed class PopulationGroupState
     public float LastKnownY;
     public double LastKnownHour;
 
+    // Временная встреча (просьба пользователя 19.11.2026): проходящая ватага,
+    // охотящаяся стая, зверь у дороги, чужая стычка, существа у находки.
+    // Маршрут — в собственном определении (TempDefinition), срок — ExpireHour
+    // по игровому времени; после ухода из обзора — Gone (запись остаётся
+    // памятью: загрузка встречу не пересоздаёт).
+    public const string Gone = "gone";
+    public const string Leave = "leave";
+    public bool Temporary;
+    public string TempKind = string.Empty;
+    public string TempReason = string.Empty;
+    public double ExpireHour;
+    public float ExitX;
+    public float ExitY;
+    public GeneratedMapActor TempDefinition = new GeneratedMapActor();
+
     public bool IsActive => Status == Active;
+}
+
+[Serializable]
+public sealed class PopulationTimedMark
+{
+    public string Key = string.Empty;
+    public double Hour;
+    public float X;
+    public float Y;
 }
 
 [Serializable]
@@ -185,4 +209,12 @@ public sealed class WorldPopulationStateData
     public List<PopulationGroupState> Groups = new List<PopulationGroupState>();
     public List<PopulationConflictState> Conflicts = new List<PopulationConflictState>();
     public List<PopulationContactState> Contacts = new List<PopulationContactState>();
+
+    // Временные встречи: следующая проверка, счётчик ID, память видов
+    // (чтобы не повторять один и тот же сразу) и недавно исследованных мест.
+    public double NextTemporaryCheckHour;
+    public int NextTemporaryNumber;
+    public List<PopulationTimedMark> TemporaryKindMemory = new List<PopulationTimedMark>();
+    public List<PopulationTimedMark> RecentFinds = new List<PopulationTimedMark>();
+    public List<string> KnownExploredIds = new List<string>();
 }

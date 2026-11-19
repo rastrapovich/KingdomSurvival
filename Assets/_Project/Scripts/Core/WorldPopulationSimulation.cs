@@ -164,6 +164,11 @@ public static partial class WorldPopulationService
                 ResolveConflict(ctx, c, t);
         }
 
+        // Временные встречи: срок, уход, появление.
+        TemporaryStep(ctx, t);
+        if (ctx.Raised)
+            return;
+
         // 5. Раз в игровой час — пополнение источников.
         if (t >= data.NextUpkeepHour)
         {
@@ -180,7 +185,7 @@ public static partial class WorldPopulationService
 
     private static void Move(TickContext ctx, PopulationGroupState g, double t)
     {
-        GeneratedMapActor def = Definition(ctx.State, g.DefinitionId);
+        GeneratedMapActor def = DefinitionOf(ctx.State, g);
         WorldMapHexGrid grid = ctx.Grid;
         if (!g.HasPosition && def != null)
         {
@@ -219,6 +224,9 @@ public static partial class WorldPopulationService
                     Step(ctx, g, ax, ay, SpeedHexesPerHour(g) * TickHours, true);
                 return;
             }
+            case PopulationGroupState.Leave:
+                Step(ctx, g, g.ExitX, g.ExitY, SpeedHexesPerHour(g) * TickHours, false);
+                return;
             case PopulationGroupState.Wait:
             case PopulationGroupState.Observe:
                 if (g.ActivityUntilHour > 0 && t >= g.ActivityUntilHour)
@@ -436,7 +444,7 @@ public static partial class WorldPopulationService
                     Raise(ctx, g, PopulationContactState.BeastAttack, t);
                 return;
             case WorldPopulationBehavior.Predator:
-                if (calm || respite)
+                if (calm || respite || g.Activity == PopulationGroupState.Leave)
                     return;
                 if (g.Activity == PopulationGroupState.Chase && g.TargetId == HeroTarget)
                 {
@@ -477,7 +485,7 @@ public static partial class WorldPopulationService
                         Raise(ctx, g, PopulationContactState.BandDemand, t);
                     return;
                 }
-                if (calm || respite || g.Activity == PopulationGroupState.Chase || g.Activity == PopulationGroupState.Avoid)
+                if (calm || respite || g.Activity == PopulationGroupState.Chase || g.Activity == PopulationGroupState.Avoid || g.Activity == PopulationGroupState.Leave)
                     return;
                 if (d <= preset.DetectHexes && !HeroNearService(ctx, ctx.HeroX, ctx.HeroY))
                 {

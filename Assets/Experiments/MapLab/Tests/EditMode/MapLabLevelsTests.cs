@@ -43,6 +43,37 @@ namespace KingdomSurvival.MapLab.Tests
         }
 
         [Test]
+        public void CloudShadow_IsSoftWhiteSilhouette_WithEmptyPadding()
+        {
+            Texture2D cloud = new Texture2D(200, 100, TextureFormat.RGBA32, false);
+            Color32[] px = new Color32[200 * 100];
+            for (int y = 0; y < 100; y++)
+                for (int x = 0; x < 200; x++)
+                    px[y * 200 + x] = x > 40 && x < 160 && y > 20 && y < 80 ? new Color32(90, 80, 70, 255) : new Color32(0, 0, 0, 0);
+            cloud.SetPixels32(px);
+            cloud.Apply();
+            Texture2D shadow = MapLabColorMath.CreateShadow(cloud, 0.1f, 0.03f, 128);
+            try
+            {
+                Assert.IsNotNull(shadow);
+                Assert.AreEqual(128, shadow.width);
+                Color32[] s = shadow.GetPixels32();
+                Color32 center = s[(shadow.height / 2) * shadow.width + shadow.width / 2];
+                Assert.Greater(center.a, 200, "Под облаком тень плотная.");
+                Assert.AreEqual(255, center.r, "Цвет тени задаёт подкраска: сам рисунок белый.");
+                Assert.AreEqual(0, s[0].a, "Поле вокруг пусто.");
+                // Край мягкий: есть промежуточные значения прозрачности.
+                Assert.IsTrue(System.Array.Exists(s, c => c.a > 30 && c.a < 220), "Размытый край.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(cloud);
+                if (shadow != null)
+                    Object.DestroyImmediate(shadow);
+            }
+        }
+
+        [Test]
         public void CpuAdjust_AppliesLevels_KeepsAlpha_SkipsTransparent()
         {
             Color32[] pixels = { new Color32(128, 128, 128, 255), new Color32(10, 20, 30, 0), new Color32(255, 0, 0, 128) };

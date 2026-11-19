@@ -32,7 +32,18 @@ public partial class PrototypeUIController
         public bool Gone;
         public float Progress = -1f;
         public Vector2 Drift;
+        // Тень облака на земле (слой под облаками); сдвиг при таянии — в
+        // долях размера тени.
+        public VisualElement Shadow;
+        public Vector2 ShadowDrift;
     }
+
+    // Поле тени вокруг силуэта (доля размера), чтобы размытие не резал край.
+    private const float FogCloudShadowPad = 0.1f;
+    private VisualElement worldMapFogCloudShadows;
+    private readonly Dictionary<Texture2D, Texture2D> worldMapFogCloudShadowTextures = new Dictionary<Texture2D, Texture2D>();
+    private string worldMapFogCloudShadowTexturesKey;
+    private float worldMapFogCloudShadowLightFactor = 1f;
 
     private const float FogCloudsMaxSweepHexes = 8f;
     private const float FogCloudsMinCheckSeconds = 0.25f;
@@ -70,6 +81,11 @@ public partial class PrototypeUIController
             Mathf.Abs(light.b - worldMapFogCloudsLight.b) < FogCloudsLightStep)
             return;
         worldMapFogCloudsLight = light;
+        // Ночью тень слабее: доля по яркости света суток.
+        float luminance = light.r * 0.299f + light.g * 0.587f + light.b * 0.114f;
+        WorldMapMovementSettingsAsset lightSettings = WorldMapVisualRuntime.LoadMovementSettings();
+        float night = lightSettings != null ? lightSettings.FogCloudShadowNight : 0.7f;
+        worldMapFogCloudShadowLightFactor = Mathf.Lerp(night, 1f, Mathf.InverseLerp(0.35f, 1f, luminance));
         foreach (WorldMapFogCloud cloud in worldMapFogCloudList)
             if (!cloud.Gone && cloud.Element != null)
                 cloud.Element.style.unityBackgroundImageTintColor = light;
@@ -108,6 +124,12 @@ public partial class PrototypeUIController
         float opacity = settings != null ? settings.FogCloudOpacity : 1f;
         worldMapFogClouds.style.opacity = opacity;
         worldMapFogClouds.style.display = worldMapFogCloudTextures.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+        if (worldMapFogCloudShadows != null)
+        {
+            bool shadows = settings == null || settings.FogCloudShadows;
+            worldMapFogCloudShadows.style.display = shadows && worldMapFogCloudTextures.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            worldMapFogCloudShadows.style.opacity = opacity * (settings != null ? settings.FogCloudShadowOpacity : 0.9f) * worldMapFogCloudShadowLightFactor;
+        }
 
         SweepWorldMapFogCloudsAlongHero(grid, settings, trigger);
 
@@ -140,6 +162,10 @@ public partial class PrototypeUIController
         worldMapFogClouds = new VisualElement { name = "world-map-fog-clouds", pickingMode = PickingMode.Ignore };
         worldMapFogClouds.AddToClassList("world-map-layer");
         parent.Insert(parent.IndexOf(worldMapFog) + 1, worldMapFogClouds);
+        // Тени — сразу под облаками: видны только на земле, где облака нет.
+        worldMapFogCloudShadows = new VisualElement { name = "world-map-fog-cloud-shadows", pickingMode = PickingMode.Ignore };
+        worldMapFogCloudShadows.AddToClassList("world-map-layer");
+        parent.Insert(parent.IndexOf(worldMapFogClouds), worldMapFogCloudShadows);
     }
 
     private void ClearWorldMapFogClouds()
@@ -149,6 +175,9 @@ public partial class PrototypeUIController
         worldMapFogClouds?.Clear();
         if (worldMapFogClouds != null)
             worldMapFogClouds.style.display = DisplayStyle.None;
+        worldMapFogCloudShadows?.Clear();
+        if (worldMapFogCloudShadows != null)
+            worldMapFogCloudShadows.style.display = DisplayStyle.None;
         worldMapFogCloudList.Clear();
         worldMapFogCloudsDissolving.Clear();
         worldMapFogCloudBuckets = null;
@@ -163,6 +192,7 @@ public partial class PrototypeUIController
     private void BuildWorldMapFogClouds(WorldMapHexGrid grid, WorldMapMovementSettingsAsset settings, float trigger)
     {
         worldMapFogClouds.Clear();
+        worldMapFogCloudShadows?.Clear();
         worldMapFogCloudList.Clear();
         worldMapFogCloudsDissolving.Clear();
         worldMapFogCloudsState = gameState;
@@ -201,6 +231,11 @@ public partial class PrototypeUIController
             if (anchor.Flip)
                 element.style.scale = new Scale(new Vector3(-1f, 1f, 1f));
             cloud.Element = element;
+            VisualElement shadow = new VisualElement { pickingMode = PickingMode.Ignore };
+            shadow.style.position = Position.Absolute;
+            if (anchor.Flip)
+                shadow.style.scale = new Scale(new Vector3(-1f, 1f, 1f));
+            cloud.Shadow = shadow;
             int index = worldMapFogCloudList.Count;
             worldMapFogCloudList.Add(cloud);
             int bucket = FogCloudBucketIndex(anchor.X, anchor.Y);
@@ -224,7 +259,9 @@ public partial class PrototypeUIController
     private void ApplyWorldMapFogCloudTextures(WorldMapMovementSettingsAsset settings)
     {
         List<Texture2D> textures = MapLabGameViews.FogCloudsAdjusted(out string fallback, out string adjustKey);
-        string key = adjustKey + ":";
+        string shadowKey = settings == null ? "-" : settings.FogCloudShadows + "|" + settings.FogCloudShadowOffsetHexes.x + "|" + settings.FogCloudShadowOffsetHexes.y + "|" +
+            settings.FogCloudShadowScale + "|" + settings.FogCloudShadowBlur + "|" + settings.FogCloudShadowColor;
+        string key = adjustKey + ":" + shadowKey + ":";
         foreach (Texture2D t in textures)
             key += t.GetHashCode() + ",";
         if (key == worldMapFogCloudsTextureKey)
@@ -243,9 +280,15 @@ public partial class PrototypeUIController
         worldMapFogCloudsWarned = warning;
 
         worldMapFogClouds.Clear();
+        worldMapFogCloudShadows?.Clear();
         if (textures.Count == 0)
             return;
         WorldMapHexGrid grid = WorldMapFog.Grid(gameState);
+        StyleBackground[] shadowBackgrounds = WorldMapFogCloudShadowBackgrounds(textures, settings);
+        Vector2 shadowOffset = (settings != null ? settings.FogCloudShadowOffsetHexes : new Vector2(1.2f, 1.8f)) * (float)grid.HexWidth;
+        float shadowScale = FogCloudShadowElementScale(settings);
+        Color shadowColor = settings != null ? settings.FogCloudShadowColor : new Color(0.09f, 0.085f, 0.12f, 1f);
+        shadowColor.a = 1f;
         // Порядок — по рядам сверху вниз (список раскладки уже так упорядочен):
         // нижнее облако ложится поверх верхнего, плотный покров читается
         // слоями. Пять рисунков укладываются в слоты одной пачки отрисовки.
@@ -272,6 +315,19 @@ public partial class PrototypeUIController
                 element.style.height = Length.Percent((float)(heightPx / grid.CanvasHeight * 100.0));
                 element.style.top = Length.Percent((float)((cloud.Anchor.Y - heightPx * 0.5) / grid.CanvasHeight * 100.0));
                 worldMapFogClouds.Add(element);
+
+                VisualElement shadow = cloud.Shadow;
+                if (shadow != null && worldMapFogCloudShadows != null && shadowBackgrounds[variant] != null)
+                {
+                    float sw = cloud.WidthPx * shadowScale, sh = heightPx * shadowScale;
+                    shadow.style.backgroundImage = shadowBackgrounds[variant];
+                    shadow.style.unityBackgroundImageTintColor = shadowColor;
+                    shadow.style.width = Length.Percent((float)(sw / grid.CanvasWidth * 100.0));
+                    shadow.style.height = Length.Percent((float)(sh / grid.CanvasHeight * 100.0));
+                    shadow.style.left = Length.Percent((float)((cloud.Anchor.X + shadowOffset.x - sw * 0.5) / grid.CanvasWidth * 100.0));
+                    shadow.style.top = Length.Percent((float)((cloud.Anchor.Y + shadowOffset.y - sh * 0.5) / grid.CanvasHeight * 100.0));
+                    worldMapFogCloudShadows.Add(shadow);
+                }
             }
         }
     }
@@ -338,6 +394,7 @@ public partial class PrototypeUIController
         // (scale -1), поэтому знак X от зеркальности не зависит.
         float heightPx = Mathf.Max(1f, cloud.HeightPx > 0f ? cloud.HeightPx : cloud.WidthPx * 0.35f);
         cloud.Drift = new Vector2((float)(dx * drift / cloud.WidthPx * 100.0), (float)(dy * drift / heightPx * 100.0));
+        cloud.ShadowDrift = cloud.Drift / Mathf.Max(0.01f, FogCloudShadowElementScale(settings));
         cloud.Progress = 0f;
         int max = settings != null ? settings.FogCloudMaxDissolving : 48;
         while (worldMapFogCloudsDissolving.Count >= max)
@@ -367,6 +424,11 @@ public partial class PrototypeUIController
             float e = settings != null ? settings.EvaluateFogCloudEase(cloud.Progress) : cloud.Progress * cloud.Progress * (3f - 2f * cloud.Progress);
             cloud.Element.style.translate = new Translate(Length.Percent(cloud.Drift.x * e), Length.Percent(cloud.Drift.y * e));
             cloud.Element.style.opacity = 1f - e;
+            if (cloud.Shadow != null)
+            {
+                cloud.Shadow.style.translate = new Translate(Length.Percent(cloud.ShadowDrift.x * e), Length.Percent(cloud.ShadowDrift.y * e));
+                cloud.Shadow.style.opacity = 1f - e;
+            }
         }
     }
 
@@ -375,5 +437,40 @@ public partial class PrototypeUIController
         cloud.Gone = true;
         cloud.Progress = 1f;
         cloud.Element?.RemoveFromHierarchy();
+        cloud.Shadow?.RemoveFromHierarchy();
+    }
+
+    // Размер элемента тени относительно облака: масштаб тени и поле вокруг силуэта.
+    private static float FogCloudShadowElementScale(WorldMapMovementSettingsAsset settings) =>
+        (settings != null ? settings.FogCloudShadowScale : 1.2f) / (1f - 2f * FogCloudShadowPad);
+
+    // Текстуры теней по рисункам облаков (размытый силуэт). Считаются один
+    // раз на рисунок и мягкость; при смене вида — для новых рисунков.
+    private StyleBackground[] WorldMapFogCloudShadowBackgrounds(List<Texture2D> textures, WorldMapMovementSettingsAsset settings)
+    {
+        StyleBackground[] result = new StyleBackground[textures.Count];
+        if (settings != null && !settings.FogCloudShadows)
+            return result;
+        float blur = settings != null ? settings.FogCloudShadowBlur : 0.03f;
+        string key = blur.ToString("0.####");
+        if (key != worldMapFogCloudShadowTexturesKey)
+        {
+            foreach (Texture2D t in worldMapFogCloudShadowTextures.Values)
+                if (t != null)
+                    Destroy(t);
+            worldMapFogCloudShadowTextures.Clear();
+            worldMapFogCloudShadowTexturesKey = key;
+        }
+        for (int i = 0; i < textures.Count; i++)
+        {
+            if (!worldMapFogCloudShadowTextures.TryGetValue(textures[i], out Texture2D shadow) || shadow == null)
+            {
+                shadow = MapLabGameViews.CreateFogCloudShadow(textures[i], FogCloudShadowPad, blur);
+                worldMapFogCloudShadowTextures[textures[i]] = shadow;
+            }
+            if (shadow != null)
+                result[i] = new StyleBackground(Background.FromTexture2D(shadow));
+        }
+        return result;
     }
 }

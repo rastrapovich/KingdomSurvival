@@ -92,7 +92,15 @@ namespace KingdomSurvival.MapLabBridge.Editor
                          ("fogCloudDriftHexes", "Отлёт, кл."),
                          ("fogCloudDissolveSeconds", "Рассеивание, с"),
                          ("fogCloudEase", "Плавность"),
-                         ("fogCloudMaxDissolving", "Тают одновременно, макс.")
+                         ("fogCloudMaxDissolving", "Тают одновременно, макс."),
+                         ("fogCloudShadows", "Тени облаков на земле"),
+                         ("fogCloudShadowOffsetXHexes", "Тень: сдвиг вправо, кл."),
+                         ("fogCloudShadowOffsetYHexes", "Тень: сдвиг вниз, кл."),
+                         ("fogCloudShadowColor", "Тень: цвет"),
+                         ("fogCloudShadowOpacity", "Тень: плотность"),
+                         ("fogCloudShadowBlur", "Тень: мягкость края"),
+                         ("fogCloudShadowScale", "Тень: размер"),
+                         ("fogCloudShadowNight", "Тень ночью (доля)")
                      })
             {
                 SerializedProperty property = so.FindProperty(name);

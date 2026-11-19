@@ -52,6 +52,15 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 202403d9a2b7a934cba7e757c79f212c, type: 3}
     - {fileID: 2800000, guid: 2930cbd5113732a4688775c11474fb06, type: 3}
     - {fileID: 2800000, guid: a0e813728a608444187fc7f1dccd7569, type: 3}
+    FogCloudBrightness: 0.95
+    FogCloudHue: 0
+    FogCloudSaturation: 0.8
+    FogCloudLevels:
+      InputBlack: 0
+      InputWhite: 255
+      Gamma: 0.95
+      OutputBlack: 40
+      OutputWhite: 222
     OwnArtUngraded: 1
     Art: []
   - Id: gloom
@@ -94,6 +103,15 @@ MonoBehaviour:
     - {fileID: 2800000, guid: c9eddac1e62f0fc49b6e1162f3e1bb26, type: 3}
     - {fileID: 2800000, guid: cf26d5c9823bf4140aa3ac77079fe0c9, type: 3}
     - {fileID: 2800000, guid: 2810ad3194a08814eb795f08ce741d59, type: 3}
+    FogCloudBrightness: 0.82
+    FogCloudHue: 0
+    FogCloudSaturation: 0.75
+    FogCloudLevels:
+      InputBlack: 0
+      InputWhite: 255
+      Gamma: 0.9
+      OutputBlack: 22
+      OutputWhite: 196
     OwnArtUngraded: 1
     Art:
     - ArtId: Archery_Target_A
@@ -528,6 +546,15 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 7801526bcd353ff4cb298a7faa5526f2, type: 3}
     - {fileID: 2800000, guid: 73b11d1d08d74124a95d58e34919ce70, type: 3}
     - {fileID: 2800000, guid: 85091eb12927f1d40b54982f229fcf74, type: 3}
+    FogCloudBrightness: 0.93
+    FogCloudHue: 0
+    FogCloudSaturation: 0.7
+    FogCloudLevels:
+      InputBlack: 0
+      InputWhite: 255
+      Gamma: 0.95
+      OutputBlack: 52
+      OutputWhite: 214
     OwnArtUngraded: 1
     Art:
     - ArtId: Archery_Target_A
@@ -923,4 +950,4 @@ MonoBehaviour:
     - ArtId: Wooden_Toy_Boat_A
       Texture: {fileID: 2800000, guid: 82fc6cac09ad96748a97ba4d2c98bb2c, type: 3}
       Enabled: 1
-  builtInVersion: 2
+  builtInVersion: 3

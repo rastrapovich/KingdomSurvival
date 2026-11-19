@@ -124,6 +124,10 @@ namespace KingdomSurvival.MapLabBridge
             adjustedCloudsKey = null;
         }
 
+        // Тень облака на земле: размытый белый силуэт (окраску задаёт интерфейс).
+        public static Texture2D CreateFogCloudShadow(Texture2D cloud, float pad, float blur) =>
+            MapLabColorMath.CreateShadow(cloud, pad, blur);
+
         // Подкраска картинок интерфейса поверх карты.
         public static Color UiTint
         {

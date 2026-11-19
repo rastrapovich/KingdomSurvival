@@ -67,6 +67,27 @@ namespace KingdomSurvival.WorldMapVisual
         [Tooltip("Сколько облаков может таять одновременно; лишние завершаются сразу.")]
         [SerializeField, Range(4, 200)] private int fogCloudMaxDissolving = 48;
 
+        // Тени облаков на земле (19.11.2026): мягкий размытый силуэт облака,
+        // сдвинутый от света (свет карты — сверху слева), под облаками и над
+        // картой — видна там, где облако нависает над открытой землёй.
+        [Header("Тени облаков на земле")]
+        [Tooltip("Рисовать тени облаков на земле.")]
+        [SerializeField] private bool fogCloudShadows = true;
+        [Tooltip("Сдвиг тени вправо от облака (клетки). Свет карты — сверху слева.")]
+        [SerializeField, Range(-6f, 6f)] private float fogCloudShadowOffsetXHexes = 1.2f;
+        [Tooltip("Сдвиг тени вниз от облака (клетки).")]
+        [SerializeField, Range(-6f, 6f)] private float fogCloudShadowOffsetYHexes = 1.8f;
+        [Tooltip("Цвет тени (прохладный, не чёрный — цветные тени карты).")]
+        [SerializeField] private Color fogCloudShadowColor = new Color(0.09f, 0.085f, 0.12f, 1f);
+        [Tooltip("Плотность тени одного облака: 0 — нет, 1 — сплошной цвет. Тени соседних облаков складываются — там темнее.")]
+        [SerializeField, Range(0f, 1f)] private float fogCloudShadowOpacity = 0.9f;
+        [Tooltip("Мягкость края тени (доля ширины облака).")]
+        [SerializeField, Range(0.005f, 0.12f)] private float fogCloudShadowBlur = 0.03f;
+        [Tooltip("Размер тени относительно облака (по высоте тень чуть приплюснута — лежит на земле).")]
+        [SerializeField, Range(0.6f, 1.6f)] private float fogCloudShadowScale = 1.2f;
+        [Tooltip("Ночью тень слабее: доля плотности в самый тёмный час.")]
+        [SerializeField, Range(0f, 1f)] private float fogCloudShadowNight = 0.7f;
+
         [Header("Местность")]
         [SerializeField] private List<TerrainEntry> terrain = new List<TerrainEntry>();
 
@@ -125,6 +146,13 @@ namespace KingdomSurvival.WorldMapVisual
         public float FogCloudDriftHexes => Mathf.Max(0f, fogCloudDriftHexes);
         public float FogCloudDissolveSeconds => Mathf.Max(0.05f, fogCloudDissolveSeconds);
         public int FogCloudMaxDissolving => Mathf.Max(1, fogCloudMaxDissolving);
+        public bool FogCloudShadows => fogCloudShadows;
+        public Vector2 FogCloudShadowOffsetHexes => new Vector2(fogCloudShadowOffsetXHexes, fogCloudShadowOffsetYHexes);
+        public Color FogCloudShadowColor => fogCloudShadowColor;
+        public float FogCloudShadowOpacity => Mathf.Clamp01(fogCloudShadowOpacity);
+        public float FogCloudShadowBlur => Mathf.Clamp(fogCloudShadowBlur, 0.005f, 0.12f);
+        public float FogCloudShadowScale => Mathf.Clamp(fogCloudShadowScale, 0.6f, 1.6f);
+        public float FogCloudShadowNight => Mathf.Clamp01(fogCloudShadowNight);
         public float EvaluateFogCloudEase(float t)
         {
             t = Mathf.Clamp01(t);

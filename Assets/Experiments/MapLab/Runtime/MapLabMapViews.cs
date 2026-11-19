@@ -158,7 +158,8 @@ namespace KingdomSurvival.MapLab
         // Версия набора встроенных видов: ассет, собранный раньше, получает
         // недостающие встроенные виды (правки автора не трогаются).
         // 2 — тёплый свет земли (мрачный) и тушь вида (сепия).
-        public const int CurrentBuiltInVersion = 2;
+        // 3 — мягкая гамма облаков тумана (меньше контраст и насыщенность).
+        public const int CurrentBuiltInVersion = 3;
         [SerializeField] private int builtInVersion;
 
         public bool EnsureBuiltIn()
@@ -187,6 +188,10 @@ namespace KingdomSurvival.MapLab
                     g.InkColor = d.InkColor;
                     g.InkDensity = d.InkDensity;
                 }
+                // Версия 3: облака тумана в гамме карты — только если автор
+                // их цвет ещё не трогал.
+                if (builtInVersion < 3 && existing.FogCloudAdjustNeutral)
+                    existing.CopyFogCloudAdjust(fallback);
             }
             builtInVersion = CurrentBuiltInVersion;
             return true;
@@ -201,6 +206,10 @@ namespace KingdomSurvival.MapLab
             Name = "Обычный",
             Note = "Прежний облик карты: живописная акварель с тушью, палитра профиля MapLab.",
             Grade = MapLabViewGrade.Neutral(),
+            // Облака мягче рисунка карты: светлая тушь и приглушённые света.
+            FogCloudBrightness = 0.95f,
+            FogCloudSaturation = 0.8f,
+            FogCloudLevels = new MapLabLevels { Gamma = 0.95f, OutputBlack = 40f, OutputWhite = 222f },
         };
 
         // 2. Мрачный: сумеречный лес, приглушённые холодные тона, тёплые окна.
@@ -230,6 +239,10 @@ namespace KingdomSurvival.MapLab
             },
             OverrideFog = true,
             FogColor = new Color(0.07f, 0.06f, 0.09f, 0.9f),
+            // Сумеречные облака: темнее и спокойнее, без светлых бликов.
+            FogCloudBrightness = 0.82f,
+            FogCloudSaturation = 0.75f,
+            FogCloudLevels = new MapLabLevels { Gamma = 0.9f, OutputBlack = 22f, OutputWhite = 196f },
             UiTint = new Color(0.62f, 0.58f, 0.62f, 1f),
             Background = MapLabPalette.Hex(0x1E1B22),
         };
@@ -260,6 +273,10 @@ namespace KingdomSurvival.MapLab
             },
             OverrideFog = true,
             FogColor = new Color(0.36f, 0.27f, 0.18f, 0.88f),
+            // Облака пергамента: тушь светлее, кремовый приглушён к бумаге.
+            FogCloudBrightness = 0.93f,
+            FogCloudSaturation = 0.7f,
+            FogCloudLevels = new MapLabLevels { Gamma = 0.95f, OutputBlack = 52f, OutputWhite = 214f },
             UiTint = new Color(0.86f, 0.74f, 0.56f, 1f),
             Background = MapLabPalette.Hex(0xE9D9B8),
         };
@@ -302,6 +319,14 @@ namespace KingdomSurvival.MapLab
         public MapLabLevels FogCloudLevels = new MapLabLevels();
 
         public bool FogCloudAdjustNeutral => MapLabColorMath.IsNeutral(FogCloudBrightness, FogCloudHue, FogCloudSaturation, FogCloudLevels);
+
+        public void CopyFogCloudAdjust(MapLabMapView other)
+        {
+            FogCloudBrightness = other.FogCloudBrightness;
+            FogCloudHue = other.FogCloudHue;
+            FogCloudSaturation = other.FogCloudSaturation;
+            (FogCloudLevels ??= new MapLabLevels()).CopyFrom(other.FogCloudLevels);
+        }
 
         public string FogCloudAdjustKey => FogCloudAdjustNeutral ? "-" :
             FogCloudBrightness.ToString("0.###") + "/" + FogCloudHue.ToString("0.##") + "/" + FogCloudSaturation.ToString("0.###") + "/" + (FogCloudLevels != null ? FogCloudLevels.Key : "-");

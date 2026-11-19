@@ -116,6 +116,87 @@ namespace KingdomSurvival.MapLab
             return result;
         }
 
+        // Тень облака на земле (19.11.2026): размытый силуэт по альфе рисунка —
+        // белый цвет (окраску задаёт подкраска элемента) и мягкая прозрачность.
+        // Небольшая (ширина width px): тень мягкая, крупные пиксели не видны,
+        // а считать её быстро. pad — поле с каждой стороны (доля ширины и
+        // высоты), чтобы размытие не обрезалось краем холста; blur — радиус
+        // размытия, доля ширины.
+        public static Texture2D CreateShadow(Texture2D source, float pad, float blur, int width = 256)
+        {
+            if (source == null || source.width <= 0 || source.height <= 0)
+                return null;
+            pad = Mathf.Clamp(pad, 0f, 0.4f);
+            int w = Mathf.Max(16, width);
+            int h = Mathf.Max(8, Mathf.RoundToInt(w * source.height / (float)source.width));
+            RenderTexture rt = RenderTexture.GetTemporary(w, h, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+            RenderTexture previous = RenderTexture.active;
+            // Рисунок — в середину с полями: uv' = (uv − pad) / (1 − 2·pad).
+            float inner = 1f - 2f * pad;
+            Graphics.Blit(source, rt, new Vector2(1f / inner, 1f / inner), new Vector2(-pad / inner, -pad / inner));
+            RenderTexture.active = rt;
+            Texture2D read = new Texture2D(w, h, TextureFormat.RGBA32, false, false);
+            read.ReadPixels(new Rect(0, 0, w, h), 0, 0, false);
+            RenderTexture.active = previous;
+            RenderTexture.ReleaseTemporary(rt);
+            Color32[] pixels = read.GetPixels32();
+            UnityEngine.Object.DestroyImmediate(read);
+
+            float[] alpha = new float[w * h];
+            for (int i = 0; i < alpha.Length; i++)
+            {
+                // За краем рисунка (поле) — пусто, даже если выборка размазала край.
+                int x = i % w, y = i / w;
+                float u = (x + 0.5f) / w, v = (y + 0.5f) / h;
+                bool inside = u >= pad && u <= 1f - pad && v >= pad && v <= 1f - pad;
+                alpha[i] = inside ? pixels[i].a / 255f : 0f;
+            }
+            int radius = Mathf.Max(1, Mathf.RoundToInt(Mathf.Max(0f, blur) * w));
+            float[] buffer = new float[alpha.Length];
+            // Три прохода прямоугольного размытия ≈ гауссово.
+            for (int pass = 0; pass < 3; pass++)
+            {
+                BoxBlur(alpha, buffer, w, h, radius, true);
+                BoxBlur(buffer, alpha, w, h, radius, false);
+            }
+            for (int i = 0; i < pixels.Length; i++)
+                pixels[i] = new Color32(255, 255, 255, (byte)Mathf.RoundToInt(Mathf.Clamp01(alpha[i]) * 255f));
+
+            Texture2D result = new Texture2D(w, h, TextureFormat.RGBA32, true, false)
+            {
+                name = source.name + " (тень)",
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Bilinear,
+                hideFlags = HideFlags.DontSave
+            };
+            result.SetPixels32(pixels);
+            // Маленькая — остаётся читаемой (проверки, повторный пересчёт).
+            result.Apply(true, false);
+            return result;
+        }
+
+        private static void BoxBlur(float[] src, float[] dst, int w, int h, int r, bool horizontal)
+        {
+            int length = horizontal ? w : h, lines = horizontal ? h : w;
+            float norm = 1f / (2 * r + 1);
+            for (int line = 0; line < lines; line++)
+            {
+                float sum = 0f;
+                for (int k = -r; k <= r; k++)
+                    sum += Sample(src, w, h, line, Mathf.Clamp(k, 0, length - 1), horizontal);
+                for (int i = 0; i < length; i++)
+                {
+                    int index = horizontal ? line * w + i : i * w + line;
+                    dst[index] = sum * norm;
+                    sum += Sample(src, w, h, line, Mathf.Min(i + r + 1, length - 1), horizontal);
+                    sum -= Sample(src, w, h, line, Mathf.Max(i - r, 0), horizontal);
+                }
+            }
+        }
+
+        private static float Sample(float[] src, int w, int h, int line, int i, bool horizontal) =>
+            horizontal ? src[line * w + i] : src[i * w + line];
+
         public static void Adjust(Color32[] pixels, float brightness, float hue, float saturation, MapLabLevels levels)
         {
             // Таблицы: sRGB-байт → линейный цвет; уровни — по каналу.

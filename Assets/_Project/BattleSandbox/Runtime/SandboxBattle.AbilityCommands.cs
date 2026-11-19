@@ -1239,12 +1239,17 @@ namespace KingdomSurvival.BattleSandbox
             if (hold != null)
                 result.Add(new SandboxContextAction { Kind = SandboxContextActionKind.BreakFree, TargetUnitId = unit.Id, LinkId = hold.Id, Label = "Вырваться" });
 
-            foreach (SandboxBattleObject item in objects.Where(item => !item.IsDestroyed && item.OwnerId != null).OrderBy(item => item.Id, StringComparer.Ordinal))
+            // Бриф «Поверхности арены»: разрушаемые объекты местности (плетень,
+            // корневое гнездо) — та же команда «Ударить»; дальним — по линии огня.
+            foreach (SandboxBattleObject item in objects.Where(item => !item.IsDestroyed && (item.OwnerId != null || (item.IsTerrain && !item.Indestructible)))
+                         .OrderBy(item => item.Id, StringComparer.Ordinal))
             {
-                SandboxUnitState owner = GetUnit(item.OwnerId);
+                SandboxUnitState owner = item.OwnerId != null ? GetUnit(item.OwnerId) : null;
                 if (owner != null && owner.Team == unit.Team)
                     continue;
                 int distance = item.Cells.Count == 0 ? int.MaxValue : item.Cells.Min(cell => cell.DistanceTo(unit.Position));
+                if (item.IsTerrain && distance > 1 && !item.Cells.Any(cell => CanShootFrom(unit.Position, cell)))
+                    continue;
                 if (item.Kind == SandboxObjectKind.Thread && distance <= 1)
                     result.Add(new SandboxContextAction { Kind = SandboxContextActionKind.CutThread, ObjectId = item.Id, Label = "Разрезать нить" });
                 if (distance <= unit.AttackRange && distance >= (unit.AttackRange > 1 ? 0 : 0))

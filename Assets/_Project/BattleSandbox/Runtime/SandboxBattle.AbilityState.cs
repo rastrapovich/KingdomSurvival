@@ -112,6 +112,7 @@ namespace KingdomSurvival.BattleSandbox
             return IsInside(cell) &&
                    GetTerrain(cell) != SandboxTerrain.Impassable &&
                    !IsGroundBlocking(cell) &&
+                   !BlockedByTerrainObject(cell) &&
                    !HasCellState(cell, SandboxCellState.Pit) &&
                    FindEggAt(cell) == null;
         }
@@ -150,13 +151,9 @@ namespace KingdomSurvival.BattleSandbox
         // Линия видимости способностей: между концами нет непроходимых клеток.
         public bool HasLineOfSight(HexCoord from, HexCoord to)
         {
-            List<HexCoord> line = SandboxHexLine.Line(from, to);
-            for (int i = 1; i < line.Count - 1; i++)
-            {
-                if (!IsInside(line[i]) || GetTerrain(line[i]) == SandboxTerrain.Impassable)
-                    return false;
-            }
-            return true;
+            // Бриф «Поверхности арены»: общая линия огня (высокие объекты,
+            // обрыв, прежние непроходимые клетки; симметрична).
+            return GetLineOfFire(from, to).Clear;
         }
 
         // ---------- Бойцы ----------

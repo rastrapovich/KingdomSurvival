@@ -46,6 +46,8 @@ namespace KingdomSurvival.BattleSandbox
         public bool IsGroundBlocking(HexCoord cell)
         {
             SandboxGround value = GetGround(cell);
+            if (value == SandboxGround.DeepWater && HasBridgeAt(cell))
+                return false;
             return value == SandboxGround.Cliff || value == SandboxGround.DeepWater;
         }
 
@@ -75,7 +77,12 @@ namespace KingdomSurvival.BattleSandbox
 
             if (GetTerrain(cell) == SandboxTerrain.Difficult)
                 Take(Has(SandboxTerrainTags.Highlander) ? 1 : r.HillCost);
-            switch (GetGround(cell))
+            // Целый мост перекрывает основание под собой (вода, топь, грязь).
+            bool bridge = HasBridgeAt(cell);
+            SandboxBattleObject placed = TerrainObjectAt(cell);
+            if (placed != null && placed.Kind == SandboxObjectKind.FallenLog)
+                Take(SandboxTerrainObjects.Get(placed.Kind).StepCost);
+            switch (bridge ? SandboxGround.Default : GetGround(cell))
             {
                 case SandboxGround.Mud: Take(Has(SandboxTerrainTags.SwampWalker) ? 1 : r.MudCost); break;
                 case SandboxGround.Bog: Take(Has(SandboxTerrainTags.SwampWalker) ? 1 : r.BogCost); break;
@@ -89,7 +96,7 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxGround.Road: Take(r.RoadCost); break;
             }
             SandboxCellState state = GetCellState(cell);
-            if ((state & SandboxCellState.ShallowWater) != 0)
+            if ((state & SandboxCellState.ShallowWater) != 0 && !bridge)
                 Take(Has(SandboxTerrainTags.WaterWalker) ? 1 : 2);
             if ((state & (SandboxCellState.LooseEarth | SandboxCellState.Subsided)) != 0)
                 Take(2);
@@ -114,6 +121,10 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxVegetation.Forest: cover = Math.Max(cover, r.ForestCover); break;
                 case SandboxVegetation.Brush: cover = Math.Max(cover, r.BrushCover); break;
             }
+            // Низкий объект на линии выстрела (плетень, стенка, завал) — мягкое
+            // укрытие; с лесом и зарослями не складывается.
+            if (GetLineOfFire(attackPosition, target.Position).LowCover)
+                cover = Math.Max(cover, r.LowObjectCover);
             int hill = SandboxTerrainRules.GetDefenseBonus(target);
             return Math.Max(0, Math.Min(cover, r.TerrainDefenseCap - hill));
         }
@@ -121,7 +132,7 @@ namespace KingdomSurvival.BattleSandbox
         // Топь: −1 Защиты, пока боец в ней (снимает «Болотный ходок»).
         public int GetSurfaceDefensePenalty(SandboxUnitState unit)
         {
-            if (unit == null || unit.IsOffBoard || GetGround(unit.Position) != SandboxGround.Bog ||
+            if (unit == null || unit.IsOffBoard || GetGround(unit.Position) != SandboxGround.Bog || HasBridgeAt(unit.Position) ||
                 unit.HasTag(SandboxTerrainTags.SwampWalker))
                 return 0;
             return Math.Max(0, SandboxSurfaceRules.Current.BogDefensePenalty);

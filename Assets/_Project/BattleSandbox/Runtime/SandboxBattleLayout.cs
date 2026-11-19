@@ -20,6 +20,14 @@ namespace KingdomSurvival.BattleSandbox
         public int StartingHitPoints;
     }
 
+    public sealed class SandboxLayoutObject
+    {
+        public SandboxObjectKind Kind;
+        public readonly List<HexCoord> Cells = new List<HexCoord>();
+        // 0 — по умолчанию для вида.
+        public int HitPoints;
+    }
+
     public sealed class SandboxBattleLayout
     {
         public readonly List<SandboxLayoutUnit> Units = new List<SandboxLayoutUnit>();
@@ -30,6 +38,8 @@ namespace KingdomSurvival.BattleSandbox
         // прежних раскладок — клетки ведут себя как раньше.
         public readonly Dictionary<HexCoord, SandboxGround> Ground = new Dictionary<HexCoord, SandboxGround>();
         public readonly Dictionary<HexCoord, SandboxVegetation> Vegetation = new Dictionary<HexCoord, SandboxVegetation>();
+        // Объекты местности: вид и занимаемые клетки (этап 2 брифа).
+        public readonly List<SandboxLayoutObject> TerrainObjects = new List<SandboxLayoutObject>();
         public int PlayerFirstRoundInitiativeBonus;
         public string LeaderUnitId;
         // Размер поля: по умолчанию — арена 10×7 (её форма); иначе — прямоугольник
@@ -58,6 +68,14 @@ namespace KingdomSurvival.BattleSandbox
             {
                 if (!InBoard(cell))
                     errors.Add("Стена вне поля: " + cell + ".");
+            }
+            foreach (SandboxLayoutObject placed in TerrainObjects)
+            {
+                if (!SandboxTerrainObjects.Get(placed.Kind).BlocksMovement)
+                    continue;
+                foreach (SandboxLayoutUnit unit in Units)
+                    if (placed.Cells.Contains(unit.Position))
+                        errors.Add("Участник '" + unit.InstanceId + "' стоит внутри объекта «" + SandboxTerrainObjects.Get(placed.Kind).Label + "».");
             }
             foreach (HexCoord cell in DifficultCells)
             {
@@ -156,6 +174,8 @@ namespace KingdomSurvival.BattleSandbox
                 battle.SetGround(pair.Key, pair.Value);
             foreach (KeyValuePair<HexCoord, SandboxVegetation> pair in Vegetation)
                 battle.SetVegetation(pair.Key, pair.Value);
+            foreach (SandboxLayoutObject placed in TerrainObjects)
+                battle.PlaceTerrainObject(placed.Kind, placed.Cells, placed.HitPoints);
             battle.Start();
             return battle;
         }

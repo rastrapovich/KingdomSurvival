@@ -654,6 +654,7 @@ namespace KingdomSurvival.BattleSandbox
             if (inkBoardGrid)
                 PaintInkBoardGrid(layout);
 
+            DrawTerrainSurfaces(painter, layout);
             DrawAbilityGround(painter, layout);
 
             if (!IsAnimating && reachable.Count > 0)

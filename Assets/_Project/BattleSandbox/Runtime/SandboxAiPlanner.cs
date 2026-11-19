@@ -196,7 +196,7 @@ namespace KingdomSurvival.BattleSandbox
                 .Where(pair => pair.Value < unit.RemainingMovement)
                 .Select(pair => pair.Key)
                 .Concat(new[] { unit.Position })
-                .Where(cell => cell.DistanceTo(target.Position) <= unit.AttackRange);
+                .Where(cell => cell.DistanceTo(target.Position) <= unit.AttackRange && battle.CanShootFrom(cell, target.Position));
             HexCoord best = fallback;
             double bestValue = double.MinValue;
             foreach (HexCoord cell in options.OrderBy(cell => cell))
@@ -204,6 +204,9 @@ namespace KingdomSurvival.BattleSandbox
                 int distance = cell.DistanceTo(target.Position);
                 double value = distance >= desiredMin && distance <= desiredMax ? 2 : 0;
                 value += NearestThreat(battle, unit, cell) * 0.5;
+                // Бриф «Поверхности арены»: стрелку выгоден холм.
+                if (battle.GetTerrain(cell) == SandboxTerrain.Difficult)
+                    value += 0.8;
                 if (cell == unit.Position)
                     value += 0.6; // уже может стрелять — не подходить без нужды
                 if (value > bestValue)

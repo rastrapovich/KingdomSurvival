@@ -285,7 +285,17 @@ namespace KingdomSurvival.BattleSandbox
         Vine,
         Thread,
         Egg,
-        Tendril
+        Tendril,
+        // Бриф «Поверхности арены», этап 2: объекты местности (без владельца).
+        Boulder,
+        Trunk,
+        FallenLog,
+        Deadfall,
+        Wattle,
+        StoneWall,
+        Bridge,
+        RootNest,
+        RitualStone
     }
 
     // Разрушаемый объект боя: лоза, нить, яйцо, жгут. Не боец: нет
@@ -303,6 +313,9 @@ namespace KingdomSurvival.BattleSandbox
         public bool CreatedThisActivation { get; internal set; }
         public string HeldUnitId { get; internal set; }
         public bool IsDestroyed => HitPoints <= 0;
+        public bool IsTerrain => Kind >= SandboxObjectKind.Boulder;
+        // Неразрушимый объект местности (валун, мост) — HitPoints не убывают.
+        public bool Indestructible { get; internal set; }
 
         public string Label
         {
@@ -313,7 +326,8 @@ namespace KingdomSurvival.BattleSandbox
                     case SandboxObjectKind.Vine: return "Лоза";
                     case SandboxObjectKind.Thread: return "Нить";
                     case SandboxObjectKind.Egg: return "Яйцо";
-                    default: return "Жгут";
+                    case SandboxObjectKind.Tendril: return "Жгут";
+                    default: return SandboxTerrainObjects.Get(Kind).Label;
                 }
             }
         }

@@ -716,7 +716,8 @@ namespace KingdomSurvival.BattleSandbox
                 return true;
             }
 
-            if (attacker.Position.DistanceTo(target.Position) <= attacker.AttackRange)
+            if (attacker.Position.DistanceTo(target.Position) <= attacker.AttackRange &&
+                CanShootFrom(attacker.Position, target.Position))
                 return true;
 
             bool found = false;
@@ -725,7 +726,8 @@ namespace KingdomSurvival.BattleSandbox
             foreach (KeyValuePair<HexCoord, int> pair in GetReachable(attackerId))
             {
                 if (pair.Value >= attacker.RemainingMovement ||
-                    pair.Key.DistanceTo(target.Position) > attacker.AttackRange)
+                    pair.Key.DistanceTo(target.Position) > attacker.AttackRange ||
+                    !CanShootFrom(pair.Key, target.Position))
                     continue;
 
                 if (!found || pair.Value < bestCost ||
@@ -791,6 +793,13 @@ namespace KingdomSurvival.BattleSandbox
                 return SandboxAttackPreview.Invalid("Цель вне дальности.");
             if (distance == 0 && !target.IsStuckInTunnel)
                 return SandboxAttackPreview.Invalid("Цель сидит на этом бойце — снимите её действием.");
+            // Бриф «Поверхности арены»: дальний выстрел — по общей линии огня.
+            if (distance > 1)
+            {
+                SandboxLineOfFire line = GetLineOfFire(attacker.Position, target.Position);
+                if (!line.Clear)
+                    return SandboxAttackPreview.Invalid("Нет линии огня: " + line.Reason + ".");
+            }
 
             return BuildAttackPreview(attacker, target, attacker.Position);
         }

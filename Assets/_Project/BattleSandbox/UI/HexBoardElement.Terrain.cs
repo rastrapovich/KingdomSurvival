@@ -85,6 +85,13 @@ namespace KingdomSurvival.BattleSandbox
                         PaintCircle(painter, c + Jitter(pair.Key, 60 + i, s * 0.8f, layout), s * 0.13f, new Color(0.40f, 0.48f, 0.27f, 0.55f), Color.clear, 0f);
                 }
             }
+            foreach (KeyValuePair<HexCoord, List<SandboxCellEffect>> pair in battle.CellEffects)
+            {
+                if (!IsBoardCell(pair.Key))
+                    continue;
+                foreach (SandboxCellEffect effect in pair.Value)
+                    DrawCellEffect(painter, layout, pair.Key, effect);
+            }
             foreach (SandboxBattleObject item in battle.TerrainObjects)
             {
                 foreach (HexCoord cell in item.Cells.Where(IsBoardCell))
@@ -133,6 +140,58 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxObjectKind.RitualStone:
                     PaintCircle(painter, c + new Vector2(0f, -s * 0.15f), s * 0.3f, new Color(0.45f, 0.45f, 0.48f, 0.95f), new Color(0.18f, 0.18f, 0.2f, 0.95f), 2f);
                     PaintCircle(painter, c + new Vector2(0f, s * 0.15f), s * 0.3f, new Color(0.45f, 0.45f, 0.48f, 0.95f), Color.clear, 0f);
+                    break;
+            }
+        }
+
+        // Временные поверхности: немного крупных форм, бойцов не закрывают.
+        private void DrawCellEffect(Painter2D painter, HexLayout layout, HexCoord cell, SandboxCellEffect effect)
+        {
+            Vector2 c = layout.GetCenter(cell);
+            float s = layout.Size;
+            switch (effect.Kind)
+            {
+                case SandboxEffectKind.Fire:
+                    PaintHex(painter, c, s * 1.02f, new Color(0.85f, 0.38f, 0.12f, 0.30f), Color.clear, 0f, true, layout.VerticalScale);
+                    for (int i = 0; i < 2; i++)
+                        PaintCircle(painter, c + Jitter(cell, 80 + i, s * 0.7f, layout), s * 0.14f, new Color(0.98f, 0.62f, 0.18f, 0.75f), Color.clear, 0f);
+                    break;
+                case SandboxEffectKind.Tar:
+                    PaintHex(painter, c, s * 1.0f, new Color(0.07f, 0.06f, 0.05f, 0.62f), Color.clear, 0f, true, layout.VerticalScale);
+                    break;
+                case SandboxEffectKind.Web:
+                    for (int i = 0; i < 3; i++)
+                        PaintSegment(painter, c + Jitter(cell, 90 + i, s * 1.2f, layout), c + Jitter(cell, 95 + i, s * 1.2f, layout), new Color(0.86f, 0.86f, 0.82f, 0.7f), 1.2f);
+                    break;
+                case SandboxEffectKind.Roots:
+                    for (int i = 0; i < 3; i++)
+                        PaintSegment(painter, c, c + Jitter(cell, 110 + i, s * 1.2f, layout), new Color(0.34f, 0.24f, 0.12f, 0.85f), 2.4f);
+                    break;
+                case SandboxEffectKind.Thorns:
+                    for (int i = 0; i < 4; i++)
+                    {
+                        Vector2 at = c + Jitter(cell, 120 + i, s * 0.9f, layout);
+                        PaintSegment(painter, at, at + new Vector2(0f, -s * 0.18f), new Color(0.30f, 0.40f, 0.18f, 0.9f), 1.6f);
+                    }
+                    break;
+                case SandboxEffectKind.Poison:
+                    PaintHex(painter, c, s * 1.0f, new Color(0.45f, 0.58f, 0.18f, 0.40f), Color.clear, 0f, true, layout.VerticalScale);
+                    break;
+                case SandboxEffectKind.Smoke:
+                    PaintCircle(painter, c + new Vector2(0f, -s * 0.2f), s * 0.6f, new Color(0.55f, 0.55f, 0.55f, 0.32f), Color.clear, 0f);
+                    break;
+                case SandboxEffectKind.Ice:
+                    PaintHex(painter, c, s * 1.03f, new Color(0.80f, 0.90f, 0.95f, 0.60f), Color.clear, 0f, true, layout.VerticalScale);
+                    Track(painter, layout, cell, c, new Color(1f, 1f, 1f, 0.7f));
+                    break;
+                case SandboxEffectKind.Electric:
+                    if (StableNoise(cell, 130) < 0.6f)
+                    {
+                        Vector2 a = c + Jitter(cell, 131, s * 0.6f, layout);
+                        Vector2 b = a + new Vector2(s * 0.18f, -s * 0.12f);
+                        PaintSegment(painter, a, b, new Color(1f, 0.92f, 0.45f, 0.9f), 1.6f);
+                        PaintSegment(painter, b, b + new Vector2(-s * 0.08f, -s * 0.14f), new Color(1f, 0.92f, 0.45f, 0.9f), 1.6f);
+                    }
                     break;
             }
         }

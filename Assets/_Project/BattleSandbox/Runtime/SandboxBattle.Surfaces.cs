@@ -79,6 +79,9 @@ namespace KingdomSurvival.BattleSandbox
                 Take(Has(SandboxTerrainTags.Highlander) ? 1 : r.HillCost);
             // Целый мост перекрывает основание под собой (вода, топь, грязь).
             bool bridge = HasBridgeAt(cell);
+            // Лёд поверх воды: на время мороза вода не действует.
+            bool frozen = IsFrozen(cell);
+            Take(EffectStepCost(unit, cell));
             SandboxBattleObject placed = TerrainObjectAt(cell);
             if (placed != null && placed.Kind == SandboxObjectKind.FallenLog)
                 Take(SandboxTerrainObjects.Get(placed.Kind).StepCost);
@@ -86,7 +89,7 @@ namespace KingdomSurvival.BattleSandbox
             {
                 case SandboxGround.Mud: Take(Has(SandboxTerrainTags.SwampWalker) ? 1 : r.MudCost); break;
                 case SandboxGround.Bog: Take(Has(SandboxTerrainTags.SwampWalker) ? 1 : r.BogCost); break;
-                case SandboxGround.ShallowWater: Take(Has(SandboxTerrainTags.WaterWalker) ? 1 : r.ShallowWaterCost); break;
+                case SandboxGround.ShallowWater: if (!frozen) Take(Has(SandboxTerrainTags.WaterWalker) ? 1 : r.ShallowWaterCost); break;
                 case SandboxGround.DeepWater: Take(r.ShallowWaterCost); break;
                 case SandboxGround.Rubble: Take(r.RubbleCost); break;
                 case SandboxGround.DeepSnow: Take(Has(SandboxTerrainTags.Snowshoe) ? 1 : r.DeepSnowCost); break;
@@ -96,7 +99,7 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxGround.Road: Take(r.RoadCost); break;
             }
             SandboxCellState state = GetCellState(cell);
-            if ((state & SandboxCellState.ShallowWater) != 0 && !bridge)
+            if ((state & SandboxCellState.ShallowWater) != 0 && !bridge && !frozen)
                 Take(Has(SandboxTerrainTags.WaterWalker) ? 1 : 2);
             if ((state & (SandboxCellState.LooseEarth | SandboxCellState.Subsided)) != 0)
                 Take(2);
@@ -175,6 +178,14 @@ namespace KingdomSurvival.BattleSandbox
                 parts.Add(unit != null && unit.HasTag(SandboxTerrainTags.SwampWalker)
                     ? "штраф защиты снят — " + SandboxSurfaceLabels.Tag(SandboxTerrainTags.SwampWalker)
                     : "−" + r.BogDefensePenalty + " защиты в топи");
+            foreach (SandboxCellEffect effect in EffectsAt(cell))
+            {
+                int left = effect.RoundsLeft(Round);
+                string term = left < 0 ? "" : left <= 1 ? " (до конца раунда)" : " (ещё " + (left - 1) + " р.)";
+                parts.Add(SandboxHazardRules.Label(effect.Kind) + (effect.Damage > 0 && SandboxHazardRules.IsHazard(effect.Kind) ? " −" + effect.Damage + " HP" : "") + term);
+            }
+            if (HasBridgeAt(cell) && (HasShallowWater(cell) || g == SandboxGround.DeepWater || g == SandboxGround.Bog))
+                parts.Add("по настилу — водная опасность не касается");
             List<string> exempt = ExemptionsAt(unit, cell, hill, g, v);
             if (exempt.Count > 0)
                 parts.Add("облегчает: " + string.Join(", ", exempt));

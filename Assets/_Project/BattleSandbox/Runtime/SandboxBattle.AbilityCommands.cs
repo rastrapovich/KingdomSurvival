@@ -714,6 +714,11 @@ namespace KingdomSurvival.BattleSandbox
                 return "провал";
             if (FindEggAt(cell) != null)
                 return "клетка занята яйцом";
+            // Бриф «Поверхности арены»: не в объект, обрыв или глубину.
+            if (BlockedByTerrainObject(cell))
+                return "препятствие";
+            if (IsGroundBlocking(cell) && !IsEnterableFor(unit, cell))
+                return GetGround(cell) == SandboxGround.DeepWater ? "глубокая вода" : "обрыв";
             SandboxUnitState occupant = GetUnitAt(cell);
             if (occupant != null && occupant != unit && occupant.Id != ignoredUnitId)
                 return "клетка занята";
@@ -727,8 +732,13 @@ namespace KingdomSurvival.BattleSandbox
             string reason = ForcedMoveBlockReason(unit, cell, null);
             if (!string.IsNullOrEmpty(reason))
                 return " " + verb + " невозможно: " + reason + ".";
+            HexCoord from = unit.Position;
             SetUnitPosition(unit, cell);
             string note = " " + unit.DisplayLabel + " " + verb + " → " + cell + ".";
+            ApplyHazardsAt(unit, cell);
+            if (!unit.IsDefeated && verb == "отброшен")
+                note += SlideOnIce(unit, from, cell);
+            cell = unit.Position;
             if (IsMovementStopCell(unit, cell))
             {
                 if (CurrentUnit == unit)
@@ -1319,6 +1329,7 @@ namespace KingdomSurvival.BattleSandbox
         private void OnObjectDestroyed(SandboxBattleObject item)
         {
             item.HitPoints = 0;
+            RemoveEffectsOfSource(item.Id);
             foreach (SandboxLink link in links.Where(link => link.ObjectId == item.Id).ToList())
                 RemoveLink(link, item.Label.ToLowerInvariant() + " перерублена.");
         }

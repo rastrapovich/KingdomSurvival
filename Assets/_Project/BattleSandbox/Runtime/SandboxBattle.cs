@@ -301,7 +301,9 @@ namespace KingdomSurvival.BattleSandbox
         FirstStrike,
         Retaliation,
         // ПР-16: удар способности (прыжок, разгон, плевок и т.п.).
-        Ability
+        Ability,
+        // Бриф «Поверхности арены»: урон поверхности (огонь, колючки, яд, ток).
+        Environment
     }
 
     // ПР-12З: запись одного удара. Исход уже применён моделью; представление
@@ -603,12 +605,31 @@ namespace KingdomSurvival.BattleSandbox
 
             HexCoord origin = unit.Position;
             int movementCost = reachable[destination];
+            // Бриф «Поверхности арены»: шаг за шагом — опасность клеток пути
+            // один раз на вид за цикл; павший останавливается на своей клетке.
+            if (SandboxMovementPath.TryBuild(this, unitId, destination, out IReadOnlyList<HexCoord> steps, out _) && steps.Count > 1)
+            {
+                for (int i = 1; i < steps.Count && !unit.IsDefeated; i++)
+                {
+                    SetUnitPosition(unit, steps[i]);
+                    ApplyHazardsAt(unit, steps[i]);
+                }
+                if (unit.IsDefeated)
+                {
+                    message = unit.DisplayLabel + " падает на пути." + string.Join(string.Empty, TakeEventLog().Select(entry => " " + entry));
+                    EvaluateBattleOutcome();
+                    if (Phase == SandboxBattlePhase.InProgress)
+                        EndActivation();
+                    return true;
+                }
+            }
             SetUnitPosition(unit, destination);
             unit.MovedThisActivation = unit.MovedThisActivation || destination != origin;
             unit.RemainingMovement = Math.Max(0, unit.RemainingMovement - movementCost);
             message = unit.DisplayLabel + " перемещается " + origin + " → " + destination +
                       ". Осталось движения: " + unit.RemainingMovement + ".";
             message += AfterVoluntaryMove(unit);
+            message += string.Join(string.Empty, TakeEventLog().Select(entry => " " + entry));
             if (IsMovementStopCell(unit, destination) && unit.ActionPoints > 0)
             {
                 // Нить: движение обнулено, действие с места осталось.

@@ -114,7 +114,8 @@ namespace KingdomSurvival.BattleSandbox
             bool hill = battle.GetTerrain(coord) == SandboxTerrain.Difficult;
             // Бриф «Поверхности арены»: основание и растительность — описание
             // клетки для бойца, чей ход (вход, бонусы, штрафы, исключения).
-            bool surface = battle.GetGround(coord) != SandboxGround.Default || battle.GetVegetation(coord) != SandboxVegetation.None;
+            bool surface = battle.GetGround(coord) != SandboxGround.Default || battle.GetVegetation(coord) != SandboxVegetation.None ||
+                           battle.EffectsAt(coord).Count > 0 || battle.TerrainObjectAt(coord) != null;
             if (!hill && !surface)
                 return;
 

@@ -159,7 +159,8 @@ namespace KingdomSurvival.BattleSandbox
         }
 
         // Временные области, закрывающие дальнюю линию (дым) — этап 3.
-        private bool BlocksLineBySurface(HexCoord cell, HexCoord from, HexCoord to) => false;
+        private bool BlocksLineBySurface(HexCoord cell, HexCoord from, HexCoord to) =>
+            from.DistanceTo(to) > 1 && HasEffect(cell, SandboxEffectKind.Smoke);
 
         // Дальний выстрел из позиции: соседняя цель — без проверки линии.
         public bool CanShootFrom(HexCoord from, HexCoord to) =>

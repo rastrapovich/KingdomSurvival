@@ -347,6 +347,7 @@ namespace KingdomSurvival.BattleSandbox
 
         private void ProcessRoundStart()
         {
+            ProcessSurfaceRoundStart();
             foreach (SandboxBattleObject thread in objects.Where(item => item.Kind == SandboxObjectKind.Thread && !item.IsDestroyed && item.ExpiresAtRound <= Round).ToList())
             {
                 thread.HitPoints = 0;
@@ -378,6 +379,10 @@ namespace KingdomSurvival.BattleSandbox
         private bool ProcessActivationStart(SandboxUnitState unit)
         {
             bool keepsTurn = true;
+            // Бриф «Поверхности арены»: новый цикл опасности и поверхность под бойцом.
+            ProcessHazardsAtActivation(unit);
+            if (unit.IsDefeated)
+                return false;
 
             // 1. Отложенные события этого источника.
             foreach (SandboxTelegraph telegraph in telegraphs.Where(item => item.SourceId == unit.Id).ToList())

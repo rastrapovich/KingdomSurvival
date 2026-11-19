@@ -75,6 +75,9 @@ namespace KingdomSurvival.BattleSandbox
                 effectiveDefense += guardBonus;
             }
 
+            // Бриф «Поверхности арены»: топь — после положительных бонусов.
+            effectiveDefense -= SandboxTerrainRules.GetSurfaceDefensePenalty(target);
+
             return Math.Max(0, effectiveDefense);
         }
 

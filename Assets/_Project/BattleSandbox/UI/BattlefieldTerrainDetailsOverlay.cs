@@ -111,15 +111,19 @@ namespace KingdomSurvival.BattleSandbox
             HexCoord coord = (HexCoord)args[1];
             if (battle.GetUnitAt(coord) != null)
                 return;
-            if (battle.GetTerrain(coord) != SandboxTerrain.Difficult)
+            bool hill = battle.GetTerrain(coord) == SandboxTerrain.Difficult;
+            // Бриф «Поверхности арены»: основание и растительность — описание
+            // клетки для бойца, чей ход (вход, бонусы, штрафы, исключения).
+            bool surface = battle.GetGround(coord) != SandboxGround.Default || battle.GetVegetation(coord) != SandboxVegetation.None;
+            if (!hill && !surface)
                 return;
 
             Vector2 rootPosition = root.WorldToLocal(evt.position);
-            ShowHillPopup(rootPosition);
+            ShowHillPopup(rootPosition, hill, surface ? battle.DescribeCell(battle.CurrentUnit, coord) : null);
             evt.StopPropagation();
         }
 
-        private void ShowHillPopup(Vector2 position)
+        private void ShowHillPopup(Vector2 position, bool hill = true, string details = null)
         {
             ClosePopup();
 
@@ -149,20 +153,28 @@ namespace KingdomSurvival.BattleSandbox
             popup.style.borderBottomLeftRadius = 5f;
             popup.style.borderBottomRightRadius = 5f;
 
-            Label title = new Label("ХОЛМ");
+            Label title = new Label(hill ? "ХОЛМ" : "МЕСТНОСТЬ");
             title.style.fontSize = 18f;
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
             title.style.color = new Color(0.93f, 0.80f, 0.55f, 1f);
             popup.Add(title);
 
-            Label description = new Label(
+            Label description = new Label(details ??
                 "Труднопроходимая возвышенность. Даёт оборонительное преимущество и улучшает позицию стрелков.");
             description.style.marginTop = 8f;
             description.style.fontSize = 12f;
             description.style.whiteSpace = WhiteSpace.Normal;
             description.style.color = new Color(0.78f, 0.76f, 0.69f, 1f);
             popup.Add(description);
+            if (hill && details == null)
+                AddHillLines();
 
+            Button close = new Button(ClosePopup) { text = "ПОНЯТНО" };
+            FinishPopup(close, position);
+        }
+
+        private void AddHillLines()
+        {
             Label movement = new Label(
                 "Стоимость входа: " + SandboxTerrainRules.HillMovementCost + " движения");
             movement.style.marginTop = 12f;
@@ -185,8 +197,10 @@ namespace KingdomSurvival.BattleSandbox
             range.style.unityFontStyleAndWeight = FontStyle.Bold;
             range.style.color = new Color(0.48f, 0.82f, 0.53f, 1f);
             popup.Add(range);
+        }
 
-            Button close = new Button(ClosePopup) { text = "ПОНЯТНО" };
+        private void FinishPopup(Button close, Vector2 position)
+        {
             close.style.marginTop = 14f;
             close.style.height = 30f;
             close.style.unityFontStyleAndWeight = FontStyle.Bold;

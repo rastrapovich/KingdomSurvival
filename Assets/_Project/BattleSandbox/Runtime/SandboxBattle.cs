@@ -441,6 +441,8 @@ namespace KingdomSurvival.BattleSandbox
                                         value == SandboxTerrain.Impassable);
             if (disabledCells != null)
                 this.disabledCells.UnionWith(disabledCells);
+            // Поверхности арены: штраф топи и укрытие читают свой бой.
+            SandboxTerrainRules.AttachBattle(this.units, this);
 
             ValidateInitialState();
         }
@@ -453,6 +455,7 @@ namespace KingdomSurvival.BattleSandbox
             Phase = SandboxBattlePhase.InProgress;
             Round = 1;
             PrepareStartingWater();
+            SyncGroundWater();
             InitializeAbilityState();
             ResetRoundRetaliations();
             BuildRoundOrder();
@@ -531,7 +534,7 @@ namespace KingdomSurvival.BattleSandbox
 
                 foreach (HexCoord next in current.Neighbors())
                 {
-                    if (!IsInside(next) || !IsEnterable(next))
+                    if (!IsInside(next) || !IsEnterableFor(unit, next))
                         continue;
                     if (GetUnitAt(next) != null && next != unit.Position)
                         continue;
@@ -540,7 +543,7 @@ namespace KingdomSurvival.BattleSandbox
                     if (current != unit.Position && IsMovementStopCell(unit, current))
                         continue;
 
-                    int stepCost = GetStepCost(next);
+                    int stepCost = GetStepCost(unit, next);
                     int newCost = costs[current] + stepCost;
                     if (newCost > budget)
                         continue;
@@ -651,7 +654,7 @@ namespace KingdomSurvival.BattleSandbox
                     return false;
             }
 
-            int strikeStepCost = GetMovementCost(target.Position);
+            int strikeStepCost = GetMovementCost(attacker, target.Position);
             bool fromPlaceWithoutMovement = attacker.ActsWithoutMovement && requestedPosition == attacker.Position;
             if (!fromPlaceWithoutMovement &&
                 (strikeStepCost == int.MaxValue ||
@@ -1289,6 +1292,10 @@ namespace KingdomSurvival.BattleSandbox
             if (HasPackBonus(attacker, target, attackPosition))
                 effectiveAttack += SandboxCombatTagRules.PackAttackBonus;
             decimal effectiveDefense = SandboxCombatTagRules.GetEffectiveDefense(target);
+            // Бриф «Поверхности арены»: укрытие леса/зарослей — только от
+            // обычного дальнего выстрела (не ответный удар, не способность).
+            if (!retaliation && abilityMultiplier == 1m)
+                effectiveDefense += GetCoverBonus(target, attackPosition, projectile: true);
 
             // 12Е-6: «Основная защита» — первая атака по носителю за раунд −1 Атака.
             if (!retaliation && target.HasPerk(SandboxPerks.BasicDefense) && target.TimesAttackedThisRound == 0)
@@ -1361,9 +1368,9 @@ namespace KingdomSurvival.BattleSandbox
                    !target.IsUnderground && !target.AwaitingPlacement;
         }
 
-        private int GetMovementCost(HexCoord position)
+        private int GetMovementCost(SandboxUnitState unit, HexCoord position)
         {
-            return IsEnterable(position) ? GetStepCost(position) : int.MaxValue;
+            return IsEnterableFor(unit, position) ? GetStepCost(unit, position) : int.MaxValue;
         }
     }
 

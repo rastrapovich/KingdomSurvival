@@ -100,6 +100,16 @@ namespace KingdomSurvival.BattlefieldDatabase
         [SerializeField] private List<BattlefieldTagDefinition> tags = new List<BattlefieldTagDefinition>();
         [SerializeField] private List<BattlefieldDefinitionData> battlefields = new List<BattlefieldDefinitionData>();
         [SerializeField] private float walkHexesPerSecond = DefaultWalkHexesPerSecond;
+        // Бриф «Поверхности арены»: рабочие числа местности (вход, укрытие,
+        // топь, предел) — одни на бой и полигон. Нет записи — по умолчанию.
+        [SerializeField] private KingdomSurvival.BattleSandbox.SandboxSurfaceRules surfaceRules = new KingdomSurvival.BattleSandbox.SandboxSurfaceRules();
+
+        public KingdomSurvival.BattleSandbox.SandboxSurfaceRules SurfaceRules => surfaceRules ??= new KingdomSurvival.BattleSandbox.SandboxSurfaceRules();
+
+        private void OnEnable()
+        {
+            KingdomSurvival.BattleSandbox.SandboxSurfaceRules.Current = SurfaceRules;
+        }
 
         // Общая скорость ходьбы по гексам — одна на бой и исследование места:
         // боец на поле и командир с отрядом в месте проходят клетку за одно

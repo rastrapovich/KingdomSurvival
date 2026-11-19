@@ -111,19 +111,14 @@ namespace KingdomSurvival.BattleSandbox
         {
             return IsInside(cell) &&
                    GetTerrain(cell) != SandboxTerrain.Impassable &&
+                   !IsGroundBlocking(cell) &&
                    !HasCellState(cell, SandboxCellState.Pit) &&
                    FindEggAt(cell) == null;
         }
 
-        // Цена входа: холм, мелкая вода, разрыхлённая земля, просадка — 2.
-        public int GetStepCost(HexCoord cell)
-        {
-            if (GetTerrain(cell) == SandboxTerrain.Difficult)
-                return 2;
-            return (GetCellState(cell) & (SandboxCellState.ShallowWater | SandboxCellState.LooseEarth | SandboxCellState.Subsided)) != 0
-                ? 2
-                : 1;
-        }
+        // Цена входа без особенностей бойца: холм, мелкая вода, разрыхлённая
+        // земля, просадка — 2; поверхности арены — SandboxBattle.Surfaces.
+        public int GetStepCost(HexCoord cell) => GetStepCost(null, cell);
 
         public bool IsFreeCell(HexCoord cell)
         {

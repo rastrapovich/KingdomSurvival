@@ -46,12 +46,33 @@ namespace KingdomSurvival.BattleSandbox
             }
         }
 
+        // Бриф «Поверхности арены»: бой бойца — для поверхностей (топь, укрытие).
+        private static readonly ConditionalWeakTable<SandboxUnitState, SandboxBattle> BattleByUnit =
+            new ConditionalWeakTable<SandboxUnitState, SandboxBattle>();
+
+        public static void AttachBattle(IEnumerable<SandboxUnitState> units, SandboxBattle battle)
+        {
+            if (units == null || battle == null)
+                return;
+            foreach (SandboxUnitState unit in units)
+            {
+                if (unit == null)
+                    continue;
+                BattleByUnit.Remove(unit);
+                BattleByUnit.Add(unit, battle);
+            }
+        }
+
+        // Штраф поверхности под бойцом (топь), применяется после бонусов.
+        public static int GetSurfaceDefensePenalty(SandboxUnitState unit) =>
+            unit != null && BattleByUnit.TryGetValue(unit, out SandboxBattle battle) ? battle.GetSurfaceDefensePenalty(unit) : 0;
+
         public static int GetDefenseBonus(SandboxUnitState unit)
         {
             if (!IsOnHill(unit))
                 return 0;
 
-            return HillDefenseBonus;
+            return SandboxSurfaceRules.Current.HillDefense;
         }
 
         public static int GetAttackRangeBonus(SandboxUnitState unit)

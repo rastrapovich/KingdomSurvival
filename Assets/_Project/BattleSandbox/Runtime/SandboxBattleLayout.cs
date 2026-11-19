@@ -26,6 +26,10 @@ namespace KingdomSurvival.BattleSandbox
         // Стены и иные непроходимые клетки места (отключённые гексы поля).
         public readonly HashSet<HexCoord> BlockedCells = new HashSet<HexCoord>();
         public readonly HashSet<HexCoord> DifficultCells = new HashSet<HexCoord>();
+        // Бриф «Поверхности арены»: основание и растительность клеток. Пусто у
+        // прежних раскладок — клетки ведут себя как раньше.
+        public readonly Dictionary<HexCoord, SandboxGround> Ground = new Dictionary<HexCoord, SandboxGround>();
+        public readonly Dictionary<HexCoord, SandboxVegetation> Vegetation = new Dictionary<HexCoord, SandboxVegetation>();
         public int PlayerFirstRoundInitiativeBonus;
         public string LeaderUnitId;
         // Размер поля: по умолчанию — арена 10×7 (её форма); иначе — прямоугольник
@@ -148,6 +152,10 @@ namespace KingdomSurvival.BattleSandbox
             battle.LeaderUnitId = LeaderUnitId;
             battle.HiddenUnitsScouted = HiddenUnitsScouted;
             battle.SetInitialWater(WaterCells);
+            foreach (KeyValuePair<HexCoord, SandboxGround> pair in Ground)
+                battle.SetGround(pair.Key, pair.Value);
+            foreach (KeyValuePair<HexCoord, SandboxVegetation> pair in Vegetation)
+                battle.SetVegetation(pair.Key, pair.Value);
             battle.Start();
             return battle;
         }

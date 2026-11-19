@@ -93,6 +93,46 @@ MonoBehaviour:
       \u0431\u043E\u043D\u0443\u0441\u0430 \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0430\u0435\u0442.
       \u0427\u0438\u0441\u043B\u043E \u2014 \u0440\u0430\u0431\u043E\u0447\u0430\u044F
       \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430."
+  - id: move.forest_walker
+    displayLabel: "Лесной ходок"
+    category: "Передвижение"
+    color: {r: 0.36, g: 0.52, b: 0.3, a: 1}
+    description: "Вход в лес и заросли стоит 1. От огня и яда не защищает. Рабочее правило арены."
+  - id: move.swamp_walker
+    displayLabel: "Болотный ходок"
+    category: "Передвижение"
+    color: {r: 0.38, g: 0.45, b: 0.33, a: 1}
+    description: "Вход в грязь и топь стоит 1; снимает −1 Защиты в топи. Рабочее правило арены."
+  - id: move.highlander
+    displayLabel: "Привычный к высоте"
+    category: "Передвижение"
+    color: {r: 0.55, g: 0.5, b: 0.42, a: 1}
+    description: "Вход на холм стоит 1; бонусы холма не удваивает. Рабочее правило арены."
+  - id: move.snowshoe
+    displayLabel: "Снегоступ"
+    category: "Передвижение"
+    color: {r: 0.75, g: 0.8, b: 0.85, a: 1}
+    description: "Вход в глубокий снег стоит 1. Рабочее правило арены."
+  - id: move.surefoot
+    displayLabel: "Цепкая поступь"
+    category: "Передвижение"
+    color: {r: 0.5, g: 0.62, b: 0.7, a: 1}
+    description: "Вход на лёд стоит 1; толчок не даёт дополнительного скольжения. Рабочее правило арены."
+  - id: move.spider_step
+    displayLabel: "Паучья поступь"
+    category: "Передвижение"
+    color: {r: 0.45, g: 0.42, b: 0.4, a: 1}
+    description: "Паутина не замедляет; от прочих захватов не защищает. Рабочее правило арены."
+  - id: move.water_walker
+    displayLabel: "Водный ходок"
+    category: "Передвижение"
+    color: {r: 0.33, g: 0.5, b: 0.62, a: 1}
+    description: "Вход в мелководье стоит 1. Доступа к глубокой воде не даёт. Рабочее правило арены."
+  - id: move.swimmer
+    displayLabel: "Пловец"
+    category: "Передвижение"
+    color: {r: 0.25, g: 0.42, b: 0.6, a: 1}
+    description: "Может входить в глубокую воду (вход 2). Рабочее правило арены."
   units:
   - id: guard
     displayLabel: "\u0413\u0432\u0430\u0440\u0434\u0435\u0435\u0446"

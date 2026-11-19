@@ -632,7 +632,7 @@ namespace KingdomSurvival.BattleSandbox
                     cell = SandboxHexLine.Step(cell, direction);
                     if (!IsFreeCell(cell) || IsMovementStopCell(unit, cell))
                         break;
-                    cost += GetStepCost(cell);
+                    cost += GetStepCost(unit, cell);
                     if (cost > unit.RemainingMovement)
                         break;
                     path.Add(cell);

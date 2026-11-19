@@ -37,7 +37,7 @@ namespace KingdomSurvival.BattleSandbox
 
             while (current != unit.Position)
             {
-                int stepCost = battle.GetStepCost(current);
+                int stepCost = battle.GetStepCost(unit, current);
                 bool found = false;
                 HexCoord bestPredecessor = default;
                 int bestPredecessorCost = 0;

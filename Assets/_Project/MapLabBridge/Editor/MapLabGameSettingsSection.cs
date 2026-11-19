@@ -81,8 +81,10 @@ namespace KingdomSurvival.MapLabBridge.Editor
             foreach ((string name, string label) in new[]
                      {
                          ("fogCloudsEnabled", "Показывать облака"),
+                         ("fogMaskVisible", "Затемнение маской под облаками"),
                          ("fogCloudTriggerRadiusHexes", "Радиус запуска, кл."),
-                         ("fogCloudSpacingHexes", "Шаг между облаками, кл."),
+                         ("fogCloudSpacingHexes", "Шаг в ряду, кл."),
+                         ("fogCloudRowSpacingHexes", "Шаг между рядами, кл."),
                          ("fogCloudJitter", "Разброс положения"),
                          ("fogCloudWidthHexes", "Ширина облака, кл."),
                          ("fogCloudSizeVariation", "Разброс размера"),

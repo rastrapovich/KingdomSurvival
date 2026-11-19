@@ -42,14 +42,22 @@ public static class WorldMapFogClouds
     // Неровная сетка опорных точек на всё полотно: ряды через шаг·0,87,
     // нечётные ряды сдвинуты на полшага, каждая точка смещена на долю шага.
     // Один и тот же seed и сетка — те же облака (загрузка, смена вида).
-    public static List<WorldMapFogCloudAnchor> Layout(WorldMapHexGrid grid, int seed, double spacingHexes, double jitter)
+    public static List<WorldMapFogCloudAnchor> Layout(WorldMapHexGrid grid, int seed, double spacingHexes, double jitter) =>
+        Layout(grid, seed, spacingHexes, Math.Max(1.0, spacingHexes) * 0.866, jitter);
+
+    // Шаг по рядам отдельно: облака широкие и низкие, поэтому ряды идут
+    // чаще столбцов — плотный покров почти без просветов. Разброс по каждой
+    // оси — доля своего шага (вертикальный разброс не раздвигает ряды).
+    public static List<WorldMapFogCloudAnchor> Layout(WorldMapHexGrid grid, int seed, double spacingHexes, double rowSpacingHexes, double jitter)
     {
         List<WorldMapFogCloudAnchor> result = new List<WorldMapFogCloudAnchor>();
         if (grid == null || grid.CanvasWidth <= 0 || grid.CanvasHeight <= 0)
             return result;
         double step = Math.Max(1.0, spacingHexes) * grid.HexWidth;
-        double rowStep = step * 0.866;
-        double spread = Math.Max(0.0, Math.Min(0.9, jitter)) * step;
+        double rowStep = Math.Max(0.5, rowSpacingHexes) * grid.HexWidth;
+        double clamped = Math.Max(0.0, Math.Min(0.9, jitter));
+        double spread = clamped * step;
+        double spreadY = clamped * rowStep * 0.3;
         int rows = (int)Math.Ceiling(grid.CanvasHeight / rowStep) + 1;
         int columns = (int)Math.Ceiling(grid.CanvasWidth / step) + 1;
         uint seedHash = Mix((uint)seed, 0x5F0C1D);
@@ -61,8 +69,9 @@ public static class WorldMapFogClouds
                 int id = row * columns + column;
                 uint hash = Mix(seedHash, (uint)id);
                 double x = column * step + shift + (Fraction(hash, 1) * 2.0 - 1.0) * spread;
-                double y = row * rowStep + (Fraction(hash, 2) * 2.0 - 1.0) * spread;
-                if (x < 0 || y < 0 || x > grid.CanvasWidth || y > grid.CanvasHeight)
+                double y = row * rowStep + (Fraction(hash, 2) * 2.0 - 1.0) * spreadY;
+                // Край полотна тоже под облаками: опора может выйти за край на полшага.
+                if (x < -step * 0.5 || y < -rowStep * 0.5 || x > grid.CanvasWidth + step * 0.5 || y > grid.CanvasHeight + rowStep * 0.5)
                     continue;
                 result.Add(new WorldMapFogCloudAnchor(id, x, y, hash));
             }

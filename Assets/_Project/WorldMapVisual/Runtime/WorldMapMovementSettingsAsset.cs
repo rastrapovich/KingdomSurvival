@@ -42,18 +42,22 @@ namespace KingdomSurvival.WorldMapVisual
         [Header("Облака тумана войны (декор)")]
         [Tooltip("Показывать облака над неисследованной местностью. Выключено — остаётся обычная маска тумана.")]
         [SerializeField] private bool fogCloudsEnabled = true;
+        [Tooltip("Прежнее затемнение неисследованного сплошной маской под облаками. Выключено (по умолчанию) — неизвестное закрывают только облака. Без облаков (выключены или нет рисунков) маска включается сама, чтобы местность не открылась.")]
+        [SerializeField] private bool fogMaskVisible;
         [Tooltip("Облако рассеивается, когда путь героя проходит ближе этого расстояния (клетки) от его центра. Не меньше радиуса открытия тумана.")]
-        [SerializeField, Range(0.5f, 12f)] private float fogCloudTriggerRadiusHexes = 4f;
-        [Tooltip("Средний шаг между облаками (клетки). Меньше — гуще.")]
-        [SerializeField, Range(2f, 12f)] private float fogCloudSpacingHexes = 4.5f;
+        [SerializeField, Range(0.5f, 12f)] private float fogCloudTriggerRadiusHexes = 3f;
+        [Tooltip("Шаг между облаками в ряду (клетки). Меньше — гуще.")]
+        [SerializeField, Range(1f, 12f)] private float fogCloudSpacingHexes = 4.5f;
+        [Tooltip("Шаг между рядами облаков (клетки). Облака низкие, поэтому ряды чаще: меньше — плотнее, без просветов.")]
+        [SerializeField, Range(0.5f, 8f)] private float fogCloudRowSpacingHexes = 1.2f;
         [Tooltip("Разброс положения облаков (доля шага): убирает ровную сетку.")]
         [SerializeField, Range(0f, 0.9f)] private float fogCloudJitter = 0.45f;
         [Tooltip("Ширина облака (клетки).")]
-        [SerializeField, Range(1f, 30f)] private float fogCloudWidthHexes = 8.5f;
+        [SerializeField, Range(1f, 30f)] private float fogCloudWidthHexes = 8f;
         [Tooltip("Разброс размера облаков (±доля).")]
-        [SerializeField, Range(0f, 0.8f)] private float fogCloudSizeVariation = 0.3f;
+        [SerializeField, Range(0f, 0.6f)] private float fogCloudSizeVariation = 0.35f;
         [Tooltip("Непрозрачность облаков.")]
-        [SerializeField, Range(0.05f, 1f)] private float fogCloudOpacity = 0.95f;
+        [SerializeField, Range(0.05f, 1f)] private float fogCloudOpacity = 1f;
         [Tooltip("На сколько клеток облако отплывает от героя, пока тает.")]
         [SerializeField, Range(0f, 12f)] private float fogCloudDriftHexes = 3f;
         [Tooltip("Длительность рассеивания (секунды реального времени).")]
@@ -110,11 +114,13 @@ namespace KingdomSurvival.WorldMapVisual
         public Color FogColor => fogColor;
         public float FogEdgeSoftness => Mathf.Clamp01(fogEdgeSoftness);
         public bool FogCloudsEnabled => fogCloudsEnabled;
+        public bool FogMaskVisible => fogMaskVisible;
+        public float FogCloudRowSpacingHexes => Mathf.Max(0.5f, fogCloudRowSpacingHexes);
         public float FogCloudTriggerRadiusHexes => Mathf.Max(fogRevealRadiusHexes, fogCloudTriggerRadiusHexes);
         public float FogCloudSpacingHexes => Mathf.Max(1f, fogCloudSpacingHexes);
         public float FogCloudJitter => Mathf.Clamp(fogCloudJitter, 0f, 0.9f);
         public float FogCloudWidthHexes => Mathf.Max(0.5f, fogCloudWidthHexes);
-        public float FogCloudSizeVariation => Mathf.Clamp(fogCloudSizeVariation, 0f, 0.9f);
+        public float FogCloudSizeVariation => Mathf.Clamp(fogCloudSizeVariation, 0f, 0.6f);
         public float FogCloudOpacity => Mathf.Clamp01(fogCloudOpacity);
         public float FogCloudDriftHexes => Mathf.Max(0f, fogCloudDriftHexes);
         public float FogCloudDissolveSeconds => Mathf.Max(0.05f, fogCloudDissolveSeconds);

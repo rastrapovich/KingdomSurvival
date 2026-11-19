@@ -49,7 +49,8 @@ public sealed class FreePlayFogCloudsTests
         Assert.Greater(a.Count, 20, "Облака на всю карту.");
         CollectionAssert.AreEqual(a.Select(x => (x.Id, x.X, x.Y, x.Hash)).ToList(), b.Select(x => (x.Id, x.X, x.Y, x.Hash)).ToList(), "Тот же seed — те же облака.");
         Assert.IsTrue(a.Zip(other, (p, q) => p.X != q.X || p.Y != q.Y).Any(d => d), "Другой seed — другая раскладка.");
-        Assert.IsTrue(a.All(x => x.X >= 0 && x.Y >= 0 && x.X <= grid.CanvasWidth && x.Y <= grid.CanvasHeight));
+        double half = 4.5 * grid.HexWidth * 0.5;
+        Assert.IsTrue(a.All(x => x.X >= -half && x.Y >= -half && x.X <= grid.CanvasWidth + half && x.Y <= grid.CanvasHeight + half), "Опоры у полотна, край тоже закрыт.");
         // Без «забора»: расстояния до соседа в ряду заметно различаются.
         double step = 4.5 * grid.HexWidth;
         List<double> gaps = new List<double>();
@@ -60,6 +61,21 @@ public sealed class FreePlayFogCloudsTests
         // Несколько рисунков и зеркал на карте.
         Assert.AreEqual(2, a.Select(x => x.Variant(2)).Distinct().Count());
         Assert.AreEqual(2, a.Select(x => x.Flip).Distinct().Count());
+    }
+
+    [Test]
+    public void DenseLayout_RowsCloserThanColumns_AndCountStaysReasonableOnHugeMap()
+    {
+        WorldMapHexGrid huge = new WorldMapHexGrid(WorldMapHexGrid.DefaultCanvasWidth, WorldMapHexGrid.DefaultCanvasHeight, CampaignStartOptions.HugeMapHexesAcross);
+        List<WorldMapFogCloudAnchor> dense = WorldMapFogClouds.Layout(huge, Seed, 4.5, 1.2, 0.45);
+        List<WorldMapFogCloudAnchor> sparse = WorldMapFogClouds.Layout(huge, Seed, 4.5, 0.45);
+        Assert.Greater(dense.Count, sparse.Count * 2, "Плотные ряды — облаков больше.");
+        Assert.Less(dense.Count, 6000, "На огромной карте число облаков остаётся разумным: " + dense.Count);
+        // Соседние ряды не расходятся дальше шага ряда с разбросом.
+        double rowStep = 1.2 * huge.HexWidth;
+        foreach (IGrouping<int, WorldMapFogCloudAnchor> row in dense.GroupBy(x => (int)System.Math.Round(x.Y / rowStep)))
+            Assert.IsTrue(row.All(x => System.Math.Abs(x.Y - row.Key * rowStep) <= rowStep * 0.3 + 1e-6));
+        TestContext.WriteLine("Облаков на огромной карте: " + dense.Count);
     }
 
     [Test]

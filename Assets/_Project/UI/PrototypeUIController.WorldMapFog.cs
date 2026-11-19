@@ -38,6 +38,16 @@ public partial class PrototypeUIController
             return;
         }
 
+        // 19.11.2026: неизвестное закрывают облака (PrototypeUIController.
+        // WorldMapFogClouds); сплошная маска — только по настройке или как
+        // запасной вариант, пока облаков нет (выключены, нет рисунков), чтобы
+        // местность не открылась. Данные и перерисовка маски не меняются.
+        WorldMapMovementSettingsAsset maskSettings = WorldMapVisualRuntime.LoadMovementSettings();
+        bool showMask = (maskSettings != null && maskSettings.FogMaskVisible) || !worldMapFogCloudsCovering;
+        DisplayStyle maskDisplay = showMask ? DisplayStyle.Flex : DisplayStyle.None;
+        if (worldMapFog.style.display != maskDisplay)
+            worldMapFog.style.display = maskDisplay;
+
         worldMapFogTimer += Time.unscaledDeltaTime;
         bool stale = !ReferenceEquals(worldMapFogState, gameState) || worldMapFogVersion != WorldMapFog.Version;
         if (!stale || (!force && worldMapFogTimer < FogMinRedrawSeconds && ReferenceEquals(worldMapFogState, gameState)))

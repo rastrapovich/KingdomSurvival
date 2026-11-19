@@ -49,6 +49,9 @@ MonoBehaviour:
     FogClouds:
     - {fileID: 2800000, guid: 09f10f9e03f6b454c8e263b7c030e88c, type: 3}
     - {fileID: 2800000, guid: c9c483c9aab5b00489959a2513a27a20, type: 3}
+    - {fileID: 2800000, guid: 202403d9a2b7a934cba7e757c79f212c, type: 3}
+    - {fileID: 2800000, guid: 2930cbd5113732a4688775c11474fb06, type: 3}
+    - {fileID: 2800000, guid: a0e813728a608444187fc7f1dccd7569, type: 3}
     OwnArtUngraded: 1
     Art: []
   - Id: gloom
@@ -88,6 +91,9 @@ MonoBehaviour:
     FogClouds:
     - {fileID: 2800000, guid: 0fcd6572caa436a43bb8289328bb2bff, type: 3}
     - {fileID: 2800000, guid: d53d26d16034515429988a86317f04b9, type: 3}
+    - {fileID: 2800000, guid: c9eddac1e62f0fc49b6e1162f3e1bb26, type: 3}
+    - {fileID: 2800000, guid: cf26d5c9823bf4140aa3ac77079fe0c9, type: 3}
+    - {fileID: 2800000, guid: 2810ad3194a08814eb795f08ce741d59, type: 3}
     OwnArtUngraded: 1
     Art:
     - ArtId: Archery_Target_A
@@ -519,6 +525,9 @@ MonoBehaviour:
     FogClouds:
     - {fileID: 2800000, guid: 8dedd5a86acf90e41a1c742ce7b07ade, type: 3}
     - {fileID: 2800000, guid: f3358ee9510e84a449eddf4b1547a931, type: 3}
+    - {fileID: 2800000, guid: 7801526bcd353ff4cb298a7faa5526f2, type: 3}
+    - {fileID: 2800000, guid: 73b11d1d08d74124a95d58e34919ce70, type: 3}
+    - {fileID: 2800000, guid: 85091eb12927f1d40b54982f229fcf74, type: 3}
     OwnArtUngraded: 1
     Art:
     - ArtId: Archery_Target_A

@@ -54,6 +54,8 @@ public partial class PrototypeUIController
     private bool worldMapFogCloudsHeroValid;
     private Vector2 worldMapFogCloudsHeroPx;
     private string worldMapFogCloudsWarned;
+    // Облака на месте и закрывают неизвестное — маску тумана можно не рисовать.
+    private bool worldMapFogCloudsCovering;
 
     private void TickWorldMapFogClouds()
     {
@@ -71,9 +73,9 @@ public partial class PrototypeUIController
             return;
 
         WorldMapHexGrid grid = WorldMapFog.Grid(gameState);
-        float trigger = settings != null ? settings.FogCloudTriggerRadiusHexes : 4f;
+        float trigger = settings != null ? settings.FogCloudTriggerRadiusHexes : 3f;
         string layoutKey = settings == null ? "-" :
-            settings.FogCloudSpacingHexes + "|" + settings.FogCloudJitter + "|" + trigger + "|" +
+            settings.FogCloudSpacingHexes + "|" + settings.FogCloudRowSpacingHexes + "|" + settings.FogCloudJitter + "|" + trigger + "|" +
             settings.FogCloudWidthHexes + "|" + settings.FogCloudSizeVariation;
         if (!ReferenceEquals(worldMapFogCloudsState, gameState) ||
             !ReferenceEquals(worldMapFogCloudsMap, gameState.GeneratedMap) ||
@@ -85,7 +87,7 @@ public partial class PrototypeUIController
         }
 
         ApplyWorldMapFogCloudTextures(settings);
-        float opacity = settings != null ? settings.FogCloudOpacity : 0.95f;
+        float opacity = settings != null ? settings.FogCloudOpacity : 1f;
         worldMapFogClouds.style.opacity = opacity;
         worldMapFogClouds.style.display = worldMapFogCloudTextures.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
 
@@ -137,6 +139,7 @@ public partial class PrototypeUIController
         worldMapFogCloudsLayoutKey = null;
         worldMapFogCloudsTextureKey = null;
         worldMapFogCloudsHeroValid = false;
+        worldMapFogCloudsCovering = false;
     }
 
     private void BuildWorldMapFogClouds(WorldMapHexGrid grid, WorldMapMovementSettingsAsset settings, float trigger)
@@ -151,9 +154,10 @@ public partial class PrototypeUIController
         worldMapFogCloudsHeroValid = false;
 
         float spacing = settings != null ? settings.FogCloudSpacingHexes : 4.5f;
+        float rowSpacing = settings != null ? settings.FogCloudRowSpacingHexes : 1.2f;
         float jitter = settings != null ? settings.FogCloudJitter : 0.45f;
-        float width = settings != null ? settings.FogCloudWidthHexes : 8.5f;
-        float variation = settings != null ? settings.FogCloudSizeVariation : 0.3f;
+        float width = settings != null ? settings.FogCloudWidthHexes : 8f;
+        float variation = settings != null ? settings.FogCloudSizeVariation : 0.35f;
 
         worldMapFogCloudBucketSize = Mathf.Max(1f, spacing) * grid.HexWidth;
         worldMapFogCloudBucketColumns = Mathf.Max(1, Mathf.CeilToInt((float)(grid.CanvasWidth / worldMapFogCloudBucketSize)) + 1);
@@ -162,7 +166,7 @@ public partial class PrototypeUIController
 
         // Уже рассеянные (у исследованного) облака не создаются вовсе —
         // после загрузки сразу виден итог, без повторной анимации.
-        foreach (WorldMapFogCloudAnchor anchor in WorldMapFogClouds.Layout(grid, gameState.GeneratedMap.Seed, spacing, jitter))
+        foreach (WorldMapFogCloudAnchor anchor in WorldMapFogClouds.Layout(grid, gameState.GeneratedMap.Seed, spacing, rowSpacing, jitter))
         {
             if (WorldMapFogClouds.IsCleared(gameState, grid, anchor.X, anchor.Y, trigger))
                 continue;
@@ -209,6 +213,7 @@ public partial class PrototypeUIController
             return;
         worldMapFogCloudsTextureKey = key;
         worldMapFogCloudTextures = textures;
+        worldMapFogCloudsCovering = textures.Count > 0;
 
         string warning = textures.Count == 0
             ? "Облака тумана: у вида «" + MapLabGameViews.ActiveName + "» и у вида «Обычный» нет рисунков облаков — показана только маска тумана (Генератор карты → Виды карты → Облака тумана войны)."
@@ -223,16 +228,24 @@ public partial class PrototypeUIController
         if (textures.Count == 0)
             return;
         WorldMapHexGrid grid = WorldMapFog.Grid(gameState);
-        // Сгруппировать по рисунку (меньше смен текстуры при отрисовке).
-        for (int variant = 0; variant < textures.Count; variant++)
+        // Порядок — по рядам сверху вниз (список раскладки уже так упорядочен):
+        // нижнее облако ложится поверх верхнего, плотный покров читается
+        // слоями. Пять рисунков укладываются в слоты одной пачки отрисовки.
+        StyleBackground[] backgrounds = new StyleBackground[textures.Count];
+        float[] aspects = new float[textures.Count];
+        for (int i = 0; i < textures.Count; i++)
         {
-            Texture2D texture = textures[variant];
-            float aspect = texture.width > 0 ? texture.height / (float)texture.width : 0.35f;
-            StyleBackground background = new StyleBackground(Background.FromTexture2D(texture));
+            backgrounds[i] = new StyleBackground(Background.FromTexture2D(textures[i]));
+            aspects[i] = textures[i].width > 0 ? textures[i].height / (float)textures[i].width : 0.35f;
+        }
+        {
             foreach (WorldMapFogCloud cloud in worldMapFogCloudList)
             {
-                if (cloud.Gone || cloud.Anchor.Variant(textures.Count) != variant)
+                if (cloud.Gone)
                     continue;
+                int variant = cloud.Anchor.Variant(textures.Count);
+                float aspect = aspects[variant];
+                StyleBackground background = backgrounds[variant];
                 float heightPx = cloud.WidthPx * aspect;
                 cloud.HeightPx = heightPx;
                 VisualElement element = cloud.Element;

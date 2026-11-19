@@ -66,6 +66,12 @@
 .map-tempo-button { width: 38px; min-width: 38px; height: 30px; margin-left: 2px; margin-right: 0px; padding-left: 0px; padding-right: 0px; font-size: 13px; color: rgb(214, 200, 168); background-color: rgb(38, 42, 48); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(88, 78, 58); border-right-color: rgb(88, 78, 58); border-top-color: rgb(88, 78, 58); border-bottom-color: rgb(88, 78, 58); border-radius: 4px; }
 .map-tempo-button--active { color: rgb(28, 24, 17); background-color: rgb(188, 136, 39); -unity-font-style: bold; }
 
+/* Смена дня и ночи (19.11.2026): круг суток справа от цифровых часов.
+   Не кнопка; внутренний диск вращается, рамка и указатель неподвижны. */
+.day-night-dial { width: 70px; min-width: 70px; height: 70px; min-height: 70px; flex-shrink: 0; margin-left: 10px; margin-right: 2px; }
+.day-night-disc { position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px; }
+.day-night-frame { position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; }
+
 /* Бриф правок п. 12: донесения — не колонка, а сворачиваемый список поверх
    карты в левом нижнем углу; карта занимает всю ширину. */
 .shell-sidebar--floating {

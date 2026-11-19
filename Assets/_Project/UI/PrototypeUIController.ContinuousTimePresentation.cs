@@ -37,6 +37,9 @@ public partial class PrototypeUIController
             "День " + gameState.Day + " · " +
             ContinuousSimulationSystem.FormatClock(clock.HourOfDay);
 
+        // Круг суток и свет карты (бриф смены дня и ночи, 19.11.2026).
+        RefreshDayNightPresentation(clock);
+
         // timeToggleButton скрыт (раздел 1/19 инструкции про карту и время —
         // ручной Пуск/Пауза больше не часть интерфейса), но текст/tooltip
         // по-прежнему обновляются на случай отладки через код/инспектор.

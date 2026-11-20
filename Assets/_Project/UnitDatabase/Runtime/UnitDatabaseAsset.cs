@@ -117,6 +117,12 @@ namespace KingdomSurvival.UnitDatabase
         [SerializeField, Min(0), Tooltip("Лимит целей/объектов/длины связи.")] private int limit;
         [SerializeField, Min(0), Tooltip("Отбрасывание/подтягивание, гексов.")] private int push;
         [SerializeField, Tooltip("ID существа, которое порождает способность.")] private string spawnUnitId = string.Empty;
+        // Пакет состояний: состояние, которое накладывает удар способности
+        // (status.002 у прыжка Рыси), и его рабочие числа. Пусто — без состояния.
+        [SerializeField, Tooltip("ID состояния каталога (status.NNN), которое накладывает удар с уроном HP.")] private string statusPayloadId = string.Empty;
+        [SerializeField, Tooltip("Только первый успешный удар этой способностью за бой.")] private bool statusPayloadOncePerBattle;
+        [SerializeField, Min(0), Tooltip("Срок состояния в собственных ходах цели, 0 — по каталогу.")] private int statusPayloadDuration;
+        [SerializeField, Min(0), Tooltip("Тик состояния, 0 — по каталогу.")] private int statusPayloadTick;
 
         public string Id => id;
         public string Title => title;
@@ -137,6 +143,18 @@ namespace KingdomSurvival.UnitDatabase
         public int Limit => limit;
         public int Push => push;
         public string SpawnUnitId => spawnUnitId ?? string.Empty;
+        public string StatusPayloadId => statusPayloadId ?? string.Empty;
+        public bool StatusPayloadOncePerBattle => statusPayloadOncePerBattle;
+        public int StatusPayloadDuration => statusPayloadDuration;
+        public int StatusPayloadTick => statusPayloadTick;
+
+        public void SetStatusPayload(string statusId, bool oncePerBattle, int payloadDuration, int payloadTick)
+        {
+            statusPayloadId = statusId ?? string.Empty;
+            statusPayloadOncePerBattle = oncePerBattle;
+            statusPayloadDuration = Math.Max(0, payloadDuration);
+            statusPayloadTick = Math.Max(0, payloadTick);
+        }
 
         // Миграция ПР-16: адресная установка механики и чисел.
         public void SetMechanic(UnitAbilityKind newKind, int newCooldown, int newRangeMin, int newRangeMax, int newPathMin, int newPathMax,

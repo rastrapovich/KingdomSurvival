@@ -276,7 +276,11 @@ namespace KingdomSurvival.BattleSandbox
                     ability.Limit,
                     ability.Push,
                     ability.Description,
-                    ability.SpawnUnitId));
+                    ability.SpawnUnitId,
+                    ability.StatusPayloadId,
+                    ability.StatusPayloadOncePerBattle,
+                    ability.StatusPayloadDuration,
+                    ability.StatusPayloadTick));
             }
             return result;
         }

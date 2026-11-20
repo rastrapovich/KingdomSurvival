@@ -124,7 +124,9 @@ namespace KingdomSurvival.BattleSandbox
 
         public bool HasTag(string tagId)
         {
-            return !string.IsNullOrWhiteSpace(tagId) && tagIds.Contains(tagId);
+            // Пакет тегов: legacy alias (tactic.pack_hunter → combat.pack и т. п.)
+            // ведёт к тому же правилу, исполняется один раз.
+            return !string.IsNullOrWhiteSpace(tagId) && (tagIds.Contains(tagId) || SandboxPassiveCatalog.IsAliased(tagIds, tagId));
         }
 
         public bool HasPerk(string perkId)
@@ -159,7 +161,10 @@ namespace KingdomSurvival.BattleSandbox
         public int TimesAttacked { get; internal set; }
         public int RetaliationsMade { get; internal set; }
         public bool ShotFromPlace { get; internal set; }
-        public int RetaliationsPerRound => HasPerk(SandboxPerks.Counterstrike) ? 2 : 1;
+        public int RetaliationsPerRound => Math.Max(HasPerk(SandboxPerks.Counterstrike) ? 2 : 1, SandboxBattle.PassiveRetaliations(this));
+        // Пакет тегов: счётчики пассивов именно этого бойца.
+        internal readonly SandboxPassiveRuntime passive = new SandboxPassiveRuntime();
+        public SandboxPassiveRuntime Passive => passive;
         public bool HasRetaliatedThisRound => RetaliationsThisRound >= RetaliationsPerRound;
 
         // Реальный вклад в бой (канон v1.48 §27.3): урон, действительно
@@ -214,7 +219,7 @@ namespace KingdomSurvival.BattleSandbox
         public string DisplayLabel => IsHidden ? "Неизвестная угроза" : Definition.RoleLabel;
         public SandboxUnitRole Role => Definition.Role;
         // Временное изменение MaxHP состояниями — не урон; возврат не лечит.
-        public int MaxHitPoints => Math.Max(1, Definition.MaxHitPoints + SandboxBattle.StatusMaxHitPointsMod(this));
+        public int MaxHitPoints => Math.Max(1, Definition.MaxHitPoints + passive.BonusMaxHitPoints + SandboxBattle.StatusMaxHitPointsMod(this));
         public int Attack => Definition.Attack;
         public int Defense => Definition.Defense;
         public int Damage => Definition.Damage;
@@ -226,7 +231,8 @@ namespace KingdomSurvival.BattleSandbox
         public bool IsDamaged => DamageTaken > 0;
         public bool CanRetaliate => !IsDefeated && !HasRetaliatedThisRound && !IsOffBoard && !IsHidden &&
                                     !SandboxBattle.StatusHas(this, SandboxStatusOpKind.NoRetaliation) &&
-                                    !SandboxBattle.StatusHas(this, SandboxStatusOpKind.SkipActivation);
+                                    !SandboxBattle.StatusHas(this, SandboxStatusOpKind.SkipActivation) &&
+                                    !SandboxBattle.PassiveBlocksRetaliation(this);
 
         // ПР-06А: человек кампании входит в бой с тем здоровьем, что у него
         // есть (1..максимум шаблона), а не всегда полным.
@@ -564,7 +570,7 @@ namespace KingdomSurvival.BattleSandbox
                     if (current != unit.Position && IsMovementStopCell(unit, current))
                         continue;
 
-                    int stepCost = GetStepCost(unit, next);
+                    int stepCost = GetStepCost(unit, next) + PassiveExtraStepCost(unit, current, next);
                     int newCost = costs[current] + stepCost;
                     if (newCost > budget)
                         continue;
@@ -633,10 +639,12 @@ namespace KingdomSurvival.BattleSandbox
                     SetUnitPosition(unit, steps[i]);
                     ApplyHazardsAt(unit, steps[i]);
                     if (!unit.IsDefeated)
+                    {
                         AfterStatusStep(unit, steps[i]);
+                        if (!unit.IsDefeated)
+                            AfterPassiveStep(unit, steps[i - 1], steps[i]);
+                    }
                 }
-                if (!unit.IsDefeated)
-                    AfterStatusVoluntaryMove(unit, steps.Count - 1);
                 if (unit.IsDefeated)
                 {
                     message = unit.DisplayLabel + " падает на пути." + string.Join(string.Empty, TakeEventLog().Select(entry => " " + entry));
@@ -648,6 +656,12 @@ namespace KingdomSurvival.BattleSandbox
             }
             SetUnitPosition(unit, destination);
             unit.MovedThisActivation = unit.MovedThisActivation || destination != origin;
+            if (destination != origin)
+            {
+                // Пакет состояний/тегов: темп, липкий отход, маскировка в движении.
+                AfterStatusVoluntaryMove(unit, origin.DistanceTo(destination));
+                AfterPassiveVoluntaryMove(unit, origin);
+            }
             unit.RemainingMovement = Math.Max(0, unit.RemainingMovement - movementCost);
             message = unit.DisplayLabel + " перемещается " + origin + " → " + destination +
                       ". Осталось движения: " + unit.RemainingMovement + ".";
@@ -926,6 +940,7 @@ namespace KingdomSurvival.BattleSandbox
             if (Phase == SandboxBattlePhase.InProgress &&
                 attacker.AttackRange == 1 &&
                 !target.IsDefeated &&
+                !HasPassive(attacker, SandboxPassiveKind.NoProvokedRetaliation) &&
                 target.CanRetaliate &&
                 attacker.Position.DistanceTo(target.Position) == 1)
             {
@@ -1270,7 +1285,7 @@ namespace KingdomSurvival.BattleSandbox
 
         public int GetRoundInitiative(SandboxUnitState unit)
         {
-            return unit.Initiative + StatusInitiativeMod(unit) + (Round <= 1 && unit.Team == SandboxTeam.Player ? PlayerFirstRoundInitiativeBonus : 0);
+            return unit.Initiative + StatusInitiativeMod(unit) + PassiveInitiativeMod(unit) + (Round <= 1 && unit.Team == SandboxTeam.Player ? PlayerFirstRoundInitiativeBonus : 0);
         }
 
         private void EvaluateBattleOutcome()
@@ -1321,8 +1336,10 @@ namespace KingdomSurvival.BattleSandbox
             int before = target.HitPoints;
             // Пакет состояний: щит, неуязвимость, перенос, временные HP, расход зарядов.
             int toHp = ResolveDirectHitBeforeHp(kind, striker, target, damage, out int temporaryAbsorbed);
+            toHp = PassiveCheatDeath(kind, target, toHp);
             target.ReceiveDamage(toHp);
             ResolveDirectHitAfterHp(kind, striker, target, before - target.HitPoints, temporaryAbsorbed);
+            OnPassiveDirectHit(kind, striker, target, before, before - target.HitPoints);
             hitRecords.Add(new SandboxHitRecord(
                 kind,
                 striker.Id,
@@ -1371,7 +1388,10 @@ namespace KingdomSurvival.BattleSandbox
             bool rangedHit = attackPosition.DistanceTo(target.Position) > 1;
             // Пакет состояний: временные модификаторы Атаки (предел ±2).
             effectiveAttack = Math.Max(0m, effectiveAttack + StatusAttackMod(attacker, target, rangedHit));
+            // Пакет тегов: постоянные условия — отдельно от предела состояний.
+            effectiveAttack = Math.Max(0m, effectiveAttack + PassiveAttackMod(attacker, target, rangedHit, attackPosition));
             decimal effectiveDefense = SandboxCombatTagRules.GetEffectiveDefense(target);
+            effectiveDefense = Math.Max(0m, effectiveDefense + PassiveDefenseMod(target, attacker, rangedHit) - PassiveIgnoreDefense(attacker, target, rangedHit));
             // Бриф «Поверхности арены»: укрытие леса/зарослей — только от
             // обычного дальнего выстрела (не ответный удар, не способность).
             if (!retaliation && abilityMultiplier == 1m)
@@ -1422,6 +1442,7 @@ namespace KingdomSurvival.BattleSandbox
                 damage++;
             // Пакет состояний: плоские изменения итогового урона (+2 / −1, минимум 1).
             damage = Math.Max(1, damage + StatusFlatDamage(attacker, target, rangedHit, SandboxDamageType.Physical, consume: false));
+            damage = PassiveDamage(attacker, target, rangedHit, damage, consume: false);
 
             return new SandboxAttackPreview(
                 true,

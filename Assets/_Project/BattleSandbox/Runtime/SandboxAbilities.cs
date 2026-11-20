@@ -74,7 +74,11 @@ namespace KingdomSurvival.BattleSandbox
             int limit = 0,
             int push = 0,
             string description = null,
-            string spawnTypeId = null)
+            string spawnTypeId = null,
+            string statusPayloadId = null,
+            bool statusPayloadOncePerBattle = false,
+            int statusPayloadDuration = 0,
+            int statusPayloadTick = 0)
         {
             Id = string.IsNullOrWhiteSpace(id) ? kind.ToString() : id;
             Title = string.IsNullOrWhiteSpace(title) ? Id : title;
@@ -92,7 +96,17 @@ namespace KingdomSurvival.BattleSandbox
             Limit = Math.Max(0, limit);
             Push = Math.Max(0, push);
             SpawnTypeId = spawnTypeId ?? string.Empty;
+            StatusPayloadId = statusPayloadId ?? string.Empty;
+            StatusPayloadOncePerBattle = statusPayloadOncePerBattle;
+            StatusPayloadDuration = Math.Max(0, statusPayloadDuration);
+            StatusPayloadTick = Math.Max(0, statusPayloadTick);
         }
+
+        // Пакет состояний: состояние удара способности (данные Базы существ).
+        public string StatusPayloadId { get; }
+        public bool StatusPayloadOncePerBattle { get; }
+        public int StatusPayloadDuration { get; }
+        public int StatusPayloadTick { get; }
 
         // Кого порождает способность (Гнездовая матка → blood_kleshchen).
         public string SpawnTypeId { get; }

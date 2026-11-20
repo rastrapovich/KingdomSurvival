@@ -227,6 +227,11 @@ namespace KingdomSurvival.BattleSandbox
         // Параметры профиля источника (явно разрешённые отличия), 0 — по определению.
         public int ProfileDuration { get; internal set; }
         public int ProfileTick { get; internal set; }
+        public int ProfileValue { get; internal set; }
+        public bool ProfileRefresh { get; internal set; }
+        public bool UntilBattleEnd { get; internal set; }
+        public int ProfileMaxCharges { get; internal set; }
+        public string Mode { get; internal set; } = string.Empty;
         public IReadOnlyList<SandboxStatusCharge> Charges => charges;
         public int ChargeCount => Definition.Stacking == SandboxStatusStacking.Charges ? charges.Count : 1;
         public int EffectiveDuration => ProfileDuration > 0 ? ProfileDuration : Definition.Duration;
@@ -239,6 +244,18 @@ namespace KingdomSurvival.BattleSandbox
         public int Duration { get; set; }
         public int Tick { get; set; }
         public bool Supernatural { get; set; }
+        // Замена числа первой операции-модификатора (−2 Защиты вместо −1 и т. п.), 0 — как в определении.
+        public int Value { get; set; }
+        // Повтор от того же источника и профиля обновляет срок (без усиления).
+        public bool RefreshSameSource { get; set; }
+        // Действует до конца боя (Старящий удар, Разъедающая слюна).
+        public bool UntilBattleEnd { get; set; }
+        // Не больше одного заряда (кровотечение «Плохо сворачивается кровь»).
+        public int MaxCharges { get; set; }
+        // Особый режим: sticky_exit — +1 цена первого выхода из соседства
+        // источника вместо штрафа всем шагам; half_speed — движение не выше
+        // половины базового (вверх).
+        public string Mode { get; set; } = string.Empty;
     }
 
     // Общие правила каталога (§17 пакета) — редактируемые настройки баланса.

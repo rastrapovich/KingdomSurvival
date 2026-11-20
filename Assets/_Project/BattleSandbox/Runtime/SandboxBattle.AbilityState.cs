@@ -473,6 +473,7 @@ namespace KingdomSurvival.BattleSandbox
 
             // 3а. Пакет состояний: восстановление → тики (≤3 HP) → смерть →
             // паника. Отдельный ход паразита выше не повторяется.
+            ProcessPassiveActivationStart(unit);
             ProcessStatusSourceActivationStart(unit);
             bool controlled = ProcessStatusActivationStart(unit);
             if (unit.IsDefeated)
@@ -489,9 +490,11 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             // 4. Ограничения состояний — к штатному бюджету хода.
+            unit.RemainingMovement += PassiveMovementStart(unit);
             int statusMovement = StatusMovementMod(unit);
             if (statusMovement != 0)
                 unit.RemainingMovement = Math.Max(0, unit.RemainingMovement + statusMovement);
+            ApplyHalfSpeed(unit);
             if (StatusHas(unit, SandboxStatusOpKind.NoVoluntaryMove))
                 unit.RemainingMovement = 0;
             if (!unit.IsNumbed && unit.NumbImmunity > 0)
@@ -524,6 +527,7 @@ namespace KingdomSurvival.BattleSandbox
             }
             // Пакет состояний: истечение по собственным ходам и ходам источника;
             // окончание оцепенения открывает прежнее окно NumbImmunity.
+            ProcessPassiveActivationEnd(unit);
             ProcessStatusActivationEnd(unit);
 
             if (tollPreparedAt.TryGetValue(unit.Id, out int preparedAt) && preparedAt < unit.ActivationCount &&
@@ -556,6 +560,7 @@ namespace KingdomSurvival.BattleSandbox
         {
             if (!defeatProcessed.Add(dead.Id))
                 return;
+            OnPassiveUnitDefeated(dead);
             OnStatusUnitDefeated(dead);
             foreach (SandboxLink link in links.Where(item => item.SourceId == dead.Id || item.TargetId == dead.Id).ToList())
                 RemoveLink(link, link.SourceId == dead.Id ? "источник пал — связь исчезла." : "жертва пала — связь исчезла.");

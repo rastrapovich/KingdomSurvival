@@ -748,6 +748,9 @@ namespace KingdomSurvival.BattleSandbox
             string reason = ForcedMoveBlockReason(unit, cell, null);
             if (!string.IsNullOrEmpty(reason))
                 return " " + verb + " невозможно: " + reason + ".";
+            // «Крепкая опора»: принудительный сдвиг на 1 гекс меньше (у способностей — 1 гекс).
+            if (PassiveResistsPush(unit))
+                return " " + unit.DisplayLabel + " удерживается на месте («Крепкая опора»).";
             HexCoord from = unit.Position;
             SetUnitPosition(unit, cell);
             string note = " " + unit.DisplayLabel + " " + verb + " → " + cell + ".";
@@ -912,7 +915,9 @@ namespace KingdomSurvival.BattleSandbox
                     unit.RemainingMovement -= unit.Position.DistanceTo(landing);
                     SetUnitPosition(unit, landing);
                     unit.MovedThisActivation = true;
+                    int hpBefore = target.HitPoints;
                     body = " → " + landing + ": " + Strike(unit, target, ability.DamageMultiplier, true, preview);
+                    body += ApplyAbilityPayload(unit, target, ability, hpBefore - target.HitPoints);
                     contact = true;
                     break;
                 }
@@ -1167,7 +1172,8 @@ namespace KingdomSurvival.BattleSandbox
 
             EvaluateBattleOutcome();
             if (Phase == SandboxBattlePhase.InProgress && contact && target != null && !unit.IsDefeated &&
-                !target.IsDefeated && target.CanRetaliate && unit.Position.DistanceTo(target.Position) == 1)
+                !target.IsDefeated && target.CanRetaliate && unit.Position.DistanceTo(target.Position) == 1 &&
+                !HasPassive(unit, SandboxPassiveKind.NoProvokedRetaliation))
             {
                 pendingRetaliationDefenderId = target.Id;
                 pendingRetaliationAttackerId = unit.Id;
@@ -1211,6 +1217,25 @@ namespace KingdomSurvival.BattleSandbox
             target.TimesAttacked++;
             return prefix + targetLabel + " — урон " + normal + " " + FormatMultiplier(multiplier) + " = " + damage + pack +
                    (target.IsDefeated ? ", выведен из строя." : ".") + RevealTarget(target);
+        }
+
+        // Состояние удара способности: только при фактическом уроне HP; «раз за бой» — по ID способности.
+        private string ApplyAbilityPayload(SandboxUnitState unit, SandboxUnitState target, SandboxAbilityDefinition ability, int hpTaken)
+        {
+            if (string.IsNullOrEmpty(ability.StatusPayloadId) || hpTaken <= 0 || target.IsDefeated || unit.IsDefeated)
+                return string.Empty;
+            string key = "payload:" + ability.Id;
+            if (ability.StatusPayloadOncePerBattle && unit.passive.UsedInBattle.Contains(key))
+                return string.Empty;
+            SandboxStatusProfile profile = ability.StatusPayloadDuration > 0 || ability.StatusPayloadTick > 0
+                ? new SandboxStatusProfile { ProfileId = key, Duration = ability.StatusPayloadDuration, Tick = ability.StatusPayloadTick }
+                : null;
+            SandboxStatusApplyResult result = ApplyStatus(ability.StatusPayloadId, target, unit, profile);
+            if (!result.Applied)
+                return " " + result.Message;
+            unit.passive.UsedInBattle.Add(key);
+            TakeLastLog(result.Message);
+            return " «" + result.Instance.Definition.Name + "» на " + target.DisplayLabel + ".";
         }
 
         private string ApplyStun(SandboxUnitState target)

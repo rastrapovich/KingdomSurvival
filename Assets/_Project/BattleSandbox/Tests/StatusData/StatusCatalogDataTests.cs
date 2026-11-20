@@ -97,5 +97,22 @@ namespace KingdomSurvival.BattleSandbox.Tests
             }
             CollectionAssert.IsEmpty(unknown, string.Join("\n", unknown));
         }
+
+        [Test]
+        public void PassiveCatalog_OnlyActiveCombatTags_NoTrashNoArchive()
+        {
+            JObject selection = Load("selection_manifest.json");
+            HashSet<string> active = new HashSet<string>(((JArray)selection["activeCombatIds"]).Select(t => (string)t));
+            List<string> wrong = SandboxPassiveCatalog.All.Where(def => !active.Contains(def.TagId)).Select(def => def.TagId).ToList();
+            CollectionAssert.IsEmpty(wrong, "в исполнитель попали неактивные/удалённые теги: " + string.Join(", ", wrong));
+            foreach (SandboxPassiveDefinition def in SandboxPassiveCatalog.All)
+            {
+                foreach (SandboxPassiveRule rule in def.Rules)
+                {
+                    foreach (string statusId in rule.StatusIds)
+                        Assert.IsNotNull(SandboxStatusCatalog.Get(statusId), def.TagId + " → " + statusId);
+                }
+            }
+        }
     }
 }

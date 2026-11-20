@@ -52,6 +52,21 @@ namespace KingdomSurvival.BattleSandbox
             }
         }
 
+        // Число операции с учётом профиля источника (замена первого модификатора).
+        internal static int V(SandboxStatusInstance instance, SandboxStatusOp op)
+        {
+            if (instance.ProfileValue == 0)
+                return op.Value;
+            foreach (SandboxStatusOp first in instance.Definition.Ops)
+            {
+                if (first.Kind == SandboxStatusOpKind.AttackMod || first.Kind == SandboxStatusOpKind.DefenseMod ||
+                    first.Kind == SandboxStatusOpKind.MovementMod || first.Kind == SandboxStatusOpKind.MaxHitPointsMod ||
+                    first.Kind == SandboxStatusOpKind.InitiativeMod)
+                    return ReferenceEquals(first, op) ? instance.ProfileValue : op.Value;
+            }
+            return op.Value;
+        }
+
         internal static bool StatusHas(SandboxUnitState unit, SandboxStatusOpKind kind) => OpsOf(unit, kind).Any();
 
         private static SandboxStatusInstance FindStatus(SandboxUnitState unit, string statusId)
@@ -69,18 +84,18 @@ namespace KingdomSurvival.BattleSandbox
             {
                 switch (op.Filter)
                 {
-                    case SandboxStatusFilter.Melee: if (!ranged) sum += op.Value; break;
-                    case SandboxStatusFilter.Ranged: if (ranged) sum += op.Value; break;
-                    case SandboxStatusFilter.VsSource: if (target != null && instance.SourceUnitId == target.Id) sum += op.Value; break;
+                    case SandboxStatusFilter.Melee: if (!ranged) sum += V(instance, op); break;
+                    case SandboxStatusFilter.Ranged: if (ranged) sum += V(instance, op); break;
+                    case SandboxStatusFilter.VsSource: if (target != null && instance.SourceUnitId == target.Id) sum += V(instance, op); break;
                     case SandboxStatusFilter.WhileSourceNear:
-                        if (IsSourceNear(attacker, instance)) sum += op.Value;
+                        if (IsSourceNear(attacker, instance)) sum += V(instance, op);
                         break;
                     case SandboxStatusFilter.WoundThreshold:
                         int full = attacker.Definition.MaxHitPoints;
-                        if (attacker.HitPoints * 4 <= full) sum += op.Value + 1;
-                        else if (attacker.HitPoints * 2 <= full) sum += op.Value;
+                        if (attacker.HitPoints * 4 <= full) sum += V(instance, op) + 1;
+                        else if (attacker.HitPoints * 2 <= full) sum += V(instance, op);
                         break;
-                    default: sum += op.Value; break;
+                    default: sum += V(instance, op); break;
                 }
             }
             // Вызов на поединок: источник тоже получает +1 против вызванного,
@@ -94,7 +109,7 @@ namespace KingdomSurvival.BattleSandbox
                 {
                     if (target.Team == attacker.Team || instance.UsesLeft <= 0)
                         continue;
-                    sum += op.Value;
+                    sum += V(instance, op);
                     if (consume && op.ConsumesUse)
                         ConsumeUse(target, instance, "использована");
                 }
@@ -109,13 +124,13 @@ namespace KingdomSurvival.BattleSandbox
             if (target == null)
                 return 0;
             // Все существующие прямые удары физические: Окаменение даёт +2 к ним.
-            int sum = OpsOf(target, SandboxStatusOpKind.DefenseMod).Sum(pair => pair.Op.Value);
+            int sum = OpsOf(target, SandboxStatusOpKind.DefenseMod).Sum(pair => V(pair.Instance, pair.Op));
             return SandboxStatusRules.Clamp(sum, SandboxStatusRules.DefenseModCap);
         }
 
         internal static int StatusMovementMod(SandboxUnitState unit)
         {
-            int sum = OpsOf(unit, SandboxStatusOpKind.MovementMod).Sum(pair => pair.Op.Value);
+            int sum = OpsOf(unit, SandboxStatusOpKind.MovementMod).Where(pair => string.IsNullOrEmpty(pair.Instance.Mode)).Sum(pair => V(pair.Instance, pair.Op));
             SandboxStatusInstance momentum = FindStatus(unit, SandboxStatusCatalog.Momentum);
             if (momentum != null)
                 sum += momentum.ChargeCount;
@@ -124,24 +139,24 @@ namespace KingdomSurvival.BattleSandbox
 
         internal static int StatusInitiativeMod(SandboxUnitState unit)
         {
-            int sum = OpsOf(unit, SandboxStatusOpKind.InitiativeMod).Sum(pair => pair.Op.Value);
+            int sum = OpsOf(unit, SandboxStatusOpKind.InitiativeMod).Sum(pair => V(pair.Instance, pair.Op));
             return SandboxStatusRules.Clamp(sum, SandboxStatusRules.InitiativeModCap);
         }
 
         internal static int StatusMaxHitPointsMod(SandboxUnitState unit)
         {
-            return OpsOf(unit, SandboxStatusOpKind.MaxHitPointsMod).Sum(pair => pair.Op.Value);
+            return OpsOf(unit, SandboxStatusOpKind.MaxHitPointsMod).Sum(pair => V(pair.Instance, pair.Op));
         }
 
         // Базовый Урон до формулы: однотипные уменьшения не складываются.
         internal static int StatusBaseDamage(SandboxUnitState attacker, bool ranged)
         {
             int strongest = 0;
-            foreach ((SandboxStatusInstance _, SandboxStatusOp op) in OpsOf(attacker, SandboxStatusOpKind.BaseDamageMod))
+            foreach ((SandboxStatusInstance instance, SandboxStatusOp op) in OpsOf(attacker, SandboxStatusOpKind.BaseDamageMod))
             {
                 if (op.Filter == SandboxStatusFilter.Melee && ranged)
                     continue;
-                strongest = Math.Min(strongest, op.Value);
+                strongest = Math.Min(strongest, V(instance, op));
             }
             return Math.Max(1, attacker.Damage + strongest);
         }
@@ -166,6 +181,9 @@ namespace KingdomSurvival.BattleSandbox
                 if (consume && op.ConsumesUse)
                     ConsumeUse(attacker, instance, "израсходовано");
             }
+            // «Не подпускает палача»: сокращение 1, общее с остальными плоскими (берётся большее).
+            if (GuardAuraReduction(attacker, target, consume))
+                Count(-1);
             if (target != null)
             {
                 foreach ((SandboxStatusInstance instance, SandboxStatusOp op) in OpsOf(target, SandboxStatusOpKind.IncomingFlat).ToList())
@@ -295,6 +313,10 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
 
+            string passiveGate = PassiveStatusGate(statusId, target, ref profile);
+            if (passiveGate != null)
+                return Reject(result, passiveGate, target);
+
             if (def.StrongControl && (target.StrongControlGuard || target.statuses.Any(item => item.Definition.StrongControl)))
                 return Reject(result, target.DisplayLabel + " невосприимчив: защита от повторного сильного контроля", target);
 
@@ -313,7 +335,23 @@ namespace KingdomSurvival.BattleSandbox
             SandboxStatusInstance existing = FindStatus(target, statusId);
             if (existing != null)
             {
-                if (def.Stacking != SandboxStatusStacking.Charges || existing.charges.Count >= def.MaxCharges)
+                if (profile != null && profile.RefreshSameSource && existing.SourceUnitId == source?.Id && existing.ProfileId == profile.ProfileId)
+                {
+                    foreach (SandboxStatusCharge charge in existing.charges)
+                    {
+                        charge.Elapsed = 0;
+                        charge.AppliedAtActivation = target.ActivationCount;
+                    }
+                    existing.Elapsed = 0;
+                    StatusRevision++;
+                    result.Applied = true;
+                    result.Instance = existing;
+                    result.Message = target.DisplayLabel + ": «" + def.Name + "» — срок обновлён.";
+                    Log(result.Message);
+                    return result;
+                }
+                int maxCharges = existing.ProfileMaxCharges > 0 ? existing.ProfileMaxCharges : def.MaxCharges;
+                if (def.Stacking != SandboxStatusStacking.Charges || existing.charges.Count >= maxCharges)
                     return Reject(result, "«" + def.Name + "» уже действует — повтор не усиливает и не продлевает", target);
                 existing.charges.Add(new SandboxStatusCharge { AppliedAtActivation = target.ActivationCount });
                 StatusRevision++;
@@ -338,7 +376,12 @@ namespace KingdomSurvival.BattleSandbox
                 UsesLeft = def.Uses,
                 ProfileId = profile?.ProfileId ?? string.Empty,
                 ProfileDuration = profile != null ? Math.Max(0, profile.Duration) : 0,
-                ProfileTick = profile != null ? Math.Max(0, profile.Tick) : 0
+                ProfileTick = profile != null ? Math.Max(0, profile.Tick) : 0,
+                ProfileValue = profile != null ? profile.Value : 0,
+                ProfileRefresh = profile != null && profile.RefreshSameSource,
+                UntilBattleEnd = profile != null && profile.UntilBattleEnd,
+                ProfileMaxCharges = profile != null ? Math.Max(0, profile.MaxCharges) : 0,
+                Mode = profile?.Mode ?? string.Empty
             };
             instance.charges.Add(new SandboxStatusCharge { AppliedAtActivation = target.ActivationCount });
             if (def.Clock == SandboxStatusClock.RoundTrigger)
@@ -534,6 +577,9 @@ namespace KingdomSurvival.BattleSandbox
             // Расход зарядов, уже учтённых в расчёте урона.
             StatusAttackMod(striker, target, ranged, consume: true);
             StatusFlatDamage(striker, target, ranged, SandboxDamageType.Physical, consume: true);
+            PassiveAttackMod(striker, target, ranged, striker.Position, consume: true);
+            PassiveDefenseMod(target, striker, ranged, consume: true);
+            PassiveDamage(striker, target, ranged, damage, consume: true);
 
             if (damage <= 0)
                 return 0;
@@ -730,7 +776,7 @@ namespace KingdomSurvival.BattleSandbox
             foreach (SandboxStatusInstance instance in unit.statuses.ToList())
             {
                 SandboxStatusDefinition def = instance.Definition;
-                if (def.Clock != SandboxStatusClock.OwnActivations)
+                if (def.Clock != SandboxStatusClock.OwnActivations || instance.UntilBattleEnd)
                     continue;
                 int duration = instance.EffectiveDuration;
                 foreach (SandboxStatusCharge charge in instance.charges.ToList())

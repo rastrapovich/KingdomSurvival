@@ -56,7 +56,8 @@ namespace KingdomSurvival.BattleSandbox
                         continue;
                     }
 
-                    if (neighborCost + stepCost != currentCost)
+                    // Пакет тегов: добавочная цена выхода («Мешает пройти», липкий отход).
+                    if (neighborCost + stepCost + battle.GetExtraStepCost(unit, neighbor, current) != currentCost)
                         continue;
 
                     if (!found || neighbor.CompareTo(bestPredecessor) < 0)

@@ -1675,7 +1675,8 @@ namespace KingdomSurvival.BattleSandbox
                     (displayedPreview != null && displayedPreview.IsValid
                         ? "\nПрогноз: " + displayedPreview.Damage + " урона · останется " +
                           displayedPreview.TargetHitPointsAfter + " HP" +
-                          (movementCost > 0 ? " · сближение " + movementCost : string.Empty)
+                          (movementCost > 0 ? " · сближение " + movementCost : string.Empty) +
+                          (string.IsNullOrEmpty(displayedPreview.Details) ? string.Empty : "\n" + displayedPreview.Details)
                         : reachableForAttack
                             ? hoverHint
                             : "\nЦель находится вне доступной зоны атаки.") +

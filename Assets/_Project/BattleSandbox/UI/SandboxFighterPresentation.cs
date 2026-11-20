@@ -545,7 +545,38 @@ namespace KingdomSurvival.BattleSandbox
 
     internal sealed class SandboxFighterDetailsView
     {
-        private const float WindowWidth = 650f;
+        private const float BaseWindowWidth = 690f;
+        private const float StatusColumnWidth = 300f;
+        private float WindowWidth => BaseWindowWidth + (StatusPanelOpen ? StatusColumnWidth + 10f : 0f);
+
+        // Пакет состояний: столбец состояний в окне бойца. Открытость общая
+        // для всех бойцов и запоминается между запусками.
+        private const string StatusPanelPrefKey = "KingdomSurvival.FighterCard.StatusPanelOpen";
+        private static bool? statusPanelOpen;
+        internal static bool StatusPanelOpen
+        {
+            get
+            {
+                if (!statusPanelOpen.HasValue)
+                    statusPanelOpen = PlayerPrefs.GetInt(StatusPanelPrefKey, 0) == 1;
+                return statusPanelOpen.Value;
+            }
+            set
+            {
+                statusPanelOpen = value;
+                PlayerPrefs.SetInt(StatusPanelPrefKey, value ? 1 : 0);
+            }
+        }
+
+        private Button statusToggle;
+        private Label statusToggleArrow;
+        private Label statusToggleCount;
+        private VisualElement statusColumn;
+        private ScrollView statusList;
+        private Label statusEmpty;
+        private SandboxBattle lastBattle;
+        private string statusSignature;
+        private Vector2? lastAnchor;
         private const float WindowHeight = 500f;
 
         private readonly VisualElement root;
@@ -809,6 +840,7 @@ namespace KingdomSurvival.BattleSandbox
             info.Add(hoverHint);
 
             body.Add(info);
+            BuildStatusPanel(body);
             window.Add(body);
 
             statTooltip = new VisualElement();
@@ -847,6 +879,8 @@ namespace KingdomSurvival.BattleSandbox
             openedState = state;
             openedInstanceId = state != null ? state.Id : null;
             openedPortrait = SandboxFighterCardFactory.ResolvePortrait(definition.Id, portrait);
+            lastAnchor = anchorPosition;
+            statusSignature = null;
             HideTooltip();
             dimmer.style.display = DisplayStyle.Flex;
             window.style.display = DisplayStyle.Flex;
@@ -876,6 +910,7 @@ namespace KingdomSurvival.BattleSandbox
             if (openedDefinition == null || window.resolvedStyle.display == DisplayStyle.None)
                 return;
 
+            lastBattle = battle;
             openedState = battle != null && !string.IsNullOrEmpty(openedInstanceId)
                 ? battle.GetUnit(openedInstanceId)
                 : null;
@@ -1014,6 +1049,7 @@ namespace KingdomSurvival.BattleSandbox
                                 : "Состояние: в бою";
             stateValue.text += AbilityLines(openedDefinition, openedState);
             stateValue.style.whiteSpace = WhiteSpace.Normal;
+            RefreshStatusPanel();
 
             float fraction = Mathf.Clamp01(
                 (float)hitPoints / Mathf.Max(1, openedDefinition.MaxHitPoints));
@@ -1064,6 +1100,225 @@ namespace KingdomSurvival.BattleSandbox
                           (cooldownLeft > 0 ? ", ещё " + cooldownLeft : string.Empty) + "): " + SandboxAbilityDefaults.Explain(ability));
             }
             return lines.Count == 0 ? string.Empty : "\n" + string.Join("\n", lines);
+        }
+
+        // ---------- Столбец состояний ----------
+
+        private void BuildStatusPanel(VisualElement body)
+        {
+            statusToggle = new Button(ToggleStatusPanel);
+            statusToggle.name = "sandbox-fighter-status-toggle";
+            statusToggle.tooltip = "Состояния бойца";
+            statusToggle.style.width = 30f;
+            statusToggle.style.flexShrink = 0f;
+            statusToggle.style.marginLeft = 10f;
+            statusToggle.style.marginRight = 0f;
+            statusToggle.style.marginTop = 0f;
+            statusToggle.style.marginBottom = 0f;
+            statusToggle.style.paddingLeft = 0f;
+            statusToggle.style.paddingRight = 0f;
+            statusToggle.style.paddingTop = 8f;
+            statusToggle.style.paddingBottom = 8f;
+            statusToggle.style.flexDirection = FlexDirection.Column;
+            statusToggle.style.alignItems = Align.Center;
+            statusToggle.style.justifyContent = Justify.FlexStart;
+            statusToggle.style.backgroundColor = new Color(0.13f, 0.145f, 0.165f, 1f);
+            SetBorder(statusToggle, new Color(0.36f, 0.33f, 0.26f, 1f));
+            SetRadius(statusToggle, 3f);
+
+            statusToggleArrow = CreateLabel("›", 16, new Color(0.91f, 0.79f, 0.54f, 1f));
+            statusToggleArrow.pickingMode = PickingMode.Ignore;
+            statusToggleArrow.style.unityFontStyleAndWeight = FontStyle.Bold;
+            statusToggle.Add(statusToggleArrow);
+
+            statusToggleCount = CreateLabel(string.Empty, 10, Color.white);
+            statusToggleCount.pickingMode = PickingMode.Ignore;
+            statusToggleCount.style.marginTop = 4f;
+            statusToggleCount.style.minWidth = 18f;
+            statusToggleCount.style.unityTextAlign = TextAnchor.MiddleCenter;
+            statusToggleCount.style.unityFontStyleAndWeight = FontStyle.Bold;
+            statusToggleCount.style.backgroundColor = new Color(0.55f, 0.22f, 0.18f, 1f);
+            SetRadius(statusToggleCount, 8f);
+            statusToggle.Add(statusToggleCount);
+
+            Label vertical = CreateLabel("С\nО\nС\nТ\nО\nЯ\nН\nИ\nЯ", 9, new Color(0.64f, 0.63f, 0.58f, 1f));
+            vertical.pickingMode = PickingMode.Ignore;
+            vertical.style.marginTop = 10f;
+            vertical.style.unityTextAlign = TextAnchor.UpperCenter;
+            vertical.style.unityFontStyleAndWeight = FontStyle.Bold;
+            statusToggle.Add(vertical);
+
+            statusToggle.RegisterCallback<PointerEnterEvent>(_ => statusToggle.style.backgroundColor = new Color(0.20f, 0.19f, 0.14f, 1f));
+            statusToggle.RegisterCallback<PointerLeaveEvent>(_ => statusToggle.style.backgroundColor = new Color(0.13f, 0.145f, 0.165f, 1f));
+            body.Add(statusToggle);
+
+            statusColumn = new VisualElement();
+            statusColumn.name = "sandbox-fighter-status-column";
+            statusColumn.style.width = StatusColumnWidth;
+            statusColumn.style.flexShrink = 0f;
+            statusColumn.style.marginLeft = 10f;
+            statusColumn.style.paddingLeft = 10f;
+            statusColumn.style.paddingRight = 6f;
+            statusColumn.style.paddingTop = 8f;
+            statusColumn.style.paddingBottom = 8f;
+            statusColumn.style.backgroundColor = new Color(0.075f, 0.085f, 0.105f, 1f);
+            SetBorder(statusColumn, new Color(0.27f, 0.30f, 0.34f, 1f));
+            SetRadius(statusColumn, 4f);
+
+            Label title = CreateLabel("СОСТОЯНИЯ", 12, new Color(0.72f, 0.67f, 0.56f, 1f));
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            title.style.marginBottom = 8f;
+            statusColumn.Add(title);
+
+            statusEmpty = CreateLabel("Действующих состояний нет.", 11, new Color(0.55f, 0.56f, 0.55f, 1f));
+            statusEmpty.style.whiteSpace = WhiteSpace.Normal;
+            statusColumn.Add(statusEmpty);
+
+            statusList = new ScrollView(ScrollViewMode.Vertical);
+            statusList.style.flexGrow = 1f;
+            statusList.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+            statusList.verticalScrollerVisibility = ScrollerVisibility.Auto;
+            statusColumn.Add(statusList);
+            body.Add(statusColumn);
+
+            ApplyStatusPanelVisibility();
+        }
+
+        private void ToggleStatusPanel()
+        {
+            StatusPanelOpen = !StatusPanelOpen;
+            ApplyStatusPanelVisibility();
+            if (openedDefinition != null)
+                PositionWindow(lastAnchor);
+            statusSignature = null;
+            RefreshStatusPanel();
+        }
+
+        private void ApplyStatusPanelVisibility()
+        {
+            bool open = StatusPanelOpen;
+            statusColumn.style.display = open ? DisplayStyle.Flex : DisplayStyle.None;
+            statusToggleArrow.text = open ? "‹" : "›";
+            window.style.width = WindowWidth;
+        }
+
+        private List<SandboxStatusView> CurrentStatusViews()
+        {
+            if (openedState == null || openedState.IsDefeated)
+                return new List<SandboxStatusView>();
+            if (lastBattle != null && ReferenceEquals(lastBattle.GetUnit(openedState.Id), openedState))
+                return lastBattle.GetStatusViews(openedState.Id, SandboxTeam.Player);
+            // Без ссылки на бой — собственные экземпляры бойца.
+            List<SandboxStatusView> views = new List<SandboxStatusView>();
+            foreach (SandboxStatusInstance instance in openedState.Statuses)
+            {
+                views.Add(new SandboxStatusView
+                {
+                    StatusId = instance.StatusId, Name = instance.Definition.Name, IconId = instance.Definition.IconId,
+                    Polarity = instance.Definition.Polarity, StrongControl = instance.Definition.StrongControl,
+                    TurnsLeft = instance.Definition.Clock == SandboxStatusClock.OwnActivations ? instance.EffectiveDuration - instance.Elapsed : -1,
+                    Charges = instance.ChargeCount, Effect = SandboxStatusText.Describe(instance.Definition, instance),
+                    Removal = SandboxStatusText.Removal(instance.Definition)
+                });
+            }
+            return views;
+        }
+
+        private void RefreshStatusPanel()
+        {
+            if (statusColumn == null)
+                return;
+            List<SandboxStatusView> views = CurrentStatusViews();
+            statusToggleCount.text = views.Count > 0 ? views.Count.ToString() : string.Empty;
+            statusToggleCount.style.display = views.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!StatusPanelOpen)
+                return;
+
+            // Пересборка только при изменении состава, сроков или зарядов.
+            System.Text.StringBuilder signature = new System.Text.StringBuilder();
+            foreach (SandboxStatusView view in views)
+                signature.Append(view.StatusId).Append(':').Append(view.TurnsLeft).Append(':').Append(view.Charges).Append(':').Append(view.TriggerRound).Append('|');
+            string key = (openedState != null ? openedState.Id : string.Empty) + "#" + signature;
+            if (key == statusSignature)
+                return;
+            statusSignature = key;
+
+            statusList.Clear();
+            statusEmpty.style.display = views.Count == 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            foreach (SandboxStatusView view in views)
+                statusList.Add(BuildStatusRow(view));
+        }
+
+        private VisualElement BuildStatusRow(SandboxStatusView view)
+        {
+            bool good = view.Polarity == SandboxStatusPolarity.Beneficial;
+            VisualElement row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.alignItems = Align.FlexStart;
+            row.style.marginBottom = 8f;
+            row.style.marginRight = 4f;
+            row.style.paddingLeft = 6f;
+            row.style.paddingRight = 6f;
+            row.style.paddingTop = 6f;
+            row.style.paddingBottom = 6f;
+            row.style.backgroundColor = new Color(0.13f, 0.145f, 0.165f, 1f);
+            SetBorder(row, good ? new Color(0.34f, 0.45f, 0.32f, 1f) : new Color(0.46f, 0.27f, 0.24f, 1f), view.StrongControl ? 2f : 1f);
+            SetRadius(row, 3f);
+
+            VisualElement icon = new VisualElement { pickingMode = PickingMode.Ignore };
+            icon.style.width = 36f;
+            icon.style.height = 36f;
+            icon.style.flexShrink = 0f;
+            icon.style.marginRight = 8f;
+            Sprite sprite = HexBoardElement.LoadStatusSprite(view.IconId);
+            if (sprite != null)
+            {
+                icon.style.backgroundImage = new StyleBackground(sprite);
+            }
+            else
+            {
+                icon.style.backgroundColor = good ? new Color(0.22f, 0.36f, 0.26f, 1f) : new Color(0.42f, 0.16f, 0.14f, 1f);
+                SetRadius(icon, 18f);
+            }
+            row.Add(icon);
+
+            VisualElement text = new VisualElement();
+            text.style.flexGrow = 1f;
+            text.style.flexShrink = 1f;
+
+            Label name = CreateLabel(view.Name, 12, good ? new Color(0.72f, 0.86f, 0.62f, 1f) : new Color(0.95f, 0.66f, 0.55f, 1f));
+            name.style.unityFontStyleAndWeight = FontStyle.Bold;
+            name.style.whiteSpace = WhiteSpace.Normal;
+            text.Add(name);
+
+            List<string> meta = new List<string>();
+            if (view.TriggerRound > 0) meta.Add("срабатывает в раунде " + view.TriggerRound);
+            else if (view.Dependent) meta.Add("пока действует связь");
+            else if (view.TurnsLeft > 0) meta.Add("осталось ходов: " + view.TurnsLeft);
+            if (view.Charges > 1) meta.Add("заряды: " + view.Charges);
+            if (!string.IsNullOrEmpty(view.SourceLabel)) meta.Add("источник: " + view.SourceLabel);
+            if (meta.Count > 0)
+            {
+                Label metaLabel = CreateLabel(string.Join(" · ", meta), 9, new Color(0.62f, 0.62f, 0.58f, 1f));
+                metaLabel.style.whiteSpace = WhiteSpace.Normal;
+                metaLabel.style.marginTop = 2f;
+                text.Add(metaLabel);
+            }
+
+            Label effect = CreateLabel(view.Effect, 10, new Color(0.80f, 0.80f, 0.76f, 1f));
+            effect.style.whiteSpace = WhiteSpace.Normal;
+            effect.style.marginTop = 3f;
+            text.Add(effect);
+
+            if (!string.IsNullOrEmpty(view.Removal))
+            {
+                Label removal = CreateLabel(view.Removal, 9, new Color(0.54f, 0.62f, 0.64f, 1f));
+                removal.style.whiteSpace = WhiteSpace.Normal;
+                removal.style.marginTop = 3f;
+                text.Add(removal);
+            }
+            row.Add(text);
+            return row;
         }
 
         private void PositionWindow(Vector2? anchorPosition)

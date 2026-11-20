@@ -50,6 +50,9 @@ namespace KingdomSurvival.BattleSandbox
         private StatusSlot pinnedStatusSlot;
         private int statusViewsKey = int.MinValue;
 
+        // Общий загрузчик значков (поле боя и карточка бойца): кэш, без повторной загрузки.
+        internal static Sprite LoadStatusSprite(string iconId) => StatusSprite(iconId);
+
         private static Sprite StatusSprite(string iconId)
         {
             if (string.IsNullOrEmpty(iconId))

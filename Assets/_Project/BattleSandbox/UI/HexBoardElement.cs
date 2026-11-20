@@ -134,6 +134,10 @@ namespace KingdomSurvival.BattleSandbox
         public event Action<string, HexCoord?> AttackRequested;
         // Момент попадания удара (запись и «цель — наш боец»): обработка кадра места даёт всплеск.
         public event Action<SandboxHitRecord, bool> ImpactShown;
+        // Подкраска фигуры по типу (обработка кадра арены, раздел «Персонажи»); null — без неё.
+        public Func<string, Color> UnitTint;
+
+        private Color LookTint(SandboxUnitState unit) => UnitTint != null && unit?.Definition != null ? UnitTint(unit.Definition.Id) : Color.white;
         public bool IsAnimating { get; private set; }
 
         public HexBoardElement()
@@ -481,7 +485,8 @@ namespace KingdomSurvival.BattleSandbox
             UnityEngine.Cursor.visible = false;
             tooltip = (hoverRangedAttack ? "Выстрел" : "Удар мечом") +
                       (movementCost > 0 ? " · движение " + movementCost : string.Empty) +
-                      " · " + preview.Damage + " урона · ЛКМ для атаки";
+                      " · " + preview.Damage + " урона" +
+                      (string.IsNullOrEmpty(preview.Details) ? string.Empty : " (" + preview.Details + ")") + " · ЛКМ для атаки";
             MarkDirtyRepaint();
             attackCursorOverlay.MarkDirtyRepaint();
         }
@@ -1130,11 +1135,11 @@ namespace KingdomSurvival.BattleSandbox
                     {
                         UnitPresentation presentation = GetPresentation(unit);
                         LayoutAnimatedImage(image, visual, presentation, unitCenter, layout);
-                        image.tintColor = presentation.CorpseDarkened
+                        image.tintColor = (presentation.CorpseDarkened
                             ? CorpseTint
                             : flashing
                                 ? Color.Lerp(Color.white, new Color(1f, 0.58f, 0.52f, 1f), targetFlash)
-                                : Color.white;
+                                : Color.white) * LookTint(unit);
                         // Полоса здоровья привязана к гексу, а не к границам кадра.
                         healthTop = unitCenter.y + layout.Size * 0.30f;
                     }
@@ -1157,9 +1162,9 @@ namespace KingdomSurvival.BattleSandbox
                         image.style.height = size;
                         image.style.left = center.x - size * 0.5f;
                         image.style.top = center.y - size * (1f - StaticAnchorFromBottom);
-                        image.tintColor = flashing
+                        image.tintColor = (flashing
                             ? Color.Lerp(Color.white, new Color(1f, 0.58f, 0.52f, 1f), targetFlash)
-                            : Color.white;
+                            : Color.white) * LookTint(unit);
                         healthCenter = center;
                         healthTop = center.y + size * StaticAnchorFromBottom - HealthBarBottomInset - HealthBarHeight;
                     }

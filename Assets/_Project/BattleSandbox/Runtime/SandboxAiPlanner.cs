@@ -67,12 +67,14 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
 
-            // Освобождение от захвата/паразита.
+            // Освобождение от захвата/паразита; очищение себя или соседа
+            // (пакет состояний): сильный контроль, взрыв, оставшиеся тики.
             foreach (SandboxContextAction context in battle.GetContextActions(unit.Id))
             {
                 double score = context.Kind == SandboxContextActionKind.BreakFree || context.Kind == SandboxContextActionKind.RemoveParasite
                     ? 3.5
-                    : context.Kind == SandboxContextActionKind.PullFree ? 3.0 : -1;
+                    : context.Kind == SandboxContextActionKind.PullFree ? 3.0
+                    : context.Kind == SandboxContextActionKind.CleanseStatus ? battle.CleanseValue(context) : -1;
                 if (score > bestScore)
                 {
                     bestScore = score;
@@ -135,10 +137,10 @@ namespace KingdomSurvival.BattleSandbox
             {
                 SandboxUnitState chosen = inPlace
                     .OrderBy(other => other.HitPoints)
-                    .ThenByDescending(other => battle.PreviewAttack(unit.Id, other.Id).Damage)
+                    .ThenByDescending(other => battle.PreviewAttack(unit.Id, other.Id).HpDamage)
                     .ThenBy(other => other.Id, StringComparer.Ordinal)
                     .First();
-                score = AttackValue(battle, unit, chosen, unit.Position, battle.PreviewAttack(unit.Id, chosen.Id).Damage);
+                score = AttackValue(battle, unit, chosen, unit.Position, battle.PreviewAttack(unit.Id, chosen.Id).HpDamage);
                 return chosen;
             }
             // Прежнее правило: без цели на месте — сближение, затем удар.
@@ -163,7 +165,8 @@ namespace KingdomSurvival.BattleSandbox
                 }
                 from = PreferredShotPosition(battle, unit, other, from);
                 SandboxAttackPreview preview = battle.PreviewReachableAttack(unit.Id, other.Id);
-                int damage = preview.IsValid ? preview.Damage : 1;
+                // Пакет состояний: по фактическому урону HP (щит/неуязвимость не «урон»).
+                int damage = preview.IsValid ? preview.HpDamage : 1;
                 double value = AttackValue(battle, unit, other, from, damage) - cost * 0.05;
                 if (best == null || value > score + 1e-9)
                 {
@@ -318,9 +321,11 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxAbilityKind.Engulf:
                     return kill > 0 ? damage : damage + 3.5;
                 case SandboxAbilityKind.StunSpit:
-                    return target != null && (target.IsStunned || !target.CanRetaliate) ? damage - 0.5 : damage + 2.5;
+                    // Пакет состояний: не тратить приём на невосприимчивую или уже ошеломлённую цель.
+                    return target != null && (battle.PreviewStatusRejection(SandboxStatusCatalog.Dazed, target, unit) != null || !target.CanRetaliate) ? damage - 0.5 : damage + 2.5;
                 case SandboxAbilityKind.NumbBite:
-                    return target != null && !target.IsGuarding && !target.IsNumbed && target.NumbImmunity == 0 ? damage + 3 : damage;
+                    return target != null && !target.IsGuarding && target.NumbImmunity == 0 &&
+                           battle.PreviewStatusRejection(SandboxStatusCatalog.Numbed, target, unit) == null ? damage + 3 : damage;
                 case SandboxAbilityKind.VineGrab:
                 case SandboxAbilityKind.TendrilGrab:
                     if (command.TargetObjectId == "pull")

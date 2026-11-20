@@ -372,8 +372,31 @@ namespace KingdomSurvival.BattleSandbox
 
         public bool IsValid { get; }
         public string Reason { get; }
+        // Прямой урон удара (после Атаки/Защиты, состояний и тегов).
         public int Damage { get; }
-        public int TargetHitPointsAfter { get; }
+        // Пакет состояний: сколько HP реально снимется (щит, неуязвимость,
+        // перенос ран, временные HP) и что ещё произойдёт — отдельными строками.
+        public int HpDamage { get; internal set; }
+        public int TargetHitPointsAfter { get; internal set; }
+        public List<string> Notes { get; } = new List<string>();
+        public List<string> StatusNotes { get; } = new List<string>();
+        // Новые тики цели в начале её хода — прогноз, не гарантированный урон удара.
+        public int UpcomingTicks { get; internal set; }
+
+        public string Details
+        {
+            get
+            {
+                List<string> parts = new List<string>();
+                if (HpDamage != Damage)
+                    parts.Add("по HP " + HpDamage);
+                parts.AddRange(Notes);
+                parts.AddRange(StatusNotes.Select(note => "наложит " + note));
+                if (UpcomingTicks > 0)
+                    parts.Add("в начале хода цели ещё " + UpcomingTicks + " урона от состояний");
+                return string.Join(" · ", parts);
+            }
+        }
 
         public SandboxAttackPreview(
             bool isValid,
@@ -384,6 +407,7 @@ namespace KingdomSurvival.BattleSandbox
             IsValid = isValid;
             Reason = reason;
             Damage = damage;
+            HpDamage = damage;
             TargetHitPointsAfter = targetHitPointsAfter;
         }
     }
@@ -1444,11 +1468,13 @@ namespace KingdomSurvival.BattleSandbox
             damage = Math.Max(1, damage + StatusFlatDamage(attacker, target, rangedHit, SandboxDamageType.Physical, consume: false));
             damage = PassiveDamage(attacker, target, rangedHit, damage, consume: false);
 
-            return new SandboxAttackPreview(
+            SandboxAttackPreview result = new SandboxAttackPreview(
                 true,
                 string.Empty,
                 damage,
                 Math.Max(0, target.HitPoints - damage));
+            EnrichPreview(result, attacker, target, rangedHit);
+            return result;
         }
 
         private static string StillStandingNote(SandboxUnitState unit, bool usedBefore)

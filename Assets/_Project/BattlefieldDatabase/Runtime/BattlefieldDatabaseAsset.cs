@@ -106,9 +106,15 @@ namespace KingdomSurvival.BattlefieldDatabase
 
         public KingdomSurvival.BattleSandbox.SandboxSurfaceRules SurfaceRules => surfaceRules ??= new KingdomSurvival.BattleSandbox.SandboxSurfaceRules();
 
+        // Бриф «Поверхности арены», этап 4: настройки генератора тем арены.
+        [SerializeField] private KingdomSurvival.BattleSandbox.SandboxArenaGenerationSettings arenaGeneration = new KingdomSurvival.BattleSandbox.SandboxArenaGenerationSettings();
+
+        public KingdomSurvival.BattleSandbox.SandboxArenaGenerationSettings ArenaGeneration => arenaGeneration ??= new KingdomSurvival.BattleSandbox.SandboxArenaGenerationSettings();
+
         private void OnEnable()
         {
             KingdomSurvival.BattleSandbox.SandboxSurfaceRules.Current = SurfaceRules;
+            KingdomSurvival.BattleSandbox.SandboxArenaGenerationSettings.Current = ArenaGeneration;
         }
 
         // Общая скорость ходьбы по гексам — одна на бой и исследование места:

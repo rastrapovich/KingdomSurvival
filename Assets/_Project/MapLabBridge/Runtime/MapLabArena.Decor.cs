@@ -107,6 +107,24 @@ namespace KingdomSurvival.MapLabBridge
                 decorPlaced.Add((p, hex * 0.75f));
             }
 
+            // 1б. Объекты местности боя — рисунком своего слота, во всю клетку.
+            List<MapLabDecorArt> objectArt = Role(MapLabDecorRole.ArenaObject);
+            foreach ((Vector2 center, string kind) in Spec.Objects)
+            {
+                List<MapLabDecorArt> pool = objectArt.FindAll(art => art.ObjectKind == kind);
+                if (pool.Count == 0)
+                    continue;
+                Vector2 p = ToWorld(center);
+                MapLabDecorArt art = pool[(int)(rng.Value() * pool.Count) % pool.Count];
+                float height = art.Height * (hex * 1.6f) / Mathf.Max(0.05f, art.HalfWidth * 2f);
+                MapLabArtEntry sized = MapLabArtAssets.AddSized(decorSet, art, MapLabArtAssets.ObjectSuffix, height);
+                if (sized == null)
+                    continue;
+                c.Features.Add((p, sized.Id, BlockKind));
+                decorPlaced.Add((p, hex * 0.75f));
+                blocked.Add(p);
+            }
+
             // 2. Группы деревьев по краям и углам.
             if (trees.Count > 0)
             {

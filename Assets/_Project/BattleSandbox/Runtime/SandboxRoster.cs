@@ -86,7 +86,9 @@ namespace KingdomSurvival.BattleSandbox
             int? terrainSeed = null,
             int playerFirstRoundInitiativeBonus = 0,
             IEnumerable<HexCoord> disabledCells = null,
-            bool hiddenUnitsScouted = false)
+            bool hiddenUnitsScouted = false,
+            SandboxArenaTheme? theme = null,
+            string themeSource = null)
         {
             if (fighters == null)
                 throw new ArgumentNullException(nameof(fighters));
@@ -153,8 +155,15 @@ namespace KingdomSurvival.BattleSandbox
                     PlaceSpawn(enemyPositions[i], SandboxTeam.Enemy, blocked, taken)));
             }
 
-            Random random = new Random(terrainSeed ?? Guid.NewGuid().GetHashCode());
-            Dictionary<HexCoord, SandboxTerrain> terrain = GenerateTerrain(units, random, blocked);
+            int seed = terrainSeed ?? Guid.NewGuid().GetHashCode();
+            // Бриф «Поверхности арены», этап 4: тема арены. Без темы — прежний
+            // генератор (те же холмы и преграды для старых seed).
+            SandboxArenaPlan plan = theme.HasValue
+                ? SandboxArenaGenerator.Generate(theme.Value, seed, units, blocked, themeSource)
+                : null;
+            Dictionary<HexCoord, SandboxTerrain> terrain = plan != null
+                ? new Dictionary<HexCoord, SandboxTerrain>(plan.Terrain)
+                : GenerateTerrain(units, new Random(seed), blocked);
             SandboxTerrainRules.RegisterBattle(units, terrain);
 
             SandboxBattle battle = new SandboxBattle(
@@ -165,6 +174,7 @@ namespace KingdomSurvival.BattleSandbox
                 blocked);
             battle.PlayerFirstRoundInitiativeBonus = playerFirstRoundInitiativeBonus;
             battle.HiddenUnitsScouted = hiddenUnitsScouted;
+            plan?.ApplyTo(battle);
             battle.Start();
             return battle;
         }

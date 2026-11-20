@@ -36,6 +36,9 @@ namespace KingdomSurvival.MapLabBridge
         // Стартовые клетки бойцов (центры, доли кадра): трава и мелочь их не
         // закрывают.
         public readonly List<Vector2> KeepClear = new List<Vector2>();
+        // Объекты местности боя (центр клетки, вид): рисунок из слота Базы
+        // ассетов «arena-object:<вид>», если он есть.
+        public readonly List<(Vector2 Center, string Kind)> Objects = new List<(Vector2, string)>();
         // Плотность декора (трава, мелочь, число групп деревьев): 1 — обычная.
         // Свой поток случайности: рельеф, клетки и бонусы от неё не зависят.
         public float DecorDensity = 1f;

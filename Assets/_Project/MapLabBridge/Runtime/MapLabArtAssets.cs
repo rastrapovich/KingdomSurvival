@@ -14,6 +14,9 @@ namespace KingdomSurvival.MapLabBridge
         LowGrass,
         Boulder,
         SmallRock,
+        // Объект местности арены (тег «arena-object:<вид>»): ставится только на
+        // клетки этого объекта, в общий декор не идёт.
+        ArenaObject,
     }
 
     public sealed class MapLabDecorArt
@@ -23,6 +26,7 @@ namespace KingdomSurvival.MapLabBridge
         public MapLabDecorRole Role;
         public float Height;         // высота карточки в мире MapLab
         public float HalfWidth;      // полуширина карточки в мире MapLab
+        public string ObjectKind;    // вид объекта местности арены (для ArenaObject)
     }
 
     // Единый каталог: записи Базы ассетов → рисунки MapLab по тому же ID.
@@ -34,6 +38,33 @@ namespace KingdomSurvival.MapLabBridge
     {
         public const string IdPrefix = "art:";
         public const string BlockSuffix = "#block";
+        public const string ObjectSuffix = "#object";
+        // Слот рисунка объекта местности арены: тег записи Базы ассетов
+        // «arena-object:<вид>» (wattle, stone_wall, fallen_log, deadfall, trunk,
+        // bridge, root_nest, ritual_stone). Нет такой записи — объект рисует
+        // доска программно.
+        public const string ArenaObjectTagPrefix = "arena-object:";
+
+        public static string ArenaObjectKindOf(ArtAssetDefinition asset)
+        {
+            if (asset?.Tags == null)
+                return null;
+            foreach (string tag in asset.Tags)
+                if (tag != null && tag.StartsWith(ArenaObjectTagPrefix))
+                    return tag.Substring(ArenaObjectTagPrefix.Length).Trim();
+            return null;
+        }
+
+        public static bool HasArenaObjectArt(string kind)
+        {
+            ArtAssetDatabaseAsset catalog = ArtAssetDatabaseAsset.Current;
+            if (catalog?.assets == null || string.IsNullOrEmpty(kind))
+                return false;
+            foreach (ArtAssetDefinition asset in catalog.assets)
+                if (asset != null && asset.UsableOnArena && !asset.IsAnimated && ArenaObjectKindOf(asset) == kind && asset.MainSprite(asset.PrimaryView) != null)
+                    return true;
+            return false;
+        }
 
         public static MapLabArtSet BuildSet(bool arena, float scale, List<MapLabDecorArt> decor)
         {
@@ -55,7 +86,8 @@ namespace KingdomSurvival.MapLabBridge
                 // Лист нескольких рисунков MapLab карточкой не покажет.
                 if (Mathf.Abs(rect.width - sprite.texture.width) > 1f || Mathf.Abs(rect.height - sprite.texture.height) > 1f)
                     continue;
-                MapLabDecorRole? role = RoleOf(asset);
+                string objectKind = arena ? ArenaObjectKindOf(asset) : null;
+                MapLabDecorRole? role = objectKind != null ? MapLabDecorRole.ArenaObject : RoleOf(asset);
                 // Фигуры бойцов на арене крупнее людей мест: мелочь (трава, камешки,
                 // бурьян) увеличивается, иначе рядом с ними теряется.
                 float boost = !arena || role == null ? 1f
@@ -72,6 +104,7 @@ namespace KingdomSurvival.MapLabBridge
                 {
                     Id = entry.Id, AssetId = asset.Id, Role = role.Value, Height = height,
                     HalfWidth = height * rect.width / Mathf.Max(1f, rect.height) * 0.5f,
+                    ObjectKind = objectKind,
                 });
             }
             return set;

@@ -56,6 +56,10 @@ namespace KingdomSurvival.BattleSandbox
                 return null;
             if (!SandboxArenaShape.MatchesDimensions(battle.Width, battle.Height))
                 return null;
+            board.ArtBackedObjects.Clear();
+            foreach (SandboxBattleObject item in battle.TerrainObjects)
+                if (item.Kind == SandboxObjectKind.Boulder || (SandboxTerrainObjects.Get(item.Kind).Indestructible && MapLabArtAssets.HasArenaObjectArt(ObjectKindId(item.Kind))))
+                    board.ArtBackedObjects.UnionWith(item.Cells);
             return new MapLabArenaDriver(BuildSpec(field, battle), surface, board, onReady);
         }
 
@@ -75,11 +79,27 @@ namespace KingdomSurvival.BattleSandbox
             foreach (HexCoord cell in BattlefieldFrame.ActiveCells(field))
             {
                 SandboxTerrain terrain = battle.GetTerrain(cell);
-                MapLabArenaCellKind kind = terrain == SandboxTerrain.Difficult ? MapLabArenaCellKind.Hill
-                    : terrain == SandboxTerrain.Impassable ? MapLabArenaCellKind.Blocked
+                // Бриф «Поверхности арены», этап 5: валун местности — тем же
+                // рисунком валуна MapLab, что непроходимая клетка.
+                bool boulder = battle.TerrainObjectAt(cell)?.Kind == SandboxObjectKind.Boulder;
+                MapLabArenaCellKind kind = terrain == SandboxTerrain.Difficult && !boulder ? MapLabArenaCellKind.Hill
+                    : terrain == SandboxTerrain.Impassable || boulder ? MapLabArenaCellKind.Blocked
                     : MapLabArenaCellKind.Open;
                 spec.Cells.Add((layout.GetCenter(cell.Q, cell.R), kind));
                 key.Append((int)kind);
+            }
+            // Объекты местности (кроме валуна — он клеткой Blocked): слот рисунка.
+            foreach (SandboxBattleObject item in battle.TerrainObjects)
+            {
+                // Разрушаемые (плетень, гнездо) — только доской: рисунок арены
+                // не перестраивается при разрушении.
+                if (item.Kind == SandboxObjectKind.Boulder || !SandboxTerrainObjects.Get(item.Kind).Indestructible)
+                    continue;
+                foreach (HexCoord cell in item.Cells)
+                {
+                    spec.Objects.Add((layout.GetCenter(cell.Q, cell.R), ObjectKindId(item.Kind)));
+                    key.Append(ObjectKindId(item.Kind));
+                }
             }
             // Стартовые клетки бойцов — без травы и мелочи поверх.
             foreach (SandboxUnitState unit in battle.Units)
@@ -88,6 +108,10 @@ namespace KingdomSurvival.BattleSandbox
             spec.Seed = StableHash(key.ToString());
             return spec;
         }
+
+        // Вид объекта для слота Базы ассетов: FallenLog → fallen_log.
+        public static string ObjectKindId(SandboxObjectKind kind) =>
+            System.Text.RegularExpressions.Regex.Replace(kind.ToString(), "(?<=[a-z])([A-Z])", "_$1").ToLowerInvariant();
 
         private static int StableHash(string text)
         {

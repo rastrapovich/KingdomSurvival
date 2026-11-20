@@ -49,10 +49,22 @@ public partial class PrototypeUIController
         // стоит отряд; подходящего рисунка нет — общее поле полигона.
         if (!request.IsLocal && string.IsNullOrEmpty(request.BattlefieldId))
             request.BattlefieldId = SelectRoadBattlefieldId();
+        if (!request.IsLocal && string.IsNullOrEmpty(request.ArenaTheme))
+            SelectRoadArenaTheme(request);
         CampaignSession.EnterBattle(request);
         ContinuousSimulationSystem.SetPaused(gameState, true);
         SceneManager.LoadScene(BattleSceneName);
         return true;
+    }
+
+    // Бриф «Поверхности арены», этап 4: тема дорожной арены по месту.
+    private void SelectRoadArenaTheme(CampaignBattleRequest request)
+    {
+        WorldMapGameplayTerrainType terrain = gameState != null && gameState.HasActiveExpedition
+            ? WorldMapNavigation.GetTerrainAtPercent(gameState.ActiveExpedition.CurrentMapXPercent, gameState.ActiveExpedition.CurrentMapYPercent)
+            : WorldMapGameplayTerrainType.OpenGround;
+        request.ArenaTheme = RoadArenaTheme.For(terrain, request.ArenaBiomeHint, request.Seed, out string source);
+        request.ArenaThemeSource = gameState != null && gameState.HasActiveExpedition ? source : "нет данных о месте — обычный пресет";
     }
 
     private string SelectRoadBattlefieldId()

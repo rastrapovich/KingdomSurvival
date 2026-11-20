@@ -304,8 +304,15 @@ namespace KingdomSurvival.BattleSandbox
             for (int i = 0; i < fighters.Count; i++)
                 campaignUnitIds.Add("player:" + fighters[i].Id + ":" + (i + 1));
 
+            // Бриф «Поверхности арены», этап 4: тема арены из контекста места.
+            SandboxArenaTheme? arenaTheme = SandboxArenaThemes.TryParse(campaignBattle.ArenaTheme, out SandboxArenaTheme parsedTheme)
+                ? parsedTheme
+                : (SandboxArenaTheme?)null;
             battle = SandboxRoster.CreateBattle(fighters, BuildCampaignEnemies(), campaignBattle.Seed,
-                campaignBattle.PlayerFirstRoundInitiativeBonus, BattlefieldFrame.DisabledCells(ActiveBattlefield()));
+                campaignBattle.PlayerFirstRoundInitiativeBonus, BattlefieldFrame.DisabledCells(ActiveBattlefield()),
+                theme: arenaTheme, themeSource: campaignBattle.ArenaThemeSource);
+            if (battle.ArenaReport != null)
+                Debug.Log("Арена дорожного боя: " + battle.ArenaReport.Summary());
             ConfigureAbilityBattle();
 
             // ПР-10: пал герой — бой проигран.
@@ -997,6 +1004,7 @@ namespace KingdomSurvival.BattleSandbox
             scouted.style.color = new Color(0.70f, 0.68f, 0.62f, 1f);
             scouted.RegisterValueChangedCallback(evt => sandboxHiddenScouted = evt.newValue);
             center.Add(scouted);
+            AddArenaThemeControls(center);
             return center;
         }
 
@@ -1097,9 +1105,10 @@ namespace KingdomSurvival.BattleSandbox
             // «Повторить бой» во время незавершённого показа прежнего боя не
             // должен унаследовать его флаги.
             ResetCombatFlow();
-            battle = SandboxRoster.CreateBattle(fighters, enemies,
+            battle = SandboxRoster.CreateBattle(fighters, enemies, SandboxSeedChoice(),
                 disabledCells: BattlefieldFrame.DisabledCells(ActiveBattlefield()),
-                hiddenUnitsScouted: sandboxHiddenScouted);
+                hiddenUnitsScouted: sandboxHiddenScouted,
+                theme: SandboxThemeChoice(), themeSource: "выбор в полигоне");
             ConfigureAbilityBattle();
             battleLog.Clear();
             battleLog.Add("Бой начался. Противник: " + string.Join(", ", enemies.GroupBy(enemy => enemy.RoleLabel)
@@ -1281,6 +1290,7 @@ namespace KingdomSurvival.BattleSandbox
             screen.Add(body);
             screen.Add(BuildSpeedControl());
             screen.Add(BuildAbilityBar());
+            AddTerrainDebugPanel();
         }
 
         // ПР-12З: общая скорость показа боя. Добавляется последним ребёнком
@@ -1324,6 +1334,8 @@ namespace KingdomSurvival.BattleSandbox
         private void OnBoardHexClicked(HexCoord coord)
         {
             if (combatAnimationRunning)
+                return;
+            if (TryHandleTerrainDebugClick(coord))
                 return;
 
             SandboxUnitState current = battle != null ? battle.CurrentUnit : null;

@@ -85,6 +85,14 @@ namespace KingdomSurvival.BattleSandbox
             if (target != null && attackScore > bestScore)
             {
                 bestScore = attackScore;
+                // Бриф «Поверхности арены»: стоит в огне/яде — ударить ту же
+                // цель из безопасной клетки, если она есть.
+                if (!attackFrom.HasValue && allowMove && battle.HazardAt(unit, unit.Position) > 0)
+                {
+                    HexCoord? safer = unit.AttackRange > 1 ? battle.BestShotCell(unit, target) : battle.SaferMeleeCell(unit, target);
+                    if (safer.HasValue && safer.Value != unit.Position && battle.HazardAt(unit, safer.Value) == 0)
+                        attackFrom = safer;
+                }
                 best = new SandboxAiDecision { Action = SandboxAiActionKind.Attack, TargetId = target.Id, MoveTo = attackFrom };
                 SandboxAbilityDefinition kite = unit.Definition.FindAbility(SandboxAbilityKind.KiteAfterShot);
                 if (kite != null && unit.AttackRange > 1)
@@ -204,9 +212,8 @@ namespace KingdomSurvival.BattleSandbox
                 int distance = cell.DistanceTo(target.Position);
                 double value = distance >= desiredMin && distance <= desiredMax ? 2 : 0;
                 value += NearestThreat(battle, unit, cell) * 0.5;
-                // Бриф «Поверхности арены»: стрелку выгоден холм.
-                if (battle.GetTerrain(cell) == SandboxTerrain.Difficult)
-                    value += 0.8;
+                // Бриф «Поверхности арены»: холм, укрытие, без опасности.
+                value += battle.ShotCellValue(unit, cell);
                 if (cell == unit.Position)
                     value += 0.6; // уже может стрелять — не подходить без нужды
                 if (value > bestValue)
@@ -274,6 +281,18 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState closest = battle.FindClosestOpponent(unit);
             if (closest == null)
                 return null;
+            // Бриф «Поверхности арены»: стрелок подходит на позицию, откуда
+            // реально стреляет (линия огня), предпочитая холм и укрытие.
+            if (unit.AttackRange > 1)
+            {
+                HexCoord? shot = battle.Units
+                    .Where(other => !other.IsDefeated && other.Team != unit.Team && !other.IsOffBoard && !other.IsUnderground)
+                    .OrderBy(other => other.Position.DistanceTo(unit.Position)).ThenBy(other => other.Id, StringComparer.Ordinal)
+                    .Select(other => battle.BestShotCell(unit, other))
+                    .FirstOrDefault(cell => cell.HasValue);
+                if (shot.HasValue)
+                    return shot;
+            }
             return battle.FindBestMoveToward(unit, closest.Position);
         }
 

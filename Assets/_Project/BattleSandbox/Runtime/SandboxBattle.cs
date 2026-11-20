@@ -1035,8 +1035,14 @@ namespace KingdomSurvival.BattleSandbox
             IReadOnlyDictionary<HexCoord, int> reachable = GetReachable(unit.Id);
             // ПР-12К: на большом поле (вся локация) — по длине пути в обход
             // стен, а не по прямой: иначе противник упирается в стену.
-            Dictionary<HexCoord, int> path = usesCompactArenaShape ? null : PathDistances(target);
-            int Distance(HexCoord cell) => path != null && path.TryGetValue(cell, out int steps) ? steps : path != null ? 100000 + cell.DistanceTo(target) : cell.DistanceTo(target);
+            // Бриф «Поверхности арены», этап 4: на компактной арене с
+            // местностью — по цене пути этого бойца (болотный ходок не
+            // обходит топь), с штрафом за опасную клетку.
+            Dictionary<HexCoord, int> path = !usesCompactArenaShape ? PathDistances(target)
+                : UsesTerrainPathing ? TravelCosts(unit, target) : null;
+            int Distance(HexCoord cell) =>
+                (path != null && path.TryGetValue(cell, out int steps) ? steps : path != null ? 100000 + cell.DistanceTo(target) : cell.DistanceTo(target)) +
+                HazardAt(unit, cell) * 3;
             HexCoord best = unit.Position;
             int bestDistance = Distance(best);
             int bestCost = 0;
@@ -1226,6 +1232,10 @@ namespace KingdomSurvival.BattleSandbox
         // 12Е-6, «Засада»: бой начат подготовленно — отряд игрока получает
         // прибавку к инициативе в первом раунде.
         public int PlayerFirstRoundInitiativeBonus { get; set; }
+
+        // Бриф «Поверхности арены», этап 4: отчёт генератора темы (null — бой
+        // без темы: прежний генератор или авторская раскладка).
+        public SandboxArenaReport ArenaReport { get; set; }
 
         public int GetRoundInitiative(SandboxUnitState unit)
         {

@@ -200,6 +200,12 @@ public sealed class CampaignBattleRequest
     // его стены задаёт разметка места (BlockedCells), а не отключённые гексы
     // собственного рисунка поля.
     public bool IgnoreFieldDisabledCells;
+    // Бриф «Поверхности арены», этап 4: тема дорожной арены (ID пресета
+    // BattleSandbox, пусто — выбрать по месту), откуда она взята (для
+    // диагностики) и подсказка биотопа группы мира.
+    public string ArenaTheme = string.Empty;
+    public string ArenaThemeSource = string.Empty;
+    public string ArenaBiomeHint = string.Empty;
     // ПР-12К: бой на месте идёт на гексах всей локации — прямоугольная сетка
     // GridWidth × GridHeight клеток размера GridHexSize (пиксели рисунка
     // места GridCanvasWidth × GridCanvasHeight). 0 — арена поля 10×7.

@@ -653,6 +653,7 @@ public static partial class WorldPopulationService
         foreach (PopulationMemberState m in group.Members.Where(m => m.Alive).Take(8))
             request.Enemies.Add(new CampaignBattleEnemy { UnitTypeId = m.UnitTypeId, Count = 1, InstanceId = m.MemberId, CurrentHitPoints = m.HitPoints });
         request.Notes.Add("Противник: " + group.Name + ".");
+        request.ArenaBiomeHint = Preset(group)?.Biome ?? string.Empty;
         return request;
     }
 

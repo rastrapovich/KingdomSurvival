@@ -114,13 +114,21 @@ public sealed class MapLabArenaPlayModeTests
         }
         Assert.Greater(hills, 0);
 
+        // Первым может ходить противник: дождаться конца его показа и хода
+        // отряда (иначе анимация шага не начнётся — гонка теста, не ошибка).
+        float turnUntil = Time.realtimeSinceStartup + 40f;
+        while (Time.realtimeSinceStartup < turnUntil && (board.IsAnimating || battle.CurrentUnit == null || battle.CurrentUnit.Team != SandboxTeam.Player ||
+                                                           (bool)Member(sandbox, "combatAnimationRunning")))
+            yield return null;
+        for (int i = 0; i < 10; i++) yield return null;
         // Движение: фигура идёт по поднятым центрам, без скачка в конце шага.
-        SandboxUnitState unit = battle.Units.First(item => item.Team == SandboxTeam.Player);
+        SandboxUnitState unit = battle.CurrentUnit != null && battle.CurrentUnit.Team == SandboxTeam.Player ? battle.CurrentUnit : battle.Units.First(item => item.Team == SandboxTeam.Player);
         HexCoord next = unit.Position.Neighbors().Where(cell => BattlefieldFrame.IsActiveCell(surface.Battlefield, cell.Q, cell.R) &&
                 battle.GetTerrain(cell) != SandboxTerrain.Impassable && battle.GetUnitAt(cell) == null)
             .OrderByDescending(cell => battle.GetTerrain(cell) == SandboxTerrain.Difficult ? 1 : 0).First();
         bool done = false;
-        Assert.IsTrue(board.PlayMoveAnimation(unit.Id, new List<HexCoord> { unit.Position, next }, () => done = true));
+        Assert.IsTrue(board.PlayMoveAnimation(unit.Id, new List<HexCoord> { unit.Position, next }, () => done = true),
+            $"Анимация шага не начата: ход {battle.CurrentUnit?.Id}, анимация {board.IsAnimating}, {unit.Id} в {unit.Position}, павший {unit.IsDefeated}.");
         Vector2 previous = (Vector2)Member(board, "movementVisualPosition");
         float size = (float)layout.GetType().GetProperty("Size").GetValue(layout);
         float largestStep = 0f;

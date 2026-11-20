@@ -215,6 +215,7 @@ namespace KingdomSurvival.BattleSandbox
             if (unit == null || unit.IsDefeated)
                 return;
             Cycle(unit).Clear();
+            RememberActivationCell(unit);
             ApplyHazardsAt(unit, unit.Position);
         }
 

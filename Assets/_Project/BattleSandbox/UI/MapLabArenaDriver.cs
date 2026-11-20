@@ -44,6 +44,74 @@ namespace KingdomSurvival.BattleSandbox
 
         public MapLabArena Arena => arena;
 
+        // Поверхности клеток в краске земли: что заказано и что уже нарисовано.
+        private readonly SandboxBattle battle;
+        private readonly System.Collections.Generic.List<(HexCoord Cell, Vector2 Center)> cellCenters;
+        private readonly System.Collections.Generic.Dictionary<HexCoord, ulong> surfacesSent = new System.Collections.Generic.Dictionary<HexCoord, ulong>();
+        private bool surfacesPending;
+
+        private static System.Collections.Generic.List<(HexCoord Cell, Vector2 Center)> ArenaCells(BattlefieldDefinitionData field)
+        {
+            BattlefieldGridLayout layout = BattlefieldFrame.ComputeLayout(new Rect(0f, 0f, BattlefieldFrame.Aspect, 1f), BattlefieldFrame.GetGridArea(field));
+            System.Collections.Generic.List<(HexCoord, Vector2)> cells = new System.Collections.Generic.List<(HexCoord, Vector2)>();
+            foreach (HexCoord cell in BattlefieldFrame.ActiveCells(field))
+                cells.Add((cell, layout.GetCenter(cell.Q, cell.R)));
+            return cells;
+        }
+
+        // Состояние боя → краска: сменившиеся поверхности перекрашиваются в
+        // фоне; доска не рисует заливку у уже нарисованных краской.
+        private void SyncSurfaces()
+        {
+            bool changed = false;
+            foreach ((HexCoord cell, Vector2 _) in cellCenters)
+            {
+                ulong mask = SurfaceMask(battle, cell);
+                surfacesSent.TryGetValue(cell, out ulong sent);
+                if (mask != sent)
+                {
+                    changed = true;
+                    break;
+                }
+            }
+            if (changed)
+            {
+                System.Collections.Generic.List<(Vector2, ulong)> list = new System.Collections.Generic.List<(Vector2, ulong)>();
+                foreach ((HexCoord cell, Vector2 center) in cellCenters)
+                {
+                    ulong mask = SurfaceMask(battle, cell);
+                    surfacesSent[cell] = mask;
+                    if (mask != 0UL)
+                        list.Add((center, mask));
+                }
+                arena.SetSurfaces(list);
+                surfacesPending = true;
+            }
+            if (arena.PumpSurfaces())
+                RequestFrame();
+            if (surfacesPending && arena.SurfacesSettled)
+            {
+                surfacesPending = false;
+                board.PaintedSurfaces = VisibleSurfaces();
+            }
+        }
+
+        // Что из заказанного видно в рисунке (на клетке реки — только вода).
+        private System.Collections.Generic.Dictionary<HexCoord, ulong> VisibleSurfaces()
+        {
+            System.Collections.Generic.Dictionary<HexCoord, ulong> visible = new System.Collections.Generic.Dictionary<HexCoord, ulong>();
+            foreach ((HexCoord cell, Vector2 center) in cellCenters)
+                if (surfacesSent.TryGetValue(cell, out ulong mask) && mask != 0UL)
+                    visible[cell] = arena.VisibleLayers(center, mask);
+            return visible;
+        }
+
+        private void RequestFrame()
+        {
+            readyAt = Time.unscaledTime;
+            renderedAt = -1f;
+        }
+
         // Арена текущего экрана боя ещё строится (экран загрузки на месте).
         public static bool Loading => current != null && !current.disposed && current.shown == null;
 
@@ -60,7 +128,7 @@ namespace KingdomSurvival.BattleSandbox
             foreach (SandboxBattleObject item in battle.TerrainObjects)
                 if (item.Kind == SandboxObjectKind.Boulder || (SandboxTerrainObjects.Get(item.Kind).Indestructible && MapLabArtAssets.HasArenaObjectArt(ObjectKindId(item.Kind))))
                     board.ArtBackedObjects.UnionWith(item.Cells);
-            return new MapLabArenaDriver(BuildSpec(field, battle), surface, board, onReady);
+            return new MapLabArenaDriver(BuildSpec(field, battle), surface, board, battle, ArenaCells(field), onReady);
         }
 
         // Раскладка боя → данные рисунка. Seed — от самой раскладки и поля:
@@ -87,6 +155,9 @@ namespace KingdomSurvival.BattleSandbox
                     : MapLabArenaCellKind.Open;
                 spec.Cells.Add((layout.GetCenter(cell.Q, cell.R), kind));
                 key.Append((int)kind);
+                ulong surfaces = SurfaceMask(battle, cell);
+                if (surfaces != 0UL)
+                    spec.Surfaces.Add((layout.GetCenter(cell.Q, cell.R), surfaces));
             }
             // Объекты местности (кроме валуна — он клеткой Blocked): слот рисунка.
             foreach (SandboxBattleObject item in battle.TerrainObjects)
@@ -109,6 +180,62 @@ namespace KingdomSurvival.BattleSandbox
             return spec;
         }
 
+        // Поверхность основания, рисуемая краской арены (0 — луг как есть).
+        public static MapLabArenaSurface GroundSurface(SandboxGround ground)
+        {
+            switch (ground)
+            {
+                case SandboxGround.Mud: return MapLabArenaSurface.Mud;
+                case SandboxGround.Bog: return MapLabArenaSurface.Bog;
+                case SandboxGround.ShallowWater: return MapLabArenaSurface.ShallowWater;
+                case SandboxGround.DeepWater: return MapLabArenaSurface.DeepWater;
+                case SandboxGround.Rubble: return MapLabArenaSurface.Rubble;
+                case SandboxGround.DeepSnow: return MapLabArenaSurface.Snow;
+                case SandboxGround.Ice: return MapLabArenaSurface.Ice;
+                case SandboxGround.Cliff: return MapLabArenaSurface.Cliff;
+                case SandboxGround.Road: return MapLabArenaSurface.Road;
+                case SandboxGround.Sand: return MapLabArenaSurface.Sand;
+                case SandboxGround.WetGround: return MapLabArenaSurface.WetGround;
+                default: return 0;
+            }
+        }
+
+        // Временная область, рисуемая краской арены (0 — остаётся значком доски).
+        public static MapLabArenaSurface EffectSurface(SandboxEffectKind kind)
+        {
+            switch (kind)
+            {
+                case SandboxEffectKind.Fire: return MapLabArenaSurface.Fire;
+                case SandboxEffectKind.Tar: return MapLabArenaSurface.Tar;
+                case SandboxEffectKind.Poison: return MapLabArenaSurface.Poison;
+                case SandboxEffectKind.Ice: return MapLabArenaSurface.Frost;
+                default: return 0;
+            }
+        }
+
+        // Все нарисованные краской слои клетки сейчас.
+        public static ulong SurfaceMask(SandboxBattle battle, HexCoord cell)
+        {
+            ulong mask = 0UL;
+            MapLabArenaSurface ground = GroundSurface(battle.GetGround(cell));
+            if (ground != 0)
+                mask |= MapLabArenaSurfaces.Bit(ground);
+            if (battle.CellStates.TryGetValue(cell, out SandboxCellState state))
+            {
+                if ((state & SandboxCellState.ShallowWater) != 0) mask |= MapLabArenaSurfaces.Bit(MapLabArenaSurface.ShallowWater);
+                if ((state & SandboxCellState.LooseEarth) != 0) mask |= MapLabArenaSurfaces.Bit(MapLabArenaSurface.LooseEarth);
+                if ((state & SandboxCellState.Subsided) != 0) mask |= MapLabArenaSurfaces.Bit(MapLabArenaSurface.Subsided);
+                if ((state & SandboxCellState.Pit) != 0) mask |= MapLabArenaSurfaces.Bit(MapLabArenaSurface.Pit);
+            }
+            foreach (SandboxCellEffect effect in battle.EffectsAt(cell))
+            {
+                MapLabArenaSurface surface = EffectSurface(effect.Kind);
+                if (surface != 0)
+                    mask |= MapLabArenaSurfaces.Bit(surface);
+            }
+            return mask;
+        }
+
         // Вид объекта для слота Базы ассетов: FallenLog → fallen_log.
         public static string ObjectKindId(SandboxObjectKind kind) =>
             System.Text.RegularExpressions.Regex.Replace(kind.ToString(), "(?<=[a-z])([A-Z])", "_$1").ToLowerInvariant();
@@ -124,11 +251,14 @@ namespace KingdomSurvival.BattleSandbox
             }
         }
 
-        private MapLabArenaDriver(MapLabArenaSpec spec, BattlefieldView surface, HexBoardElement board, Action onReady)
+        private MapLabArenaDriver(MapLabArenaSpec spec, BattlefieldView surface, HexBoardElement board, SandboxBattle battle,
+            System.Collections.Generic.List<(HexCoord Cell, Vector2 Center)> cells, Action onReady)
         {
             this.surface = surface;
             this.board = board;
             this.onReady = onReady;
+            this.battle = battle;
+            cellCenters = cells;
             // На экране один бой — одна арена: прежняя (экран боя закрыт или
             // сцена выгружена без события отсоединения панели) освобождается.
             if (current != null && !current.disposed)
@@ -226,6 +356,8 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             }
             UpdateLoadingScreen();
+            if (attached)
+                SyncSurfaces();
             if (lookPending)
             {
                 lookPending = false;
@@ -271,8 +403,13 @@ namespace KingdomSurvival.BattleSandbox
                 expectedSeconds = Mathf.Clamp(Time.realtimeSinceStartup - loadingStarted, 1f, 15f);
                 surface.Relief = this;
                 board.Relief = this;
+                // Краска собрана по раскладке (spec.Surfaces) — она и нарисована.
+                foreach ((HexCoord cell, Vector2 _) in cellCenters)
+                    surfacesSent[cell] = SurfaceMask(battle, cell);
+                board.PaintedSurfaces = VisibleSurfaces();
                 RemoveLoadingScreen();
             }
+            board.SetTerrainOverlay(arena.OverlayTexture);
             board.MarkDirtyRepaint();
         }
 
@@ -301,7 +438,11 @@ namespace KingdomSurvival.BattleSandbox
             if (surface.Relief == this)
                 surface.Relief = null;
             if (board.Relief == this)
+            {
                 board.Relief = null;
+                board.SetTerrainOverlay(null);
+                board.PaintedSurfaces = null;
+            }
             if (shown != null)
                 surface.SetSceneTexture(null);
             RemoveLoadingScreen();

@@ -23,6 +23,8 @@ namespace KingdomSurvival.MapLab
         private const int KeyRock = 4;
         private const int KeyShore = 5;
         private const int KeyYard = 6;
+        // Поверхность IMapLabSurfacePaint: мазки — её собственным цветом.
+        private const int KeySurface = 7;
         private const int KeyFieldBase = 16;
         public const int Gutter = 2;
 
@@ -65,6 +67,9 @@ namespace KingdomSurvival.MapLab
             // Ревизия 06: стены обрывов — рисунки; земля у обрыва — обычный луг
             // (без камня и штриховки покраски: светлой подложки над кромкой и под подошвой).
             public bool DrawnCliffs;
+            // Поверхности поверх луга (боевая арена: лёд, грязь, снег…) — в
+            // базовом слое, до мазков: мазки кладутся уже их цветом.
+            public IMapLabSurfacePaint Surfaces;
         }
 
         // 12У-C: сессия покраски — общие поля, дороги и параметры; тайлы можно
@@ -274,6 +279,7 @@ namespace KingdomSurvival.MapLab
             private readonly bool stage05;
             private readonly MapLabWash.Layer washes;
             private readonly bool drawnCliffs;
+            private readonly IMapLabSurfacePaint surfaces;
             private readonly MapLabNoise groups, ochre;
             public long StrokeCount;
             public long StampCount;
@@ -316,6 +322,7 @@ namespace KingdomSurvival.MapLab
                 stage05 = settings.IsStage05;
                 edgeAa = stage05 ? Mathf.Clamp(settings.Stage05.StrokeEdge, 0.2f, 3f) : Mathf.Clamp(settings.Stage03.StrokeEdge, 0.3f, 3f);
                 washes = options.Washes;
+                surfaces = options.Surfaces;
                 drawnCliffs = options.DrawnCliffs;
                 groups = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "paint05-groups", MapLabData.AlgorithmVersion));
                 ochre = new MapLabNoise(MapLabRandom.StreamSeed(data.Seed, "paint05-shore-ochre", MapLabData.AlgorithmVersion));
@@ -553,6 +560,9 @@ namespace KingdomSurvival.MapLab
                         c = Color.Lerp(c, Color.Lerp(c, pal.RoadEdge, 0.5f), shoulder * 0.14f);
                         if (body > 0.5f) k = KeyRoad;
                     }
+
+                    if (surfaces != null && surfaces.Apply(w, pal, ref c, out bool owns) && owns)
+                        k = KeySurface;
 
                     if (stage05 && washes != null && washes.Patches.Count > 0 && (k == KeyGrass || k == KeyForest))
                         c = MapLabWash.Apply(washes, w, c, s, settings.Stage05.WashStrength);

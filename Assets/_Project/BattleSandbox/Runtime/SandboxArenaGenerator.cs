@@ -565,7 +565,10 @@ namespace KingdomSurvival.BattleSandbox
         {
             HexCoord top = new HexCoord(4 + b.Rng.Next(3), 0);
             HexCoord bottom = new HexCoord(3 + b.Rng.Next(3), SandboxArenaShape.Height - 1);
-            List<HexCoord> river = SandboxHexLine.Line(top, bottom).Where(SandboxArenaShape.Contains).ToList();
+            // Русло с изгибом: через точку в середине поля, смещённую вбок.
+            int bend = b.Rng.Next(2) == 0 ? -2 : 2;
+            HexCoord turn = new HexCoord(Math.Max(2, Math.Min(SandboxArenaShape.Width - 3, (top.Q + bottom.Q) / 2 + bend)), SandboxArenaShape.Height / 2);
+            List<HexCoord> river = SandboxHexLine.Line(top, turn).Concat(SandboxHexLine.Line(turn, bottom)).Distinct().Where(SandboxArenaShape.Contains).ToList();
             foreach (HexCoord cell in river)
                 b.Ground(cell, SandboxGround.DeepWater);
             List<HexCoord> middle = river.Where(c => c.R >= 2 && c.R <= 4).ToList();

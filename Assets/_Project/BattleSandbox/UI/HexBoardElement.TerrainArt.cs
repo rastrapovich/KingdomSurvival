@@ -29,7 +29,8 @@ namespace KingdomSurvival.BattleSandbox
             return item.IsDestroyed ? kind + "_broken" : kind;
         }
 
-        private (Texture2D Texture, Vector2 Pivot) BoardArt(string kind, HexCoord cell)
+        // Рисунки — в текущем виде карты: смена вида сбрасывает кэш.
+        private void EnsureArtCacheView()
         {
             string view = KingdomSurvival.MapLab.MapLabMapViews.ActiveId;
             if (terrainArtCacheView != view)
@@ -37,6 +38,11 @@ namespace KingdomSurvival.BattleSandbox
                 terrainArtCache.Clear();
                 terrainArtCacheView = view;
             }
+        }
+
+        private (Texture2D Texture, Vector2 Pivot) BoardArt(string kind, HexCoord cell)
+        {
+            EnsureArtCacheView();
             int pick = Mathf.Abs(cell.Q * 73856093 ^ cell.R * 19349663);
             string key = kind + "@" + pick % 7;
             if (!terrainArtCache.TryGetValue(key, out (Texture2D, Vector2) art))
@@ -53,6 +59,94 @@ namespace KingdomSurvival.BattleSandbox
             string kind = BoardArtKind(item);
             return kind != null && BoardArt(kind, cell).Texture != null;
         }
+
+        // 20.11.2026: верхний слой арены MapLab — стоящие объекты (деревья,
+        // камни, стенки) на прозрачном фоне. Лежит над рисунком доски (сетка,
+        // отметки, заливки), но под фигурами и картинками объектов доски:
+        // линии клеток уходят под деревья. null — слоя нет.
+        private Image terrainOverlay;
+        private Texture terrainOverlayTexture;
+
+        public void SetTerrainOverlay(Texture texture)
+        {
+            if (terrainOverlayTexture == texture)
+                return;
+            terrainOverlayTexture = texture;
+            SyncUnitImages();
+        }
+
+        private void SyncTerrainOverlay(HexLayout layout)
+        {
+            if (terrainOverlayTexture == null || Relief == null)
+            {
+                terrainOverlay?.RemoveFromHierarchy();
+                terrainOverlay = null;
+                return;
+            }
+            if (terrainOverlay == null)
+            {
+                terrainOverlay = new Image { name = "arena-objects-overlay", pickingMode = PickingMode.Ignore, scaleMode = ScaleMode.StretchToFill };
+                terrainOverlay.style.position = Position.Absolute;
+            }
+            if (terrainOverlay.parent != this)
+                Add(terrainOverlay);
+            terrainOverlay.image = terrainOverlayTexture;
+            Rect frame = layout.Frame;
+            terrainOverlay.style.left = frame.x;
+            terrainOverlay.style.top = frame.y;
+            terrainOverlay.style.width = frame.width;
+            terrainOverlay.style.height = frame.height;
+            // Первым ребёнком: всё, что рисует сама доска, — под ним; фигуры — над ним.
+            terrainOverlay.SendToBack();
+        }
+
+        // Поверхности клеток, уже нарисованные в краске земли арены (слои
+        // MapLabArenaSurfaces.Bit): у них программная заливка не рисуется.
+        private IReadOnlyDictionary<HexCoord, ulong> paintedSurfaces;
+
+        public IReadOnlyDictionary<HexCoord, ulong> PaintedSurfaces
+        {
+            get => paintedSurfaces;
+            set
+            {
+                paintedSurfaces = value;
+                MarkDirtyRepaint();
+            }
+        }
+
+        private bool Painted(HexCoord cell, MapLabArenaSurface surface) =>
+            Relief != null && paintedSurfaces != null && paintedSurfaces.TryGetValue(cell, out ulong layers) &&
+            (layers & MapLabArenaSurfaces.Bit(surface)) != 0UL;
+
+        private bool PaintedGround(HexCoord cell, SandboxGround ground)
+        {
+            MapLabArenaSurface surface = MapLabArenaDriver.GroundSurface(ground);
+            return surface != 0 && Painted(cell, surface);
+        }
+
+        private bool PaintedEffect(HexCoord cell, SandboxEffectKind kind)
+        {
+            MapLabArenaSurface surface = MapLabArenaDriver.EffectSurface(kind);
+            return surface != 0 && Painted(cell, surface);
+        }
+
+        private (Texture2D Texture, Vector2 Pivot) VegetationArt(HexCoord cell, SandboxVegetation vegetation)
+        {
+            MapLabDecorRole role = vegetation == SandboxVegetation.Forest ? MapLabDecorRole.Tree : MapLabDecorRole.TallPlant;
+            EnsureArtCacheView();
+            int pick = Mathf.Abs(cell.Q * 92821 ^ cell.R * 68917);
+            string key = "veg:" + role + "@" + pick % 7;
+            if (!terrainArtCache.TryGetValue(key, out (Texture2D, Vector2) art))
+            {
+                Texture2D texture = MapLabArtAssets.ArenaDecorTexture(role, pick, out Vector2 pivot);
+                terrainArtCache[key] = art = (texture, pivot);
+            }
+            return art;
+        }
+
+        // Растительность клетки нарисована рисунком (программный значок не нужен).
+        private bool HasVegetationArt(HexCoord cell, SandboxVegetation vegetation) =>
+            (vegetation == SandboxVegetation.Forest || vegetation == SandboxVegetation.Brush) && VegetationArt(cell, vegetation).Texture != null;
 
         private void SyncTerrainObjectImages(HexLayout layout, List<(string id, float key, VisualElement element)> depthEntries)
         {
@@ -92,6 +186,35 @@ namespace KingdomSurvival.BattleSandbox
                         // Чуть позади фигуры той же клетки (по обломкам ходят).
                         depthEntries.Add((id, ground.y - 0.5f, image));
                     }
+                }
+                // Кустарник и лес клетки — рисунками Базы ассетов у задней
+                // кромки клетки (боец в середине клетки виден); выгорел —
+                // рисунок снимается.
+                foreach (KeyValuePair<HexCoord, SandboxVegetation> pair in battle.VegetationCells)
+                {
+                    if (!IsBoardCell(pair.Key) || !HasVegetationArt(pair.Key, pair.Value))
+                        continue;
+                    bool forest = pair.Value == SandboxVegetation.Forest;
+                    (Texture2D texture, Vector2 pivot) = VegetationArt(pair.Key, pair.Value);
+                    float w = layout.Size * Mathf.Sqrt(3f) * (forest ? 0.95f : 0.62f);
+                    float h = w * texture.height / Mathf.Max(1f, texture.width);
+                    Vector2 ground = layout.GetCenter(pair.Key) + new Vector2((forest ? -0.28f : 0.3f) * layout.Size, -0.38f * layout.Size * layout.VerticalScale);
+                    string id = "terrain-veg:" + pair.Key;
+                    visible.Add(id);
+                    if (!terrainArtImages.TryGetValue(id, out Image image))
+                    {
+                        image = new Image { pickingMode = PickingMode.Ignore, scaleMode = ScaleMode.StretchToFill };
+                        image.style.position = Position.Absolute;
+                        terrainArtImages[id] = image;
+                        Add(image);
+                    }
+                    image.image = texture;
+                    image.style.width = w;
+                    image.style.height = h;
+                    image.style.left = ground.x - w * pivot.x;
+                    image.style.top = ground.y - h * (1f - pivot.y);
+                    image.style.display = DisplayStyle.Flex;
+                    depthEntries.Add((id, ground.y, image));
                 }
             }
             List<string> stale = null;

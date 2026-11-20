@@ -33,7 +33,10 @@ namespace KingdomSurvival.MapLabBridge
             foreach (Vector2 point in Spec.KeepClear)
                 keep.Add(ToWorld(point));
             List<Vector2> blocked = new List<Vector2>();
+            // Вода реки: ни травы, ни мелочи.
+            blocked.AddRange(riverWorld);
             decorPlaced.Clear();
+            groundArtIds.Clear();
             DecorFeatures = 0;
 
             void Add(Vector2 p, string id, float half)
@@ -121,9 +124,33 @@ namespace KingdomSurvival.MapLabBridge
                 if (sized == null)
                     continue;
                 c.Features.Add((p, sized.Id, BlockKind));
+                // Настил моста — пол: под сеткой, не в слое объектов.
+                if (kind == "bridge" || kind == "bridge_deck")
+                    groundArtIds.Add(sized.Id);
                 decorPlaced.Add((p, hex * 0.75f));
                 blocked.Add(p);
             }
+
+            // 1в. Щебень: кроме краски земли — 2–3 мелких камня на клетке
+            // (пол: под сеткой клеток, не в слое объектов).
+            ulong rubbleBit = MapLabArenaSurfaces.Bit(MapLabArenaSurface.Rubble);
+            if (small.Count > 0)
+                foreach ((Vector2 center, ulong layers) in Spec.Surfaces)
+                {
+                    if ((layers & rubbleBit) == 0UL)
+                        continue;
+                    Vector2 p = ToWorld(center);
+                    int stones = 2 + (int)(rng.Value() * 2f);
+                    for (int i = 0; i < stones; i++)
+                    {
+                        MapLabDecorArt art = small[(int)(rng.Value() * small.Count) % small.Count];
+                        float angle = rng.Value() * Mathf.PI * 2f;
+                        Vector2 q = p + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * hex * rng.Range(0.15f, 0.6f);
+                        c.Features.Add((q, art.Id, DecorKind));
+                        groundArtIds.Add(art.Id);
+                        DecorFeatures++;
+                    }
+                }
 
             // 2. Группы деревьев по краям и углам.
             if (trees.Count > 0)
@@ -219,6 +246,7 @@ namespace KingdomSurvival.MapLabBridge
                         if (Near(keep, q, hex * 0.8f) || Near(blocked, q, hex * 0.75f) || Crowded(q, art.HalfWidth * 0.35f, 0.7f))
                             continue;
                         Add(q, art.Id, art.HalfWidth * 0.35f);
+                        groundArtIds.Add(art.Id);
                     }
                 }
             }

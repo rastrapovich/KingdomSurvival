@@ -21,7 +21,7 @@ namespace KingdomSurvival.BattleSandbox
             // Основания: слитые пятна по маске клеток (одна заливка на
             // связный участок, без «наклеек» и швов), затем редкие детали.
             foreach (IGrouping<SandboxGround, KeyValuePair<HexCoord, SandboxGround>> group in battle.GroundCells
-                         .Where(pair => IsBoardCell(pair.Key)).GroupBy(pair => pair.Value).OrderBy(group => (int)group.Key))
+                         .Where(pair => IsBoardCell(pair.Key) && !PaintedGround(pair.Key, pair.Value)).GroupBy(pair => pair.Value).OrderBy(group => (int)group.Key))
             {
                 (Color fill, Color edge) = GroundFill(group.Key);
                 if (fill.a > 0f)
@@ -29,7 +29,7 @@ namespace KingdomSurvival.BattleSandbox
             }
             foreach (KeyValuePair<HexCoord, SandboxGround> pair in battle.GroundCells)
             {
-                if (!IsBoardCell(pair.Key))
+                if (!IsBoardCell(pair.Key) || PaintedGround(pair.Key, pair.Value))
                     continue;
                 Vector2 c = layout.GetCenter(pair.Key);
                 float s = layout.Size;
@@ -61,7 +61,7 @@ namespace KingdomSurvival.BattleSandbox
             }
             foreach (KeyValuePair<HexCoord, SandboxVegetation> pair in battle.VegetationCells)
             {
-                if (!IsBoardCell(pair.Key))
+                if (!IsBoardCell(pair.Key) || HasVegetationArt(pair.Key, pair.Value))
                     continue;
                 Vector2 c = layout.GetCenter(pair.Key);
                 float s = layout.Size;

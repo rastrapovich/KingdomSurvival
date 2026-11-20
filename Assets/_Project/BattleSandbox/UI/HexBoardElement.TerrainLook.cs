@@ -223,7 +223,8 @@ namespace KingdomSurvival.BattleSandbox
                         effectShownAt[key] = shown = now;
                     effectGhosts.Remove(key);
                     effectLast[key] = effect;
-                    draw.Add((pair.Key, effect, Mathf.Clamp01((now - shown) / EffectFadeSeconds)));
+                    if (!PaintedEffect(pair.Key, effect.Kind))
+                        draw.Add((pair.Key, effect, Mathf.Clamp01((now - shown) / EffectFadeSeconds)));
                 }
             }
             foreach ((HexCoord, SandboxEffectKind) key in effectShownAt.Keys.Where(k => !present.Contains(k)).ToList())
@@ -238,7 +239,7 @@ namespace KingdomSurvival.BattleSandbox
                 float fade = 1f - (now - ghost.Value.RemovedAt) / EffectFadeSeconds;
                 if (fade <= 0f)
                     effectGhosts.Remove(ghost.Key);
-                else
+                else if (!PaintedEffect(ghost.Key.Item1, ghost.Key.Item2))
                     draw.Add((ghost.Key.Item1, ghost.Value.Effect, fade));
             }
 

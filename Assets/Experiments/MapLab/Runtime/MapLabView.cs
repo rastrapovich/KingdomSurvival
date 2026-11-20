@@ -784,6 +784,7 @@ namespace KingdomSurvival.MapLab
                 RoadInkInPaint = !Settings.Stage03.Ink,
                 Washes = placeWashes && WantsWashes ? WashLayer() : null,
                 DrawnCliffs = WillDrawCliffs06,
+                Surfaces = SurfacePaint,
             };
             paintContribution = options.StrokeContribution;
             return options;
@@ -827,6 +828,7 @@ namespace KingdomSurvival.MapLab
 
         private void DestroyTiles()
         {
+            ResetRepaint();
             foreach (Texture2D t in paintTiles)
             {
                 owned.Remove(t);

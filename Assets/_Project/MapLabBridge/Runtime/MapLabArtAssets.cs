@@ -78,6 +78,34 @@ namespace KingdomSurvival.MapLabBridge
             return own != null ? own : chosen.MainSprite(view).texture;
         }
 
+        // Рисунок декора арены по роли (бурьян, дерево…) — для слоя доски
+        // (кустарник и лес клетки: могут выгореть в бою). Выбор устойчив по pick.
+        public static Texture2D ArenaDecorTexture(MapLabDecorRole role, int pick, out Vector2 pivot)
+        {
+            pivot = new Vector2(0.5f, 0f);
+            ArtAssetDatabaseAsset catalog = ArtAssetDatabaseAsset.Current;
+            if (catalog?.assets == null)
+                return null;
+            List<ArtAssetDefinition> found = new List<ArtAssetDefinition>();
+            foreach (ArtAssetDefinition asset in catalog.assets)
+            {
+                if (asset == null || !asset.UsableOnArena || asset.IsAnimated || ArenaObjectKindOf(asset) != null || RoleOf(asset) != role)
+                    continue;
+                Sprite sprite = asset.MainSprite(asset.PrimaryView);
+                if (sprite == null || sprite.texture == null || Mathf.Abs(sprite.rect.width - sprite.texture.width) > 1f || Mathf.Abs(sprite.rect.height - sprite.texture.height) > 1f)
+                    continue;
+                found.Add(asset);
+            }
+            if (found.Count == 0)
+                return null;
+            found.Sort((a, b) => string.CompareOrdinal(a.Name, b.Name));
+            ArtAssetDefinition chosen = found[((pick % found.Count) + found.Count) % found.Count];
+            ArtAssetView view = chosen.PrimaryView;
+            pivot = chosen.Settings(view).Pivot;
+            Texture2D own = MapLabMapViews.Active?.FindTexture(IdPrefix + chosen.Id);
+            return own != null ? own : chosen.MainSprite(view).texture;
+        }
+
         public static bool HasArenaObjectArt(string kind)
         {
             ArtAssetDatabaseAsset catalog = ArtAssetDatabaseAsset.Current;

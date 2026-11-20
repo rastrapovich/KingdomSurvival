@@ -1269,6 +1269,7 @@ namespace KingdomSurvival.BattleSandbox
 
             SyncTerrainObjectImages(layout, depthEntries);
             ApplyDepthOrder(depthEntries);
+            SyncTerrainOverlay(layout);
             foreach (VisualElement healthBar in unitHealthBars.Values)
                 healthBar.BringToFront();
             attackCursorOverlay.BringToFront();

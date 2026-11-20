@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using KingdomSurvival.MapLabBridge;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -138,7 +139,7 @@ namespace KingdomSurvival.BattleSandbox
                 if (!IsBoardCell(pair.Key))
                     continue;
                 Vector2 center = layout.GetCenter(pair.Key);
-                if ((pair.Value & SandboxCellState.ShallowWater) != 0)
+                if ((pair.Value & SandboxCellState.ShallowWater) != 0 && !Painted(pair.Key, MapLabArenaSurface.ShallowWater))
                 {
                     // Спокойная сине-серая заливка чуть шире гекса: соседние
                     // водные клетки сливаются без внутренних швов.
@@ -152,7 +153,7 @@ namespace KingdomSurvival.BattleSandbox
                         PaintSegment(painter, center + shift - dir, center + shift + dir, new Color(0.78f, 0.86f, 0.88f, 0.45f), 1.4f);
                     }
                 }
-                if ((pair.Value & SandboxCellState.LooseEarth) != 0)
+                if ((pair.Value & SandboxCellState.LooseEarth) != 0 && !Painted(pair.Key, MapLabArenaSurface.LooseEarth))
                 {
                     PaintHex(painter, center, radius * 0.92f, new Color(0.47f, 0.34f, 0.20f, 0.32f), Color.clear, 0f, true, layout.VerticalScale);
                     for (int i = 0; i < 3; i++)
@@ -161,9 +162,9 @@ namespace KingdomSurvival.BattleSandbox
                         PaintCircle(painter, dot, 2.2f, new Color(0.30f, 0.21f, 0.12f, 0.75f), Color.clear, 0f);
                     }
                 }
-                if ((pair.Value & SandboxCellState.Subsided) != 0)
+                if ((pair.Value & SandboxCellState.Subsided) != 0 && !Painted(pair.Key, MapLabArenaSurface.Subsided))
                     PaintHex(painter, center, radius * 0.9f, new Color(0.34f, 0.26f, 0.17f, 0.36f), new Color(0.22f, 0.16f, 0.10f, 0.6f), 1.2f, true, layout.VerticalScale);
-                if ((pair.Value & SandboxCellState.Pit) != 0)
+                if ((pair.Value & SandboxCellState.Pit) != 0 && !Painted(pair.Key, MapLabArenaSurface.Pit))
                 {
                     PaintHex(painter, center, radius * 0.9f, new Color(0.05f, 0.04f, 0.035f, 0.86f), new Color(0.32f, 0.22f, 0.13f, 0.9f), 2f, true, layout.VerticalScale);
                     PaintCircle(painter, center, layout.Size * 0.28f, new Color(0f, 0f, 0f, 0.9f), Color.clear, 0f);

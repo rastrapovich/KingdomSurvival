@@ -123,6 +123,18 @@ namespace KingdomSurvival.MapLab
                 return new Vector2(x * data.Cell, z * data.Cell);
             }
 
+            // Доля мели в точке (0 — обычное русло): RiverShoals композиции.
+            private float ShoalAt(Vector2 p)
+            {
+                float best = 0f;
+                foreach (Vector3 s in composition.RiverShoals)
+                {
+                    float d = Vector2.Distance(p, new Vector2(s.x, s.y));
+                    best = Mathf.Max(best, 1f - MapLabGeometry.SmoothStep(s.z * 0.55f, s.z, d));
+                }
+                return best;
+            }
+
             private int Seed => data.Seed;
 
             private MapLabNoise Noise(string stream)
@@ -429,7 +441,7 @@ namespace KingdomSurvival.MapLab
                     for (int i = 1; i < line.Count - 1; i++)
                     {
                         Vector2 t = (line[i + 1] - line[i - 1]).normalized;
-                        line[i] += MapLabGeometry.LeftNormal(t) * meander.Fbm(st[i] / 45f, k * 5.3f, 2) * 5f;
+                        line[i] += MapLabGeometry.LeftNormal(t) * meander.Fbm(st[i] / 45f, k * 5.3f, 2) * 5f * source.MeanderScale;
                     }
                     line = MapLabGeometry.Resample(line, 1.5f);
                     st = MapLabGeometry.Stations(line);
@@ -538,6 +550,10 @@ namespace KingdomSurvival.MapLab
                         float bed = level - water.RiverDepth;
                         float q = d / inner;
                         h = Mathf.Min(h, Mathf.Lerp(bed, level - 0.18f, q * q));
+                        // Мель (брод боевой арены): дно поднято почти к воде — вода светлее.
+                        float shoal = ShoalAt(World(index % n, index / n));
+                        if (shoal > 0f)
+                            h = Mathf.Lerp(h, level - 0.1f, shoal);
                         float current = data.WaterLevel[index];
                         data.WaterLevel[index] = float.IsNaN(current) ? level : Mathf.Max(current, level);
                         if (data.Water[index] == (byte)MapLabWaterKind.Dry)
@@ -871,7 +887,7 @@ namespace KingdomSurvival.MapLab
                         int i = data.Index(x, z);
                         Vector2 p = World(x, z);
                         float slope = data.SlopeDegrees[i];
-                        float rocky = MapLabGeometry.SmoothStep(26f, 42f, slope) * (0.75f + 0.25f * rockNoise.Fbm(p.x / 9f, p.y / 9f, 2));
+                        float rocky = composition.NoSlopeRock ? 0f : MapLabGeometry.SmoothStep(26f, 42f, slope) * (0.75f + 0.25f * rockNoise.Fbm(p.x / 9f, p.y / 9f, 2));
                         // Под крышкой уступа (верхняя сторона) камень не красим — крышка
                         // берёт цвет поверхности и должна быть травяной, как площадка.
                         float sdc = cliffSigned[i];

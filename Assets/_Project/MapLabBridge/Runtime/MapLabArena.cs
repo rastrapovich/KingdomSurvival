@@ -31,7 +31,8 @@ namespace KingdomSurvival.MapLabBridge
         // Единиц мира MapLab на радиус гекса (масштаб деревьев и мазков).
         public float HexWorld = 3f;
         // Подъём вершины холма на экране, в радиусах гекса.
-        public float HillLiftHexes = 0.3f;
+        // 20.11.2026: 0,3 → 0,5 — холм читается рельефом без подложки.
+        public float HillLiftHexes = 0.5f;
         public readonly List<(Vector2 Center, MapLabArenaCellKind Kind)> Cells = new List<(Vector2, MapLabArenaCellKind)>();
         // Стартовые клетки бойцов (центры, доли кадра): трава и мелочь их не
         // закрывают.
@@ -39,6 +40,8 @@ namespace KingdomSurvival.MapLabBridge
         // Объекты местности боя (центр клетки, вид): рисунок из слота Базы
         // ассетов «arena-object:<вид>», если он есть.
         public readonly List<(Vector2 Center, string Kind)> Objects = new List<(Vector2, string)>();
+        // Поверхности клеток (центр, слои MapLabArenaSurfaces.Bit) — в краске земли.
+        public readonly List<(Vector2 Center, ulong Layers)> Surfaces = new List<(Vector2, ulong)>();
         // Плотность декора (трава, мелочь, число групп деревьев): 1 — обычная.
         // Свой поток случайности: рельеф, клетки и бонусы от неё не зависят.
         public float DecorDensity = 1f;
@@ -181,7 +184,7 @@ namespace KingdomSurvival.MapLabBridge
                 camera.allowMSAA = true;
                 camera.allowHDR = false;
                 camera.clearFlags = CameraClearFlags.SolidColor;
-                camera.cullingMask = 1 << Layer;
+                camera.cullingMask = (1 << Layer) | (1 << OverlayLayer);
                 rig = cameraObject.AddComponent<MapLabCameraRig>();
                 rig.enabled = false;
 
@@ -203,6 +206,7 @@ namespace KingdomSurvival.MapLabBridge
                 if (decorSet != null) view.FeatureExtraSets.Add(decorSet);
                 if (assets.ArtSet05 != null) view.FeatureExtraSets.Add(assets.ArtSet05);
                 if (assets.ArtSetPoi != null) view.FeatureExtraSets.Add(assets.ArtSetPoi);
+                PrepareSurfaces();
                 pending = view.GenerateStepwise();
             }
             catch (Exception exception)
@@ -247,13 +251,14 @@ namespace KingdomSurvival.MapLabBridge
             if (markerRoot != null)
                 markerRoot.gameObject.SetActive(false);
             SetLayer(view.transform);
+            SplitOverlay();
             // Опорная высота — ровная земля открытых клеток: на них подъём 0,
             // и сетка там лежит как прежде.
             float sum = 0f;
             int count = 0;
             foreach ((Vector2 center, MapLabArenaCellKind kind) in Spec.Cells)
             {
-                if (kind != MapLabArenaCellKind.Open)
+                if (kind != MapLabArenaCellKind.Open || riverCells.Contains(CellKey(center)))
                     continue;
                 Vector2 w = ToWorld(center);
                 sum += view.Data.SampleHeight(w.x, w.y);
@@ -317,6 +322,7 @@ namespace KingdomSurvival.MapLabBridge
                 FromPlan = true,
                 // Без случайных одиночных деревьев, кустов и валунов посреди поля.
                 AssetField = true,
+                NoSlopeRock = true,
                 PlayRect = new Rect(Margin, zBottom, Spec.Aspect * k, depth),
                 MapEdgeForest = 0f,
                 LakeLevelFraction = 0f,
@@ -329,6 +335,7 @@ namespace KingdomSurvival.MapLabBridge
             c.PlanHeight = new float[cols * cols];
             c.PlanForest = new float[cols * cols];
             c.PlanField = new float[cols * cols];
+            PlanRiver(c);
 
             List<Vector2> hills = new List<Vector2>();
             List<Vector2> cells = new List<Vector2>();
@@ -504,6 +511,7 @@ namespace KingdomSurvival.MapLabBridge
                     camera.Render();
                     camera.targetTexture = null;
                 }
+                RenderOverlay();
             }
             finally
             {
@@ -571,9 +579,9 @@ namespace KingdomSurvival.MapLabBridge
             for (int i = 0; i < count; i++)
             {
                 Camera other = cameras[i];
-                if ((other.cullingMask & (1 << Layer)) == 0 || IsArenaCamera(other))
+                if ((other.cullingMask & ArenaMask) == 0 || IsArenaCamera(other))
                     continue;
-                other.cullingMask &= ~(1 << Layer);
+                other.cullingMask &= ~ArenaMask;
             }
         }
 
@@ -626,6 +634,7 @@ namespace KingdomSurvival.MapLabBridge
                 Object.DestroyImmediate(camera.gameObject);
             if (settings != null)
                 Object.DestroyImmediate(settings);
+            ReleaseOverlay();
             if (decorSet != null)
                 Object.DestroyImmediate(decorSet);
             // Поле уже отвязано от кадра (драйвер снимает текстуру до Dispose):

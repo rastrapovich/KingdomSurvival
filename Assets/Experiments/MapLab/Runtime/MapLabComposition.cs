@@ -37,6 +37,8 @@ namespace KingdomSurvival.MapLab
             public float WidthScale = 1f;
             public int FromLake = -1;  // индекс озера-истока
             public int IntoLake = -1;  // индекс озера-устья
+            // Размах извилин русла (1 — как на карте; 0 — точно по контрольным точкам).
+            public float MeanderScale = 1f;
         }
 
         public sealed class Road
@@ -103,6 +105,11 @@ namespace KingdomSurvival.MapLab
         // Поле ассетов окна генератора: пустая поляна без леса и без случайных
         // одиночных объектов.
         public bool AssetField;
+        // Боевая арена: без серого камня по крутизне склона (холм читается
+        // рельефом и светом, а не серой полосой по подножию).
+        public bool NoSlopeRock;
+        // Мели в руслах (x, z, радиус): дно поднято почти к воде (брод арены).
+        public readonly List<Vector3> RiverShoals = new List<Vector3>();
         public Rect PlayRect;
         public float[] PlanForest, PlanField;
         // Боевая арена: рельеф задан явно — высота 0..1 (доля диапазона высот)

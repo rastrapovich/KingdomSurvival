@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using KingdomSurvival.MapLab;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
 namespace KingdomSurvival.MapLabBridge
@@ -73,6 +74,28 @@ namespace KingdomSurvival.MapLabBridge
         {
             Application.quitting -= Shutdown;
             Application.quitting += Shutdown;
+            RenderPipelineManager.beginContextRendering -= HideFromOtherCameras;
+            RenderPipelineManager.beginContextRendering += HideFromOtherCameras;
+        }
+
+        // Мир живой карты остаётся в памяти и вне экрана карты (бой, место),
+        // чтобы после боя карта не пересобиралась. Его слой видит только
+        // камера карты: перед кадром любой другой игровой камеры слой с неё
+        // снимается. Прежде слой снимался лишь в Render() карты, и Main Camera
+        // каждой новой сцены боя («Everything») рисовала весь мир карты —
+        // тысячи рендереров леса и домов — под интерфейсом боя каждый кадр.
+        private static void HideFromOtherCameras(ScriptableRenderContext context, List<Camera> cameras)
+        {
+            World w = current;
+            if (w == null || cameras == null)
+                return;
+            const int bit = 1 << Layer;
+            for (int i = 0; i < cameras.Count; i++)
+            {
+                Camera camera = cameras[i];
+                if (camera != null && camera != w.Camera && camera.cameraType == CameraType.Game && (camera.cullingMask & bit) != 0)
+                    camera.cullingMask &= ~bit;
+            }
         }
 
         public static void Shutdown()

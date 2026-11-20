@@ -34,13 +34,13 @@ namespace KingdomSurvival.BattleSandbox
 
         private static readonly SandboxUnitDefinition[] EnemyRosterData =
         {
-            new SandboxUnitDefinition("forest_beast_1", "Зверь", SandboxUnitRole.Beast, 10, 2, 1, 3, 4, 5, 1,
+            new SandboxUnitDefinition("forest_beast_1", "Бурогрив", SandboxUnitRole.Beast, 10, 2, 1, 3, 4, 5, 1,
                 new[] { SandboxCombatTagRules.Beast }),
-            new SandboxUnitDefinition("forest_beast_2", "Зверь", SandboxUnitRole.Beast, 10, 2, 1, 3, 4, 5, 1,
+            new SandboxUnitDefinition("forest_beast_2", "Бурогрив", SandboxUnitRole.Beast, 10, 2, 1, 3, 4, 5, 1,
                 new[] { SandboxCombatTagRules.Beast }),
-            new SandboxUnitDefinition("forest_beast_3", "Зверь", SandboxUnitRole.Beast, 14, 3, 2, 4, 4, 4, 1,
+            new SandboxUnitDefinition("forest_beast_3", "Матёрый бурогрив", SandboxUnitRole.Beast, 14, 3, 2, 4, 4, 4, 1,
                 new[] { SandboxCombatTagRules.Beast }),
-            new SandboxUnitDefinition("forest_beast_4", "Зверь", SandboxUnitRole.Beast, 18, 4, 3, 5, 3, 2, 1,
+            new SandboxUnitDefinition("forest_beast_4", "Седой бурогрив", SandboxUnitRole.Beast, 18, 4, 3, 5, 3, 2, 1,
                 new[] { SandboxCombatTagRules.Beast, SandboxCombatTagRules.HumanSlayer })
         };
 

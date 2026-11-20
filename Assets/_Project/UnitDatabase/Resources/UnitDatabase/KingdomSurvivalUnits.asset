@@ -94,45 +94,73 @@ MonoBehaviour:
       \u0427\u0438\u0441\u043B\u043E \u2014 \u0440\u0430\u0431\u043E\u0447\u0430\u044F
       \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430."
   - id: move.forest_walker
-    displayLabel: "Лесной ходок"
-    category: "Передвижение"
+    displayLabel: "\u041B\u0435\u0441\u043D\u043E\u0439 \u0445\u043E\u0434\u043E\u043A"
+    category: "\u041F\u0435\u0440\u0435\u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435"
     color: {r: 0.36, g: 0.52, b: 0.3, a: 1}
-    description: "Вход в лес и заросли стоит 1. От огня и яда не защищает. Рабочее правило арены."
+    description: "\u0412\u0445\u043E\u0434 \u0432 \u043B\u0435\u0441 \u0438 \u0437\u0430\u0440\u043E\u0441\u043B\u0438
+      \u0441\u0442\u043E\u0438\u0442 1. \u041E\u0442 \u043E\u0433\u043D\u044F \u0438
+      \u044F\u0434\u0430 \u043D\u0435 \u0437\u0430\u0449\u0438\u0449\u0430\u0435\u0442.
+      \u0420\u0430\u0431\u043E\u0447\u0435\u0435 \u043F\u0440\u0430\u0432\u0438\u043B\u043E
+      \u0430\u0440\u0435\u043D\u044B."
   - id: move.swamp_walker
-    displayLabel: "Болотный ходок"
-    category: "Передвижение"
+    displayLabel: "\u0411\u043E\u043B\u043E\u0442\u043D\u044B\u0439 \u0445\u043E\u0434\u043E\u043A"
+    category: "\u041F\u0435\u0440\u0435\u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435"
     color: {r: 0.38, g: 0.45, b: 0.33, a: 1}
-    description: "Вход в грязь и топь стоит 1; снимает −1 Защиты в топи. Рабочее правило арены."
+    description: "\u0412\u0445\u043E\u0434 \u0432 \u0433\u0440\u044F\u0437\u044C
+      \u0438 \u0442\u043E\u043F\u044C \u0441\u0442\u043E\u0438\u0442 1; \u0441\u043D\u0438\u043C\u0430\u0435\u0442
+      \u22121 \u0417\u0430\u0449\u0438\u0442\u044B \u0432 \u0442\u043E\u043F\u0438.
+      \u0420\u0430\u0431\u043E\u0447\u0435\u0435 \u043F\u0440\u0430\u0432\u0438\u043B\u043E
+      \u0430\u0440\u0435\u043D\u044B."
   - id: move.highlander
-    displayLabel: "Привычный к высоте"
-    category: "Передвижение"
+    displayLabel: "\u041F\u0440\u0438\u0432\u044B\u0447\u043D\u044B\u0439 \u043A
+      \u0432\u044B\u0441\u043E\u0442\u0435"
+    category: "\u041F\u0435\u0440\u0435\u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435"
     color: {r: 0.55, g: 0.5, b: 0.42, a: 1}
-    description: "Вход на холм стоит 1; бонусы холма не удваивает. Рабочее правило арены."
+    description: "\u0412\u0445\u043E\u0434 \u043D\u0430 \u0445\u043E\u043B\u043C
+      \u0441\u0442\u043E\u0438\u0442 1; \u0431\u043E\u043D\u0443\u0441\u044B \u0445\u043E\u043B\u043C\u0430
+      \u043D\u0435 \u0443\u0434\u0432\u0430\u0438\u0432\u0430\u0435\u0442. \u0420\u0430\u0431\u043E\u0447\u0435\u0435
+      \u043F\u0440\u0430\u0432\u0438\u043B\u043E \u0430\u0440\u0435\u043D\u044B."
   - id: move.snowshoe
-    displayLabel: "Снегоступ"
-    category: "Передвижение"
+    displayLabel: "\u0421\u043D\u0435\u0433\u043E\u0441\u0442\u0443\u043F"
+    category: "\u041F\u0435\u0440\u0435\u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435"
     color: {r: 0.75, g: 0.8, b: 0.85, a: 1}
-    description: "Вход в глубокий снег стоит 1. Рабочее правило арены."
+    description: "\u0412\u0445\u043E\u0434 \u0432 \u0433\u043B\u0443\u0431\u043E\u043A\u0438\u0439
+      \u0441\u043D\u0435\u0433 \u0441\u0442\u043E\u0438\u0442 1. \u0420\u0430\u0431\u043E\u0447\u0435\u0435
+      \u043F\u0440\u0430\u0432\u0438\u043B\u043E \u0430\u0440\u0435\u043D\u044B."
   - id: move.surefoot
-    displayLabel: "Цепкая поступь"
-    category: "Передвижение"
+    displayLabel: "\u0426\u0435\u043F\u043A\u0430\u044F \u043F\u043E\u0441\u0442\u0443\u043F\u044C"
+    category: "\u041F\u0435\u0440\u0435\u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435"
     color: {r: 0.5, g: 0.62, b: 0.7, a: 1}
-    description: "Вход на лёд стоит 1; толчок не даёт дополнительного скольжения. Рабочее правило арены."
+    description: "\u0412\u0445\u043E\u0434 \u043D\u0430 \u043B\u0451\u0434 \u0441\u0442\u043E\u0438\u0442
+      1; \u0442\u043E\u043B\u0447\u043E\u043A \u043D\u0435 \u0434\u0430\u0451\u0442
+      \u0434\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0433\u043E
+      \u0441\u043A\u043E\u043B\u044C\u0436\u0435\u043D\u0438\u044F. \u0420\u0430\u0431\u043E\u0447\u0435\u0435
+      \u043F\u0440\u0430\u0432\u0438\u043B\u043E \u0430\u0440\u0435\u043D\u044B."
   - id: move.spider_step
-    displayLabel: "Паучья поступь"
-    category: "Передвижение"
+    displayLabel: "\u041F\u0430\u0443\u0447\u044C\u044F \u043F\u043E\u0441\u0442\u0443\u043F\u044C"
+    category: "\u041F\u0435\u0440\u0435\u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435"
     color: {r: 0.45, g: 0.42, b: 0.4, a: 1}
-    description: "Паутина не замедляет; от прочих захватов не защищает. Рабочее правило арены."
+    description: "\u041F\u0430\u0443\u0442\u0438\u043D\u0430 \u043D\u0435 \u0437\u0430\u043C\u0435\u0434\u043B\u044F\u0435\u0442;
+      \u043E\u0442 \u043F\u0440\u043E\u0447\u0438\u0445 \u0437\u0430\u0445\u0432\u0430\u0442\u043E\u0432
+      \u043D\u0435 \u0437\u0430\u0449\u0438\u0449\u0430\u0435\u0442. \u0420\u0430\u0431\u043E\u0447\u0435\u0435
+      \u043F\u0440\u0430\u0432\u0438\u043B\u043E \u0430\u0440\u0435\u043D\u044B."
   - id: move.water_walker
-    displayLabel: "Водный ходок"
-    category: "Передвижение"
+    displayLabel: "\u0412\u043E\u0434\u043D\u044B\u0439 \u0445\u043E\u0434\u043E\u043A"
+    category: "\u041F\u0435\u0440\u0435\u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435"
     color: {r: 0.33, g: 0.5, b: 0.62, a: 1}
-    description: "Вход в мелководье стоит 1. Доступа к глубокой воде не даёт. Рабочее правило арены."
+    description: "\u0412\u0445\u043E\u0434 \u0432 \u043C\u0435\u043B\u043A\u043E\u0432\u043E\u0434\u044C\u0435
+      \u0441\u0442\u043E\u0438\u0442 1. \u0414\u043E\u0441\u0442\u0443\u043F\u0430
+      \u043A \u0433\u043B\u0443\u0431\u043E\u043A\u043E\u0439 \u0432\u043E\u0434\u0435
+      \u043D\u0435 \u0434\u0430\u0451\u0442. \u0420\u0430\u0431\u043E\u0447\u0435\u0435
+      \u043F\u0440\u0430\u0432\u0438\u043B\u043E \u0430\u0440\u0435\u043D\u044B."
   - id: move.swimmer
-    displayLabel: "Пловец"
-    category: "Передвижение"
+    displayLabel: "\u041F\u043B\u043E\u0432\u0435\u0446"
+    category: "\u041F\u0435\u0440\u0435\u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435"
     color: {r: 0.25, g: 0.42, b: 0.6, a: 1}
-    description: "Может входить в глубокую воду (вход 2). Рабочее правило арены."
+    description: "\u041C\u043E\u0436\u0435\u0442 \u0432\u0445\u043E\u0434\u0438\u0442\u044C
+      \u0432 \u0433\u043B\u0443\u0431\u043E\u043A\u0443\u044E \u0432\u043E\u0434\u0443
+      (\u0432\u0445\u043E\u0434 2). \u0420\u0430\u0431\u043E\u0447\u0435\u0435 \u043F\u0440\u0430\u0432\u0438\u043B\u043E
+      \u0430\u0440\u0435\u043D\u044B."
   units:
   - id: guard
     displayLabel: "\u0413\u0432\u0430\u0440\u0434\u0435\u0435\u0446"
@@ -361,7 +389,7 @@ MonoBehaviour:
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: forest_beast
-    displayLabel: "\u0417\u0432\u0435\u0440\u044C"
+    displayLabel: "\u0411\u0443\u0440\u043E\u0433\u0440\u0438\u0432"
     category: 1
     combatRole: 6
     maxHitPoints: 10
@@ -371,17 +399,25 @@ MonoBehaviour:
     movement: 4
     initiative: 5
     attackRange: 1
-    portrait: {fileID: 21300000, guid: 4bf98c43e23bb7d4ebc699a7047c2885, type: 3}
+    portrait: {fileID: 21300000, guid: 38ad592ba7ed0d34fb6c5850a05ee886, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 21300000, guid: 0b2ce88e830b4a641a116a7f2440dd6b, type: 3}
+    battlefieldSprite: {fileID: 21300000, guid: 00c967c1822c24347bdd63512b36facf, type: 3}
     battlefieldScale: 1.1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt: []
+    viewArt:
+    - viewId: gloom
+      portrait: {fileID: 0}
+      battlefieldSprite: {fileID: 21300000, guid: 36d21b60092e0c647b617ddebcfc9757, type: 3}
+      animationSetId: 
+    - viewId: sepia
+      portrait: {fileID: 0}
+      battlefieldSprite: {fileID: 21300000, guid: 7c1172c5c589a1d43b83838a14a72e4f, type: 3}
+      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast
@@ -390,7 +426,7 @@ MonoBehaviour:
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: forest_beast_strong
-    displayLabel: "\u0417\u0432\u0435\u0440\u044C"
+    displayLabel: "\u041C\u0430\u0442\u0451\u0440\u044B\u0439 \u0431\u0443\u0440\u043E\u0433\u0440\u0438\u0432"
     category: 1
     combatRole: 6
     maxHitPoints: 14
@@ -400,17 +436,25 @@ MonoBehaviour:
     movement: 4
     initiative: 4
     attackRange: 1
-    portrait: {fileID: 21300000, guid: c86db8b3513d1414aa505ccca893339d, type: 3}
+    portrait: {fileID: 21300000, guid: 37bde86bd6dd15648822d4bd4583c4de, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 21300000, guid: 3fb5f8e2f73bcb541ac5618e33045b14, type: 3}
+    battlefieldSprite: {fileID: 21300000, guid: 38dab28cee566bb43be292dc44671e6b, type: 3}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt: []
+    viewArt:
+    - viewId: gloom
+      portrait: {fileID: 0}
+      battlefieldSprite: {fileID: 21300000, guid: 1ae5b568ae4da2945b0914935e96cf71, type: 3}
+      animationSetId: 
+    - viewId: sepia
+      portrait: {fileID: 0}
+      battlefieldSprite: {fileID: 21300000, guid: 25909c472c368d14cafa6a28e3f901ac, type: 3}
+      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast
@@ -419,7 +463,7 @@ MonoBehaviour:
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: forest_beast_alpha
-    displayLabel: "\u0417\u0432\u0435\u0440\u044C"
+    displayLabel: "\u0421\u0435\u0434\u043E\u0439 \u0431\u0443\u0440\u043E\u0433\u0440\u0438\u0432"
     category: 1
     combatRole: 6
     maxHitPoints: 18
@@ -429,17 +473,25 @@ MonoBehaviour:
     movement: 3
     initiative: 2
     attackRange: 1
-    portrait: {fileID: 21300000, guid: 83fa1a0ca6eee6d49bd02a9b5a3da1c8, type: 3}
+    portrait: {fileID: 21300000, guid: cec1b078908051043a8bf56e62af74f3, type: 3}
     portraitFitMode: 0
     portraitScale: 0.94
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 21300000, guid: f307f18609cf733428ea3cf99fca80e4, type: 3}
+    battlefieldSprite: {fileID: 21300000, guid: 0b0f3f34e83bc444d99d4d41a69799e7, type: 3}
     battlefieldScale: 2.2
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt: []
+    viewArt:
+    - viewId: gloom
+      portrait: {fileID: 0}
+      battlefieldSprite: {fileID: 21300000, guid: a89d68053ac4c814e82b350ea3bdaff3, type: 3}
+      animationSetId: 
+    - viewId: sepia
+      portrait: {fileID: 0}
+      battlefieldSprite: {fileID: 21300000, guid: e797b7f657fef384b81453ec4eee0668, type: 3}
+      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast

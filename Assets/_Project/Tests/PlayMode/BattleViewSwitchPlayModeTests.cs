@@ -92,6 +92,7 @@ public sealed class BattleViewSwitchPlayModeTests
         Invoke(sandbox, "ChangeCount", false, "militia", 1);
         Invoke(sandbox, "ChangeCount", true, "blood_kleshchen", 1);
         Invoke(sandbox, "ChangeCount", true, "wolf", 1);
+        Invoke(sandbox, "ChangeCount", true, "forest_beast_alpha", 1);
         Invoke(sandbox, "StartBattle");
         float deadline = Time.realtimeSinceStartup + 60f;
         while (MapLabArenaDriver.Loading && Time.realtimeSinceStartup < deadline)
@@ -121,6 +122,8 @@ public sealed class BattleViewSwitchPlayModeTests
             Assert.IsNotNull(guard);
             Assert.AreNotSame(classicGuard, guard, "гвардеец взял фигуру вида «" + viewId + "»");
             StringAssert.Contains("__" + viewId + "__", guard.name, "фигура из слота вида");
+            Sprite beast = (Sprite)Get(Invoke(content, "GetVisual", "forest_beast_alpha"), "BattlefieldSprite");
+            StringAssert.Contains("forest_beast_alpha__field__" + viewId + "__", beast.name, "бурогрив в виде «" + viewId + "»");
             float[] shot = new float[1];
             yield return Capture(sandbox, "battle_view_" + viewId, shot);
             Assert.Greater(Mathf.Abs(shot[0] - classic[0]), 0.005f, "кадр поля перекрасился (" + viewId + ")");

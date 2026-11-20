@@ -1267,6 +1267,7 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
 
+            SyncTerrainObjectImages(layout, depthEntries);
             ApplyDepthOrder(depthEntries);
             foreach (VisualElement healthBar in unitHealthBars.Values)
                 healthBar.BringToFront();
@@ -1417,7 +1418,9 @@ namespace KingdomSurvival.BattleSandbox
             switch (terrain)
             {
                 case SandboxTerrain.Difficult:
-                    return hexStyle.DifficultColor;
+                    // Холм на рельефе MapLab-арены и так виден — без серой
+                    // подложки; без рельефа (прежняя картинка поля) — заливкой.
+                    return Relief != null ? Color.clear : hexStyle.DifficultColor;
                 case SandboxTerrain.Impassable:
                     return hexStyle.ImpassableColor;
                 default:

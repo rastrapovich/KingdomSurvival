@@ -86,7 +86,7 @@ namespace KingdomSurvival.BattleSandbox
                 foreach (HexCoord cell in item.Cells.Where(IsBoardCell))
                 {
                     // Объект под рисунком MapLab-арены (валун, слот Базы ассетов) — уже нарисован артом.
-                    if (Relief != null && ArtBackedObjects.Contains(cell))
+                    if ((Relief != null && ArtBackedObjects.Contains(cell)) || HasBoardArt(item, cell))
                         continue;
                     DrawTerrainObject(painter, layout, item, cell, radius);
                 }

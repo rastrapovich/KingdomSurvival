@@ -227,6 +227,26 @@ public sealed class BattleTerrainScenarioPlayModeTests
                     yield return Shot(s.Name + "_view_" + view);
                 }
                 MapLabMapViews.ActiveId = MapLabMapViews.ClassicId;
+
+                // Плетень — слой доски: целый, затем сломанный (обломки).
+                yield return StartScenario(sandbox, s.Theme, s.Seed, s.Fighters, s.Enemies);
+                SandboxBattle fenced = (SandboxBattle)Member(sandbox, "battle");
+                SandboxUnitState hero = fenced.Units.First(u => u.Team == SandboxTeam.Player);
+                HexCoord fenceCell = hero.Position.Neighbors().OrderBy(c => c)
+                    .First(c => fenced.IsEnterable(c) && fenced.GetUnitAt(c) == null && fenced.TerrainObjectAt(c) == null);
+                Assert.IsTrue(fenced.DebugPlaceObject(fenceCell, SandboxObjectKind.Wattle));
+                Invoke(sandbox, "RefreshBattleScreen");
+                for (int i = 0; i < 10; i++) yield return null;
+                yield return Shot(s.Name + "_e_wattle");
+                SandboxBattleObject wattle = fenced.TerrainObjectAt(fenceCell);
+                wattle.GetType().GetProperty("HitPoints").SetValue(wattle, 0);
+                Invoke(sandbox, "RefreshBattleScreen");
+                for (int i = 0; i < 10; i++) yield return null;
+                Assert.IsTrue(fenced.IsEnterable(fenceCell), "Сломанный плетень не держит.");
+                yield return Shot(s.Name + "_f_wattle_broken");
+                HexBoardElement fenceBoard = (HexBoardElement)Member(sandbox, "Board");
+                Log(s.Name + ": плетень " + fenceCell + " — картинок слоя доски " +
+                    ((System.Collections.IDictionary)Member(fenceBoard, "terrainArtImages")).Count);
             }
             int objects = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None).Length;
             Log(s.Name + ": объектов сцены " + objects + ", RenderTexture " + Resources.FindObjectsOfTypeAll<RenderTexture>().Length);

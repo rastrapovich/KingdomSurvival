@@ -55,6 +55,29 @@ namespace KingdomSurvival.MapLabBridge
             return null;
         }
 
+        // Рисунок слота для слоя доски (разрушаемые объекты): pick выбирает
+        // вариант, рисунок — в текущем виде карты (свой PNG вида, если есть).
+        // null — записи нет.
+        public static Texture2D ArenaObjectTexture(string kind, int pick, out Vector2 pivot)
+        {
+            pivot = new Vector2(0.5f, 0f);
+            ArtAssetDatabaseAsset catalog = ArtAssetDatabaseAsset.Current;
+            if (catalog?.assets == null || string.IsNullOrEmpty(kind))
+                return null;
+            List<ArtAssetDefinition> found = new List<ArtAssetDefinition>();
+            foreach (ArtAssetDefinition asset in catalog.assets)
+                if (asset != null && asset.UsableOnArena && !asset.IsAnimated && ArenaObjectKindOf(asset) == kind && asset.MainSprite(asset.PrimaryView) != null)
+                    found.Add(asset);
+            if (found.Count == 0)
+                return null;
+            found.Sort((a, b) => string.CompareOrdinal(a.Name, b.Name));
+            ArtAssetDefinition chosen = found[((pick % found.Count) + found.Count) % found.Count];
+            ArtAssetView view = chosen.PrimaryView;
+            pivot = chosen.Settings(view).Pivot;
+            Texture2D own = MapLabMapViews.Active?.FindTexture(IdPrefix + chosen.Id);
+            return own != null ? own : chosen.MainSprite(view).texture;
+        }
+
         public static bool HasArenaObjectArt(string kind)
         {
             ArtAssetDatabaseAsset catalog = ArtAssetDatabaseAsset.Current;

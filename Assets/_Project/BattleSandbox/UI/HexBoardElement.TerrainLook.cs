@@ -44,7 +44,11 @@ namespace KingdomSurvival.BattleSandbox
             RegisterCallback<DetachFromPanelEvent>(_ => MapLabMapViews.ActiveChanged -= OnMapViewChanged);
         }
 
-        private void OnMapViewChanged() => MarkDirtyRepaint();
+        private void OnMapViewChanged()
+        {
+            MarkDirtyRepaint();
+            SyncUnitImages();
+        }
 
         private void BeginTerrainFrame()
         {

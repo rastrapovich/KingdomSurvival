@@ -80,6 +80,11 @@ namespace KingdomSurvival.MapLabBridge
         public bool Building => pending != null;
         public float Progress => Ready ? 1f : view != null ? view.BuildProgress : 0f;
         public MapLabView View => view;
+        // Камера кадра арены (проход «Холста» обработки кадра привязывается к ней).
+        public Camera FrameCamera => camera;
+        // Всплеск линзы сейчас (удар в бою) и тряска в долях высоты кадра.
+        public System.Func<float> LensPulse;
+        public Vector2 ShakeShare;
 
         // Смена вида карты в бою (20.11.2026): свои рисунки вида для общих
         // ассетов подменяются без пересборки; цветокоррекция и так берётся
@@ -497,7 +502,8 @@ namespace KingdomSurvival.MapLabBridge
             camera.aspect = pixelWidth / (float)pixelHeight;
             camera.nearClipPlane = Mathf.Max(0.3f, distance - size * 1.6f - 60f);
             camera.farClipPlane = distance + size * 1.6f + 60f;
-            camera.transform.SetPositionAndRotation(focus - rotation * Vector3.forward * distance, rotation);
+            Vector3 shake = rotation * new Vector3(ShakeShare.x, ShakeShare.y, 0f) * k;
+            camera.transform.SetPositionAndRotation(focus - rotation * Vector3.forward * distance + shake, rotation);
             rig.Target = focus;
             view.OnCameraChanged();
             view.PumpStreaming(false);

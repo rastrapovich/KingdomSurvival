@@ -15,7 +15,7 @@ namespace KingdomSurvival.LocationRendering
     // светом и тенями и фигуры. Бой на месте идёт поверх той же картинки:
     // камера совмещает кадр арены на рисунке с полем боя на экране.
     // Не владеет сохранением и часами кампании.
-    public sealed partial class LocationWorldRenderer : IDisposable
+    public sealed partial class LocationWorldRenderer : IDisposable, ILocationCanvasSource
     {
         public enum ActorKind { Party, Retinue, Enemy }
 

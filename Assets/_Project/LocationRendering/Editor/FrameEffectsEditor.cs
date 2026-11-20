@@ -102,7 +102,8 @@ namespace KingdomSurvival.LocationRendering.Editor
 
         private LocationSky Sky => new LocationSky(Visual, Database.worldLighting);
 
-        private LocationPostEffects BasePost
+        // Общая обработка (все виды без своей).
+        private LocationPostEffects CommonPost
         {
             get
             {
@@ -111,6 +112,77 @@ namespace KingdomSurvival.LocationRendering.Editor
                 if (sky.Post == null) sky.Post = new LocationPostEffects();
                 return sky.Post.Repair();
             }
+        }
+
+        // Своя обработка видов карты: у арены — из её настроек, у места — у неба.
+        public Func<List<LocationViewFrame>> ViewFrames;
+
+        private List<LocationViewFrame> Views => ViewFrames != null ? ViewFrames() : Direct ? null : Sky.ViewFrames;
+
+        // Что правится: "" — общая, иначе ID вида.
+        public static string ViewTarget
+        {
+            get => EditorPrefs.GetString(PrefsKey + "ViewTarget", "");
+            set => EditorPrefs.SetString(PrefsKey + "ViewTarget", value ?? "");
+        }
+
+        private LocationViewFrame EditedView => string.IsNullOrEmpty(ViewTarget) || Views == null ? null : LocationFrameViews.Get(Views, ViewTarget);
+
+        // Основные настройки правки: своя у выбранного вида (если включена) или общая.
+        private LocationPostEffects BasePost
+        {
+            get
+            {
+                LocationViewFrame view = EditedView;
+                return view != null && view.Own ? view.Post.Repair() : CommonPost;
+            }
+        }
+
+        // Выбран другой вид (окно показывает его на предпросмотре).
+        public Action ViewSelected;
+
+        // Ряд «Общая / Обычный / Мрачный / Сепия» и «Своя обработка у вида».
+        // false — у выбранного вида своей нет: разделы ниже не строятся.
+        private bool BuildViewTarget()
+        {
+            if (Views == null) return true;
+            Label caption = new Label("Обработка по видам карты: общая действует во всех видах без своей.");
+            caption.style.whiteSpace = WhiteSpace.Normal;
+            caption.style.marginTop = 4;
+            parent.Add(caption);
+            VisualElement row = Row(true);
+            string target = ViewTarget;
+            List<(string Id, string Name)> views = KingdomSurvival.MapLabBridge.MapLabGameViews.All();
+            void Add(string id, string title)
+            {
+                bool own = !string.IsNullOrEmpty(id) && Views.Exists(item => item != null && item.ViewId == id && item.Own);
+                Button button = new Button(() =>
+                {
+                    ViewTarget = id;
+                    if (!string.IsNullOrEmpty(id)) KingdomSurvival.MapLabBridge.MapLabGameViews.Select(id);
+                    ViewSelected?.Invoke();
+                    Rebuild?.Invoke();
+                }) { text = title + (own ? " ●" : ""), tooltip = own ? "У вида своя обработка" : string.IsNullOrEmpty(id) ? "Общая обработка" : "Вид берёт общую обработку" };
+                if (id == target) { button.style.unityFontStyleAndWeight = FontStyle.Bold; button.style.color = new Color(.95f, .82f, .5f); }
+                row.Add(button);
+            }
+            Add("", "Общая");
+            foreach ((string id, string name) in views) Add(id, name);
+            parent.Add(row);
+            LocationViewFrame view = EditedView;
+            if (view == null) return true;
+            string viewName = views.Find(item => item.Id == view.ViewId).Name ?? view.ViewId;
+            UnityEngine.UIElements.Toggle ownToggle = new UnityEngine.UIElements.Toggle("Своя обработка у вида «" + viewName + "»") { value = view.Own };
+            ownToggle.tooltip = "Выключено — вид берёт общую обработку. Включение начинается с копии общей.";
+            ownToggle.RegisterValueChangedCallback(evt => Change(() =>
+            {
+                if (evt.newValue && !view.Own) view.Post = CommonPost.Clone();
+                view.Own = evt.newValue;
+            }, true));
+            parent.Add(ownToggle);
+            if (view.Own) return true;
+            Help("Вид «" + viewName + "» берёт общую обработку. Включите «Свою обработку», чтобы настроить его отдельно.");
+            return false;
         }
 
         private LocationFrameKey EditedKey => EditTarget.StartsWith("key:") ? Sky.FrameKeys.Find(EditTarget.Substring(4)) : null;
@@ -141,6 +213,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             LocationPostEffects post = Post;
 
             BuildTarget(sky);
+            if (!BuildViewTarget()) return root;
             Toggle("Обработка кадра включена", basePost.Enabled, value => basePost.Enabled = value, true,
                 "Главный выключатель: без него ни один эффект ниже не виден.");
             if (!basePost.Enabled) Help("Обработка кадра выключена — эффекты не видны (настройки сохраняются).");
@@ -200,6 +273,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 title.style.marginBottom = 4;
                 parent.Add(title);
             }
+            if (!BuildViewTarget()) return root;
             Toggle("Обработка кадра включена", post.Enabled, value => post.Enabled = value, true,
                 "Главный выключатель: без него ни один эффект ниже не виден.");
             if (!post.Enabled) Help("Обработка кадра выключена — эффекты не видны (настройки сохраняются).");

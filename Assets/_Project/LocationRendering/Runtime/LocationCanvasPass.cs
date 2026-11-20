@@ -19,7 +19,7 @@ namespace KingdomSurvival.LocationRendering
         private const string ShaderPath = "LocationRendering/LocationCanvas";
         public const int MaxPaletteColors = 64;
 
-        private static readonly Dictionary<Camera, LocationWorldRenderer> bound = new Dictionary<Camera, LocationWorldRenderer>();
+        private static readonly Dictionary<Camera, ILocationCanvasSource> bound = new Dictionary<Camera, ILocationCanvasSource>();
         private static readonly CanvasPass before = new CanvasPass(0, RenderPassEvent.BeforeRenderingPostProcessing, "Холст места · до обработки");
         private static readonly CanvasPass after = new CanvasPass(1, RenderPassEvent.AfterRenderingPostProcessing, "Холст места · после обработки");
         private static readonly Vector4[] palette = new Vector4[MaxPaletteColors];
@@ -40,7 +40,7 @@ namespace KingdomSurvival.LocationRendering
         // Сколько раз проходы холста попали в кадр (проверки).
         public static int RecordedPasses { get; private set; }
 
-        public static void Bind(Camera camera, LocationWorldRenderer renderer)
+        public static void Bind(Camera camera, ILocationCanvasSource renderer)
         {
             if (camera == null || renderer == null) return;
             if (!registered)
@@ -51,10 +51,10 @@ namespace KingdomSurvival.LocationRendering
             bound[camera] = renderer;
         }
 
-        public static void Unbind(LocationWorldRenderer renderer)
+        public static void Unbind(ILocationCanvasSource renderer)
         {
             List<Camera> gone = null;
-            foreach (KeyValuePair<Camera, LocationWorldRenderer> entry in bound)
+            foreach (KeyValuePair<Camera, ILocationCanvasSource> entry in bound)
                 if (entry.Value == renderer || entry.Key == null) (gone ??= new List<Camera>()).Add(entry.Key);
             if (gone != null) foreach (Camera camera in gone) bound.Remove(camera);
         }
@@ -71,8 +71,8 @@ namespace KingdomSurvival.LocationRendering
 
         private static void OnBeginCamera(ScriptableRenderContext context, Camera camera)
         {
-            if (camera == null || !bound.TryGetValue(camera, out LocationWorldRenderer renderer) || renderer == null) return;
-            LocationPostEffects post = renderer.PostActive ? renderer.Post : null;
+            if (camera == null || !bound.TryGetValue(camera, out ILocationCanvasSource renderer) || renderer == null) return;
+            LocationPostEffects post = renderer.CanvasPost;
             if (post == null) return;
             UniversalAdditionalCameraData data = camera.GetUniversalAdditionalCameraData();
             if (data == null || !data.renderPostProcessing) return;
@@ -326,5 +326,17 @@ namespace KingdomSurvival.LocationRendering
                 RecordedPasses++;
             }
         }
+    }
+}
+
+namespace KingdomSurvival.LocationRendering
+{
+    // Источник «Холста» для камеры: мир места (LocationWorldRenderer) или
+    // арена боя (ArenaFrameState). null в CanvasPost — проходов нет.
+    public interface ILocationCanvasSource
+    {
+        KingdomSurvival.BattlefieldDatabase.LocationPostEffects CanvasPost { get; }
+        float Seconds { get; }
+        LocationFrameRuntime FrameRuntime();
     }
 }

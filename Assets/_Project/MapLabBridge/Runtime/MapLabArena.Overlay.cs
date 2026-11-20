@@ -110,7 +110,7 @@ namespace KingdomSurvival.MapLabBridge
                 RenderLayer(overlayTarget);
                 if (graded && MergeMaterial() != null)
                 {
-                    framePost.Begin(camera, Spec.Frame);
+                    framePost.Begin(camera, Spec.Frame, LensPulse != null ? LensPulse() : 0f);
                     RenderTexture colour = RenderTexture.GetTemporary(new RenderTextureDescriptor(overlayTarget.width, overlayTarget.height, GraphicsFormat.R8G8B8A8_SRGB, 24));
                     RenderLayer(colour);
                     overlayGraded = EnsureLayerTexture(overlayGraded, "MapLab Arena Objects Graded");
@@ -199,7 +199,7 @@ namespace KingdomSurvival.MapLabBridge
                 return false;
             }
             framePost ??= new ArenaFramePost(Layer);
-            return framePost.Begin(camera, post);
+            return framePost.Begin(camera, post, LensPulse != null ? LensPulse() : 0f);
         }
 
         private void ReleaseOverlay()

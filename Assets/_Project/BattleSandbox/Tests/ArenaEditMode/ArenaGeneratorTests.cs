@@ -99,7 +99,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
             frame.Repair();
             Assert.That(frame.Views.Select(v => v.ViewId), Is.SupersetOf(ArenaFrameSettings.KnownViews));
             Assert.That(frame.For("gloom"), Is.SameAs(frame.Common));
-            ArenaViewFrame gloom = frame.View("gloom");
+            LocationViewFrame gloom = frame.View("gloom");
             gloom.Own = true;
             Assert.That(frame.For("gloom"), Is.SameAs(gloom.Post));
             Assert.That(frame.For("sepia"), Is.SameAs(frame.Common));
@@ -182,6 +182,76 @@ namespace KingdomSurvival.BattleSandbox.Tests
             }
             finally
             {
+                arena.Dispose();
+            }
+        }
+
+        [Test]
+        public void GrassZone_GladeAndOutside_ShiftGrassBetweenFieldAndEdges()
+        {
+            if (!MapLabArena.Available)
+                Assert.Ignore("Нет MapLabGameAssets с профилем — арена MapLab выключена.");
+            SandboxBattle battle = SandboxRoster.CreateDefaultBattle(new[] { "guard", "archer", "spearman", "scout" }, SandboxRoster.PlayerRoster, SandboxRoster.EnemyRoster, 7);
+            float Share(MapLabArenaLook look)
+            {
+                MapLabArenaSpec spec = MapLabArenaDriver.BuildSpec(null, battle);
+                spec.Look = look;
+                MapLabArena arena = MapLabArena.Build(spec);
+                try
+                {
+                    Assert.That(arena.Ready, Is.True, arena.Error);
+                    return arena.GrassOnFieldShare;
+                }
+                finally { arena.Dispose(); }
+            }
+            MapLabArenaLook Look(float inField, float outside) => new MapLabArenaLook { GrassCarpet = 6f, GrassSingles = 1f, GrassInField = inField, GrassOutsideField = outside };
+            float even = Share(Look(1f, 1f)), glade = Share(Look(3f, .3f)), edges = Share(Look(.3f, 3f));
+            Debug.Log($"Генератор арен: доля травы на поле — ровно {even:0.00}, поляна {glade:0.00}, гуще за полем {edges:0.00}.");
+            Assert.That(glade, Is.GreaterThan(even + .1f), "поляна: на поле травы заметно больше");
+            Assert.That(edges, Is.LessThan(even - .1f), "гуще за полем: на поле травы заметно меньше");
+        }
+
+        [Test]
+        public void LocationSky_ViewUsesOwnFrameOnlyWhenEnabled()
+        {
+            LocationVisualDefinition visual = new LocationVisualDefinition { UseWorldLighting = false };
+            LocationSky sky = new LocationSky(visual, new LocationWorldLighting());
+            Assert.That(sky.PostFor("gloom"), Is.SameAs(sky.Post), "без своей — общая");
+            LocationViewFrame gloom = LocationFrameViews.Get(sky.ViewFrames, "gloom");
+            Assert.That(sky.PostFor("gloom"), Is.SameAs(sky.Post), "запись есть, но своя выключена — общая");
+            gloom.Own = true;
+            Assert.That(sky.PostFor("gloom"), Is.SameAs(gloom.Post));
+            Assert.That(sky.PostFor("sepia"), Is.SameAs(sky.Post));
+        }
+
+        [Test]
+        public void ArenaCanvas_LetterboxDrawnOnArenaFrame()
+        {
+            if (!MapLabArena.Available)
+                Assert.Ignore("Нет MapLabGameAssets с профилем — арена MapLab выключена.");
+            SandboxBattle battle = SandboxRoster.CreateDefaultBattle(new[] { "guard", "archer", "spearman", "scout" }, SandboxRoster.PlayerRoster, SandboxRoster.EnemyRoster, 3);
+            MapLabArenaSpec spec = MapLabArenaDriver.BuildSpec(null, battle);
+            MapLabArena arena = MapLabArena.Build(spec);
+            LocationPostEffects post = new LocationPostEffects { Enabled = true, Bloom = false };
+            post.Game.Letterbox = .2f;
+            post.Game.LetterboxColor = new Color(1f, 0f, 1f, 1f);
+            KingdomSurvival.LocationRendering.ArenaFrameState state = new KingdomSurvival.LocationRendering.ArenaFrameState { PostSource = () => post };
+            try
+            {
+                Assert.That(arena.Ready, Is.True, arena.Error);
+                KingdomSurvival.LocationRendering.LocationCanvasPass.Bind(arena.FrameCamera, state);
+                arena.Spec.Frame = post;
+                RenderTexture frame = arena.Render(640, 360);
+                Color[] pixels = Read(frame, out _);
+                Color top = pixels[(frame.height - 3) * frame.width + frame.width / 2];
+                Debug.Log("Холст на арене: верхняя полоса " + top);
+                Assert.That(top.r, Is.GreaterThan(.8f), "кинополоса цвета раздела «Игра» сверху кадра арены");
+                Assert.That(top.g, Is.LessThan(.2f));
+                Assert.That(top.b, Is.GreaterThan(.8f));
+            }
+            finally
+            {
+                KingdomSurvival.LocationRendering.LocationCanvasPass.Unbind(state);
                 arena.Dispose();
             }
         }

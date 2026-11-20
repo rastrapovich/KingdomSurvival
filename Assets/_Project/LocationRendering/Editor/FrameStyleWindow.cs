@@ -17,7 +17,7 @@ namespace KingdomSurvival.LocationRendering.Editor
     // выбранный сохранённый стиль), справа — панель FrameEffectsEditor
     // (стили и разделы). Правки — те же данные, что у Базы локаций
     // (небо места или общий свет мира), с Undo и записью ассета.
-    public sealed class FrameStyleWindow : EditorWindow
+    public sealed partial class FrameStyleWindow : EditorWindow
     {
         private const string PrefsKey = "KS.FrameStyleWindow.";
 
@@ -105,8 +105,8 @@ namespace KingdomSurvival.LocationRendering.Editor
         {
             database = AssetDatabase.LoadAssetAtPath<LocalLocationDatabaseAsset>(LocalLocationDatabaseAsset.AssetPath);
             fields = Resources.Load<BattlefieldDatabaseAsset>(BattlefieldDatabaseAsset.ResourcesPath);
-            if (string.IsNullOrEmpty(selectedId)) selectedId = EditorPrefs.GetString(PrefsKey + "Location", "");
-            if (database != null && Location == null)
+            if (string.IsNullOrEmpty(selectedId)) selectedId = EditorPrefs.GetString(PrefsKey + "Location", ArenaId);
+            if (database != null && Location == null && !ArenaMode)
                 selectedId = database.locations.FirstOrDefault(item => database.FindVisual(item.Id) != null)?.Id ?? database.locations.FirstOrDefault()?.Id;
             compare = (CompareMode)EditorPrefs.GetInt(PrefsKey + "Compare", 0);
             compareSource = (CompareSource)EditorPrefs.GetInt(PrefsKey + "CompareSource", 0);
@@ -143,6 +143,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             List<LocalLocationDefinition> places = database != null
                 ? database.locations.Where(item => database.FindVisual(item.Id) != null).OrderBy(item => item.IsBattlefield).ThenBy(item => item.DisplayName).ToList()
                 : new List<LocalLocationDefinition>();
+            // Первая строка — генерируемая арена боя (её обработка кадра — в ассете генератора арен).
+            places.Insert(0, new LocalLocationDefinition { Id = ArenaId, DisplayName = "Арена боя (генерируемая)" });
             if (places.Count > 0)
             {
                 List<string> names = places.Select(item => (item.IsBattlefield ? "Поле боя · " : "") + item.DisplayName).ToList();
@@ -188,6 +190,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         {
             if (panel == null || database == null) return;
             panel.Clear();
+            if (ArenaMode) { BuildArenaPanel(); return; }
             LocalLocationDefinition location = Location;
             if (location == null) { panel.Add(new HelpBox("Нет мест с художественной сборкой.", HelpBoxMessageType.Info)); return; }
             Label title = new Label(location.DisplayName) { style = { fontSize = 15, unityFontStyleAndWeight = FontStyle.Bold, color = new Color(.88f, .78f, .53f), marginBottom = 4 } };
@@ -247,6 +250,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             {
                 saveAt = -1;
                 if (database != null) AssetDatabase.SaveAssetIfDirty(database);
+                if (arenaAsset != null) AssetDatabase.SaveAssetIfDirty(arenaAsset);
             }
             if (rebuildAt > 0 && now >= rebuildAt)
             {
@@ -254,6 +258,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 RebuildPreview();
                 StructureChanged?.Invoke();
             }
+            PumpArena();
             bool active = focusedWindow == this || mouseOverWindow == this || dragging;
             if (now >= nextRepaint)
             {
@@ -269,6 +274,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void RebuildPreview()
         {
             ReleasePreview();
+            if (ArenaMode) { RebuildArena(); return; }
             if (database == null || Location == null || Field == null || EditorApplication.isPlayingOrWillChangePlaymode) return;
             preview = new PreviewRenderUtility(true);
             renderer = new LocationWorldRenderer(Location, Visual, Field, null, database.worldLighting);
@@ -293,6 +299,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             Release(ref afterTexture);
             Release(ref beforeTexture);
             Release(ref referenceFitted);
+            ReleaseArena();
         }
 
         private static void Release(ref RenderTexture texture)
@@ -318,6 +325,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             Rect area = new Rect(0, 0, canvas.contentRect.width, canvas.contentRect.height);
             if (float.IsNaN(area.width) || area.width < 10 || area.height < 10) return;
             EditorGUI.DrawRect(area, new Color(.045f, .055f, .05f));
+            if (ArenaMode) { DrawArenaPreview(area); return; }
             if (renderer == null || preview == null)
             {
                 GUI.Label(new Rect(10, 10, area.width - 20, 40), EditorApplication.isPlaying ? "Идёт игра — предпросмотр вернётся после выхода из Play Mode." : "Выберите место с художественной сборкой и полем боя.");
@@ -941,6 +949,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         // Кадр без LUT, 1600 по ширине (полоска LUT займёт верхний левый угол).
         private Texture2D Snapshot()
         {
+            if (ArenaMode) return ArenaSnapshot();
             if (renderer == null || preview == null) return null;
             LocationToneEffects tone = Sky.Post?.Tone;
             Texture2D lut = tone?.Lut;

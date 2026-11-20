@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 using UnityEngine;
 
@@ -213,6 +214,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         public LocationDaylight Daylight = new LocationDaylight();
         public LocationSunDefinition Sun = new LocationSunDefinition();
         public LocationPostEffects Post = new LocationPostEffects();
+        // Своя обработка кадра у вида карты (иначе — Post, общая).
+        public List<LocationViewFrame> ViewFrames = new List<LocationViewFrame>();
         // Ключи суток обработки кадра (окно «Обработка кадра» → «Время и зоны»).
         public LocationFrameKeys FrameKeys = new LocationFrameKeys();
         public bool PeopleCastShadows = true;
@@ -255,6 +258,19 @@ namespace KingdomSurvival.BattlefieldDatabase
             get => IsWorld ? World.Post : visual.Post;
             set { if (IsWorld) World.Post = value; else visual.Post = value; }
         }
+
+        // Своя обработка кадра у видов карты (общая — Post).
+        public List<LocationViewFrame> ViewFrames
+        {
+            get
+            {
+                if (IsWorld) return World.ViewFrames ??= new List<LocationViewFrame>();
+                return visual.ViewFrames ??= new List<LocationViewFrame>();
+            }
+        }
+
+        // Обработка кадра для вида: своя у вида — если включена, иначе общая.
+        public LocationPostEffects PostFor(string viewId) => LocationFrameViews.Pick(ViewFrames, Post, viewId);
 
         public LocationFrameKeys FrameKeys
         {

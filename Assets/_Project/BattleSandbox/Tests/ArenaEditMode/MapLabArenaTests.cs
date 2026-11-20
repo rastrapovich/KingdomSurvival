@@ -15,13 +15,27 @@ namespace KingdomSurvival.BattleSandbox.Tests
         private static SandboxBattle Battle(int seed) => SandboxRoster.CreateDefaultBattle(
             new[] { "guard", "archer", "spearman", "scout" }, SandboxRoster.PlayerRoster, SandboxRoster.EnemyRoster, seed);
 
+        // Проверки алгоритма — на настройках генератора по умолчанию, а не на
+        // текущих настройках автора в ассете («Генератор арен»).
+        private static MapLabArenaSpec DefaultSpec(SandboxBattle battle)
+        {
+            MapLabArenaSpec spec = MapLabArenaDriver.BuildSpec(null, battle);
+            MapLabArenaLook look = new MapLabArenaLook();
+            spec.Look = look;
+            spec.HillLiftHexes = look.HillLiftHexes;
+            spec.DecorDensity = look.DecorDensity;
+            spec.AssetScale = look.AssetScale;
+            spec.Frame = null;
+            return spec;
+        }
+
         [Test]
         public void Spec_FollowsAcceptedBattleLayout_AndIsStableForSameLayout()
         {
             for (int seed = 0; seed < 30; seed++)
             {
                 SandboxBattle battle = Battle(seed);
-                MapLabArenaSpec spec = MapLabArenaDriver.BuildSpec(null, battle);
+                MapLabArenaSpec spec = DefaultSpec(battle);
                 List<HexCoord> cells = BattlefieldFrame.ActiveCells(null).ToList();
                 Assert.That(spec.Cells.Count, Is.EqualTo(cells.Count), "Seed " + seed);
                 for (int i = 0; i < cells.Count; i++)
@@ -58,7 +72,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
             foreach (int seed in new[] { 3, 11 })
             {
                 SandboxBattle battle = Battle(seed);
-                MapLabArenaSpec spec = MapLabArenaDriver.BuildSpec(null, battle);
+                MapLabArenaSpec spec = DefaultSpec(battle);
                 MapLabArena arena = MapLabArena.Build(spec);
                 try
                 {
@@ -160,9 +174,9 @@ namespace KingdomSurvival.BattleSandbox.Tests
             }
 
             SandboxBattle battle = Battle(5);
-            MapLabArenaSpec sparse = MapLabArenaDriver.BuildSpec(null, battle);
+            MapLabArenaSpec sparse = DefaultSpec(battle);
             sparse.DecorDensity = 0.3f;
-            MapLabArenaSpec dense = MapLabArenaDriver.BuildSpec(null, battle);
+            MapLabArenaSpec dense = DefaultSpec(battle);
             dense.DecorDensity = 2f;
             MapLabArena first = MapLabArena.Build(sparse), second = MapLabArena.Build(dense);
             try

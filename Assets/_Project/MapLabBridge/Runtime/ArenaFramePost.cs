@@ -57,7 +57,7 @@ namespace KingdomSurvival.MapLabBridge
         public int Layer { get; }
 
         // Перед кадром камеры: true — обработка идёт (объём включён).
-        public bool Begin(Camera camera, LocationPostEffects post)
+        public bool Begin(Camera camera, LocationPostEffects post, float pulse = 0f)
         {
             UniversalAdditionalCameraData data = camera != null ? camera.GetUniversalAdditionalCameraData() : null;
             if (data == null)
@@ -71,7 +71,7 @@ namespace KingdomSurvival.MapLabBridge
                 volume.enabled = false;
                 return false;
             }
-            Apply(post);
+            Apply(post, pulse);
             LocationAntialiasing mode = post.Quality != null ? post.Quality.Antialiasing : LocationAntialiasing.None;
             data.antialiasing = mode == LocationAntialiasing.None ? AntialiasingMode.None
                 : mode == LocationAntialiasing.Fxaa ? AntialiasingMode.FastApproximateAntialiasing : AntialiasingMode.SubpixelMorphologicalAntiAliasing;
@@ -101,7 +101,7 @@ namespace KingdomSurvival.MapLabBridge
                 data.renderPostProcessing = false;
         }
 
-        private void Apply(LocationPostEffects post)
+        private void Apply(LocationPostEffects post, float pulse)
         {
             LocationColorGrade grade = post.Day ?? new LocationColorGrade();
             if (profile.TryGet(out ColorAdjustments color))
@@ -193,13 +193,13 @@ namespace KingdomSurvival.MapLabBridge
             LocationLensEffects lens = post.Lens ?? new LocationLensEffects();
             if (profile.TryGet(out ChromaticAberration aberration))
             {
-                float value = Mathf.Clamp01(lens.ChromaticAberration);
+                float value = Mathf.Clamp01(lens.ChromaticAberration + lens.PulseAberration * pulse);
                 aberration.active = value > .001f;
                 aberration.intensity.Override(value);
             }
             if (profile.TryGet(out LensDistortion distortion))
             {
-                float value = Mathf.Clamp(lens.Distortion, -1, 1);
+                float value = Mathf.Clamp(lens.Distortion + lens.PulseDistortion * pulse, -1, 1);
                 distortion.active = Mathf.Abs(value) > .001f;
                 distortion.intensity.Override(value);
                 distortion.scale.Override(Mathf.Clamp(lens.DistortionScale, .01f, 5));

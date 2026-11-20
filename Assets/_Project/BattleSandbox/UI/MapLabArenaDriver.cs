@@ -32,6 +32,8 @@ namespace KingdomSurvival.BattleSandbox
         private bool attached, disposed;
         private readonly bool preview;
         private int frameVersion = ArenaGeneratorAsset.Version;
+        private ArenaFrameBinding frameBinding;
+        public ArenaFrameBinding Frame => frameBinding;
         public bool Disposed => disposed;
         public bool Shown => shown != null;
         private float readyAt = -1f;
@@ -285,6 +287,7 @@ namespace KingdomSurvival.BattleSandbox
                 current = this;
             }
             arena = MapLabArena.Begin(spec);
+            frameBinding = new ArenaFrameBinding(arena, board);
             CreateLoadingScreen();
             surface.schedule.Execute(Tick).Every(0);
             surface.RegisterCallback<DetachFromPanelEvent>(_ => Dispose());
@@ -396,7 +399,11 @@ namespace KingdomSurvival.BattleSandbox
             Vector2Int size = new Vector2Int(Mathf.RoundToInt(frame.width * scale), Mathf.RoundToInt(frame.height * scale));
             // Тот же размер: после готовности кадр догружается (не чаще 10 раз
             // в секунду), дальше не перерисовывается.
-            if (shown != null && size == lastSize && (Time.realtimeSinceStartup - readyAt > SettleSeconds || Time.realtimeSinceStartup - renderedAt < 0.1f))
+            // Обработка кадра со временем (вспышка, тряска, плёнка, облака) — кадр
+            // каждые ~1/30 с, пока она идёт.
+            bool animating = frameBinding != null && frameBinding.Animating;
+            if (shown != null && size == lastSize && (animating ? Time.realtimeSinceStartup - renderedAt < 1f / 30f
+                    : Time.realtimeSinceStartup - readyAt > SettleSeconds || Time.realtimeSinceStartup - renderedAt < 0.1f))
                 return;
             renderedAt = Time.realtimeSinceStartup;
             lastSize = size;
@@ -416,6 +423,7 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             // Обработка кадра арены — по виду карты (своя у вида или общая).
             arena.Spec.Frame = ArenaGeneratorAsset.FrameFor(MapLabGameViews.ActiveId);
+            frameBinding?.BeforeRender();
             RenderTexture target = arena.Render(requestedSize.x, requestedSize.y);
             if (target != null && shown != target)
             {
@@ -473,6 +481,7 @@ namespace KingdomSurvival.BattleSandbox
             if (shown != null)
                 surface.SetSceneTexture(null);
             RemoveLoadingScreen();
+            frameBinding?.Dispose();
             arena.Dispose();
         }
     }

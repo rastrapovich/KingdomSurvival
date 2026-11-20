@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KingdomSurvival.MapLabBridge::KingdomSurvival.MapLabBridge.ArenaGeneratorAsset
   Tactics:
     FreeShare: 0.6
-    SpecialShare: 0.25
+    SpecialShare: 0.221
     ObstacleShare: 0.15
     MaxAttempts: 48
     MaxDetourFactor: 2.2
@@ -36,23 +36,25 @@ MonoBehaviour:
     TreeClearance: 1.3
     TreeMainSpecies: 0.65
     TreeYoungAtEdge: 0.5
-    TreeScale: 1
+    TreeScale: 1.26
     WeedChance: 0.65
     StumpChance: 0.65
     WeedScale: 1
-    GrassPatchesMin: 8
+    GrassPatchesMin: 76.2
     GrassPatchesMax: 13
-    GrassPatchSizeMin: 0.6
-    GrassPatchSizeMax: 1.6
+    GrassPatchSizeMin: 1.08
+    GrassPatchSizeMax: 4.8
     GrassPerPatchMin: 2
     GrassPerPatchMax: 7
     GrassSpacing: 0.7
-    GrassClearOfStart: 0.8
-    GrassOutside: 0
-    GrassScale: 1
-    PaintedGrass: 0
-    PaintedGrassDensity: 1
-    InkGrassDensity: 1
+    GrassClearOfStart: 1.95
+    GrassOutside: 0.96
+    GrassScale: 2.02
+    GrassCarpet: 0
+    GrassCarpetInk: 0.3
+    GrassCarpetScale: 1
+    GrassCarpetPatchiness: 0.5
+    GrassSingles: 0
     ReedDensity: 0
     SmallRocksMin: 2
     SmallRocksMax: 5
@@ -66,43 +68,43 @@ MonoBehaviour:
     Common:
       Enabled: 0
       Day:
+        Exposure: -0.39
+        Contrast: 6.6
+        Saturation: 0.4
+        Temperature: -0.4
+        Tint: 38.5
+        Filter: {r: 1, g: 1, b: 1, a: 1}
+      Night:
         Exposure: 0
         Contrast: 0
         Saturation: 0
         Temperature: 0
         Tint: 0
         Filter: {r: 1, g: 1, b: 1, a: 1}
-      Night:
-        Exposure: -0.25
-        Contrast: 8
-        Saturation: -30
-        Temperature: -18
-        Tint: 0
-        Filter: {r: 0.82, g: 0.88, b: 1, a: 1}
-      Bloom: 1
-      BloomIntensity: 0.6
-      BloomThreshold: 0.9
+      Bloom: 0
+      BloomIntensity: 5
+      BloomThreshold: 0.38
       BloomScatter: 0.6
       BloomTint: {r: 1, g: 1, b: 1, a: 1}
       Vignette: 0
-      VignetteIntensity: 0.28
+      VignetteIntensity: 0.188
       VignetteSmoothness: 0.45
       VignetteColor: {r: 0, g: 0, b: 0, a: 1}
-      Grain: 0
+      Grain: 0.217
       Tonemapping: 0
       GrainType: 0
       GrainResponse: 0.8
       Tone:
-        Lut: {fileID: 0}
-        LutContribution: 1
+        Lut: {fileID: 2800000, guid: cb2256acf568659499291fdd3faef245, type: 3}
+        LutContribution: 0.096
         SplitToning: 0
         SplitShadows: {r: 0.42, g: 0.5, b: 0.62, a: 1}
         SplitHighlights: {r: 0.68, g: 0.6, b: 0.46, a: 1}
         SplitBalance: 0
-        ShadowsMidtonesHighlights: 0
+        ShadowsMidtonesHighlights: 1
         Shadows:
           Color: {r: 1, g: 1, b: 1, a: 1}
-          Offset: 0
+          Offset: 0.21
         Midtones:
           Color: {r: 1, g: 1, b: 1, a: 1}
           Offset: 0
@@ -115,13 +117,13 @@ MonoBehaviour:
           Offset: 0
         Gamma:
           Color: {r: 1, g: 1, b: 1, a: 1}
-          Offset: 0
+          Offset: 0.01
         Gain:
           Color: {r: 1, g: 1, b: 1, a: 1}
-          Offset: 0
+          Offset: -0.83
         ChannelMixer: 0
         MixerRed: {x: 100, y: 0, z: 0}
-        MixerGreen: {x: 0, y: 100, z: 0}
+        MixerGreen: {x: -18, y: 100, z: -10}
         MixerBlue: {x: 0, y: 0, z: 100}
         Curves: 0
         Master:
@@ -320,11 +322,11 @@ MonoBehaviour:
         ShadowsEnd: 0.3
         HighlightsStart: 0.55
         HighlightsEnd: 1
-        SelectiveColor: 0
+        SelectiveColor: 1
         Selective:
-        - Hue: 0
-          Saturation: 1
-          Lightness: 0
+        - Hue: 9
+          Saturation: 1.25
+          Lightness: -0.06
         - Hue: 0
           Saturation: 1
           Lightness: 0
@@ -371,10 +373,10 @@ MonoBehaviour:
           m_ColorSpace: -1
           m_NumColorKeys: 3
           m_NumAlphaKeys: 2
-        GradientStrength: 0.5
+        GradientStrength: 0.321
       Lens:
-        ChromaticAberration: 0
-        Distortion: 0
+        ChromaticAberration: 0.1
+        Distortion: -0.32
         DistortionScale: 1
         PulseAberration: 0.6
         PulseDistortion: -0.25
@@ -390,65 +392,65 @@ MonoBehaviour:
         PulseFlashStrength: 0.25
       Canvas:
         Painterly: 0
-        PainterlyRadius: 3
+        PainterlyRadius: 1
         PainterlyStrength: 1
-        Fog: 0
+        Fog: 1
         FogDirection: 0
         FogColor: {r: 0.62, g: 0.66, b: 0.66, a: 1}
-        FogDensity: 0.35
-        FogStart: 0.45
+        FogDensity: 0.004
+        FogStart: 0.194
         FogEnd: 1
-        FogNoise: 0.35
-        FogNoiseScale: 3
-        FogSpeed: 0.03
+        FogNoise: 1
+        FogNoiseScale: 12
+        FogSpeed: 0.276
         Palette: 0
-        PaletteLevels: 8
+        PaletteLevels: 12
         PaletteTexture: {fileID: 0}
         PaletteStrength: 1
         PaletteDither: 0.3
         Paper: 0
         PaperTexture: {fileID: 0}
-        PaperStrength: 0.35
-        PaperScale: 1
-        PaperFibers: 0.5
-        Sharpen: 0
-        SharpenStrength: 0.6
-        TiltShift: 0
-        TiltFocus: 0.5
-        TiltBand: 0.35
-        TiltBlur: 5
+        PaperStrength: 0.108
+        PaperScale: 6
+        PaperFibers: 0.45
+        Sharpen: 1
+        SharpenStrength: 0.934
+        TiltShift: 1
+        TiltFocus: 0.507
+        TiltBand: 0.713
+        TiltBlur: 14.87
         Ink: 0
-        InkColor: {r: 0.1, g: 0.07, b: 0.05, a: 1}
-        InkThreshold: 0.35
-        InkWidth: 1
-        InkStrength: 0.8
+        InkColor: {r: 0, g: 0, b: 0, a: 1}
+        InkThreshold: 0.199
+        InkWidth: 0.63
+        InkStrength: 0.446
         Hatching: 0
-        HatchColor: {r: 0.12, g: 0.09, b: 0.07, a: 1}
-        HatchThreshold: 0.35
-        HatchCross: 0.18
-        HatchSpacing: 6
-        HatchStrength: 0.6
-        Border: 0
+        HatchColor: {r: 0, g: 0, b: 0, a: 1}
+        HatchThreshold: 0.088
+        HatchCross: 0.271
+        HatchSpacing: 7
+        HatchStrength: 0.25
+        Border: 1
         BorderTexture: {fileID: 0}
-        BorderColor: {r: 0.08, g: 0.06, b: 0.05, a: 1}
-        BorderSize: 0.04
-        BorderRoughness: 0.5
+        BorderColor: {r: 0, g: 0, b: 0, a: 1}
+        BorderSize: 0.006
+        BorderRoughness: 1
         Film: 0
-        FilmDust: 0.4
-        FilmScratches: 0.3
-        FilmFlicker: 0.3
+        FilmDust: 0
+        FilmScratches: 0
+        FilmFlicker: 0.9
       Sprites:
-        Wind: 0
-        WindStrength: 0.08
+        Wind: 1
+        WindStrength: 0.067
         WindSpeed: 1
         WindGusts: 0.5
         WindHeight: 2.5
         WindDirection: 0.3
         WindTrees: 0.6
         WindPlants: 1
-        Outline: 0
-        OutlineColor: {r: 0.08, g: 0.06, b: 0.05, a: 0.85}
-        OutlineWidth: 1.5
+        Outline: 1
+        OutlineColor: {r: 0, g: 0, b: 0, a: 1}
+        OutlineWidth: 1.43
         OutlinePeople: 1
         OutlineObjects: 0
         Distance: 0
@@ -493,8 +495,8 @@ MonoBehaviour:
           Groups: 3
         Midges:
           Enabled: 0
-          Density: 60
-          Size: 0.14
+          Density: 18.5
+          Size: 0.051
           SizeJitter: 0.3
           Lifetime: 3
           Speed: 0.05
@@ -508,17 +510,17 @@ MonoBehaviour:
           Opacity: 0.75
           WindShare: 0.1
           Texture: {fileID: 0}
-          Time: 3
+          Time: 0
           FromHour: 17
           ToHour: 22
           Stretch: 1
-          Groups: 3
+          Groups: 2
         Rain:
           Enabled: 0
-          Density: 160
-          Size: 0.045
-          SizeJitter: 0.3
-          Lifetime: 1.2
+          Density: 57
+          Size: 0.022
+          SizeJitter: 0.138
+          Lifetime: 3.4
           Speed: 9
           Angle: 260
           Spread: 4
@@ -537,9 +539,9 @@ MonoBehaviour:
           Groups: 3
         Leaves:
           Enabled: 0
-          Density: 2
-          Size: 0.45
-          SizeJitter: 0.4
+          Density: 4.38
+          Size: 0.08
+          SizeJitter: 0.121
           Lifetime: 9
           Speed: 0.35
           Angle: 270
@@ -603,7 +605,7 @@ MonoBehaviour:
           Groups: 3
         Version: 1
       Quality:
-        Antialiasing: 0
+        Antialiasing: 4
       Characters:
         All:
           UnitId: 
@@ -619,23 +621,36 @@ MonoBehaviour:
           LevelsGamma: 1
           LevelsOutBlack: 0
           LevelsOutWhite: 255
-        Creatures: []
+        Creatures:
+        - UnitId: militia
+          Hue: 0
+          Saturation: 1.07
+          Brightness: 0.79
+          Contrast: -0.02
+          Tint: {r: 1, g: 1, b: 1, a: 1}
+          SunLight: 1
+          FireLight: 1
+          LevelsInBlack: 0
+          LevelsInWhite: 255
+          LevelsGamma: 1
+          LevelsOutBlack: 0
+          LevelsOutWhite: 255
       Air:
-        Clouds: 0
-        CloudCoverage: 0.45
-        CloudDarkness: 0.35
-        CloudScale: 8
-        CloudSoftness: 0.35
+        Clouds: 1
+        CloudCoverage: 0.592
+        CloudDarkness: 0.396
+        CloudScale: 5
+        CloudSoftness: 0.31
         CloudSpeed: 0.4
         CloudAngle: 20
         Rays: 0
         RaysFollowSun: 1
-        RaysAngle: 250
-        RaysIntensity: 0.2
+        RaysAngle: 98
+        RaysIntensity: 0.238
         RaysColor: {r: 1, g: 0.9, b: 0.7, a: 1}
-        RaysWidth: 1.2
-        RaysDensity: 0.5
-        RaysSpeed: 0.15
+        RaysWidth: 0.81
+        RaysDensity: 0.258
+        RaysSpeed: 0.158
         HeatHaze: 0
         HazeStrength: 1
         HazeRadius: 0.6
@@ -1846,43 +1861,43 @@ MonoBehaviour:
       Post:
         Enabled: 0
         Day:
+          Exposure: -0.39
+          Contrast: 6.6
+          Saturation: 0.4
+          Temperature: -0.4
+          Tint: 38.5
+          Filter: {r: 1, g: 1, b: 1, a: 1}
+        Night:
           Exposure: 0
           Contrast: 0
           Saturation: 0
           Temperature: 0
           Tint: 0
           Filter: {r: 1, g: 1, b: 1, a: 1}
-        Night:
-          Exposure: -0.25
-          Contrast: 8
-          Saturation: -30
-          Temperature: -18
-          Tint: 0
-          Filter: {r: 0.82, g: 0.88, b: 1, a: 1}
-        Bloom: 1
-        BloomIntensity: 0.6
-        BloomThreshold: 0.9
+        Bloom: 0
+        BloomIntensity: 5
+        BloomThreshold: 0.38
         BloomScatter: 0.6
         BloomTint: {r: 1, g: 1, b: 1, a: 1}
         Vignette: 0
-        VignetteIntensity: 0.28
+        VignetteIntensity: 0.188
         VignetteSmoothness: 0.45
         VignetteColor: {r: 0, g: 0, b: 0, a: 1}
-        Grain: 0
+        Grain: 0.217
         Tonemapping: 0
         GrainType: 0
         GrainResponse: 0.8
         Tone:
-          Lut: {fileID: 0}
-          LutContribution: 1
+          Lut: {fileID: 2800000, guid: cb2256acf568659499291fdd3faef245, type: 3}
+          LutContribution: 0.096
           SplitToning: 0
           SplitShadows: {r: 0.42, g: 0.5, b: 0.62, a: 1}
           SplitHighlights: {r: 0.68, g: 0.6, b: 0.46, a: 1}
           SplitBalance: 0
-          ShadowsMidtonesHighlights: 0
+          ShadowsMidtonesHighlights: 1
           Shadows:
             Color: {r: 1, g: 1, b: 1, a: 1}
-            Offset: 0
+            Offset: 0.21
           Midtones:
             Color: {r: 1, g: 1, b: 1, a: 1}
             Offset: 0
@@ -1895,13 +1910,13 @@ MonoBehaviour:
             Offset: 0
           Gamma:
             Color: {r: 1, g: 1, b: 1, a: 1}
-            Offset: 0
+            Offset: 0.01
           Gain:
             Color: {r: 1, g: 1, b: 1, a: 1}
-            Offset: 0
+            Offset: -0.83
           ChannelMixer: 0
           MixerRed: {x: 100, y: 0, z: 0}
-          MixerGreen: {x: 0, y: 100, z: 0}
+          MixerGreen: {x: -18, y: 100, z: -10}
           MixerBlue: {x: 0, y: 0, z: 100}
           Curves: 0
           Master:
@@ -2100,11 +2115,11 @@ MonoBehaviour:
           ShadowsEnd: 0.3
           HighlightsStart: 0.55
           HighlightsEnd: 1
-          SelectiveColor: 0
+          SelectiveColor: 1
           Selective:
-          - Hue: 0
-            Saturation: 1
-            Lightness: 0
+          - Hue: 9
+            Saturation: 1.25
+            Lightness: -0.06
           - Hue: 0
             Saturation: 1
             Lightness: 0
@@ -2151,10 +2166,10 @@ MonoBehaviour:
             m_ColorSpace: -1
             m_NumColorKeys: 3
             m_NumAlphaKeys: 2
-          GradientStrength: 0.5
+          GradientStrength: 0.321
         Lens:
-          ChromaticAberration: 0
-          Distortion: 0
+          ChromaticAberration: 0.1
+          Distortion: -0.32
           DistortionScale: 1
           PulseAberration: 0.6
           PulseDistortion: -0.25
@@ -2170,65 +2185,65 @@ MonoBehaviour:
           PulseFlashStrength: 0.25
         Canvas:
           Painterly: 0
-          PainterlyRadius: 3
+          PainterlyRadius: 1
           PainterlyStrength: 1
-          Fog: 0
+          Fog: 1
           FogDirection: 0
           FogColor: {r: 0.62, g: 0.66, b: 0.66, a: 1}
-          FogDensity: 0.35
-          FogStart: 0.45
+          FogDensity: 0.004
+          FogStart: 0.194
           FogEnd: 1
-          FogNoise: 0.35
-          FogNoiseScale: 3
-          FogSpeed: 0.03
+          FogNoise: 1
+          FogNoiseScale: 12
+          FogSpeed: 0.276
           Palette: 0
-          PaletteLevels: 8
+          PaletteLevels: 12
           PaletteTexture: {fileID: 0}
           PaletteStrength: 1
           PaletteDither: 0.3
           Paper: 0
           PaperTexture: {fileID: 0}
-          PaperStrength: 0.35
-          PaperScale: 1
-          PaperFibers: 0.5
-          Sharpen: 0
-          SharpenStrength: 0.6
-          TiltShift: 0
-          TiltFocus: 0.5
-          TiltBand: 0.35
-          TiltBlur: 5
+          PaperStrength: 0.108
+          PaperScale: 6
+          PaperFibers: 0.45
+          Sharpen: 1
+          SharpenStrength: 0.934
+          TiltShift: 1
+          TiltFocus: 0.507
+          TiltBand: 0.713
+          TiltBlur: 14.87
           Ink: 0
-          InkColor: {r: 0.1, g: 0.07, b: 0.05, a: 1}
-          InkThreshold: 0.35
-          InkWidth: 1
-          InkStrength: 0.8
+          InkColor: {r: 0, g: 0, b: 0, a: 1}
+          InkThreshold: 0.199
+          InkWidth: 0.63
+          InkStrength: 0.446
           Hatching: 0
-          HatchColor: {r: 0.12, g: 0.09, b: 0.07, a: 1}
-          HatchThreshold: 0.35
-          HatchCross: 0.18
-          HatchSpacing: 6
-          HatchStrength: 0.6
-          Border: 0
+          HatchColor: {r: 0, g: 0, b: 0, a: 1}
+          HatchThreshold: 0.088
+          HatchCross: 0.271
+          HatchSpacing: 7
+          HatchStrength: 0.25
+          Border: 1
           BorderTexture: {fileID: 0}
-          BorderColor: {r: 0.08, g: 0.06, b: 0.05, a: 1}
-          BorderSize: 0.04
-          BorderRoughness: 0.5
+          BorderColor: {r: 0, g: 0, b: 0, a: 1}
+          BorderSize: 0.006
+          BorderRoughness: 1
           Film: 0
-          FilmDust: 0.4
-          FilmScratches: 0.3
-          FilmFlicker: 0.3
+          FilmDust: 0
+          FilmScratches: 0
+          FilmFlicker: 0.9
         Sprites:
-          Wind: 0
-          WindStrength: 0.08
+          Wind: 1
+          WindStrength: 0.067
           WindSpeed: 1
           WindGusts: 0.5
           WindHeight: 2.5
           WindDirection: 0.3
           WindTrees: 0.6
           WindPlants: 1
-          Outline: 0
-          OutlineColor: {r: 0.08, g: 0.06, b: 0.05, a: 0.85}
-          OutlineWidth: 1.5
+          Outline: 1
+          OutlineColor: {r: 0, g: 0, b: 0, a: 1}
+          OutlineWidth: 1.43
           OutlinePeople: 1
           OutlineObjects: 0
           Distance: 0
@@ -2273,8 +2288,8 @@ MonoBehaviour:
             Groups: 3
           Midges:
             Enabled: 0
-            Density: 60
-            Size: 0.14
+            Density: 18.5
+            Size: 0.051
             SizeJitter: 0.3
             Lifetime: 3
             Speed: 0.05
@@ -2288,17 +2303,17 @@ MonoBehaviour:
             Opacity: 0.75
             WindShare: 0.1
             Texture: {fileID: 0}
-            Time: 3
+            Time: 0
             FromHour: 17
             ToHour: 22
             Stretch: 1
-            Groups: 3
+            Groups: 2
           Rain:
             Enabled: 0
-            Density: 160
-            Size: 0.045
-            SizeJitter: 0.3
-            Lifetime: 1.2
+            Density: 57
+            Size: 0.022
+            SizeJitter: 0.138
+            Lifetime: 3.4
             Speed: 9
             Angle: 260
             Spread: 4
@@ -2317,9 +2332,9 @@ MonoBehaviour:
             Groups: 3
           Leaves:
             Enabled: 0
-            Density: 2
-            Size: 0.45
-            SizeJitter: 0.4
+            Density: 4.38
+            Size: 0.08
+            SizeJitter: 0.121
             Lifetime: 9
             Speed: 0.35
             Angle: 270
@@ -2383,7 +2398,7 @@ MonoBehaviour:
             Groups: 3
           Version: 1
         Quality:
-          Antialiasing: 0
+          Antialiasing: 4
         Characters:
           All:
             UnitId: 
@@ -2399,23 +2414,36 @@ MonoBehaviour:
             LevelsGamma: 1
             LevelsOutBlack: 0
             LevelsOutWhite: 255
-          Creatures: []
+          Creatures:
+          - UnitId: militia
+            Hue: 0
+            Saturation: 1.07
+            Brightness: 0.79
+            Contrast: -0.02
+            Tint: {r: 1, g: 1, b: 1, a: 1}
+            SunLight: 1
+            FireLight: 1
+            LevelsInBlack: 0
+            LevelsInWhite: 255
+            LevelsGamma: 1
+            LevelsOutBlack: 0
+            LevelsOutWhite: 255
         Air:
-          Clouds: 0
-          CloudCoverage: 0.45
-          CloudDarkness: 0.35
-          CloudScale: 8
-          CloudSoftness: 0.35
+          Clouds: 1
+          CloudCoverage: 0.592
+          CloudDarkness: 0.396
+          CloudScale: 5
+          CloudSoftness: 0.31
           CloudSpeed: 0.4
           CloudAngle: 20
           Rays: 0
           RaysFollowSun: 1
-          RaysAngle: 250
-          RaysIntensity: 0.2
+          RaysAngle: 98
+          RaysIntensity: 0.238
           RaysColor: {r: 1, g: 0.9, b: 0.7, a: 1}
-          RaysWidth: 1.2
-          RaysDensity: 0.5
-          RaysSpeed: 0.15
+          RaysWidth: 0.81
+          RaysDensity: 0.258
+          RaysSpeed: 0.158
           HeatHaze: 0
           HazeStrength: 1
           HazeRadius: 0.6

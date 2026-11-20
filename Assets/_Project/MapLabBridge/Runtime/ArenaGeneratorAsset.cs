@@ -126,6 +126,13 @@ namespace KingdomSurvival.MapLabBridge
         public float GrassClearOfStart = 0.8f;
         // Пятна и за краем поля (на окраинах кадра).
         public float GrassOutside = 0f;
+        // Густота травы на поле клеток и за ним (множители всех видов травы:
+        // пятна, ковёр, россыпь). 1 и 1 — ровно, как прежде. Поляна — на поле
+        // больше; «за клетками гуще» — за полем больше.
+        public float GrassInField = 1f;
+        public float GrassOutsideField = 1f;
+        // Ширина перехода от поля к окраине, в гексах.
+        public float GrassFieldEdge = 1.5f;
         public float GrassScale = 1f;
 
         // Травяной ковёр: пучки травы карты мира (набор этапа 05, роли
@@ -165,7 +172,7 @@ namespace KingdomSurvival.MapLabBridge
     public sealed class ArenaFrameSettings
     {
         public LocationPostEffects Common = new LocationPostEffects();
-        public List<ArenaViewFrame> Views = new List<ArenaViewFrame>();
+        public List<LocationViewFrame> Views = new List<LocationViewFrame>();
 
         public static readonly string[] KnownViews = { MapLabMapViews.ClassicId, MapLabMapViews.GloomId, MapLabMapViews.SepiaId };
 
@@ -173,44 +180,20 @@ namespace KingdomSurvival.MapLabBridge
         {
             Common ??= new LocationPostEffects();
             Common.Repair();
-            Views ??= new List<ArenaViewFrame>();
+            Views ??= new List<LocationViewFrame>();
             Views.RemoveAll(item => item == null || string.IsNullOrEmpty(item.ViewId));
             foreach (string id in KnownViews)
                 View(id);
-            foreach (ArenaViewFrame view in Views)
+            foreach (LocationViewFrame view in Views)
             {
                 view.Post ??= new LocationPostEffects();
                 view.Post.Repair();
             }
         }
 
-        public ArenaViewFrame View(string viewId)
-        {
-            if (string.IsNullOrEmpty(viewId))
-                return null;
-            ArenaViewFrame found = Views.Find(item => item != null && item.ViewId == viewId);
-            if (found == null)
-            {
-                found = new ArenaViewFrame { ViewId = viewId };
-                Views.Add(found);
-            }
-            return found;
-        }
+        public LocationViewFrame View(string viewId) => LocationFrameViews.Get(Views, viewId);
 
-        // Своя у вида — если включена; иначе общая.
-        public LocationPostEffects For(string viewId)
-        {
-            ArenaViewFrame view = string.IsNullOrEmpty(viewId) ? null : Views?.Find(item => item != null && item.ViewId == viewId);
-            return view != null && view.Own && view.Post != null ? view.Post : Common;
-        }
-    }
-
-    [Serializable]
-    public sealed class ArenaViewFrame
-    {
-        public string ViewId = string.Empty;
-        // Своя обработка у вида (иначе — общая).
-        public bool Own;
-        public LocationPostEffects Post = new LocationPostEffects();
+        // Своя у вида — если включена; иначе общая (то же правило, что у мест).
+        public LocationPostEffects For(string viewId) => LocationFrameViews.Pick(Views, Common, viewId);
     }
 }

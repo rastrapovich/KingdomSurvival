@@ -49,6 +49,17 @@ namespace KingdomSurvival.LocationRendering.Editor
                 look.GrassSpacing = .45f; look.GrassClearOfStart = .4f; look.GrassOutside = 1.5f;
                 look.GrassCarpet = 10f; look.GrassCarpetScale = 1.2f; look.GrassSingles = 1.5f; look.GrassScale = 1.3f;
             }), "Пятен травы втрое больше, травяной ковёр и россыпь травинок по всему полю");
+            AddButton(presets, "Поляна", () => ApplyLook(look =>
+            {
+                look.GrassCarpet = 10f; look.GrassCarpetScale = 1.2f; look.GrassSingles = 1.5f;
+                look.GrassPatchesMin = 24; look.GrassPatchesMax = 32; look.GrassPerPatchMin = 6; look.GrassPerPatchMax = 12;
+                look.GrassInField = 2.5f; look.GrassOutsideField = .6f; look.GrassFieldEdge = 1.5f;
+            }), "Поле клеток — сплошная травяная поляна, вокруг травы меньше");
+            AddButton(presets, "Гуще за полем", () => ApplyLook(look =>
+            {
+                look.GrassCarpet = Mathf.Max(look.GrassCarpet, 6f); look.GrassSingles = Mathf.Max(look.GrassSingles, 1f);
+                look.GrassInField = .5f; look.GrassOutsideField = 2f; look.GrassFieldEdge = 1.5f;
+            }), "На клетках трава реже, за полем — гуще, переход плавный");
             AddButton(presets, "Густой лес", () => ApplyLook(look =>
             {
                 look.TreeGroupsMin = 14; look.TreeGroupsMax = 20;
@@ -114,6 +125,10 @@ namespace KingdomSurvival.LocationRendering.Editor
             F("Look.GrassSpacing", "Теснота (меньше — гуще)", .1f, 1.5f);
             F("Look.GrassClearOfStart", "Отступ от стартовых клеток, гексов", 0, 2f, "0 — трава и под бойцами");
             F("Look.GrassOutside", "Пятна за краем поля, гексов", 0, 4f);
+            SubHeading("Где гуще: на поле или за ним");
+            F("Look.GrassInField", "Густота травы на поле клеток", 0, 4f, "Множитель всех видов травы на клетках боя. 1 и 1 — ровно; больше на поле — поляна");
+            F("Look.GrassOutsideField", "Густота травы за полем", 0, 4f, "Множитель травы дальше от клеток. Больше, чем на поле, — за клетками всегда гуще");
+            F("Look.GrassFieldEdge", "Переход поле → окраина, гексов", .2f, 5f, "Ширина плавного перехода густоты от края клеток");
             F("Look.GrassScale", "Размер травы", .4f, 3f);
             SubHeading("Травяной ковёр и россыпь (по всему полю)");
             F("Look.GrassCarpet", "Ковёр: пучков травы карты на гекс", 0, 40, "Пучки травы карты мира (набор этапа 05) ровно по полю; 0 — нет ковра");
@@ -204,65 +219,16 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void BuildFrame()
         {
             asset.Frame.Repair();
-            Help("Обработка кадра генерируемой арены боя. «Общая» действует во всех видах карты, у которых не включена своя. " +
-                 "Вид выбирается и здесь, и в игре (кнопка «Вид: …» в бою); предпросмотр справа — в выбранном виде.");
-            VisualElement targets = Row();
-            string target = FrameTarget;
-            void Target(string id, string title)
-            {
-                Button button = new Button(() =>
-                {
-                    FrameTarget = id;
-                    if (!string.IsNullOrEmpty(id)) MapLabGameViews.Select(id);
-                    driver?.RequestRedraw();
-                    BuildLeft();
-                }) { text = title };
-                if (id == target) { button.style.unityFontStyleAndWeight = FontStyle.Bold; button.style.color = new Color(.95f, .82f, .5f); }
-                targets.Add(button);
-            }
-            Target("", "Общая");
-            foreach ((string id, string name) in MapLabGameViews.All())
-                Target(id, name);
-            left.Add(targets);
-
-            ArenaViewFrame view = string.IsNullOrEmpty(target) ? null : asset.Frame.View(target);
-            string active = MapLabGameViews.ActiveId;
-            ArenaViewFrame activeView = asset.Frame.View(active);
-            if (view == null)
-            {
-                if (activeView != null && activeView.Own)
-                    Warn("В предпросмотре вид «" + MapLabGameViews.ActiveName + "» — у него своя обработка, общая там не видна. Выберите вид без своей обработки, чтобы видеть общую.");
-            }
-            else
-            {
-                Toggle own = new Toggle("Своя обработка у вида «" + ViewName(target) + "»") { value = view.Own };
-                own.tooltip = "Выключено — вид берёт общую обработку. Включение начинается с копии общей.";
-                own.RegisterValueChangedCallback(evt =>
-                {
-                    Undo.RecordObject(asset, "Обработка кадра арены: своя у вида");
-                    if (evt.newValue && !view.Own) view.Post = asset.Frame.Common.Clone();
-                    view.Own = evt.newValue;
-                    ignoreUntil = 0;
-                    MarkChanged(false);
-                    BuildLeft();
-                });
-                left.Add(own);
-                if (!view.Own)
-                {
-                    Help("Вид берёт общую обработку. Включите «Свою обработку», чтобы настроить его отдельно.");
-                    return;
-                }
-            }
-
-            LocationPostEffects edited = view != null ? view.Post : asset.Frame.Common;
+            Help("Обработка кадра генерируемой арены боя — те же правила, что у мест: «Общая» действует во всех видах карты без своей; " +
+                 "у вида можно включить свою. Выбор вида здесь меняет вид и в предпросмотре (и в игре — та же настройка, что кнопка «Вид: …» в бою).");
             FrameEffectsEditor editor = new FrameEffectsEditor
             {
                 Database = AssetDatabase.LoadAssetAtPath<LocalLocationDatabaseAsset>(LocalLocationDatabaseAsset.AssetPath),
-                DirectPost = () => edited,
-                DirectTitle = view == null ? "Правится: общая обработка кадра арен (все виды без своей)" : "Правится: своя обработка вида «" + ViewName(target) + "»",
-                Sections = LocationFrameSection.Color | LocationFrameSection.LightLens | LocationFrameSection.Tone | LocationFrameSection.Quality,
-                DirectNote = "На арене действуют «Цвет» (день), «Свет и линза», «Тон» (кроме выборочной коррекции и градиентной карты) и сглаживание. " +
-                             "Холст, эффекты рисунков, атмосфера и персонажи — проходы мира места, на арене их нет.",
+                DirectPost = () => asset.Frame.Common,
+                ViewFrames = () => asset.Frame.Views,
+                DirectTitle = "Правится: обработка кадра арен боя",
+                Sections = ArenaFrameSections,
+                DirectNote = ArenaFrameNote,
                 Change = (action, rebuild) =>
                 {
                     Undo.RecordObject(asset, "Обработка кадра арены");
@@ -271,11 +237,22 @@ namespace KingdomSurvival.LocationRendering.Editor
                     MarkChanged(false);
                     if (rebuild) BuildLeft();
                 },
-                Rebuild = BuildLeft
+                Rebuild = BuildLeft,
+                ViewSelected = () => driver?.RequestRedraw(),
+                Pulse = strength => ArenaFrameBinding.Current?.Hit(strength),
+                Hit = strength => ArenaFrameBinding.Current?.Hit(strength),
             };
             if (editor.Database == null) { Help("Не найдена База локаций (сохранённые стили кадра)."); return; }
             left.Add(editor.Build());
         }
+
+        // Разделы обработки кадра, которые действуют на арене.
+        public const LocationFrameSection ArenaFrameSections = LocationFrameSection.Color | LocationFrameSection.LightLens | LocationFrameSection.Tone |
+                                                                LocationFrameSection.Canvas | LocationFrameSection.Game | LocationFrameSection.Characters | LocationFrameSection.Quality;
+
+        public const string ArenaFrameNote = "На арене действуют: цвет, свет и линза (со всплеском, вспышкой и тряской при ударе), тон, холст и воздух (облака, лучи), " +
+                                             "игровые состояния (красные края по здоровью вождя, вспышка, затемнение, полосы) и персонажи (подкраска и яркость фигур доски). " +
+                                             "Эффекты рисунков и частицы атмосферы — свойства мира места: у рисунка арены MapLab их нет.";
 
         private static string ViewName(string id) => MapLabGameViews.All().FirstOrDefault(item => item.Id == id).Name ?? id;
 

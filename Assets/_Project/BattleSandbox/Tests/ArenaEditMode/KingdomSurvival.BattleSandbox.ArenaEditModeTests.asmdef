@@ -7,7 +7,8 @@
     "KingdomSurvival.BattlefieldDatabase",
     "KingdomSurvival.MapLabBridge",
     "KingdomSurvival.MapLab",
-    "KingdomSurvival.ArtAssetDatabase"
+    "KingdomSurvival.ArtAssetDatabase",
+    "KingdomSurvival.LocationRendering"
   ],
   "includePlatforms": [
     "Editor"

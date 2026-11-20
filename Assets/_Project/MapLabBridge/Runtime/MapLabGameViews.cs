@@ -11,6 +11,15 @@ namespace KingdomSurvival.MapLabBridge
     // пересборка живой карты. Сами виды — MapLabMapViews (Resources).
     public static class MapLabGameViews
     {
+        // Обработка кадра мест берёт свою у текущего вида (LocationFrameViews):
+        // вид знает только этот модуль.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+#endif
+        private static void RegisterFrameViews() =>
+            KingdomSurvival.BattlefieldDatabase.LocationFrameViews.ActiveViewProvider = () => ActiveId;
+
         public static event Action Changed
         {
             add => MapLabMapViews.ActiveChanged += value;

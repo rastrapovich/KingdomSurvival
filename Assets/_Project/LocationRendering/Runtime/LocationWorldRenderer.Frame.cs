@@ -50,6 +50,9 @@ namespace KingdomSurvival.LocationRendering
         // Обработка кадра сейчас идёт (включена и не скрыта «до» сравнения).
         public bool PostActive => frameShown && Post != null && Post.Enabled;
 
+        // Обработка для прохода «Холста» (null — выключена).
+        public LocationPostEffects CanvasPost => PostActive ? Post : null;
+
         // Холст для LocationCanvasPass (null — нет).
         public LocationCanvasEffects ActiveCanvas => PostActive ? Post.Canvas : null;
 
@@ -78,10 +81,12 @@ namespace KingdomSurvival.LocationRendering
                 if (key?.Post != null) yield return key.Post;
             foreach (LocationFrameZone zone in Definition.FrameZones ?? new List<LocationFrameZone>())
                 if (zone?.Post != null) yield return zone.Post;
+            foreach (LocationViewFrame view in Sky.ViewFrames)
+                if (view != null && view.Own && view.Post != null) yield return view.Post;
         }
 
         // Набор материалов по нынешним данным (окна сравнивают с BuiltSpriteStructure).
-        public string CurrentSpriteStructure => SpriteStructureKey(Sky.Post, ExtraPosts());
+        public string CurrentSpriteStructure => SpriteStructureKey(Sky.PostFor(LocationFrameViews.ActiveViewId), ExtraPosts().Append(Sky.Post));
 
         // ------------------------------------------------------------------
         // Итог настроек кадра: основные → ключи суток (по часу) → зоны (по
@@ -150,8 +155,9 @@ namespace KingdomSurvival.LocationRendering
 
         private void UpdateEffectivePost()
         {
-            LocationPostEffects basePost = Sky.Post;
-            if (basePost == null) Sky.Post = basePost = new LocationPostEffects();
+            if (Sky.Post == null) Sky.Post = new LocationPostEffects();
+            // Своя обработка у текущего вида карты — если включена, иначе общая.
+            LocationPostEffects basePost = Sky.PostFor(LocationFrameViews.ActiveViewId);
             basePost.Repair();
             LocationFrameKeys keys = Sky.FrameKeys;
             List<LocationFrameZone> zones = Definition.FrameZones;

@@ -133,6 +133,95 @@ namespace KingdomSurvival.AnimationDatabase.Tests
         }
 
         [Test]
+        public void MirrorDirection_MatchesHorizontalMirrorOfStandardTable()
+        {
+            CreatureAnimationDatabaseAsset database = ScriptableObject.CreateInstance<CreatureAnimationDatabaseAsset>();
+            created.Add(database);
+            database.ResetDirectionMap();
+            foreach (CreatureAnimationDirection direction in CreatureAnimationLabels.Directions)
+            {
+                CreatureAnimationDirection mirrored = CreatureAnimationLabels.MirrorDirection(direction);
+                Assert.AreEqual(CreatureAnimationLabels.MirrorFacing(database.GetFacing(direction)), database.GetFacing(mirrored),
+                    "Зеркальная пара ракурса " + direction + " смотрит в отражённую сторону.");
+                Assert.AreEqual(direction, CreatureAnimationLabels.MirrorDirection(mirrored));
+            }
+        }
+
+        [Test]
+        public void Resolver_MirrorMode_OneRightView_IsMirroredForLeftFacings()
+        {
+            CreatureAnimationSetData set = MakeSet((CreatureAnimationAction.Idle, CreatureAnimationDirection.Front, 4));
+
+            // Без режима — прежнее правило: ближайший ракурс, без отражения.
+            CreatureAnimationClip plain = CreatureAnimationResolver.Resolve(set, CreatureAnimationAction.Idle, CreatureAnimationDirection.Back);
+            Assert.AreEqual(CreatureAnimationDirection.Front, plain.Direction);
+            Assert.IsFalse(plain.Mirrored);
+
+            set.SetMirrorMissingDirections(true);
+            // Вправо, вправо-вверх, вправо-вниз — как нарисовано.
+            foreach (CreatureAnimationDirection right in new[] { CreatureAnimationDirection.Front, CreatureAnimationDirection.FrontRight, CreatureAnimationDirection.FrontLeft })
+            {
+                CreatureAnimationClip clip = CreatureAnimationResolver.Resolve(set, CreatureAnimationAction.Idle, right);
+                Assert.AreEqual(CreatureAnimationDirection.Front, clip.Direction);
+                Assert.IsFalse(clip.Mirrored, right + " смотрит вправо — без отражения.");
+            }
+            // Влево, влево-вверх, влево-вниз — тот же ракурс, отражённый.
+            foreach (CreatureAnimationDirection left in new[] { CreatureAnimationDirection.Back, CreatureAnimationDirection.BackRight, CreatureAnimationDirection.BackLeft })
+            {
+                CreatureAnimationClip clip = CreatureAnimationResolver.Resolve(set, CreatureAnimationAction.Idle, left);
+                Assert.AreEqual(CreatureAnimationDirection.Front, clip.Direction);
+                Assert.IsTrue(clip.Mirrored, left + " смотрит влево — отражение.");
+                Assert.IsTrue(clip.IsDirectionSubstitute);
+            }
+        }
+
+        [Test]
+        public void Resolver_MirrorMode_DrawnDirectionWinsOverMirror()
+        {
+            CreatureAnimationSetData set = MakeSet(
+                (CreatureAnimationAction.Walk, CreatureAnimationDirection.Front, 3),
+                (CreatureAnimationAction.Walk, CreatureAnimationDirection.Back, 3));
+            set.SetMirrorMissingDirections(true);
+
+            CreatureAnimationClip back = CreatureAnimationResolver.Resolve(set, CreatureAnimationAction.Walk, CreatureAnimationDirection.Back);
+            Assert.AreEqual(CreatureAnimationDirection.Back, back.Direction);
+            Assert.IsFalse(back.Mirrored, "Нарисованный ракурс важнее отражённого.");
+
+            CreatureAnimationClip backRight = CreatureAnimationResolver.Resolve(set, CreatureAnimationAction.Walk, CreatureAnimationDirection.BackRight);
+            Assert.AreEqual(CreatureAnimationDirection.Back, backRight.Direction, "На равном расстоянии прямой ракурс важнее отражённого.");
+            Assert.IsFalse(backRight.Mirrored);
+        }
+
+        [Test]
+        public void Player_MirrorMode_ReportsMirroredClip_AndKeepsWalkPhase()
+        {
+            CreatureAnimationSetData set = MakeSet((CreatureAnimationAction.Walk, CreatureAnimationDirection.Front, 4));
+            set.SetMirrorMissingDirections(true);
+            CreatureAnimationPlayer player = new CreatureAnimationPlayer(set, CreatureAnimationDirection.Front);
+            player.Play(CreatureAnimationAction.Walk, 0f);
+            Sprite before = player.Evaluate(0.3f);
+            Assert.IsFalse(player.IsMirrored);
+
+            player.SetDirection(CreatureAnimationDirection.Back);
+            Assert.IsTrue(player.IsMirrored);
+            Assert.AreSame(before, player.Evaluate(0.3f), "Поворот не перезапускает шаг.");
+        }
+
+        [Test]
+        public void Status_MirrorMode_OneViewPerActionIsReady()
+        {
+            CreatureAnimationSetData set = MakeSet(
+                (CreatureAnimationAction.Idle, CreatureAnimationDirection.Front, 4),
+                (CreatureAnimationAction.Walk, CreatureAnimationDirection.Front, 6),
+                (CreatureAnimationAction.Attack, CreatureAnimationDirection.Front, 6),
+                (CreatureAnimationAction.Death, CreatureAnimationDirection.Front, 6));
+            Assert.AreEqual(CreatureAnimationSetStatus.Partial, set.Status);
+            set.SetMirrorMissingDirections(true);
+            Assert.AreEqual(CreatureAnimationSetStatus.Ready, set.Status);
+            Assert.IsFalse(set.HasCompleteAction(CreatureAnimationAction.Hit), "Действие без кадров не полное.");
+        }
+
+        [Test]
         public void SkipLastFrames_DropsOneToThreeTrailingFrames_InEveryDirection()
         {
             CreatureAnimationSetData set = MakeSet(

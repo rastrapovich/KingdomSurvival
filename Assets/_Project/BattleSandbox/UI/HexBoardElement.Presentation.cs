@@ -575,10 +575,13 @@ namespace KingdomSurvival.BattleSandbox
             image.style.width = width;
             image.style.height = height;
             // Отражение — вокруг центра картинки, поэтому опора X тоже отражается:
-            // ноги остаются в центре гекса.
-            float pivotX = presentation.Mirrored ? 1f - set.Pivot.x : set.Pivot.x;
-            float offsetX = presentation.Mirrored ? -cellOffset.x : cellOffset.x;
-            image.style.scale = new Scale(new Vector3(presentation.Mirrored ? -1f : 1f, 1f, 1f));
+            // ноги остаются в центре гекса. Противник отражён целиком; клип
+            // набора «один ракурс + отражение» отражается ещё раз (два
+            // отражения дают прямую картинку).
+            bool flip = presentation.Mirrored != (presentation.Player != null && presentation.Player.IsMirrored);
+            float pivotX = flip ? 1f - set.Pivot.x : set.Pivot.x;
+            float offsetX = flip ? -cellOffset.x : cellOffset.x;
+            image.style.scale = new Scale(new Vector3(flip ? -1f : 1f, 1f, 1f));
             image.style.left = ground.x - pivotX * width + offsetX * width;
             image.style.top = ground.y - (1f - set.Pivot.y) * height - cellOffset.y * height;
         }

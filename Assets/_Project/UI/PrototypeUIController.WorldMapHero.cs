@@ -264,6 +264,15 @@ public partial class PrototypeUIController
         float height = hexRadius * heightInRadii * set.FieldScale * Mathf.Max(0.0001f, worldMapZoom);
         float width = height * canvas.x / Mathf.Max(1f, canvas.y);
         Vector2 cellOffset = worldMapHeroPlayer.Clip != null ? worldMapHeroPlayer.Clip.Offset : Vector2.zero;
+        // Набор «один ракурс + отражение»: картинка, опора X и поправка ракурса
+        // отражаются вокруг центра кадра — ноги остаются в точке героя.
+        bool flip = worldMapHeroPlayer.IsMirrored;
+        float pivotX = flip ? 1f - set.Pivot.x : set.Pivot.x;
+        if (flip)
+            cellOffset.x = -cellOffset.x;
+        float scaleX = flip ? -1f : 1f;
+        if (worldMapHeroImage.style.scale.value.value.x != scaleX)
+            worldMapHeroImage.style.scale = new Scale(new Vector3(scaleX, 1f, 1f));
 
         if (worldMapHeroFallback.style.display != DisplayStyle.None)
             worldMapHeroFallback.style.display = DisplayStyle.None;
@@ -280,7 +289,7 @@ public partial class PrototypeUIController
         }
 
         worldMapHeroImage.style.translate = new Translate(
-            ground.x - set.Pivot.x * width + cellOffset.x * width,
+            ground.x - pivotX * width + cellOffset.x * width,
             ground.y - (1f - set.Pivot.y) * height - cellOffset.y * height);
     }
 

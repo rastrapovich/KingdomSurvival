@@ -144,6 +144,10 @@ namespace KingdomSurvival.AnimationDatabase
 
         public bool IsActionSubstitute => Action != RequestedAction;
         public bool IsDirectionSubstitute => Direction != RequestedDirection;
+        // Кадры ракурса Direction показываются отражёнными по горизонтали
+        // (режим набора «один ракурс + отражение»). Показ отражает картинку,
+        // опору X и поправку ракурса.
+        public bool Mirrored { get; }
 
         // Момент удара в секундах от начала клипа.
         public float ImpactSeconds => Duration * Data.ImpactTime;
@@ -154,8 +158,10 @@ namespace KingdomSurvival.AnimationDatabase
             CreatureAnimationClipData data,
             CreatureAnimationFrames cell,
             List<Sprite> frames,
-            List<int> sourceNumbers)
+            List<int> sourceNumbers,
+            bool mirrored = false)
         {
+            Mirrored = mirrored;
             RequestedAction = requestedAction;
             RequestedDirection = requestedDirection;
             Data = data;
@@ -250,7 +256,7 @@ namespace KingdomSurvival.AnimationDatabase
                 if (data == null)
                     continue;
 
-                CreatureAnimationClip clip = ResolveDirection(action, direction, data);
+                CreatureAnimationClip clip = ResolveDirection(action, direction, data, set.MirrorMissingDirections);
                 if (clip != null)
                     return clip;
             }
@@ -259,24 +265,33 @@ namespace KingdomSurvival.AnimationDatabase
 
         // Ближайший имеющийся ракурс этого действия: сначала точный, затем
         // соседние по кругу (по часовой, против часовой), затем дальше.
+        // С отражением на каждом расстоянии после прямого ракурса пробуется
+        // зеркальный: ракурс, который после отражения смотрит на этом
+        // расстоянии от нужного. Прямой при равенстве важнее отражённого.
         public static CreatureAnimationClip ResolveDirection(
             CreatureAnimationAction requestedAction,
             CreatureAnimationDirection direction,
-            CreatureAnimationClipData data)
+            CreatureAnimationClipData data,
+            bool allowMirror = false)
         {
             int count = CreatureAnimationLabels.DirectionCount;
             int start = (int)direction;
             for (int distance = 0; distance <= count / 2; distance++)
             {
-                for (int sign = 1; sign >= -1; sign -= 2)
+                for (int pass = 0; pass < (allowMirror ? 2 : 1); pass++)
                 {
-                    if (distance == 0 && sign < 0)
-                        continue;
-                    int index = ((start + sign * distance) % count + count) % count;
-                    CreatureAnimationFrames cell = data.FindDirection((CreatureAnimationDirection)index);
-                    CreatureAnimationClip clip = Build(requestedAction, direction, data, cell);
-                    if (clip != null)
-                        return clip;
+                    bool mirrored = pass == 1;
+                    for (int sign = 1; sign >= -1; sign -= 2)
+                    {
+                        if (distance == 0 && sign < 0)
+                            continue;
+                        CreatureAnimationDirection seen = (CreatureAnimationDirection)(((start + sign * distance) % count + count) % count);
+                        CreatureAnimationDirection source = mirrored ? CreatureAnimationLabels.MirrorDirection(seen) : seen;
+                        CreatureAnimationFrames cell = data.FindDirection(source);
+                        CreatureAnimationClip clip = Build(requestedAction, direction, data, cell, mirrored);
+                        if (clip != null)
+                            return clip;
+                    }
                 }
             }
             return null;
@@ -291,7 +306,8 @@ namespace KingdomSurvival.AnimationDatabase
             CreatureAnimationAction requestedAction,
             CreatureAnimationDirection requestedDirection,
             CreatureAnimationClipData data,
-            CreatureAnimationFrames cell)
+            CreatureAnimationFrames cell,
+            bool mirrored)
         {
             if (cell == null || cell.FrameCount == 0)
                 return null;
@@ -310,7 +326,7 @@ namespace KingdomSurvival.AnimationDatabase
             }
             if (frames.Count == 0)
                 return null;
-            return new CreatureAnimationClip(requestedAction, requestedDirection, data, cell, frames, numbers);
+            return new CreatureAnimationClip(requestedAction, requestedDirection, data, cell, frames, numbers, mirrored);
         }
     }
 
@@ -351,6 +367,9 @@ namespace KingdomSurvival.AnimationDatabase
         }
 
         public float StartedAt => startedAt;
+
+        // Текущий клип показывается отражённым («один ракурс + отражение»).
+        public bool IsMirrored => Clip != null && Clip.Mirrored;
 
         // Смерть имеет приоритет: павший не возвращается к живым действиям.
         public bool Play(CreatureAnimationAction action, float time, string clipKey = null)

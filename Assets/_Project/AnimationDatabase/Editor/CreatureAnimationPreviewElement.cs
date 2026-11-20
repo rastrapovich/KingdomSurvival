@@ -327,7 +327,8 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             }
             else if (clip != null && clip.IsDirectionSubstitute)
             {
-                text = "Ракурса «" + CreatureAnimationLabels.DirectionTitle(direction) + "» нет — показан ближайший: «" +
+                text = "Ракурса «" + CreatureAnimationLabels.DirectionTitle(direction) + "» нет — показан " +
+                       (clip.Mirrored ? "отражённый" : "ближайший") + ": «" +
                        CreatureAnimationLabels.DirectionTitle(clip.Direction) + "».";
             }
             noticeLabel.text = text;
@@ -378,6 +379,12 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             Vector2 offset = clip != null ? clip.Offset : Vector2.zero;
             float left = (width - size.x) * 0.5f + offset.x * size.x;
             float top = (height - size.y) * 0.5f - offset.y * size.y;
+            // Отражённый клип («один ракурс + отражение»): картинка отражена
+            // вокруг своего центра и сдвинута так, чтобы ноги остались на опоре.
+            bool flip = clip != null && clip.Mirrored;
+            if (flip)
+                left = (width - size.x) * 0.5f + (2f * Pivot.x - 1f) * size.x - offset.x * size.x;
+            spriteImage.style.scale = new Scale(new Vector3(flip ? -1f : 1f, 1f, 1f));
             spriteImage.style.left = left;
             spriteImage.style.top = top;
             spriteImage.style.width = size.x;
@@ -481,6 +488,8 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             if (database != null)
             {
                 HexFacing facing = database.GetFacing(clip != null ? clip.Direction : direction);
+                if (clip != null && clip.Mirrored)
+                    facing = CreatureAnimationLabels.MirrorFacing(facing);
                 Vector2 arrow = FacingScreenVector(facing).normalized * hexSize * 0.8f;
                 painter.strokeColor = new Color(1f, 1f, 1f, 0.85f);
                 painter.lineWidth = 2f;

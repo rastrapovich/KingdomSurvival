@@ -253,6 +253,10 @@ namespace KingdomSurvival.AnimationDatabase
         // Шаг ходьбы: сколько гексов проходит один цикл «Ходьбы». Скорость на
         // поле = шаг / длительность цикла, поэтому ноги не скользят.
         [SerializeField, Min(0.1f)] private float walkHexesPerCycle = 1f;
+        // «Один ракурс + отражение»: недостающий ракурс берётся у зеркальной
+        // пары, картинка показывается отражённой (волк нарисован лицом вправо —
+        // влево он смотрит отражённым). Действию хватает одного ракурса.
+        [SerializeField] private bool mirrorMissingDirections;
         [SerializeField] private List<CreatureAnimationClipData> clips = new List<CreatureAnimationClipData>();
 
         public string Id => id ?? string.Empty;
@@ -261,6 +265,7 @@ namespace KingdomSurvival.AnimationDatabase
         public Vector2 Pivot => pivot;
         public float FieldScale => Mathf.Max(0.1f, fieldScale);
         public Vector2Int CanvasSize => canvasSize;
+        public bool MirrorMissingDirections => mirrorMissingDirections;
         public IReadOnlyList<CreatureAnimationClipData> Clips => clips;
 
         public CreatureAnimationSetData()
@@ -328,13 +333,20 @@ namespace KingdomSurvival.AnimationDatabase
             }
         }
 
+        // Полное действие: все шесть ракурсов, а в режиме «один ракурс +
+        // отражение» — хотя бы один (остальные дают отражение и подбор).
         public bool HasCompleteAction(CreatureAnimationAction action)
         {
             CreatureAnimationClipData clip = FindClip(action);
-            return clip != null && clip.DirectionsWithFrames == CreatureAnimationLabels.DirectionCount;
+            if (clip == null)
+                return false;
+            return mirrorMissingDirections
+                ? clip.DirectionsWithFrames > 0
+                : clip.DirectionsWithFrames == CreatureAnimationLabels.DirectionCount;
         }
 
-        // «Готово»: ожидание, ходьба, смерть и атака или выстрел во всех шести ракурсах.
+        // «Готово»: ожидание, ходьба, смерть и атака или выстрел во всех шести
+        // ракурсах (в режиме отражения — хотя бы в одном).
         public CreatureAnimationSetStatus Status
         {
             get
@@ -391,6 +403,7 @@ namespace KingdomSurvival.AnimationDatabase
         public void SetPivot(Vector2 value) { pivot = value; }
         public void SetFieldScale(float value) { fieldScale = Mathf.Max(0.1f, value); }
         public void SetCanvasSize(Vector2Int value) { canvasSize = value; }
+        public void SetMirrorMissingDirections(bool value) { mirrorMissingDirections = value; }
 
         public const float DefaultWalkHexesPerSecond = 3f;
         public const float MinWalkHexesPerSecond = 0.5f;

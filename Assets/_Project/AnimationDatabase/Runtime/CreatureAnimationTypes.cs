@@ -207,6 +207,29 @@ namespace KingdomSurvival.AnimationDatabase
                    action == CreatureAnimationAction.SpecialAttack;
         }
 
+        // Зеркальная пара ракурса при отражении по горизонтали (вправо ↔ влево)
+        // по стандартной таблице ракурсов: Front ↔ Back, Front_Right ↔
+        // Back_Right, Front_Left ↔ Back_Left. Подбор ближайшего ракурса тоже
+        // опирается на стандартный круг.
+        public static CreatureAnimationDirection MirrorDirection(CreatureAnimationDirection direction)
+        {
+            int count = DirectionCount;
+            return (CreatureAnimationDirection)(((3 - (int)direction) % count + count) % count);
+        }
+
+        public static HexFacing MirrorFacing(HexFacing facing)
+        {
+            switch (facing)
+            {
+                case HexFacing.East: return HexFacing.West;
+                case HexFacing.West: return HexFacing.East;
+                case HexFacing.NorthEast: return HexFacing.NorthWest;
+                case HexFacing.NorthWest: return HexFacing.NorthEast;
+                case HexFacing.SouthEast: return HexFacing.SouthWest;
+                default: return HexFacing.SouthEast;
+            }
+        }
+
         // Расстояние по кругу ракурсов: 0…3.
         public static int RingDistance(int first, int second, int count)
         {

@@ -795,6 +795,8 @@ namespace KingdomSurvival.LocationRendering
                 height = hexWorld * FieldHeightInHexSizes * actor.Player.Set.FieldScale;
                 pivot = actor.Player.Set.Pivot;
                 offset = actor.Player.Clip?.Offset ?? Vector2.zero;
+                // Набор «один ракурс + отражение»: отражённый клип — ещё одно отражение.
+                if (actor.Player.IsMirrored) mirrored = !mirrored;
             }
             else if (actor.Unit?.ActiveBattlefieldSprite == null)
             {

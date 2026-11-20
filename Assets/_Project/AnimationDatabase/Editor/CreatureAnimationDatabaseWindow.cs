@@ -472,6 +472,28 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             setPanel.Add(walkStep);
             setPanel.Add(walkSpeed);
 
+            Toggle mirror = new Toggle("Один ракурс + отражение")
+            {
+                value = set.MirrorMissingDirections,
+                tooltip = "Недостающие ракурсы берутся у зеркальной пары и показываются отражёнными: " +
+                          "существо, нарисованное лицом вправо («Спереди»), влево смотрит отражённым. " +
+                          "Действию хватает одного ракурса — набор считается готовым. " +
+                          "Для существ с асимметричным оружием или светом не включать."
+            };
+            mirror.style.marginTop = 4f;
+            mirror.labelElement.style.minWidth = 110f;
+            mirror.RegisterValueChangedCallback(evt =>
+            {
+                CreatureAnimationSetData s = SelectedSet;
+                if (s == null || s.MirrorMissingDirections == evt.newValue)
+                    return;
+                Undo.RecordObject(database, "Один ракурс + отражение");
+                s.SetMirrorMissingDirections(evt.newValue);
+                EditorUtility.SetDirty(database);
+                ShowSelection();
+            });
+            setPanel.Add(mirror);
+
             CreatureAnimationSetData template = database.TemplateSet;
             bool isTemplate = template != null && ReferenceEquals(template, set);
             Label templateLabel = new Label(isTemplate
@@ -618,7 +640,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                                              (present > 0 ? "\nнормали " + litCells + "/" + present : string.Empty), 118f);
                 title.style.unityTextAlign = TextAnchor.MiddleLeft;
                 title.style.minHeight = TableCellHeight;
-                title.style.color = present == 6 ? ReadyColor : present > 0 ? PartialColor : EmptyColor;
+                title.style.color = set != null && set.HasCompleteAction(action) ? ReadyColor : present > 0 ? PartialColor : EmptyColor;
                 if (action == selectedAction)
                     title.style.unityFontStyleAndWeight = FontStyle.Bold;
                 row.Add(title);
@@ -799,10 +821,12 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 ModifyClip("Скорость анимации", c => c.SetFramesPerSecond(Mathf.Clamp(evt.newValue, CreatureAnimationClipData.MinFramesPerSecond, CreatureAnimationClipData.MaxFramesPerSecond))));
             detailPanel.Add(fps);
 
-            CreatureAnimationClip resolved = CreatureAnimationResolver.ResolveDirection(selectedAction, selectedDirection, clip);
+            CreatureAnimationClip resolved = CreatureAnimationResolver.ResolveDirection(selectedAction, selectedDirection, clip, set != null && set.MirrorMissingDirections);
             string duration = resolved != null
                 ? "Длительность: " + resolved.Duration.ToString("0.00") + " с · " + resolved.FrameCount + " кадр(ов)" +
-                  (resolved.IsDirectionSubstitute ? " (ракурс «" + CreatureAnimationLabels.DirectionTitle(resolved.Direction) + "»)" : string.Empty) +
+                  (resolved.IsDirectionSubstitute
+                      ? " (ракурс «" + CreatureAnimationLabels.DirectionTitle(resolved.Direction) + "»" + (resolved.Mirrored ? ", отражённый" : string.Empty) + ")"
+                      : string.Empty) +
                   (clip.UseSourceTiming ? " · исходный темп" : string.Empty)
                 : "Длительность: —";
             Label durationLabel = new Label(duration);

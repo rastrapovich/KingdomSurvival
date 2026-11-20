@@ -1,0 +1,1179 @@
+{
+  "date": "2026-11-20",
+  "commit": "55bc8cc4f981343f29583942a3cd98410b839b5e",
+  "workingTreeDirty": true,
+  "units": [
+    {
+      "id": "guard",
+      "displayLabel": "Гвардеец",
+      "maxHitPoints": 16,
+      "attack": 2,
+      "defense": 4,
+      "damage": 3,
+      "movement": 3,
+      "initiative": 3,
+      "attackRange": 1,
+      "tagIds": [
+        "species.human",
+        "role.defender",
+        "trait.armored"
+      ],
+      "abilities": []
+    },
+    {
+      "id": "archer",
+      "displayLabel": "Лучник",
+      "maxHitPoints": 11,
+      "attack": 3,
+      "defense": 1,
+      "damage": 3,
+      "movement": 3,
+      "initiative": 5,
+      "attackRange": 4,
+      "tagIds": [
+        "species.human",
+        "combat.ranged"
+      ],
+      "abilities": []
+    },
+    {
+      "id": "healer",
+      "displayLabel": "Лекарь",
+      "maxHitPoints": 12,
+      "attack": 1,
+      "defense": 2,
+      "damage": 3,
+      "movement": 3,
+      "initiative": 3,
+      "attackRange": 1,
+      "tagIds": [
+        "species.human"
+      ],
+      "abilities": []
+    },
+    {
+      "id": "spearman",
+      "displayLabel": "Копейщик",
+      "maxHitPoints": 15,
+      "attack": 3,
+      "defense": 3,
+      "damage": 3,
+      "movement": 3,
+      "initiative": 4,
+      "attackRange": 1,
+      "tagIds": [
+        "species.human",
+        "trait.beast_slayer"
+      ],
+      "abilities": []
+    },
+    {
+      "id": "scout",
+      "displayLabel": "Разведчик",
+      "maxHitPoints": 12,
+      "attack": 2,
+      "defense": 2,
+      "damage": 3,
+      "movement": 4,
+      "initiative": 6,
+      "attackRange": 1,
+      "tagIds": [
+        "species.human"
+      ],
+      "abilities": []
+    },
+    {
+      "id": "militia",
+      "displayLabel": "Ополченец",
+      "maxHitPoints": 14,
+      "attack": 2,
+      "defense": 2,
+      "damage": 3,
+      "movement": 4,
+      "initiative": 2,
+      "attackRange": 1,
+      "tagIds": [
+        "species.human"
+      ],
+      "abilities": []
+    },
+    {
+      "id": "forest_beast",
+      "displayLabel": "Бурогрив",
+      "maxHitPoints": 10,
+      "attack": 2,
+      "defense": 1,
+      "damage": 3,
+      "movement": 4,
+      "initiative": 5,
+      "attackRange": 1,
+      "tagIds": [
+        "species.beast"
+      ],
+      "abilities": []
+    },
+    {
+      "id": "forest_beast_strong",
+      "displayLabel": "Матёрый бурогрив",
+      "maxHitPoints": 14,
+      "attack": 3,
+      "defense": 2,
+      "damage": 4,
+      "movement": 4,
+      "initiative": 4,
+      "attackRange": 1,
+      "tagIds": [
+        "species.beast"
+      ],
+      "abilities": []
+    },
+    {
+      "id": "forest_beast_alpha",
+      "displayLabel": "Седой бурогрив",
+      "maxHitPoints": 18,
+      "attack": 4,
+      "defense": 3,
+      "damage": 5,
+      "movement": 3,
+      "initiative": 2,
+      "attackRange": 1,
+      "tagIds": [
+        "species.beast",
+        "trait.human_slayer"
+      ],
+      "abilities": []
+    },
+    {
+      "id": "wolf",
+      "displayLabel": "Волк",
+      "maxHitPoints": 10,
+      "attack": 3,
+      "defense": 1,
+      "damage": 3,
+      "movement": 5,
+      "initiative": 6,
+      "attackRange": 1,
+      "tagIds": [
+        "species.beast",
+        "combat.pack"
+      ],
+      "abilities": []
+    },
+    {
+      "id": "lynx",
+      "displayLabel": "Рысь",
+      "maxHitPoints": 9,
+      "attack": 4,
+      "defense": 1,
+      "damage": 4,
+      "movement": 5,
+      "initiative": 8,
+      "attackRange": 1,
+      "tagIds": [
+        "species.beast"
+      ],
+      "abilities": [
+        {
+          "id": "lynx.pounce",
+          "title": "Прыжок",
+          "description": "Цель в пределах 3 гексов: прыжок на 2–3 гекса к свободной клетке рядом с ней (тратит столько же движения) и удар ×1,25.",
+          "brick": 0,
+          "status": 1,
+          "kind": 1,
+          "cooldown": 2,
+          "rangeMin": 1,
+          "rangeMax": 3,
+          "pathMin": 2,
+          "pathMax": 3,
+          "damageMultiplier": 1.25,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "boar",
+      "displayLabel": "Кабан",
+      "maxHitPoints": 16,
+      "attack": 3,
+      "defense": 2,
+      "damage": 4,
+      "movement": 4,
+      "initiative": 4,
+      "attackRange": 1,
+      "tagIds": [
+        "species.beast"
+      ],
+      "abilities": [
+        {
+          "id": "boar.rush",
+          "title": "Короткий разгон",
+          "description": "Разбег по прямой на 2–3 гекса и удар ×1,25 по цели на продолжении линии.",
+          "brick": 5,
+          "status": 1,
+          "kind": 2,
+          "cooldown": 2,
+          "rangeMin": 1,
+          "rangeMax": 1,
+          "pathMin": 2,
+          "pathMax": 3,
+          "damageMultiplier": 1.25,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "bear",
+      "displayLabel": "Медведь",
+      "maxHitPoints": 22,
+      "attack": 4,
+      "defense": 3,
+      "damage": 5,
+      "movement": 3,
+      "initiative": 2,
+      "attackRange": 1,
+      "tagIds": [
+        "species.beast"
+      ],
+      "abilities": [
+        {
+          "id": "bear.break_guard",
+          "title": "Сбить стойку",
+          "description": "Соседняя цель: удар ×1,15 по текущей защите, затем снимает защитную стойку.",
+          "brick": 5,
+          "status": 1,
+          "kind": 3,
+          "cooldown": 2,
+          "rangeMin": 1,
+          "rangeMax": 1,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1.15,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "elk_bull",
+      "displayLabel": "Лось-секач",
+      "maxHitPoints": 18,
+      "attack": 3,
+      "defense": 2,
+      "damage": 4,
+      "movement": 5,
+      "initiative": 5,
+      "attackRange": 1,
+      "tagIds": [
+        "species.beast"
+      ],
+      "abilities": [
+        {
+          "id": "elk_bull.toss",
+          "title": "Отбросить",
+          "description": "Соседняя цель: удар ×1,1, затем отбрасывание на 1 гекс от себя.",
+          "brick": 1,
+          "status": 1,
+          "kind": 4,
+          "cooldown": 2,
+          "rangeMin": 1,
+          "rangeMax": 1,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1.1,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 1,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "sheshka",
+      "displayLabel": "Шешка",
+      "maxHitPoints": 8,
+      "attack": 2,
+      "defense": 0,
+      "damage": 2,
+      "movement": 5,
+      "initiative": 8,
+      "attackRange": 1,
+      "tagIds": [],
+      "abilities": []
+    },
+    {
+      "id": "prakh",
+      "displayLabel": "Прах",
+      "maxHitPoints": 10,
+      "attack": 2,
+      "defense": 1,
+      "damage": 3,
+      "movement": 4,
+      "initiative": 6,
+      "attackRange": 1,
+      "tagIds": [],
+      "abilities": []
+    },
+    {
+      "id": "blood_kleshchen",
+      "displayLabel": "Кровяной клещень",
+      "maxHitPoints": 8,
+      "attack": 3,
+      "defense": 0,
+      "damage": 2,
+      "movement": 5,
+      "initiative": 7,
+      "attackRange": 1,
+      "tagIds": [
+        "species.beast"
+      ],
+      "abilities": [
+        {
+          "id": "blood_kleshchen.attach",
+          "title": "Цепляется",
+          "description": "Соседняя цель: укус ×0,75; если оба живы — садится на неё и в начале своих ходов пьёт 2 HP. Снять — 1 действие жертвы или соседнего союзника.",
+          "brick": 6,
+          "status": 1,
+          "kind": 5,
+          "cooldown": 2,
+          "rangeMin": 1,
+          "rangeMax": 1,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 0.75,
+          "amount": 2,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        },
+        {
+          "id": "blood_kleshchen.spit",
+          "title": "Ошеломляющий плевок",
+          "description": "Одна цель в 2–3 гексах на линии видимости: ×0,5 (минимум 1) и «Ошеломлён» — без ответных ударов и с −1 движения до конца следующего хода цели.",
+          "brick": 3,
+          "status": 1,
+          "kind": 6,
+          "cooldown": 3,
+          "rangeMin": 2,
+          "rangeMax": 3,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 0.5,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "padalny_mnogonog",
+      "displayLabel": "Падальный многоног",
+      "maxHitPoints": 13,
+      "attack": 3,
+      "defense": 2,
+      "damage": 3,
+      "movement": 4,
+      "initiative": 5,
+      "attackRange": 1,
+      "tagIds": [
+        "species.beast"
+      ],
+      "abilities": [
+        {
+          "id": "padalny_mnogonog.numb",
+          "title": "Оцепеняет",
+          "description": "Соседняя цель: укус ×1 и «Оцепенение» на следующий ход (без добровольного движения и ответов). Защитная стойка блокирует оцепенение, но не урон.",
+          "brick": 3,
+          "status": 1,
+          "kind": 7,
+          "cooldown": 3,
+          "rangeMin": 1,
+          "rangeMax": 1,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        },
+        {
+          "id": "padalny_mnogonog.feed",
+          "title": "Кормится",
+          "description": "ИИ: прежде всего бьёт оцепеневшую жертву.",
+          "brick": 0,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "shipovik",
+      "displayLabel": "Шиповик",
+      "maxHitPoints": 10,
+      "attack": 3,
+      "defense": 1,
+      "damage": 3,
+      "movement": 3,
+      "initiative": 6,
+      "attackRange": 4,
+      "tagIds": [
+        "combat.ranged"
+      ],
+      "abilities": [
+        {
+          "id": "shipovik.kite",
+          "title": "Стреляет и отходит",
+          "description": "ИИ: выстрел и отход на 1–2 гекса в пределах того же движения.",
+          "brick": 0,
+          "status": 1,
+          "kind": 18,
+          "cooldown": 0,
+          "rangeMin": 3,
+          "rangeMax": 4,
+          "pathMin": 1,
+          "pathMax": 2,
+          "damageMultiplier": 1,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "kosteplyuy",
+      "displayLabel": "Костеплюй",
+      "maxHitPoints": 12,
+      "attack": 3,
+      "defense": 1,
+      "damage": 4,
+      "movement": 3,
+      "initiative": 4,
+      "attackRange": 3,
+      "tagIds": [
+        "combat.ranged",
+        "trait.armored"
+      ],
+      "abilities": []
+    },
+    {
+      "id": "treshchotka",
+      "displayLabel": "Трещотка",
+      "maxHitPoints": 8,
+      "attack": 3,
+      "defense": 0,
+      "damage": 3,
+      "movement": 4,
+      "initiative": 8,
+      "attackRange": 5,
+      "tagIds": [
+        "combat.ranged"
+      ],
+      "abilities": [
+        {
+          "id": "treshchotka.distance",
+          "title": "Держит дистанцию",
+          "description": "ИИ: держит дистанцию 4–5 гексов, при угрозе сначала отходит.",
+          "brick": 0,
+          "status": 1,
+          "kind": 19,
+          "cooldown": 0,
+          "rangeMin": 4,
+          "rangeMax": 5,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "tinny_polzun",
+      "displayLabel": "Тинный ползун",
+      "maxHitPoints": 20,
+      "attack": 2,
+      "defense": 4,
+      "damage": 3,
+      "movement": 2,
+      "initiative": 2,
+      "attackRange": 1,
+      "tagIds": [
+        "role.defender"
+      ],
+      "abilities": [
+        {
+          "id": "tinny_polzun.engulf",
+          "title": "Накрывает",
+          "description": "Соседняя цель: ×0,75 и «Захвачен». В начале ходов ползуна жертва теряет 2 HP. Вырваться/вытащить — 1 действие.",
+          "brick": 2,
+          "status": 1,
+          "kind": 8,
+          "cooldown": 2,
+          "rangeMin": 1,
+          "rangeMax": 1,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 0.75,
+          "amount": 2,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "kamnespin",
+      "displayLabel": "Камнеспин",
+      "maxHitPoints": 16,
+      "attack": 2,
+      "defense": 3,
+      "damage": 3,
+      "movement": 2,
+      "initiative": 2,
+      "attackRange": 1,
+      "tagIds": [
+        "trait.armored",
+        "role.defender"
+      ],
+      "abilities": []
+    },
+    {
+      "id": "zhivuchy_gnilets",
+      "displayLabel": "Живучий гнилец",
+      "maxHitPoints": 22,
+      "attack": 3,
+      "defense": 3,
+      "damage": 4,
+      "movement": 2,
+      "initiative": 2,
+      "attackRange": 1,
+      "tagIds": [],
+      "abilities": [
+        {
+          "id": "zhivuchy_gnilets.regen",
+          "title": "Восстанавливается",
+          "description": "В начале своего хода на мелкой воде восстанавливает 10% HP (вверх, минимум 1).",
+          "brick": 4,
+          "status": 1,
+          "kind": 21,
+          "cooldown": 0,
+          "rangeMin": 1,
+          "rangeMax": 1,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 10,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "srubnik",
+      "displayLabel": "Срубник",
+      "maxHitPoints": 12,
+      "attack": 4,
+      "defense": 1,
+      "damage": 4,
+      "movement": 3,
+      "initiative": 7,
+      "attackRange": 1,
+      "tagIds": [
+        "trait.human_slayer"
+      ],
+      "abilities": [
+        {
+          "id": "srubnik.hidden",
+          "title": "Скрыт до броска",
+          "description": "Если разведка не заметила — начинает бой скрытым (виден подозрительный пень). Раскрывается своей атакой, уроном или контактом.",
+          "brick": 8,
+          "status": 1,
+          "kind": 22,
+          "cooldown": 0,
+          "rangeMin": 1,
+          "rangeMax": 1,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "pepelny_vepr",
+      "displayLabel": "Пепельный вепрь",
+      "maxHitPoints": 18,
+      "attack": 4,
+      "defense": 2,
+      "damage": 4,
+      "movement": 4,
+      "initiative": 5,
+      "attackRange": 1,
+      "tagIds": [
+        "species.beast"
+      ],
+      "abilities": [
+        {
+          "id": "pepelny_vepr.charge",
+          "title": "Разгоняется и сбивает",
+          "description": "Разбег по прямой на 2–4 гекса и удар ×1,25 по цели на продолжении линии, затем отбрасывание на 1 гекс.",
+          "brick": 5,
+          "status": 1,
+          "kind": 2,
+          "cooldown": 3,
+          "rangeMin": 1,
+          "rangeMax": 1,
+          "pathMin": 2,
+          "pathMax": 4,
+          "damageMultiplier": 1.25,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 1,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "beregovik",
+      "displayLabel": "Береговик",
+      "maxHitPoints": 16,
+      "attack": 3,
+      "defense": 3,
+      "damage": 4,
+      "movement": 3,
+      "initiative": 4,
+      "attackRange": 1,
+      "tagIds": [],
+      "abilities": [
+        {
+          "id": "beregovik.pull",
+          "title": "Тянет к воде",
+          "description": "Притягивает бойца к воде.\nСущество выведено из набора 19.11.2026.",
+          "brick": 1,
+          "status": 2,
+          "kind": 0,
+          "cooldown": 0,
+          "rangeMin": 0,
+          "rangeMax": 0,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        },
+        {
+          "id": "beregovik.wet",
+          "title": "Сильнее у воды",
+          "description": "На мокром гексе бьёт сильнее.\nСущество выведено из набора 19.11.2026.",
+          "brick": 4,
+          "status": 2,
+          "kind": 0,
+          "cooldown": 0,
+          "rangeMin": 0,
+          "rangeMax": 0,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "lozovy_khvatun",
+      "displayLabel": "Лозовый хватун",
+      "maxHitPoints": 15,
+      "attack": 3,
+      "defense": 2,
+      "damage": 3,
+      "movement": 1,
+      "initiative": 3,
+      "attackRange": 3,
+      "tagIds": [
+        "combat.ranged"
+      ],
+      "abilities": [
+        {
+          "id": "lozovy_khvatun.tether",
+          "title": "Хватает и подтягивает",
+          "description": "Цель до 3 гексов: ×0,75, лоза (5 HP) и подтягивание на 1 гекс. Следующими ходами подтягивает ещё; рвётся дальше 4 гексов.",
+          "brick": 2,
+          "status": 1,
+          "kind": 9,
+          "cooldown": 2,
+          "rangeMin": 1,
+          "rangeMax": 3,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 0.75,
+          "amount": 0,
+          "objectHitPoints": 5,
+          "duration": 0,
+          "limit": 4,
+          "push": 1,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "zvonnik",
+      "displayLabel": "Звонник",
+      "maxHitPoints": 18,
+      "attack": 3,
+      "defense": 3,
+      "damage": 4,
+      "movement": 3,
+      "initiative": 5,
+      "attackRange": 2,
+      "tagIds": [],
+      "abilities": [
+        {
+          "id": "zvonnik.mark",
+          "title": "Метит",
+          "description": "До 2 врагов в 3 гексах получают метку. На следующем ходу «Удар звона» ×1,25 по отмеченным, оставшимся в зоне радиуса 3.",
+          "brick": 3,
+          "status": 1,
+          "kind": 10,
+          "cooldown": 2,
+          "rangeMin": 0,
+          "rangeMax": 3,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1.25,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 2,
+          "push": 0,
+          "spawnUnitId": null
+        },
+        {
+          "id": "zvonnik.toll",
+          "title": "Бьёт отмеченных",
+          "description": "Вторая часть «Метит»: в следующую активацию — удар звона ×1,25 по отмеченным, оставшимся в объявленной зоне. Исполняется способностью «Метит».",
+          "brick": 9,
+          "status": 1,
+          "kind": 0,
+          "cooldown": 0,
+          "rangeMin": 0,
+          "rangeMax": 0,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "belorev",
+      "displayLabel": "Белорев",
+      "maxHitPoints": 26,
+      "attack": 4,
+      "defense": 3,
+      "damage": 5,
+      "movement": 3,
+      "initiative": 3,
+      "attackRange": 1,
+      "tagIds": [
+        "species.beast"
+      ],
+      "abilities": [
+        {
+          "id": "belorev.scatter",
+          "title": "Разгоняет строй",
+          "description": "Натиском разбрасывает нескольких бойцов и сбивает стойки.\nРешение 19.11.2026: фирменные способности (натиск, рёв, устойчивость к контролю) отключены; обычная боевая запись сохранена.",
+          "brick": 5,
+          "status": 2,
+          "kind": 0,
+          "cooldown": 0,
+          "rangeMin": 0,
+          "rangeMax": 0,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "chernolob",
+      "displayLabel": "Чернолоб",
+      "maxHitPoints": 28,
+      "attack": 5,
+      "defense": 4,
+      "damage": 5,
+      "movement": 3,
+      "initiative": 2,
+      "attackRange": 1,
+      "tagIds": [
+        "species.beast",
+        "trait.armored"
+      ],
+      "abilities": [
+        {
+          "id": "chernolob.breakthrough",
+          "title": "Прорыв",
+          "description": "Прорывается через строй; после сорванного рывка открыт с фланга.\nРешение 19.11.2026: «Прорыв» отключён; обычный боец.",
+          "brick": 5,
+          "status": 2,
+          "kind": 0,
+          "cooldown": 0,
+          "rangeMin": 0,
+          "rangeMax": 0,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        },
+        {
+          "id": "chernolob.telegraph",
+          "title": "Показанный рывок",
+          "description": "Линия рывка видна за ход.\nРешение 19.11.2026: «Показанный рывок» отключён.",
+          "brick": 9,
+          "status": 2,
+          "kind": 0,
+          "cooldown": 0,
+          "rangeMin": 0,
+          "rangeMax": 0,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "podkopen",
+      "displayLabel": "Подкопень",
+      "maxHitPoints": 16,
+      "attack": 3,
+      "defense": 2,
+      "damage": 4,
+      "movement": 3,
+      "initiative": 4,
+      "attackRange": 1,
+      "tagIds": [],
+      "abilities": [
+        {
+          "id": "podkopen.burrow",
+          "title": "Подкоп",
+          "description": "Уходит под землю и объявляет выход до 3 гексов по грунту. На следующем ходу выходит и может ударить соседнего ×1,15 и подтянуть к норе.",
+          "brick": 8,
+          "status": 1,
+          "kind": 11,
+          "cooldown": 3,
+          "rangeMin": 1,
+          "rangeMax": 3,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1.15,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 2,
+          "limit": 0,
+          "push": 1,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "golosoed",
+      "displayLabel": "Голосоед",
+      "maxHitPoints": 12,
+      "attack": 2,
+      "defense": 1,
+      "damage": 3,
+      "movement": 4,
+      "initiative": 6,
+      "attackRange": 1,
+      "tagIds": [],
+      "abilities": [
+        {
+          "id": "golosoed.call",
+          "title": "Зов",
+          "description": "Цель до 4 гексов без защитной стойки делает один вынужденный шаг ближе. Без урона.",
+          "brick": 1,
+          "status": 1,
+          "kind": 12,
+          "cooldown": 3,
+          "rangeMin": 1,
+          "rangeMax": 4,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 0,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 1,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "kostyanoi_sadovnik",
+      "displayLabel": "Костяной садовник",
+      "maxHitPoints": 18,
+      "attack": 3,
+      "defense": 2,
+      "damage": 4,
+      "movement": 3,
+      "initiative": 3,
+      "attackRange": 1,
+      "tagIds": [],
+      "abilities": [
+        {
+          "id": "kostyanoi_sadovnik.roots",
+          "title": "Пустить корни",
+          "description": "Поглощает соседний труп и восстанавливает 25% HP (минимум 1).",
+          "brick": 7,
+          "status": 1,
+          "kind": 13,
+          "cooldown": 2,
+          "rangeMin": 1,
+          "rangeMax": 1,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 25,
+          "objectHitPoints": 0,
+          "duration": 0,
+          "limit": 0,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "nitnik",
+      "displayLabel": "Нитник",
+      "maxHitPoints": 12,
+      "attack": 2,
+      "defense": 1,
+      "damage": 3,
+      "movement": 4,
+      "initiative": 5,
+      "attackRange": 1,
+      "tagIds": [],
+      "abilities": [
+        {
+          "id": "nitnik.thread",
+          "title": "Сплести нить",
+          "description": "Нить между двумя точками в 3 гексах (длина 2–4), 4 HP, 3 раунда. Вход на гекс нити останавливает движение (кроме создателя).",
+          "brick": 4,
+          "status": 1,
+          "kind": 14,
+          "cooldown": 2,
+          "rangeMin": 1,
+          "rangeMax": 3,
+          "pathMin": 2,
+          "pathMax": 4,
+          "damageMultiplier": 1,
+          "amount": 0,
+          "objectHitPoints": 4,
+          "duration": 3,
+          "limit": 2,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "rechnoy_uzel",
+      "displayLabel": "Речной узел",
+      "maxHitPoints": 36,
+      "attack": 4,
+      "defense": 3,
+      "damage": 5,
+      "movement": 1,
+      "initiative": 2,
+      "attackRange": 1,
+      "tagIds": [],
+      "abilities": [
+        {
+          "id": "rechnoy_uzel.tendrils",
+          "title": "Захват жгутом",
+          "description": "Свободный жгут хватает цель до 3 гексов (×0,75); удержанного можно подтянуть к телу. Жгут 6 HP.",
+          "brick": 2,
+          "status": 1,
+          "kind": 15,
+          "cooldown": 0,
+          "rangeMin": 1,
+          "rangeMax": 3,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 0.75,
+          "amount": 0,
+          "objectHitPoints": 6,
+          "duration": 0,
+          "limit": 3,
+          "push": 1,
+          "spawnUnitId": null
+        },
+        {
+          "id": "rechnoy_uzel.flood",
+          "title": "Разлив",
+          "description": "Каждую 2-ю свою активацию объявляет 2 клетки разлива у воды; они станут мелкой водой на следующем ходу. Не больше 12 клеток за бой.",
+          "brick": 4,
+          "status": 1,
+          "kind": 23,
+          "cooldown": 0,
+          "rangeMin": 1,
+          "rangeMax": 1,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 2,
+          "objectHitPoints": 0,
+          "duration": 2,
+          "limit": 12,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "khozyain_temnoy_yamy",
+      "displayLabel": "Хозяин тёмной ямы",
+      "maxHitPoints": 40,
+      "attack": 4,
+      "defense": 3,
+      "damage": 5,
+      "movement": 2,
+      "initiative": 3,
+      "attackRange": 1,
+      "tagIds": [],
+      "abilities": [
+        {
+          "id": "khozyain_temnoy_yamy.pits",
+          "title": "Провалы",
+          "description": "Цикл: уходит под землю → объявляет 2 просадки и выход → выходит (просадки бьют ×1) и остаётся уязвим до следующего хода.",
+          "brick": 8,
+          "status": 1,
+          "kind": 16,
+          "cooldown": 0,
+          "rangeMin": 1,
+          "rangeMax": 4,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 2,
+          "objectHitPoints": 0,
+          "duration": 2,
+          "limit": 4,
+          "push": 0,
+          "spawnUnitId": null
+        }
+      ]
+    },
+    {
+      "id": "gnezdovaya_matka",
+      "displayLabel": "Гнездовая матка",
+      "maxHitPoints": 30,
+      "attack": 2,
+      "defense": 2,
+      "damage": 3,
+      "movement": 1,
+      "initiative": 2,
+      "attackRange": 1,
+      "tagIds": [],
+      "abilities": [
+        {
+          "id": "gnezdovaya_matka.eggs",
+          "title": "Отложить яйцо",
+          "description": "Яйцо (5 HP) на соседней клетке; через 2 хода матки вылупляется клещень. Не больше 3 яиц и 3 живых клещней.",
+          "brick": 10,
+          "status": 1,
+          "kind": 17,
+          "cooldown": 3,
+          "rangeMin": 1,
+          "rangeMax": 1,
+          "pathMin": 0,
+          "pathMax": 0,
+          "damageMultiplier": 1,
+          "amount": 2,
+          "objectHitPoints": 5,
+          "duration": 2,
+          "limit": 3,
+          "push": 0,
+          "spawnUnitId": "blood_kleshchen"
+        }
+      ]
+    }
+  ],
+  "note": "Снимок для сопоставления, не замена актуальной Unity-базы."
+}

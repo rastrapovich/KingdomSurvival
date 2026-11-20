@@ -1210,6 +1210,11 @@ namespace KingdomSurvival.BattleSandbox
                 {
                     visibleUnitIds.Add(unit.Id);
                     SyncHealthBar(unit, healthCenter, healthTop, layout.Size * HealthBarWidthScale);
+                    // Пакет состояний: якорь значков — верх стабильной рамки фигуры.
+                    float figureTop = figures.Count > 0 && figures[figures.Count - 1].UnitId == unit.Id
+                        ? figures[figures.Count - 1].Rect.yMin
+                        : unitCenter.y - layout.Size * 0.9f;
+                    CollectStatusAnchor(unit, unitCenter, figureTop, layout);
                 }
             }
 
@@ -1272,6 +1277,7 @@ namespace KingdomSurvival.BattleSandbox
             SyncTerrainOverlay(layout);
             foreach (VisualElement healthBar in unitHealthBars.Values)
                 healthBar.BringToFront();
+            SyncStatusIcons();
             attackCursorOverlay.BringToFront();
             damageLabel.BringToFront();
         }
@@ -1356,6 +1362,7 @@ namespace KingdomSurvival.BattleSandbox
                 healthBar.RemoveFromHierarchy();
             unitHealthBars.Clear();
             unitHealthFills.Clear();
+            ClearStatusIcons();
         }
 
         private static void DrawRoleMark(

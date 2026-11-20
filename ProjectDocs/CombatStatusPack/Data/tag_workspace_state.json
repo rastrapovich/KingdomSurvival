@@ -1,0 +1,1835 @@
+{
+  "schema": "ks.creature-tags.workspace",
+  "schemaVersion": 3,
+  "catalogVersion": "2026-11-20-status-passives-1",
+  "updatedAt": 1795180583074,
+  "changes": {
+    "nature.returned": {
+      "name": "Нежить",
+      "effect": "Посмертное происхождение. Особые способы контакта и избавления задаются отдельно; общих иммунитетов нет.",
+      "notes": "",
+      "categories": [
+        "combat",
+        "myth",
+        "body"
+      ],
+      "favorite": true,
+      "updatedAt": 1793835692623
+    },
+    "nature.spirit": {
+      "name": "Дух",
+      "effect": "Проявление нечеловеческой силы. Сам тег не даёт неуязвимость или проход сквозь стены.",
+      "notes": "",
+      "categories": [
+        "combat",
+        "myth",
+        "body"
+      ],
+      "favorite": true,
+      "updatedAt": 1793835717843
+    },
+    "tactic.pack_hunter": {
+      "name": "Стая",
+      "effect": "Получает +1 к Атаке вблизи, если рядом с целью стоит другой союзный стайный охотник.",
+      "notes": "",
+      "categories": [
+        "combat"
+      ],
+      "favorite": true,
+      "updatedAt": 1793931159145
+    },
+    "tactic.isolation_hunter": {
+      "name": "Охотник",
+      "effect": "Получает +1 к Атаке вблизи против цели, рядом с которой нет её союзников.",
+      "notes": "",
+      "categories": [
+        "combat"
+      ],
+      "favorite": true,
+      "updatedAt": 1793931182902
+    },
+    "tactic.wounded_hunter": {
+      "name": "Чует слабину",
+      "effect": "Получает +1 к Атаке вблизи против цели, у которой осталось не больше половины здоровья.",
+      "notes": "",
+      "categories": [
+        "combat"
+      ],
+      "favorite": true,
+      "updatedAt": 1793931283059
+    },
+    "trait.exposed_flanks": {
+      "favorite": true,
+      "updatedAt": 1793931346987
+    },
+    "trait.ranged_resistant": {
+      "favorite": true,
+      "updatedAt": 1793931358470
+    },
+    "trait.height_adapted": {
+      "name": "Цепкий",
+      "effect": "Тратит на клетку склона 1 очко движения вместо 2. Стены и пропасти не пересекает.",
+      "notes": "",
+      "categories": [
+        "combat",
+        "travel",
+        "body"
+      ],
+      "favorite": true,
+      "updatedAt": 1793931427063
+    },
+    "tactic.last_ally_standing": {
+      "name": "Загнанный одиночка",
+      "effect": "Получает +2 к Атаке вблизи, пока на поле не осталось других живых союзников.",
+      "notes": "",
+      "categories": [
+        "combat"
+      ],
+      "favorite": true,
+      "updatedAt": 1793931677960
+    },
+    "candidate.ks.0104": {
+      "name": "Неуверенность",
+      "effect": "За пределами половины своей дальности теряет 1 Атаку; ближняя половина работает обычно.",
+      "notes": "отдельный тег приобретаемый, можно от него избавиться в процессе",
+      "categories": [
+        "combat"
+      ],
+      "favorite": true,
+      "updatedAt": 1795090198479
+    },
+    "candidate.ks.0113": {
+      "favorite": true,
+      "updatedAt": 1795090818678
+    },
+    "candidate.ks.0204": {
+      "name": "Громко спит",
+      "effect": "Во время сна создаёт шумный сигнал стоянки , есть небольшой шанс что нападут во время отдыха.",
+      "notes": "",
+      "categories": [
+        "camp",
+        "support"
+      ],
+      "favorite": true,
+      "updatedAt": 1795092023253
+    },
+    "candidate.ks.0205": {
+      "favorite": true,
+      "updatedAt": 1795092032678
+    },
+    "candidate.ks.0206": {
+      "favorite": true,
+      "updatedAt": 1795092092790
+    },
+    "candidate.ks.0207": {
+      "favorite": true,
+      "updatedAt": 1795092123414
+    },
+    "candidate.ks.0282": {
+      "favorite": true,
+      "updatedAt": 1795092699056
+    },
+    "candidate.ks.0292": {
+      "favorite": true,
+      "updatedAt": 1795092852022
+    },
+    "candidate.ks.0127": {
+      "name": "Липкий след",
+      "effect": "После принудительного сдвига первая пройденная им клетка становится липкой на один раунд. Клетка Требует дополнительного передвижения",
+      "notes": "",
+      "categories": [
+        "combat",
+        "risk"
+      ],
+      "favorite": true,
+      "updatedAt": 1795093270348
+    },
+    "candidate.ks.0129": {
+      "name": "Регенерация",
+      "effect": "Восстанавливает 1 здоровье в начале хода,",
+      "notes": "",
+      "categories": [
+        "combat",
+        "risk"
+      ],
+      "favorite": true,
+      "updatedAt": 1795093304919
+    },
+    "passive.20261119.002": {
+      "favorite": true,
+      "updatedAt": 1795105739102
+    },
+    "passive.20261119.003": {
+      "name": "Крепкая кольчуга",
+      "effect": "Снижает прямой физический урон на 20%, минимум остаётся 1. Периодический урон не сокращается.",
+      "notes": "это будет не тег а предмет. тоже сделать его. и добавить в список предметов",
+      "categories": [
+        "defense"
+      ],
+      "favorite": true,
+      "updatedAt": 1795105834167
+    },
+    "passive.20261119.004": {
+      "favorite": true,
+      "updatedAt": 1795106587605
+    },
+    "passive.20261119.005": {
+      "favorite": true,
+      "updatedAt": 1795106625004
+    },
+    "passive.20261119.007": {
+      "name": "Строевой наставник",
+      "effect": "Соседние союзники получают +1 Атаку, пока носитель не оглушён. Две такие ауры не складываются.",
+      "notes": "",
+      "categories": [
+        "support"
+      ],
+      "favorite": true,
+      "updatedAt": 1795106712411
+    },
+    "passive.20261119.009": {
+      "favorite": true,
+      "updatedAt": 1795106762605
+    },
+    "passive.20261119.010": {
+      "name": "Сбивающий облик",
+      "effect": "Первая ближняя атака каждого врага с тегом \"человек\" по носителю получает −2 Атаку. Работает один раз на врага за бой.",
+      "notes": "",
+      "categories": [
+        "defense"
+      ],
+      "favorite": true,
+      "updatedAt": 1795106830371
+    },
+    "passive.20261119.012": {
+      "favorite": true,
+      "updatedAt": 1795107266551
+    },
+    "passive.20261119.013": {
+      "name": "Слаженность рощи",
+      "effect": "Соседние союзники с тегом \"растение \" получают +1 Защиту. Носитель не получает бонус от себя.",
+      "notes": "Так же добавь тег растение получают на 50% больше урона огнем",
+      "categories": [
+        "support"
+      ],
+      "favorite": true,
+      "updatedAt": 1795107377073
+    },
+    "passive.20261119.014": {
+      "name": "Хранитель поросли",
+      "effect": "Соседний союзник с тегом растение восстанавливает 1 HP за раунд.",
+      "notes": "",
+      "categories": [
+        "support"
+      ],
+      "favorite": true,
+      "updatedAt": 1795107465490
+    },
+    "passive.20261119.016": {
+      "favorite": true,
+      "updatedAt": 1795107484481
+    },
+    "passive.20261119.019": {
+      "favorite": true,
+      "updatedAt": 1795107575581
+    },
+    "passive.20261119.020": {
+      "favorite": true,
+      "updatedAt": 1795107587115
+    },
+    "passive.20261119.021": {
+      "name": "Подавление",
+      "effect": "Получает +2 Атаки против цели, чьё максимальное здоровье не превышает половины максимального здоровья носителя.",
+      "notes": "",
+      "categories": [
+        "attack"
+      ],
+      "favorite": true,
+      "updatedAt": 1795107626368
+    },
+    "passive.20261119.022": {
+      "favorite": true,
+      "updatedAt": 1795107635203
+    },
+    "passive.20261119.024": {
+      "favorite": true,
+      "updatedAt": 1795107696738
+    },
+    "passive.20261119.025": {
+      "favorite": true,
+      "updatedAt": 1795107713600
+    },
+    "passive.20261119.027": {
+      "favorite": true,
+      "updatedAt": 1795107825396
+    },
+    "passive.20261119.029": {
+      "name": "Чумной распад",
+      "effect": "При гибели накладывает на соседних живых врагов гниение: −1 HP в начале двух следующих ходов. Союзников тоже задевает.",
+      "notes": "",
+      "categories": [
+        "status",
+        "death"
+      ],
+      "favorite": true,
+      "updatedAt": 1795107937893
+    },
+    "passive.20261119.031": {
+      "favorite": true,
+      "updatedAt": 1795107968983
+    },
+    "passive.20261119.032": {
+      "favorite": true,
+      "updatedAt": 1795107986312
+    },
+    "passive.20261119.033": {
+      "favorite": true,
+      "updatedAt": 1795108023630
+    },
+    "passive.20261119.035": {
+      "favorite": true,
+      "updatedAt": 1795108105449
+    },
+    "passive.20261119.036": {
+      "favorite": true,
+      "updatedAt": 1795108279398
+    },
+    "passive.20261119.037": {
+      "name": "Звереет от боли",
+      "effect": "После полученного прямого урона следующая собственная атака получает +3 Атаки; заряд один, пропадает через два хода.",
+      "notes": "",
+      "categories": [
+        "attack"
+      ],
+      "favorite": true,
+      "updatedAt": 1795108384314
+    },
+    "passive.20261119.038": {
+      "favorite": true,
+      "updatedAt": 1795108402470
+    },
+    "passive.20261119.040": {
+      "name": "полёт",
+      "effect": "Может пролетать над низкими преградами за обычную цену шага. Завершает движение только на свободном допустимом гексе.",
+      "notes": "",
+      "categories": [
+        "movement"
+      ],
+      "favorite": true,
+      "updatedAt": 1795108505161
+    },
+    "passive.20261119.041": {
+      "favorite": true,
+      "updatedAt": 1795108567601
+    },
+    "passive.20261119.042": {
+      "favorite": true,
+      "updatedAt": 1795108613146
+    },
+    "passive.20261119.043": {
+      "name": "Охотник",
+      "effect": "Получает +2 Атаки против явно помеченного зверя. Назначение другим существам по внешности запрещено.",
+      "notes": "",
+      "categories": [
+        "attack"
+      ],
+      "favorite": true,
+      "updatedAt": 1795108658931
+    },
+    "passive.20261119.044": {
+      "name": "Великанобой",
+      "effect": "Против цели с тегом крупный игнорирует 2 Защиты. Не действует на просто высокий спрайт.",
+      "notes": "Добавить тег \"крупный\"",
+      "categories": [
+        "attack"
+      ],
+      "favorite": true,
+      "updatedAt": 1795108716399
+    },
+    "passive.20261119.068": {
+      "favorite": true,
+      "updatedAt": 1795108788985
+    },
+    "passive.20261119.066": {
+      "favorite": true,
+      "updatedAt": 1795108881964
+    },
+    "passive.20261119.065": {
+      "favorite": true,
+      "updatedAt": 1795108895500
+    },
+    "passive.20261119.062": {
+      "name": "Запоминает противника",
+      "effect": "После первого нападения на носителя получает +2 Атаки против этого конкретного врага до конца боя. Только один запомненный враг.",
+      "notes": "",
+      "categories": [
+        "attack"
+      ],
+      "favorite": true,
+      "updatedAt": 1795108978876
+    },
+    "passive.20261119.061": {
+      "favorite": true,
+      "updatedAt": 1795108991653
+    },
+    "passive.20261119.060": {
+      "favorite": true,
+      "updatedAt": 1795109033283
+    },
+    "passive.20261119.056": {
+      "favorite": true,
+      "updatedAt": 1795109141051
+    },
+    "passive.20261119.052": {
+      "favorite": true,
+      "updatedAt": 1795109214181
+    },
+    "passive.20261119.050": {
+      "favorite": true,
+      "updatedAt": 1795109242461
+    },
+    "passive.20261119.145": {
+      "deleted": true,
+      "updatedAt": 1795110664325
+    },
+    "passive.20261119.146": {
+      "deleted": true,
+      "updatedAt": 1795110688079
+    },
+    "passive.20261119.147": {
+      "name": "Вызывает на себя",
+      "effect": "Соседние враги получают −2 Атаки, когда обычным ударом бьют другого союзника носителя. Выбор цели остаётся свободным.",
+      "notes": "",
+      "categories": [
+        "support"
+      ],
+      "deleted": true,
+      "updatedAt": 1795110727087
+    },
+    "passive.20261119.148": {
+      "deleted": true,
+      "updatedAt": 1795110759763
+    },
+    "passive.20261119.149": {
+      "favorite": true,
+      "updatedAt": 1795110790173
+    },
+    "passive.20261119.150": {
+      "deleted": true,
+      "updatedAt": 1795110843185
+    },
+    "passive.20261119.151": {
+      "deleted": true,
+      "updatedAt": 1795110856357
+    },
+    "passive.20261119.152": {
+      "deleted": true,
+      "updatedAt": 1795110871041
+    },
+    "passive.20261119.153": {
+      "deleted": true,
+      "updatedAt": 1795110918739
+    },
+    "passive.20261119.154": {
+      "deleted": true,
+      "updatedAt": 1795110929414
+    },
+    "passive.20261119.155": {
+      "deleted": true,
+      "updatedAt": 1795111026768
+    },
+    "passive.20261119.156": {
+      "deleted": true,
+      "updatedAt": 1795111173586
+    },
+    "passive.20261119.157": {
+      "deleted": true,
+      "updatedAt": 1795111187203
+    },
+    "passive.20261119.158": {
+      "favorite": true,
+      "updatedAt": 1795111238640
+    },
+    "passive.20261119.159": {
+      "deleted": true,
+      "updatedAt": 1795111276320
+    },
+    "passive.20261119.160": {
+      "deleted": true,
+      "updatedAt": 1795111289942
+    },
+    "passive.20261119.161": {
+      "deleted": true,
+      "updatedAt": 1795111300826
+    },
+    "passive.20261119.162": {
+      "deleted": true,
+      "updatedAt": 1795111305812
+    },
+    "passive.20261119.175": {
+      "deleted": true,
+      "updatedAt": 1795111465874
+    },
+    "passive.20261119.174": {
+      "deleted": true,
+      "updatedAt": 1795111495800
+    },
+    "passive.20261119.173": {
+      "deleted": true,
+      "updatedAt": 1795111502974
+    },
+    "passive.20261119.172": {
+      "deleted": true,
+      "updatedAt": 1795111505582
+    },
+    "passive.20261119.171": {
+      "deleted": true,
+      "updatedAt": 1795111515438
+    },
+    "passive.20261119.170": {
+      "name": "Растёт от призыва",
+      "effect": "Первое появление союзного призванного существа в раунде даёт носителю +1 Атаку до конца боя, максимум +3.",
+      "notes": "особенно полезно будет для существ с тегом растение",
+      "categories": [
+        "support"
+      ],
+      "favorite": true,
+      "updatedAt": 1795111548196
+    },
+    "passive.20261119.169": {
+      "deleted": true,
+      "updatedAt": 1795111553563
+    },
+    "passive.20261119.167": {
+      "favorite": true,
+      "updatedAt": 1795111578912
+    },
+    "passive.20261119.168": {
+      "favorite": true,
+      "updatedAt": 1795111596380
+    },
+    "passive.20261119.166": {
+      "name": "Последний дар защиты",
+      "effect": "При гибели ближайший живой союзник в радиусе 2 получает +2 защиты до конца боя. Равенство решается порядком отряда.",
+      "notes": "",
+      "categories": [
+        "death"
+      ],
+      "favorite": true,
+      "updatedAt": 1795111656812
+    },
+    "passive.20261119.165": {
+      "favorite": true,
+      "updatedAt": 1795111688910
+    },
+    "passive.20261119.164": {
+      "favorite": true,
+      "updatedAt": 1795111833405
+    },
+    "passive.20261119.163": {
+      "deleted": true,
+      "updatedAt": 1795111871087
+    },
+    "passive.20261119.198": {
+      "name": "Лесная защита",
+      "effect": "На лесном гексе получает дополнительно +1 Защиту и не платит дополнительное движение за лес. Только поле боя.",
+      "notes": "",
+      "categories": [
+        "environment"
+      ],
+      "favorite": true,
+      "updatedAt": 1795111916316
+    },
+    "passive.20261119.199": {
+      "name": "Хозяин холмов",
+      "effect": "На гексе возвышенности получает дополнительно +1 Защиту; подъём не стоит лишнего движения.",
+      "notes": "",
+      "categories": [
+        "environment"
+      ],
+      "favorite": true,
+      "updatedAt": 1795111941061
+    },
+    "passive.20261119.200": {
+      "favorite": true,
+      "updatedAt": 1795111943014
+    },
+    "passive.20261119.201": {
+      "deleted": true,
+      "updatedAt": 1795118986326
+    },
+    "passive.20261119.202": {
+      "name": "Тяжёлые снаряды",
+      "effect": "дальнее попадание в свой ход уменьшает Защиту цели на 1 на два хода.",
+      "notes": "",
+      "categories": [
+        "status",
+        "control"
+      ],
+      "favorite": true,
+      "updatedAt": 1795119035452
+    },
+    "passive.20261119.203": {
+      "deleted": true,
+      "updatedAt": 1795119113575
+    },
+    "passive.20261119.204": {
+      "favorite": true,
+      "updatedAt": 1795119124891
+    },
+    "passive.20261119.205": {
+      "deleted": true,
+      "updatedAt": 1795119316026
+    },
+    "passive.20261119.206": {
+      "favorite": true,
+      "updatedAt": 1795119358453
+    },
+    "passive.20261119.207": {
+      "favorite": true,
+      "updatedAt": 1795119369509
+    },
+    "passive.20261119.209": {
+      "deleted": true,
+      "updatedAt": 1795119415396
+    },
+    "passive.20261119.211": {
+      "favorite": true,
+      "updatedAt": 1795119479230
+    },
+    "passive.20261119.212": {
+      "favorite": true,
+      "updatedAt": 1795119487713
+    },
+    "passive.20261119.213": {
+      "favorite": true,
+      "updatedAt": 1795119499354
+    },
+    "passive.20261119.226": {
+      "name": "Два выстрела",
+      "effect": "Обычная дальняя атака выпускает два снаряда по одной цели.Между ними проходят реакции и расходуются заряды.",
+      "notes": "",
+      "categories": [
+        "attack"
+      ],
+      "favorite": true,
+      "updatedAt": 1795125424521
+    },
+    "passive.20261119.227": {
+      "favorite": true,
+      "updatedAt": 1795125428100
+    },
+    "passive.20261119.228": {
+      "favorite": true,
+      "updatedAt": 1795125573181
+    },
+    "passive.20261119.229": {
+      "deleted": true,
+      "updatedAt": 1795125639920
+    },
+    "passive.20261119.230": {
+      "favorite": true,
+      "updatedAt": 1795125677944
+    },
+    "passive.20261119.231": {
+      "deleted": true,
+      "updatedAt": 1795125691152
+    },
+    "passive.20261119.232": {
+      "name": "Разъедающая слюна",
+      "effect": "Каждое третье обычное попадание снимает 2 защиты сверх обычного урона.",
+      "notes": "",
+      "categories": [
+        "status",
+        "control"
+      ],
+      "favorite": true,
+      "updatedAt": 1795125735101
+    },
+    "passive.20261119.233": {
+      "deleted": true,
+      "updatedAt": 1795125762235
+    },
+    "passive.20261119.234": {
+      "deleted": true,
+      "updatedAt": 1795125774760
+    },
+    "passive.20261119.236": {
+      "favorite": true,
+      "updatedAt": 1795125800966
+    },
+    "candidate.ks.0261": {
+      "deleted": true,
+      "updatedAt": 1795125823506
+    },
+    "candidate.ks.0262": {
+      "favorite": true,
+      "updatedAt": 1795125832093
+    },
+    "candidate.ks.0264": {
+      "deleted": true,
+      "updatedAt": 1795125859215
+    },
+    "candidate.ks.0265": {
+      "deleted": true,
+      "updatedAt": 1795125917621
+    },
+    "passive.20261119.240": {
+      "deleted": true,
+      "updatedAt": 1795125940269
+    },
+    "passive.20261119.241": {
+      "deleted": true,
+      "updatedAt": 1795125986208
+    },
+    "passive.20261119.242": {
+      "favorite": true,
+      "updatedAt": 1795125997860
+    },
+    "passive.20261119.243": {
+      "deleted": true,
+      "updatedAt": 1795126059977
+    },
+    "passive.20261119.244": {
+      "favorite": true,
+      "updatedAt": 1795126069184
+    },
+    "passive.20261119.245": {
+      "deleted": true,
+      "updatedAt": 1795126170071
+    },
+    "passive.20261119.246": {
+      "deleted": true,
+      "updatedAt": 1795126173983
+    },
+    "passive.20261119.247": {
+      "favorite": true,
+      "updatedAt": 1795126178292
+    },
+    "passive.20261119.249": {
+      "name": "Оппортунист",
+      "effect": "Когда соседний враг добровольно выходит из соседства, автоматически наносит обычный ближний удар. Один общий заряд реакции на раунд.",
+      "notes": "",
+      "categories": [
+        "reaction"
+      ],
+      "favorite": true,
+      "updatedAt": 1795126248147
+    },
+    "passive.20261119.250": {
+      "deleted": true,
+      "updatedAt": 1795126264147
+    },
+    "passive.20261119.251": {
+      "deleted": true,
+      "updatedAt": 1795126395125
+    },
+    "passive.20261119.252": {
+      "deleted": true,
+      "updatedAt": 1795126417596
+    },
+    "passive.20261119.253": {
+      "deleted": true,
+      "updatedAt": 1795126443247
+    },
+    "passive.20261119.254": {
+      "deleted": true,
+      "updatedAt": 1795126453393
+    },
+    "passive.20261119.256": {
+      "name": "Живучий",
+      "effect": "Первое падение до 0 HP от обычного оружия оставляет 1 HP.",
+      "notes": "",
+      "categories": [
+        "defense"
+      ],
+      "favorite": true,
+      "updatedAt": 1795126508312
+    },
+    "passive.20261119.257": {
+      "favorite": true,
+      "updatedAt": 1795126516619
+    },
+    "passive.20261119.258": {
+      "deleted": true,
+      "updatedAt": 1795126538705
+    },
+    "passive.20261119.259": {
+      "deleted": true,
+      "updatedAt": 1795126547477
+    },
+    "passive.20261119.260": {
+      "favorite": true,
+      "updatedAt": 1795126572030
+    },
+    "passive.20261119.261": {
+      "name": "Маскируется в движении",
+      "effect": "Пока не атаковал после последнего перемещения, дальние обычные удары по нему получают −3 Атаки. Полной невидимости нет.",
+      "notes": "",
+      "categories": [
+        "defense"
+      ],
+      "favorite": true,
+      "updatedAt": 1795126616896
+    },
+    "passive.20261119.262": {
+      "deleted": true,
+      "updatedAt": 1795126628892
+    },
+    "passive.20261119.263": {
+      "deleted": true,
+      "updatedAt": 1795126649347
+    },
+    "passive.20261119.264": {
+      "name": "Отражающий покров",
+      "effect": "В чётные раунды прямой HP-урон возвращают нападавшему 1 урон; один запуск за раунд. Нечётные раунды безопасны.",
+      "notes": "",
+      "categories": [
+        "defense"
+      ],
+      "favorite": true,
+      "updatedAt": 1795126747348
+    },
+    "passive.20261119.265": {
+      "deleted": true,
+      "updatedAt": 1795126793167
+    },
+    "passive.20261119.266": {
+      "deleted": true,
+      "updatedAt": 1795126809731
+    },
+    "passive.20261119.267": {
+      "name": "Второе дыхание",
+      "effect": "При первом падении ниже половины HP восстанавливает 3 HP и получает +1 Атаку до конца боя. Лечение не запускает порог повторно.",
+      "notes": "",
+      "categories": [
+        "healing"
+      ],
+      "favorite": true,
+      "updatedAt": 1795126829297
+    },
+    "passive.20261119.268": {
+      "favorite": true,
+      "deleted": true,
+      "updatedAt": 1795126890547
+    },
+    "passive.20261119.269": {
+      "deleted": true,
+      "updatedAt": 1795126900470
+    },
+    "passive.20261119.270": {
+      "deleted": true,
+      "updatedAt": 1795126981815
+    },
+    "passive.20261119.271": {
+      "deleted": true,
+      "updatedAt": 1795126997129
+    },
+    "passive.20261119.272": {
+      "deleted": true,
+      "updatedAt": 1795127066502
+    },
+    "passive.20261119.214": {
+      "deleted": true,
+      "updatedAt": 1795127089109
+    },
+    "passive.20261119.215": {
+      "deleted": true,
+      "updatedAt": 1795127143012
+    },
+    "passive.20261119.216": {
+      "deleted": true,
+      "updatedAt": 1795127225647
+    },
+    "passive.20261119.217": {
+      "favorite": false,
+      "deleted": true,
+      "updatedAt": 1795127252179
+    },
+    "passive.20261119.218": {
+      "deleted": true,
+      "updatedAt": 1795127260436
+    },
+    "passive.20261119.219": {
+      "favorite": true,
+      "updatedAt": 1795127273152
+    },
+    "passive.20261119.220": {
+      "name": "Слабеет вместе с телом",
+      "effect": "При HP ниже половины обычный урон уменьшается на 25%. При HP ниже четверти — на 50%, минимум 1.",
+      "notes": "",
+      "categories": [
+        "attack"
+      ],
+      "favorite": true,
+      "updatedAt": 1795127348813
+    },
+    "passive.20261119.221": {
+      "deleted": true,
+      "updatedAt": 1795127369944
+    },
+    "passive.20261119.222": {
+      "deleted": true,
+      "updatedAt": 1795127374904
+    },
+    "passive.20261119.223": {
+      "deleted": true,
+      "updatedAt": 1795127386394
+    },
+    "passive.20261119.224": {
+      "deleted": true,
+      "updatedAt": 1795127392219
+    },
+    "passive.20261119.225": {
+      "name": "Питается победой",
+      "effect": "После убийства живого врага максимальное и текущее HP увеличиваются на 2 до конца боя, максимум +6.",
+      "notes": "",
+      "categories": [
+        "healing"
+      ],
+      "favorite": true,
+      "updatedAt": 1795127449915
+    },
+    "passive.20261119.069": {
+      "name": "Пристреливается",
+      "effect": "После атаки, нанёсшей 0 HP-урона, следующая атака получает +2 Атаки, максимум +6. Нанесённый HP-урон сбрасывает накопление.",
+      "notes": "",
+      "categories": [
+        "attack"
+      ],
+      "favorite": true,
+      "updatedAt": 1795127532055
+    },
+    "passive.20261119.070": {
+      "favorite": true,
+      "updatedAt": 1795127548262
+    },
+    "passive.20261119.071": {
+      "favorite": true,
+      "updatedAt": 1795127567719
+    },
+    "passive.20261119.072": {
+      "deleted": true,
+      "updatedAt": 1795127596224
+    },
+    "passive.20261119.073": {
+      "name": "Добивает раненых",
+      "effect": "Получает +2 Атаки против цели с 30% HP и меньше.",
+      "notes": "",
+      "categories": [
+        "attack"
+      ],
+      "favorite": true,
+      "updatedAt": 1795127691790
+    },
+    "passive.20261119.074": {
+      "deleted": true,
+      "updatedAt": 1795127719438
+    },
+    "passive.20261119.075": {
+      "deleted": true,
+      "updatedAt": 1795127740095
+    },
+    "passive.20261119.076": {
+      "favorite": true,
+      "updatedAt": 1795127746717
+    },
+    "passive.20261119.077": {
+      "favorite": true,
+      "updatedAt": 1795127784087
+    },
+    "passive.20261119.078": {
+      "deleted": true,
+      "updatedAt": 1795127802886
+    },
+    "passive.20261119.079": {
+      "deleted": true,
+      "updatedAt": 1795127809247
+    },
+    "passive.20261119.080": {
+      "deleted": true,
+      "updatedAt": 1795127819434
+    },
+    "passive.20261119.081": {
+      "deleted": true,
+      "updatedAt": 1795127824395
+    },
+    "passive.20261119.082": {
+      "deleted": true,
+      "updatedAt": 1795127829362
+    },
+    "passive.20261119.083": {
+      "favorite": true,
+      "updatedAt": 1795127849068
+    },
+    "passive.20261119.084": {
+      "name": "Воин-одиночка",
+      "effect": "Если в радиусе 2 нет живых союзников, получает +2 Атаку и +2 Защиту. Враги условие не выключают.",
+      "notes": "",
+      "categories": [
+        "attack"
+      ],
+      "favorite": true,
+      "updatedAt": 1795127871789
+    },
+    "passive.20261119.086": {
+      "favorite": true,
+      "updatedAt": 1795127879912
+    },
+    "passive.20261119.087": {
+      "deleted": true,
+      "updatedAt": 1795127911890
+    },
+    "passive.20261119.088": {
+      "deleted": true,
+      "updatedAt": 1795127913863
+    },
+    "passive.20261119.089": {
+      "deleted": true,
+      "updatedAt": 1795127917008
+    },
+    "passive.20261119.090": {
+      "deleted": true,
+      "updatedAt": 1795127928110
+    },
+    "passive.20261119.091": {
+      "deleted": true,
+      "updatedAt": 1795127931594
+    },
+    "passive.20261119.092": {
+      "favorite": true,
+      "updatedAt": 1795127940164
+    },
+    "passive.20261119.093": {
+      "deleted": true,
+      "updatedAt": 1795127946435
+    },
+    "passive.20261119.103": {
+      "favorite": true,
+      "updatedAt": 1795127964122
+    },
+    "passive.20261119.104": {
+      "deleted": true,
+      "updatedAt": 1795128013489
+    },
+    "passive.20261119.105": {
+      "deleted": true,
+      "updatedAt": 1795128032738
+    },
+    "passive.20261119.106": {
+      "deleted": true,
+      "updatedAt": 1795128104863
+    },
+    "passive.20261119.107": {
+      "name": "Скрытый фланг",
+      "effect": "Если с противоположной стороны цели стоит союзник носителя, обычный ближний удар получает +2 урона.",
+      "notes": "",
+      "categories": [
+        "attack"
+      ],
+      "favorite": true,
+      "updatedAt": 1795128125575
+    },
+    "passive.20261119.108": {
+      "deleted": true,
+      "updatedAt": 1795128140275
+    },
+    "passive.20261119.109": {
+      "deleted": true,
+      "updatedAt": 1795128144186
+    },
+    "passive.20261119.110": {
+      "deleted": true,
+      "updatedAt": 1795128155422
+    },
+    "passive.20261119.111": {
+      "deleted": true,
+      "updatedAt": 1795128161568
+    },
+    "passive.20261119.112": {
+      "name": "Автоматический укол",
+      "effect": "После успешного блока ближнего удара автоматически наносит 1 урон нападавшему, если он соседний. Раз за раунд, без цепных реакций.",
+      "notes": "",
+      "categories": [
+        "reaction"
+      ],
+      "favorite": true,
+      "updatedAt": 1795128194247
+    },
+    "passive.20261119.113": {
+      "deleted": true,
+      "updatedAt": 1795128214330
+    },
+    "passive.20261119.114": {
+      "deleted": true,
+      "updatedAt": 1795128224697
+    },
+    "passive.20261119.115": {
+      "deleted": true,
+      "updatedAt": 1795128235023
+    },
+    "passive.20261119.116": {
+      "deleted": true,
+      "updatedAt": 1795128241033
+    },
+    "passive.20261119.117": {
+      "deleted": true,
+      "updatedAt": 1795128263196
+    },
+    "passive.20261119.118": {
+      "deleted": true,
+      "updatedAt": 1795128277613
+    },
+    "passive.20261119.119": {
+      "deleted": true,
+      "updatedAt": 1795128287018
+    },
+    "passive.20261119.120": {
+      "deleted": true,
+      "updatedAt": 1795128289877
+    },
+    "passive.20261119.121": {
+      "deleted": true,
+      "updatedAt": 1795128308224
+    },
+    "passive.20261119.122": {
+      "deleted": true,
+      "updatedAt": 1795128312053
+    },
+    "passive.20261119.123": {
+      "deleted": true,
+      "updatedAt": 1795128319625
+    },
+    "passive.20261119.124": {
+      "deleted": true,
+      "updatedAt": 1795128346924
+    },
+    "passive.20261119.125": {
+      "deleted": true,
+      "updatedAt": 1795128350594
+    },
+    "passive.20261119.126": {
+      "deleted": true,
+      "updatedAt": 1795128352316
+    },
+    "passive.20261119.133": {
+      "deleted": true,
+      "updatedAt": 1795128371458
+    },
+    "passive.20261119.134": {
+      "deleted": true,
+      "updatedAt": 1795128395095
+    },
+    "passive.20261119.135": {
+      "deleted": true,
+      "updatedAt": 1795128412538
+    },
+    "passive.20261119.136": {
+      "name": "Умелые руки лекаря",
+      "effect": "Первое лечение союзника в свой ход восстанавливает дополнительно 2 HP; самоисцеление бонус не получает.",
+      "notes": "",
+      "categories": [
+        "healing"
+      ],
+      "favorite": true,
+      "updatedAt": 1795128436963
+    },
+    "passive.20261119.137": {
+      "deleted": true,
+      "updatedAt": 1795128474924
+    },
+    "passive.20261119.138": {
+      "favorite": true,
+      "updatedAt": 1795128485358
+    },
+    "passive.20261119.139": {
+      "deleted": true,
+      "updatedAt": 1795128495622
+    },
+    "passive.20261119.140": {
+      "deleted": true,
+      "updatedAt": 1795128500196
+    },
+    "passive.20261119.141": {
+      "deleted": true,
+      "updatedAt": 1795128512199
+    },
+    "passive.20261119.142": {
+      "deleted": true,
+      "updatedAt": 1795128517820
+    },
+    "passive.20261119.143": {
+      "deleted": true,
+      "updatedAt": 1795128530902
+    },
+    "passive.20261119.177": {
+      "favorite": true,
+      "updatedAt": 1795128550791
+    },
+    "passive.20261119.178": {
+      "favorite": true,
+      "updatedAt": 1795128560813
+    },
+    "passive.20261119.179": {
+      "deleted": true,
+      "updatedAt": 1795128628630
+    },
+    "passive.20261119.180": {
+      "favorite": true,
+      "updatedAt": 1795128665609
+    },
+    "passive.20261119.181": {
+      "favorite": true,
+      "updatedAt": 1795128716359
+    },
+    "passive.20261119.182": {
+      "favorite": true,
+      "deleted": true,
+      "updatedAt": 1795128734428
+    },
+    "passive.20261119.183": {
+      "favorite": true,
+      "updatedAt": 1795128750302
+    },
+    "passive.20261119.184": {
+      "deleted": true,
+      "updatedAt": 1795128760421
+    },
+    "passive.20261119.185": {
+      "deleted": true,
+      "updatedAt": 1795128767672
+    },
+    "passive.20261119.186": {
+      "deleted": true,
+      "updatedAt": 1795128771402
+    },
+    "passive.20261119.187": {
+      "deleted": true,
+      "updatedAt": 1795128773401
+    },
+    "passive.20261119.188": {
+      "deleted": true,
+      "updatedAt": 1795128782143
+    },
+    "passive.20261119.189": {
+      "deleted": true,
+      "updatedAt": 1795128806751
+    },
+    "passive.20261119.190": {
+      "deleted": true,
+      "updatedAt": 1795128818626
+    },
+    "passive.20261119.191": {
+      "deleted": true,
+      "updatedAt": 1795128831362
+    },
+    "passive.20261119.192": {
+      "deleted": true,
+      "updatedAt": 1795128851291
+    },
+    "passive.20261119.193": {
+      "deleted": true,
+      "updatedAt": 1795128865907
+    },
+    "passive.20261119.194": {
+      "name": "Знает лесную схватку",
+      "effect": "На лесном гексе обычная Атака +1.",
+      "notes": "",
+      "categories": [
+        "environment"
+      ],
+      "favorite": true,
+      "updatedAt": 1795128892385
+    },
+    "passive.20261119.195": {
+      "favorite": true,
+      "updatedAt": 1795128901148
+    },
+    "passive.20261119.196": {
+      "name": "Дрожит перед зверем",
+      "effect": "Обычная Атака −1 против существ с тегом зверь. Прочие цели штрафа не дают.",
+      "notes": "",
+      "categories": [
+        "weakness"
+      ],
+      "favorite": true,
+      "updatedAt": 1795128965264
+    },
+    "passive.20261119.197": {
+      "favorite": true,
+      "updatedAt": 1795128973806
+    },
+    "tactic.guard_hunter": {
+      "deleted": true,
+      "updatedAt": 1795128998527
+    },
+    "trait.anchored": {
+      "favorite": true,
+      "updatedAt": 1795129050207
+    },
+    "trait.venomous_flesh": {
+      "name": "Ядовитая плоть",
+      "effect": "Первый за раунд ближний удар по нему отравляет напавшего, если существо выжило. Яд снимает по 1 здоровью два хода.",
+      "notes": "",
+      "categories": [
+        "status",
+        "control"
+      ],
+      "favorite": true,
+      "updatedAt": 1795129084761
+    },
+    "trait.bloodless": {
+      "favorite": true,
+      "updatedAt": 1795129096859
+    },
+    "movement.wetland_walker": {
+      "favorite": true,
+      "updatedAt": 1795129106583
+    },
+    "ecology.dries_out": {
+      "deleted": true,
+      "updatedAt": 1795129263262
+    },
+    "myth.place_bound": {
+      "deleted": true,
+      "updatedAt": 1795129308328
+    },
+    "myth.material_anchor": {
+      "deleted": true,
+      "updatedAt": 1795129316425
+    },
+    "body.line_blocker": {
+      "deleted": true,
+      "updatedAt": 1795129323369
+    },
+    "body.low_profile": {
+      "deleted": true,
+      "updatedAt": 1795129343661
+    },
+    "body.brittle_armor": {
+      "deleted": true,
+      "updatedAt": 1795129383460
+    },
+    "body.renewing_armor": {
+      "deleted": true,
+      "updatedAt": 1795129393380
+    },
+    "body.spiny": {
+      "favorite": true,
+      "updatedAt": 1795129405285
+    },
+    "body.sticky": {
+      "favorite": true,
+      "updatedAt": 1795129430772
+    },
+    "body.diffuse": {
+      "deleted": true,
+      "updatedAt": 1795129447751
+    },
+    "trait.rest_knitter": {
+      "favorite": true,
+      "updatedAt": 1795129507297
+    },
+    "ecology.dangerous_remains": {
+      "favorite": true,
+      "updatedAt": 1795129523490
+    },
+    "sense.light_sensitive": {
+      "deleted": true,
+      "updatedAt": 1795129536859
+    },
+    "sense.no_sight": {
+      "deleted": true,
+      "updatedAt": 1795129564874
+    },
+    "tactic.zone_holder": {
+      "favorite": true,
+      "updatedAt": 1795129576523
+    },
+    "tactic.pursuer": {
+      "favorite": true,
+      "updatedAt": 1795129608990
+    },
+    "tactic.slow_turner": {
+      "favorite": true,
+      "updatedAt": 1795129619964
+    },
+    "tactic.shot_exhausted": {
+      "favorite": true,
+      "updatedAt": 1795129639000
+    },
+    "resist.biological_poison": {
+      "name": "Иммунитет к яду",
+      "effect": "Не получает состояния яда.",
+      "notes": "",
+      "categories": [
+        "status",
+        "defense"
+      ],
+      "favorite": true,
+      "updatedAt": 1795129690258
+    },
+    "resist.binding_slack": {
+      "deleted": true,
+      "updatedAt": 1795129762600
+    },
+    "resist.fearless": {
+      "name": "Не поддаётся страху",
+      "effect": "Не подаётся состоянию испуг",
+      "notes": "",
+      "categories": [
+        "status",
+        "morale"
+      ],
+      "favorite": true,
+      "updatedAt": 1795129811801
+    },
+    "weakness.light_revealed": {
+      "deleted": true,
+      "updatedAt": 1795129817794
+    },
+    "resist.vegetation_hazard": {
+      "deleted": true,
+      "updatedAt": 1795129826295
+    },
+    "resist.short_stun": {
+      "favorite": true,
+      "updatedAt": 1795129847320
+    },
+    "weakness.noisy_steps": {
+      "deleted": true,
+      "updatedAt": 1795129858987
+    },
+    "weakness.fragile_grip": {
+      "deleted": true,
+      "updatedAt": 1795129865733
+    },
+    "myth.shared_fate": {
+      "favorite": true,
+      "updatedAt": 1795129874118
+    },
+    "passive.20261119b.002": {
+      "deleted": true,
+      "updatedAt": 1795129938397
+    },
+    "passive.20261119b.003": {
+      "deleted": true,
+      "updatedAt": 1795129943615
+    },
+    "passive.20261119b.005": {
+      "deleted": true,
+      "updatedAt": 1795129947311
+    },
+    "passive.20261119b.006": {
+      "deleted": true,
+      "updatedAt": 1795129949764
+    },
+    "passive.20261119b.007": {
+      "deleted": true,
+      "updatedAt": 1795129963124
+    },
+    "passive.20261119b.008": {
+      "favorite": true,
+      "updatedAt": 1795129969030
+    },
+    "passive.20261119b.009": {
+      "deleted": true,
+      "updatedAt": 1795130044074
+    },
+    "passive.20261119b.010": {
+      "favorite": true,
+      "updatedAt": 1795130056814
+    },
+    "passive.20261119b.011": {
+      "deleted": true,
+      "updatedAt": 1795130068295
+    },
+    "passive.20261119b.012": {
+      "deleted": true,
+      "updatedAt": 1795130072164
+    },
+    "passive.20261119b.013": {
+      "deleted": true,
+      "updatedAt": 1795130091906
+    },
+    "passive.20261119b.014": {
+      "deleted": true,
+      "updatedAt": 1795130112497
+    },
+    "passive.20261119b.015": {
+      "deleted": true,
+      "updatedAt": 1795130124081
+    },
+    "passive.20261119b.016": {
+      "favorite": true,
+      "updatedAt": 1795130140753
+    },
+    "passive.20261119b.017": {
+      "deleted": true,
+      "updatedAt": 1795130170625
+    },
+    "passive.20261119b.018": {
+      "deleted": true,
+      "updatedAt": 1795130175813
+    },
+    "passive.20261119b.019": {
+      "deleted": true,
+      "updatedAt": 1795130184183
+    },
+    "passive.20261119b.020": {
+      "deleted": true,
+      "updatedAt": 1795130186549
+    },
+    "passive.20261119b.021": {
+      "favorite": true,
+      "updatedAt": 1795130193569
+    },
+    "passive.20261119b.022": {
+      "deleted": true,
+      "updatedAt": 1795130209453
+    },
+    "passive.20261119b.023": {
+      "deleted": true,
+      "updatedAt": 1795130211202
+    },
+    "passive.20261119b.026": {
+      "favorite": true,
+      "updatedAt": 1795130240276
+    },
+    "passive.20261119b.027": {
+      "favorite": true,
+      "updatedAt": 1795130280241
+    },
+    "passive.20261119b.028": {
+      "favorite": true,
+      "updatedAt": 1795130314464
+    },
+    "passive.20261119b.029": {
+      "favorite": true,
+      "updatedAt": 1795130321520
+    },
+    "passive.20261119b.030": {
+      "deleted": true,
+      "updatedAt": 1795130332559
+    },
+    "passive.20261119b.031": {
+      "deleted": true,
+      "updatedAt": 1795130339933
+    },
+    "passive.20261119b.032": {
+      "deleted": true,
+      "updatedAt": 1795130347287
+    },
+    "passive.20261119b.033": {
+      "deleted": true,
+      "updatedAt": 1795130369603
+    },
+    "passive.20261119b.034": {
+      "favorite": true,
+      "updatedAt": 1795130377297
+    },
+    "passive.20261119b.035": {
+      "favorite": true,
+      "updatedAt": 1795130396367
+    },
+    "passive.20261119b.036": {
+      "favorite": true,
+      "updatedAt": 1795173292502
+    },
+    "passive.20261119b.037": {
+      "deleted": true,
+      "updatedAt": 1795130449556
+    },
+    "passive.20261119b.038": {
+      "favorite": true,
+      "updatedAt": 1795130455714
+    },
+    "passive.20261119b.039": {
+      "favorite": true,
+      "updatedAt": 1795130464210
+    },
+    "passive.20261119b.040": {
+      "deleted": true,
+      "updatedAt": 1795130489696
+    },
+    "passive.20261119b.041": {
+      "deleted": true,
+      "updatedAt": 1795130496512
+    },
+    "passive.20261119b.042": {
+      "deleted": true,
+      "updatedAt": 1795130517166
+    },
+    "passive.20261119b.047": {
+      "favorite": true,
+      "updatedAt": 1795130588990
+    },
+    "passive.20261119b.048": {
+      "deleted": true,
+      "updatedAt": 1795130676709
+    },
+    "passive.20261119b.049": {
+      "deleted": true,
+      "updatedAt": 1795130679192
+    },
+    "passive.20261119b.050": {
+      "deleted": true,
+      "updatedAt": 1795130681253
+    },
+    "passive.20261119b.051": {
+      "deleted": true,
+      "updatedAt": 1795130682809
+    },
+    "passive.20261119b.052": {
+      "deleted": true,
+      "updatedAt": 1795130685072
+    },
+    "passive.20261119b.053": {
+      "deleted": true,
+      "updatedAt": 1795130712147
+    },
+    "passive.20261119b.054": {
+      "deleted": true,
+      "updatedAt": 1795130724863
+    },
+    "passive.20261119b.055": {
+      "deleted": true,
+      "updatedAt": 1795130727225
+    },
+    "passive.20261119b.056": {
+      "deleted": true,
+      "updatedAt": 1795130760087
+    },
+    "passive.20261119b.057": {
+      "name": "Победа обращает в страх",
+      "effect": "После первого убийства  за раунд ближайший враг в радиусе 2 получает  страх.",
+      "notes": "",
+      "categories": [
+        "status",
+        "morale"
+      ],
+      "favorite": true,
+      "updatedAt": 1795130813428
+    },
+    "passive.20261119b.058": {
+      "deleted": true,
+      "updatedAt": 1795130823336
+    },
+    "passive.20261119b.059": {
+      "deleted": true,
+      "updatedAt": 1795130846299
+    },
+    "passive.20261119b.060": {
+      "deleted": true,
+      "updatedAt": 1795130848670
+    },
+    "passive.20261119b.061": {
+      "deleted": true,
+      "updatedAt": 1795130852500
+    },
+    "passive.20261119b.062": {
+      "deleted": true,
+      "updatedAt": 1795130856877
+    },
+    "passive.20261119b.063": {
+      "deleted": true,
+      "updatedAt": 1795130863831
+    },
+    "passive.20261119b.065": {
+      "name": "Кованый наконечник",
+      "effect": "Обычная стрела игнорирует 1 Защиту",
+      "notes": "",
+      "categories": [
+        "attack"
+      ],
+      "favorite": true,
+      "updatedAt": 1795130894874
+    },
+    "passive.20261119b.066": {
+      "deleted": true,
+      "updatedAt": 1795130936824
+    },
+    "passive.20261119b.067": {
+      "deleted": true,
+      "updatedAt": 1795130941947
+    },
+    "passive.20261119b.068": {
+      "deleted": true,
+      "updatedAt": 1795130944753
+    },
+    "passive.20261119b.069": {
+      "deleted": true,
+      "updatedAt": 1795130947625
+    },
+    "passive.20261119b.070": {
+      "deleted": true,
+      "updatedAt": 1795130952305
+    },
+    "passive.20261119b.071": {
+      "deleted": true,
+      "updatedAt": 1795130956388
+    },
+    "passive.20261119b.072": {
+      "deleted": true,
+      "updatedAt": 1795130959394
+    },
+    "passive.20261119b.073": {
+      "deleted": true,
+      "updatedAt": 1795130969646
+    },
+    "passive.20261119b.074": {
+      "deleted": true,
+      "updatedAt": 1795130974727
+    },
+    "passive.20261119b.075": {
+      "deleted": true,
+      "updatedAt": 1795130976529
+    },
+    "passive.20261119b.076": {
+      "deleted": true,
+      "updatedAt": 1795130979610
+    },
+    "passive.20261119b.077": {
+      "deleted": true,
+      "updatedAt": 1795130981516
+    },
+    "passive.20261119b.078": {
+      "deleted": true,
+      "updatedAt": 1795130987093
+    },
+    "passive.20261119b.079": {
+      "deleted": true,
+      "updatedAt": 1795130989006
+    },
+    "passive.20261119b.080": {
+      "deleted": true,
+      "updatedAt": 1795130990303
+    },
+    "passive.20261119b.087": {
+      "deleted": true,
+      "updatedAt": 1795130999834
+    },
+    "passive.20261119b.086": {
+      "deleted": true,
+      "updatedAt": 1795131015102
+    },
+    "passive.20261119b.085": {
+      "deleted": true,
+      "updatedAt": 1795131019747
+    },
+    "passive.20261119b.084": {
+      "deleted": true,
+      "updatedAt": 1795131027074
+    },
+    "passive.20261119b.083": {
+      "deleted": true,
+      "updatedAt": 1795131037838
+    },
+    "passive.20261119b.081": {
+      "deleted": true,
+      "updatedAt": 1795131040672
+    },
+    "passive.20261119.023": {
+      "favorite": true,
+      "updatedAt": 1795173244466
+    },
+    "passive.20261119.046": {
+      "favorite": true,
+      "updatedAt": 1795173249610
+    },
+    "passive.20261119.101": {
+      "favorite": true,
+      "updatedAt": 1795173259600
+    },
+    "passive.20261119.208": {
+      "favorite": true,
+      "updatedAt": 1795173278122
+    },
+    "passive.20261119b.043": {
+      "favorite": false,
+      "updatedAt": 1795173347731
+    },
+    "passive.status.20261120.001": {
+      "favorite": true,
+      "updatedAt": 1795173375466
+    },
+    "passive.status.20261120.002": {
+      "favorite": true,
+      "updatedAt": 1795173381055
+    },
+    "passive.status.20261120.003": {
+      "favorite": false,
+      "updatedAt": 1795173407917
+    },
+    "passive.status.20261120.006": {
+      "favorite": true,
+      "updatedAt": 1795173478845
+    },
+    "passive.status.20261120.008": {
+      "favorite": true,
+      "updatedAt": 1795173552071
+    },
+    "passive.status.20261120.009": {
+      "favorite": true,
+      "updatedAt": 1795173582271
+    },
+    "passive.status.20261120.011": {
+      "favorite": true,
+      "updatedAt": 1795173600599
+    },
+    "passive.status.20261120.012": {
+      "favorite": true,
+      "updatedAt": 1795173611341
+    },
+    "passive.status.20261120.015": {
+      "favorite": true,
+      "updatedAt": 1795173641183
+    },
+    "passive.status.20261120.016": {
+      "favorite": true,
+      "updatedAt": 1795173673767
+    },
+    "passive.status.20261120.019": {
+      "favorite": true,
+      "updatedAt": 1795173715293
+    },
+    "passive.status.20261120.024": {
+      "favorite": true,
+      "updatedAt": 1795173774423
+    },
+    "passive.status.20261120.025": {
+      "favorite": true,
+      "updatedAt": 1795173781995
+    },
+    "passive.status.20261120.026": {
+      "favorite": true,
+      "updatedAt": 1795173808841
+    },
+    "passive.status.20261120.030": {
+      "favorite": true,
+      "updatedAt": 1795173858845
+    },
+    "passive.status.20261120.032": {
+      "favorite": false,
+      "updatedAt": 1795173902769
+    },
+    "passive.status.20261120.033": {
+      "favorite": true,
+      "updatedAt": 1795173919475
+    },
+    "passive.status.20261120.035": {
+      "favorite": false,
+      "updatedAt": 1795173960839
+    },
+    "passive.status.20261120.041": {
+      "favorite": true,
+      "updatedAt": 1795174022543
+    },
+    "passive.status.20261120.065": {
+      "favorite": true,
+      "updatedAt": 1795180583073
+    }
+  },
+  "custom": [],
+  "exportedAt": "2026-11-20T13:18:20.889Z"
+}

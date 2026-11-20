@@ -1,0 +1,1435 @@
+{
+  "schema": "ks.package.sha256.v1",
+  "files": [
+    {
+      "path": "Art/StatusIcons/PNG128/status_001.png",
+      "sizeBytes": 8665,
+      "sha256": "f40c317e250cb6f1bb412577b933380b694ff7a05e91ecb2310e61a5047f20d2"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_002.png",
+      "sizeBytes": 8241,
+      "sha256": "ec7f70eaa81a6edbfa0dc68630c14805203f4d807a66b4a3202dc272211b7ebd"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_003.png",
+      "sizeBytes": 8681,
+      "sha256": "99a8cb6ac4457c2c810e77e4c050a8c4e826917d05dc8f3b35352f856f98320f"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_006.png",
+      "sizeBytes": 9205,
+      "sha256": "47c01fe6513aa0c193c7f36165e08c39e44f39ab96f4480d03416e82ff118d8e"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_007.png",
+      "sizeBytes": 8796,
+      "sha256": "aadeab50392dda6deecd004de14404684f21cecf6ae9f12ed67ef6202d44f973"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_008.png",
+      "sizeBytes": 8613,
+      "sha256": "bf127d6fa7fe8bbece841b9a30231d59881c23a3f92a9d9a74d208905ecbe797"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_009.png",
+      "sizeBytes": 7755,
+      "sha256": "5e92fb3d3255eee29721291b40f45aef29135d9600831077b18116bb627a751a"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_010.png",
+      "sizeBytes": 8864,
+      "sha256": "72083b2596d63571331550bd4c5302964854e645c5aa66531638cd005eb039c2"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_011.png",
+      "sizeBytes": 8307,
+      "sha256": "640dfcf0a270201b8b6456e014449daf19d366fb838b8f0a6f4ecee96d00a814"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_012.png",
+      "sizeBytes": 8324,
+      "sha256": "131056c6474b8ed5bbc3a0491fcd8e385cacb1b81f6c493fbe886d3a7a739d10"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_014.png",
+      "sizeBytes": 8077,
+      "sha256": "5eb0ef33979f53829009e1957e116e01b1e057935aa945248edb3b1883da41c8"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_015.png",
+      "sizeBytes": 7567,
+      "sha256": "d66b9a46d29520d9227695de81c5bb902e7fd521accc723cdc1a623cfe74d7e8"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_018.png",
+      "sizeBytes": 7782,
+      "sha256": "ff180235d6a549ec1e885027d17a3168f548d7a50e3753abf550c947d37a5891"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_019.png",
+      "sizeBytes": 9478,
+      "sha256": "5b1c9f3e61a22dbacfd08e9048b0bc30248c939a2308ebbdc9200f6f2c82aa3f"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_022.png",
+      "sizeBytes": 7660,
+      "sha256": "531f3994646b29fed4f82cc4bba464a1323b7a0d6b38008c70b76ae6d4e9382b"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_023.png",
+      "sizeBytes": 8145,
+      "sha256": "19ad48d203417abba5d0df71b6b79976c7b7c5f026182183a8864e50d7b1fc9e"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_025.png",
+      "sizeBytes": 8185,
+      "sha256": "79c122bdf618b83f43a7a6fb72e62183f6073f24fdf260feeaea37f068c6ceb2"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_026.png",
+      "sizeBytes": 8563,
+      "sha256": "38c18616b3ff09d5443f543595a65f926a0f8de66404c00163163230f7705d66"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_027.png",
+      "sizeBytes": 7304,
+      "sha256": "f0a83684fbeec0d275c27686ead6ad20ed1b4a7bb169637ae39fa7f682f49c8d"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_028.png",
+      "sizeBytes": 8032,
+      "sha256": "91e137005ac6c70eaf8a6805d0b736561dd844f32eab986253774452e4fb2b6b"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_030.png",
+      "sizeBytes": 7958,
+      "sha256": "23e2a6b53a0a5f7a1d63469437572a3a0cc3b86488bfee80db33e8290ddf7bdf"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_032.png",
+      "sizeBytes": 9126,
+      "sha256": "354c2e683a21c8c71fa303fc7e019efb799cd745fd1fac65632d226d4cfbdf26"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_033.png",
+      "sizeBytes": 8120,
+      "sha256": "453fffc7ab8a091fcc7c59cff5e3a92a96398f8877783fb945359fba16ce151d"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_041.png",
+      "sizeBytes": 7547,
+      "sha256": "a64bcd4afdf89c0ebace892dae9dda7928968f42ee5e1f32f6e2df39c34fc5bf"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_043.png",
+      "sizeBytes": 7008,
+      "sha256": "16e43ca67efed4b755cfe330a895d076ca8e4bd37bcb60331af479dff165f1d6"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_044.png",
+      "sizeBytes": 8180,
+      "sha256": "f497f05373394f2577c6c8bee54d37fcf57ba9ef3e53704bec37a3192eb62887"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_046.png",
+      "sizeBytes": 9505,
+      "sha256": "a4b8f507fa7685ef806499a4d31ef3bf18778247409e179eca08e6fa5204b04c"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_047.png",
+      "sizeBytes": 8332,
+      "sha256": "8b1c2bf2d60e32ca4b1435d643c2d3bc8f9ad43fe59d670a014e3533679e5fee"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_054.png",
+      "sizeBytes": 7994,
+      "sha256": "e5be9064b33982bcf69851ef07545366c3ca3556a49ec86f25c6099c1b2c4d69"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_055.png",
+      "sizeBytes": 7937,
+      "sha256": "6985bb8f96e0749c12c2fb9262cc04e5462ee864a54f55654ac7635926f36895"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_056.png",
+      "sizeBytes": 8026,
+      "sha256": "6cf97a711d8a055feaad3f0d7d05eed78322326ffa2d0e6ef025b7a4564b054c"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_057.png",
+      "sizeBytes": 8375,
+      "sha256": "e744b4649ce44db1922eaaaea9551e9f2fd06beb973a4ead6ba932d699c193d5"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_058.png",
+      "sizeBytes": 8857,
+      "sha256": "7a146ab503758ad673b547f6833fbf09fd640b34224c793f3a48efde01be9e90"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_059.png",
+      "sizeBytes": 8830,
+      "sha256": "29ea041a4dca8a308d2f1264e015a27b49f35ed173e9529a1af69a8f35a6b1b2"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_060.png",
+      "sizeBytes": 8057,
+      "sha256": "38d589e067d60fdcdafbb9b2a095a1fc54b24c9fa42c7512e9b47e0c2d597fc9"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_061.png",
+      "sizeBytes": 7798,
+      "sha256": "a1b93aa5e1e88c466e1a8c301f4eee261bf76b23bdb11865262fe7ad6435ebcb"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_065.png",
+      "sizeBytes": 9071,
+      "sha256": "649c4f739e496631d1c6ba56abb8eb50c4701f79eda9bdfa8832b3807d1f8b14"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_066.png",
+      "sizeBytes": 8108,
+      "sha256": "33b3977edb8c37a29d99369b6ee76eceba42d4566843d36c9b80390774a7a08a"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_067.png",
+      "sizeBytes": 8208,
+      "sha256": "081ea0bb4feda2ca8a05ece52f7503273d12cfef5867ea258ea2dd2b3ccb1f1c"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_068.png",
+      "sizeBytes": 9112,
+      "sha256": "8c9e36b4d1c106730528cda4b70fcf1819cbd5c431dd5d6f6d9230558787686b"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_070.png",
+      "sizeBytes": 8345,
+      "sha256": "540e170523a72206c0bb0acb467146c6664753b0ec5df10a19ae25fd35ff6114"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_071.png",
+      "sizeBytes": 7937,
+      "sha256": "6c6d04471d9dac073b57140f8f5e1c5555545e7e4a6e34d0d61a2bbc804b2d75"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_072.png",
+      "sizeBytes": 8195,
+      "sha256": "8ee6bb2aebab18dcdf179a019846d61f96c7f0b8b88052ec17b9a738774ba074"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_077.png",
+      "sizeBytes": 8662,
+      "sha256": "4ee5a40350ebad6421453c116f18c6d8035506ed7feaf872dcfb4368f13b67a0"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_078.png",
+      "sizeBytes": 8044,
+      "sha256": "54b37018b6588dd9a1691e7ab174ab15a6c2fc221f4a5d220ad175760fb74782"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_079.png",
+      "sizeBytes": 7904,
+      "sha256": "6ca96bc4e0a9c9b73988eb248e558f6773d36db8f4854e7422a27e54645f3132"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_084.png",
+      "sizeBytes": 9073,
+      "sha256": "e9d0b27579e4e7d77a40e0c080f5370411477ca06aafe569b9dd95cbfcd785bb"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_087.png",
+      "sizeBytes": 8322,
+      "sha256": "34814be517cee0d95a014fc2e3f9ea7d032881098ff19daa579ef765e9d04caa"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_088.png",
+      "sizeBytes": 8512,
+      "sha256": "0f6763d1e97f4c29c35ac69e211f70467cdc1e04703eb0a24ec0949f93cc8f6e"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_098.png",
+      "sizeBytes": 9130,
+      "sha256": "ec386e2fb47f31e86cda46a613d6fd2b1eeadf727433c9c0b7e30add448e344f"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_099.png",
+      "sizeBytes": 8329,
+      "sha256": "81a14f1bac3eae0000f5d074cb0432f6e60f8b26355e8dd464151fb155614400"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_101.png",
+      "sizeBytes": 8447,
+      "sha256": "6515a80d7745239e7f76d4db18de9e48548a08b53b7205e84f2aa5662eccdca4"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_102.png",
+      "sizeBytes": 8810,
+      "sha256": "2a80494fc37eac1a388a1545d43117167c716b6b5a67f88974b5845feb2e92d5"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_105.png",
+      "sizeBytes": 8261,
+      "sha256": "59e963ae07b169dcdab116cc304b5a6246bf87ee5c9c6f0ebaa777f5a6aa7904"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_106.png",
+      "sizeBytes": 8520,
+      "sha256": "8bf02857257fd040bb81f216e49401f470a80be5bca0b2e398abbf700cd84211"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_107.png",
+      "sizeBytes": 8466,
+      "sha256": "f048101beb6956b947a889d70e5b802cfa2578049b399d007051c554ee8b2fad"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_109.png",
+      "sizeBytes": 8133,
+      "sha256": "47db7e766688008ce3c75e4eac0b24ec8f37d2fa82650d5ec0a1bbcc237e137a"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_110.png",
+      "sizeBytes": 8035,
+      "sha256": "824dc51dccf6b84e588480d84183b811b15a49d37a89d4a9f62cd2c37dbc4af1"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_113.png",
+      "sizeBytes": 8714,
+      "sha256": "d5d37decae8d8e218e085631078e1a25095f150d368f260321667ea5542e3b2d"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_114.png",
+      "sizeBytes": 8714,
+      "sha256": "a4d1df20d178fe2222d46bf2fe816328d7f170e1a5a1191c84953cb61745c65f"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_117.png",
+      "sizeBytes": 8488,
+      "sha256": "bf9a37c4c28670dbb240b5dc9533ef1b0b9e49884b8f675fd6ef11353126a1b3"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_119.png",
+      "sizeBytes": 7220,
+      "sha256": "3db4f1901fc74081dc028fff2f8f7da8c745554f79628f044f37e9829f68f402"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_130.png",
+      "sizeBytes": 8657,
+      "sha256": "6d9193b8e5754980daaf413ef35deebef3d9adca2c3c028e5aebbb8760c3301d"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_132.png",
+      "sizeBytes": 8670,
+      "sha256": "46f67a343f72e79353ff029c622679f6117d5d38ab39b255affa2b0cfcf86155"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_135.png",
+      "sizeBytes": 9635,
+      "sha256": "2bb2c6b78d5753f548e17ca3bf0c5219635f0b7a0dcf63332aa7445838e3c7ce"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_136.png",
+      "sizeBytes": 8614,
+      "sha256": "882adc4c7966f4e3bfc833132c118d91c0df7ca4bd9ce83baa7c9faf0c3efbf4"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_137.png",
+      "sizeBytes": 8065,
+      "sha256": "03971fb8f410b681030f0c03cd8494a28fa3ab3476d81b79c9b87683162be496"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_138.png",
+      "sizeBytes": 9091,
+      "sha256": "5b85a1b4389cf54b93534513ee2903372d99c7c270c09e03d94f0690c1ff4e2e"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_139.png",
+      "sizeBytes": 8549,
+      "sha256": "5405d61dbf11acae04ae13bed18a2c03a5f01c7289458ee56b3f5c7b718f00ab"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_142.png",
+      "sizeBytes": 8903,
+      "sha256": "f77eff41c0f626c6baf5363d7543b3e46269089eee5b49c9755496af63a0e56c"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_146.png",
+      "sizeBytes": 8008,
+      "sha256": "d9a038ec8c8621d508024563e3b9c575b5e02ac7458abbe82d5b33816d93291d"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_148.png",
+      "sizeBytes": 8434,
+      "sha256": "015836c74174d00ef4ee61782ed1c744105364baea1a8b940faca385d72405f3"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_150.png",
+      "sizeBytes": 8536,
+      "sha256": "ea0862333e6fb111e5f1e0e7ee8c4607b3ecd702145fc07f5136198f46eedc3b"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_156.png",
+      "sizeBytes": 7440,
+      "sha256": "1b65ceb6c0633da96fcc502ed8ee8526c33835fa6f0778d61183a334471c5e34"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_158.png",
+      "sizeBytes": 8396,
+      "sha256": "3e564dfc35ef4447b213f9ea5bbe0bd1cc9176be8bc5df77d4d2c2f8fba03025"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_159.png",
+      "sizeBytes": 7908,
+      "sha256": "b056a48b57a6e8a5ac098d19b2211c433c34069210caac124f5bd1fef2b8e7fb"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_161.png",
+      "sizeBytes": 7786,
+      "sha256": "bbe6b59e980fbb2177c6e5e490fb25908617361e4ad0ae9ca6d8b08fe3671b5d"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_168.png",
+      "sizeBytes": 8983,
+      "sha256": "f3b4371aec4e979ce39772f3e5a987b159752c4f1e834276969c4ecc53bb81cd"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_171.png",
+      "sizeBytes": 8957,
+      "sha256": "1b0044b24398056afd3a13c3ee2ec5cf0c18aea3990e76086cd161ed518b87d1"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_185.png",
+      "sizeBytes": 8288,
+      "sha256": "02dc720b4f7918d1041d4394fe259414a9cb94583fd7fad96e5b9fe8cd0d4ee5"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_186.png",
+      "sizeBytes": 8463,
+      "sha256": "6218288728edd0f6f332c0af929e6fdfc1bbfa9de98ffcb768b6bc50c69d656b"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_187.png",
+      "sizeBytes": 8295,
+      "sha256": "07f689e79c5a87557fdba9a0f84651767dbbce26f7e40db436ed67730b158521"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_188.png",
+      "sizeBytes": 8843,
+      "sha256": "51d1bd686279e26aebff3ab81fc567e23d231ef898297d4f63bd8a322ec6acb3"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_189.png",
+      "sizeBytes": 8356,
+      "sha256": "5b5a66b1b3024a72580686ff55372b8fdda8f549608638007ab54a3858f5b630"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_190.png",
+      "sizeBytes": 7528,
+      "sha256": "654a380b270a000c87a94a43180e1bdf2606b022264ab1f11a866d90075996c4"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_193.png",
+      "sizeBytes": 8350,
+      "sha256": "75d1d29eeca2418230750e7eaac05990d80ff152429097d224c25cb312989e81"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_194.png",
+      "sizeBytes": 8155,
+      "sha256": "465d0bfddc6561def2c6e99b2df17e5bdcacb60361255a860eb1e52fc93f8f51"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_199.png",
+      "sizeBytes": 8669,
+      "sha256": "3f067d11f15faba5984828737d127fc4e5afae3b2582e0e424967ddca4ad5dfd"
+    },
+    {
+      "path": "Art/StatusIcons/PNG128/status_203.png",
+      "sizeBytes": 8628,
+      "sha256": "d373a77f7df1d65caec5e9d46880b3b7fc637fa256d8ff9d4c09887635a7ab1d"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_001.png",
+      "sizeBytes": 18629,
+      "sha256": "c1c022a0a04be7d555a79ad6cf7652b3a5e15a4df5d9a112fcab2fc8ade379f9"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_002.png",
+      "sizeBytes": 17239,
+      "sha256": "6f2564b2660aea6720f6122c5707c02ea24ed5821c8a4f31034bc24d1b6e0728"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_003.png",
+      "sizeBytes": 18580,
+      "sha256": "53fa31b55b2cd7f1138f07e79cd98d73a7a8500cc792ec7a9c4fbe0d6c0771bf"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_006.png",
+      "sizeBytes": 19388,
+      "sha256": "cfef7aa9c8fc87d9c7fb10a665ca2a9c3e631d45d2b1aec8fcbb6ab7b27c3a16"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_007.png",
+      "sizeBytes": 18550,
+      "sha256": "922b1506760c61ff17f6b8c81c52a58802926c59540c98b2eb4c3d15a85a5e60"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_008.png",
+      "sizeBytes": 18165,
+      "sha256": "7a9d00b8dc8046fcf33ce2258c2791fc7611d54ee7e4d8bed9b2e01576c89c78"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_009.png",
+      "sizeBytes": 16425,
+      "sha256": "3700fe392d105bbfaa4c389ad8d05f4bf7282f5d622bcb272585d3555fcbe1e9"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_010.png",
+      "sizeBytes": 18824,
+      "sha256": "c0897c1ed7fbc2d319fb68d90e42c151c277000ae213f6bee7f47e74d03f4bb5"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_011.png",
+      "sizeBytes": 17550,
+      "sha256": "ea765d856f2b860f362de83428d891d5aaf707dc4170315dd351b08b24679643"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_012.png",
+      "sizeBytes": 17703,
+      "sha256": "36c1502df445e20abbdf1a30b8c5831888d89263246105d54e4cc1033d4bc3ff"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_014.png",
+      "sizeBytes": 17014,
+      "sha256": "98493a2ecc4cead2fdad80d3272c7c0b7fc63c186e2486e33afc6a614c9e0039"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_015.png",
+      "sizeBytes": 16180,
+      "sha256": "7d4efa0df06374b43dd1b29585fa37c539714591d1f37d05bbee923837f4a3bc"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_018.png",
+      "sizeBytes": 16718,
+      "sha256": "72e14f8cf4cc4cbfb6f39960faa4646bab8c6f6372f8107680e8fc2689bb3147"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_019.png",
+      "sizeBytes": 19316,
+      "sha256": "d902fcaf370cfb7216358737c90652ee633a73fa63bdac7df9f0de34085cc701"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_022.png",
+      "sizeBytes": 16550,
+      "sha256": "a8c5121243ce2fe3deaaaaa23e4a9e66e44591627e356f64dd1f1d0ac4c7ae49"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_023.png",
+      "sizeBytes": 16958,
+      "sha256": "8b3429702ff1149c4265a8d1837a0f8ff42238cbe913a96d6552e04334ba6f49"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_025.png",
+      "sizeBytes": 17668,
+      "sha256": "d63c9f6a730fe467cefc413dee03c77f386d975052f68d1739c105bbba792284"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_026.png",
+      "sizeBytes": 18186,
+      "sha256": "4374ee3ae1315ccb3e857e989bdb2236779708ec25ee696ed8cce5c96c40ad42"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_027.png",
+      "sizeBytes": 15565,
+      "sha256": "56b0c03e31647d2f8ea646ae34b11451c1c32c777ea9dab50fdfc661078f900b"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_028.png",
+      "sizeBytes": 17029,
+      "sha256": "b3971a46f6c28028fc395e591cc91ca4af7d6f5c5b207010b8abd056eb4fdb3e"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_030.png",
+      "sizeBytes": 17079,
+      "sha256": "c269e0182a687280bbc487ee04fb6e9d4948c7414ba0a9be74051eaa0db3485c"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_032.png",
+      "sizeBytes": 18612,
+      "sha256": "c2ccfab3638847667d9e4187e78e6b5720b53f859af0ce970f687368c9103faa"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_033.png",
+      "sizeBytes": 17121,
+      "sha256": "f8d34dd1cb0402ce5666ba0aa892071b0e17c9c32fe2a12de844a1dfd0a6c0b5"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_041.png",
+      "sizeBytes": 15838,
+      "sha256": "5eae9884229c73363d86a7148760410b9a5813173bda7378939df18cc8da5305"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_043.png",
+      "sizeBytes": 15180,
+      "sha256": "d017712151badc93f7448907205e02ec2f997378b7f2ac1f53244653212ee20f"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_044.png",
+      "sizeBytes": 17175,
+      "sha256": "9428efa8bbc35d461bf6fdf766fdbfe54ff32dfd8819f078ca72abf3dbb3e7c5"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_046.png",
+      "sizeBytes": 19670,
+      "sha256": "98e0aaf0a463a290b83978e52f8b5d8eeb1ce464a4bbe375325a996f2f4b4f76"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_047.png",
+      "sizeBytes": 17378,
+      "sha256": "4a39d97aafef709599bb63ab1ffbc60185f90c5bc067fd6d28bf521121bc3c65"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_054.png",
+      "sizeBytes": 16718,
+      "sha256": "3041e55f4ac161a07ea49488994134c889325b2160686953aae3e5f0e343a2c8"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_055.png",
+      "sizeBytes": 16645,
+      "sha256": "f24bc991f842e132ca39440d33926267c8ed4dc8bad1ae544c6204050ec87531"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_056.png",
+      "sizeBytes": 16677,
+      "sha256": "5b966e32bfd8fd7d3cbb514599c424300f68ae5be8375c6e9bfa7789e08811da"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_057.png",
+      "sizeBytes": 17626,
+      "sha256": "5b938cd2dfb62c12f10d6c574ca93d53d47be7097c6912221e84d71d8e01be7c"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_058.png",
+      "sizeBytes": 18595,
+      "sha256": "2f90e4206f2ee87f7c16b4cdf82dfe2bbfedc390641b19f6d7fc4d793c6127df"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_059.png",
+      "sizeBytes": 18576,
+      "sha256": "71f4590804f6631cf303c60f489f500590e6d86bff37b3de1df5eb7be6060705"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_060.png",
+      "sizeBytes": 16898,
+      "sha256": "69e1a75a0ee2fe2d7890958cd4b38818fb6a7c91d3c6d59eddbbe6e9fb010df6"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_061.png",
+      "sizeBytes": 16119,
+      "sha256": "6734440b2bf7640c174d34477b534cb4d5e88d23e89f70dafdd3ef440abc528e"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_065.png",
+      "sizeBytes": 19320,
+      "sha256": "a3292d91c46488ff4c27589a8ada026a9a2677b8ed37c43b04c3bc818f64720e"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_066.png",
+      "sizeBytes": 17217,
+      "sha256": "00ed3b528fb5e3450ebf8a2050e900129c4e8794f8f42690261bdfe5c38a71d9"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_067.png",
+      "sizeBytes": 16765,
+      "sha256": "a14ec8a31d6f186a3d41a21682f84f20ef57f82fec1aa62830b176f13ef07799"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_068.png",
+      "sizeBytes": 18707,
+      "sha256": "1a33805f99cb135623150786fd2b7548cfc3dbbe95bcb1913325d32dd1cfa3e2"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_070.png",
+      "sizeBytes": 17645,
+      "sha256": "f656d13c27bd6125f5314c94e613dac2c1ac27c5a3c6bf1b2e34b1f90b66e1b1"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_071.png",
+      "sizeBytes": 16615,
+      "sha256": "5f2af96be4f0819b0d9ff73e0493b90301e0025aa9a31e4487d970a53cb3d280"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_072.png",
+      "sizeBytes": 17302,
+      "sha256": "ebb7887e369352738b3dec7b5d2a54af882ebe33c644ee2f462b13d30c7d5719"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_077.png",
+      "sizeBytes": 18349,
+      "sha256": "2ac11ba8c115a1003cd1d6e2335aa71d41fce78ca89a4e8ee43fe8676ca87169"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_078.png",
+      "sizeBytes": 16885,
+      "sha256": "222c0c95b555655fd022c825d3cfa0611e3fa27a3ba26bb011a3286f680d286e"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_079.png",
+      "sizeBytes": 16676,
+      "sha256": "44ffa9f17e3084e3f5c9c8b6ceaec73fbc180b7bc603f9c3515f9b25de22779c"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_084.png",
+      "sizeBytes": 19222,
+      "sha256": "b5499e76450998ba28a3e0ac76667d44f134883cdc4f2f4e1a45ea6562449254"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_087.png",
+      "sizeBytes": 17459,
+      "sha256": "186ceaa5cad386a3019664bc62285b1c0a66de0330f32414e1a224464ee7dd9f"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_088.png",
+      "sizeBytes": 17674,
+      "sha256": "9a1033d6fc77e18208e7b91d36af53101278f467f095b4bebe6e74458d61dcd5"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_098.png",
+      "sizeBytes": 19366,
+      "sha256": "a325b42e3bb60e0d6ccaa9c63c116147a94d60418e533bef80b1616d84136743"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_099.png",
+      "sizeBytes": 17379,
+      "sha256": "13783d7c45dbad7b6a7b02629b5ce66371feacb57e25efc7c62030f0e4a2fed2"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_101.png",
+      "sizeBytes": 17702,
+      "sha256": "9c3952c825795bef6904ddb4fd5a9d7285e4fcbc58af4abdf554ae71e01865f2"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_102.png",
+      "sizeBytes": 18636,
+      "sha256": "a90285c1734ecd2c5e0eaf910aeee5af99c119c6736d21e02dee80d8929d513d"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_105.png",
+      "sizeBytes": 17589,
+      "sha256": "49e65a8d78885d3a715aa333507253de6d184986e4a81de1b79c1d2e8ace8de4"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_106.png",
+      "sizeBytes": 17646,
+      "sha256": "6f9b3e962c22b617556d37d5ee873563a8e6475416fe9c800a67953add013117"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_107.png",
+      "sizeBytes": 17653,
+      "sha256": "daaf4a18fb46a4a05c410eb28b16ec79d892a5e880c6f4a9e078e8364f8aae1c"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_109.png",
+      "sizeBytes": 17277,
+      "sha256": "78fc4017953a7f010ec6d5c7c12ec6b9f2b912c61e1f800cbf0bbcef0c43f305"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_110.png",
+      "sizeBytes": 16881,
+      "sha256": "816cc583798f19300f18189991a5bc54e57d52e853c978f3425606b98b43eb65"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_113.png",
+      "sizeBytes": 18259,
+      "sha256": "384c4981e47eeb31dc5a3e85c1e43505f789469acb118b043c8cc58a8a67adf0"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_114.png",
+      "sizeBytes": 18348,
+      "sha256": "0b31622ce68abd867845750f1c95729ff99518a55bb72471b69ab205bd4be686"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_117.png",
+      "sizeBytes": 18069,
+      "sha256": "89f30a7be8f27eaafd40b85ea8ecd2095253e85e4b2b58f37537926cb72199c2"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_119.png",
+      "sizeBytes": 15656,
+      "sha256": "92863ec08ff3acccf20a7b92a34dc4976d6c0490b4b7f5e8bbf8a898973fcd3e"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_130.png",
+      "sizeBytes": 17997,
+      "sha256": "4ac323c98e98cc4b14bd2cb05c9bf93db4e6fcd7f9177ae594a57ec0b5667ddf"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_132.png",
+      "sizeBytes": 18176,
+      "sha256": "888f0c3e579425cb452700826a67b3f63d75a101539f6f6a62cf421d8978d9c1"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_135.png",
+      "sizeBytes": 19786,
+      "sha256": "804bdd676d0e6f497ebadc69b041b2e4164fe4cc3e74410b16a5180e356b966a"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_136.png",
+      "sizeBytes": 18180,
+      "sha256": "691d742b9c7a9818f6a6436d8c1cf43c6d7b9297c66e29524caf31d9909a9dac"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_137.png",
+      "sizeBytes": 16905,
+      "sha256": "f43e5f1b764a74b08d666ae8dddf2185365f54e6c3ad0e45e5d47f587c68cb04"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_138.png",
+      "sizeBytes": 19152,
+      "sha256": "1246f2d53967175b6ff5a0e7122e75743d868b3423995af3d4ecd6fd72d4f15e"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_139.png",
+      "sizeBytes": 18478,
+      "sha256": "41fb6e18d2b6825b85337d9b666aafaa45ebe1ab87eb9762f760de56c8c2a375"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_142.png",
+      "sizeBytes": 18542,
+      "sha256": "a6e7455ef24b59c83163ba7ade863ff31338d3450da2648a2f9191cac89cc556"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_146.png",
+      "sizeBytes": 17000,
+      "sha256": "fcae33a6a9762b16ddede986ae279fbeda29cb9b999166a8b46a3cfd40c8a5ba"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_148.png",
+      "sizeBytes": 17962,
+      "sha256": "02180f3aeb6850414408f832e5fc5b2a00507f0c94a2c60d446acfd2c933182f"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_150.png",
+      "sizeBytes": 18063,
+      "sha256": "0dc65bff2193b3164c56c3f5c8da9f59309ae1511a1e631e9d3c8037ddcaa1b2"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_156.png",
+      "sizeBytes": 15720,
+      "sha256": "bef341c1b6356244de991f100d758d92fa880bcfafeac26a74970c9001ff1d09"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_158.png",
+      "sizeBytes": 17689,
+      "sha256": "5fb04fab8415ea522e2d2bf7c2546858570ced37fb94bd715e1e44c45036ae55"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_159.png",
+      "sizeBytes": 16812,
+      "sha256": "87dc9391c52d40ee63672397b58fc329f8381944f0e599fe097b8854ed19cb25"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_161.png",
+      "sizeBytes": 16203,
+      "sha256": "11c802fa4c8c769773189407cec95c9b0735310b794995219b6be3c407441575"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_168.png",
+      "sizeBytes": 19075,
+      "sha256": "0755c93b12f015a57c8e32e35c0d4ab9cb50421f1c09e9162e137277bc6f6147"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_171.png",
+      "sizeBytes": 18854,
+      "sha256": "7fd0412e2d9a9848e15a541f2f3adfad673a3b9b60f7c9cfd697430582598ace"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_185.png",
+      "sizeBytes": 17143,
+      "sha256": "eb5c4078c0e8132067c9d1192ad9689a03d3462a0a9c1b9a8ed192f7c7eb1e14"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_186.png",
+      "sizeBytes": 17439,
+      "sha256": "e8d737c72f0f5295dedccfbfde4f89061aba0af0ce12df94abcc4bc4d96dd5c4"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_187.png",
+      "sizeBytes": 17325,
+      "sha256": "8c7f57cfa746b8f9f544d447752e77d830b327a4b8a68ca6fe39e5f664ae609d"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_188.png",
+      "sizeBytes": 18396,
+      "sha256": "9e0ca8585ff4882cf06bf56ec7cb9350d28d48649993816347d3c1320dc10c17"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_189.png",
+      "sizeBytes": 17634,
+      "sha256": "d90f1dab356450d1ddd484b17d1db05fefdd9faa5cd97fb658461a8c1f7d83bd"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_190.png",
+      "sizeBytes": 15975,
+      "sha256": "7b483473e518ba4b522ee071cc26c8c2963891945b3617ab07f68ffd4a8bf8d6"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_193.png",
+      "sizeBytes": 17391,
+      "sha256": "fbf99e7da524c4e5ffb6381df85bb3e6e0e13b5ebee4916aeba98ea5ecbe907a"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_194.png",
+      "sizeBytes": 17074,
+      "sha256": "75a02acfb33b6796e23561786b3a238a679b72442eca2527510425a689c2efbd"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_199.png",
+      "sizeBytes": 18442,
+      "sha256": "00dad755465f20cf41b03b86dd760de1a19ef915a8e3c5237264b5d65734de67"
+    },
+    {
+      "path": "Art/StatusIcons/PNG256/status_203.png",
+      "sizeBytes": 18483,
+      "sha256": "84e0b2cbb241f4396800e7f8425854b7a4cf58bd6c8fbb317ee527573fcfb41a"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_001.svg",
+      "sizeBytes": 1767,
+      "sha256": "521966f3213d235f412052cee0b97ce5b250d0c6fcdf66d2025df2345eea2667"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_002.svg",
+      "sizeBytes": 1414,
+      "sha256": "2c602d0f87b0549e0ef6ec56257f4f141c45ef5dd4cc9eafba973322d1bb635d"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_003.svg",
+      "sizeBytes": 1256,
+      "sha256": "e084c79159005a76c859a8e3e43608c6c5d9903ae70b091d05f3c4dd30eae4eb"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_006.svg",
+      "sizeBytes": 1676,
+      "sha256": "f5671b2ebbd8ad7bfb9f6c842a04292145b26d29820920e9c4a55fddd8a74099"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_007.svg",
+      "sizeBytes": 1900,
+      "sha256": "1f14e29c135ca473d54471d761ce321dd7b00d8ff6c3d7ebd0a37912c5a150fe"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_008.svg",
+      "sizeBytes": 1773,
+      "sha256": "ea36897beae6e1d0c79083283866b76caccff61122e52c4674483456cce1bde6"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_009.svg",
+      "sizeBytes": 1428,
+      "sha256": "f946fdea45f4e8a3925ad3b158d5ca26316da2e54d2f0f10e845cf347860b5a7"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_010.svg",
+      "sizeBytes": 1595,
+      "sha256": "195f5a7a844f1cee8eae86c20b4d533dd7c554311638ef4a233f574155b9f994"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_011.svg",
+      "sizeBytes": 1297,
+      "sha256": "946260c73a7dc379afcc51a33ce4766304f2c297e6010c1531aa4b5e14da5e72"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_012.svg",
+      "sizeBytes": 1415,
+      "sha256": "41546aae3718b112b9c474d849beeffa6a67cc2c2007f8069544605bd4f7e45d"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_014.svg",
+      "sizeBytes": 1685,
+      "sha256": "5ed3033621b50d845b281cb855f774738c5bbe461ee7dfdb1d80c9dc39aa9264"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_015.svg",
+      "sizeBytes": 1189,
+      "sha256": "f348ae3e60d091e15109b1a0de0ed132d99a6a2aa47447c6986c09cd7b08497c"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_018.svg",
+      "sizeBytes": 1308,
+      "sha256": "ec7838eee98635d2ff325cb3fd833448419ebd5703b379d0194b8da2a57f65cd"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_019.svg",
+      "sizeBytes": 1979,
+      "sha256": "51fdf8bc435930cbb1f2279fba14706bdcdc7da6da4302b33c28c79427948b35"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_022.svg",
+      "sizeBytes": 1100,
+      "sha256": "65893b9c13d47c5173d740bb9bdf61cecfe99f763f208340d38751c17141c320"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_023.svg",
+      "sizeBytes": 1441,
+      "sha256": "686e8f39f4ca0617215d8223185a89a30db70159fcf538028d116509e7000202"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_025.svg",
+      "sizeBytes": 1699,
+      "sha256": "285a5ab72a7dbc33d4153a7b32f36b26eb9719ec2fc7b6306f919e2de3508978"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_026.svg",
+      "sizeBytes": 1467,
+      "sha256": "3903ba1480d1ad21c0e48fdeacc7d74cdb4f40744f4700d2b631aa3d644c9ccb"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_027.svg",
+      "sizeBytes": 1485,
+      "sha256": "697a490ecd3c99382997594a97f1812edfd31d7185abea619a40068fddb6997c"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_028.svg",
+      "sizeBytes": 1497,
+      "sha256": "3a3c1cf88a99d50e9c3c21bf264ab7ad1313ad5aacbd8bfa6710b8ffc6d6fdc2"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_030.svg",
+      "sizeBytes": 1419,
+      "sha256": "fd27d8ba9b53b6e139948af77cd1394c2bcc8411c2811c75ad04d7f1024fa907"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_032.svg",
+      "sizeBytes": 1572,
+      "sha256": "79e4699cd9183e75024a522f66f2a12c7a9e6f9fc027332933e52dc4d80ffdc9"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_033.svg",
+      "sizeBytes": 1430,
+      "sha256": "0a54dd16f9fc95ce93c9f7969a0524a33604382253c394dd937028903cffab3c"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_041.svg",
+      "sizeBytes": 1480,
+      "sha256": "c0d18b24735e0cd400635d1071fc9e0c67306a901da8e730dc4f78307705859e"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_043.svg",
+      "sizeBytes": 1396,
+      "sha256": "cec1618926a5cb842d023cea6049c83b5a3e2f5696257c0b43a00fb5a8efffc2"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_044.svg",
+      "sizeBytes": 1456,
+      "sha256": "19e558d4bd3cbcf91303c1dfedf9e8f40e8b4277d76650c194f05ad8eb17530f"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_046.svg",
+      "sizeBytes": 1175,
+      "sha256": "9b861c5418f99bf5982116098b6aaf43ed8beb5cea453fc0c6c3e764847ff3bc"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_047.svg",
+      "sizeBytes": 1056,
+      "sha256": "96e1d81573163f222841682037f6211747687d281a27d909b74117f87654d6c9"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_054.svg",
+      "sizeBytes": 1416,
+      "sha256": "881628836c5116e341cf8e27be237d4683a92ce6fcbbab7da50a8b3c9dd54c02"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_055.svg",
+      "sizeBytes": 1405,
+      "sha256": "6d3504548c740daebe1e1460050356cb6baaa488a424a540beb026c8df5995a3"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_056.svg",
+      "sizeBytes": 1383,
+      "sha256": "10efffc0038f43add5ed3f2e14689c6845d57b5b8633a01960655c1082df3b6c"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_057.svg",
+      "sizeBytes": 1553,
+      "sha256": "5cc400c9409cf3c99d389e78a9ac20b249d023d3fbbc87ae3d0a397a51b7c749"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_058.svg",
+      "sizeBytes": 1875,
+      "sha256": "bd266abe1e9da65f06908c91f383c5363a880deeceb3208439126aa767e845c2"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_059.svg",
+      "sizeBytes": 1458,
+      "sha256": "f7ccfc2bcfee8e15bf8edee63e58831837cdd70a4df4afd6ffff9ecc6aab44dd"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_060.svg",
+      "sizeBytes": 1554,
+      "sha256": "c72cc91962d4b10d357092a6de49e7e16b6182b09b9114099bf2e93a19baf8ad"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_061.svg",
+      "sizeBytes": 1412,
+      "sha256": "c4e64a245e257cc6e25339e651535df60acfdae05997f58aa1683d047fa147c3"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_065.svg",
+      "sizeBytes": 1545,
+      "sha256": "abbf3b0f1fc13d21817393fb1b8852a7b65e4830f3e404f7984c8ec70592331b"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_066.svg",
+      "sizeBytes": 1382,
+      "sha256": "a8d393417cd5cfd4699d4b399f03157d9314630021fed6eb36d5654cec3dd47d"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_067.svg",
+      "sizeBytes": 1396,
+      "sha256": "01daa7e237b67476250e94abdb5c091a1d62dbba02b4b072313b790d9a571e4c"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_068.svg",
+      "sizeBytes": 1566,
+      "sha256": "9df2cdce7d3556470a5582fbafbb6360c9fa1ccc1569fb9844fe5b6d4f1d8f3b"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_070.svg",
+      "sizeBytes": 1580,
+      "sha256": "deb4313498d689cbf8159fb80f76c0bb65b407e05dcf36518521fc709e7aaa82"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_071.svg",
+      "sizeBytes": 1473,
+      "sha256": "6265e650a4ee304056fe46cb4abeed5d3da3015374f0ac6202979fbf28d78c16"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_072.svg",
+      "sizeBytes": 1326,
+      "sha256": "d5a2d0be4924848b03fd7d23d16c025081f19ca679339597a16f6167f1f8347a"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_077.svg",
+      "sizeBytes": 1732,
+      "sha256": "d15970442e78dfaa03656a3bcc6cd4c04429581c77dd12fcf57034b7b27d93ce"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_078.svg",
+      "sizeBytes": 1297,
+      "sha256": "97bd8bbe3f303e93d02d1fa4ee5802b10c68befcbfda025cad2930ec2f3cc5c3"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_079.svg",
+      "sizeBytes": 1402,
+      "sha256": "186b0a1600462b8cffa76616e85f7a630a180dc82af14777e1ffc5aaecd4af7a"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_084.svg",
+      "sizeBytes": 1291,
+      "sha256": "e01e7e5686f9d7da4c8f6248c86a201dc67aa03bfd2eb0792e77ea3dfe145db6"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_087.svg",
+      "sizeBytes": 1321,
+      "sha256": "af0f6922acb188692e26ceacd8ae08600823002ec13e746ce2792d07588cf0a2"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_088.svg",
+      "sizeBytes": 1420,
+      "sha256": "6e9aab645e7d05907bb02db95e88224f30757f944ed39aae4e7070b19f5adbd9"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_098.svg",
+      "sizeBytes": 1841,
+      "sha256": "6bb810acb30b9f9a9594e7379bace7e1f973da1bc0c388378a6055d424c8fe36"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_099.svg",
+      "sizeBytes": 1465,
+      "sha256": "e04f63fffd616dfc2dff091019f927e4c70c55a234d3d71c5188d63b791d83b0"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_101.svg",
+      "sizeBytes": 1292,
+      "sha256": "9039398d692be4680c676067f2399c9beb8e2e387e2a60abd92dcb2958087a58"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_102.svg",
+      "sizeBytes": 1414,
+      "sha256": "b2bb958a5a2c4cd7153f4b2ba3a9a3f544c16d10bd4c3b5ce4387ab45409d4ba"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_105.svg",
+      "sizeBytes": 1445,
+      "sha256": "0b152c7bee37e0ad78cdf4618a37415505c58e6d10707bf9eb4db6bce75fc648"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_106.svg",
+      "sizeBytes": 1623,
+      "sha256": "b5a4719d87a41bc7e43153094c8e9b1ed260c053218836f1575c1f59530cbd1b"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_107.svg",
+      "sizeBytes": 1671,
+      "sha256": "6c2fd672a6d367fa34757671c66ddaaf59a8818b9b4851e0f0f1c89f21e1588a"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_109.svg",
+      "sizeBytes": 1797,
+      "sha256": "9a302ae537a80f225cdecf88730715e60207c728bc14381d35cf5296859345a0"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_110.svg",
+      "sizeBytes": 1185,
+      "sha256": "587ae7acf937db840cf36e81ec7de15c2b3df1ce9131a05ff6f41466fa16fac2"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_113.svg",
+      "sizeBytes": 1400,
+      "sha256": "092530bd8a169e10e493da9b23956acb688669df0823bbed8d6c575b0db99506"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_114.svg",
+      "sizeBytes": 1460,
+      "sha256": "bfa21314282560ab6c7ea8c7d321970882c2cc746718b99390466da5a820139f"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_117.svg",
+      "sizeBytes": 1420,
+      "sha256": "f966c4cd6b7b954bca8ad05c00fb0611700f35f11c3d4c9a60844a0b92dc3f01"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_119.svg",
+      "sizeBytes": 1337,
+      "sha256": "9b7cc85abc59c5ce11785f365866eca8e6b9aaaefe8043157bb9952b5fa4a3f7"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_130.svg",
+      "sizeBytes": 1532,
+      "sha256": "8a99d708a3ff5cbb97b8ac65e5aac5e9a71da54d32a10eb76491e7fb4b414cbe"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_132.svg",
+      "sizeBytes": 1387,
+      "sha256": "7f9864f4c20bcc6a9f163f81f53356d4f9dc1c3a74f2eb09c8fcd53ee8321f97"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_135.svg",
+      "sizeBytes": 1566,
+      "sha256": "1eb5f147f28e0bb34219c22feadb26522a782cc1923838a60d4c6e2bb6496e52"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_136.svg",
+      "sizeBytes": 1423,
+      "sha256": "97e1215f2e033ffabe71dfe638c8873b1491cf7c8e92ab89e56028fa8587971a"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_137.svg",
+      "sizeBytes": 1456,
+      "sha256": "699aa409191c1cc720bc67dbcc30ab10958b47724ed8b0771f02638ffbe9b0cb"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_138.svg",
+      "sizeBytes": 1762,
+      "sha256": "b37001a2db38880edb170ca79a00ff3dff0a375a2c766b8fc4c96c4082bdcdd6"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_139.svg",
+      "sizeBytes": 1158,
+      "sha256": "d93bc80d6210335cbfb080490bf7797fc7cba28a6d8c2626421a2f31f2ea44e8"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_142.svg",
+      "sizeBytes": 1407,
+      "sha256": "bd0945a3b1bdb087c146019c9bd043bd79da9811efc7f97d9e4b0535373a7891"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_146.svg",
+      "sizeBytes": 1439,
+      "sha256": "8f871654b8ba6f7151ad696d5b4eb9826b8496064310a93ce6bd79348d0d51eb"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_148.svg",
+      "sizeBytes": 1462,
+      "sha256": "01dca1c0e3ebcd681cf05f281b1a5781ff07895c0bd48298864af32623d57780"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_150.svg",
+      "sizeBytes": 1419,
+      "sha256": "0df3156a7ec26bd956a196a7d67e4863bfd32e5d310d2e20443e41dcd3b99ea1"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_156.svg",
+      "sizeBytes": 1393,
+      "sha256": "69b9f346fd358342fa4d75ecc8b69e7959297cedd87d725247209a3b44ff5b45"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_158.svg",
+      "sizeBytes": 1340,
+      "sha256": "cb5e65562f70fc5f1b14481ff05b1ee05746808600a56ea480be9ec979d21a96"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_159.svg",
+      "sizeBytes": 1274,
+      "sha256": "397bf4ff873f3ef2a42a291b412f0d62eadce64e05ad5e1369690dae32ac654d"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_161.svg",
+      "sizeBytes": 1385,
+      "sha256": "5224319405fe6bcbd368b5c83d0be158784662a41b01e7e4dd4e72783022503a"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_168.svg",
+      "sizeBytes": 1394,
+      "sha256": "b48b483cb7e4c5cc8dc00f80d979b56401f5d1d38bc45434cf48d91971d4afb9"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_171.svg",
+      "sizeBytes": 1569,
+      "sha256": "202b298db919db972c0f874c2b77545e5abcd3fce27f3e751378725371c86390"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_185.svg",
+      "sizeBytes": 1422,
+      "sha256": "3d89cd67cbdb827adcd01bb265fcabd1d1d837dd9d8e29dfce1fd599d9f760f6"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_186.svg",
+      "sizeBytes": 1413,
+      "sha256": "a9d892f4ad50f63a8a4f2374fe571fedc5228b834c22f5b797fbf9a95c5021c3"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_187.svg",
+      "sizeBytes": 1538,
+      "sha256": "24464bf61205c036837596b78fb61de20508b80f596c9673d9e7bfc153d75a7b"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_188.svg",
+      "sizeBytes": 1541,
+      "sha256": "4849895fc49237ecf6a13e9515f04d21bb23fff30f6f6a30a7f1bbe18a9f35f8"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_189.svg",
+      "sizeBytes": 1478,
+      "sha256": "54c45c943c82b822927e3d55cdd4020e9848060b9598e2453445f7f229f1f8ed"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_190.svg",
+      "sizeBytes": 1409,
+      "sha256": "9a2bfd9d9281786b6a98bd707e340affdbbf6e7cd8a97ff2f669c5d0f0e086f9"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_193.svg",
+      "sizeBytes": 1183,
+      "sha256": "2f4b58cb1fdb9663b780231248bb640e70734cafd785939006702b098ea39a47"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_194.svg",
+      "sizeBytes": 1800,
+      "sha256": "4bf2129ed188e7d6ec0d8f72930a5e2f0f6a3e499edcb4057f6a57dcab7c3581"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_199.svg",
+      "sizeBytes": 1425,
+      "sha256": "648f36113fd66f56b64747e5a462db3f02bdcc2eec029ed37071578da012d38f"
+    },
+    {
+      "path": "Art/StatusIcons/SVG/status_203.svg",
+      "sizeBytes": 1869,
+      "sha256": "8f4cd63cb3ddea2052dca0e047ba313c245d63e93602ac9e0cfe8ed5be1ce076"
+    },
+    {
+      "path": "CLAUDE_MASTER_BRIEF_RU.md",
+      "sizeBytes": 2095876,
+      "sha256": "dc0a26d441c29c5a88cf8a2358e5e0fcfeace2bf8a305599c0c7008d0226c240"
+    },
+    {
+      "path": "Data/combat_statuses.json",
+      "sizeBytes": 197346,
+      "sha256": "643a5a5cb22d311fe8799e4e7623ca79a6d67601a5e300f6ea8c9eca539ed319"
+    },
+    {
+      "path": "Data/creature_assignments.json",
+      "sizeBytes": 12918,
+      "sha256": "7a6c73383ebe53625e84aee0fb48ec16426e6c12516a9df0794026591946d12f"
+    },
+    {
+      "path": "Data/implementation_coverage.csv",
+      "sizeBytes": 65529,
+      "sha256": "2627b76cb2faf0229b590468bc3bd6574a5f5146afc9251ac41fd5b54ebb8f0a"
+    },
+    {
+      "path": "Data/legacy_aliases.json",
+      "sizeBytes": 603,
+      "sha256": "a28b20bab5aa656c11b26859baf1dc63ac05df789ecf9182af3a520d712b17d4"
+    },
+    {
+      "path": "Data/package_counts.json",
+      "sizeBytes": 162,
+      "sha256": "1ff445d07bda63484170f885b254a91756cd2499b67dae53cf7455a637d9a8da"
+    },
+    {
+      "path": "Data/passive_tags_effective.json",
+      "sizeBytes": 1826730,
+      "sha256": "eeee2c35fcf8710717e2cc9af6e823837d09664c779089d875cc5bdd3a433ea9"
+    },
+    {
+      "path": "Data/rule_variants_and_conflicts.json",
+      "sizeBytes": 44824,
+      "sha256": "fd850c73b89ba179c6347ffc2ab7a7282b8ccfaa3cf2d565e5ba7df9706dc62d"
+    },
+    {
+      "path": "Data/selection_manifest.json",
+      "sizeBytes": 18470,
+      "sha256": "20711ee30b343a7c8f5cc3e450c1e16ddc64138b1377c920afa60ee11d393756"
+    },
+    {
+      "path": "Data/state_tag_links.json",
+      "sizeBytes": 92339,
+      "sha256": "fe55232a6825b1afdc80023f16a8862ea485b993214a47d2c1f4ff2b92b0dc81"
+    },
+    {
+      "path": "Data/status_acceptance_matrix.csv",
+      "sizeBytes": 63866,
+      "sha256": "59c01800e9078142594108d40dd6db38050ac3773a2a2a28cf72afc57a6038fb"
+    },
+    {
+      "path": "Data/status_icon_manifest.json",
+      "sizeBytes": 72437,
+      "sha256": "428ab398d08dab1caa06c52d80d1ee33b839cbe7d96f19ec8649b5f6e9c2bf22"
+    },
+    {
+      "path": "Data/tag_workspace_state.json",
+      "sizeBytes": 51513,
+      "sha256": "0fdef9f26095690e40a0056453b2bb9421dfde871345c34db150e7252b605e3a"
+    },
+    {
+      "path": "Data/unit_baseline_snapshot.json",
+      "sizeBytes": 32519,
+      "sha256": "4bfb5b7d8c0d2e0d8f6a0fc55d874ce53fcb545553ff62a1469022fbf8a9156f"
+    },
+    {
+      "path": "PREVIEW.html",
+      "sizeBytes": 220850,
+      "sha256": "32061edb33acf71f9bde550bc4899946e5c036b0d5b0971032586bdd749c48d8"
+    },
+    {
+      "path": "README_RU.md",
+      "sizeBytes": 2458,
+      "sha256": "3ba180341f1d3a852dae62af13795fd93d4aeba1eb72001df6b57247f74b7dca"
+    },
+    {
+      "path": "Sources/Combat_Status_Workshop_source.html",
+      "sizeBytes": 205772,
+      "sha256": "456b79f8246cbdadf49ac5448c57a145964d28a27c33621fee7b87648fdc8c3c"
+    },
+    {
+      "path": "Sources/Creature_Tag_Workshop_source.html",
+      "sizeBytes": 2033152,
+      "sha256": "0c93c5077db23e119b205e26267aaceff36c888b36045cb80ad9c063b9f9ac31"
+    },
+    {
+      "path": "Tools/validate_package.py",
+      "sizeBytes": 4694,
+      "sha256": "edcc8ad94cf60e6232acaedeed880a936a4bd40bff6340cdc9d6bbec3520ce0a"
+    }
+  ]
+}

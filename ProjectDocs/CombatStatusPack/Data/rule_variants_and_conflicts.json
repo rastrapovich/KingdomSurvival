@@ -1,0 +1,468 @@
+{
+  "schema": "ks.rule-resolution.v1",
+  "entries": [
+    {
+      "tagId": "trait.venomous_flesh",
+      "currentName": "Ядовитая плоть",
+      "currentEffect": "Первый за раунд ближний удар по нему отравляет напавшего, если существо выжило. Яд снимает по 1 здоровью два хода.",
+      "previousUnacceptedProposal": "Первый за раунд ближний удар с HP-уроном по носителю накладывает на напавшего Отравление (1 урон × 3 собственных хода), если носитель выжил. Действующий яд не обновляется.",
+      "decision": "Сохранить явные 1×2 и триггер пережитого ближнего попадания; не менять на 1×3.",
+      "implementationProfile": "status.001 / venomous_flesh: tick=1,duration=2,repeat=Ignore,maxInstances=1,oncePerRound; source=носитель, target=напавший.",
+      "normalizedStatusIds": [
+        "status.001"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "body.sticky",
+      "currentName": "Липкая поверхность",
+      "currentEffect": "После ближнего попадания по нему следующий отход стоит на 1 очко движения дороже. Полного захвата нет.",
+      "previousUnacceptedProposal": "Первое ближнее попадание с HP-уроном по носителю за раунд накладывает на напавшего Запутан: движение −1 на 2 хода. Штраф Атаки из вторичного варианта не включён; повтор не продлевает.",
+      "decision": "Сохранить именно добавочную цену следующего отхода, а не штраф всем шагам.",
+      "implementationProfile": "status.047 / sticky_exit: replaceOperations, exitCost+1,charge=1,expire=endNextTargetActivation; расход только при реальном выходе из соседства. Не Захват.",
+      "normalizedStatusIds": [
+        "status.047"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "resist.short_stun",
+      "currentName": "Быстро приходит в себя",
+      "currentEffect": "Оглушение может лишить его не более одного следующего хода; продлевать тот же эффект повторно нельзя.",
+      "previousUnacceptedProposal": "Первое Оглушение за бой не накладывается. Заряд расходуется только при успешной попытке после прочих иммунитетов. Паралич, сон и заморозку не блокирует.",
+      "decision": "Текущая формулировка теперь совпадает с общей защитой от повторного сильного контроля. Не добавлять непринятую защиту от первого оглушения.",
+      "implementationProfile": "Legacy policy alias к общей длительности Оглушения и recontrol protection; не выдавать за дополнительный бонус, не назначать новым существам ради пустого усиления.",
+      "normalizedStatusIds": [
+        "status.025"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "myth.shared_fate",
+      "currentName": "Делит связь",
+      "currentEffect": "Половина полученного урона уходит связанному участнику. Связь показана; её можно разорвать предусмотренным способом.",
+      "previousUnacceptedProposal": "В начале боя связывается с одним назначенным союзником в радиусе 3 и видимости состоянием Связанные раны. Половина прямого HP-урона с округлением вниз передаётся союзнику; перенос не делится повторно. Связь длится 2 хода и прекращается при гибели источника; повторного наложения за бой нет.",
+      "decision": "Сохранить зависимую делимую связь без выдуманного автоматического переназначения партнёра.",
+      "implementationProfile": "status.109 profile untilLinkBroken; назначенный до боя один живой союзник в радиусе 3 и видимости. Делить прямой HP-урон один раз floor(half), при гибели/дистанции>3/потере видимости разорвать; источник и партнёр видимы. Не копировать урон поверх исходного.",
+      "normalizedStatusIds": [
+        "status.109",
+        "status.110"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "candidate.ks.0292",
+      "currentName": "Опасность первого укуса",
+      "currentEffect": "Только первое попадание за бой накладывает сильный, но снимаемый яд; остальные удары обычные.",
+      "previousUnacceptedProposal": "Первое ближнее попадание с HP-уроном за бой накладывает Отравление: 1 урон в начале 3 следующих ходов цели. Действующий яд не усиливается и не продлевается.",
+      "decision": "Слово «сильный» не задаёт числа. Безопасный стартовый параметр — штатные 1×3, только первый успешный укус за бой.",
+      "implementationProfile": "status.001 default 1×3,oncePerBattle,meleeHitWithHpDamage; текст «сильный» оставить в sourceText, в игровом tooltip показать точное 1×3.",
+      "normalizedStatusIds": [
+        "status.001"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.009",
+      "currentName": "Удар с оцепенением",
+      "currentEffect": "Каждое третье обычное попадание уменьшает движение цели на 1 на её следующий ход. Счётчик виден и затем сбрасывается.",
+      "previousUnacceptedProposal": "Каждое третье обычное попадание с HP-уроном накладывает Замедление: движение −1 на 2 собственных хода цели. Не продлевает действующее Замедление; счётчик после попытки сбрасывается.",
+      "decision": "Название не определяет механику: это мягкое −1 движения, не Оцепенение.",
+      "implementationProfile": "status.041 / short_slow: movement−1,duration=1,repeat=Ignore; everyThirdOrdinaryHpHit, reset visible counter after attempt.",
+      "normalizedStatusIds": [
+        "status.041"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.012",
+      "currentName": "Изнуряющая пыль",
+      "currentEffect": "Раз за раунд первое попадание уменьшает Атаку цели на 1 до конца её следующего хода. Повтор продлевает, но не усиливает.",
+      "previousUnacceptedProposal": "Первое обычное попадание с HP-уроном за раунд накладывает Слабость: Атака −1 на 2 хода. Действующая Слабость не продлевается.",
+      "decision": "Сохранить одноходовую Слабость и явно разрешённое продление.",
+      "implementationProfile": "status.071 / dust: attack−1,duration=1,repeat=RefreshSameSource,oncePerRound; не усиливать силу.",
+      "normalizedStatusIds": [
+        "status.071"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.029",
+      "currentName": "Чумной распад",
+      "currentEffect": "При гибели накладывает на соседних живых врагов гниение: −1 HP в начале двух следующих ходов. Союзников тоже задевает.",
+      "previousUnacceptedProposal": "При гибели все соседние живые бойцы, включая союзников, получают Отравление (1 × 3 хода). Действующий яд не обновляется; иммунитет проверяется отдельно. Один запуск при окончательной гибели.",
+      "decision": "Гниение — вариант Отравления, не второе состояние Чума. Дружественный огонь обязателен.",
+      "implementationProfile": "status.001 / rot: tick=1,duration=2,repeat=Ignore; onFinalDeath apply to all adjacent living units, allies included.",
+      "normalizedStatusIds": [
+        "status.001"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.052",
+      "currentName": "Ядовитая атака",
+      "currentEffect": "Первое обычное попадание за ход накладывает яд на два хода по 1 HP. Новый яд обновляет срок без сложения урона.",
+      "previousUnacceptedProposal": "Первое обычное попадание с HP-уроном за свой ход накладывает Отравление (1 × 3 хода). Действующее Отравление не усиливается и не продлевается.",
+      "decision": "Сохранить пользовательский яд 1×2 с обновлением; базовый яд остаётся 1×3.",
+      "implementationProfile": "status.001 / venom_attack: tick=1,duration=2,repeat=RefreshSameSource,oncePerOwnActivation onOrdinaryHpHit. При более сильном чужом яде не перезаписывать/продлевать его.",
+      "normalizedStatusIds": [
+        "status.001"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.068",
+      "currentName": "Меткое ослабление",
+      "currentEffect": "Каждое третье обычное дальнее попадание накладывает −1 Защиту на два хода. Счётчик общий и видимый.",
+      "previousUnacceptedProposal": "Каждое третье обычное дальнее попадание с HP-уроном накладывает Кислотное разъедание брони: Защита −1 на 2 хода. Повтор не продлевает; счётчик виден.",
+      "decision": "Сохранить временное снижение Защиты на 1 без объявления физического снаряда кислотой.",
+      "implementationProfile": "status.019 / armor_weakening_impact: defense−1,duration=2,subtype=impact; нет тика/повреждения предмета; everyThirdRangedHpHit.",
+      "normalizedStatusIds": [
+        "status.019"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.070",
+      "currentName": "Рвущие удары",
+      "currentEffect": "Обычное попадание с уроном не менее 20% максимального HP цели накладывает рану: −1 движение на два хода. Раз за ход.",
+      "previousUnacceptedProposal": "Раз за свой ход обычное попадание с уроном не менее 20% базового MaxHP цели накладывает «Повреждена нога»: движение −1 до конца боя или помощи за 1 действие. Действует защита от повторного наложения после помощи.",
+      "decision": "Сохранить двухходовую рану ноги, не менять её на ранение до конца боя.",
+      "implementationProfile": "status.185 / temporary_leg: movement−1,duration=2; oneOwnActivation trigger damage≥ceil(.20×baseMaxHP). Освобождение/помощь за 1 действие доступно; grace после помощи.",
+      "normalizedStatusIds": [
+        "status.185"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.083",
+      "currentName": "Подавляет темпом",
+      "currentEffect": "Обычное попадание по врагу, который ещё не ходил в раунде, уменьшает его Атаку на 1 на следующий ход. Максимум −2.",
+      "previousUnacceptedProposal": "Первое обычное попадание с HP-уроном за свой ход по ещё не действовавшему в раунде врагу накладывает Слабость (Атака −1, 2 хода). Действующую Слабость не усиливает и не продлевает.",
+      "decision": "Подавление не новый statusId; это одноходовое накопление штрафа Атаки максимум −2.",
+      "implementationProfile": "status.071 / overwhelm: attack−1 percharge,maxMagnitude=2,duration=1 percharge; обычное HP-попадание по ещё не ходившей в раунде цели.",
+      "normalizedStatusIds": [
+        "status.071"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.090",
+      "currentName": "Устрашающие раны",
+      "currentEffect": "Первое за ход попадание с HP-уроном уменьшает Атаку живой разумной цели на 1 до конца её следующего хода как страх.",
+      "previousUnacceptedProposal": "Первое за ход обычное попадание с HP-уроном по разумной цели накладывает Страх на 2 хода: Атака −1 и запрет приближаться к видимому источнику в радиусе 3. Повтор не продлевает.",
+      "decision": "Архивный вариант страха уменьшает только Атаку; не добавлять запрет приближения.",
+      "implementationProfile": "status.055 / fear_accuracy_only: attack−1,duration=1,noApproach=false; oncePerOwnActivation onHpHit. Применяется иммунитет к Страху.",
+      "normalizedStatusIds": [
+        "status.055"
+      ],
+      "scope": "Корзина: только сохранение данных",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.149",
+      "currentName": "Смертельная отрава",
+      "currentEffect": "Первое попадание по каждой живой цели накладывает тяжёлый яд: 2 HP в начале двух следующих ходов. Мгновенное убийство не переносится.",
+      "previousUnacceptedProposal": "Первое попадание по каждой живой цели за бой накладывает штатное Отравление (1 × 3 хода); только первый фактически прошедший тик этого яда усилен на 1. Действующий чужой яд не заменяется, общий предел тиков 3 HP сохраняется.",
+      "decision": "Сохранить явно выбранный тяжёлый яд 2×2. Не превращать в instant kill и не складывать с обычным ядом.",
+      "implementationProfile": "status.001 / deadly_venom: tick=2,duration=2,repeat=Ignore,oncePerTargetPerBattle. Сильнейший профиль занимает один слот Отравления. Потолок обычных тиков 3 HP действует.",
+      "normalizedStatusIds": [
+        "status.001"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.157",
+      "currentName": "Избыток лечения в покров",
+      "currentEffect": "Полученное сверх полного HP лечение превращает до 2 единиц избытка в разовый щит. В раунде создаётся один щит, щиты не складываются.",
+      "previousUnacceptedProposal": "Раз за раунд до 2 единиц избыточного лечения создают Запас временной жизни равного размера на 2 хода. Берётся больший из действующего и нового запаса; остаток не пополняется.",
+      "decision": "Сохраняем архивный покров из избытка лечения как пул HP, не как полное поглощение любого попадания.",
+      "implementationProfile": "status.148 / overheal_pool: amount=min(2,realOverheal),duration=2,oncePerRound; replace only larger, no refill on repeat.",
+      "normalizedStatusIds": [
+        "status.148"
+      ],
+      "scope": "Корзина: только сохранение данных",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.178",
+      "currentName": "Плохо сворачивается кровь",
+      "currentEffect": "Каждое кровотечение длится на один ход дольше, максимум три. Несколько источников всё равно не складывают тик.",
+      "previousUnacceptedProposal": "Каждый заряд Кровотечения длится 3 собственных хода вместо 2. Максимум 2 независимых заряда; каждый наносит 1 урон. Общий потолок обычных тиков 3 HP за активацию сохраняется.",
+      "decision": "Сохранить явное «не складывают тик»: у этого носителя кровотечение максимум один заряд, но длится 3 хода.",
+      "implementationProfile": "status.002 target profile: duration=3,maxCharges=1,tick=1,repeat=Ignore. Не применять одновременно общий cap 2 как дополнительный заряд.",
+      "normalizedStatusIds": [
+        "status.002"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.202",
+      "currentName": "Тяжёлые снаряды",
+      "currentEffect": "дальнее попадание в свой ход уменьшает Защиту цели на 1 на два хода.",
+      "previousUnacceptedProposal": "Первое обычное дальнее попадание с HP-уроном в свой ход накладывает Кислотное разъедание брони (Защита −1, 2 хода). Повтор не продлевает; доспех не ломается.",
+      "decision": "Сохранить снижение Защиты на 1 на два хода при дальнем попадании в свой ход.",
+      "implementationProfile": "status.019 / armor_weakening_impact: defense−1,duration=2,repeat=Ignore; subtype=impact, не кислота и не поломка брони.",
+      "normalizedStatusIds": [
+        "status.019"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.203",
+      "currentName": "Каменеющая рана",
+      "currentEffect": "Каждое третье дальнее попадание обездвиживает на один ход, но даёт цели +2 Защиты на тот же срок.",
+      "previousUnacceptedProposal": "Каждая третья собственная обычная дальняя атака вместо прямого урона пытается наложить Окаменение на 1 ход с +2 Защиты от физического урона. После попытки счётчик сбрасывается; действует общая защита от повторного контроля.",
+      "decision": "В корзине; не внедрять как бесплатное полное Окаменение поверх атаки.",
+      "implementationProfile": "Архивный profile status.043: movement=0,duration=1,physicalDefense+2,actionAllowed=true; strongControl=false.",
+      "normalizedStatusIds": [
+        "status.043"
+      ],
+      "scope": "Корзина: только сохранение данных",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.219",
+      "currentName": "Замедляющий удар",
+      "currentEffect": "Первое попадание в раунде уменьшает движение цели вдвое с округлением вверх на один ход. Атаку не отнимает.",
+      "previousUnacceptedProposal": "Первое обычное попадание с HP-уроном за раунд накладывает Замедление: движение −1 на 2 хода. Атака сохраняется; действующий эффект не продлевается.",
+      "decision": "Сохранить явное деление движения пополам на один ход.",
+      "implementationProfile": "status.041 / half_speed: allowedMovement=min(currentAllowed,ceil(baseAvailable/2)),duration=1,repeat=Ignore. Это лимит разрешённого движения, не суммируемый плоский −3; удержание имеет приоритет.",
+      "normalizedStatusIds": [
+        "status.041"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.228",
+      "currentName": "Связывающие корни",
+      "currentEffect": "Первое ближнее попадание обездвиживает цель, пока носитель соседствует и сам не двигается. На одного носителя одна связь.",
+      "previousUnacceptedProposal": "Первое ближнее попадание с HP-уроном за свой ход накладывает Захват на одну цель: нельзя уйти из соседства до освобождения за 1 действие или разрыва соседства. На носителя одна связь, при его гибели связь прекращается.",
+      "decision": "По текущему тексту это зависимый Захват, а не объект-корень с 5 HP. Название сохранить.",
+      "implementationProfile": "status.044 / adjacent_roots: oneTargetPerSource; break on sourceMove or lostAdjacency/sourceDeath; release action=1. Не накладывать одновременно status.023.",
+      "normalizedStatusIds": [
+        "status.044"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.229",
+      "currentName": "Песочная слепота",
+      "currentEffect": "Каждое третье обычное попадание накладывает −2 Атаки дальним ударам на один ход. Безглазых не затрагивает.",
+      "previousUnacceptedProposal": "Каждое третье обычное попадание с HP-уроном накладывает Ослепление на 1 ход: Атака −2, адресная дальняя атака только по соседней цели. Не действует на явно безглазую цель; повтор не продлевает.",
+      "decision": "Архивный песок штрафует только дальнюю Атаку, не ограничивает радиус.",
+      "implementationProfile": "status.168 / ranged_sand: rangedAttack−2,duration=1,noRangeClamp,requiresEyes; everyThirdOrdinaryHpHit.",
+      "normalizedStatusIds": [
+        "status.168"
+      ],
+      "scope": "Корзина: только сохранение данных",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.230",
+      "currentName": "Старящий удар",
+      "currentEffect": "Первое попадание по живой цели уменьшает её максимальный HP на 10% до конца боя. Не убивает само по себе, эффект не складывается.",
+      "previousUnacceptedProposal": "Первое обычное попадание с HP-уроном по живой цели за бой накладывает Высасывание жизненной силы: MaxHP −2 на 2 хода, минимум 1. Потерянное при ограничении текущее HP после снятия не лечится.",
+      "decision": "Сохранить процентное снижение MaxHP до конца боя вместо непринятых фиксированных −2 на 2 хода.",
+      "implementationProfile": "status.077 / aging: delta=max(1,floor(.1×baseMaxHP)), minimumMaxHP=1,duration=battle,nonStacking; currentHP clamp is not damage; undo maximum does not heal. OncePerLivingTargetPerBattle.",
+      "normalizedStatusIds": [
+        "status.077"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.232",
+      "currentName": "Разъедающая слюна",
+      "currentEffect": "Каждое третье обычное попадание снимает 2 защиты сверх обычного урона.",
+      "previousUnacceptedProposal": "Каждое третье обычное попадание с HP-уроном накладывает Кислотное разъедание брони: Защита −1 на 2 хода. Повтор не усиливает и не продлевает; прямой урон атаки обычный.",
+      "decision": "Неясный срок задать явно: −2 Защиты до конца боя, без накопления ниже общего предела временных состояний.",
+      "implementationProfile": "status.019 / corrosive_spit: defense−2,duration=battle,repeat=Ignore; everyThirdOrdinaryHpHit. Не повреждает прочность предмета; не отнимает новые 2 каждым повтором.",
+      "normalizedStatusIds": [
+        "status.019"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.236",
+      "currentName": "Мёртвая тревога",
+      "currentEffect": "Соседние живые враги получают −1 Защиту от страха. Неживые и бесстрашные не затрагиваются.",
+      "previousUnacceptedProposal": "В начале собственного хода один ближайший живой враг в радиусе 1 получает Страх на 2 хода, если ещё не подвергался этой ауре в этом бою. Бесстрашие проверяется явно; равенство — по инициативе и ID.",
+      "decision": "Сохранить непрерывную ауру −1 Защиты от страха; не подменять двухходовым Страхом с запретом приближения.",
+      "implementationProfile": "status.055 / dread_aura: defense−1,attackPenalty=0,noApproach=false,duration=whileAdjacentSourceAlive; onlyLiving and notFearImmune; sameAuraFamily noStack.",
+      "normalizedStatusIds": [
+        "status.055"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.241",
+      "currentName": "Обвивает при попадании",
+      "currentEffect": "Первое ближнее попадание за раунд уменьшает движение цели на 1, пока носитель соседствует. Полного пропуска хода нет.",
+      "previousUnacceptedProposal": "Первое ближнее попадание с HP-уроном за раунд накладывает Замедление (движение −1, 2 хода), которое снимается раньше при разрыве соседства с источником. Повтор не продлевает.",
+      "decision": "В корзине. Это зависимое мягкое замедление, а не полный Захват.",
+      "implementationProfile": "status.041 / adjacent_wrap: movement−1,untilLostAdjacency,oneInstance; action and reaction allowed.",
+      "normalizedStatusIds": [
+        "status.041"
+      ],
+      "scope": "Корзина: только сохранение данных",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.242",
+      "currentName": "Зловонная близость",
+      "currentEffect": "Соседний дышащий враг получает −1 Атаку. После ухода штраф исчезает; отдельного накопления нет.",
+      "previousUnacceptedProposal": "В начале собственного хода накладывает Дурноту (Атака −1 на 2 хода) на одного ближайшего дышащего врага в соседстве. Каждая цель подвергается этой ауре только один раз за бой; иммунитет проверяется отдельно.",
+      "decision": "Сохранить ауру соседства и требование дыхания, а не однократное состояние на 2 хода.",
+      "implementationProfile": "status.078 / stench: attack−1,duration=whileAdjacentSourceAlive,requiresBreathing; no nausea/no DoT, no sameAura stacking.",
+      "normalizedStatusIds": [
+        "status.078"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.247",
+      "currentName": "Не вязнет в паутине",
+      "currentEffect": "Клетки паутины не повышают цену его движения и не накладывают замедление. Нити с уроном всё ещё ранят.",
+      "previousUnacceptedProposal": "Паутина на гексах не увеличивает цену движения. Не получает «Покрыт паутиной»; В сети, Захват и корни действуют обычным образом.",
+      "decision": "Не превращать защиту от клеток паутины в непринятый иммунитет к адресному опутыванию.",
+      "implementationProfile": "Terrain web cost/apply-slow hook ignored. Status.022 здесь reference-only, иммунитета к нему нет; В сети/корни/Захват/урон нитей обычные.",
+      "normalizedStatusIds": [],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119.265",
+      "currentName": "Ледяные удары",
+      "currentEffect": "Первое обычное попадание за раунд уменьшает движение цели на 1 на два хода. Повтор обновляет срок без усиления.",
+      "previousUnacceptedProposal": "Первое обычное попадание холодом с HP-уроном за раунд добавляет цели 1 заряд «Покрыт инеем» по штатным порогам. Максимум 1 заряд от этого источника за раунд; при заморозке действует защита от повторного контроля.",
+      "decision": "Архивный ледяной удар замедляет на 1 на 2 хода и обновляет срок; он не копит иней до заморозки.",
+      "implementationProfile": "status.041 / icy_slow: movement−1,duration=2,repeat=RefreshSameSource; oncePerRound ordinaryHpHit.",
+      "normalizedStatusIds": [
+        "status.041"
+      ],
+      "scope": "Корзина: только сохранение данных",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119b.027",
+      "currentName": "Целебное напутствие",
+      "currentEffect": "Первый вылеченный союзник в свой ход получает +1 Атаку до конца его следующего хода. Повторное лечение не складывает бонус.",
+      "previousUnacceptedProposal": "Первое реальное лечение другого союзника в свой ход дополнительно даёт ему Воодушевление на 2 хода: снять и предотвратить Страх и Деморализацию. Не даёт отдельного бонуса Атаки.",
+      "decision": "Сохранить +1 Атаки от лечения, не добавлять незаявленный иммунитет к Страху.",
+      "implementationProfile": "Источник хранит временный ModifierInstance attack+1 до конца следующей активации получателя. Не накладывает базовый status.190. Показывать временный бонус в карточке и журнале с источником; status.190 связь — reference-only.",
+      "normalizedStatusIds": [],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119b.028",
+      "currentName": "Перевязь с оберегом",
+      "currentEffect": "Первый вылеченный союзник в свой ход получает сокращение следующего физического попадания на 2 урона. Одно срабатывание, не складывается.",
+      "previousUnacceptedProposal": "Первый реально вылеченный союзник в свой ход получает Каменную кожу: прямой физический урон −1, минимум 1, на 2 хода. С защитой от стрел не суммируется; повтор не обновляет.",
+      "decision": "Сохранить разовое сокращение следующего физического попадания на 2, не менять на длительную Каменную кожу −1.",
+      "implementationProfile": "status.135 / healing_ward: flatPhysicalReduction=2,charges=1,expire=endNextTargetActivation,minimumDamage=1; strongest reduction only. Once per healer own activation.",
+      "normalizedStatusIds": [
+        "status.135"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119b.029",
+      "currentName": "Сила после исцеления",
+      "currentEffect": "Реальное лечение другого бойца дополнительно даёт ему 2 временных HP до конца следующего хода. Раз на цель за раунд; временное HP не складывается.",
+      "previousUnacceptedProposal": "Раз на цель за раунд реальное лечение другого бойца даёт Запас временной жизни 2 HP на 2 собственных хода. С действующим запасом берётся больший, остаток не пополняется.",
+      "decision": "Сохранить 2 временных HP до конца следующего хода, не продлевать до 2 ходов.",
+      "implementationProfile": "status.148 / heal_buffer: pool=2,duration=1,oncePerTargetPerRound; stronger only, no refill.",
+      "normalizedStatusIds": [
+        "status.148"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119b.030",
+      "currentName": "Световая рябь",
+      "currentEffect": "Первое прямое магическое попадание светом за ход уменьшает Атаку цели и одного ближайшего к ней врага на 1 на следующий ход.",
+      "previousUnacceptedProposal": "Первое прямое световое попадание с HP-уроном за ход накладывает Слабость (−1 Атака, 2 хода) на цель и одного ближайшего к ней врага в радиусе 1. Повтор не продлевает; равенство по ID.",
+      "decision": "Сохранить одноходовую Слабость двух целей.",
+      "implementationProfile": "status.071 / radiance: attack−1,duration=1,oncePerOwnActivation; main target + nearest adjacent enemy, stable ID tie break.",
+      "normalizedStatusIds": [
+        "status.071"
+      ],
+      "scope": "Корзина: только сохранение данных",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119b.035",
+      "currentName": "Промораживает насквозь",
+      "currentEffect": "Первое прямое попадание холодом за ход делает следующий холодный удар по той же цели сильнее на 1 урон. Метка живёт два хода и затем расходуется.",
+      "previousUnacceptedProposal": "Первое за ход прямое холодное попадание по цели с 1–2 зарядами «Покрыт инеем» наносит +1 урон. Заряды не расходуются; замороженная цель бонуса не даёт, чтобы не усиливать контроль.",
+      "decision": "Сохранить отдельный заряд следующего холодного попадания, не давать незаявленный иней/заморозку.",
+      "implementationProfile": "PassiveRuntime pending cold-hit modifier: targetId, bonusDamage=1,charges=1,expiry=2 target activations. Consume on next cold HpHit; no status.015 accumulation. Show source/charge in target detail and preview.",
+      "normalizedStatusIds": [],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119b.036",
+      "currentName": "Иней поверх слабости",
+      "currentEffect": "При первом наложении носителем отрицательного состояния за раунд цель покрывается инеем: ближайший шаг стоит на 1 движение больше. Огонь снимает иней.",
+      "previousUnacceptedProposal": "Первое реально наложенное носителем вредное состояние за раунд добавляет цели 1 заряд «Покрыт инеем». Собственный иней не запускает правило; максимум 1 заряд от источника за раунд, общая защита от контроля сохраняется.",
+      "decision": "Сохранить дополнительную цену ближайшего шага, не запускать штатную заморозку от трёх таких срабатываний.",
+      "implementationProfile": "status.015 / thin_rime: nextStepCost+1,charge=1,expire=endNextTargetActivation,fireRemoves=true,accumulationEnabled=false. Trigger first actual negativeStateApplied perRound, cannot trigger from self. Frost-threshold consumers require accumulationEnabled=true.",
+      "normalizedStatusIds": [
+        "status.015"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "passive.20261119b.057",
+      "currentName": "Победа обращает в страх",
+      "currentEffect": "После первого убийства  за раунд ближайший враг в радиусе 2 получает  страх.",
+      "previousUnacceptedProposal": "",
+      "decision": "Незаписанный срок Страха взять из выбранного состояния: 2 хода.",
+      "implementationProfile": "status.055 default; oncePerRound first qualifying kill,nearestEnemy within2,stableId tie; oneApplicationPerTargetPerSourcePerBattle.",
+      "normalizedStatusIds": [
+        "status.055"
+      ],
+      "scope": "Активный боевой кандидат",
+      "preserveOriginal": true
+    },
+    {
+      "tagId": "status.130/formula",
+      "currentName": "Защитная стойка: округление",
+      "currentEffect": "50% с округлением вверх в карточке расходится с текущим кодом floor и минимумом +1.",
+      "previousUnacceptedProposal": "",
+      "decision": "Для интеграции сохранить текущий SandboxCombatTagRules: guardBonus=max(1,floor(effectiveDefenseBeforeGuard×.5)). Не складывать второй бонус состояния. Число/округление сделать одной настройкой.",
+      "implementationProfile": "Синхронизировать игровое описание с фактической формулой; при Защите 0/1/3/4 бонус +1/+1/+1/+2.",
+      "normalizedStatusIds": [
+        "status.130"
+      ],
+      "scope": "Активное правило",
+      "preserveOriginal": true
+    }
+  ]
+}

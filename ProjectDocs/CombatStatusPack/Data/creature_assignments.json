@@ -1,0 +1,209 @@
+{
+  "schema": "ks.creature-status-pilot.v1",
+  "assignments": [
+    {
+      "unitId": "wolf",
+      "nameRu": "Волк",
+      "addPassiveIds": [
+        "tactic.pack_hunter"
+      ],
+      "abilityStatusPayloads": [],
+      "roleReason": "Сохранить уже действующую стаю: alias на combat.pack, не второй бонус.",
+      "counterplay": "Разделить стаю; не давать двум волкам соседствовать с целью.",
+      "policy": "Добавить к текущим данным без изменения базовых характеристик и удаления существующих способностей. Не добавлять duplicate executor по alias.",
+      "prototypeOnly": true
+    },
+    {
+      "unitId": "lynx",
+      "nameRu": "Рысь",
+      "addPassiveIds": [],
+      "abilityStatusPayloads": [
+        {
+          "existingAbilityKind": "Pounce",
+          "statusId": "status.002",
+          "trigger": "первый успешный Pounce с HP-уроном за бой",
+          "charges": 1,
+          "duration": 2,
+          "tick": 1,
+          "limit": "1 наложение за бой, не на обычные удары",
+          "preserveCurrentCooldown": true
+        }
+      ],
+      "roleReason": "Одна отсроченная рваная рана усиливает роль засадника, не вводя новую кнопку.",
+      "counterplay": "Перевязать один заряд за действие; не оставлять уязвимого бойца под первый прыжок.",
+      "policy": "Добавить к текущим данным без изменения базовых характеристик и удаления существующих способностей. Не добавлять duplicate executor по alias.",
+      "prototypeOnly": true
+    },
+    {
+      "unitId": "shipovik",
+      "nameRu": "Шиповик",
+      "addPassiveIds": [
+        "passive.20261119.052"
+      ],
+      "abilityStatusPayloads": [],
+      "roleReason": "Мобильный стрелок получает один понятный вид давления: ядовитая колючка. Профиль яда 1×2 из текущего тега.",
+      "counterplay": "Сократить дистанцию; очистить яд; не пытаться лечением HP снять отравление.",
+      "policy": "Добавить к текущим данным без изменения базовых характеристик и удаления существующих способностей. Не добавлять duplicate executor по alias.",
+      "prototypeOnly": true
+    },
+    {
+      "unitId": "blood_kleshchen",
+      "nameRu": "Кровяной клещень",
+      "addPassiveIds": [],
+      "abilityStatusPayloads": [
+        {
+          "existingAbilityKind": "Attach",
+          "statusId": "status.008",
+          "mode": "migrateExistingOnly",
+          "note": "Паразит на жертве; сохранить уже существующий отдельный тик/действие клещня. Не добавлять второй DoT."
+        }
+      ],
+      "roleReason": "Наглядно показать существующее прикрепление.",
+      "counterplay": "Снять паразита предусмотренной помощью/действием; убить источник.",
+      "policy": "Добавить к текущим данным без изменения базовых характеристик и удаления существующих способностей. Не добавлять duplicate executor по alias.",
+      "prototypeOnly": true
+    },
+    {
+      "unitId": "padalny_mnogonog",
+      "nameRu": "Падальный многоног",
+      "addPassiveIds": [],
+      "abilityStatusPayloads": [
+        {
+          "existingAbilityKind": "NumbBite",
+          "statusId": "status.027",
+          "mode": "migrateExistingOnly",
+          "note": "Сохранить КД, блокировку стойкой и NumbImmunity. FeedOnNumbed проверяет этот же экземпляр."
+        }
+      ],
+      "roleReason": "Оцепенение остаётся мягким контролем с действием с места.",
+      "counterplay": "Стойка блокирует текущий укус; использовать действие с места и окно иммунитета.",
+      "policy": "Добавить к текущим данным без изменения базовых характеристик и удаления существующих способностей. Не добавлять duplicate executor по alias.",
+      "prototypeOnly": true
+    },
+    {
+      "unitId": "treshchotka",
+      "nameRu": "Трещотка",
+      "addPassiveIds": [],
+      "abilityStatusPayloads": [
+        {
+          "existingAbilityKind": "StunSpit",
+          "statusId": "status.025",
+          "mode": "migrateExistingOnly",
+          "note": "Цена/КД штатной способности сохраняются, дополнительно общая защита сильной группы."
+        }
+      ],
+      "roleReason": "Оглушение переводится на единый механизм и иконку.",
+      "counterplay": "Прервать/переждать доступность способности; использовать окно защиты от повторного контроля.",
+      "policy": "Добавить к текущим данным без изменения базовых характеристик и удаления существующих способностей. Не добавлять duplicate executor по alias.",
+      "prototypeOnly": true
+    },
+    {
+      "unitId": "tinny_polzun",
+      "nameRu": "Тинный ползун",
+      "addPassiveIds": [
+        "body.sticky"
+      ],
+      "abilityStatusPayloads": [
+        {
+          "existingAbilityKind": "Engulf",
+          "statusId": "status.044",
+          "mode": "migrateExistingOnly",
+          "note": "Не удваивать захват и существующие −2 HP на ходах ползуна. Payload удержания и его tick-source разнести явно."
+        }
+      ],
+      "roleReason": "Липкая поверхность затрудняет отход; активное поглощение уже задаёт основную роль.",
+      "counterplay": "Помощь соседнего союзника, уход до захвата; не давать липкости превращаться в второй полный контроль.",
+      "policy": "Добавить к текущим данным без изменения базовых характеристик и удаления существующих способностей. Не добавлять duplicate executor по alias.",
+      "prototypeOnly": true
+    },
+    {
+      "unitId": "lozovy_khvatun",
+      "nameRu": "Лозовый хватун",
+      "addPassiveIds": [
+        "passive.status.20261120.015"
+      ],
+      "abilityStatusPayloads": [
+        {
+          "existingAbilityKind": "VineGrab",
+          "statusId": "status.023",
+          "mode": "migrateExistingOnly",
+          "note": "Сохранить объект-корень/HP/дистанцию/освобождение. Не накладывать ещё один независимый корень."
+        }
+      ],
+      "roleReason": "Выбранный пассив даёт +1 первому удару по собственной связанной добыче.",
+      "counterplay": "Перерубить 5 HP корня, освободиться действием, разорвать источник/дистанцию.",
+      "policy": "Добавить к текущим данным без изменения базовых характеристик и удаления существующих способностей. Не добавлять duplicate executor по alias.",
+      "prototypeOnly": true
+    },
+    {
+      "unitId": "kamnespin",
+      "nameRu": "Камнеспин",
+      "addPassiveIds": [
+        "trait.exposed_flanks"
+      ],
+      "abilityStatusPayloads": [],
+      "roleReason": "Сохраняет уязвимость к двум соседним врагам вместо выдачи ещё одной защиты.",
+      "counterplay": "Окружать; не вводить направление спрайта как обязательное правило.",
+      "policy": "Добавить к текущим данным без изменения базовых характеристик и удаления существующих способностей. Не добавлять duplicate executor по alias.",
+      "prototypeOnly": true
+    },
+    {
+      "unitId": "healer",
+      "nameRu": "Лекарь",
+      "addPassiveIds": [
+        "passive.status.20261120.002"
+      ],
+      "abilityStatusPayloads": [],
+      "roleReason": "Первое лечение за бой дополнительно снимает яд — доступная контригра к пилотному Шиповику.",
+      "counterplay": "Научить ИИ и UI выбирать реальное лечение отравленного союзника, не тратить очищение на пустой HP-результат.",
+      "policy": "Добавить к текущим данным без изменения базовых характеристик и удаления существующих способностей. Не добавлять duplicate executor по alias.",
+      "prototypeOnly": true
+    },
+    {
+      "unitId": "guard",
+      "nameRu": "Гвардеец",
+      "addPassiveIds": [
+        "passive.status.20261120.019"
+      ],
+      "abilityStatusPayloads": [],
+      "roleReason": "Соседний союзник под полным контролем получает защиту первого прямого удара за раунд.",
+      "counterplay": "Разорвать соседство; тики и второй удар обходят разовый ресурс.",
+      "policy": "Добавить к текущим данным без изменения базовых характеристик и удаления существующих способностей. Не добавлять duplicate executor по alias.",
+      "prototypeOnly": true
+    },
+    {
+      "unitId": "nitnik",
+      "nameRu": "Нитник",
+      "addPassiveIds": [],
+      "abilityStatusPayloads": [
+        {
+          "existingAbilityKind": "WeaveThread",
+          "statusId": null,
+          "mode": "keepTerrainObject",
+          "note": "Сама нить — линия поля, не автоматически Покрыт паутиной. Только срабатывание её текущего удержания привязать к подходящему состоянию/источнику."
+        }
+      ],
+      "roleReason": "Не превратить линию геометрии в постоянный абстрактный дебафф.",
+      "counterplay": "Уничтожать/обходить нить штатным способом.",
+      "policy": "Добавить к текущим данным без изменения базовых характеристик и удаления существующих способностей. Не добавлять duplicate executor по alias.",
+      "prototypeOnly": true
+    },
+    {
+      "unitId": "gnezdovaya_matka",
+      "nameRu": "Гнездовая матка",
+      "addPassiveIds": [],
+      "abilityStatusPayloads": [
+        {
+          "existingAbilityKind": "LayEgg",
+          "statusId": null,
+          "mode": "keepExistingGroundEggs",
+          "note": "Сохранить два стартовых яйца/лимиты текущей базы; status.203 не добавлять автоматически."
+        }
+      ],
+      "roleReason": "Матка остаётся боссом наземных целей и призывов.",
+      "counterplay": "Разрушить яйца до вылупления; не тратить весь урон только в босса.",
+      "policy": "Добавить к текущим данным без изменения базовых характеристик и удаления существующих способностей. Не добавлять duplicate executor по alias.",
+      "prototypeOnly": true
+    }
+  ]
+}

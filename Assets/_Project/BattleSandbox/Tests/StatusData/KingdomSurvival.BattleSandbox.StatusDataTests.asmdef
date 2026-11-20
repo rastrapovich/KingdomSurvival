@@ -1,0 +1,26 @@
+{
+  "name": "KingdomSurvival.BattleSandbox.StatusDataTests",
+  "rootNamespace": "KingdomSurvival.BattleSandbox.Tests",
+  "references": [
+    "KingdomSurvival.BattleSandbox.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll",
+    "Newtonsoft.Json.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

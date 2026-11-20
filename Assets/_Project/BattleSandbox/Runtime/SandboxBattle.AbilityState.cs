@@ -243,6 +243,7 @@ namespace KingdomSurvival.BattleSandbox
                         UpdateLinkObjectCells(link);
                 }
             }
+            CheckStatusLinkDistances();
         }
 
         private void UpdateLinkObjectCells(SandboxLink link)
@@ -371,6 +372,8 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
             objects.RemoveAll(item => item.IsDestroyed && item.Kind != SandboxObjectKind.Tendril);
+            // Пакет состояний: Отложенный взрыв и Приговор (раунд R+2).
+            ProcessStatusRoundStart();
         }
 
         // ---------- Начало активации ----------
@@ -468,18 +471,30 @@ namespace KingdomSurvival.BattleSandbox
                 Log(unit.DisplayLabel + " на мелкой воде восстанавливается: +" + (unit.HitPoints - before) + " HP.");
             }
 
-            // 4. Ограничения состояний — к штатному бюджету хода.
-            if (unit.IsStunned)
+            // 3а. Пакет состояний: восстановление → тики (≤3 HP) → смерть →
+            // паника. Отдельный ход паразита выше не повторяется.
+            ProcessStatusSourceActivationStart(unit);
+            bool controlled = ProcessStatusActivationStart(unit);
+            if (unit.IsDefeated)
+                return false;
+            if (controlled)
             {
-                unit.StunCounted = true;
-                unit.RemainingMovement = Math.Max(0, unit.RemainingMovement - 1);
-            }
-            if (unit.IsNumbed)
-            {
-                unit.NumbCounted = true;
+                // Сильный контроль: активация имеет Start и End, но без
+                // движения и действия; срок расходуется в конце.
+                unit.ActionPoints = 0;
                 unit.RemainingMovement = 0;
+                Log(unit.DisplayLabel + " пропускает ход: «" +
+                    unit.statuses.First(item => item.Definition.Has(SandboxStatusOpKind.SkipActivation)).Definition.Name + "».");
+                return false;
             }
-            else if (unit.NumbImmunity > 0)
+
+            // 4. Ограничения состояний — к штатному бюджету хода.
+            int statusMovement = StatusMovementMod(unit);
+            if (statusMovement != 0)
+                unit.RemainingMovement = Math.Max(0, unit.RemainingMovement + statusMovement);
+            if (StatusHas(unit, SandboxStatusOpKind.NoVoluntaryMove))
+                unit.RemainingMovement = 0;
+            if (!unit.IsNumbed && unit.NumbImmunity > 0)
             {
                 unit.NumbImmunityCounted = true;
             }
@@ -501,23 +516,15 @@ namespace KingdomSurvival.BattleSandbox
 
         private void ProcessActivationEnd(SandboxUnitState unit)
         {
-            if (unit.StunCounted)
-            {
-                unit.IsStunned = false;
-                unit.StunCounted = false;
-            }
-            if (unit.NumbCounted)
-            {
-                unit.IsNumbed = false;
-                unit.NumbCounted = false;
-                unit.NumbImmunity = 1;
-                unit.NumbImmunityCounted = false;
-            }
-            else if (unit.NumbImmunityCounted)
+            // Окно иммунитета многонога закрывается в конце хода без оцепенения.
+            if (unit.NumbImmunityCounted && !unit.IsNumbed)
             {
                 unit.NumbImmunity = 0;
                 unit.NumbImmunityCounted = false;
             }
+            // Пакет состояний: истечение по собственным ходам и ходам источника;
+            // окончание оцепенения открывает прежнее окно NumbImmunity.
+            ProcessStatusActivationEnd(unit);
 
             if (tollPreparedAt.TryGetValue(unit.Id, out int preparedAt) && preparedAt < unit.ActivationCount &&
                 telegraphs.Any(item => item.SourceId == unit.Id && item.Kind == SandboxTelegraphKind.Toll))
@@ -549,6 +556,7 @@ namespace KingdomSurvival.BattleSandbox
         {
             if (!defeatProcessed.Add(dead.Id))
                 return;
+            OnStatusUnitDefeated(dead);
             foreach (SandboxLink link in links.Where(item => item.SourceId == dead.Id || item.TargetId == dead.Id).ToList())
                 RemoveLink(link, link.SourceId == dead.Id ? "источник пал — связь исчезла." : "жертва пала — связь исчезла.");
 

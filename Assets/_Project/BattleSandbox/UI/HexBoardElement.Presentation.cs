@@ -81,6 +81,7 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             presentedBattle = battle;
             presentations.Clear();
+            ClearStatusIcons();
             vanishAfterStep.Clear();
             depthOrder.Clear();
         }

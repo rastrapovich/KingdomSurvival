@@ -1,0 +1,547 @@
+﻿id,kind,name,included,priority,runtimeExecutor,tests,note
+status.001,status,Отравление,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.002,status,Кровотечение,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.003,status,Горение,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.006,status,Тлеющее проклятие,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.007,status,Мучительная связь,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.008,status,Паразит на теле,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.009,status,"Ужас, нарастающий со временем",True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.010,status,Отложенный взрыв,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.011,status,Болевое эхо,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.012,status,Кровавая порча,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.014,status,Озябший,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.015,status,Покрыт инеем,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.018,status,Облит смолой,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.019,status,Кислотное разъедание брони,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.168,status,Ослепление,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.022,status,Покрыт паутиной,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.023,status,Опутан корнями,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.025,status,Оглушение,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.026,status,Ошеломление,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.027,status,Оцепенение,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.028,status,Паралич,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.030,status,Сон,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.032,status,Окаменение,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.033,status,Заморожен,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.041,status,Замедление,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.043,status,Обездвиживание,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.044,status,Захват,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.046,status,В сети,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.047,status,Запутан,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.054,status,Окружён,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.055,status,Страх,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.056,status,Паника,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.057,status,Ужас,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.058,status,Скованный страхом,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.059,status,Смятение,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.060,status,Очарование,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.061,status,Подчинение,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.065,status,Спровоцирован,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.066,status,Деморализация,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.067,status,Сломленный дух,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.068,status,Отчаяние,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.070,status,Чума,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.071,status,Слабость,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.072,status,Обессиленный,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.077,status,Высасывание жизненной силы,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.078,status,Дурнота,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.079,status,Тошнота,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.084,status,Забывчивость стрелка,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.087,status,Отяжеление,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.088,status,Ослаблен ударом,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.098,status,Роковая метка,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.099,status,Проклятие слабого удара,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.101,status,Метка добычи,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.102,status,Отмеченная цель,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.105,status,Приговор,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.106,status,Вызов на поединок,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.107,status,Под защитой союзника,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.109,status,Связанные раны,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.110,status,Привязка к источнику,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.113,status,Свирепость,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.114,status,Временный вампиризм,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.117,status,Кровожадность,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.119,status,Боевой подъём,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.130,status,Защитная стойка,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.132,status,Щит одного попадания,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.135,status,Каменная кожа,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.136,status,Защита от стрел,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.137,status,Защита от чар,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.138,status,Огненный покров,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.139,status,Зеркальная защита,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.142,status,Краткая неуязвимость,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.146,status,Постепенное восстановление,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.148,status,Запас временной жизни,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.150,status,При смерти,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.156,status,Ускоренное перемещение,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.158,status,Перехват инициативы,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.159,status,Прилив сил,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.161,status,Набранный темп,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.171,status,Невидимость,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.185,status,Повреждена нога,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.186,status,Повреждена рука,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.187,status,Контузия головы,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.188,status,Порча невезения,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.189,status,Боевая удача,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.190,status,Воодушевление,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.193,status,Рваная рана,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.194,status,Ранящее перемещение,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.199,status,Сила от ран,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+status.203,status,Зародыш в теле,True,full89,TODO by Claude,TODO,"Package supplies data/art/brief, not Unity implementation"
+nature.returned,passive,Нежить,False,outsideCombat,not required: archive,n/a,
+nature.spirit,passive,Дух,False,outsideCombat,not required: archive,n/a,
+tactic.pack_hunter,passive,Стая,True,favorite,TODO by Claude,TODO,
+tactic.isolation_hunter,passive,Охотник,True,favorite,TODO by Claude,TODO,
+tactic.wounded_hunter,passive,Чует слабину,True,favorite,TODO by Claude,TODO,
+tactic.guard_hunter,passive,Давит стойку,False,trash,not required: archive,n/a,
+trait.exposed_flanks,passive,Открытые бока,True,favorite,TODO by Claude,TODO,
+trait.ranged_resistant,passive,Прикрыт от обстрела,True,favorite,TODO by Claude,TODO,
+trait.height_adapted,passive,Цепкий,True,favorite,TODO by Claude,TODO,
+tactic.last_ally_standing,passive,Загнанный одиночка,True,favorite,TODO by Claude,TODO,
+trait.anchored,passive,Крепкая опора,True,favorite,TODO by Claude,TODO,
+trait.venomous_flesh,passive,Ядовитая плоть,True,favorite,TODO by Claude,TODO,Сохранить явные 1×2 и триггер пережитого ближнего попадания; не менять на 1×3.
+trait.bloodless,passive,Без кровотока,True,favorite,TODO by Claude,TODO,
+movement.wetland_walker,passive,Ходит по жиже,True,favorite,TODO by Claude,TODO,
+ecology.dries_out,passive,Пересыхает,False,trash,not required: archive,n/a,
+myth.place_bound,passive,Привязанный к месту,False,trash,not required: archive,n/a,
+myth.material_anchor,passive,Держится носителем,False,trash,not required: archive,n/a,
+body.line_blocker,passive,Закрывает линию огня,False,trash,not required: archive,n/a,
+body.low_profile,passive,Прячется за малым укрытием,False,trash,not required: archive,n/a,
+body.brittle_armor,passive,Ломкий панцирь,False,trash,not required: archive,n/a,
+body.renewing_armor,passive,Восстанавливает покров,False,trash,not required: archive,n/a,
+body.spiny,passive,Колючий,True,favorite,TODO by Claude,TODO,
+body.sticky,passive,Липкая поверхность,True,favorite,TODO by Claude,TODO,"Сохранить именно добавочную цену следующего отхода, а не штраф всем шагам."
+body.diffuse,passive,Сыпучее тело,False,trash,not required: archive,n/a,
+trait.rest_knitter,passive,Срастается в покое,True,favorite,TODO by Claude,TODO,
+ecology.dangerous_remains,passive,Опасные останки,True,favorite,TODO by Claude,TODO,
+sense.light_sensitive,passive,Свет режет глаза,False,trash,not required: archive,n/a,
+sense.no_sight,passive,Не видит,False,trash,not required: archive,n/a,
+tactic.zone_holder,passive,Мешает пройти,True,favorite,TODO by Claude,TODO,
+tactic.pursuer,passive,Идёт следом,True,favorite,TODO by Claude,TODO,
+tactic.slow_turner,passive,Долго разворачивается,True,favorite,TODO by Claude,TODO,
+tactic.shot_exhausted,passive,Открывается после выстрела,True,favorite,TODO by Claude,TODO,
+resist.biological_poison,passive,Иммунитет к яду,True,favorite,TODO by Claude,TODO,
+resist.binding_slack,passive,Не стесняют путы,False,trash,not required: archive,n/a,
+resist.fearless,passive,Не поддаётся страху,True,favorite,TODO by Claude,TODO,
+weakness.light_revealed,passive,Выдаётся на свету,False,trash,not required: archive,n/a,
+resist.vegetation_hazard,passive,Не ранят заросли,False,trash,not required: archive,n/a,
+resist.short_stun,passive,Быстро приходит в себя,True,favorite,TODO by Claude,TODO,Текущая формулировка теперь совпадает с общей защитой от повторного сильного контроля. Не добавлять непринятую защиту от первого оглушения.
+weakness.noisy_steps,passive,Выдают шаги,False,trash,not required: archive,n/a,
+weakness.fragile_grip,passive,Хватка слабеет от боли,False,trash,not required: archive,n/a,
+myth.shared_fate,passive,Делит связь,True,favorite,TODO by Claude,TODO,Сохранить зависимую делимую связь без выдуманного автоматического переназначения партнёра.
+candidate.ks.0104,passive,Неуверенность,True,favorite,TODO by Claude,TODO,
+candidate.ks.0113,passive,Рваный темп,True,favorite,TODO by Claude,TODO,
+candidate.ks.0127,passive,Липкий след,True,favorite,TODO by Claude,TODO,
+candidate.ks.0129,passive,Регенерация,True,favorite,TODO by Claude,TODO,
+candidate.ks.0204,passive,Громко спит,False,outsideCombat,not required: archive,n/a,
+candidate.ks.0205,passive,Не ест человеческий запас,False,outsideCombat,not required: archive,n/a,
+candidate.ks.0206,passive,Заготавливает понемногу,False,outsideCombat,not required: archive,n/a,
+candidate.ks.0207,passive,Портит общий корм,False,outsideCombat,not required: archive,n/a,
+candidate.ks.0261,passive,Порог смены шкуры,False,trash,not required: archive,n/a,
+candidate.ks.0262,passive,Тихая фаза,True,favorite,TODO by Claude,TODO,
+candidate.ks.0264,passive,Взаимная сырость,False,trash,not required: archive,n/a,
+candidate.ks.0265,passive,Сухой покров раним,False,trash,not required: archive,n/a,
+candidate.ks.0282,passive,Лечение по очереди,True,favorite,TODO by Claude,TODO,
+candidate.ks.0292,passive,Опасность первого укуса,True,favorite,TODO by Claude,TODO,"Слово «сильный» не задаёт числа. Безопасный стартовый параметр — штатные 1×3, только первый успешный укус за бой."
+passive.20261119.002,passive,Дух ополчения,True,favorite,TODO by Claude,TODO,
+passive.20261119.003,passive,Крепкая кольчуга,True,favorite,TODO by Claude,TODO,
+passive.20261119.004,passive,Гроза крылатых,True,favorite,TODO by Claude,TODO,
+passive.20261119.005,passive,Разгон по прямой,True,favorite,TODO by Claude,TODO,
+passive.20261119.007,passive,Строевой наставник,True,favorite,TODO by Claude,TODO,
+passive.20261119.009,passive,Удар с оцепенением,True,favorite,TODO by Claude,TODO,"Название не определяет механику: это мягкое −1 движения, не Оцепенение."
+passive.20261119.010,passive,Сбивающий облик,True,favorite,TODO by Claude,TODO,
+passive.20261119.012,passive,Изнуряющая пыль,True,favorite,TODO by Claude,TODO,Сохранить одноходовую Слабость и явно разрешённое продление.
+passive.20261119.013,passive,Слаженность рощи,True,favorite,TODO by Claude,TODO,
+passive.20261119.014,passive,Хранитель поросли,True,favorite,TODO by Claude,TODO,
+passive.20261119.016,passive,Соседний всплеск,True,favorite,TODO by Claude,TODO,
+passive.20261119.019,passive,Неиссякаемый ответ,True,favorite,TODO by Claude,TODO,
+passive.20261119.020,passive,Удар и возврат,True,favorite,TODO by Claude,TODO,
+passive.20261119.021,passive,Подавление,True,favorite,TODO by Claude,TODO,
+passive.20261119.022,passive,Три пасти,True,favorite,TODO by Claude,TODO,
+passive.20261119.023,passive,Сбрасывает порчу,True,favorite,TODO by Claude,TODO,
+passive.20261119.024,passive,Жаростойкая шкура,True,favorite,TODO by Claude,TODO,
+passive.20261119.025,passive,Не загорается,True,favorite,TODO by Claude,TODO,
+passive.20261119.027,passive,Пустоты между костями,True,favorite,TODO by Claude,TODO,
+passive.20261119.029,passive,Чумной распад,True,favorite,TODO by Claude,TODO,"Гниение — вариант Отравления, не второе состояние Чума. Дружественный огонь обязателен."
+passive.20261119.031,passive,Пьёт жизненную силу,True,favorite,TODO by Claude,TODO,
+passive.20261119.032,passive,Поводырь мёртвых,True,favorite,TODO by Claude,TODO,
+passive.20261119.033,passive,Копит ярость ударов,True,favorite,TODO by Claude,TODO,
+passive.20261119.035,passive,Сквозистое тело,True,favorite,TODO by Claude,TODO,
+passive.20261119.036,passive,Страшный укус,True,favorite,TODO by Claude,TODO,
+passive.20261119.037,passive,Звереет от боли,True,favorite,TODO by Claude,TODO,
+passive.20261119.038,passive,Боевая спячка,True,favorite,TODO by Claude,TODO,
+passive.20261119.040,passive,полёт,True,favorite,TODO by Claude,TODO,
+passive.20261119.041,passive,Бьёт через строй,True,favorite,TODO by Claude,TODO,
+passive.20261119.042,passive,Гнетущее присутствие,True,favorite,TODO by Claude,TODO,
+passive.20261119.043,passive,Охотник,True,favorite,TODO by Claude,TODO,
+passive.20261119.044,passive,Великанобой,True,favorite,TODO by Claude,TODO,
+passive.20261119.046,passive,Несгибаемый разум,True,favorite,TODO by Claude,TODO,
+passive.20261119.050,passive,Безответный удар,True,favorite,TODO by Claude,TODO,
+passive.20261119.052,passive,Ядовитая атака,True,favorite,TODO by Claude,TODO,Сохранить пользовательский яд 1×2 с обновлением; базовый яд остаётся 1×3.
+passive.20261119.056,passive,Легко воспламеняется,True,favorite,TODO by Claude,TODO,
+passive.20261119.057,passive,Ломает заграждения,True,candidate,TODO by Claude,TODO,
+passive.20261119.060,passive,Вожак ловчих,True,favorite,TODO by Claude,TODO,
+passive.20261119.061,passive,Учится держать удар,True,favorite,TODO by Claude,TODO,
+passive.20261119.062,passive,Запоминает противника,True,favorite,TODO by Claude,TODO,
+passive.20261119.065,passive,Привыкает к боли,True,favorite,TODO by Claude,TODO,
+passive.20261119.066,passive,Безумие потерь,True,favorite,TODO by Claude,TODO,
+passive.20261119.068,passive,Меткое ослабление,True,favorite,TODO by Claude,TODO,Сохранить временное снижение Защиты на 1 без объявления физического снаряда кислотой.
+passive.20261119.069,passive,Пристреливается,True,favorite,TODO by Claude,TODO,
+passive.20261119.070,passive,Рвущие удары,True,favorite,TODO by Claude,TODO,"Сохранить двухходовую рану ноги, не менять её на ранение до конца боя."
+passive.20261119.071,passive,Девять жизней,True,favorite,TODO by Claude,TODO,
+passive.20261119.072,passive,Крепкий лоб,False,trash,not required: archive,n/a,
+passive.20261119.073,passive,Добивает раненых,True,favorite,TODO by Claude,TODO,
+passive.20261119.074,passive,Ищет просвет,False,trash,not required: archive,n/a,
+passive.20261119.075,passive,Лёгкость реакции,False,trash,not required: archive,n/a,
+passive.20261119.076,passive,Стойкий к состояниям,True,favorite,TODO by Claude,TODO,
+passive.20261119.077,passive,Работает в окружении,True,favorite,TODO by Claude,TODO,
+passive.20261119.078,passive,Читает дальний замах,False,trash,not required: archive,n/a,
+passive.20261119.079,passive,Мастер щита,False,trash,not required: archive,n/a,
+passive.20261119.080,passive,Привык к тяжести,False,trash,not required: archive,n/a,
+passive.20261119.081,passive,Не теряет темп при ожидании,False,trash,not required: archive,n/a,
+passive.20261119.082,passive,Преимущество размаха,False,trash,not required: archive,n/a,
+passive.20261119.083,passive,Подавляет темпом,True,favorite,TODO by Claude,TODO,Подавление не новый statusId; это одноходовое накопление штрафа Атаки максимум −2.
+passive.20261119.084,passive,Воин-одиночка,True,favorite,TODO by Claude,TODO,
+passive.20261119.086,passive,Победа окрыляет,True,favorite,TODO by Claude,TODO,
+passive.20261119.087,passive,Помнит пробитое место,False,trash,not required: archive,n/a,
+passive.20261119.088,passive,Лёгкий доспех спасает,False,trash,not required: archive,n/a,
+passive.20261119.089,passive,Скован боем,False,trash,not required: archive,n/a,
+passive.20261119.090,passive,Устрашающие раны,False,trash,not required: archive,n/a,Архивный вариант страха уменьшает только Атаку; не добавлять запрет приближения.
+passive.20261119.091,passive,Свободная рука,False,trash,not required: archive,n/a,
+passive.20261119.092,passive,Вкус победы,True,favorite,TODO by Claude,TODO,
+passive.20261119.093,passive,Крепкий дух,False,trash,not required: archive,n/a,
+passive.20261119.095,passive,На последнем дыхании,True,candidate,TODO by Claude,TODO,
+passive.20261119.096,passive,Мститель,True,candidate,TODO by Claude,TODO,
+passive.20261119.097,passive,Пользуется сумятицей,True,candidate,TODO by Claude,TODO,
+passive.20261119.098,passive,Хороший пациент,True,candidate,TODO by Claude,TODO,
+passive.20261119.099,passive,Ищет стык доспеха,True,candidate,TODO by Claude,TODO,
+passive.20261119.100,passive,Фехтовальная защита,True,candidate,TODO by Claude,TODO,
+passive.20261119.101,passive,Ночная выдержка,True,favorite,TODO by Claude,TODO,
+passive.20261119.102,passive,Ночная стрельба,True,candidate,TODO by Claude,TODO,
+passive.20261119.103,passive,Бьёт уходящего по ногам,True,favorite,TODO by Claude,TODO,
+passive.20261119.104,passive,Выстрел в упор,False,trash,not required: archive,n/a,
+passive.20261119.105,passive,Мелкие переступания,False,trash,not required: archive,n/a,
+passive.20261119.106,passive,Повторный выпад,False,trash,not required: archive,n/a,
+passive.20261119.107,passive,Скрытый фланг,True,favorite,TODO by Claude,TODO,
+passive.20261119.108,passive,Твёрдая рука перехвата,False,trash,not required: archive,n/a,
+passive.20261119.109,passive,Каменные кулаки,False,trash,not required: archive,n/a,
+passive.20261119.110,passive,Широкий шаг,False,trash,not required: archive,n/a,
+passive.20261119.111,passive,Поправка на расстояние,False,trash,not required: archive,n/a,
+passive.20261119.112,passive,Автоматический укол,True,favorite,TODO by Claude,TODO,
+passive.20261119.113,passive,Отражает снаряд щитом,False,trash,not required: archive,n/a,
+passive.20261119.114,passive,Срывает ответный выпад,False,trash,not required: archive,n/a,
+passive.20261119.115,passive,Знает приём врага,False,trash,not required: archive,n/a,
+passive.20261119.116,passive,Ритм непрерывных попаданий,False,trash,not required: archive,n/a,
+passive.20261119.117,passive,Блок накапливает натиск,False,trash,not required: archive,n/a,
+passive.20261119.118,passive,Берегущий спутника,False,trash,not required: archive,n/a,
+passive.20261119.119,passive,Уверенный боевой ритм,False,trash,not required: archive,n/a,
+passive.20261119.120,passive,Тяжёлый первый удар,False,trash,not required: archive,n/a,
+passive.20261119.121,passive,Не сдаёт блок от серии,False,trash,not required: archive,n/a,
+passive.20261119.122,passive,Проникающие чары,False,trash,not required: archive,n/a,
+passive.20261119.123,passive,Крадущий здоровье,False,trash,not required: archive,n/a,
+passive.20261119.124,passive,Кровь вместо силы,False,trash,not required: archive,n/a,
+passive.20261119.125,passive,Удерживает поток,False,trash,not required: archive,n/a,
+passive.20261119.126,passive,Долгие чары,False,trash,not required: archive,n/a,
+passive.20261119.127,passive,Крадёт запас сил,True,candidate,TODO by Claude,TODO,
+passive.20261119.128,passive,Сифон чужой силы,True,candidate,TODO by Claude,TODO,
+passive.20261119.129,passive,Непроницаемый для обычного,True,candidate,TODO by Claude,TODO,
+passive.20261119.130,passive,Опора соседей,True,candidate,TODO by Claude,TODO,
+passive.20261119.131,passive,Точность против уклонения,True,candidate,TODO by Claude,TODO,
+passive.20261119.132,passive,Пробивает поглощение,True,candidate,TODO by Claude,TODO,
+passive.20261119.133,passive,Пересиливает блок,False,trash,not required: archive,n/a,
+passive.20261119.134,passive,Мастер столкновений,False,trash,not required: archive,n/a,
+passive.20261119.135,passive,Усиливает отраву,False,trash,not required: archive,n/a,
+passive.20261119.136,passive,Умелые руки лекаря,True,favorite,TODO by Claude,TODO,
+passive.20261119.137,passive,Союзный удар на подлёте,False,trash,not required: archive,n/a,
+passive.20261119.138,passive,Сосуд живучести,True,favorite,TODO by Claude,TODO,
+passive.20261119.139,passive,Первый среди товарищей,False,trash,not required: archive,n/a,
+passive.20261119.140,passive,Сработавшаяся пара,False,trash,not required: archive,n/a,
+passive.20261119.141,passive,Усиливает физический натиск,False,trash,not required: archive,n/a,
+passive.20261119.142,passive,Усиливает чародейский напор,False,trash,not required: archive,n/a,
+passive.20261119.143,passive,Дар поддержки,False,trash,not required: archive,n/a,
+passive.20261119.145,passive,Двойной натиск,False,trash,not required: archive,n/a,
+passive.20261119.146,passive,Ускользает от заклинаний,False,trash,not required: archive,n/a,
+passive.20261119.147,passive,Вызывает на себя,False,trash,not required: archive,n/a,
+passive.20261119.148,passive,Кровь для командира,False,trash,not required: archive,n/a,
+passive.20261119.149,passive,Смертельная отрава,True,favorite,TODO by Claude,TODO,Сохранить явно выбранный тяжёлый яд 2×2. Не превращать в instant kill и не складывать с обычным ядом.
+passive.20261119.150,passive,Готов к схватке,False,trash,not required: archive,n/a,
+passive.20261119.151,passive,Врывается без заминки,False,trash,not required: archive,n/a,
+passive.20261119.152,passive,Студёное касание,False,trash,not required: archive,n/a,
+passive.20261119.153,passive,Первое ранение закаляет,False,trash,not required: archive,n/a,
+passive.20261119.154,passive,Отзвук союзных чар,False,trash,not required: archive,n/a,
+passive.20261119.155,passive,Чистое добивание,False,trash,not required: archive,n/a,
+passive.20261119.156,passive,Избыточный удар,False,trash,not required: archive,n/a,
+passive.20261119.157,passive,Избыток лечения в покров,False,trash,not required: archive,n/a,"Сохраняем архивный покров из избытка лечения как пул HP, не как полное поглощение любого попадания."
+passive.20261119.158,passive,Считает павших,True,favorite,TODO by Claude,TODO,
+passive.20261119.159,passive,Павшие крепят строй,False,trash,not required: archive,n/a,
+passive.20261119.160,passive,Заслон до сближения,False,trash,not required: archive,n/a,
+passive.20261119.161,passive,Общий первый порыв,False,trash,not required: archive,n/a,
+passive.20261119.162,passive,Усиливает чары отряда,False,trash,not required: archive,n/a,
+passive.20261119.163,passive,Раненый яростнее,False,trash,not required: archive,n/a,
+passive.20261119.164,passive,Последний взрыв,True,favorite,TODO by Claude,TODO,
+passive.20261119.165,passive,Распадается на выводок,True,favorite,TODO by Claude,TODO,
+passive.20261119.166,passive,Последний дар защиты,True,favorite,TODO by Claude,TODO,
+passive.20261119.167,passive,Последний целебный выдох,True,favorite,TODO by Claude,TODO,
+passive.20261119.168,passive,Передаёт натиск,True,favorite,TODO by Claude,TODO,
+passive.20261119.169,passive,Гасит первое благословение,False,trash,not required: archive,n/a,
+passive.20261119.170,passive,Растёт от призыва,True,favorite,TODO by Claude,TODO,
+passive.20261119.171,passive,Провожает новобранца,False,trash,not required: archive,n/a,
+passive.20261119.172,passive,Ответ на чужую магию,False,trash,not required: archive,n/a,
+passive.20261119.173,passive,Ответ на исцеление,False,trash,not required: archive,n/a,
+passive.20261119.174,passive,Срывает восстановленный заслон,False,trash,not required: archive,n/a,
+passive.20261119.175,passive,Не нападает сам,False,trash,not required: archive,n/a,
+passive.20261119.177,passive,Кровь быстро свёртывается,True,favorite,TODO by Claude,TODO,
+passive.20261119.178,passive,Плохо сворачивается кровь,True,favorite,TODO by Claude,TODO,"Сохранить явное «не складывают тик»: у этого носителя кровотечение максимум один заряд, но длится 3 хода."
+passive.20261119.179,passive,Опасен у края смерти,False,trash,not required: archive,n/a,
+passive.20261119.180,passive,Силен неповреждённым,True,favorite,TODO by Claude,TODO,
+passive.20261119.181,passive,Отчаянно увёртлив,True,favorite,TODO by Claude,TODO,
+passive.20261119.182,passive,Резво начинает,False,trash,not required: archive,n/a,
+passive.20261119.183,passive,Горяч на старте,True,favorite,TODO by Claude,TODO,
+passive.20261119.184,passive,Воитель света,False,trash,not required: archive,n/a,
+passive.20261119.185,passive,Боец сумрака,False,trash,not required: archive,n/a,
+passive.20261119.186,passive,Свет мешает биться,False,trash,not required: archive,n/a,
+passive.20261119.187,passive,Нервничает в темноте,False,trash,not required: archive,n/a,
+passive.20261119.188,passive,Точная дальняя рука,False,trash,not required: archive,n/a,
+passive.20261119.189,passive,Жестокий ближний удар,False,trash,not required: archive,n/a,
+passive.20261119.190,passive,Сбалансированная опора,False,trash,not required: archive,n/a,
+passive.20261119.191,passive,Крепко держится за жизнь,False,trash,not required: archive,n/a,
+passive.20261119.192,passive,Судьба исправляет удар,False,trash,not required: archive,n/a,
+passive.20261119.193,passive,Чует скрытого рядом,False,trash,not required: archive,n/a,
+passive.20261119.194,passive,Знает лесную схватку,True,favorite,TODO by Claude,TODO,
+passive.20261119.195,passive,Хрупкий,True,favorite,TODO by Claude,TODO,
+passive.20261119.196,passive,Дрожит перед зверем,True,favorite,TODO by Claude,TODO,
+passive.20261119.197,passive,Растерян в первом раунде,True,favorite,TODO by Claude,TODO,
+passive.20261119.198,passive,Лесная защита,True,favorite,TODO by Claude,TODO,
+passive.20261119.199,passive,Хозяин холмов,True,favorite,TODO by Claude,TODO,
+passive.20261119.200,passive,Болотная стойка,True,favorite,TODO by Claude,TODO,
+passive.20261119.201,passive,Бронебойный выстрел,False,trash,not required: archive,n/a,
+passive.20261119.202,passive,Тяжёлые снаряды,True,favorite,TODO by Claude,TODO,Сохранить снижение Защиты на 1 на два хода при дальнем попадании в свой ход.
+passive.20261119.203,passive,Каменеющая рана,False,trash,not required: archive,n/a,В корзине; не внедрять как бесплатное полное Окаменение поверх атаки.
+passive.20261119.204,passive,Разбивает оружие,True,favorite,TODO by Claude,TODO,
+passive.20261119.205,passive,Разбивает доспех,False,trash,not required: archive,n/a,
+passive.20261119.206,passive,Первое парирование,True,favorite,TODO by Claude,TODO,
+passive.20261119.207,passive,Ответ прежде удара,True,favorite,TODO by Claude,TODO,
+passive.20261119.208,passive,Не слабеет от ран,True,favorite,TODO by Claude,TODO,
+passive.20261119.209,passive,Ровный боевой дух,False,trash,not required: archive,n/a,
+passive.20261119.210,passive,Не устаёт в бою,True,candidate,TODO by Claude,TODO,
+passive.20261119.211,passive,Затаптывает слабого,True,favorite,TODO by Claude,TODO,
+passive.20261119.212,passive,Отнимает боезапас,True,favorite,TODO by Claude,TODO,
+passive.20261119.213,passive,Поглощает останки,True,favorite,TODO by Claude,TODO,
+passive.20261119.214,passive,Несокрушим в обороне,False,trash,not required: archive,n/a,
+passive.20261119.215,passive,Просачивается через строй,False,trash,not required: archive,n/a,
+passive.20261119.216,passive,Удар между двух,False,trash,not required: archive,n/a,
+passive.20261119.217,passive,Точный приступ,False,trash,not required: archive,n/a,
+passive.20261119.218,passive,Не промахивается в упор,False,trash,not required: archive,n/a,
+passive.20261119.219,passive,Замедляющий удар,True,favorite,TODO by Claude,TODO,Сохранить явное деление движения пополам на один ход.
+passive.20261119.220,passive,Слабеет вместе с телом,True,favorite,TODO by Claude,TODO,
+passive.20261119.221,passive,Натиск с открытием,False,trash,not required: archive,n/a,
+passive.20261119.222,passive,Свет вокруг носителя,False,trash,not required: archive,n/a,
+passive.20261119.223,passive,Ведёт слабейшего,False,trash,not required: archive,n/a,
+passive.20261119.224,passive,Сдерживает яд у своих,False,trash,not required: archive,n/a,
+passive.20261119.225,passive,Питается победой,True,favorite,TODO by Claude,TODO,
+passive.20261119.226,passive,Два выстрела,True,favorite,TODO by Claude,TODO,
+passive.20261119.227,passive,Два ближних удара,True,favorite,TODO by Claude,TODO,
+passive.20261119.228,passive,Связывающие корни,True,favorite,TODO by Claude,TODO,"По текущему тексту это зависимый Захват, а не объект-корень с 5 HP. Название сохранить."
+passive.20261119.229,passive,Песочная слепота,False,trash,not required: archive,n/a,"Архивный песок штрафует только дальнюю Атаку, не ограничивает радиус."
+passive.20261119.230,passive,Старящий удар,True,favorite,TODO by Claude,TODO,Сохранить процентное снижение MaxHP до конца боя вместо непринятых фиксированных −2 на 2 хода.
+passive.20261119.231,passive,Смертный удар,False,trash,not required: archive,n/a,
+passive.20261119.232,passive,Разъедающая слюна,True,favorite,TODO by Claude,TODO,"Неясный срок задать явно: −2 Защиты до конца боя, без накопления ниже общего предела временных состояний."
+passive.20261119.233,passive,Снимает чужой покров,False,trash,not required: archive,n/a,
+passive.20261119.234,passive,Дорого обходятся чары,False,trash,not required: archive,n/a,
+passive.20261119.235,passive,Отнимает чародейский запас,True,candidate,TODO by Claude,TODO,
+passive.20261119.236,passive,Мёртвая тревога,True,favorite,TODO by Claude,TODO,Сохранить непрерывную ауру −1 Защиты от страха; не подменять двухходовым Страхом с запретом приближения.
+passive.20261119.240,passive,Цепляется после укуса,False,trash,not required: archive,n/a,
+passive.20261119.241,passive,Обвивает при попадании,False,trash,not required: archive,n/a,"В корзине. Это зависимое мягкое замедление, а не полный Захват."
+passive.20261119.242,passive,Зловонная близость,True,favorite,TODO by Claude,TODO,"Сохранить ауру соседства и требование дыхания, а не однократное состояние на 2 хода."
+passive.20261119.243,passive,Рвёт двумя хватками,False,trash,not required: archive,n/a,
+passive.20261119.244,passive,Сопротивляется оружию,True,favorite,TODO by Claude,TODO,
+passive.20261119.245,passive,Стремительный захват добычи,False,trash,not required: archive,n/a,
+passive.20261119.246,passive,Лезет по стенам арены,False,trash,not required: archive,n/a,
+passive.20261119.247,passive,Не вязнет в паутине,True,favorite,TODO by Claude,TODO,Не превращать защиту от клеток паутины в непринятый иммунитет к адресному опутыванию.
+passive.20261119.249,passive,Оппортунист,True,favorite,TODO by Claude,TODO,
+passive.20261119.250,passive,Срывает колдовство рядом,False,trash,not required: archive,n/a,
+passive.20261119.251,passive,Ожесточённо держится,False,trash,not required: archive,n/a,
+passive.20261119.252,passive,Рассеянное множество,False,trash,not required: archive,n/a,
+passive.20261119.253,passive,Восстановление с условием,False,trash,not required: archive,n/a,
+passive.20261119.254,passive,Отступ не рвёт наблюдение,False,trash,not required: archive,n/a,
+passive.20261119.256,passive,Живучий,True,favorite,TODO by Claude,TODO,
+passive.20261119.257,passive,Разлетается осколками,True,favorite,TODO by Claude,TODO,
+passive.20261119.258,passive,Не берут ослепляющие чары,False,trash,not required: archive,n/a,
+passive.20261119.259,passive,Слабеет под солнцем,False,trash,not required: archive,n/a,
+passive.20261119.260,passive,Взрывоопасная гибель,True,favorite,TODO by Claude,TODO,
+passive.20261119.261,passive,Маскируется в движении,True,favorite,TODO by Claude,TODO,
+passive.20261119.262,passive,Нужен ближний добивающий,False,trash,not required: archive,n/a,
+passive.20261119.263,passive,Срастаются вместе,False,trash,not required: archive,n/a,
+passive.20261119.264,passive,Отражающий покров,True,favorite,TODO by Claude,TODO,
+passive.20261119.265,passive,Ледяные удары,False,trash,not required: archive,n/a,Архивный ледяной удар замедляет на 1 на 2 хода и обновляет срок; он не копит иней до заморозки.
+passive.20261119.266,passive,Стремительные ноги,False,trash,not required: archive,n/a,
+passive.20261119.267,passive,Второе дыхание,True,favorite,TODO by Claude,TODO,
+passive.20261119.268,passive,Огонь разрушает восстановление,False,trash,not required: archive,n/a,
+passive.20261119.269,passive,Нечувствителен к холоду,False,trash,not required: archive,n/a,
+passive.20261119.270,passive,Яд природного оружия,False,trash,not required: archive,n/a,
+passive.20261119.271,passive,Хрупкое каменное тело,False,trash,not required: archive,n/a,
+passive.20261119.272,passive,Густой подшёрсток,False,trash,not required: archive,n/a,
+passive.20261119b.002,passive,Всегда настороже,False,trash,not required: archive,n/a,
+passive.20261119b.003,passive,Легко поднимается,False,trash,not required: archive,n/a,
+passive.20261119b.005,passive,Скрещённые клинки,False,trash,not required: archive,n/a,
+passive.20261119b.006,passive,Знаток одной стихии,False,trash,not required: archive,n/a,
+passive.20261119b.007,passive,Тяжёлый рискованный замах,False,trash,not required: archive,n/a,
+passive.20261119b.008,passive,Бьёт и отступает,True,favorite,TODO by Claude,TODO,
+passive.20261119b.009,passive,Встречает на острие,False,trash,not required: archive,n/a,
+passive.20261119b.010,passive,Мстит за соседнего,True,favorite,TODO by Claude,TODO,
+passive.20261119b.011,passive,Сбивает чародейское сосредоточение,False,trash,not required: archive,n/a,
+passive.20261119b.012,passive,Щит против взрыва,False,trash,not required: archive,n/a,
+passive.20261119b.013,passive,Уходит от площадного удара,False,trash,not required: archive,n/a,
+passive.20261119b.014,passive,Рефлекторно бережёт себя,False,trash,not required: archive,n/a,
+passive.20261119b.015,passive,Опередивший ранит точнее,False,trash,not required: archive,n/a,
+passive.20261119b.016,passive,Первый бросок из засады,True,favorite,TODO by Claude,TODO,
+passive.20261119b.017,passive,Тяжесть надёжного удара,False,trash,not required: archive,n/a,
+passive.20261119b.018,passive,Резкий выброс чар,False,trash,not required: archive,n/a,
+passive.20261119b.019,passive,Сила голой руки,False,trash,not required: archive,n/a,
+passive.20261119b.020,passive,Чары питают оружие,False,trash,not required: archive,n/a,
+passive.20261119b.021,passive,Порча ведёт клинок,True,favorite,TODO by Claude,TODO,
+passive.20261119b.022,passive,Оружие наводит чары,False,trash,not required: archive,n/a,
+passive.20261119b.023,passive,Чары уплотняют оберег,False,trash,not required: archive,n/a,
+passive.20261119b.024,passive,Бережёт своих внутри чар,True,candidate,TODO by Claude,TODO,
+passive.20261119b.025,passive,Жатва чужой жизни,True,candidate,TODO by Claude,TODO,
+passive.20261119b.026,passive,Лекарь крепнет от помощи,True,favorite,TODO by Claude,TODO,
+passive.20261119b.027,passive,Целебное напутствие,True,favorite,TODO by Claude,TODO,"Сохранить +1 Атаки от лечения, не добавлять незаявленный иммунитет к Страху."
+passive.20261119b.028,passive,Перевязь с оберегом,True,favorite,TODO by Claude,TODO,"Сохранить разовое сокращение следующего физического попадания на 2, не менять на длительную Каменную кожу −1."
+passive.20261119b.029,passive,Сила после исцеления,True,favorite,TODO by Claude,TODO,"Сохранить 2 временных HP до конца следующего хода, не продлевать до 2 ходов."
+passive.20261119b.030,passive,Световая рябь,False,trash,not required: archive,n/a,Сохранить одноходовую Слабость двух целей.
+passive.20261119b.031,passive,Отзвук наложенной порчи,False,trash,not required: archive,n/a,
+passive.20261119b.032,passive,Гром расшатывает опору,False,trash,not required: archive,n/a,
+passive.20261119b.033,passive,Утомляет повторным мороком,False,trash,not required: archive,n/a,
+passive.20261119b.034,passive,От удара стынет земля,True,favorite,TODO by Claude,TODO,
+passive.20261119b.035,passive,Промораживает насквозь,True,favorite,TODO by Claude,TODO,"Сохранить отдельный заряд следующего холодного попадания, не давать незаявленный иней/заморозку."
+passive.20261119b.036,passive,Иней поверх слабости,True,favorite,TODO by Claude,TODO,"Сохранить дополнительную цену ближайшего шага, не запускать штатную заморозку от трёх таких срабатываний."
+passive.20261119b.037,passive,Не скользит по льду,False,trash,not required: archive,n/a,
+passive.20261119b.038,passive,Вода затягивает раны,True,favorite,TODO by Claude,TODO,
+passive.20261119b.039,passive,Заросли кормят тело,True,favorite,TODO by Claude,TODO,
+passive.20261119b.040,passive,Удар приносит воду,False,trash,not required: archive,n/a,
+passive.20261119b.041,passive,Чует мокрую цель,False,trash,not required: archive,n/a,
+passive.20261119b.042,passive,Удар о твёрдый покров сбивает,False,trash,not required: archive,n/a,
+passive.20261119b.043,passive,Оберег ближних чар,True,candidate,TODO by Claude,TODO,
+passive.20261119b.044,passive,Копит грозовую искру,True,candidate,TODO by Claude,TODO,
+passive.20261119b.045,passive,Не бьёт током от воды,True,candidate,TODO by Claude,TODO,
+passive.20261119b.046,passive,Силовой покров разряжается,True,candidate,TODO by Claude,TODO,
+passive.20261119b.047,passive,Подступ к открытому врагу,True,favorite,TODO by Claude,TODO,
+passive.20261119b.048,passive,Не тяготится щитом,False,trash,not required: archive,n/a,
+passive.20261119b.049,passive,Стальной сердечник щита,False,trash,not required: archive,n/a,
+passive.20261119b.050,passive,Держит щитовую стену,False,trash,not required: archive,n/a,
+passive.20261119b.051,passive,Ловит стрелы широким щитом,False,trash,not required: archive,n/a,
+passive.20261119b.052,passive,Рубит щиты тяжёлым оружием,False,trash,not required: archive,n/a,
+passive.20261119b.053,passive,Отбивает стрелу клинком,False,trash,not required: archive,n/a,
+passive.20261119b.054,passive,Уверенность тяжёлого бойца,False,trash,not required: archive,n/a,
+passive.20261119b.055,passive,Сильный удар валит,False,trash,not required: archive,n/a,
+passive.20261119b.056,passive,Своих ободряет победой,False,trash,not required: archive,n/a,
+passive.20261119b.057,passive,Победа обращает в страх,True,favorite,TODO by Claude,TODO,Незаписанный срок Страха взять из выбранного состояния: 2 хода.
+passive.20261119b.058,passive,Уверенно колет древком,False,trash,not required: archive,n/a,
+passive.20261119b.059,passive,Держит на конце копья,False,trash,not required: archive,n/a,
+passive.20261119b.060,passive,Сбивает всадника древком,False,trash,not required: archive,n/a,
+passive.20261119b.061,passive,Копейный строй,False,trash,not required: archive,n/a,
+passive.20261119b.062,passive,Колющий удар против натиска,False,trash,not required: archive,n/a,
+passive.20261119b.063,passive,Лук не сбивается шагом,False,trash,not required: archive,n/a,
+passive.20261119b.064,passive,Стреляет в слабое место,True,candidate,TODO by Claude,TODO,
+passive.20261119b.065,passive,Кованый наконечник,True,favorite,TODO by Claude,TODO,
+passive.20261119b.066,passive,Движение при накладывании стрелы,False,trash,not required: archive,n/a,
+passive.20261119b.067,passive,Быстро натягивает лук,False,trash,not required: archive,n/a,
+passive.20261119b.068,passive,Стабилен верхом с луком,False,trash,not required: archive,n/a,
+passive.20261119b.069,passive,Болт прошивает лёгкую броню,False,trash,not required: archive,n/a,
+passive.20261119b.070,passive,Привычка взводить арбалет,False,trash,not required: archive,n/a,
+passive.20261119b.071,passive,Павеза за спиной,False,trash,not required: archive,n/a,
+passive.20261119b.072,passive,Перезарядку не сбить мелочью,False,trash,not required: archive,n/a,
+passive.20261119b.073,passive,Арбалет не мешает шагу,False,trash,not required: archive,n/a,
+passive.20261119b.074,passive,Тяжёлый болт срывает седло,False,trash,not required: archive,n/a,
+passive.20261119b.075,passive,Дротик служит копьём,False,trash,not required: archive,n/a,
+passive.20261119b.076,passive,Топор раскалывает щит,False,trash,not required: archive,n/a,
+passive.20261119b.077,passive,Дротик пробивает заслон,False,trash,not required: archive,n/a,
+passive.20261119b.078,passive,Бросок на бегу,False,trash,not required: archive,n/a,
+passive.20261119b.079,passive,Метатель под обстрелом,False,trash,not required: archive,n/a,
+passive.20261119b.080,passive,Последний дротик бережёт для раненого,False,trash,not required: archive,n/a,
+passive.20261119b.081,passive,Боевой запас метателя,False,trash,not required: archive,n/a,
+passive.20261119b.083,passive,Сдерживает удар скачущего,False,trash,not required: archive,n/a,
+passive.20261119b.084,passive,Мягко приземляется,False,trash,not required: archive,n/a,
+passive.20261119b.085,passive,Ведёт личным примером,False,trash,not required: archive,n/a,
+passive.20261119b.086,passive,Крепкая плоть бойца,False,trash,not required: archive,n/a,
+passive.20261119b.087,passive,Мощный бросок,False,trash,not required: archive,n/a,
+passive.status.20261120.001,passive,Едкая смесь,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.002,passive,Вытягивает отраву,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.003,passive,Противоядие наготове,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.004,passive,Чистая перевязь,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.005,passive,Пьёт из открытой раны,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.006,passive,След крови,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.007,passive,Затягивает рваные края,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.008,passive,Копоть в глазах,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.009,passive,Смолистый плевок,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.010,passive,Сбивает пламя с товарища,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.011,passive,Огонь будит ярость,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.012,passive,Тепло под кольчугой,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.013,passive,Лёд сковывает слабого,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.014,passive,Осколок освобождения,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.015,passive,Корни держат добычу,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.016,passive,Подрезает путы,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.017,passive,Скользкая хватка,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.018,passive,Удерживает с усилием,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.019,passive,Не подпускает палача,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.020,passive,Память о мороке,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.021,passive,Слышит родной голос,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.022,passive,Не спит стоя,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.023,passive,Чуткий часовой,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.024,passive,Трудно устрашить повторно,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.025,passive,Крепнет рядом с вожаком,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.026,passive,Охотится на паникующего,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.027,passive,Не видит страшного,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.028,passive,Страх ослабляет хватку,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.029,passive,Не ведётся на вызов,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.030,passive,Вызов держит строй,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.031,passive,Охотник на дурман,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.032,passive,Хвори мешают лечению,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.033,passive,Чистит заразу отдыхом,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.034,passive,Снимает тяжесть удара,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.035,passive,Клинок находит метку,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.036,passive,Метка не прячется,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.037,passive,Запоминает сорванную добычу,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.038,passive,Оберег от приговора,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.039,passive,Сбивает отсчёт порчи,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.040,passive,Не кормит болевое эхо,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.041,passive,Рвёт мучительную связь,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.042,passive,Связь укрепляет стража,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.043,passive,Разрывает связь на исходе,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.044,passive,Зависть к чужому покрову,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.045,passive,Берегущий заговор,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.046,passive,Зеркало не обманешь дважды,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.047,passive,Заслон от пылающей кожи,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.048,passive,Щит любит ожидание,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.049,passive,Второе дыхание покрова,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.050,passive,Обрывает чужую подпитку,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.051,passive,Жизнь не впрок,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.052,passive,Силу ран бережёт,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.053,passive,Кровожадность выдаёт,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.054,passive,Завершает бой хладнокровно,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.055,passive,Сдерживает удачу,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.056,passive,Удача утешает,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.057,passive,Шаг вопреки слабости,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.058,passive,Сбитый темп отрезвляет,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.059,passive,Не уронит инициативу,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.060,passive,Помощь возвращает шаг,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.061,passive,Не бросает оружие от боли,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.062,passive,Опора при контузии,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.063,passive,Не даст захватить разум умирающего,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.064,passive,Спасённый держится крепче,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.065,passive,Выдавливает паразита,True,favorite,TODO by Claude,TODO,
+passive.status.20261120.066,passive,Носитель заразы слабеет,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.067,passive,Не терпит чужих корней,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.068,passive,Очищение оставляет оберег,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.069,passive,Проклятие цепляется за ослабленного,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.070,passive,Обет держит удар,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.071,passive,Цена чужого воодушевления,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.072,passive,Порча ищет прореху,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.073,passive,Точный ответ на ослепление,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.074,passive,Стойка удерживает силы,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.075,passive,Собирается после встряски,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.076,passive,В оцепенении бережётся стрел,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.077,passive,Разгон разрывает кольцо,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.078,passive,Последняя искра надежды,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.079,passive,Руки помнят выстрел,True,candidate,TODO by Claude,TODO,
+passive.status.20261120.080,passive,Покров оставляет брешь,True,candidate,TODO by Claude,TODO,

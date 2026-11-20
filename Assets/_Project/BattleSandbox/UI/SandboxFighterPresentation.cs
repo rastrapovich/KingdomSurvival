@@ -1033,8 +1033,17 @@ namespace KingdomSurvival.BattleSandbox
             if (state != null && !state.IsDefeated)
             {
                 List<string> flags = new List<string>();
-                if (state.IsStunned) flags.Add("ошеломлён");
-                if (state.IsNumbed) flags.Add("оцепенение");
+                // Пакет состояний: полный список действующих состояний бойца.
+                foreach (SandboxStatusInstance status in state.Statuses)
+                {
+                    string time = status.Definition.Clock == SandboxStatusClock.OwnActivations
+                        ? " " + (status.EffectiveDuration - status.Elapsed) + " х."
+                        : string.Empty;
+                    string charges = status.Definition.Stacking == SandboxStatusStacking.Charges && status.Charges.Count > 1
+                        ? " ×" + status.Charges.Count
+                        : string.Empty;
+                    flags.Add(status.Definition.Name.ToLowerInvariant() + charges + time);
+                }
                 if (state.NumbImmunity > 0) flags.Add("иммунитет к оцепенению");
                 if (state.IsAttached) flags.Add("сидит на жертве");
                 if (state.IsUnderground) flags.Add("под землёй");

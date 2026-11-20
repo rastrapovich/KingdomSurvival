@@ -1,0 +1,3246 @@
+{
+  "links": [
+    {
+      "tagId": "trait.venomous_flesh",
+      "statusId": "status.001",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "trait.bloodless",
+      "statusId": "status.002",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "body.sticky",
+      "statusId": "status.047",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "resist.biological_poison",
+      "statusId": "status.001",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "resist.fearless",
+      "statusId": "status.055",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "resist.short_stun",
+      "statusId": "status.025",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "myth.shared_fate",
+      "statusId": "status.109",
+      "roles": [
+        "support"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "myth.shared_fate",
+      "statusId": "status.110",
+      "roles": [
+        "support"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "candidate.ks.0292",
+      "statusId": "status.001",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.009",
+      "statusId": "status.041",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.012",
+      "statusId": "status.071",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.023",
+      "statusId": "status.006",
+      "roles": [
+        "cleanse"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.023",
+      "statusId": "status.012",
+      "roles": [
+        "cleanse"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.023",
+      "statusId": "status.099",
+      "roles": [
+        "cleanse"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.023",
+      "statusId": "status.188",
+      "roles": [
+        "cleanse"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.023",
+      "statusId": "status.009",
+      "roles": [
+        "cleanse"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.023",
+      "statusId": "status.055",
+      "roles": [
+        "cleanse"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.023",
+      "statusId": "status.057",
+      "roles": [
+        "cleanse"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.023",
+      "statusId": "status.058",
+      "roles": [
+        "cleanse"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.023",
+      "statusId": "status.059",
+      "roles": [
+        "cleanse"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.023",
+      "statusId": "status.060",
+      "roles": [
+        "cleanse"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.023",
+      "statusId": "status.061",
+      "roles": [
+        "cleanse"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.025",
+      "statusId": "status.003",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.029",
+      "statusId": "status.001",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.046",
+      "statusId": "status.060",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.046",
+      "statusId": "status.061",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.052",
+      "statusId": "status.001",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.068",
+      "statusId": "status.019",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.070",
+      "statusId": "status.185",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.071",
+      "statusId": "status.001",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.071",
+      "statusId": "status.002",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.075",
+      "statusId": "status.041",
+      "roles": [
+        "self"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.076",
+      "statusId": "status.001",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.076",
+      "statusId": "status.002",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.076",
+      "statusId": "status.071",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.083",
+      "statusId": "status.071",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.090",
+      "statusId": "status.055",
+      "roles": [
+        "apply"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.093",
+      "statusId": "status.055",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.101",
+      "statusId": "status.055",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.126",
+      "statusId": "status.071",
+      "roles": [
+        "amplify"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.126",
+      "statusId": "status.072",
+      "roles": [
+        "amplify"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.126",
+      "statusId": "status.041",
+      "roles": [
+        "amplify"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.126",
+      "statusId": "status.087",
+      "roles": [
+        "amplify"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.126",
+      "statusId": "status.099",
+      "roles": [
+        "amplify"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.135",
+      "statusId": "status.001",
+      "roles": [
+        "amplify"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.149",
+      "statusId": "status.001",
+      "roles": [
+        "apply",
+        "amplify"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.157",
+      "statusId": "status.148",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.113",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.114",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.117",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.119",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.130",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.132",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.135",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.136",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.137",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.138",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.139",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.142",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.146",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.148",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.156",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.158",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.159",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.171",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.189",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.190",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.169",
+      "statusId": "status.199",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.174",
+      "statusId": "status.132",
+      "roles": [
+        "react"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.177",
+      "statusId": "status.002",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.178",
+      "statusId": "status.002",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.191",
+      "statusId": "status.001",
+      "roles": [
+        "resist",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.191",
+      "statusId": "status.002",
+      "roles": [
+        "resist",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.193",
+      "statusId": "status.171",
+      "roles": [
+        "exploit"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.202",
+      "statusId": "status.019",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.203",
+      "statusId": "status.043",
+      "roles": [
+        "apply"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.208",
+      "statusId": "status.186",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.208",
+      "statusId": "status.187",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.209",
+      "statusId": "status.067",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.215",
+      "statusId": "status.054",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.219",
+      "statusId": "status.041",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.224",
+      "statusId": "status.001",
+      "roles": [
+        "support",
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.228",
+      "statusId": "status.044",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.229",
+      "statusId": "status.168",
+      "roles": [
+        "apply"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.230",
+      "statusId": "status.077",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.232",
+      "statusId": "status.019",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.113",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.114",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.117",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.135",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.136",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.137",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.138",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.139",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.146",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.148",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.156",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.158",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.171",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.189",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.233",
+      "statusId": "status.190",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.236",
+      "statusId": "status.055",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.241",
+      "statusId": "status.041",
+      "roles": [
+        "apply"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.242",
+      "statusId": "status.078",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.265",
+      "statusId": "status.041",
+      "roles": [
+        "apply"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.268",
+      "statusId": "status.003",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": true,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119.268",
+      "statusId": "status.146",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": true,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.011",
+      "statusId": "status.110",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.011",
+      "statusId": "status.113",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.011",
+      "statusId": "status.114",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.011",
+      "statusId": "status.117",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.011",
+      "statusId": "status.135",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.011",
+      "statusId": "status.136",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.011",
+      "statusId": "status.138",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.011",
+      "statusId": "status.146",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.011",
+      "statusId": "status.156",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.011",
+      "statusId": "status.171",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.006",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.012",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.019",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.041",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.055",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.067",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.070",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.071",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.072",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.078",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.087",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.098",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.099",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.101",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.102",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.185",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.186",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.187",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.021",
+      "statusId": "status.188",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.028",
+      "statusId": "status.135",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.029",
+      "statusId": "status.148",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.030",
+      "statusId": "status.071",
+      "roles": [
+        "apply"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.031",
+      "statusId": "status.041",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.031",
+      "statusId": "status.071",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.031",
+      "statusId": "status.072",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.031",
+      "statusId": "status.099",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.033",
+      "statusId": "status.060",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.033",
+      "statusId": "status.059",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.033",
+      "statusId": "status.071",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.036",
+      "statusId": "status.015",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.041",
+      "statusId": "status.003",
+      "roles": [
+        "exploit"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.043",
+      "statusId": "status.148",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.050",
+      "statusId": "status.130",
+      "roles": [
+        "self"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.051",
+      "statusId": "status.130",
+      "roles": [
+        "self"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.056",
+      "statusId": "status.055",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.057",
+      "statusId": "status.055",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.20261119b.061",
+      "statusId": "status.130",
+      "roles": [
+        "support",
+        "self"
+      ],
+      "favorite": false,
+      "deleted": true,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.001",
+      "statusId": "status.001",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.001",
+      "statusId": "status.019",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.002",
+      "statusId": "status.001",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.003",
+      "statusId": "status.001",
+      "roles": [
+        "support",
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.004",
+      "statusId": "status.002",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.004",
+      "statusId": "status.193",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.005",
+      "statusId": "status.002",
+      "roles": [
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.006",
+      "statusId": "status.002",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.006",
+      "statusId": "status.101",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.007",
+      "statusId": "status.193",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.007",
+      "statusId": "status.194",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.008",
+      "statusId": "status.003",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.008",
+      "statusId": "status.168",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.009",
+      "statusId": "status.018",
+      "roles": [
+        "apply"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.010",
+      "statusId": "status.003",
+      "roles": [
+        "cleanse",
+        "support"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.010",
+      "statusId": "status.130",
+      "roles": [
+        "cleanse",
+        "support"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.011",
+      "statusId": "status.003",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.011",
+      "statusId": "status.113",
+      "roles": [
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.012",
+      "statusId": "status.014",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.012",
+      "statusId": "status.015",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.013",
+      "statusId": "status.015",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.013",
+      "statusId": "status.071",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.014",
+      "statusId": "status.033",
+      "roles": [
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.015",
+      "statusId": "status.023",
+      "roles": [
+        "exploit"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.015",
+      "statusId": "status.101",
+      "roles": [
+        "exploit"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.016",
+      "statusId": "status.022",
+      "roles": [
+        "cleanse",
+        "support"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.016",
+      "statusId": "status.046",
+      "roles": [
+        "cleanse",
+        "support"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.016",
+      "statusId": "status.047",
+      "roles": [
+        "cleanse",
+        "support"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.017",
+      "statusId": "status.044",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.018",
+      "statusId": "status.044",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.018",
+      "statusId": "status.043",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.019",
+      "statusId": "status.032",
+      "roles": [
+        "support",
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.019",
+      "statusId": "status.033",
+      "roles": [
+        "support",
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.019",
+      "statusId": "status.025",
+      "roles": [
+        "support",
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.019",
+      "statusId": "status.028",
+      "roles": [
+        "support",
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.020",
+      "statusId": "status.059",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.020",
+      "statusId": "status.060",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.020",
+      "statusId": "status.061",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.021",
+      "statusId": "status.059",
+      "roles": [
+        "support",
+        "cleanse"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.021",
+      "statusId": "status.060",
+      "roles": [
+        "support",
+        "cleanse"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.021",
+      "statusId": "status.061",
+      "roles": [
+        "support",
+        "cleanse"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.022",
+      "statusId": "status.030",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.023",
+      "statusId": "status.030",
+      "roles": [
+        "support",
+        "cleanse"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.024",
+      "statusId": "status.055",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.024",
+      "statusId": "status.057",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.024",
+      "statusId": "status.058",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.025",
+      "statusId": "status.055",
+      "roles": [
+        "support",
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.025",
+      "statusId": "status.066",
+      "roles": [
+        "support",
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.025",
+      "statusId": "status.190",
+      "roles": [
+        "support",
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.026",
+      "statusId": "status.056",
+      "roles": [
+        "exploit"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.026",
+      "statusId": "status.057",
+      "roles": [
+        "exploit"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.027",
+      "statusId": "status.168",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.027",
+      "statusId": "status.055",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.027",
+      "statusId": "status.057",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.028",
+      "statusId": "status.055",
+      "roles": [
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.028",
+      "statusId": "status.044",
+      "roles": [
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.029",
+      "statusId": "status.065",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.029",
+      "statusId": "status.106",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.030",
+      "statusId": "status.106",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.030",
+      "statusId": "status.190",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.031",
+      "statusId": "status.078",
+      "roles": [
+        "exploit"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.031",
+      "statusId": "status.079",
+      "roles": [
+        "exploit"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.031",
+      "statusId": "status.070",
+      "roles": [
+        "exploit"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.032",
+      "statusId": "status.070",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.033",
+      "statusId": "status.070",
+      "roles": [
+        "cleanse"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.033",
+      "statusId": "status.078",
+      "roles": [
+        "cleanse"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.034",
+      "statusId": "status.088",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.034",
+      "statusId": "status.099",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.035",
+      "statusId": "status.098",
+      "roles": [
+        "exploit"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.035",
+      "statusId": "status.102",
+      "roles": [
+        "exploit"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.036",
+      "statusId": "status.101",
+      "roles": [
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.036",
+      "statusId": "status.102",
+      "roles": [
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.036",
+      "statusId": "status.171",
+      "roles": [
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.037",
+      "statusId": "status.101",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.037",
+      "statusId": "status.156",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.038",
+      "statusId": "status.105",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.038",
+      "statusId": "status.010",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.039",
+      "statusId": "status.105",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.039",
+      "statusId": "status.010",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.040",
+      "statusId": "status.011",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.041",
+      "statusId": "status.007",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.041",
+      "statusId": "status.110",
+      "roles": [
+        "resist"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.042",
+      "statusId": "status.107",
+      "roles": [
+        "self"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.042",
+      "statusId": "status.109",
+      "roles": [
+        "self"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.043",
+      "statusId": "status.109",
+      "roles": [
+        "resist",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.044",
+      "statusId": "status.135",
+      "roles": [
+        "dispel",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.044",
+      "statusId": "status.136",
+      "roles": [
+        "dispel",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.044",
+      "statusId": "status.148",
+      "roles": [
+        "dispel",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.045",
+      "statusId": "status.137",
+      "roles": [
+        "amplify"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.046",
+      "statusId": "status.139",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.047",
+      "statusId": "status.138",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.048",
+      "statusId": "status.132",
+      "roles": [
+        "amplify"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.049",
+      "statusId": "status.148",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.049",
+      "statusId": "status.146",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.050",
+      "statusId": "status.146",
+      "roles": [
+        "dispel"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.051",
+      "statusId": "status.114",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.051",
+      "statusId": "status.199",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.052",
+      "statusId": "status.199",
+      "roles": [
+        "amplify"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.053",
+      "statusId": "status.117",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.053",
+      "statusId": "status.171",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.054",
+      "statusId": "status.119",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.054",
+      "statusId": "status.067",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.055",
+      "statusId": "status.188",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.055",
+      "statusId": "status.189",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.056",
+      "statusId": "status.189",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.056",
+      "statusId": "status.066",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.057",
+      "statusId": "status.156",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.057",
+      "statusId": "status.041",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.058",
+      "statusId": "status.161",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.058",
+      "statusId": "status.059",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.059",
+      "statusId": "status.158",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.059",
+      "statusId": "status.087",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.060",
+      "statusId": "status.159",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.060",
+      "statusId": "status.185",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.061",
+      "statusId": "status.186",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.061",
+      "statusId": "status.088",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.062",
+      "statusId": "status.187",
+      "roles": [
+        "self"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.062",
+      "statusId": "status.130",
+      "roles": [
+        "self"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.063",
+      "statusId": "status.150",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.063",
+      "statusId": "status.061",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.063",
+      "statusId": "status.059",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.063",
+      "statusId": "status.060",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.064",
+      "statusId": "status.150",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.064",
+      "statusId": "status.148",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.065",
+      "statusId": "status.008",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.065",
+      "statusId": "status.203",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.065",
+      "statusId": "status.002",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": true,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.066",
+      "statusId": "status.008",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.066",
+      "statusId": "status.203",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.066",
+      "statusId": "status.071",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.067",
+      "statusId": "status.023",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.067",
+      "statusId": "status.018",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.068",
+      "statusId": "status.006",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.068",
+      "statusId": "status.012",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.068",
+      "statusId": "status.188",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.068",
+      "statusId": "status.137",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.069",
+      "statusId": "status.006",
+      "roles": [
+        "amplify"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.069",
+      "statusId": "status.071",
+      "roles": [
+        "amplify"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.070",
+      "statusId": "status.012",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.070",
+      "statusId": "status.043",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.071",
+      "statusId": "status.190",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.071",
+      "statusId": "status.055",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.072",
+      "statusId": "status.019",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.072",
+      "statusId": "status.188",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.072",
+      "statusId": "status.102",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.073",
+      "statusId": "status.168",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.073",
+      "statusId": "status.102",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.074",
+      "statusId": "status.072",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.074",
+      "statusId": "status.130",
+      "roles": [
+        "resist"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.075",
+      "statusId": "status.026",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.075",
+      "statusId": "status.158",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.076",
+      "statusId": "status.027",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.076",
+      "statusId": "status.136",
+      "roles": [
+        "apply",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.077",
+      "statusId": "status.054",
+      "roles": [
+        "self"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.077",
+      "statusId": "status.161",
+      "roles": [
+        "self"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.078",
+      "statusId": "status.068",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.078",
+      "statusId": "status.190",
+      "roles": [
+        "cleanse",
+        "react"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.079",
+      "statusId": "status.084",
+      "roles": [
+        "resist",
+        "apply"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.079",
+      "statusId": "status.088",
+      "roles": [
+        "resist",
+        "apply"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.080",
+      "statusId": "status.142",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    },
+    {
+      "tagId": "passive.status.20261120.080",
+      "statusId": "status.071",
+      "roles": [
+        "drawback"
+      ],
+      "favorite": false,
+      "deleted": false,
+      "referenceVsExecutable": "Verify role and resolved profile; this is not an unconditional ApplyStatus."
+    }
+  ]
+}

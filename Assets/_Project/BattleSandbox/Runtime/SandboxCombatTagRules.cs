@@ -69,16 +69,30 @@ namespace KingdomSurvival.BattleSandbox
 
             if (target.IsGuarding)
             {
+                // status.130 (реестр пакета): прежняя формула floor(×0,5), минимум +1,
+                // от Защиты до стойки; второй бонус состояния не добавляется.
                 int guardBonus = Math.Max(
                     MinimumGuardDefenseBonus,
                     (int)Math.Floor(effectiveDefense * 0.50m));
                 effectiveDefense += guardBonus;
             }
 
+            // Пакет состояний: временные модификаторы Защиты (предел ±2).
+            effectiveDefense += SandboxBattle.StatusDefenseMod(target);
+
             // Бриф «Поверхности арены»: топь — после положительных бонусов.
             effectiveDefense -= SandboxTerrainRules.GetSurfaceDefensePenalty(target);
 
             return Math.Max(0, effectiveDefense);
+        }
+
+        // Фактическая прибавка стойки (для подсказки status.130).
+        public static int GetGuardBonus(SandboxUnitState unit)
+        {
+            if (unit == null)
+                return 0;
+            int before = unit.Defense + (unit.HasTag(Armored) ? ArmoredDefenseBonus : 0) + SandboxTerrainRules.GetDefenseBonus(unit);
+            return Math.Max(MinimumGuardDefenseBonus, (int)Math.Floor(before * 0.50m));
         }
 
         public static int GetGuardDefensePercent(SandboxUnitState unit)

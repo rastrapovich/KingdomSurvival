@@ -191,7 +191,23 @@ namespace KingdomSurvival.BattleSandbox
             string gate = AbilityGate(unit, ability);
             if (!string.IsNullOrEmpty(gate))
                 return SandboxAbilityPreview.Invalid(gate);
+            // Пакет состояний: вредный приём по врагу — тот же запрос допустимости, что у атаки.
+            SandboxUnitState target = command.TargetUnitId != null ? GetUnit(command.TargetUnitId) : null;
+            if (target != null && target.Team != unit.Team)
+            {
+                string block = GetStatusTargetBlock(unit, target, unit.Position.DistanceTo(target.Position) > 1 &&
+                                                                  ability.Kind != SandboxAbilityKind.Pounce && ability.Kind != SandboxAbilityKind.Charge);
+                if (!string.IsNullOrEmpty(block))
+                    return SandboxAbilityPreview.Invalid(block);
+            }
             return Evaluate(unit, ability, command);
+        }
+
+        // Сообщение наложения уже войдёт в текст способности — не дублировать в журнале.
+        private void TakeLastLog(string message)
+        {
+            if (eventLog.Count > 0 && eventLog[eventLog.Count - 1] == message.Trim())
+                eventLog.RemoveAt(eventLog.Count - 1);
         }
 
         private IEnumerable<SandboxUnitState> Opponents(SandboxUnitState unit)
@@ -1199,16 +1215,21 @@ namespace KingdomSurvival.BattleSandbox
 
         private string ApplyStun(SandboxUnitState target)
         {
-            target.IsStunned = true;
-            target.StunCounted = false;
+            // Пакет состояний: прежнее поведение плевка = status.026 «Ошеломление».
+            SandboxStatusApplyResult result = ApplyStatus(SandboxStatusCatalog.Dazed, target, CurrentUnit);
+            if (!result.Applied)
+                return " " + result.Message;
+            TakeLastLog(result.Message);
             CancelPreparedOnControl(target);
             return " «Ошеломлён»: без ответных ударов, −1 движения до конца следующего хода.";
         }
 
         private string ApplyNumb(SandboxUnitState target)
         {
-            target.IsNumbed = true;
-            target.NumbCounted = false;
+            SandboxStatusApplyResult result = ApplyStatus(SandboxStatusCatalog.Numbed, target, CurrentUnit);
+            if (!result.Applied)
+                return " " + result.Message;
+            TakeLastLog(result.Message);
             CancelPreparedOnControl(target);
             return " «Оцепенение»: на следующий ход без движения и ответов.";
         }
@@ -1228,9 +1249,19 @@ namespace KingdomSurvival.BattleSandbox
         {
             List<SandboxContextAction> result = new List<SandboxContextAction>();
             SandboxUnitState unit = GetUnit(unitId);
-            if (unit == null || CurrentUnit != unit || Phase != SandboxBattlePhase.InProgress || HasPendingRetaliation ||
-                unit.ActionPoints <= 0 || unit.HasAttacked || unit.IsOffBoard)
+            if (unit == null || CurrentUnit != unit || Phase != SandboxBattlePhase.InProgress || HasPendingRetaliation || unit.IsOffBoard)
                 return result;
+            // «Прилив сил»: отдельное действие только на помощь/освобождение/очищение.
+            bool supportOnly = (unit.ActionPoints <= 0 || unit.HasAttacked) && unit.SupportActions > 0;
+            if ((unit.ActionPoints <= 0 || unit.HasAttacked) && !supportOnly)
+                return result;
+            if (supportOnly)
+            {
+                result.AddRange(StatusCleanseActions(unit));
+                return result;
+            }
+            // Пакет состояний: очищение себя или соседнего союзника за 1 действие.
+            result.AddRange(StatusCleanseActions(unit));
 
             SandboxUnitState own = GetAttachedParasite(unit);
             if (own != null && own.Team != unit.Team)
@@ -1274,10 +1305,33 @@ namespace KingdomSurvival.BattleSandbox
             if (action == null)
                 return false;
             SandboxContextAction match = GetContextActions(unitId).FirstOrDefault(item =>
-                item.Kind == action.Kind && item.TargetUnitId == action.TargetUnitId && item.ObjectId == action.ObjectId);
+                item.Kind == action.Kind && item.TargetUnitId == action.TargetUnitId && item.ObjectId == action.ObjectId &&
+                item.StatusId == action.StatusId);
             if (match == null)
                 return false;
             SandboxUnitState unit = GetUnit(unitId);
+            if (match.Kind == SandboxContextActionKind.CleanseStatus)
+            {
+                message = ExecuteCleanse(unit, match);
+                if (unit.SupportActions > 0)
+                {
+                    // Отдельное действие «Прилива сил» не тратит обычное действие.
+                    unit.SupportActions--;
+                    SandboxStatusInstance surge = unit.statuses.FirstOrDefault(item => item.StatusId == SandboxStatusCatalog.ExtraSupport);
+                    if (surge != null)
+                        RemoveStatusInstance(unit, surge, "израсходован");
+                }
+                else
+                {
+                    unit.ActionPoints = 0;
+                    unit.RemainingMovement = 0;
+                    unit.HasAttacked = true;
+                }
+                string cleansed = message;
+                message += string.Join(string.Empty, TakeEventLog().Where(entry => !cleansed.Contains(entry)).Select(entry => " " + entry));
+                EvaluateBattleOutcome();
+                return true;
+            }
             switch (match.Kind)
             {
                 case SandboxContextActionKind.RemoveParasite:

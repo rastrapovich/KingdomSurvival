@@ -175,10 +175,20 @@ namespace KingdomSurvival.BattleSandbox
         public int ActivationCount { get; internal set; }
         internal readonly Dictionary<string, int> AbilityReadyAt = new Dictionary<string, int>(StringComparer.Ordinal);
         public bool TryGetAbilityReadyAt(string abilityId, out int readyAt) => AbilityReadyAt.TryGetValue(abilityId ?? string.Empty, out readyAt);
-        public bool IsStunned { get; internal set; }
-        internal bool StunCounted;
-        public bool IsNumbed { get; internal set; }
-        internal bool NumbCounted;
+        // Пакет состояний: временные состояния бойца (один источник истины).
+        // Прежние флаги — вычисляемые фасады: «Ошеломлён» плевка Трещотки =
+        // status.026, «Оцепенение» укуса Многонога = status.027.
+        internal readonly List<SandboxStatusInstance> statuses = new List<SandboxStatusInstance>();
+        public IReadOnlyList<SandboxStatusInstance> Statuses => statuses;
+        public bool HasStatus(string statusId) => statuses.Any(item => item.StatusId == statusId);
+        public bool IsStunned => HasStatus(SandboxStatusCatalog.Dazed);
+        public bool IsNumbed => HasStatus(SandboxStatusCatalog.Numbed);
+        // Защита от повторного сильного контроля (общая группа) и её снятие
+        // в конце первого хода, начавшегося без такого контроля.
+        public bool StrongControlGuard { get; internal set; }
+        internal bool StrongControlReleaseAtEnd;
+        // «Прилив сил»: дополнительное действие только на помощь/очищение.
+        public int SupportActions { get; internal set; }
         public int NumbImmunity { get; internal set; }
         internal bool NumbImmunityCounted;
         // Ход без движения (оцепенение, захват, остановка нитью, выход из-под
@@ -203,7 +213,8 @@ namespace KingdomSurvival.BattleSandbox
         public string TypeId => Definition.Id;
         public string DisplayLabel => IsHidden ? "Неизвестная угроза" : Definition.RoleLabel;
         public SandboxUnitRole Role => Definition.Role;
-        public int MaxHitPoints => Definition.MaxHitPoints;
+        // Временное изменение MaxHP состояниями — не урон; возврат не лечит.
+        public int MaxHitPoints => Math.Max(1, Definition.MaxHitPoints + SandboxBattle.StatusMaxHitPointsMod(this));
         public int Attack => Definition.Attack;
         public int Defense => Definition.Defense;
         public int Damage => Definition.Damage;
@@ -213,7 +224,9 @@ namespace KingdomSurvival.BattleSandbox
         public bool IsDefeated => HitPoints <= 0;
         public int DamageTaken => Math.Max(0, MaxHitPoints - HitPoints);
         public bool IsDamaged => DamageTaken > 0;
-        public bool CanRetaliate => !IsDefeated && !HasRetaliatedThisRound && !IsStunned && !IsNumbed && !IsOffBoard && !IsHidden;
+        public bool CanRetaliate => !IsDefeated && !HasRetaliatedThisRound && !IsOffBoard && !IsHidden &&
+                                    !SandboxBattle.StatusHas(this, SandboxStatusOpKind.NoRetaliation) &&
+                                    !SandboxBattle.StatusHas(this, SandboxStatusOpKind.SkipActivation);
 
         // ПР-06А: человек кампании входит в бой с тем здоровьем, что у него
         // есть (1..максимум шаблона), а не всегда полным.
@@ -303,7 +316,9 @@ namespace KingdomSurvival.BattleSandbox
         // ПР-16: удар способности (прыжок, разгон, плевок и т.п.).
         Ability,
         // Бриф «Поверхности арены»: урон поверхности (огонь, колючки, яд, ток).
-        Environment
+        Environment,
+        // Пакет состояний: фиксированный урон состояния (тик, взрыв, перенос).
+        Status
     }
 
     // ПР-12З: запись одного удара. Исход уже применён моделью; представление
@@ -499,7 +514,9 @@ namespace KingdomSurvival.BattleSandbox
             if (HasPendingRetaliation || unit == null || unit.IsDefeated ||
                 unit.ActionPoints <= 0 || unit.RemainingMovement <= 0 || unit.IsOffBoard)
                 return result;
-            return BuildReachable(unit, unit.RemainingMovement);
+            result = BuildReachable(unit, unit.RemainingMovement);
+            FilterStatusReachable(unit, result);
+            return result;
         }
 
         // ПР-16: достижимые клетки при заданном бюджете (отход Шиповика
@@ -509,7 +526,9 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState unit = GetUnit(unitId);
             if (unit == null || unit.IsDefeated || unit.IsOffBoard || budget <= 0)
                 return new Dictionary<HexCoord, int>();
-            return BuildReachable(unit, budget);
+            Dictionary<HexCoord, int> reachable = BuildReachable(unit, budget);
+            FilterStatusReachable(unit, reachable);
+            return reachable;
         }
 
         private Dictionary<HexCoord, int> BuildReachable(SandboxUnitState unit, int budget)
@@ -613,7 +632,11 @@ namespace KingdomSurvival.BattleSandbox
                 {
                     SetUnitPosition(unit, steps[i]);
                     ApplyHazardsAt(unit, steps[i]);
+                    if (!unit.IsDefeated)
+                        AfterStatusStep(unit, steps[i]);
                 }
+                if (!unit.IsDefeated)
+                    AfterStatusVoluntaryMove(unit, steps.Count - 1);
                 if (unit.IsDefeated)
                 {
                     message = unit.DisplayLabel + " падает на пути." + string.Join(string.Empty, TakeEventLog().Select(entry => " " + entry));
@@ -737,8 +760,11 @@ namespace KingdomSurvival.BattleSandbox
                 return true;
             }
 
+            // Ослепление / Забывчивость стрелка: дальний выстрел только вплотную.
+            bool rangedBlocked = !string.IsNullOrEmpty(GetStatusTargetBlock(attacker, target, ranged: true));
             if (attacker.Position.DistanceTo(target.Position) <= attacker.AttackRange &&
-                CanShootFrom(attacker.Position, target.Position))
+                CanShootFrom(attacker.Position, target.Position) &&
+                (!rangedBlocked || attacker.Position.DistanceTo(target.Position) <= 1))
                 return true;
 
             bool found = false;
@@ -748,6 +774,7 @@ namespace KingdomSurvival.BattleSandbox
             {
                 if (pair.Value >= attacker.RemainingMovement ||
                     pair.Key.DistanceTo(target.Position) > attacker.AttackRange ||
+                    (rangedBlocked && pair.Key.DistanceTo(target.Position) > 1) ||
                     !CanShootFrom(pair.Key, target.Position))
                     continue;
 
@@ -821,6 +848,10 @@ namespace KingdomSurvival.BattleSandbox
                 if (!line.Clear)
                     return SandboxAttackPreview.Invalid("Нет линии огня: " + line.Reason + ".");
             }
+            // Пакет состояний: тот же запрос допустимости, что у ИИ и способностей.
+            string statusBlock = GetStatusTargetBlock(attacker, target, distance > 1);
+            if (!string.IsNullOrEmpty(statusBlock))
+                return SandboxAttackPreview.Invalid(statusBlock);
 
             return BuildAttackPreview(attacker, target, attacker.Position);
         }
@@ -1239,7 +1270,7 @@ namespace KingdomSurvival.BattleSandbox
 
         public int GetRoundInitiative(SandboxUnitState unit)
         {
-            return unit.Initiative + (Round <= 1 && unit.Team == SandboxTeam.Player ? PlayerFirstRoundInitiativeBonus : 0);
+            return unit.Initiative + StatusInitiativeMod(unit) + (Round <= 1 && unit.Team == SandboxTeam.Player ? PlayerFirstRoundInitiativeBonus : 0);
         }
 
         private void EvaluateBattleOutcome()
@@ -1262,7 +1293,10 @@ namespace KingdomSurvival.BattleSandbox
                 Phase = SandboxBattlePhase.EnemyVictory;
 
             if (Phase != SandboxBattlePhase.InProgress)
+            {
                 ClearPendingRetaliation();
+                ClearStatusesAtBattleEnd();
+            }
         }
 
         private void ResetRoundRetaliations()
@@ -1285,7 +1319,10 @@ namespace KingdomSurvival.BattleSandbox
         private void ApplyHit(SandboxHitKind kind, SandboxUnitState striker, SandboxUnitState target, int damage)
         {
             int before = target.HitPoints;
-            target.ReceiveDamage(damage);
+            // Пакет состояний: щит, неуязвимость, перенос, временные HP, расход зарядов.
+            int toHp = ResolveDirectHitBeforeHp(kind, striker, target, damage, out int temporaryAbsorbed);
+            target.ReceiveDamage(toHp);
+            ResolveDirectHitAfterHp(kind, striker, target, before - target.HitPoints, temporaryAbsorbed);
             hitRecords.Add(new SandboxHitRecord(
                 kind,
                 striker.Id,
@@ -1331,6 +1368,9 @@ namespace KingdomSurvival.BattleSandbox
             // целью стоит другой живой носитель тега.
             if (HasPackBonus(attacker, target, attackPosition))
                 effectiveAttack += SandboxCombatTagRules.PackAttackBonus;
+            bool rangedHit = attackPosition.DistanceTo(target.Position) > 1;
+            // Пакет состояний: временные модификаторы Атаки (предел ±2).
+            effectiveAttack = Math.Max(0m, effectiveAttack + StatusAttackMod(attacker, target, rangedHit));
             decimal effectiveDefense = SandboxCombatTagRules.GetEffectiveDefense(target);
             // Бриф «Поверхности арены»: укрытие леса/зарослей — только от
             // обычного дальнего выстрела (не ответный удар, не способность).
@@ -1364,21 +1404,24 @@ namespace KingdomSurvival.BattleSandbox
                 damageMultiplier = 1m;
             }
 
+            int baseDamage = StatusBaseDamage(attacker, rangedHit);
             int damage = Math.Max(
                 1,
-                (int)Math.Floor(attacker.Damage * damageMultiplier));
+                (int)Math.Floor(baseDamage * damageMultiplier));
             if (abilityMultiplier != 1m)
             {
                 // Модификатор способности — ровно один раз, к базовому Урону;
                 // усиление не съедается округлением (минимум +1 к обычному).
                 int normal = damage;
-                damage = Math.Max(1, (int)Math.Floor(attacker.Damage * damageMultiplier * abilityMultiplier));
+                damage = Math.Max(1, (int)Math.Floor(baseDamage * damageMultiplier * abilityMultiplier));
                 if (abilityMultiplier > 1m && damage <= normal)
                     damage = normal + 1;
             }
             // «Контрудар II» — первый ответный удар за раунд +1 Урон.
             if (retaliation && attacker.HasPerk(SandboxPerks.CounterstrikeDamage) && attacker.RetaliationsThisRound == 0)
                 damage++;
+            // Пакет состояний: плоские изменения итогового урона (+2 / −1, минимум 1).
+            damage = Math.Max(1, damage + StatusFlatDamage(attacker, target, rangedHit, SandboxDamageType.Physical, consume: false));
 
             return new SandboxAttackPreview(
                 true,
@@ -1405,7 +1448,8 @@ namespace KingdomSurvival.BattleSandbox
                    attacker.ActionPoints > 0 &&
                    (attacker.RemainingMovement > 0 || attacker.ActsWithoutMovement) &&
                    !attacker.HasAttacked && !attacker.IsOffBoard &&
-                   !target.IsUnderground && !target.AwaitingPlacement;
+                   !target.IsUnderground && !target.AwaitingPlacement &&
+                   string.IsNullOrEmpty(GetStatusTargetBlock(attacker, target, ranged: false));
         }
 
         private int GetMovementCost(SandboxUnitState unit, HexCoord position)

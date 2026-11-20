@@ -1,0 +1,1697 @@
+{
+  "schema": "ks.status-icons.v1",
+  "count": 89,
+  "items": [
+    {
+      "statusId": "status.001",
+      "nameRu": "Отравление",
+      "category": "dot",
+      "svg": "Art/StatusIcons/SVG/status_001.svg",
+      "png256": "Art/StatusIcons/PNG256/status_001.png",
+      "png128": "Art/StatusIcons/PNG128/status_001.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#a07260",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.002",
+      "nameRu": "Кровотечение",
+      "category": "dot",
+      "svg": "Art/StatusIcons/SVG/status_002.svg",
+      "png256": "Art/StatusIcons/PNG256/status_002.png",
+      "png128": "Art/StatusIcons/PNG128/status_002.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#a07260",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.003",
+      "nameRu": "Горение",
+      "category": "dot",
+      "svg": "Art/StatusIcons/SVG/status_003.svg",
+      "png256": "Art/StatusIcons/PNG256/status_003.png",
+      "png128": "Art/StatusIcons/PNG128/status_003.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#a07260",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.006",
+      "nameRu": "Тлеющее проклятие",
+      "category": "dot",
+      "svg": "Art/StatusIcons/SVG/status_006.svg",
+      "png256": "Art/StatusIcons/PNG256/status_006.png",
+      "png128": "Art/StatusIcons/PNG128/status_006.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#a07260",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.007",
+      "nameRu": "Мучительная связь",
+      "category": "dot",
+      "svg": "Art/StatusIcons/SVG/status_007.svg",
+      "png256": "Art/StatusIcons/PNG256/status_007.png",
+      "png128": "Art/StatusIcons/PNG128/status_007.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#a07260",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.008",
+      "nameRu": "Паразит на теле",
+      "category": "dot",
+      "svg": "Art/StatusIcons/SVG/status_008.svg",
+      "png256": "Art/StatusIcons/PNG256/status_008.png",
+      "png128": "Art/StatusIcons/PNG128/status_008.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#a07260",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.009",
+      "nameRu": "Ужас, нарастающий со временем",
+      "category": "dot",
+      "svg": "Art/StatusIcons/SVG/status_009.svg",
+      "png256": "Art/StatusIcons/PNG256/status_009.png",
+      "png128": "Art/StatusIcons/PNG128/status_009.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#a07260",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.010",
+      "nameRu": "Отложенный взрыв",
+      "category": "dot",
+      "svg": "Art/StatusIcons/SVG/status_010.svg",
+      "png256": "Art/StatusIcons/PNG256/status_010.png",
+      "png128": "Art/StatusIcons/PNG128/status_010.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#a07260",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.011",
+      "nameRu": "Болевое эхо",
+      "category": "dot",
+      "svg": "Art/StatusIcons/SVG/status_011.svg",
+      "png256": "Art/StatusIcons/PNG256/status_011.png",
+      "png128": "Art/StatusIcons/PNG128/status_011.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#a07260",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.012",
+      "nameRu": "Кровавая порча",
+      "category": "dot",
+      "svg": "Art/StatusIcons/SVG/status_012.svg",
+      "png256": "Art/StatusIcons/PNG256/status_012.png",
+      "png128": "Art/StatusIcons/PNG128/status_012.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#a07260",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.014",
+      "nameRu": "Озябший",
+      "category": "coat",
+      "svg": "Art/StatusIcons/SVG/status_014.svg",
+      "png256": "Art/StatusIcons/PNG256/status_014.png",
+      "png128": "Art/StatusIcons/PNG128/status_014.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a0a0",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.015",
+      "nameRu": "Покрыт инеем",
+      "category": "coat",
+      "svg": "Art/StatusIcons/SVG/status_015.svg",
+      "png256": "Art/StatusIcons/PNG256/status_015.png",
+      "png128": "Art/StatusIcons/PNG128/status_015.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a0a0",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.018",
+      "nameRu": "Облит смолой",
+      "category": "coat",
+      "svg": "Art/StatusIcons/SVG/status_018.svg",
+      "png256": "Art/StatusIcons/PNG256/status_018.png",
+      "png128": "Art/StatusIcons/PNG128/status_018.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a0a0",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.019",
+      "nameRu": "Кислотное разъедание брони",
+      "category": "coat",
+      "svg": "Art/StatusIcons/SVG/status_019.svg",
+      "png256": "Art/StatusIcons/PNG256/status_019.png",
+      "png128": "Art/StatusIcons/PNG128/status_019.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a0a0",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.168",
+      "nameRu": "Ослепление",
+      "category": "vision",
+      "svg": "Art/StatusIcons/SVG/status_168.svg",
+      "png256": "Art/StatusIcons/PNG256/status_168.png",
+      "png128": "Art/StatusIcons/PNG128/status_168.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#a996b0",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.022",
+      "nameRu": "Покрыт паутиной",
+      "category": "coat",
+      "svg": "Art/StatusIcons/SVG/status_022.svg",
+      "png256": "Art/StatusIcons/PNG256/status_022.png",
+      "png128": "Art/StatusIcons/PNG128/status_022.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a0a0",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.023",
+      "nameRu": "Опутан корнями",
+      "category": "coat",
+      "svg": "Art/StatusIcons/SVG/status_023.svg",
+      "png256": "Art/StatusIcons/PNG256/status_023.png",
+      "png128": "Art/StatusIcons/PNG128/status_023.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a0a0",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.025",
+      "nameRu": "Оглушение",
+      "category": "control",
+      "svg": "Art/StatusIcons/SVG/status_025.svg",
+      "png256": "Art/StatusIcons/PNG256/status_025.png",
+      "png128": "Art/StatusIcons/PNG128/status_025.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b6a36f",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.026",
+      "nameRu": "Ошеломление",
+      "category": "control",
+      "svg": "Art/StatusIcons/SVG/status_026.svg",
+      "png256": "Art/StatusIcons/PNG256/status_026.png",
+      "png128": "Art/StatusIcons/PNG128/status_026.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b6a36f",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.027",
+      "nameRu": "Оцепенение",
+      "category": "control",
+      "svg": "Art/StatusIcons/SVG/status_027.svg",
+      "png256": "Art/StatusIcons/PNG256/status_027.png",
+      "png128": "Art/StatusIcons/PNG128/status_027.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b6a36f",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.028",
+      "nameRu": "Паралич",
+      "category": "control",
+      "svg": "Art/StatusIcons/SVG/status_028.svg",
+      "png256": "Art/StatusIcons/PNG256/status_028.png",
+      "png128": "Art/StatusIcons/PNG128/status_028.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b6a36f",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.030",
+      "nameRu": "Сон",
+      "category": "control",
+      "svg": "Art/StatusIcons/SVG/status_030.svg",
+      "png256": "Art/StatusIcons/PNG256/status_030.png",
+      "png128": "Art/StatusIcons/PNG128/status_030.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b6a36f",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.032",
+      "nameRu": "Окаменение",
+      "category": "control",
+      "svg": "Art/StatusIcons/SVG/status_032.svg",
+      "png256": "Art/StatusIcons/PNG256/status_032.png",
+      "png128": "Art/StatusIcons/PNG128/status_032.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b6a36f",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.033",
+      "nameRu": "Заморожен",
+      "category": "control",
+      "svg": "Art/StatusIcons/SVG/status_033.svg",
+      "png256": "Art/StatusIcons/PNG256/status_033.png",
+      "png128": "Art/StatusIcons/PNG128/status_033.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b6a36f",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.041",
+      "nameRu": "Замедление",
+      "category": "move",
+      "svg": "Art/StatusIcons/SVG/status_041.svg",
+      "png256": "Art/StatusIcons/PNG256/status_041.png",
+      "png128": "Art/StatusIcons/PNG128/status_041.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#ad936f",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.043",
+      "nameRu": "Обездвиживание",
+      "category": "move",
+      "svg": "Art/StatusIcons/SVG/status_043.svg",
+      "png256": "Art/StatusIcons/PNG256/status_043.png",
+      "png128": "Art/StatusIcons/PNG128/status_043.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#ad936f",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.044",
+      "nameRu": "Захват",
+      "category": "move",
+      "svg": "Art/StatusIcons/SVG/status_044.svg",
+      "png256": "Art/StatusIcons/PNG256/status_044.png",
+      "png128": "Art/StatusIcons/PNG128/status_044.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#ad936f",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.046",
+      "nameRu": "В сети",
+      "category": "move",
+      "svg": "Art/StatusIcons/SVG/status_046.svg",
+      "png256": "Art/StatusIcons/PNG256/status_046.png",
+      "png128": "Art/StatusIcons/PNG128/status_046.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#ad936f",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.047",
+      "nameRu": "Запутан",
+      "category": "move",
+      "svg": "Art/StatusIcons/SVG/status_047.svg",
+      "png256": "Art/StatusIcons/PNG256/status_047.png",
+      "png128": "Art/StatusIcons/PNG128/status_047.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#ad936f",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.054",
+      "nameRu": "Окружён",
+      "category": "move",
+      "svg": "Art/StatusIcons/SVG/status_054.svg",
+      "png256": "Art/StatusIcons/PNG256/status_054.png",
+      "png128": "Art/StatusIcons/PNG128/status_054.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#ad936f",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.055",
+      "nameRu": "Страх",
+      "category": "mind",
+      "svg": "Art/StatusIcons/SVG/status_055.svg",
+      "png256": "Art/StatusIcons/PNG256/status_055.png",
+      "png128": "Art/StatusIcons/PNG128/status_055.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b08b9b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.056",
+      "nameRu": "Паника",
+      "category": "mind",
+      "svg": "Art/StatusIcons/SVG/status_056.svg",
+      "png256": "Art/StatusIcons/PNG256/status_056.png",
+      "png128": "Art/StatusIcons/PNG128/status_056.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b08b9b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.057",
+      "nameRu": "Ужас",
+      "category": "mind",
+      "svg": "Art/StatusIcons/SVG/status_057.svg",
+      "png256": "Art/StatusIcons/PNG256/status_057.png",
+      "png128": "Art/StatusIcons/PNG128/status_057.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b08b9b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.058",
+      "nameRu": "Скованный страхом",
+      "category": "mind",
+      "svg": "Art/StatusIcons/SVG/status_058.svg",
+      "png256": "Art/StatusIcons/PNG256/status_058.png",
+      "png128": "Art/StatusIcons/PNG128/status_058.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b08b9b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.059",
+      "nameRu": "Смятение",
+      "category": "mind",
+      "svg": "Art/StatusIcons/SVG/status_059.svg",
+      "png256": "Art/StatusIcons/PNG256/status_059.png",
+      "png128": "Art/StatusIcons/PNG128/status_059.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b08b9b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.060",
+      "nameRu": "Очарование",
+      "category": "mind",
+      "svg": "Art/StatusIcons/SVG/status_060.svg",
+      "png256": "Art/StatusIcons/PNG256/status_060.png",
+      "png128": "Art/StatusIcons/PNG128/status_060.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b08b9b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.061",
+      "nameRu": "Подчинение",
+      "category": "mind",
+      "svg": "Art/StatusIcons/SVG/status_061.svg",
+      "png256": "Art/StatusIcons/PNG256/status_061.png",
+      "png128": "Art/StatusIcons/PNG128/status_061.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b08b9b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.065",
+      "nameRu": "Спровоцирован",
+      "category": "mind",
+      "svg": "Art/StatusIcons/SVG/status_065.svg",
+      "png256": "Art/StatusIcons/PNG256/status_065.png",
+      "png128": "Art/StatusIcons/PNG128/status_065.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b08b9b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.066",
+      "nameRu": "Деморализация",
+      "category": "mind",
+      "svg": "Art/StatusIcons/SVG/status_066.svg",
+      "png256": "Art/StatusIcons/PNG256/status_066.png",
+      "png128": "Art/StatusIcons/PNG128/status_066.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b08b9b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.067",
+      "nameRu": "Сломленный дух",
+      "category": "mind",
+      "svg": "Art/StatusIcons/SVG/status_067.svg",
+      "png256": "Art/StatusIcons/PNG256/status_067.png",
+      "png128": "Art/StatusIcons/PNG128/status_067.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b08b9b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.068",
+      "nameRu": "Отчаяние",
+      "category": "mind",
+      "svg": "Art/StatusIcons/SVG/status_068.svg",
+      "png256": "Art/StatusIcons/PNG256/status_068.png",
+      "png128": "Art/StatusIcons/PNG128/status_068.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b08b9b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.070",
+      "nameRu": "Чума",
+      "category": "weak",
+      "svg": "Art/StatusIcons/SVG/status_070.svg",
+      "png256": "Art/StatusIcons/PNG256/status_070.png",
+      "png128": "Art/StatusIcons/PNG128/status_070.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a17b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.071",
+      "nameRu": "Слабость",
+      "category": "weak",
+      "svg": "Art/StatusIcons/SVG/status_071.svg",
+      "png256": "Art/StatusIcons/PNG256/status_071.png",
+      "png128": "Art/StatusIcons/PNG128/status_071.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a17b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.072",
+      "nameRu": "Обессиленный",
+      "category": "weak",
+      "svg": "Art/StatusIcons/SVG/status_072.svg",
+      "png256": "Art/StatusIcons/PNG256/status_072.png",
+      "png128": "Art/StatusIcons/PNG128/status_072.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a17b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.077",
+      "nameRu": "Высасывание жизненной силы",
+      "category": "weak",
+      "svg": "Art/StatusIcons/SVG/status_077.svg",
+      "png256": "Art/StatusIcons/PNG256/status_077.png",
+      "png128": "Art/StatusIcons/PNG128/status_077.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a17b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.078",
+      "nameRu": "Дурнота",
+      "category": "weak",
+      "svg": "Art/StatusIcons/SVG/status_078.svg",
+      "png256": "Art/StatusIcons/PNG256/status_078.png",
+      "png128": "Art/StatusIcons/PNG128/status_078.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a17b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.079",
+      "nameRu": "Тошнота",
+      "category": "weak",
+      "svg": "Art/StatusIcons/SVG/status_079.svg",
+      "png256": "Art/StatusIcons/PNG256/status_079.png",
+      "png128": "Art/StatusIcons/PNG128/status_079.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a17b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.084",
+      "nameRu": "Забывчивость стрелка",
+      "category": "weak",
+      "svg": "Art/StatusIcons/SVG/status_084.svg",
+      "png256": "Art/StatusIcons/PNG256/status_084.png",
+      "png128": "Art/StatusIcons/PNG128/status_084.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a17b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.087",
+      "nameRu": "Отяжеление",
+      "category": "weak",
+      "svg": "Art/StatusIcons/SVG/status_087.svg",
+      "png256": "Art/StatusIcons/PNG256/status_087.png",
+      "png128": "Art/StatusIcons/PNG128/status_087.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a17b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.088",
+      "nameRu": "Ослаблен ударом",
+      "category": "weak",
+      "svg": "Art/StatusIcons/SVG/status_088.svg",
+      "png256": "Art/StatusIcons/PNG256/status_088.png",
+      "png128": "Art/StatusIcons/PNG128/status_088.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#91a17b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.098",
+      "nameRu": "Роковая метка",
+      "category": "vuln",
+      "svg": "Art/StatusIcons/SVG/status_098.svg",
+      "png256": "Art/StatusIcons/PNG256/status_098.png",
+      "png128": "Art/StatusIcons/PNG128/status_098.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#aa776c",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.099",
+      "nameRu": "Проклятие слабого удара",
+      "category": "vuln",
+      "svg": "Art/StatusIcons/SVG/status_099.svg",
+      "png256": "Art/StatusIcons/PNG256/status_099.png",
+      "png128": "Art/StatusIcons/PNG128/status_099.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#aa776c",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.101",
+      "nameRu": "Метка добычи",
+      "category": "mark",
+      "svg": "Art/StatusIcons/SVG/status_101.svg",
+      "png256": "Art/StatusIcons/PNG256/status_101.png",
+      "png128": "Art/StatusIcons/PNG128/status_101.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#c0ac7c",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.102",
+      "nameRu": "Отмеченная цель",
+      "category": "mark",
+      "svg": "Art/StatusIcons/SVG/status_102.svg",
+      "png256": "Art/StatusIcons/PNG256/status_102.png",
+      "png128": "Art/StatusIcons/PNG128/status_102.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#c0ac7c",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.105",
+      "nameRu": "Приговор",
+      "category": "mark",
+      "svg": "Art/StatusIcons/SVG/status_105.svg",
+      "png256": "Art/StatusIcons/PNG256/status_105.png",
+      "png128": "Art/StatusIcons/PNG128/status_105.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#c0ac7c",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.106",
+      "nameRu": "Вызов на поединок",
+      "category": "mark",
+      "svg": "Art/StatusIcons/SVG/status_106.svg",
+      "png256": "Art/StatusIcons/PNG256/status_106.png",
+      "png128": "Art/StatusIcons/PNG128/status_106.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#c0ac7c",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.107",
+      "nameRu": "Под защитой союзника",
+      "category": "mark",
+      "svg": "Art/StatusIcons/SVG/status_107.svg",
+      "png256": "Art/StatusIcons/PNG256/status_107.png",
+      "png128": "Art/StatusIcons/PNG128/status_107.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#c0ac7c",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.109",
+      "nameRu": "Связанные раны",
+      "category": "mark",
+      "svg": "Art/StatusIcons/SVG/status_109.svg",
+      "png256": "Art/StatusIcons/PNG256/status_109.png",
+      "png128": "Art/StatusIcons/PNG128/status_109.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#c0ac7c",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.110",
+      "nameRu": "Привязка к источнику",
+      "category": "mark",
+      "svg": "Art/StatusIcons/SVG/status_110.svg",
+      "png256": "Art/StatusIcons/PNG256/status_110.png",
+      "png128": "Art/StatusIcons/PNG128/status_110.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#c0ac7c",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.113",
+      "nameRu": "Свирепость",
+      "category": "attack",
+      "svg": "Art/StatusIcons/SVG/status_113.svg",
+      "png256": "Art/StatusIcons/PNG256/status_113.png",
+      "png128": "Art/StatusIcons/PNG128/status_113.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b78b67",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.114",
+      "nameRu": "Временный вампиризм",
+      "category": "attack",
+      "svg": "Art/StatusIcons/SVG/status_114.svg",
+      "png256": "Art/StatusIcons/PNG256/status_114.png",
+      "png128": "Art/StatusIcons/PNG128/status_114.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b78b67",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.117",
+      "nameRu": "Кровожадность",
+      "category": "attack",
+      "svg": "Art/StatusIcons/SVG/status_117.svg",
+      "png256": "Art/StatusIcons/PNG256/status_117.png",
+      "png128": "Art/StatusIcons/PNG128/status_117.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b78b67",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.119",
+      "nameRu": "Боевой подъём",
+      "category": "attack",
+      "svg": "Art/StatusIcons/SVG/status_119.svg",
+      "png256": "Art/StatusIcons/PNG256/status_119.png",
+      "png128": "Art/StatusIcons/PNG128/status_119.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b78b67",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.130",
+      "nameRu": "Защитная стойка",
+      "category": "defense",
+      "svg": "Art/StatusIcons/SVG/status_130.svg",
+      "png256": "Art/StatusIcons/PNG256/status_130.png",
+      "png128": "Art/StatusIcons/PNG128/status_130.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#9caaa2",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.132",
+      "nameRu": "Щит одного попадания",
+      "category": "defense",
+      "svg": "Art/StatusIcons/SVG/status_132.svg",
+      "png256": "Art/StatusIcons/PNG256/status_132.png",
+      "png128": "Art/StatusIcons/PNG128/status_132.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#9caaa2",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.135",
+      "nameRu": "Каменная кожа",
+      "category": "defense",
+      "svg": "Art/StatusIcons/SVG/status_135.svg",
+      "png256": "Art/StatusIcons/PNG256/status_135.png",
+      "png128": "Art/StatusIcons/PNG128/status_135.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#9caaa2",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.136",
+      "nameRu": "Защита от стрел",
+      "category": "defense",
+      "svg": "Art/StatusIcons/SVG/status_136.svg",
+      "png256": "Art/StatusIcons/PNG256/status_136.png",
+      "png128": "Art/StatusIcons/PNG128/status_136.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#9caaa2",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.137",
+      "nameRu": "Защита от чар",
+      "category": "defense",
+      "svg": "Art/StatusIcons/SVG/status_137.svg",
+      "png256": "Art/StatusIcons/PNG256/status_137.png",
+      "png128": "Art/StatusIcons/PNG128/status_137.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#9caaa2",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.138",
+      "nameRu": "Огненный покров",
+      "category": "defense",
+      "svg": "Art/StatusIcons/SVG/status_138.svg",
+      "png256": "Art/StatusIcons/PNG256/status_138.png",
+      "png128": "Art/StatusIcons/PNG128/status_138.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#9caaa2",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.139",
+      "nameRu": "Зеркальная защита",
+      "category": "defense",
+      "svg": "Art/StatusIcons/SVG/status_139.svg",
+      "png256": "Art/StatusIcons/PNG256/status_139.png",
+      "png128": "Art/StatusIcons/PNG128/status_139.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#9caaa2",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.142",
+      "nameRu": "Краткая неуязвимость",
+      "category": "defense",
+      "svg": "Art/StatusIcons/SVG/status_142.svg",
+      "png256": "Art/StatusIcons/PNG256/status_142.png",
+      "png128": "Art/StatusIcons/PNG128/status_142.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#9caaa2",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.146",
+      "nameRu": "Постепенное восстановление",
+      "category": "heal",
+      "svg": "Art/StatusIcons/SVG/status_146.svg",
+      "png256": "Art/StatusIcons/PNG256/status_146.png",
+      "png128": "Art/StatusIcons/PNG128/status_146.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#94ab85",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.148",
+      "nameRu": "Запас временной жизни",
+      "category": "heal",
+      "svg": "Art/StatusIcons/SVG/status_148.svg",
+      "png256": "Art/StatusIcons/PNG256/status_148.png",
+      "png128": "Art/StatusIcons/PNG128/status_148.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#94ab85",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.150",
+      "nameRu": "При смерти",
+      "category": "heal",
+      "svg": "Art/StatusIcons/SVG/status_150.svg",
+      "png256": "Art/StatusIcons/PNG256/status_150.png",
+      "png128": "Art/StatusIcons/PNG128/status_150.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#94ab85",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.156",
+      "nameRu": "Ускоренное перемещение",
+      "category": "tempo",
+      "svg": "Art/StatusIcons/SVG/status_156.svg",
+      "png256": "Art/StatusIcons/PNG256/status_156.png",
+      "png128": "Art/StatusIcons/PNG128/status_156.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b2a674",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.158",
+      "nameRu": "Перехват инициативы",
+      "category": "tempo",
+      "svg": "Art/StatusIcons/SVG/status_158.svg",
+      "png256": "Art/StatusIcons/PNG256/status_158.png",
+      "png128": "Art/StatusIcons/PNG128/status_158.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b2a674",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.159",
+      "nameRu": "Прилив сил",
+      "category": "tempo",
+      "svg": "Art/StatusIcons/SVG/status_159.svg",
+      "png256": "Art/StatusIcons/PNG256/status_159.png",
+      "png128": "Art/StatusIcons/PNG128/status_159.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b2a674",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.161",
+      "nameRu": "Набранный темп",
+      "category": "tempo",
+      "svg": "Art/StatusIcons/SVG/status_161.svg",
+      "png256": "Art/StatusIcons/PNG256/status_161.png",
+      "png128": "Art/StatusIcons/PNG128/status_161.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b2a674",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.171",
+      "nameRu": "Невидимость",
+      "category": "vision",
+      "svg": "Art/StatusIcons/SVG/status_171.svg",
+      "png256": "Art/StatusIcons/PNG256/status_171.png",
+      "png128": "Art/StatusIcons/PNG128/status_171.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#a996b0",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.185",
+      "nameRu": "Повреждена нога",
+      "category": "stack",
+      "svg": "Art/StatusIcons/SVG/status_185.svg",
+      "png256": "Art/StatusIcons/PNG256/status_185.png",
+      "png128": "Art/StatusIcons/PNG128/status_185.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#9da28b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.186",
+      "nameRu": "Повреждена рука",
+      "category": "stack",
+      "svg": "Art/StatusIcons/SVG/status_186.svg",
+      "png256": "Art/StatusIcons/PNG256/status_186.png",
+      "png128": "Art/StatusIcons/PNG128/status_186.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#9da28b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.187",
+      "nameRu": "Контузия головы",
+      "category": "stack",
+      "svg": "Art/StatusIcons/SVG/status_187.svg",
+      "png256": "Art/StatusIcons/PNG256/status_187.png",
+      "png128": "Art/StatusIcons/PNG128/status_187.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#9da28b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.188",
+      "nameRu": "Порча невезения",
+      "category": "stack",
+      "svg": "Art/StatusIcons/SVG/status_188.svg",
+      "png256": "Art/StatusIcons/PNG256/status_188.png",
+      "png128": "Art/StatusIcons/PNG128/status_188.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#9da28b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.189",
+      "nameRu": "Боевая удача",
+      "category": "stack",
+      "svg": "Art/StatusIcons/SVG/status_189.svg",
+      "png256": "Art/StatusIcons/PNG256/status_189.png",
+      "png128": "Art/StatusIcons/PNG128/status_189.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#9da28b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.190",
+      "nameRu": "Воодушевление",
+      "category": "stack",
+      "svg": "Art/StatusIcons/SVG/status_190.svg",
+      "png256": "Art/StatusIcons/PNG256/status_190.png",
+      "png128": "Art/StatusIcons/PNG128/status_190.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#9da28b",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.193",
+      "nameRu": "Рваная рана",
+      "category": "vuln",
+      "svg": "Art/StatusIcons/SVG/status_193.svg",
+      "png256": "Art/StatusIcons/PNG256/status_193.png",
+      "png128": "Art/StatusIcons/PNG128/status_193.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#aa776c",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.194",
+      "nameRu": "Ранящее перемещение",
+      "category": "move",
+      "svg": "Art/StatusIcons/SVG/status_194.svg",
+      "png256": "Art/StatusIcons/PNG256/status_194.png",
+      "png128": "Art/StatusIcons/PNG128/status_194.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#ad936f",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.199",
+      "nameRu": "Сила от ран",
+      "category": "attack",
+      "svg": "Art/StatusIcons/SVG/status_199.svg",
+      "png256": "Art/StatusIcons/PNG256/status_199.png",
+      "png128": "Art/StatusIcons/PNG128/status_199.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#b78b67",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    },
+    {
+      "statusId": "status.203",
+      "nameRu": "Зародыш в теле",
+      "category": "dot",
+      "svg": "Art/StatusIcons/SVG/status_203.svg",
+      "png256": "Art/StatusIcons/PNG256/status_203.png",
+      "png128": "Art/StatusIcons/PNG128/status_203.png",
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "alpha": true,
+      "colourSpace": "sRGB",
+      "runtimeBadgeTextBaked": false,
+      "uiLogicalSize": 32,
+      "accent": "#a07260",
+      "style": "Art Style Canon §10: крупный тушевой знак, матовая плоскость; редактируемый векторный мастер",
+      "artStatus": "Комплект для проверки в интерфейсе; не новая фиксация художественного канона"
+    }
+  ]
+}

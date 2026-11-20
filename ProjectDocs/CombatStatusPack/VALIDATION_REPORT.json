@@ -1,0 +1,17 @@
+{
+  "packageValidation": "PASS",
+  "statuses": 89,
+  "tags": 457,
+  "favoritesPreserved": 176,
+  "selectedActiveCombat": 168,
+  "trashPreserved": 197,
+  "svgFiles": 89,
+  "pngFiles": 178,
+  "uniqueIcons": 89,
+  "checkedFiles": 286,
+  "sourceFieldsPreserved": true,
+  "unityImplementationTested": false,
+  "note": "Проверка комплектности/сохранности, не тест реализации боевых правил.",
+  "previewFunctionalCheck": "PASS: real JS in Node VM, 0–12 effects and geometry, no browser rendering claim",
+  "pngOutsideCircleTransparency": "PASS"
+}

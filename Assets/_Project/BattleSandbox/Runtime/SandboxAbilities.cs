@@ -268,7 +268,9 @@ namespace KingdomSurvival.BattleSandbox
         BreakFree,
         PullFree,
         CutThread,
-        AttackObject
+        AttackObject,
+        // Пакет состояний: очищение себя или соседнего союзника за 1 действие.
+        CleanseStatus
     }
 
     public sealed class SandboxContextAction
@@ -278,6 +280,7 @@ namespace KingdomSurvival.BattleSandbox
         public string TargetUnitId { get; set; }
         public string ObjectId { get; set; }
         public string LinkId { get; set; }
+        public string StatusId { get; set; }
     }
 
     public enum SandboxObjectKind

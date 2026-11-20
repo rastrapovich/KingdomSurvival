@@ -1,0 +1,21 @@
+{
+  "passives": [
+    {
+      "catalogId": "tactic.pack_hunter",
+      "runtimeId": "combat.pack",
+      "policy": "One executor, preserve current PackBonusDefault; never add both bonuses."
+    }
+  ],
+  "statuses": {
+    "IsStunned": "status.025",
+    "IsNumbed": "status.027",
+    "IsGuarding": "status.130",
+    "AttachedToId": "status.008 on host; source parasite",
+    "IsHidden": "status.171 only where actually invisibility; not burrow"
+  },
+  "notAliases": [
+    "combat.ranged ≠ trait.ranged_resistant",
+    "LayEgg ≠ status.203",
+    "VineGrab ≠ all independent immobilize profiles"
+  ]
+}

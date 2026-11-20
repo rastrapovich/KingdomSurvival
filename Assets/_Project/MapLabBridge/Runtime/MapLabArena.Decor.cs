@@ -23,7 +23,8 @@ namespace KingdomSurvival.MapLabBridge
         {
             MapLabRandom rng = MapLabRandom.ForStream(Spec.Seed, "arena-decor", MapLabData.AlgorithmVersion);
             float hex = Spec.HexWorld;
-            float density = Mathf.Clamp(Spec.DecorDensity, 0f, 3f);
+            MapLabArenaLook look = Look;
+            float density = Mathf.Clamp(Spec.DecorDensity, 0f, 5f);
             float lean = cos / Mathf.Max(0.05f, sin);
             Rect frame = new Rect(Margin, zBottom, Spec.Aspect * k, depth);
             List<MapLabDecorArt> trees = Role(MapLabDecorRole.Tree), stumps = Role(MapLabDecorRole.Stump),
@@ -99,7 +100,7 @@ namespace KingdomSurvival.MapLabBridge
                     continue;
                 }
                 // Валуны чаще пней; рисунок растягивается на ширину клетки.
-                MapLabDecorArt art = boulders.Count > 0 && (stumps.Count == 0 || rng.Value() < 0.7f)
+                MapLabDecorArt art = boulders.Count > 0 && (stumps.Count == 0 || rng.Value() < look.BlockBoulderShare)
                     ? boulders[(int)(rng.Value() * boulders.Count) % boulders.Count]
                     : blockers[(int)(rng.Value() * blockers.Count) % blockers.Count];
                 float height = art.Height * (hex * 1.5f) / Mathf.Max(0.05f, art.HalfWidth * 2f);
@@ -140,7 +141,7 @@ namespace KingdomSurvival.MapLabBridge
                     if ((layers & rubbleBit) == 0UL)
                         continue;
                     Vector2 p = ToWorld(center);
-                    int stones = 2 + (int)(rng.Value() * 2f);
+                    int stones = look.RubbleStonesMin + (int)(rng.Value() * Mathf.Max(1, look.RubbleStonesMax - look.RubbleStonesMin + 1));
                     for (int i = 0; i < stones; i++)
                     {
                         MapLabDecorArt art = small[(int)(rng.Value() * small.Count) % small.Count];
@@ -162,13 +163,13 @@ namespace KingdomSurvival.MapLabBridge
                 for (float x = frame.xMin - hex; x <= frame.xMax + hex; x += hex * 1.2f)
                 {
                     Vector2 p = new Vector2(x + rng.Range(-0.5f, 0.5f) * hex, z + rng.Range(-0.5f, 0.5f) * hex);
-                    if (Covers(p, typical * 0.8f, typicalHalf * 0.8f, hex * 1.4f))
+                    if (Covers(p, typical * 0.8f, typicalHalf * 0.8f, hex * (Mathf.Approximately(look.TreeClearance, 1.3f) ? 1.4f : look.TreeClearance + 0.1f)))
                         continue;
                     Vector2 offset = p - frameCenter;
                     float corner = Mathf.Clamp01(Mathf.Abs(offset.x) / (frame.width * 0.5f)) * Mathf.Clamp01(Mathf.Abs(offset.y) / (frame.height * 0.5f));
                     seeds.Add((p, 0.35f + corner + rng.Value() * 0.4f));
                 }
-                int groups = Mathf.RoundToInt(Mathf.Lerp(9f, 13f, rng.Value()) * Mathf.Sqrt(Mathf.Max(0.2f, density)));
+                int groups = Mathf.RoundToInt(Mathf.Lerp(look.TreeGroupsMin, look.TreeGroupsMax, rng.Value()) * Mathf.Sqrt(Mathf.Max(0.2f, density)));
                 List<Vector2> centers = new List<Vector2>();
                 for (int g = 0; g < groups && seeds.Count > 0; g++)
                 {
@@ -182,7 +183,7 @@ namespace KingdomSurvival.MapLabBridge
                         if (pick <= 0f) break;
                     }
                     Vector2 center = seeds[chosen].Point;
-                    seeds.RemoveAll(seed => Vector2.Distance(seed.Point, center) < hex * 3.2f);
+                    seeds.RemoveAll(seed => Vector2.Distance(seed.Point, center) < hex * look.TreeGroupGap);
                     centers.Add(center);
                 }
                 foreach (Vector2 center in centers)
@@ -190,16 +191,16 @@ namespace KingdomSurvival.MapLabBridge
                     // Группа — одна-две породы, ядро крупнее, к краю моложе.
                     MapLabDecorArt main = trees[(int)(rng.Value() * trees.Count) % trees.Count];
                     MapLabDecorArt second = trees[(int)(rng.Value() * trees.Count) % trees.Count];
-                    int count = 3 + (int)(rng.Value() * 6f);
+                    int count = look.TreesPerGroupMin + (int)(rng.Value() * Mathf.Max(1, look.TreesPerGroupMax - look.TreesPerGroupMin + 1));
                     for (int attempt = 0, placed = 0; attempt < count * 6 && placed < count; attempt++)
                     {
                         float radius = Mathf.Sqrt(rng.Value());
                         float angle = rng.Value() * Mathf.PI * 2f;
-                        Vector2 q = center + new Vector2(Mathf.Cos(angle) * hex * 2.6f, Mathf.Sin(angle) * hex * 1.8f) * radius;
-                        MapLabDecorArt art = rng.Value() < 0.65f ? main : second;
-                        if (radius > 0.7f && rng.Value() < 0.5f)
+                        Vector2 q = center + new Vector2(Mathf.Cos(angle) * hex * 2.6f, Mathf.Sin(angle) * hex * 1.8f) * radius * look.TreeGroupSpread;
+                        MapLabDecorArt art = rng.Value() < look.TreeMainSpecies ? main : second;
+                        if (radius > 0.7f && rng.Value() < look.TreeYoungAtEdge)
                             art = trees[(int)(rng.Value() * Mathf.Max(1, trees.Count / 2)) % trees.Count];
-                        if (!InView(q, art.Height, art.HalfWidth) || Covers(q, art.Height, art.HalfWidth, hex * 1.3f) || Crowded(q, art.HalfWidth * 0.5f, 0.55f))
+                        if (!InView(q, art.Height, art.HalfWidth) || Covers(q, art.Height, art.HalfWidth, hex * look.TreeClearance) || Crowded(q, art.HalfWidth * 0.5f, 0.55f))
                             continue;
                         Add(q, art.Id, art.HalfWidth * 0.5f);
                         placed++;
@@ -209,7 +210,7 @@ namespace KingdomSurvival.MapLabBridge
                     for (int extra = 0; extra < 2; extra++)
                     {
                         List<MapLabDecorArt> pool = extra == 0 ? tall : stumps;
-                        if (pool.Count == 0 || rng.Value() > 0.65f * Mathf.Min(1f, density))
+                        if (pool.Count == 0 || rng.Value() > (extra == 0 ? look.WeedChance : look.StumpChance) * Mathf.Min(1f, density))
                             continue;
                         MapLabDecorArt art = pool[(int)(rng.Value() * pool.Count) % pool.Count];
                         for (int attempt = 0; attempt < 6; attempt++)
@@ -228,14 +229,15 @@ namespace KingdomSurvival.MapLabBridge
             // и камней на клетках. Пятно — одна-две травы, разные размеры.
             if (low.Count > 0)
             {
-                int patches = Mathf.RoundToInt(Mathf.Lerp(8f, 13f, rng.Value()) * density);
+                int patches = Mathf.RoundToInt(Mathf.Lerp(look.GrassPatchesMin, look.GrassPatchesMax, rng.Value()) * density);
+                float outside = Mathf.Max(0f, look.GrassOutside) * hex;
                 for (int patch = 0; patch < patches; patch++)
                 {
-                    Vector2 center = new Vector2(rng.Range(frame.xMin, frame.xMax), rng.Range(frame.yMin, frame.yMax));
-                    float spread = hex * rng.Range(0.6f, 1.6f);
+                    Vector2 center = new Vector2(rng.Range(frame.xMin - outside, frame.xMax + outside), rng.Range(frame.yMin - outside, frame.yMax + outside));
+                    float spread = hex * rng.Range(look.GrassPatchSizeMin, look.GrassPatchSizeMax);
                     MapLabDecorArt first = low[(int)(rng.Value() * low.Count) % low.Count];
                     MapLabDecorArt other = low[(int)(rng.Value() * low.Count) % low.Count];
-                    int count = 2 + (int)(rng.Value() * 6f);
+                    int count = look.GrassPerPatchMin + (int)(rng.Value() * Mathf.Max(1, look.GrassPerPatchMax - look.GrassPerPatchMin + 1));
                     for (int i = 0; i < count; i++)
                     {
                         // Гуще к середине пятна, реже к краю (не ровный ковёр).
@@ -243,7 +245,7 @@ namespace KingdomSurvival.MapLabBridge
                         float angle = rng.Value() * Mathf.PI * 2f;
                         Vector2 q = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle) * 0.7f) * spread * radius;
                         MapLabDecorArt art = rng.Value() < 0.7f ? first : other;
-                        if (Near(keep, q, hex * 0.8f) || Near(blocked, q, hex * 0.75f) || Crowded(q, art.HalfWidth * 0.35f, 0.7f))
+                        if ((look.GrassClearOfStart > 0f && Near(keep, q, hex * look.GrassClearOfStart)) || Near(blocked, q, hex * 0.75f) || Crowded(q, art.HalfWidth * 0.35f, look.GrassSpacing))
                             continue;
                         Add(q, art.Id, art.HalfWidth * 0.35f);
                         groundArtIds.Add(art.Id);
@@ -254,7 +256,7 @@ namespace KingdomSurvival.MapLabBridge
             // 4. Редкие мелкие камни на окраинах.
             if (small.Count > 0)
             {
-                int rocks = Mathf.RoundToInt(rng.Range(2f, 5f) * density);
+                int rocks = Mathf.RoundToInt(rng.Range(look.SmallRocksMin, look.SmallRocksMax) * density);
                 for (int i = 0, attempt = 0; i < rocks && attempt < rocks * 8; attempt++)
                 {
                     MapLabDecorArt art = small[(int)(rng.Value() * small.Count) % small.Count];
@@ -264,6 +266,103 @@ namespace KingdomSurvival.MapLabBridge
                     Add(q, art.Id, art.HalfWidth * 0.5f);
                     i++;
                 }
+            }
+
+            // 5. Травяной ковёр и россыпь травинок («Генератор арен»): дрожащая
+            // решётка по всему кадру, свой поток случайности — прочий декор от
+            // них не зависит. Пол: под сеткой клеток.
+            PlaceCarpet(c, frame, keep, blocked, low);
+        }
+
+        private void PlaceCarpet(MapLabComposition c, Rect frame, List<Vector2> keep, List<Vector2> blocked, List<MapLabDecorArt> low)
+        {
+            MapLabArenaLook look = Look;
+            float hex = Spec.HexWorld;
+            float hexArea = hex * hex * 2.598f;
+            List<MapLabArtEntry> tufts = new List<MapLabArtEntry>(), inks = new List<MapLabArtEntry>();
+            if (look.GrassCarpet > 0f)
+                CarpetArt(look.GrassCarpetScale, tufts, inks);
+            MapLabRandom rng = MapLabRandom.ForStream(Spec.Seed, "arena-carpet", MapLabData.AlgorithmVersion);
+            MapLabNoise noise = new MapLabNoise(MapLabRandom.StreamSeed(Spec.Seed, "arena-carpet-noise", MapLabData.AlgorithmVersion));
+            float outside = Mathf.Max(0f, look.GrassOutside) * hex + hex * 0.5f;
+            float lean = cos / Mathf.Max(0.05f, sin);
+            Rect area = new Rect(frame.xMin - outside, frame.yMin - outside - hex * lean, frame.width + outside * 2f, frame.height + outside * 2f + hex * lean);
+
+            bool Clear(Vector2 q)
+            {
+                foreach (Vector2 point in blocked)
+                    if (Vector2.Distance(point, q) < hex * 0.6f)
+                        return false;
+                if (look.GrassClearOfStart > 0f)
+                    foreach (Vector2 point in keep)
+                        if (Vector2.Distance(point, q) < hex * look.GrassClearOfStart * 0.6f)
+                            return false;
+                return true;
+            }
+
+            // Плешины и густые места — по шуму; patchiness 0 — ровно.
+            bool Keep(Vector2 q)
+            {
+                float n = noise.Fbm(q.x / (hex * 3.5f), q.y / (hex * 3.5f), 3) * 0.5f + 0.5f;
+                float density = Mathf.Lerp(1f, Mathf.Clamp01((n - 0.25f) * 2f), Mathf.Clamp01(look.GrassCarpetPatchiness));
+                return rng.Value() < density;
+            }
+
+            void Grid(float perHex, System.Action<Vector2> place)
+            {
+                if (perHex <= 0f)
+                    return;
+                float step = Mathf.Sqrt(hexArea / Mathf.Min(perHex, 60f));
+                for (float z = area.yMin; z <= area.yMax; z += step)
+                for (float x = area.xMin; x <= area.xMax; x += step)
+                {
+                    Vector2 q = new Vector2(x + rng.Range(-0.45f, 0.45f) * step, z + rng.Range(-0.45f, 0.45f) * step);
+                    if (Clear(q) && Keep(q))
+                        place(q);
+                }
+            }
+
+            if (tufts.Count + inks.Count > 0)
+                Grid(look.GrassCarpet, q =>
+                {
+                    List<MapLabArtEntry> pool = inks.Count > 0 && (tufts.Count == 0 || rng.Value() < look.GrassCarpetInk) ? inks : tufts;
+                    MapLabArtEntry art = pool[(int)(rng.Value() * pool.Count) % pool.Count];
+                    c.Features.Add((q, art.Id, DecorKind));
+                    groundArtIds.Add(art.Id);
+                    DecorFeatures++;
+                });
+            if (low.Count > 0)
+                Grid(look.GrassSingles, q =>
+                {
+                    MapLabDecorArt art = low[(int)(rng.Value() * low.Count) % low.Count];
+                    c.Features.Add((q, art.Id, DecorKind));
+                    groundArtIds.Add(art.Id);
+                    DecorFeatures++;
+                });
+        }
+
+        // Пучки травы карты (набор этапа 05) — копии в наборе арены своего размера.
+        private void CarpetArt(float scale, List<MapLabArtEntry> tufts, List<MapLabArtEntry> inks)
+        {
+            MapLabArtSet source = MapLabGameAssets.Load()?.ArtSet05;
+            if (source == null || decorSet == null)
+                return;
+            foreach (MapLabArtEntry entry in source.Entries)
+            {
+                if (entry == null || !entry.HasTexture || (entry.Role != "grass_tuft" && entry.Role != "grass_ink_tuft"))
+                    continue;
+                string id = "carpet:" + entry.Id;
+                MapLabArtEntry copy = decorSet.Find(id);
+                if (copy == null)
+                {
+                    copy = JsonUtility.FromJson<MapLabArtEntry>(JsonUtility.ToJson(entry));
+                    copy.Id = id;
+                    copy.Texture = entry.Texture;
+                    // Пучок карты рядом с бойцами мелок: × размер гекса арены / 3.
+                    copy.WorldHeight = entry.WorldHeight * Mathf.Max(0.1f, scale) * Spec.HexWorld / 3f;
+                    decorSet.Entries.Add(copy);
+                }
+                (entry.Role == "grass_ink_tuft" ? inks : tufts).Add(copy);
             }
         }
 

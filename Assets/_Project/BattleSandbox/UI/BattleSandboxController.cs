@@ -66,6 +66,8 @@ namespace KingdomSurvival.BattleSandbox
         {
             unitContent = SandboxUnitDatabaseAdapter.Load();
             battlefieldDatabase = Resources.Load<BattlefieldDatabaseAsset>(BattlefieldDatabaseAsset.ResourcesPath);
+            // Общие настройки «Генератора арен»: тактика клеток — до генерации боя.
+            KingdomSurvival.MapLabBridge.ArenaGeneratorAsset.Load().Activate();
         }
 
         private void Initialize()
@@ -1063,13 +1065,13 @@ namespace KingdomSurvival.BattleSandbox
                 surface.style.top = 0f;
             }
             BattlefieldSurface = surface;
-            // Поле, собранное в Базе локаций, — живой кадр места под доской
-            // (дорожный бой и полигон; бой на месте уже идёт поверх места).
-            // Обычная арена — рисунок MapLab по раскладке боя (холмы на клетках
-            // холма); выключен в MapLabGameAssets или ошибка — прежний путь.
-            if (!IsWorldUnderlayBattle && (campaignBattle == null || !campaignBattle.UsesLocationGrid)
-                && MapLabArenaDriver.TryCreate(field, surface, boardElement, battle, QueueEnemyStepIfNeeded) == null)
-                BattlefieldSceneDriver.TryCreate(field, surface, boardElement);
+            // Обычная арена (дорожный бой и полигон; бой на месте уже идёт
+            // поверх места) — генерируемый рисунок MapLab по раскладке боя
+            // («Генератор арен»). Выключен в MapLabGameAssets или ошибка —
+            // картинка поля из базы полей боя. Собранных вручную полей боя
+            // больше нет (20.11.2026).
+            if (!IsWorldUnderlayBattle && (campaignBattle == null || !campaignBattle.UsesLocationGrid))
+                MapLabArenaDriver.TryCreate(field, surface, boardElement, battle, QueueEnemyStepIfNeeded);
             // В редакторе правки окна базы видны в идущем бою.
             if (Application.isEditor)
             {

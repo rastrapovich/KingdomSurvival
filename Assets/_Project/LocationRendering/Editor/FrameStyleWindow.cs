@@ -178,6 +178,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             toolbar.Add(source);
             toolbar.Add(new ToolbarButton(() => { zoom = 1; center = Vector2.zero; }) { text = "Вписать", tooltip = "Всё место целиком (колесо — масштаб, перетаскивание — сдвиг)" });
             toolbar.Add(new ToolbarButton(OpenDatabase) { text = "База локаций", tooltip = "Открыть это место в Базе локаций" });
+            toolbar.Add(new ToolbarButton(() => ArenaGeneratorWindow.OpenFrame()) { text = "Арены боя ↗", tooltip = "Обработка кадра генерируемых арен боя: общая и своя у вида «Обычный / Мрачный / Сепия» (окно «Генератор арен»)" });
             return toolbar;
         }
 

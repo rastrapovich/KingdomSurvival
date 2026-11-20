@@ -13,6 +13,19 @@ namespace KingdomSurvival.BattleSandbox
         {
             if (!requests.Contains(driver))
                 requests.Add(driver);
+#if UNITY_EDITOR
+            // Вне Play Mode (окно «Генератор арен») LateUpdate не идёт: кадр —
+            // после обновления окон редактора, тоже вне обновления панелей.
+            if (!Application.isPlaying)
+            {
+                if (!editorQueued)
+                {
+                    editorQueued = true;
+                    UnityEditor.EditorApplication.delayCall += FlushEditor;
+                }
+                return;
+            }
+#endif
             if (instance != null)
                 return;
             // Объект сцены боя: уходит вместе со сценой и Play Mode, при новом
@@ -21,7 +34,19 @@ namespace KingdomSurvival.BattleSandbox
             instance = host.AddComponent<ArenaRenderPump>();
         }
 
-        private void LateUpdate()
+#if UNITY_EDITOR
+        private static bool editorQueued;
+
+        private static void FlushEditor()
+        {
+            editorQueued = false;
+            Flush();
+        }
+#endif
+
+        private void LateUpdate() => Flush();
+
+        private static void Flush()
         {
             if (KingdomSurvival.MapLabBridge.MapLabArena.HasLive)
                 KingdomSurvival.MapLabBridge.MapLabArena.StripOtherCameras();

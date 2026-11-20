@@ -23,7 +23,7 @@ namespace KingdomSurvival.LocationRendering.Editor
     // кадр поля показывается на рисунке там, где начнётся бой.
     public sealed partial class LocationDatabaseWindow : EditorWindow
     {
-        private enum Tool { Select, Terrain, Entrance, ObjectPoint, Enemy, TriggerArea, ArenaFrame, RetreatPoint, TestStart, Pivot, LightShape, PlaceAsset, Scatter, FieldHexes }
+        private enum Tool { Select, Terrain, Entrance, ObjectPoint, Enemy, TriggerArea, ArenaFrame, RetreatPoint, TestStart, Pivot, LightShape, PlaceAsset, Scatter }
         private enum Kind { None, Art, Entrance, GameObject, Enemy, Encounter }
         private enum Tab { Place, Game, Light, Art, Ground, Scatter, Frame }
         private static readonly string[] TabNames = { "Место", "Игровое", "Свет", "Предметы", "Земля", "Раскидка", "Кадр" };
@@ -118,7 +118,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (database == null || database.locations.All(item => item.Id != locationId)) return;
             if (database != null) AssetDatabase.SaveAssetIfDirty(database);
             selectedId = locationId;
-            if (list != null) { listKind = Location.IsBattlefield ? ListKind.Battlefields : ListKind.Places; RefreshList(); RefreshListKind(); }
+            if (list != null) RefreshList();
             tab = Tab.Art;
             selectedKind = objectId != null ? Kind.Art : Kind.None;
             selectedElementId = objectId;
@@ -156,13 +156,14 @@ namespace KingdomSurvival.LocationRendering.Editor
             LocationLightingTestBootstrap.EnsureCamp();
             database = AssetDatabase.LoadAssetAtPath<LocalLocationDatabaseAsset>(LocalLocationDatabaseAsset.AssetPath);
             fields = Resources.Load<BattlefieldDatabaseAsset>(BattlefieldDatabaseAsset.ResourcesPath);
-            // Поля боя правятся только здесь: поле без сборки собирается само (рисунок — земля).
-            int assembled = AssembleAllBattlefields(database, fields);
+            // 20.11.2026: собранных вручную полей боя больше нет — арены генерируются
+            // («Генератор арен»); прежние сборки убираются из базы.
+            int removedFields = RemoveBattlefieldScenes(database);
             rootVisualElement.Clear();
             rootVisualElement.style.backgroundColor = new Color(.12f, .145f, .135f);
             Toolbar toolbar = new Toolbar();
             AddButton(toolbar, "+ Локация", AddLocation);
-            AddButton(toolbar, "+ Поле боя", AddBattlefieldScene);
+            AddButton(toolbar, "Генератор арен ↗", ArenaGeneratorWindow.Open);
             AddButton(toolbar, "Дублировать", DuplicateLocation);
             AddButton(toolbar, "Удалить", DeleteLocation);
             AddButton(toolbar, "Проверить", Validate);
@@ -172,7 +173,6 @@ namespace KingdomSurvival.LocationRendering.Editor
             TwoPaneSplitView outer = new TwoPaneSplitView(0, 195, TwoPaneSplitViewOrientation.Horizontal);
             outer.style.flexGrow = 1;
             VisualElement left = new VisualElement();
-            BuildListKind(left);
             ToolbarSearchField search = new ToolbarSearchField();
             search.RegisterValueChangedCallback(evt => { query = evt.newValue; RefreshList(); });
             left.Add(search);
@@ -180,7 +180,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             list.style.flexGrow = 1;
             list.makeItem = () => { Label label = new Label(); label.style.whiteSpace = WhiteSpace.Normal; label.style.paddingLeft = 8; return label; };
             list.bindItem = (row, index) => ((Label)row).text = visible[index].DisplayName + "\n" +
-                (visible[index].IsBattlefield ? "Поле боя" : database.FindVisual(visible[index].Id)?.TechnicalTest == true ? "Технический тест" : "Исследуемое место");
+                (database.FindVisual(visible[index].Id)?.TechnicalTest == true ? "Технический тест" : "Исследуемое место");
             list.selectionChanged += values =>
             {
                 LocalLocationDefinition selected = values.OfType<LocalLocationDefinition>().FirstOrDefault();
@@ -257,7 +257,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             rootVisualElement.RegisterCallback<PointerUpEvent>(_ => fieldHeld = false, TrickleDown.TrickleDown);
             rootVisualElement.RegisterCallback<PointerCancelEvent>(_ => fieldHeld = false, TrickleDown.TrickleDown);
             inner.Add(settings); outer.Add(inner); rootVisualElement.Add(outer);
-            status = new Label(assembled > 0 ? "Поля боя перенесены сюда: " + assembled + " (список «Поля боя»). Рисунок поля — земля; ставьте на него ассеты." : "Движение по месту — как на глобальной карте; клетки — только в бою.");
+            status = new Label(removedFields > 0 ? "Собранные вручную поля боя убраны: " + removedFields + ". Арены теперь генерируются — окно «Генератор арен»." : "Движение по месту — как на глобальной карте; клетки — только в бою.");
             status.style.paddingLeft = 8; status.style.height = 26; rootVisualElement.Add(status);
             RefreshList();
             viewCenter = CanvasSize / 2;
@@ -285,11 +285,9 @@ namespace KingdomSurvival.LocationRendering.Editor
                 case Tool.LightShape: status.text = "Форма света: тяните точку, клик у края — новая точка, Shift+клик — удалить."; break;
                 case Tool.PlaceAsset: status.text = "Ставить ассет «" + (ArtAssetDatabaseAsset.FindCurrent(placingAssetId)?.Name ?? "?") + "»: клик — новый экземпляр; Esc или «Выбор» — закончить."; break;
                 case Tool.Scatter: status.text = ScatterHint(); break;
-                case Tool.FieldHexes: status.text = "Гексы поля: ЛКМ по гексу — отключить или включить, протяжка — тем же состоянием; Esc — закончить."; break;
                 default: status.text = "Выбор: клик по метке или предмету, перетаскивание — переместить."; break;
             }
             if (value == Tool.Scatter) tab = Tab.Scatter;
-            else if (value == Tool.FieldHexes) tab = Tab.Place;
             else if (value == Tool.Terrain) tab = Tab.Place;
             else if (value == Tool.LightShape) tab = Tab.Light;
             else if (value == Tool.TestStart || value == Tool.Pivot || value == Tool.PlaceAsset) tab = tab == Tab.Light ? Tab.Light : Tab.Art;
@@ -302,7 +300,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void RefreshList()
         {
             if (list == null || database == null) return;
-            visible = database.locations.Where(item => MatchesListKind(item) && (item.DisplayName.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
+            visible = database.locations.Where(item => !item.IsBattlefield && (item.DisplayName.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
                 item.Id.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)).ToList();
             list.itemsSource = visible; list.Rebuild();
         }
@@ -566,22 +564,21 @@ namespace KingdomSurvival.LocationRendering.Editor
             Toggle(tiledGround ? "Пол — временная заглушка" : "Рисунок — временная заглушка", location.PlaceholderArt, value => location.PlaceholderArt = value);
             settings[settings.childCount - 1].tooltip = "В игре у места подпись «временный фон — рисунка ещё нет».";
 
-            if (location.IsBattlefield) BuildBattlefieldSceneSettings(location);
-            else BuildPlaceMovementAndBattle(location);
+            BuildPlaceMovementAndBattle(location);
             BuildServiceLayers();
         }
 
         private void BuildPlaceMovementAndBattle(LocalLocationDefinition location)
         {
             Heading("Перемещение");
-            Help("Отряд ходит по гексам боя этого места, как на поле боя, с общей скоростью ходьбы («Ходьба, гексов/с» — список «Поля боя» → «Общее для всех полей»: " +
+            Help("Отряд ходит по гексам боя этого места, как на поле боя, с общей скоростью ходьбы («Ходьба, гексов/с» — окно «Генератор арен» → «Общее для полей боя»: " +
                  BattlefieldDatabaseAsset.SharedWalkHexesPerSecond.ToString("0.#") + " гекса/с). Время пути — свои числа места.");
             WorldMapMovementRules rules = location.MovementRules;
             Number("Часов на клетку", rules.TravelHoursPerHex, .001f, .2f, value => location.Movement.TravelHoursPerHex = value);
             Number("Часов на действие", (float)location.HoursPerInteraction, 0, 2, value => location.HoursPerInteraction = value);
 
             Heading("Бой на месте");
-            Help("Сетка и вид гексов — настройки выбранного поля боя (список «Поля боя»): правка здесь меняет и бой, и все места с этим полем. " +
+            Help("Сетка и вид гексов — настройки выбранного поля боя (записи базы полей боя): правка здесь меняет и бой, и все места с этим полем. " +
                  "Бой идёт на гексах всей локации; размер гекса — от «Ширины кадра боя» (сколько пикселей рисунка помещается по ширине экрана в начале боя), " +
                  "кадр столкновения — где камера боя смотрит в начале. Отключённые гексы поля в бою на месте не действуют: стены задаёт разметка и предметы, " +
                  "которые перекрывают проход (на рисунке — красный крест).");
@@ -590,7 +587,6 @@ namespace KingdomSurvival.LocationRendering.Editor
                      (geometry.BattleGrid.IsTooLarge ? " — больше предела " + LocationBattleGrid.MaxCells + ": увеличьте «Ширину кадра боя»." : "."));
             List<BattlefieldDefinitionData> fieldOptions = fields.Battlefields.Where(item => item != null).ToList();
             Choice("Поле боя", fieldOptions, item => item.DisplayLabel, Field, item => location.BattlefieldId = item.Id);
-            AddButton(settings, "Открыть это поле боя", () => OpenBattlefieldScene(location.BattlefieldId));
             Number("Ширина кадра боя (пиксели)", location.BattleFrameWidth, 320, Mathf.Max(640, location.CanvasWidth * 2), value => location.BattleFrameWidth = value);
             BuildFieldHexCards();
         }
@@ -1434,8 +1430,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (evt.type == EventType.MouseDown && frame.Contains(evt.mousePosition)) canvas.Focus();
             if (HandleCropInput(evt, frame, pixel)) return true;
             if (HandlePictureCropInput(evt, frame, pixel)) return true;
-            if (HandleFieldHexInput(evt, frame, pixel)) return true;
-            if (evt.type == EventType.KeyDown && evt.keyCode == KeyCode.Escape && (tool == Tool.PlaceAsset || tool == Tool.FieldHexes))
+            if (evt.type == EventType.KeyDown && evt.keyCode == KeyCode.Escape && tool == Tool.PlaceAsset)
             {
                 SetTool(Tool.Select); evt.Use(); return true;
             }
@@ -1801,7 +1796,7 @@ namespace KingdomSurvival.LocationRendering.Editor
 
         private void DuplicateLocation()
         {
-            if (Location == null || DuplicateBattlefieldScene(Location)) return;
+            if (Location == null) return;
             Change(() =>
             {
                 LocalLocationDefinition location = JsonUtility.FromJson<LocalLocationDefinition>(JsonUtility.ToJson(Location));
@@ -1816,7 +1811,7 @@ namespace KingdomSurvival.LocationRendering.Editor
 
         private void DeleteLocation()
         {
-            if (Location == null || selectedId == LocationLightingTestBootstrap.CampId || DeleteBattlefieldScene(Location)) return;
+            if (Location == null || selectedId == LocationLightingTestBootstrap.CampId) return;
             if (Visual?.TechnicalTest != true)
             {
                 EditorUtility.DisplayDialog("Игровое место", "Удаление игрового места требует проверки ссылок карты и истории. Здесь можно удалять только технические локации.", "Понятно");

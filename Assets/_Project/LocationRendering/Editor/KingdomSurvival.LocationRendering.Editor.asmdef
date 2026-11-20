@@ -14,7 +14,10 @@
     "Unity.RenderPipelines.Core.Runtime",
     "KingdomSurvival.LocationRendering",
     "KingdomSurvival.DialogueDatabase",
-    "Unity.RenderPipelines.Universal.2D.Runtime"
+    "Unity.RenderPipelines.Universal.2D.Runtime",
+    "KingdomSurvival.MapLabBridge",
+    "KingdomSurvival.MapLab",
+    "KingdomSurvival.BattleSandbox.UI"
   ],
   "includePlatforms": [
     "Editor"

@@ -28,12 +28,13 @@ namespace KingdomSurvival.MapLabBridge
         private readonly HashSet<string> groundArtIds = new HashSet<string>();
         private readonly List<Renderer> overlayRenderers = new List<Renderer>();
         private readonly List<Renderer> groundRenderers = new List<Renderer>();
-        private RenderTexture overlayTarget;
+        private RenderTexture overlayTarget, overlayGraded;
+        private bool overlayGradedShown;
         private Material depthOnly;
         private static Shader depthOnlyShader;
 
         // Верхний слой последнего кадра (null — объектов нет или слой недоступен).
-        public RenderTexture OverlayTexture => overlayRenderers.Count > 0 ? overlayTarget : null;
+        public RenderTexture OverlayTexture => overlayRenderers.Count == 0 ? null : overlayGradedShown && overlayGraded != null ? overlayGraded : overlayTarget;
         public int OverlayRendererCount => overlayRenderers.Count;
 
         private void SplitOverlay()
@@ -79,22 +80,15 @@ namespace KingdomSurvival.MapLabBridge
         }
 
         // Верхний слой: только объекты, земля — глубиной, фон прозрачный.
-        private void RenderOverlay()
+        // С обработкой кадра (graded) слой рисуется дважды: без обработки —
+        // ради прозрачности, с обработкой — ради цвета; склейка — шейдером
+        // MapLabArenaAlphaMerge (URP после обработки выводит альфу 1).
+        private void RenderOverlay(bool graded)
         {
+            overlayGradedShown = false;
             if (overlayRenderers.Count == 0 || depthOnly == null || target == null)
                 return;
-            if (overlayTarget == null || overlayTarget.width != target.width || overlayTarget.height != target.height)
-            {
-                if (overlayTarget != null)
-                    released.Add((overlayTarget, Time.frameCount + ReleaseDelayFrames));
-                overlayTarget = new RenderTexture(target.width, target.height, 24, GraphicsFormat.R8G8B8A8_SRGB)
-                {
-                    name = "MapLab Arena Objects",
-                    antiAliasing = 1,
-                    hideFlags = HideFlags.DontSave,
-                };
-                overlayTarget.Create();
-            }
+            overlayTarget = EnsureLayerTexture(overlayTarget, "MapLab Arena Objects");
             int mask = camera.cullingMask;
             Color background = camera.backgroundColor;
             Material[] saved = new Material[groundRenderers.Count];
@@ -111,21 +105,19 @@ namespace KingdomSurvival.MapLabBridge
             {
                 camera.cullingMask = 1 << OverlayLayer;
                 camera.backgroundColor = new Color(0f, 0f, 0f, 0f);
-                if (EffectiveFrameMsaa > 1)
+                if (graded)
+                    framePost.Suspend(camera);
+                RenderLayer(overlayTarget);
+                if (graded && MergeMaterial() != null)
                 {
-                    RenderTextureDescriptor descriptor = new RenderTextureDescriptor(overlayTarget.width, overlayTarget.height, GraphicsFormat.R8G8B8A8_SRGB, 24) { msaaSamples = EffectiveFrameMsaa };
-                    RenderTexture frame = RenderTexture.GetTemporary(descriptor);
-                    camera.targetTexture = frame;
-                    camera.Render();
-                    camera.targetTexture = null;
-                    Graphics.Blit(frame, overlayTarget);
-                    RenderTexture.ReleaseTemporary(frame);
-                }
-                else
-                {
-                    camera.targetTexture = overlayTarget;
-                    camera.Render();
-                    camera.targetTexture = null;
+                    framePost.Begin(camera, Spec.Frame);
+                    RenderTexture colour = RenderTexture.GetTemporary(new RenderTextureDescriptor(overlayTarget.width, overlayTarget.height, GraphicsFormat.R8G8B8A8_SRGB, 24));
+                    RenderLayer(colour);
+                    overlayGraded = EnsureLayerTexture(overlayGraded, "MapLab Arena Objects Graded");
+                    alphaMerge.SetTexture(GradedTexId, colour);
+                    Graphics.Blit(overlayTarget, overlayGraded, alphaMerge);
+                    RenderTexture.ReleaseTemporary(colour);
+                    overlayGradedShown = true;
                 }
             }
             finally
@@ -143,18 +135,93 @@ namespace KingdomSurvival.MapLabBridge
             }
         }
 
+        private RenderTexture EnsureLayerTexture(RenderTexture texture, string name)
+        {
+            if (texture != null && texture.width == target.width && texture.height == target.height)
+                return texture;
+            if (texture != null)
+                released.Add((texture, Time.frameCount + ReleaseDelayFrames));
+            texture = new RenderTexture(target.width, target.height, 24, GraphicsFormat.R8G8B8A8_SRGB)
+            {
+                name = name,
+                antiAliasing = 1,
+                hideFlags = HideFlags.DontSave,
+            };
+            texture.Create();
+            return texture;
+        }
+
+        private void RenderLayer(RenderTexture destination)
+        {
+            if (EffectiveFrameMsaa > 1)
+            {
+                RenderTextureDescriptor descriptor = new RenderTextureDescriptor(destination.width, destination.height, GraphicsFormat.R8G8B8A8_SRGB, 24) { msaaSamples = EffectiveFrameMsaa };
+                RenderTexture frame = RenderTexture.GetTemporary(descriptor);
+                camera.targetTexture = frame;
+                camera.Render();
+                camera.targetTexture = null;
+                Graphics.Blit(frame, destination);
+                RenderTexture.ReleaseTemporary(frame);
+            }
+            else
+            {
+                camera.targetTexture = destination;
+                camera.Render();
+                camera.targetTexture = null;
+            }
+        }
+
+        private static readonly int GradedTexId = Shader.PropertyToID("_GradedTex");
+        private static Shader alphaMergeShader;
+        private Material alphaMerge;
+
+        private Material MergeMaterial()
+        {
+            if (alphaMerge != null)
+                return alphaMerge;
+            if (alphaMergeShader == null)
+                alphaMergeShader = Resources.Load<Shader>("MapLabArenaAlphaMerge");
+            if (alphaMergeShader == null || !alphaMergeShader.isSupported)
+                return null;
+            alphaMerge = new Material(alphaMergeShader) { name = "MapLab Arena Alpha Merge", hideFlags = HideFlags.HideAndDontSave };
+            return alphaMerge;
+        }
+
+        // Обработка кадра этой арены (Spec.Frame): true — кадр идёт с ней.
+        private ArenaFramePost framePost;
+
+        private bool BeginFrame()
+        {
+            KingdomSurvival.BattlefieldDatabase.LocationPostEffects post = Spec.Frame;
+            if (post == null || !post.Enabled)
+            {
+                framePost?.Begin(camera, null);
+                return false;
+            }
+            framePost ??= new ArenaFramePost(Layer);
+            return framePost.Begin(camera, post);
+        }
+
         private void ReleaseOverlay()
         {
-            if (overlayTarget != null)
+            foreach (RenderTexture texture in new[] { overlayTarget, overlayGraded })
             {
-                overlayTarget.Release();
-                Object.DestroyImmediate(overlayTarget);
-                overlayTarget = null;
+                if (texture == null)
+                    continue;
+                texture.Release();
+                Object.DestroyImmediate(texture);
             }
+            overlayTarget = null;
+            overlayGraded = null;
             if (depthOnly != null)
             {
                 Object.DestroyImmediate(depthOnly);
                 depthOnly = null;
+            }
+            if (alphaMerge != null)
+            {
+                Object.DestroyImmediate(alphaMerge);
+                alphaMerge = null;
             }
         }
     }

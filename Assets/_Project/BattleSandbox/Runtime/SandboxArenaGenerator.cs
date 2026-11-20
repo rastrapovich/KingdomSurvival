@@ -90,7 +90,8 @@ namespace KingdomSurvival.BattleSandbox
     }
 
     // Настройки генератора тем (доли клеток — не художественное правило
-    // 70/25/5). Правятся в Базе локаций, игра берёт их из Current.
+    // 70/25/5). Правятся в окне «Генератор арен» (ассет ArenaGeneratorAsset),
+    // игра берёт их из Current. Значения по умолчанию дают прежние арены.
     [Serializable]
     public sealed class SandboxArenaGenerationSettings
     {
@@ -108,6 +109,30 @@ namespace KingdomSurvival.BattleSandbox
         public int MaxAttempts = 48;
         // Кратчайший путь сближения не длиннее прямой × этот множитель.
         public float MaxDetourFactor = 2.2f;
+
+        // Объём частей рецептов (1 — как задумано темой): холмы, кустарник и
+        // лес, особое основание (топь, грязь, мелководье, щебень, снег, лёд),
+        // преграды (валуны, стволы, завалы, стенки).
+        public float HillAmount = 1f;
+        public float VegetationAmount = 1f;
+        public float GroundAmount = 1f;
+        public float ObstacleAmount = 1f;
+
+        // Река (берег и брод, берег с мостом): изгиб русла в клетках вбок от
+        // прямой, ширина русла (1–2 клетки), число бродов (1–3).
+        public int RiverBend = 2;
+        public int RiverWidth = 1;
+        public int FordCount = 2;
+
+        public SandboxArenaGenerationSettings Clone() => (SandboxArenaGenerationSettings)MemberwiseClone();
+    }
+
+    // Что объём части рецепта меняет.
+    public enum SandboxArenaPart
+    {
+        Hills,
+        Vegetation,
+        Ground
     }
 
     // Диагностика генерации: тема, источник выбора, seed, попытки, доли,
@@ -504,10 +529,10 @@ namespace KingdomSurvival.BattleSandbox
                 foreach (HexCoord cell in ArenaCenter.Neighbors().Where(b.Free).Where((_, i) => i % 2 == 0))
                     b.Vegetation(cell, SandboxVegetation.Brush);
             }
-            int hills = b.Special(0.45);
+            int hills = b.Special(0.45, SandboxArenaPart.Hills);
             b.Hills(b.Middle(), hills / 2 + hills % 2);
             b.Hills(b.Middle(), hills / 2);
-            b.Brush(b.Middle(), b.Special(0.30), SandboxVegetation.Brush);
+            b.Brush(b.Middle(), b.Special(0.30, SandboxArenaPart.Vegetation), SandboxVegetation.Brush);
             b.FallenLogs(b.Simple ? 1 : 2);
             b.Scatter(SandboxObjectKind.Boulder, b.Obstacles(0.75), 2);
             b.Scatter(SandboxObjectKind.Deadfall, b.Obstacles(0.25), 1);
@@ -519,12 +544,12 @@ namespace KingdomSurvival.BattleSandbox
         {
             bool top = b.Rng.Next(2) == 0;
             int row = top ? 1 : 5;
-            List<HexCoord> forest = b.Blob(new HexCoord(3 + b.Rng.Next(4), row), b.Special(0.55), cell => top ? cell.R <= 2 : cell.R >= 4);
+            List<HexCoord> forest = b.Blob(new HexCoord(3 + b.Rng.Next(4), row), b.Special(0.55, SandboxArenaPart.Vegetation), cell => top ? cell.R <= 2 : cell.R >= 4);
             foreach (HexCoord cell in forest)
                 b.Vegetation(cell, SandboxVegetation.Forest);
             List<HexCoord> edge = forest.SelectMany(c => c.Neighbors()).Where(b.Free).Distinct().OrderBy(c => c).ToList();
             HexCoord brushStart = edge.Count > 0 ? edge[b.Rng.Next(edge.Count)] : b.Middle();
-            b.Brush(brushStart, b.Special(0.30), SandboxVegetation.Brush);
+            b.Brush(brushStart, b.Special(0.30, SandboxArenaPart.Vegetation), SandboxVegetation.Brush);
             int trunks = b.Obstacles(0.6);
             foreach (HexCoord cell in forest.OrderBy(_ => b.Rng.Next()).Take(trunks))
                 b.Object(SandboxObjectKind.Trunk, cell);
@@ -553,7 +578,7 @@ namespace KingdomSurvival.BattleSandbox
                 b.Ground(cell, SandboxGround.ShallowWater);
             foreach (HexCoord cell in rim.Where(b.Free).OrderBy(_ => b.Rng.Next()).Take(mud))
                 b.Ground(cell, SandboxGround.Mud);
-            b.Brush(b.Anywhere(), b.Special(0.15), SandboxVegetation.Brush);
+            b.Brush(b.Anywhere(), b.Special(0.15, SandboxArenaPart.Vegetation), SandboxVegetation.Brush);
             b.Scatter(SandboxObjectKind.Trunk, b.Obstacles(0.3), 1);
             b.Scatter(SandboxObjectKind.Deadfall, b.Obstacles(0.25), 1);
         }
@@ -565,32 +590,56 @@ namespace KingdomSurvival.BattleSandbox
         {
             HexCoord top = new HexCoord(4 + b.Rng.Next(3), 0);
             HexCoord bottom = new HexCoord(3 + b.Rng.Next(3), SandboxArenaShape.Height - 1);
-            // Русло с изгибом: через точку в середине поля, смещённую вбок.
-            int bend = b.Rng.Next(2) == 0 ? -2 : 2;
+            // Русло с изгибом: через точку в середине поля, смещённую вбок
+            // (изгиб — настройка «Изгиб реки», 0 — прямое русло).
+            int bendSize = Math.Max(0, Math.Min(4, b.Settings.RiverBend));
+            int bend = b.Rng.Next(2) == 0 ? -bendSize : bendSize;
             HexCoord turn = new HexCoord(Math.Max(2, Math.Min(SandboxArenaShape.Width - 3, (top.Q + bottom.Q) / 2 + bend)), SandboxArenaShape.Height / 2);
             List<HexCoord> river = SandboxHexLine.Line(top, turn).Concat(SandboxHexLine.Line(turn, bottom)).Distinct().Where(SandboxArenaShape.Contains).ToList();
+            // Ширина русла 2 — соседняя клетка ряда справа.
+            if (b.Settings.RiverWidth >= 2)
+                river = river.Concat(river.Select(c => new HexCoord(c.Q + 1, c.R))).Distinct().Where(SandboxArenaShape.Contains).ToList();
+            bool wide = b.Settings.RiverWidth >= 2;
             foreach (HexCoord cell in river)
                 b.Ground(cell, SandboxGround.DeepWater);
             List<HexCoord> middle = river.Where(c => c.R >= 2 && c.R <= 4).ToList();
             List<HexCoord> far = river.Where(c => c.R <= 1 || c.R >= 5).ToList();
+            // Широкое русло переходится только всем рядом: брод и мост — на ряд.
+            List<HexCoord> RowOf(HexCoord cell) => wide ? river.Where(c => c.R == cell.R).ToList() : new List<HexCoord> { cell };
             if (bridge)
             {
                 HexCoord deck = middle[b.Rng.Next(middle.Count)];
-                b.ObjectOver(SandboxObjectKind.Bridge, deck);
+                foreach (HexCoord cell in RowOf(deck))
+                    b.ObjectOver(SandboxObjectKind.Bridge, cell);
             }
             else
             {
+                int fords = Math.Max(1, Math.Min(3, b.Settings.FordCount));
                 HexCoord shortFord = middle[b.Rng.Next(middle.Count)];
-                b.Ground(shortFord, SandboxGround.ShallowWater);
-                HexCoord farFord = far[b.Rng.Next(far.Count)];
-                b.Ground(farFord, SandboxGround.ShallowWater);
-                foreach (HexCoord cell in farFord.Neighbors().Where(river.Contains).Take(b.Simple ? 0 : 1))
+                foreach (HexCoord cell in RowOf(shortFord))
                     b.Ground(cell, SandboxGround.ShallowWater);
+                if (fords >= 2)
+                {
+                    HexCoord farFord = far[b.Rng.Next(far.Count)];
+                    foreach (HexCoord cell in RowOf(farFord))
+                        b.Ground(cell, SandboxGround.ShallowWater);
+                    foreach (HexCoord cell in farFord.Neighbors().Where(river.Contains).Take(b.Simple ? 0 : 1))
+                        b.Ground(cell, SandboxGround.ShallowWater);
+                }
+                if (fords >= 3)
+                {
+                    // Третий брод — в ряду, где брода ещё нет.
+                    List<HexCoord> rest = river.Where(c => b.Plan.Ground.TryGetValue(c, out SandboxGround g) && g == SandboxGround.DeepWater &&
+                                                           !river.Any(o => o.R == c.R && b.Plan.Ground.TryGetValue(o, out SandboxGround og) && og == SandboxGround.ShallowWater)).ToList();
+                    if (rest.Count > 0)
+                        foreach (HexCoord cell in RowOf(rest[b.Rng.Next(rest.Count)]))
+                            b.Ground(cell, SandboxGround.ShallowWater);
+                }
             }
             List<HexCoord> shore = river.SelectMany(c => c.Neighbors()).Where(b.Free).Distinct().OrderBy(c => c).ToList();
             foreach (HexCoord cell in shore.OrderBy(_ => b.Rng.Next()).Take(b.Special(0.35)))
                 b.Ground(cell, SandboxGround.Mud);
-            foreach (HexCoord cell in shore.Where(b.Free).OrderBy(_ => b.Rng.Next()).Take(b.Special(0.25)))
+            foreach (HexCoord cell in shore.Where(b.Free).OrderBy(_ => b.Rng.Next()).Take(b.Special(0.25, SandboxArenaPart.Vegetation)))
                 b.Vegetation(cell, SandboxVegetation.Brush);
             b.Scatter(SandboxObjectKind.Boulder, Math.Max(0, b.Obstacles(1.0) - river.Count), 1, cell => !shore.Contains(cell));
         }
@@ -603,7 +652,7 @@ namespace KingdomSurvival.BattleSandbox
             List<HexCoord> slope = SandboxHexLine.Line(new HexCoord(5 + shift, 0), new HexCoord(4 - shift, SandboxArenaShape.Height - 1))
                 .Where(SandboxArenaShape.Contains).ToList();
             List<HexCoord> wide = slope.Concat(slope.Select(c => new HexCoord(c.Q + 1, c.R)))
-                .Where(b.Free).Distinct().OrderBy(_ => b.Rng.Next()).Take(b.Special(0.55)).ToList();
+                .Where(b.Free).Distinct().OrderBy(_ => b.Rng.Next()).Take(b.Special(0.55, SandboxArenaPart.Hills)).ToList();
             foreach (HexCoord cell in wide)
                 b.Hill(cell);
             List<HexCoord> foot = wide.SelectMany(c => c.Neighbors()).Where(b.Free).Distinct().OrderBy(c => c).ToList();
@@ -626,7 +675,7 @@ namespace KingdomSurvival.BattleSandbox
         private static void RuinedHillfort(Builder b)
         {
             HexCoord center = new HexCoord(4 + b.Rng.Next(2), 3);
-            b.Hills(center, b.Special(0.50));
+            b.Hills(center, b.Special(0.50, SandboxArenaPart.Hills));
             List<HexCoord> ring = SandboxArenaShape.Cells().Where(c => c.DistanceTo(center) == 2).OrderBy(c => Angle(center, c)).ToList();
             int start = b.Rng.Next(ring.Count);
             int wall = b.Simple ? 2 : Math.Min(5, b.Obstacles(0.6));
@@ -680,6 +729,7 @@ namespace KingdomSurvival.BattleSandbox
         private sealed class Builder
         {
             private readonly SandboxArenaPlan plan;
+            public SandboxArenaPlan Plan => plan;
             private readonly HashSet<HexCoord> spawns;
             private readonly int candidates;
             public readonly Random Rng;
@@ -700,8 +750,11 @@ namespace KingdomSurvival.BattleSandbox
             private double Scale => Simple ? 0.5 : 1.0;
 
             // Бюджет особой проходимой местности / преград на долю рецепта.
-            public int Special(double part) => Math.Max(Simple ? 0 : 1, (int)Math.Round(candidates * settings.SpecialShare * part * Scale));
-            public int Obstacles(double part) => Math.Max(0, (int)Math.Round(candidates * settings.ObstacleShare * part * Scale));
+            public int Special(double part, SandboxArenaPart kind = SandboxArenaPart.Ground) => Amount(kind) <= 0.0 ? 0 : Math.Max(Simple ? 0 : 1, (int)Math.Round(candidates * settings.SpecialShare * part * Scale * Amount(kind)));
+
+            private double Amount(SandboxArenaPart kind) => Math.Max(0.0, kind == SandboxArenaPart.Hills ? settings.HillAmount : kind == SandboxArenaPart.Vegetation ? settings.VegetationAmount : settings.GroundAmount);
+            public int Obstacles(double part) => Math.Max(0, (int)Math.Round(candidates * settings.ObstacleShare * part * Scale * Math.Max(0.0, settings.ObstacleAmount)));
+            public SandboxArenaGenerationSettings Settings => settings;
 
             private bool Active(HexCoord cell) => SandboxArenaShape.Contains(cell) && !plan.Terrain.ContainsKey(cell);
 

@@ -30,6 +30,10 @@ namespace KingdomSurvival.BattleSandbox
         private readonly Action onReady;
         private Texture shown;
         private bool attached, disposed;
+        private readonly bool preview;
+        private int frameVersion = ArenaGeneratorAsset.Version;
+        public bool Disposed => disposed;
+        public bool Shown => shown != null;
         private float readyAt = -1f;
         private Vector2Int lastSize;
         private float renderedAt = -1f;
@@ -106,9 +110,12 @@ namespace KingdomSurvival.BattleSandbox
             return visible;
         }
 
+        // Перерисовать кадр (окно генератора: сменилась обработка кадра).
+        public void RequestRedraw() => RequestFrame();
+
         private void RequestFrame()
         {
-            readyAt = Time.unscaledTime;
+            readyAt = Time.realtimeSinceStartup;
             renderedAt = -1f;
         }
 
@@ -117,8 +124,10 @@ namespace KingdomSurvival.BattleSandbox
 
         // Обычная арена 10 × 7 без боя на месте и без сетки локации.
         // onReady — арена показана (или сборка не удалась): бой может идти.
+        // preview — предпросмотр окна «Генератор арен»: не занимает место
+        // арены экрана боя (идущий бой не освобождается).
         public static MapLabArenaDriver TryCreate(BattlefieldDefinitionData field, BattlefieldView surface, HexBoardElement board, SandboxBattle battle,
-            Action onReady = null)
+            Action onReady = null, bool preview = false)
         {
             if (surface == null || board == null || battle == null || !MapLabArena.Available)
                 return null;
@@ -128,7 +137,7 @@ namespace KingdomSurvival.BattleSandbox
             foreach (SandboxBattleObject item in battle.TerrainObjects)
                 if (item.Kind == SandboxObjectKind.Boulder || (SandboxTerrainObjects.Get(item.Kind).Indestructible && MapLabArtAssets.HasArenaObjectArt(ObjectKindId(item.Kind))))
                     board.ArtBackedObjects.UnionWith(item.Cells);
-            return new MapLabArenaDriver(BuildSpec(field, battle), surface, board, battle, ArenaCells(field), onReady);
+            return new MapLabArenaDriver(BuildSpec(field, battle), surface, board, battle, ArenaCells(field), onReady, preview);
         }
 
         // Раскладка боя → данные рисунка. Seed — от самой раскладки и поля:
@@ -137,11 +146,18 @@ namespace KingdomSurvival.BattleSandbox
         {
             Rect gridArea = BattlefieldFrame.GetGridArea(field);
             BattlefieldGridLayout layout = BattlefieldFrame.ComputeLayout(new Rect(0f, 0f, BattlefieldFrame.Aspect, 1f), gridArea);
+            // Рисунок — по общим настройкам «Генератора арен» (их запоминает игра).
+            MapLabArenaLook look = ArenaGeneratorAsset.CurrentLook.Clone();
             MapLabArenaSpec spec = new MapLabArenaSpec
             {
                 Aspect = BattlefieldFrame.Aspect,
                 VerticalScale = layout.VerticalScale,
                 HexNominal = layout.Size,
+                Look = look,
+                HillLiftHexes = look.HillLiftHexes,
+                DecorDensity = look.DecorDensity,
+                AssetScale = look.AssetScale,
+                Frame = ArenaGeneratorAsset.FrameFor(MapLabGameViews.ActiveId),
             };
             StringBuilder key = new StringBuilder(field != null ? field.Id : string.Empty);
             foreach (HexCoord cell in BattlefieldFrame.ActiveCells(field))
@@ -252,8 +268,9 @@ namespace KingdomSurvival.BattleSandbox
         }
 
         private MapLabArenaDriver(MapLabArenaSpec spec, BattlefieldView surface, HexBoardElement board, SandboxBattle battle,
-            System.Collections.Generic.List<(HexCoord Cell, Vector2 Center)> cells, Action onReady)
+            System.Collections.Generic.List<(HexCoord Cell, Vector2 Center)> cells, Action onReady, bool preview)
         {
+            this.preview = preview;
             this.surface = surface;
             this.board = board;
             this.onReady = onReady;
@@ -261,9 +278,12 @@ namespace KingdomSurvival.BattleSandbox
             cellCenters = cells;
             // На экране один бой — одна арена: прежняя (экран боя закрыт или
             // сцена выгружена без события отсоединения панели) освобождается.
-            if (current != null && !current.disposed)
-                current.Dispose();
-            current = this;
+            if (!preview)
+            {
+                if (current != null && !current.disposed)
+                    current.Dispose();
+                current = this;
+            }
             arena = MapLabArena.Begin(spec);
             CreateLoadingScreen();
             surface.schedule.Execute(Tick).Every(0);
@@ -358,6 +378,11 @@ namespace KingdomSurvival.BattleSandbox
             UpdateLoadingScreen();
             if (attached)
                 SyncSurfaces();
+            if (frameVersion != ArenaGeneratorAsset.Version)
+            {
+                frameVersion = ArenaGeneratorAsset.Version;
+                RequestFrame();
+            }
             if (lookPending)
             {
                 lookPending = false;
@@ -371,9 +396,9 @@ namespace KingdomSurvival.BattleSandbox
             Vector2Int size = new Vector2Int(Mathf.RoundToInt(frame.width * scale), Mathf.RoundToInt(frame.height * scale));
             // Тот же размер: после готовности кадр догружается (не чаще 10 раз
             // в секунду), дальше не перерисовывается.
-            if (shown != null && size == lastSize && (Time.unscaledTime - readyAt > SettleSeconds || Time.unscaledTime - renderedAt < 0.1f))
+            if (shown != null && size == lastSize && (Time.realtimeSinceStartup - readyAt > SettleSeconds || Time.realtimeSinceStartup - renderedAt < 0.1f))
                 return;
-            renderedAt = Time.unscaledTime;
+            renderedAt = Time.realtimeSinceStartup;
             lastSize = size;
             // Сам кадр рисуется в LateUpdate (ArenaRenderPump), а не во время
             // обновления панелей UI: на D3D12 рендер камеры посреди обновления
@@ -389,6 +414,8 @@ namespace KingdomSurvival.BattleSandbox
         {
             if (disposed || !arena.Ready || requestedSize.x < 8)
                 return;
+            // Обработка кадра арены — по виду карты (своя у вида или общая).
+            arena.Spec.Frame = ArenaGeneratorAsset.FrameFor(MapLabGameViews.ActiveId);
             RenderTexture target = arena.Render(requestedSize.x, requestedSize.y);
             if (target != null && shown != target)
             {
@@ -399,7 +426,7 @@ namespace KingdomSurvival.BattleSandbox
             {
                 // Первый кадр показан: рельеф доски и поля, экран загрузки снят.
                 attached = true;
-                readyAt = Time.unscaledTime;
+                readyAt = Time.realtimeSinceStartup;
                 expectedSeconds = Mathf.Clamp(Time.realtimeSinceStartup - loadingStarted, 1f, 15f);
                 surface.Relief = this;
                 board.Relief = this;
@@ -423,7 +450,7 @@ namespace KingdomSurvival.BattleSandbox
             if (disposed)
                 return;
             lookPending = true;
-            readyAt = Time.unscaledTime;
+            readyAt = Time.realtimeSinceStartup;
             renderedAt = -1f;
         }
 

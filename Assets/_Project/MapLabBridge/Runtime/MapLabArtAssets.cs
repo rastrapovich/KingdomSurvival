@@ -117,7 +117,7 @@ namespace KingdomSurvival.MapLabBridge
             return false;
         }
 
-        public static MapLabArtSet BuildSet(bool arena, float scale, List<MapLabDecorArt> decor)
+        public static MapLabArtSet BuildSet(bool arena, float scale, List<MapLabDecorArt> decor, System.Func<MapLabDecorRole, float> roleScale = null)
         {
             ArtAssetDatabaseAsset catalog = ArtAssetDatabaseAsset.Current;
             if (catalog == null || catalog.assets == null)
@@ -145,6 +145,9 @@ namespace KingdomSurvival.MapLabBridge
                     : role == MapLabDecorRole.LowGrass ? 2.2f
                     : role == MapLabDecorRole.SmallRock ? 2f
                     : role == MapLabDecorRole.TallPlant ? 1.5f : 1f;
+                // Размер по роли из «Генератора арен» (деревья, трава, бурьян).
+                if (arena && role != null && roleScale != null)
+                    boost *= Mathf.Max(0.05f, roleScale(role.Value));
                 float height = rect.height / asset.SafePixelsPerUnit * scale * boost;
                 Vector2 pivot = asset.Settings(view).Pivot;
                 MapLabArtEntry entry = Entry(IdPrefix + asset.Id, asset, sprite, height, pivot);

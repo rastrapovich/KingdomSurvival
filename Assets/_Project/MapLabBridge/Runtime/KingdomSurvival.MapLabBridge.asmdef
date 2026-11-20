@@ -4,7 +4,11 @@
   "references": [
     "KingdomSurvival.Core",
     "KingdomSurvival.MapLab",
-    "KingdomSurvival.ArtAssetDatabase"
+    "KingdomSurvival.ArtAssetDatabase",
+    "KingdomSurvival.BattlefieldDatabase",
+    "KingdomSurvival.BattleSandbox.Runtime",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Core.Runtime"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

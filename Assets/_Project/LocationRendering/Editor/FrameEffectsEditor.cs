@@ -40,6 +40,15 @@ namespace KingdomSurvival.LocationRendering.Editor
         public Action<string> TestState;
         // Открыть отдельное окно (с вкладки Базы локаций).
         public Action OpenWindow;
+        // Прямая правка (генератор арен): панель правит эти настройки, без
+        // неба места, ключей суток и зон; видны только разделы Sections.
+        public Func<LocationPostEffects> DirectPost;
+        public string DirectTitle;
+        public LocationFrameSection Sections = LocationFrameSection.All;
+        // Примечание над вкладками (что из разделов не действует).
+        public string DirectNote;
+
+        private bool Direct => DirectPost != null;
 
         private VisualElement parent;
 
@@ -97,6 +106,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         {
             get
             {
+                if (Direct) return (DirectPost() ?? new LocationPostEffects()).Repair();
                 LocationSky sky = Sky;
                 if (sky.Post == null) sky.Post = new LocationPostEffects();
                 return sky.Post.Repair();
@@ -111,6 +121,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         {
             get
             {
+                if (Direct) return BasePost;
                 LocationPostEffects target = EditedKey?.Post ?? EditedZone?.Post;
                 return target != null ? target.Repair() : BasePost;
             }
@@ -121,6 +132,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             VisualElement root = new VisualElement();
             parent = root;
             if (Database == null) { Help("База мест не найдена."); return root; }
+            if (Direct) return BuildDirect(root);
             if (Visual == null) { Help("У места нет художественной сборки — обработке кадра нечего показывать."); return root; }
             Visual.FrameZones ??= new List<LocationFrameZone>();
             if (EditTarget != "" && EditedKey == null && EditedZone == null) EditTarget = "";
@@ -154,7 +166,14 @@ namespace KingdomSurvival.LocationRendering.Editor
             root.Add(body);
             parent = body;
             if (TabId == "Time") BuildTimeZones(sky, basePost);
-            else switch ((LocationFrameSection)Enum.Parse(typeof(LocationFrameSection), TabId))
+            else BuildSection((LocationFrameSection)Enum.Parse(typeof(LocationFrameSection), TabId), post);
+            parent = root;
+            return root;
+        }
+
+        private void BuildSection(LocationFrameSection section, LocationPostEffects post)
+        {
+            switch (section)
             {
                 case LocationFrameSection.Color: BuildColor(post); break;
                 case LocationFrameSection.LightLens: BuildLightLens(post); break;
@@ -166,6 +185,45 @@ namespace KingdomSurvival.LocationRendering.Editor
                 case LocationFrameSection.Characters: BuildCharacters(post); break;
                 default: BuildQuality(post); BuildQualityLevel(); BuildCost(post); break;
             }
+        }
+
+        // Прямая правка (генератор арен): выключатель, стили, вкладки разрешённых разделов.
+        private VisualElement BuildDirect(VisualElement root)
+        {
+            LocationPostEffects post = BasePost;
+            if (!string.IsNullOrEmpty(DirectTitle))
+            {
+                Label title = new Label(DirectTitle);
+                title.style.unityFontStyleAndWeight = FontStyle.Bold;
+                title.style.whiteSpace = WhiteSpace.Normal;
+                title.style.color = new Color(.95f, .78f, .45f);
+                title.style.marginBottom = 4;
+                parent.Add(title);
+            }
+            Toggle("Обработка кадра включена", post.Enabled, value => post.Enabled = value, true,
+                "Главный выключатель: без него ни один эффект ниже не виден.");
+            if (!post.Enabled) Help("Обработка кадра выключена — эффекты не видны (настройки сохраняются).");
+            BuildStyles(post);
+            List<LocationFrameSection> allowed = LocationFrameSections.Order.Where(section => (Sections & section) != 0).ToList();
+            if (allowed.Count == 0) return root;
+            LocationFrameSection current = allowed.FirstOrDefault(section => section.ToString() == TabId);
+            if (current == LocationFrameSection.None) current = allowed[0];
+            VisualElement tabs = Row(true);
+            foreach (LocationFrameSection section in allowed)
+            {
+                LocationFrameSection captured = section;
+                Button button = new Button(() => { TabId = captured.ToString(); Rebuild?.Invoke(); }) { text = LocationFrameSections.Title(section) };
+                if (section == current) { button.style.unityFontStyleAndWeight = FontStyle.Bold; button.style.color = new Color(.95f, .82f, .5f); }
+                tabs.Add(button);
+            }
+            tabs.style.marginTop = 8;
+            root.Add(tabs);
+            if (!string.IsNullOrEmpty(DirectNote)) Help(DirectNote);
+            VisualElement body = new VisualElement();
+            body.SetEnabled(post.Enabled);
+            root.Add(body);
+            parent = body;
+            BuildSection(current, post);
             parent = root;
             return root;
         }
@@ -442,7 +500,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 sections.Add(toggle);
             }
             block.Add(sections);
-            if (Sky.IsWorld)
+            if (!Direct && Sky.IsWorld)
                 Help("Небо места — общий свет мира: «Применить» меняет кадр всех мест с общим светом.");
             parent = previous;
         }

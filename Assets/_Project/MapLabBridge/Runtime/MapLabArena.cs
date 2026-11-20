@@ -48,6 +48,10 @@ namespace KingdomSurvival.MapLabBridge
         // Единиц мира MapLab на единицу мира мест (размер рисунков Базы
         // ассетов на арене). 0 — из MapLabGameAssets.
         public float AssetScale;
+        // Рисунок арены из «Генератора арен» (null — текущие настройки ассета).
+        public MapLabArenaLook Look;
+        // Обработка кадра (null — без неё). Меняется и после сборки.
+        public KingdomSurvival.BattlefieldDatabase.LocationPostEffects Frame;
     }
 
     // Боевая арена в стиле карты: маленький мир MapLab по раскладке боя.
@@ -169,7 +173,7 @@ namespace KingdomSurvival.MapLabBridge
                 settings.name = "MapLab Arena Profile";
                 settings.hideFlags = HideFlags.HideAndDontSave;
                 float scale = Spec.AssetScale > 0f ? Spec.AssetScale : assets.ArenaAssetScale;
-                decorSet = MapLabArtAssets.BuildSet(true, scale, decorArt);
+                decorSet = MapLabArtAssets.BuildSet(true, scale, decorArt, RoleScale);
                 artMs = watch.Elapsed.TotalMilliseconds;
                 ConfigureSettings(settings);
                 float side = settings.General.MapSize;
@@ -275,8 +279,17 @@ namespace KingdomSurvival.MapLabBridge
             Debug.Log($"MapLab: арена построена за {BuildMs / 1000.0:0.0} с (рисунки Базы ассетов {artMs:0} мс, план {planMs:0} мс, генерация и сборка {BuildMs - artMs - planMs:0} мс).");
         }
 
+        private MapLabArenaLook Look => Spec.Look ??= ArenaGeneratorAsset.CurrentLook.Clone();
+
+        private float RoleScale(MapLabDecorRole role) =>
+            role == MapLabDecorRole.Tree ? Look.TreeScale
+            : role == MapLabDecorRole.LowGrass ? Look.GrassScale
+            : role == MapLabDecorRole.TallPlant ? Look.WeedScale : 1f;
+
         private void ConfigureSettings(MapLabSettings s)
         {
+            // Плотности мазков MapLab профиля (до отключения на арене).
+            float assetsReed = Mathf.Max(0.2f, s.Stage05.ReedDensity);
             float width = Spec.Aspect * k;
             float side = width + 2f * Margin;
             s.General.MapSize = side;
@@ -286,7 +299,7 @@ namespace KingdomSurvival.MapLabBridge
             s.Stage05.FrameWidth = 0f;
             s.Stage05.PaintStreaming = MapLabPaintStreaming.Off;
             // Крупный план: покраска плотнее, чем на карте мира.
-            s.Stage03.PaintTexelsPerUnit = 24f;
+            s.Stage03.PaintTexelsPerUnit = Mathf.Clamp(Look.PaintTexelsPerUnit, 8f, 48f);
             // Без alpha-to-coverage: на D3D12 (GTX 1070) рендер арены с ним ронял
             // редактор и игру при выходе — и с MSAA, и без. Края — по порогу альфы.
             s.Stage05.AlphaToCoverage = false;
@@ -309,6 +322,9 @@ namespace KingdomSurvival.MapLabBridge
                 s.Stage05.RockDensity = 0f;
                 s.Stage05.HayDensity = 0f;
             }
+            // Камыш MapLab у воды реки арены (настройка «Генератора арен»).
+            if (Look.ReedDensity > 0f)
+                s.Stage05.ReedDensity = Mathf.Max(0f, assetsReed * Look.ReedDensity);
         }
 
         // Кадр поля (доли высоты кадра, Y вниз) → мир MapLab (x, z) на земле.
@@ -491,6 +507,7 @@ namespace KingdomSurvival.MapLabBridge
             MapLabMapView look = MapLabMapViews.Active;
             camera.backgroundColor = look != null && look.Grade != null && !look.Grade.IsNeutral ? look.Background : paper;
             MapLabViewGradeShader.Apply(look);
+            bool graded = BeginFrame();
             try
             {
                 if (EffectiveFrameMsaa > 1)
@@ -511,10 +528,11 @@ namespace KingdomSurvival.MapLabBridge
                     camera.Render();
                     camera.targetTexture = null;
                 }
-                RenderOverlay();
+                RenderOverlay(graded);
             }
             finally
             {
+                framePost?.End(camera);
                 MapLabViewGradeShader.Neutral();
             }
             return target;
@@ -635,6 +653,8 @@ namespace KingdomSurvival.MapLabBridge
             if (settings != null)
                 Object.DestroyImmediate(settings);
             ReleaseOverlay();
+            framePost?.Dispose();
+            framePost = null;
             if (decorSet != null)
                 Object.DestroyImmediate(decorSet);
             // Поле уже отвязано от кадра (драйвер снимает текстуру до Dispose):

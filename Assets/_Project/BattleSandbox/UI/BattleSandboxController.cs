@@ -1295,7 +1295,7 @@ namespace KingdomSurvival.BattleSandbox
 
         // ПР-12З: общая скорость показа боя. Добавляется последним ребёнком
         // экрана: оформление поля опирается на первые два.
-        private static VisualElement BuildSpeedControl()
+        private VisualElement BuildSpeedControl()
         {
             VisualElement panel = new VisualElement { name = "battle-speed-control" };
             panel.style.position = Position.Absolute;
@@ -1328,6 +1328,8 @@ namespace KingdomSurvival.BattleSandbox
                 Refresh(evt.newValue);
             });
             panel.Add(slider);
+            // Вид карты (20.11.2026) — та же панель настроек показа.
+            AddBattleViewButton(panel);
             return panel;
         }
 
@@ -1605,6 +1607,7 @@ namespace KingdomSurvival.BattleSandbox
 
             foreach (string entry in battle.TakeEventLog())
                 AddBattleLog(entry);
+            ApplyPendingBattleView();
             board.SetBattle(battle, selectedTargetId);
             fighterDetailsView.Refresh(battle);
             roundLabel.text = "Раунд " + battle.Round + " · движение + одно боевое действие";

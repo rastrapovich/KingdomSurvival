@@ -138,6 +138,7 @@ namespace KingdomSurvival.BattleSandbox
             CreateLoadingScreen();
             surface.schedule.Execute(Tick).Every(0);
             surface.RegisterCallback<DetachFromPanelEvent>(_ => Dispose());
+            MapLabGameViews.Changed += OnViewChanged;
         }
 
         public float LiftShare(Vector2 frameShare) => attached ? arena.LiftShare(frameShare) : 0f;
@@ -225,6 +226,12 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             }
             UpdateLoadingScreen();
+            if (lookPending)
+            {
+                lookPending = false;
+                if (!arena.ApplyActiveLook())
+                    UnityEngine.Debug.LogWarning("[MapLabArena] Рисунки вида «" + MapLabGameViews.ActiveName + "» без пересборки арены не подменяются — меняется только цвет.");
+            }
             Rect frame = surface.FrameRect;
             if (frame.width < 2f || frame.height < 2f)
                 return;
@@ -269,11 +276,26 @@ namespace KingdomSurvival.BattleSandbox
             board.MarkDirtyRepaint();
         }
 
+        // Вид карты сменился (кнопкой в бою или на карте): подменить рисунки
+        // вида и перерисовать кадр; арена ещё строится — вид возьмётся при
+        // первом кадре (цветокоррекция) и подменится по готовности.
+        private bool lookPending;
+
+        private void OnViewChanged()
+        {
+            if (disposed)
+                return;
+            lookPending = true;
+            readyAt = Time.unscaledTime;
+            renderedAt = -1f;
+        }
+
         public void Dispose()
         {
             if (disposed)
                 return;
             disposed = true;
+            MapLabGameViews.Changed -= OnViewChanged;
             if (current == this)
                 current = null;
             if (surface.Relief == this)

@@ -72,6 +72,7 @@ namespace KingdomSurvival.LocationRendering
 
         private sealed class Actor
         {
+            public string ViewId = string.Empty;
             public string Id;
             public string UnitTypeId;
             public Transform Anchor;
@@ -709,7 +710,10 @@ namespace KingdomSurvival.LocationRendering
             foreach (ActorFrame frame in frames)
             {
                 if (string.IsNullOrEmpty(frame.Id)) continue;
-                if (!actors.TryGetValue(frame.Id, out Actor actor) || actor.UnitTypeId != (frame.UnitTypeId ?? string.Empty))
+                // Сменился вид карты (кнопка в бою или на карте) — фигура заново
+                // с рисунком и набором анимаций нового вида.
+                if (!actors.TryGetValue(frame.Id, out Actor actor) || actor.UnitTypeId != (frame.UnitTypeId ?? string.Empty) ||
+                    actor.ViewId != UnitArtViews.ActiveViewId)
                 {
                     if (actor != null) Destroy(actor.Anchor.gameObject);
                     actor = CreateActor(frame);
@@ -751,6 +755,7 @@ namespace KingdomSurvival.LocationRendering
                 UnitTypeId = frame.UnitTypeId ?? string.Empty,
                 Anchor = anchor,
                 Unit = unit,
+                ViewId = UnitArtViews.ActiveViewId,
                 Facing = frame.Kind == ActorKind.Enemy ? HexFacing.West : HexFacing.East
             };
             // Рисунок и набор анимаций — выбранного вида (пустой слот вида —

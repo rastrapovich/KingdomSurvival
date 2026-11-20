@@ -73,6 +73,17 @@ namespace KingdomSurvival.MapLabBridge
         public bool Building => pending != null;
         public float Progress => Ready ? 1f : view != null ? view.BuildProgress : 0f;
         public MapLabView View => view;
+
+        // Смена вида карты в бою (20.11.2026): свои рисунки вида для общих
+        // ассетов подменяются без пересборки; цветокоррекция и так берётся
+        // при каждом кадре. false — подмена невозможна (другая палитра или
+        // незнакомые материалы): остаётся прежний рисунок с новой цветокоррекцией.
+        public bool ApplyActiveLook()
+        {
+            if (!Ready)
+                return false;
+            return view.SwapLook(MapLabMapViews.Active);
+        }
         public float Mean => mean;
 
         private MapLabView view;

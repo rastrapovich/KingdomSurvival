@@ -196,6 +196,8 @@ Kingdom Survival — компактная сюжетная 2D-RPG в славя�
 | 37 | `forest_beast_strong` | Зверь | С | сильный, образец (8) |
 | 38 | `forest_beast_alpha` | Зверь | С | вожак, образец (9) |
 
+Дозаказ портретов и имён для трёх «Зверей» — [FOREST_BEASTS_ART_BRIEF.md](FOREST_BEASTS_ART_BRIEF.md) (20.11.2026).
+
 ---
 
 ## 7. Проверка каждого изображения

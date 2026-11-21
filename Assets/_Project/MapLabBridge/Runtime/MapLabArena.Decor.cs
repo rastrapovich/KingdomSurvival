@@ -52,7 +52,7 @@ namespace KingdomSurvival.MapLabBridge
             float lean = cos / Mathf.Max(0.05f, sin);
             Rect frame = new Rect(Margin, zBottom, Spec.Aspect * k, depth);
             List<MapLabDecorArt> trees = Role(MapLabDecorRole.Tree), stumps = Role(MapLabDecorRole.Stump),
-                tall = Role(MapLabDecorRole.TallPlant), low = Role(MapLabDecorRole.LowGrass),
+                tall = Role(MapLabDecorRole.TallPlant), low = Role(MapLabDecorRole.LowGrass), tallGrass = Role(MapLabDecorRole.TallGrass),
                 boulders = Role(MapLabDecorRole.Boulder), small = Role(MapLabDecorRole.SmallRock);
             List<Vector2> keep = new List<Vector2>();
             foreach (Vector2 point in Spec.KeepClear)
@@ -277,14 +277,19 @@ namespace KingdomSurvival.MapLabBridge
                         float angle = prng.Value() * Mathf.PI * 2f;
                         Vector2 q = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle) * 0.7f) * spread * radius;
                         MapLabDecorArt art = prng.Value() < 0.7f ? first : other;
+                        if (tallGrass.Count > 0 && look.TallGrassShare > 0f && prng.Value() < look.TallGrassShare)
+                            art = tallGrass[(int)(prng.Value() * tallGrass.Count) % tallGrass.Count];
                         float lot = prng.Value();
                         // Травинка по своей густоте относительно центра пятна.
                         if (lot >= Mathf.Clamp01(zone.Density(q) / Mathf.Max(0.05f, centerDensity)))
                             continue;
                         if ((look.GrassClearOfStart > 0f && Near(keep, q, hex * look.GrassClearOfStart)) || Near(blocked, q, hex * 0.75f) || Crowded(q, art.HalfWidth * 0.35f, look.GrassSpacing))
                             continue;
+                        if (art.Role == MapLabDecorRole.TallGrass && Covers(q, art.Height, art.HalfWidth, hex * 0.9f))
+                            continue;
                         Add(q, art.Id, art.HalfWidth * 0.35f);
-                        groundArtIds.Add(art.Id);
+                        if (art.Role != MapLabDecorRole.TallGrass)
+                            groundArtIds.Add(art.Id);
                         grassPoints.Add(q);
                     }
                 }
@@ -310,12 +315,17 @@ namespace KingdomSurvival.MapLabBridge
                         float angle = rng.Value() * Mathf.PI * 2f;
                         Vector2 q = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle) * 0.7f) * spread * radius;
                         MapLabDecorArt art = rng.Value() < 0.7f ? first : other;
+                        if (tallGrass.Count > 0 && look.TallGrassShare > 0f && rng.Value() < look.TallGrassShare)
+                            art = tallGrass[(int)(rng.Value() * tallGrass.Count) % tallGrass.Count];
                         if (!zone.Accept(q))
                             continue;
                         if ((look.GrassClearOfStart > 0f && Near(keep, q, hex * look.GrassClearOfStart)) || Near(blocked, q, hex * 0.75f) || Crowded(q, art.HalfWidth * 0.35f, look.GrassSpacing))
                             continue;
+                        if (art.Role == MapLabDecorRole.TallGrass && Covers(q, art.Height, art.HalfWidth, hex * 0.9f))
+                            continue;
                         Add(q, art.Id, art.HalfWidth * 0.35f);
-                        groundArtIds.Add(art.Id);
+                        if (art.Role != MapLabDecorRole.TallGrass)
+                            groundArtIds.Add(art.Id);
                         grassPoints.Add(q);
                     }
                 }
@@ -427,10 +437,33 @@ namespace KingdomSurvival.MapLabBridge
                     DecorFeatures++;
                     grassPoints.Add(q);
                 });
+            List<MapLabDecorArt> tallGrass = Role(MapLabDecorRole.TallGrass);
+            // Высокая трава закрывала бы бойцов: мимо клеток поля и клеток за ней на экране.
+            bool OverField(Vector2 p, MapLabDecorArt a)
+            {
+                foreach (Vector2 cell in decorCells)
+                {
+                    if (Vector2.Distance(p, cell) < hex * 0.9f)
+                        return true;
+                    if (Mathf.Abs(cell.x - p.x) < a.HalfWidth * 0.75f + hex * 0.8f && cell.y > p.y - hex * 0.3f && cell.y - p.y < a.Height * lean + hex * 0.9f)
+                        return true;
+                }
+                return false;
+            }
             if (low.Count > 0)
                 Grid(look.GrassSingles, (q, roll) =>
                 {
                     MapLabDecorArt art = low[(int)(roll() * low.Count) % low.Count];
+                    if (tallGrass.Count > 0 && look.TallGrassShare > 0f && roll() < look.TallGrassShare)
+                    {
+                        MapLabDecorArt tallArt = tallGrass[(int)(roll() * tallGrass.Count) % tallGrass.Count];
+                        if (OverField(q, tallArt))
+                            return;
+                        c.Features.Add((q, tallArt.Id, DecorKind));
+                        DecorFeatures++;
+                        grassPoints.Add(q);
+                        return;
+                    }
                     c.Features.Add((q, art.Id, DecorKind));
                     groundArtIds.Add(art.Id);
                     DecorFeatures++;
@@ -441,6 +474,31 @@ namespace KingdomSurvival.MapLabBridge
         // Пучки травы карты (набор этапа 05) — копии в наборе арены своего размера.
         private void CarpetArt(float scale, List<MapLabArtEntry> tufts, List<MapLabArtEntry> inks)
         {
+            // Низкая трава пакета «Grass_*» (три вида) — вместо мелких пучков карты мира.
+            // Размер записи уже с множителем арены, ковёр — свой масштаб; нет пакета —
+            // как прежде.
+            foreach (MapLabDecorArt art in decorArt)
+            {
+                if (!art.Pack || art.Role != MapLabDecorRole.LowGrass || decorSet == null)
+                    continue;
+                MapLabArtEntry packed = decorSet.Find(art.Id);
+                if (packed == null || !packed.HasTexture)
+                    continue;
+                // «#» в ID — рисунок вида берётся у основной записи («art:…»).
+                string packId = art.Id + "#carpet";
+                MapLabArtEntry packCopy = decorSet.Find(packId);
+                if (packCopy == null)
+                {
+                    packCopy = JsonUtility.FromJson<MapLabArtEntry>(JsonUtility.ToJson(packed));
+                    packCopy.Id = packId;
+                    packCopy.Texture = packed.Texture;
+                    packCopy.WorldHeight = packed.WorldHeight * Mathf.Max(0.1f, scale);
+                    decorSet.Entries.Add(packCopy);
+                }
+                tufts.Add(packCopy);
+            }
+            if (tufts.Count > 0)
+                return;
             MapLabArtSet source = MapLabGameAssets.Load()?.ArtSet05;
             if (source == null || decorSet == null)
                 return;

@@ -26,7 +26,13 @@ namespace KingdomSurvival.ArtAssets.Editor
         {
             public string Id, Name, Category, File;
             public float TreeRatio;
+            // Колонка «Высота_м» (пакет травы): видимая высота в метрах, 0 — нет.
+            public float HeightM;
         }
+
+        // Пакет луговой травы (15 вариантов × 3 вида): ID «Grass_*».
+        public const string GrassTag = "grass-pack-15";
+        public static bool IsGrass(Entry entry) => entry.Id != null && entry.Id.StartsWith("Grass_", StringComparison.Ordinal);
 
         // Видимая высота силуэта в единицах мира мест (человек ≈ 1,7).
         // Деревья — от предложенного отношения пакета (молодое = 1).
@@ -45,14 +51,20 @@ namespace KingdomSurvival.ArtAssets.Editor
         {
             string path = Path.Combine(folder, "CATALOG_RU.csv");
             List<Entry> entries = new List<Entry>();
-            foreach (string raw in File.ReadAllLines(path, Encoding.UTF8).Skip(1))
+            string[] lines = File.ReadAllLines(path, Encoding.UTF8);
+            // Колонка высоты — по заголовку; число — с десятичной точкой при любой локали.
+            int heightColumn = lines.Length > 0 ? Array.FindIndex(lines[0].Trim('﻿', ' ').Split(';'), h => h.Trim() == "Высота_м") : -1;
+            foreach (string raw in lines.Skip(1))
             {
                 string line = raw.Trim('﻿', ' ');
                 if (line.Length == 0) continue;
                 string[] cells = line.Split(';');
                 if (cells.Length < 4) continue;
                 float.TryParse(cells.Length > 6 ? cells[6] : "", NumberStyles.Float, CultureInfo.InvariantCulture, out float ratio);
-                entries.Add(new Entry { Id = cells[0].Trim(), Name = cells[1].Trim(), Category = cells[2].Trim(), File = cells[3].Trim(), TreeRatio = ratio });
+                float heightM = 0f;
+                if (heightColumn >= 0 && heightColumn < cells.Length)
+                    float.TryParse(cells[heightColumn].Trim().Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out heightM);
+                entries.Add(new Entry { Id = cells[0].Trim(), Name = cells[1].Trim(), Category = cells[2].Trim(), File = cells[3].Trim(), TreeRatio = ratio, HeightM = heightM });
             }
             return entries;
         }
@@ -70,10 +82,12 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         // Пакет арены: всё «Только арена». На карту автор подключает нужные
         // деревья сам, меняя назначение в карточке.
+        // Пакет арены: всё «Только арена» (трава «Grass_*» — тоже, для боевой арены).
         public static ArtAssetPurpose PurposeOf(Entry entry) => ArtAssetPurpose.ArenaOnly;
 
         public static float HeightOf(Entry entry) =>
-            entry.TreeRatio > 0 ? entry.TreeRatio * YoungTreeHeight : Heights.TryGetValue(entry.Id, out float height) ? height : 1f;
+            entry.HeightM > 0 ? entry.HeightM
+            : entry.TreeRatio > 0 ? entry.TreeRatio * YoungTreeHeight : Heights.TryGetValue(entry.Id, out float height) ? height : 1f;
 
         [MenuItem("Kingdom Survival/База ассетов: импорт пакета рисунков…")]
         private static void ImportFromMenu()
@@ -132,7 +146,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                 {
                     asset.Category = CategoryOf(entry);
                     asset.Purpose = PurposeOf(entry);
-                    asset.Tags = new List<string> { PackTag, entry.Id };
+                    asset.Tags = new List<string> { IsGrass(entry) ? GrassTag : PackTag, entry.Id };
                     asset.Credit = "Kingdom Survival · пакет ассетов арены, первый набор";
                     asset.LitBySun = true;
                     asset.LitByFire = true;

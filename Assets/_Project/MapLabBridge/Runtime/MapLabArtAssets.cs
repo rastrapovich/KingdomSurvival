@@ -17,6 +17,9 @@ namespace KingdomSurvival.MapLabBridge
         // Объект местности арены (тег «arena-object:<вид>»): ставится только на
         // клетки этого объекта, в общий декор не идёт.
         ArenaObject,
+        // Высокая луговая трава пакета «Grass_*» (от 0,75 м): не бурьян у деревьев,
+        // а трава пятен и россыпи арены. Значения сериализуются — только в конец.
+        TallGrass,
     }
 
     public sealed class MapLabDecorArt
@@ -27,6 +30,7 @@ namespace KingdomSurvival.MapLabBridge
         public float Height;         // высота карточки в мире MapLab
         public float HalfWidth;      // полуширина карточки в мире MapLab
         public string ObjectKind;    // вид объекта местности арены (для ArenaObject)
+        public bool Pack;            // трава пакета «Grass_*» (15 вариантов × 3 вида)
     }
 
     // Единый каталог: записи Базы ассетов → рисунки MapLab по тому же ID.
@@ -144,7 +148,7 @@ namespace KingdomSurvival.MapLabBridge
                 float boost = !arena || role == null ? 1f
                     : role == MapLabDecorRole.LowGrass ? 2.2f
                     : role == MapLabDecorRole.SmallRock ? 2f
-                    : role == MapLabDecorRole.TallPlant ? 1.5f : 1f;
+                    : role == MapLabDecorRole.TallPlant || role == MapLabDecorRole.TallGrass ? 1.5f : 1f;
                 // Размер по роли из «Генератора арен» (деревья, трава, бурьян).
                 if (arena && role != null && roleScale != null)
                     boost *= Mathf.Max(0.05f, roleScale(role.Value));
@@ -152,7 +156,7 @@ namespace KingdomSurvival.MapLabBridge
                 Vector2 pivot = asset.Settings(view).Pivot;
                 MapLabArtEntry entry = Entry(IdPrefix + asset.Id, asset, sprite, height, pivot);
                 entry.WalkBend = asset.WalkBend >= 0f ? asset.WalkBend
-                    : role == MapLabDecorRole.LowGrass || role == MapLabDecorRole.TallPlant ? 1f : 0f;
+                    : role == MapLabDecorRole.LowGrass || role == MapLabDecorRole.TallPlant || role == MapLabDecorRole.TallGrass ? 1f : 0f;
                 set.Entries.Add(entry);
                 if (decor == null || role == null)
                     continue;
@@ -161,6 +165,7 @@ namespace KingdomSurvival.MapLabBridge
                     Id = entry.Id, AssetId = asset.Id, Role = role.Value, Height = height,
                     HalfWidth = height * rect.width / Mathf.Max(1f, rect.height) * 0.5f,
                     ObjectKind = objectKind,
+                    Pack = IsGrassPack(asset),
                 });
             }
             return set;
@@ -277,8 +282,24 @@ namespace KingdomSurvival.MapLabBridge
             { "Reedgrass", "Fireweed", "Nettle", "Burdock", "Fern", "Cattail", "TallCattail", "Raspberry" };
         private static readonly HashSet<string> SmallRocks = new HashSet<string> { "SmallRock", "GroundCobble" };
 
+        // Трава пакета «Grass_*» (тег — ID варианта поставки). Высота записи
+        // решает только низкая она или высокая; высокая — не бурьян у деревьев.
+        public const string GrassPackPrefix = "Grass_";
+
+        public static bool IsGrassPack(ArtAssetDefinition asset)
+        {
+            if (asset?.Tags == null)
+                return false;
+            foreach (string tag in asset.Tags)
+                if (tag != null && tag.StartsWith(GrassPackPrefix))
+                    return true;
+            return false;
+        }
+
         public static MapLabDecorRole? RoleOf(ArtAssetDefinition asset)
         {
+            if (IsGrassPack(asset))
+                return asset.Height < 0.75f ? MapLabDecorRole.LowGrass : MapLabDecorRole.TallGrass;
             if (asset.Tags != null)
                 foreach (string tag in asset.Tags)
                 {

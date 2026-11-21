@@ -104,6 +104,7 @@ namespace KingdomSurvival.MapLabBridge
 
         private bool RenderOverlayInto(RenderTexture rawTarget, ref RenderTexture gradedTarget, bool graded)
         {
+            Shader.SetGlobalVector(ShadowId, Vector4.zero);
             bool gradedDone = false;
             int mask = camera.cullingMask;
             Color background = camera.backgroundColor;

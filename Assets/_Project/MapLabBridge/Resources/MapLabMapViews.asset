@@ -336,15 +336,6 @@ MonoBehaviour:
     - ArtId: Map05_GrassInk_Upright_A
       Texture: {fileID: 2800000, guid: 5e91e3175da1fce4ba0519d7ba243911, type: 3}
       Enabled: 1
-    - ArtId: Map05_Grass_Bent_D
-      Texture: {fileID: 2800000, guid: 052cfcba278e38642b49c304970f5607, type: 3}
-      Enabled: 1
-    - ArtId: Map05_Grass_Fan_B
-      Texture: {fileID: 2800000, guid: daed4d5bc71a92c41adb2fc06c6d28e7, type: 3}
-      Enabled: 1
-    - ArtId: Map05_Grass_Sparse_C
-      Texture: {fileID: 2800000, guid: 143a62811f82cc645b3344ff32bb5b05, type: 3}
-      Enabled: 1
     - ArtId: Map05_Grass_Tuft_A
       Texture: {fileID: 2800000, guid: 6e1653904adddfa47990a2846c7cba54, type: 3}
       Enabled: 1
@@ -507,14 +498,26 @@ MonoBehaviour:
     - ArtId: Wooden_Toy_Boat_A
       Texture: {fileID: 2800000, guid: f97a0d73104d52d47a81acc4b3a4ab5d, type: 3}
       Enabled: 1
+    - ArtId: art:asset_06cbc6a1916a
+      Texture: {fileID: 2800000, guid: 93a51b1b35d134a4ebc699c9ddd75a36, type: 3}
+      Enabled: 1
     - ArtId: art:asset_1a3c5d5688c2
       Texture: {fileID: 2800000, guid: fec8d2ee2fe13c740b7a563458bedc27, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_27101fceb290
+      Texture: {fileID: 2800000, guid: 04ed4a86c2c82ef4b94c02ca1270fb33, type: 3}
       Enabled: 1
     - ArtId: art:asset_2c8befd51c5e
       Texture: {fileID: 2800000, guid: 86f341efac30f804f9909dbe23563938, type: 3}
       Enabled: 1
     - ArtId: art:asset_33e5fdc16d8a
       Texture: {fileID: 2800000, guid: c3d4f82f1f4f02f4682ed8424b5bd119, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_35643432e577
+      Texture: {fileID: 2800000, guid: 81ccd13c92714c84c8a45544fd218f37, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_3769a7720e84
+      Texture: {fileID: 2800000, guid: 5a614c1e068b7c1489c3b01c857bb49c, type: 3}
       Enabled: 1
     - ArtId: art:asset_3f39bf115e04
       Texture: {fileID: 2800000, guid: f1becb75bfd765b40a22179a36e62f14, type: 3}
@@ -525,17 +528,50 @@ MonoBehaviour:
     - ArtId: art:asset_691fc415b9bc
       Texture: {fileID: 2800000, guid: 95f00dbad4a167048a62b96888e97a46, type: 3}
       Enabled: 1
+    - ArtId: art:asset_69e4c7026ad0
+      Texture: {fileID: 2800000, guid: 1ab419f3aaf72f94f91d71b93de89b78, type: 3}
+      Enabled: 1
     - ArtId: art:asset_7aa3da37f887
       Texture: {fileID: 2800000, guid: 1eeaf64c896b41d4b9b6baaac46d23af, type: 3}
       Enabled: 1
     - ArtId: art:asset_8454963431a1
       Texture: {fileID: 2800000, guid: 5e855c0428feec741ae715b527018de0, type: 3}
       Enabled: 1
+    - ArtId: art:asset_845610396778
+      Texture: {fileID: 2800000, guid: 8741d94fba942464ab6c6f95e5aa1fff, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_87abccd1ec46
+      Texture: {fileID: 2800000, guid: 3d057de5a48071b44971b4c64b40b59d, type: 3}
+      Enabled: 1
     - ArtId: art:asset_9365e8159ac0
       Texture: {fileID: 2800000, guid: 47b6e66e06b983543badbaa2a9b6078b, type: 3}
       Enabled: 1
+    - ArtId: art:asset_976873e8c507
+      Texture: {fileID: 2800000, guid: 7e16a318af38f8d4b890f179f54a9493, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_9df0dc120b46
+      Texture: {fileID: 2800000, guid: 1f841f003dca0304daba049ada149af6, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_acc9fde0568e
+      Texture: {fileID: 2800000, guid: fdc3688390ec55f4db9d5b96d6e4f595, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_bbcd6a22cc8b
+      Texture: {fileID: 2800000, guid: b1da2f297a6d35042818fc35f3de5d0c, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_bf990bbd5646
+      Texture: {fileID: 2800000, guid: 59ca459789e266f4a9174344b9995d5d, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_c2627919e5ba
+      Texture: {fileID: 2800000, guid: db29ccc375350b64bb4fa89b713f3009, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_e8b01ea0063c
+      Texture: {fileID: 2800000, guid: 39a9eb4feffb5494f9283f93c37b663b, type: 3}
+      Enabled: 1
     - ArtId: art:asset_eb10b6111158
       Texture: {fileID: 2800000, guid: 99bd56d7102139646abe05df16ce09c3, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_f4c1f72a95c2
+      Texture: {fileID: 2800000, guid: 1c8b22c59265b1b49a350aa26b644187, type: 3}
       Enabled: 1
   - Id: sepia
     Name: "\u0421\u0435\u043F\u0438\u044F"
@@ -809,15 +845,6 @@ MonoBehaviour:
     - ArtId: Map05_GrassInk_Upright_A
       Texture: {fileID: 2800000, guid: 851892e003cbfc74ba0e4b6ca6ca8a8c, type: 3}
       Enabled: 1
-    - ArtId: Map05_Grass_Bent_D
-      Texture: {fileID: 2800000, guid: 4636a35f33c28eb4a90cbeca7cd9a50f, type: 3}
-      Enabled: 1
-    - ArtId: Map05_Grass_Fan_B
-      Texture: {fileID: 2800000, guid: e75e71f716fb7fd4a9e8c713198ab4cd, type: 3}
-      Enabled: 1
-    - ArtId: Map05_Grass_Sparse_C
-      Texture: {fileID: 2800000, guid: f9b7a4b3dec720147907095d1a1e6268, type: 3}
-      Enabled: 1
     - ArtId: Map05_Grass_Tuft_A
       Texture: {fileID: 2800000, guid: 8e0e3d67c4007444b9f4016c91e348b2, type: 3}
       Enabled: 1
@@ -980,14 +1007,26 @@ MonoBehaviour:
     - ArtId: Wooden_Toy_Boat_A
       Texture: {fileID: 2800000, guid: 82fc6cac09ad96748a97ba4d2c98bb2c, type: 3}
       Enabled: 1
+    - ArtId: art:asset_06cbc6a1916a
+      Texture: {fileID: 2800000, guid: 7b72d2cd13631a54a9870e4626ad9b1e, type: 3}
+      Enabled: 1
     - ArtId: art:asset_1a3c5d5688c2
       Texture: {fileID: 2800000, guid: 06a3d94ce6837eb42aa994febd14dd9d, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_27101fceb290
+      Texture: {fileID: 2800000, guid: 3a40949d0bd470545b202088c424c27a, type: 3}
       Enabled: 1
     - ArtId: art:asset_2c8befd51c5e
       Texture: {fileID: 2800000, guid: 64adaf370c09c2140bb5e07652412354, type: 3}
       Enabled: 1
     - ArtId: art:asset_33e5fdc16d8a
       Texture: {fileID: 2800000, guid: 7a56d9a04dea8144896dae1c8d5a1271, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_35643432e577
+      Texture: {fileID: 2800000, guid: a7169995c9d30dc4289b112d9d2fe56e, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_3769a7720e84
+      Texture: {fileID: 2800000, guid: 79dd137183ca8534e82ade3aaca371ca, type: 3}
       Enabled: 1
     - ArtId: art:asset_3f39bf115e04
       Texture: {fileID: 2800000, guid: ea6dff06aa7127647b1e1c1b42d91bc4, type: 3}
@@ -998,16 +1037,49 @@ MonoBehaviour:
     - ArtId: art:asset_691fc415b9bc
       Texture: {fileID: 2800000, guid: cada4044a5be89c409274ed7bd9d5552, type: 3}
       Enabled: 1
+    - ArtId: art:asset_69e4c7026ad0
+      Texture: {fileID: 2800000, guid: a9aa8039834d2304eba097aac06acdee, type: 3}
+      Enabled: 1
     - ArtId: art:asset_7aa3da37f887
       Texture: {fileID: 2800000, guid: 677241290b61f44489e2e6804f9a568d, type: 3}
       Enabled: 1
     - ArtId: art:asset_8454963431a1
       Texture: {fileID: 2800000, guid: 913c75ec021158d4bbd8ddc46761c6ac, type: 3}
       Enabled: 1
+    - ArtId: art:asset_845610396778
+      Texture: {fileID: 2800000, guid: 7dbf771ab7a5d644899c4862c0289ae7, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_87abccd1ec46
+      Texture: {fileID: 2800000, guid: a78085a465c2de14793585202c273838, type: 3}
+      Enabled: 1
     - ArtId: art:asset_9365e8159ac0
       Texture: {fileID: 2800000, guid: 0420306284175d14c896313ff0f5480a, type: 3}
       Enabled: 1
+    - ArtId: art:asset_976873e8c507
+      Texture: {fileID: 2800000, guid: cc12e72232ceb4746bedbbd65475bcbc, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_9df0dc120b46
+      Texture: {fileID: 2800000, guid: 51e795bc50bfe404b8c0e5dbbf401b41, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_acc9fde0568e
+      Texture: {fileID: 2800000, guid: b6b3d5d06a3ab7f45957527f53124e64, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_bbcd6a22cc8b
+      Texture: {fileID: 2800000, guid: 5a55a28893a0ee94fbf32dce59f0616a, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_bf990bbd5646
+      Texture: {fileID: 2800000, guid: ce52f0f19d457954d89d8088c9da47b2, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_c2627919e5ba
+      Texture: {fileID: 2800000, guid: 7f0a4e8227b44064c908cfceb41cdd15, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_e8b01ea0063c
+      Texture: {fileID: 2800000, guid: 68a5b322f95f0a2429e13114c52fb5f0, type: 3}
+      Enabled: 1
     - ArtId: art:asset_eb10b6111158
       Texture: {fileID: 2800000, guid: 631891e2367509e48ae637f2edc42c38, type: 3}
+      Enabled: 1
+    - ArtId: art:asset_f4c1f72a95c2
+      Texture: {fileID: 2800000, guid: 1ee5b2c0a0901ae499c79c3dcf7b9f84, type: 3}
       Enabled: 1
   builtInVersion: 3

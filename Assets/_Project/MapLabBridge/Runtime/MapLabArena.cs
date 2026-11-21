@@ -116,6 +116,38 @@ namespace KingdomSurvival.MapLabBridge
 
         private static void ClearWalkers() => Shader.SetGlobalFloat("_MapLabWalkerCount", 0f);
 
+        // Силуэтные тени карточек (проход «SilhouetteShadow» шейдера карточек): только в нижнем кадре,
+        // в слое объектов и слоях «впереди бойца» их нет.
+        private static readonly int ShadowId = Shader.PropertyToID("_MapLabShadow");
+        private static readonly int ShadowColorId = Shader.PropertyToID("_MapLabShadowColor");
+
+        public static readonly Color SilhouetteShadowColor = new Color(0.07f, 0.09f, 0.03f, 1f);
+        public const float SilhouetteShadowOpacity = 0.34f;
+        // Длина тени в долях высоты и угол: свет слева сверху, тень падает вправо и чуть к зрителю.
+        public const float SilhouetteShadowLength = 0.5f;
+
+        private void SetShadows(bool on)
+        {
+            if (!on)
+            {
+                Shader.SetGlobalVector(ShadowId, Vector4.zero);
+                return;
+            }
+            Vector3 light = view != null && view.Settings != null ? view.Settings.LightDirection : new Vector3(-0.62f, 0.72f, 0.06f);
+            float rise = Mathf.Max(0.15f, light.y);
+            Vector2 ground = new Vector2(-light.x, -light.z) / rise * SilhouetteShadowLength;
+            Shader.SetGlobalVector(ShadowId, new Vector4(ground.x, ground.y, SilhouetteShadowOpacity, 1f));
+            Shader.SetGlobalColor(ShadowColorId, SilhouetteShadowColor);
+        }
+
+        // Направление тени на экране (единичный вектор, Y вниз) — для теней бойцов доски.
+        public Vector2 ShadowScreenDirection()
+        {
+            Vector3 light = view != null && view.Settings != null ? view.Settings.LightDirection : new Vector3(-0.62f, 0.72f, 0.06f);
+            Vector2 d = new Vector2(-light.x, light.z);
+            return d.sqrMagnitude > 1e-6f ? d.normalized : Vector2.right;
+        }
+
         // Смена вида карты в бою (20.11.2026): свои рисунки вида для общих
         // ассетов подменяются без пересборки; цветокоррекция и так берётся
         // при каждом кадре. false — подмена невозможна (другая палитра или
@@ -318,7 +350,7 @@ namespace KingdomSurvival.MapLabBridge
 
         private float RoleScale(MapLabDecorRole role) =>
             role == MapLabDecorRole.Tree ? Look.TreeScale
-            : role == MapLabDecorRole.LowGrass ? Look.GrassScale
+            : role == MapLabDecorRole.LowGrass || role == MapLabDecorRole.TallGrass ? Look.GrassScale
             : role == MapLabDecorRole.TallPlant ? Look.WeedScale : 1f;
 
         private void ConfigureSettings(MapLabSettings s)
@@ -333,6 +365,7 @@ namespace KingdomSurvival.MapLabBridge
             s.Stage05.WideFrame = false;
             // Тени арены: край размыт (трава и кусты рядом с бойцами не «лужи»).
             s.Stage03.ShadowSoftEdge = Spec.HexWorld * 0.16f;
+            s.Stage03.SilhouetteShadows = true;
             s.Stage05.FrameWidth = 0f;
             s.Stage05.PaintStreaming = MapLabPaintStreaming.Off;
             // Крупный план: покраска плотнее, чем на карте мира.
@@ -547,6 +580,7 @@ namespace KingdomSurvival.MapLabBridge
             MapLabViewGradeShader.Apply(look);
             bool graded = BeginFrame();
             ApplyWalkers();
+            SetShadows(true);
             try
             {
                 if (EffectiveFrameMsaa > 1)
@@ -572,6 +606,7 @@ namespace KingdomSurvival.MapLabBridge
             finally
             {
                 ClearWalkers();
+                SetShadows(false);
                 framePost?.End(camera);
                 MapLabViewGradeShader.Neutral();
             }

@@ -95,7 +95,11 @@ namespace KingdomSurvival.MapLabBridge
             if (overlayRenderers.Count == 0 || depthOnly == null || target == null)
                 return;
             overlayTarget = EnsureLayerTexture(overlayTarget, "MapLab Arena Objects");
-            overlayGradedShown = RenderOverlayInto(overlayTarget, ref overlayGraded, graded);
+            // Кусты и трава «пола» в этом слое — только глубина: ближний куст вырезает дерево за ним,
+            // сам куст остаётся в нижнем кадре (под сеткой).
+            FloorDepthOnly(true);
+            try { overlayGradedShown = RenderOverlayInto(overlayTarget, ref overlayGraded, graded); }
+            finally { FloorDepthOnly(false); }
         }
 
         private bool RenderOverlayInto(RenderTexture rawTarget, ref RenderTexture gradedTarget, bool graded)
@@ -149,6 +153,45 @@ namespace KingdomSurvival.MapLabBridge
         }
 
 
+
+        private readonly Dictionary<Material, Material> floorDepthMaterials = new Dictionary<Material, Material>();
+        private Material[] floorSaved;
+
+        // Карточки «пола» на время слоя объектов: тот же шейдер и прогиб, но без цвета и раньше
+        // остальных — они пишут глубину, и дальние объекты (стволы) за ними не рисуются.
+        private void FloorDepthOnly(bool on)
+        {
+            if (on)
+            {
+                floorSaved = new Material[floorCards.Count];
+                for (int i = 0; i < floorCards.Count; i++)
+                {
+                    Renderer card = floorCards[i];
+                    if (card == null) continue;
+                    Material source = card.sharedMaterial;
+                    if (source == null) continue;
+                    floorSaved[i] = source;
+                    if (!floorDepthMaterials.TryGetValue(source, out Material copy) || copy == null)
+                        floorDepthMaterials[source] = copy = new Material(source) { hideFlags = HideFlags.HideAndDontSave };
+                    else
+                        copy.CopyPropertiesFromMaterial(source);
+                    copy.SetFloat("_ColorMask", 0f);
+                    copy.renderQueue = 2400;
+                    card.sharedMaterial = copy;
+                    card.gameObject.layer = OverlayLayer;
+                }
+                return;
+            }
+            if (floorSaved == null) return;
+            for (int i = 0; i < floorCards.Count; i++)
+            {
+                Renderer card = floorCards[i];
+                if (card == null || floorSaved[i] == null) continue;
+                card.sharedMaterial = floorSaved[i];
+                card.gameObject.layer = Layer;
+            }
+            floorSaved = null;
+        }
         // ---------- слои «впереди бойца» ----------
         // Фигуры бойцов — элементы UI над кадром арены, поэтому куст или дерево перед
         // бойцом без этого слоя оказывались бы под ним. Для каждой строки земли с бойцами
@@ -287,6 +330,9 @@ namespace KingdomSurvival.MapLabBridge
                         texture.Release();
                         Object.DestroyImmediate(texture);
                     }
+            foreach (Material copy in floorDepthMaterials.Values)
+                if (copy != null) Object.DestroyImmediate(copy);
+            floorDepthMaterials.Clear();
             System.Array.Clear(frontRaw, 0, MaxFrontLayers);
             System.Array.Clear(frontGraded, 0, MaxFrontLayers);
             overlayTarget = null;

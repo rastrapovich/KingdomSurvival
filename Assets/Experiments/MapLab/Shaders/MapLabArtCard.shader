@@ -45,6 +45,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
         _StrokeLush ("Мазки: сочный оттенок", Color) = (0.45, 0.48, 0.25, 1)
         [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("ZTest", Float) = 4
         [Enum(Off, 0, On, 1)] _ZWrite ("ZWrite", Float) = 1
+        [Enum(UnityEngine.Rendering.ColorWriteMask)] _ColorMask ("Маска цвета (0 — только глубина)", Float) = 15
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Src blend", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Dst blend", Float) = 0
     }
@@ -60,6 +61,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
             Blend [_SrcBlend] [_DstBlend]
             Cull Off
             AlphaToMask [_AlphaToMask]
+            ColorMask [_ColorMask]
 
             HLSLPROGRAM
             #pragma vertex Vert

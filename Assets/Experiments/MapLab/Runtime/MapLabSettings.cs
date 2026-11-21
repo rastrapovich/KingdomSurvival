@@ -368,6 +368,8 @@ namespace KingdomSurvival.MapLab
         public bool ForestAccents = true;
         [Tooltip("Стилизованные цветные тени объектов (падающая + контактная) вместо мягких пятен этапа 02.")]
         public bool ObjectShadows = true;
+        [Tooltip("Размытие внешнего края падающей тени, ед. мира (0 — как есть). Арена боя задаёт своё.")]
+        public float ShadowSoftEdge = 0f;
         public MapLabInkStyle InkStyle = new MapLabInkStyle();
 
         [Header("Мазки (мировой масштаб)")]

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using KingdomSurvival.BattlefieldDatabase;
 using KingdomSurvival.MapLabBridge;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -73,6 +74,61 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             terrainOverlayTexture = texture;
             SyncUnitImages();
+        }
+
+        // Слои «впереди бойца» (арена): объекты, стоящие ближе к зрителю, чем ноги бойца,
+        // ложатся поверх него (и поверх более дальних), но под более близких бойцов.
+        private readonly List<(float KeyY, float ShareY)> frontRows = new List<(float, float)>();
+        private readonly List<(float KeyY, Texture Texture)> frontLayers = new List<(float, Texture)>();
+        private readonly List<Image> frontImages = new List<Image>();
+
+        // Строки земли, где стоят живые бойцы: ключ порядка слоёв и доля кадра (Y вниз, плоская).
+        public IReadOnlyList<(float KeyY, float ShareY)> FrontRows => frontRows;
+
+        public void SetFrontLayers(IReadOnlyList<(float KeyY, Texture Texture)> layers)
+        {
+            frontLayers.Clear();
+            if (layers != null) frontLayers.AddRange(layers);
+            SyncUnitImages();
+        }
+
+        private void NoteFrontRow(HexLayout layout, Vector2 unitCenter)
+        {
+            Rect frame = layout.Frame;
+            if (Relief == null || frame.height < 1f) return;
+            Vector2 flat = BattlefieldReliefMath.Lower(Relief, frame, unitCenter);
+            frontRows.Add((unitCenter.y, (flat.y - frame.y) / frame.height));
+        }
+
+        private void AddFrontLayers(HexLayout layout, List<(string id, float key, VisualElement element)> depthEntries)
+        {
+            int used = 0;
+            if (Relief != null && terrainOverlayTexture != null)
+            {
+                Rect frame = layout.Frame;
+                foreach ((float keyY, Texture texture) in frontLayers)
+                {
+                    if (texture == null) continue;
+                    while (frontImages.Count <= used)
+                    {
+                        Image created = new Image { pickingMode = PickingMode.Ignore, scaleMode = ScaleMode.StretchToFill };
+                        created.style.position = Position.Absolute;
+                        frontImages.Add(created);
+                    }
+                    Image image = frontImages[used];
+                    if (image.parent != this) Add(image);
+                    image.image = texture;
+                    image.style.display = DisplayStyle.Flex;
+                    image.style.left = frame.x;
+                    image.style.top = frame.y;
+                    image.style.width = frame.width;
+                    image.style.height = frame.height;
+                    depthEntries.Add(("front:" + used, keyY + 0.25f, image));
+                    used++;
+                }
+            }
+            for (int i = used; i < frontImages.Count; i++)
+                frontImages[i].RemoveFromHierarchy();
         }
 
         private void SyncTerrainOverlay(HexLayout layout)

@@ -73,10 +73,9 @@ public partial class PrototypeUIController
                 int shownOnBuildings = 0;
                 shownOnBuildings += AddWorldMapBuildingQuestMarker(alive, location, "tavern", WorldMapMarkerService.TavernQuestErrands(gameState, location.Id).Count, info.Unexplored);
                 shownOnBuildings += AddWorldMapBuildingQuestMarker(alive, location, "board", WorldMapMarkerService.BoardQuestErrands(gameState, location.Id).Count, info.Unexplored);
-                // «?» неизвестной деревни — в её точке, только без «!» на зданиях.
-                if (shownOnBuildings > 0 || !info.Unexplored)
-                    continue;
-                info = new WorldMapMarkerInfo(WorldMapMarkerKind.UnknownPlace, true, 0);
+                // Деревня, нарисованная зданиями, «?» в центре не получает: метки только
+                // над конкретными зданиями с поручением.
+                continue;
             }
             WorldMapQuestMarker marker = EnsureWorldMapQuestMarker(alive, location.Id, null, info);
             marker.Anchor = WorldMapQuestMarkerAnchor(location, out marker.Lifted);

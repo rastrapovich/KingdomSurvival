@@ -551,14 +551,14 @@ namespace KingdomSurvival.BattleSandbox
 
         // Пакет состояний: столбец состояний в окне бойца. Открытость общая
         // для всех бойцов и запоминается между запусками.
-        private const string StatusPanelPrefKey = "KingdomSurvival.FighterCard.StatusPanelOpen";
+        private const string StatusPanelPrefKey = "KingdomSurvival.FighterCard.StatusPanelOpen.v2";
         private static bool? statusPanelOpen;
         internal static bool StatusPanelOpen
         {
             get
             {
                 if (!statusPanelOpen.HasValue)
-                    statusPanelOpen = PlayerPrefs.GetInt(StatusPanelPrefKey, 0) == 1;
+                    statusPanelOpen = PlayerPrefs.GetInt(StatusPanelPrefKey, 1) == 1;
                 return statusPanelOpen.Value;
             }
             set

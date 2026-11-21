@@ -28,6 +28,8 @@ namespace KingdomSurvival.MapLabBridge
         private readonly HashSet<string> groundArtIds = new HashSet<string>();
         private readonly List<Renderer> overlayRenderers = new List<Renderer>();
         private readonly List<Renderer> groundRenderers = new List<Renderer>();
+        // Низкая трава и кусты «пола»: в кадре под сеткой, но перед бойцом они его закрывают.
+        private readonly List<Renderer> floorCards = new List<Renderer>();
         private RenderTexture overlayTarget, overlayGraded;
         private bool overlayGradedShown;
         private Material depthOnly;
@@ -41,6 +43,7 @@ namespace KingdomSurvival.MapLabBridge
         {
             overlayRenderers.Clear();
             groundRenderers.Clear();
+            floorCards.Clear();
             if (depthOnlyShader == null)
                 depthOnlyShader = Resources.Load<Shader>("MapLabArenaDepthOnly");
             if (depthOnlyShader == null || !depthOnlyShader.isSupported)
@@ -62,7 +65,10 @@ namespace KingdomSurvival.MapLabBridge
                 string name = material != null ? material.name : string.Empty;
                 const string prefix = "MapLab Art ";
                 if (name.StartsWith(prefix) && groundArtIds.Contains(name.Substring(prefix.Length)))
+                {
+                    floorCards.Add(renderer);
                     continue;
+                }
                 renderer.gameObject.layer = OverlayLayer;
                 overlayRenderers.Add(renderer);
             }
@@ -89,6 +95,12 @@ namespace KingdomSurvival.MapLabBridge
             if (overlayRenderers.Count == 0 || depthOnly == null || target == null)
                 return;
             overlayTarget = EnsureLayerTexture(overlayTarget, "MapLab Arena Objects");
+            overlayGradedShown = RenderOverlayInto(overlayTarget, ref overlayGraded, graded);
+        }
+
+        private bool RenderOverlayInto(RenderTexture rawTarget, ref RenderTexture gradedTarget, bool graded)
+        {
+            bool gradedDone = false;
             int mask = camera.cullingMask;
             Color background = camera.backgroundColor;
             Material[] saved = new Material[groundRenderers.Count];
@@ -107,17 +119,17 @@ namespace KingdomSurvival.MapLabBridge
                 camera.backgroundColor = new Color(0f, 0f, 0f, 0f);
                 if (graded)
                     framePost.Suspend(camera);
-                RenderLayer(overlayTarget);
+                RenderLayer(rawTarget);
                 if (graded && MergeMaterial() != null)
                 {
                     framePost.Begin(camera, Spec.Frame, LensPulse != null ? LensPulse() : 0f);
-                    RenderTexture colour = RenderTexture.GetTemporary(new RenderTextureDescriptor(overlayTarget.width, overlayTarget.height, GraphicsFormat.R8G8B8A8_SRGB, 24));
+                    RenderTexture colour = RenderTexture.GetTemporary(new RenderTextureDescriptor(rawTarget.width, rawTarget.height, GraphicsFormat.R8G8B8A8_SRGB, 24));
                     RenderLayer(colour);
-                    overlayGraded = EnsureLayerTexture(overlayGraded, "MapLab Arena Objects Graded");
+                    gradedTarget = EnsureLayerTexture(gradedTarget, "MapLab Arena Objects Graded");
                     alphaMerge.SetTexture(GradedTexId, colour);
-                    Graphics.Blit(overlayTarget, overlayGraded, alphaMerge);
+                    Graphics.Blit(rawTarget, gradedTarget, alphaMerge);
                     RenderTexture.ReleaseTemporary(colour);
-                    overlayGradedShown = true;
+                    gradedDone = true;
                 }
             }
             finally
@@ -133,8 +145,65 @@ namespace KingdomSurvival.MapLabBridge
                     ground.gameObject.layer = Layer;
                 }
             }
+            return gradedDone;
         }
 
+
+        // ---------- слои «впереди бойца» ----------
+        // Фигуры бойцов — элементы UI над кадром арены, поэтому куст или дерево перед
+        // бойцом без этого слоя оказывались бы под ним. Для каждой строки земли с бойцами
+        // рисуется слой только тех объектов, чья опора ближе к зрителю, чем ноги бойца;
+        // доска кладёт его поверх бойцов этой строки (и дальних), под ближними.
+        private const int MaxFrontLayers = 10;
+        private readonly RenderTexture[] frontRaw = new RenderTexture[MaxFrontLayers];
+        private readonly RenderTexture[] frontGraded = new RenderTexture[MaxFrontLayers];
+        private readonly List<Renderer> frontHidden = new List<Renderer>();
+        private static readonly int FrontOnId = Shader.PropertyToID("_MapLabFrontOn");
+        private static readonly int FrontZId = Shader.PropertyToID("_MapLabFrontZ");
+
+        // Кадр доли высоты (Y вниз) → мировая глубина земли.
+        public float GroundZ(float frameShareY) => ToWorld(new Vector2(0f, frameShareY)).y;
+
+        // Слой объектов впереди глубины clipZ (мир) в слот index; null — объектов нет.
+        // Вызывать сразу после Render (камера стоит как в кадре).
+        public RenderTexture RenderFront(int index, float clipZ)
+        {
+            if (index < 0 || index >= MaxFrontLayers || overlayRenderers.Count == 0 || depthOnly == null || target == null || !Ready)
+                return null;
+            frontRaw[index] = EnsureLayerTexture(frontRaw[index], "MapLab Arena Front " + index);
+            frontHidden.Clear();
+            // Клип есть только у шейдера карточек рисунков: прочие объекты в этом слое не нужны.
+            foreach (Renderer renderer in overlayRenderers)
+            {
+                if (renderer == null || !renderer.enabled) continue;
+                Material material = renderer.sharedMaterial;
+                if (material != null && material.shader != null && material.shader.name == "Kingdom Survival/MapLab/Art Card") continue;
+                renderer.enabled = false;
+                frontHidden.Add(renderer);
+            }
+            foreach (Renderer card in floorCards)
+                if (card != null) card.gameObject.layer = OverlayLayer;
+            Shader.SetGlobalFloat(FrontOnId, 1f);
+            Shader.SetGlobalFloat(FrontZId, clipZ - 0.05f);
+            ApplyWalkers();
+            try
+            {
+                bool graded = Spec.Frame != null && Spec.Frame.Enabled && framePost != null;
+                bool done = RenderOverlayInto(frontRaw[index], ref frontGraded[index], graded);
+                return done ? frontGraded[index] : frontRaw[index];
+            }
+            finally
+            {
+                Shader.SetGlobalFloat(FrontOnId, 0f);
+                foreach (Renderer card in floorCards)
+                    if (card != null) card.gameObject.layer = Layer;
+                ClearWalkers();
+                foreach (Renderer renderer in frontHidden)
+                    if (renderer != null) renderer.enabled = true;
+                frontHidden.Clear();
+                framePost?.End(camera);
+            }
+        }
         private RenderTexture EnsureLayerTexture(RenderTexture texture, string name)
         {
             if (texture != null && texture.width == target.width && texture.height == target.height)
@@ -211,6 +280,15 @@ namespace KingdomSurvival.MapLabBridge
                 texture.Release();
                 Object.DestroyImmediate(texture);
             }
+            for (int i = 0; i < MaxFrontLayers; i++)
+                foreach (RenderTexture texture in new[] { frontRaw[i], frontGraded[i] })
+                    if (texture != null)
+                    {
+                        texture.Release();
+                        Object.DestroyImmediate(texture);
+                    }
+            System.Array.Clear(frontRaw, 0, MaxFrontLayers);
+            System.Array.Clear(frontGraded, 0, MaxFrontLayers);
             overlayTarget = null;
             overlayGraded = null;
             if (depthOnly != null)

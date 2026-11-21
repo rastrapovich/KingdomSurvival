@@ -114,6 +114,8 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
             states.Add(BoundColor("Цель", style.FindPropertyRelative("targetColor")));
             states.Add(BoundColor("Наведение: заливка", style.FindPropertyRelative("attackHoverFill")));
             states.Add(BoundColor("Наведение: линия", style.FindPropertyRelative("attackHoverLine")));
+            states.Add(BoundColor("Траектория хода", style.FindPropertyRelative("routeColor")));
+            states.Add(BoundSlider("Толщина траектории", style.FindPropertyRelative("routeLineWidth"), 0.5f, 8f));
             card.Add(states);
 
             Toggle samples = new Toggle("Показать состояния на предпросмотре") { value = showStateSamples };

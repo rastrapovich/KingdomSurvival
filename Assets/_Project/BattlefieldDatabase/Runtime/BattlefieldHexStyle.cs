@@ -36,6 +36,9 @@ namespace KingdomSurvival.BattlefieldDatabase
         [SerializeField] private Color targetColor = new Color(0.58f, 0.20f, 0.17f, 0.80f);
         [SerializeField] private Color attackHoverFill = new Color(0.82f, 0.64f, 0.18f, 0.16f);
         [SerializeField] private Color attackHoverLine = new Color(0.98f, 0.80f, 0.32f, 0.95f);
+        [Tooltip("Траектория хода при наведении — тем же пером, что контуры клеток.")]
+        [SerializeField] private Color routeColor = new Color(0.62f, 0.86f, 0.92f, 0.95f);
+        [SerializeField, Range(0.5f, 8f)] private float routeLineWidth = 2.6f;
 
         // Картинка гекса растягивается на прямоугольник гекса (ширина : высота ≈ 1,15 : 1).
         public Sprite HexImage => hexImage;
@@ -63,6 +66,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         public Color TargetColor => targetColor;
         public Color AttackHoverFill => attackHoverFill;
         public Color AttackHoverLine => attackHoverLine;
+        public Color RouteColor => routeColor;
+        public float RouteLineWidth => Mathf.Max(0.5f, routeLineWidth);
 
         // Цвет с учётом общей непрозрачности сетки.
         public Color Fade(Color color)

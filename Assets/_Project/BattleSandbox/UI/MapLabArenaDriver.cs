@@ -401,7 +401,9 @@ namespace KingdomSurvival.BattleSandbox
             // в секунду), дальше не перерисовывается.
             // Обработка кадра со временем (вспышка, тряска, плёнка, облака) — кадр
             // каждые ~1/30 с, пока она идёт.
-            bool animating = frameBinding != null && frameBinding.Animating;
+            // Идущий боец гнёт траву: кадр каждые ~1/30 с, пока он идёт и трава возвращается.
+            bool walking = UpdateWalkers();
+            bool animating = (frameBinding != null && frameBinding.Animating) || walking;
             if (shown != null && size == lastSize && (animating ? Time.realtimeSinceStartup - renderedAt < 1f / 30f
                     : Time.realtimeSinceStartup - readyAt > SettleSeconds || Time.realtimeSinceStartup - renderedAt < 0.1f))
                 return;
@@ -415,6 +417,77 @@ namespace KingdomSurvival.BattleSandbox
         }
 
         private Vector2Int requestedSize;
+
+        // ---------- объекты впереди бойцов ----------
+
+        private readonly System.Collections.Generic.List<(float KeyY, float ShareY)> frontRowsSorted = new System.Collections.Generic.List<(float, float)>();
+        private readonly System.Collections.Generic.List<(float KeyY, Texture Texture)> frontOut = new System.Collections.Generic.List<(float, Texture)>();
+
+        // Для каждой строки земли с бойцами — слой объектов, стоящих ближе к зрителю.
+        private void RenderFronts()
+        {
+            frontOut.Clear();
+            frontRowsSorted.Clear();
+            frontRowsSorted.AddRange(board.FrontRows);
+            frontRowsSorted.Sort((a, b) => a.KeyY.CompareTo(b.KeyY));
+            float last = float.NegativeInfinity;
+            int slot = 0;
+            foreach ((float keyY, float shareY) in frontRowsSorted)
+            {
+                if (keyY - last < 1.5f) continue;
+                last = keyY;
+                RenderTexture layer = arena.RenderFront(slot, arena.GroundZ(shareY));
+                if (layer == null) break;
+                frontOut.Add((keyY, layer));
+                slot++;
+            }
+            board.SetFrontLayers(frontOut);
+        }
+
+        // ---------- проход по траве ----------
+
+        private const float TrailSeconds = 0.9f;
+        private const float TrailStep = 0.1f;
+        private const int TrailMax = 5;
+        private readonly System.Collections.Generic.List<(Vector2 Nominal, float Time)> trail = new System.Collections.Generic.List<(Vector2, float)>();
+        private readonly System.Collections.Generic.List<(Vector2 Nominal, float Strength)> walkerPoints = new System.Collections.Generic.List<(Vector2, float)>();
+        private bool walkersWereActive;
+
+        // Ноги идущего бойца и следы за ним → арена (трава отклоняется и
+        // возвращается). true — трава сейчас в движении (кадр обновляется часто).
+        private bool UpdateWalkers()
+        {
+            float now = Time.realtimeSinceStartup;
+            Vector2 share = default;
+            bool walking = board != null && board.TryGetWalkerFrameShare(out share);
+            Vector2 current = default;
+            if (walking)
+            {
+                current = new Vector2(share.x * arena.Spec.Aspect, share.y);
+                if (trail.Count == 0 || now - trail[trail.Count - 1].Time >= TrailStep)
+                {
+                    trail.Add((current, now));
+                    if (trail.Count > TrailMax)
+                        trail.RemoveAt(0);
+                }
+            }
+            for (int i = trail.Count - 1; i >= 0; i--)
+                if (now - trail[i].Time > TrailSeconds)
+                    trail.RemoveAt(i);
+
+            walkerPoints.Clear();
+            if (walking)
+                walkerPoints.Add((current, 1f));
+            for (int i = trail.Count - 1; i >= 0; i--)
+                walkerPoints.Add((trail[i].Nominal, 0.8f * (1f - (now - trail[i].Time) / TrailSeconds)));
+            arena.SetWalkers(walkerPoints);
+
+            bool active = walkerPoints.Count > 0;
+            if (walkersWereActive && !active)
+                RequestFrame();   // трава вернулась — последний кадр без изгиба
+            walkersWereActive = active;
+            return active;
+        }
 
         // Из LateUpdate: нарисовать запрошенный кадр и показать его.
         internal void RenderRequested()
@@ -444,6 +517,7 @@ namespace KingdomSurvival.BattleSandbox
                 board.PaintedSurfaces = VisibleSurfaces();
                 RemoveLoadingScreen();
             }
+            RenderFronts();
             board.SetTerrainOverlay(arena.OverlayTexture);
             board.MarkDirtyRepaint();
         }

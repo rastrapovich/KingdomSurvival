@@ -251,7 +251,45 @@ namespace KingdomSurvival.MapLabBridge
 
             // 3. Низкая трава пятнами с паузами (поле и окраины), мимо стартов
             // и камней на клетках. Пятно — одна-две травы, разные размеры.
-            if (low.Count > 0)
+            if (low.Count > 0 && !zone.Uniform)
+            {
+                // Густота поля и окраины разная (ползунки «на поле» и «за полем»): пятна —
+                // кандидаты с устойчивым жребием (свой поток на номер пятна, жребий по
+                // положению), поэтому изменение густоты только добавляет или убирает траву
+                // и не перемешивает всё поле; поле и окраина не влияют друг на друга.
+                float patchBase = Mathf.Lerp(look.GrassPatchesMin, look.GrassPatchesMax, rng.Value()) * density;
+                int candidates = Mathf.RoundToInt(patchBase * GrassZone.MaxMultiplier);
+                float reach = Mathf.Max(0f, look.GrassOutside) * hex;
+                for (int patch = 0; patch < candidates; patch++)
+                {
+                    MapLabRandom prng = MapLabRandom.ForStream(Spec.Seed, "arena-grass-patch-" + patch, MapLabData.AlgorithmVersion);
+                    Vector2 center = new Vector2(prng.Range(frame.xMin - reach, frame.xMax + reach), prng.Range(frame.yMin - reach, frame.yMax + reach));
+                    float centerDensity = zone.Density(center);
+                    if (prng.Value() >= centerDensity / GrassZone.MaxMultiplier)
+                        continue;
+                    float spread = hex * prng.Range(look.GrassPatchSizeMin, look.GrassPatchSizeMax);
+                    MapLabDecorArt first = low[(int)(prng.Value() * low.Count) % low.Count];
+                    MapLabDecorArt other = low[(int)(prng.Value() * low.Count) % low.Count];
+                    int count = look.GrassPerPatchMin + (int)(prng.Value() * Mathf.Max(1, look.GrassPerPatchMax - look.GrassPerPatchMin + 1));
+                    for (int i = 0; i < count; i++)
+                    {
+                        float radius = prng.Value() * prng.Value();
+                        float angle = prng.Value() * Mathf.PI * 2f;
+                        Vector2 q = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle) * 0.7f) * spread * radius;
+                        MapLabDecorArt art = prng.Value() < 0.7f ? first : other;
+                        float lot = prng.Value();
+                        // Травинка по своей густоте относительно центра пятна.
+                        if (lot >= Mathf.Clamp01(zone.Density(q) / Mathf.Max(0.05f, centerDensity)))
+                            continue;
+                        if ((look.GrassClearOfStart > 0f && Near(keep, q, hex * look.GrassClearOfStart)) || Near(blocked, q, hex * 0.75f) || Crowded(q, art.HalfWidth * 0.35f, look.GrassSpacing))
+                            continue;
+                        Add(q, art.Id, art.HalfWidth * 0.35f);
+                        groundArtIds.Add(art.Id);
+                        grassPoints.Add(q);
+                    }
+                }
+            }
+            if (low.Count > 0 && zone.Uniform)
             {
                 int patches = Mathf.RoundToInt(Mathf.Lerp(look.GrassPatchesMin, look.GrassPatchesMax, rng.Value()) * density * zone.Scale);
                 float outside = Mathf.Max(0f, look.GrassOutside) * hex;
@@ -338,34 +376,61 @@ namespace KingdomSurvival.MapLabBridge
                 return rng.Value() < density;
             }
 
-            void Grid(float perHex, System.Action<Vector2> place)
+            void Grid(float perHex, System.Action<Vector2, System.Func<float>> place)
             {
                 if (perHex <= 0f)
                     return;
+                if (!zone.Uniform)
+                {
+                    // Густота на поле и за полем — по плавной карте густоты: решётка
+                    // с запасом (до максимума ползунка), точка остаётся по устойчивому
+                    // жребию. Больше густоты — только добавляются точки, остальные на
+                    // месте; поле и окраина независимы.
+                    float fine = Mathf.Min(perHex * GrassZone.MaxMultiplier, 120f);
+                    float fineStep = Mathf.Sqrt(hexArea / fine);
+                    int iz = 0;
+                    for (float z = area.yMin; z <= area.yMax; z += fineStep, iz++)
+                    {
+                        int ix = 0;
+                        for (float x = area.xMin; x <= area.xMax; x += fineStep, ix++)
+                        {
+                            Vector2 q = new Vector2(x + (GrassZone.Lot(ix, iz, 1u) - 0.5f) * 0.9f * fineStep, z + (GrassZone.Lot(ix, iz, 2u) - 0.5f) * 0.9f * fineStep);
+                            float want = Mathf.Min(1f, perHex * zone.Density(q) / fine);
+                            if (GrassZone.Lot(ix, iz, 3u) >= want || !Clear(q))
+                                continue;
+                            float patch = Mathf.Lerp(1f, Mathf.Clamp01((noise.Fbm(q.x / (hex * 3.5f), q.y / (hex * 3.5f), 3) * 0.5f + 0.5f - 0.25f) * 2f), Mathf.Clamp01(look.GrassCarpetPatchiness));
+                            if (GrassZone.Lot(ix, iz, 4u) >= patch)
+                                continue;
+                            int roll = 0;
+                            place(q, () => GrassZone.Lot(ix, iz, 5u + (uint)roll++));
+                        }
+                    }
+                    return;
+                }
                 float step = Mathf.Sqrt(hexArea / Mathf.Min(perHex * zone.Scale, 120f));
                 for (float z = area.yMin; z <= area.yMax; z += step)
                 for (float x = area.xMin; x <= area.xMax; x += step)
                 {
                     Vector2 q = new Vector2(x + rng.Range(-0.45f, 0.45f) * step, z + rng.Range(-0.45f, 0.45f) * step);
                     if (Clear(q) && Keep(q) && zone.Accept(q))
-                        place(q);
+                        place(q, rng.Value);
                 }
             }
 
             if (tufts.Count + inks.Count > 0)
-                Grid(look.GrassCarpet, q =>
+                Grid(look.GrassCarpet, (q, roll) =>
                 {
-                    List<MapLabArtEntry> pool = inks.Count > 0 && (tufts.Count == 0 || rng.Value() < look.GrassCarpetInk) ? inks : tufts;
-                    MapLabArtEntry art = pool[(int)(rng.Value() * pool.Count) % pool.Count];
+                    List<MapLabArtEntry> pool = inks.Count > 0 && (tufts.Count == 0 || roll() < look.GrassCarpetInk) ? inks : tufts;
+                    MapLabArtEntry art = pool[(int)(roll() * pool.Count) % pool.Count];
                     c.Features.Add((q, art.Id, DecorKind));
                     groundArtIds.Add(art.Id);
                     DecorFeatures++;
                     grassPoints.Add(q);
                 });
             if (low.Count > 0)
-                Grid(look.GrassSingles, q =>
+                Grid(look.GrassSingles, (q, roll) =>
                 {
-                    MapLabDecorArt art = low[(int)(rng.Value() * low.Count) % low.Count];
+                    MapLabDecorArt art = low[(int)(roll() * low.Count) % low.Count];
                     c.Features.Add((q, art.Id, DecorKind));
                     groundArtIds.Add(art.Id);
                     DecorFeatures++;
@@ -417,6 +482,19 @@ namespace KingdomSurvival.MapLabBridge
             private readonly float inField, outside, edge, max;
             private readonly MapLabRandom rng;
             public readonly bool Uniform;
+            // Наибольшее значение ползунков густоты (на поле и за полем).
+            public const float MaxMultiplier = 4f;
+
+            // Устойчивый жребий 0..1 по ячейке решётки: не зависит от порядка бросков.
+            public static float Lot(int ix, int iz, uint salt)
+            {
+                unchecked
+                {
+                    uint h = (uint)ix * 73856093u ^ (uint)iz * 19349663u ^ salt * 83492791u;
+                    h ^= h >> 13; h *= 0x5bd1e995u; h ^= h >> 15; h *= 0x27d4eb2du; h ^= h >> 16;
+                    return (h & 0xFFFFFFu) / 16777216f;
+                }
+            }
 
             public GrassZone(MapLabArena arena, List<Vector2> cells)
             {

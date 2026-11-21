@@ -291,9 +291,9 @@ namespace KingdomSurvival.LocationRendering.Editor
 
         private SandboxBattle CreateBattle(SandboxArenaTheme theme, int seed)
         {
-            IReadOnlyList<SandboxUnitDefinition> players = SandboxRoster.PlayerRoster, enemies = SandboxRoster.EnemyRoster;
-            List<SandboxUnitDefinition> ours = Enumerable.Range(0, Mathf.Clamp(Fighters, 1, 6)).Select(i => players[i % players.Count]).ToList();
-            List<SandboxUnitDefinition> theirs = Enumerable.Range(0, Mathf.Clamp(Enemies, 1, 8)).Select(i => enemies[i % enemies.Count]).ToList();
+            // Бойцы отряда и случайные существа Базы существ (по seed), а не заглушки.
+            ArenaPreviewContent.Pick(seed, Mathf.Clamp(Fighters, 1, 6), Mathf.Clamp(Enemies, 1, 8),
+                out List<SandboxUnitDefinition> ours, out List<SandboxUnitDefinition> theirs);
             asset.Activate();
             return SandboxRoster.CreateBattle(ours, theirs, seed, disabledCells: BattlefieldFrame.DisabledCells(Field),
                 theme: theme, themeSource: "Генератор арен");
@@ -382,6 +382,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             board.style.backgroundColor = Color.clear;
             board.style.borderLeftWidth = board.style.borderRightWidth = board.style.borderTopWidth = board.style.borderBottomWidth = 0;
             board.SetBattlefield(field, style, true);
+            ArenaPreviewContent.Apply(board);
             board.SetBattle(previewBattle, null);
             previewHost.Add(surface);
             driver = MapLabArenaDriver.TryCreate(field, surface, board, previewBattle, null, true);

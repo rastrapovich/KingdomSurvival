@@ -176,6 +176,7 @@ public partial class PrototypeUIController
         WorldMapMovementSettingsAsset settings = WorldMapVisualRuntime.LoadMovementSettings();
         TickWorldMapHold(now, settings);
         TickWorldMapZoom(dt);
+        TickWorldMapKeyboardPan(dt);
         TickWorldMapCameraFollow(dt, settings);
         TickWorldMapClickMarker(now, settings);
         // Шаг фигуры — в темпе карты (п. 18): ноги не отстают от пути.
@@ -485,6 +486,34 @@ public partial class PrototypeUIController
         }
 
         ZoomWorldMapAroundScreenPoint(next / Mathf.Max(0.0001f, worldMapZoom), worldMapZoomPivot);
+    }
+
+    // Сдвиг карты клавишами W/A/S/D: за секунду — доля стороны рамки просмотра
+    // (не зависит от масштаба). Ручная панорама отпускает камеру героя.
+    private const float WorldMapKeyboardPanViewportsPerSecond = 0.9f;
+
+    private void TickWorldMapKeyboardPan(float dt)
+    {
+        if (dt <= 0f || !IsWorldMapScreenOpen || isPanningWorldMap || worldMapViewport == null)
+            return;
+        UnityEngine.InputSystem.Keyboard keyboard = UnityEngine.InputSystem.Keyboard.current;
+        if (keyboard == null || HasBlockingModalWork())
+            return;
+        if (GetComponent<UIDocument>()?.rootVisualElement?.focusController?.focusedElement is TextField)
+            return;
+
+        float x = (keyboard.dKey.isPressed ? 1f : 0f) - (keyboard.aKey.isPressed ? 1f : 0f);
+        float y = (keyboard.sKey.isPressed ? 1f : 0f) - (keyboard.wKey.isPressed ? 1f : 0f);
+        if (x == 0f && y == 0f)
+            return;
+
+        float step = WorldMapKeyboardPanViewportsPerSecond * dt;
+        // Взгляд движется к краю карты — полотно уходит в обратную сторону.
+        worldMapPanOffsetX -= x * step * worldMapViewport.resolvedStyle.width;
+        worldMapPanOffsetY -= y * step * worldMapViewport.resolvedStyle.height;
+        SuspendWorldMapCameraFollow();
+        ClampWorldMapPan();
+        ApplyWorldMapViewportTransform();
     }
 
     // Ручная панорама отпускает камеру до следующего приказа или «К герою».

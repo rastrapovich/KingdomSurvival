@@ -135,8 +135,6 @@ namespace KingdomSurvival.BattleSandbox
                     HideGroup(pair.Value);
             }
             statusAnchors.Clear();
-            if (statusTooltip != null)
-                statusTooltip.BringToFront();
         }
 
         private void LayoutGroup(SandboxUnitState unit, StatusGroup group, Vector2 anchor)
@@ -245,7 +243,7 @@ namespace KingdomSurvival.BattleSandbox
         private StatusSlot CreateSlot()
         {
             StatusSlot slot = new StatusSlot();
-            VisualElement root = new VisualElement { focusable = true, pickingMode = PickingMode.Position };
+            VisualElement root = new VisualElement { focusable = false, pickingMode = PickingMode.Ignore };
             root.style.position = Position.Absolute;
             root.style.width = StatusIconSize;
             root.style.height = StatusIconSize;
@@ -278,17 +276,7 @@ namespace KingdomSurvival.BattleSandbox
             root.Add(slot.Charges);
             slot.Root = root;
 
-            root.RegisterCallback<PointerEnterEvent>(_ => ShowStatusTooltip(slot, false));
-            root.RegisterCallback<PointerLeaveEvent>(_ => HideStatusTooltip(slot));
-            root.RegisterCallback<FocusInEvent>(_ => ShowStatusTooltip(slot, false));
-            root.RegisterCallback<FocusOutEvent>(_ => HideStatusTooltip(slot));
-            root.RegisterCallback<PointerDownEvent>(evt =>
-            {
-                // Клик закрепляет подсказку (не только наведение).
-                pinnedStatusSlot = pinnedStatusSlot == slot ? null : slot;
-                ShowStatusTooltip(slot, true);
-                evt.StopPropagation();
-            });
+            // На поле — только значки, без описаний; полный список состояний — в карточке бойца.
             Add(root);
             // Появление: прозрачность и масштаб 0,9 → 1 на следующем кадре.
             root.schedule.Execute(() =>
@@ -373,8 +361,6 @@ namespace KingdomSurvival.BattleSandbox
             slot.Root.style.borderLeftWidth = width; slot.Root.style.borderRightWidth = width;
             SetRadius(slot.Root, StatusIconSize * 0.5f);
             slot.Tooltip = unit.DisplayLabel + " — " + view.Tooltip;
-            if (pinnedStatusSlot == slot)
-                ShowStatusTooltip(slot, true);
         }
 
         private void FillMore(StatusSlot slot, StatusGroup group, int hidden)
@@ -406,43 +392,6 @@ namespace KingdomSurvival.BattleSandbox
                 slot.Root.style.display = DisplayStyle.None;
             if (group.More != null)
                 group.More.Root.style.display = DisplayStyle.None;
-        }
-
-        private void ShowStatusTooltip(StatusSlot slot, bool pinned)
-        {
-            if (string.IsNullOrEmpty(slot.Tooltip))
-                return;
-            if (statusTooltip == null)
-            {
-                statusTooltip = new Label { pickingMode = PickingMode.Ignore };
-                statusTooltip.style.position = Position.Absolute;
-                statusTooltip.style.maxWidth = 300;
-                statusTooltip.style.whiteSpace = WhiteSpace.Normal;
-                statusTooltip.style.fontSize = 12;
-                statusTooltip.style.paddingLeft = 8; statusTooltip.style.paddingRight = 8;
-                statusTooltip.style.paddingTop = 6; statusTooltip.style.paddingBottom = 6;
-                statusTooltip.style.color = new Color(0.97f, 0.94f, 0.87f, 1f);
-                statusTooltip.style.backgroundColor = new Color(0.10f, 0.09f, 0.07f, 0.95f);
-                SetRadius(statusTooltip, 4f);
-                Add(statusTooltip);
-            }
-            statusTooltip.text = slot.Tooltip + (pinned ? "\n(закреплено — щелчок снимает)" : string.Empty);
-            statusTooltip.style.display = DisplayStyle.Flex;
-            float left = slot.Root.style.left.value.value + StatusIconSize + 6f;
-            float top = slot.Root.style.top.value.value;
-            // У края поля — подсказка с другой стороны значка.
-            if (left + 300f > contentRect.width)
-                left = Mathf.Max(2f, slot.Root.style.left.value.value - 306f);
-            statusTooltip.style.left = left;
-            statusTooltip.style.top = Mathf.Max(2f, top);
-            statusTooltip.BringToFront();
-        }
-
-        private void HideStatusTooltip(StatusSlot slot)
-        {
-            if (statusTooltip == null || pinnedStatusSlot == slot)
-                return;
-            statusTooltip.style.display = DisplayStyle.None;
         }
 
         private void ClearStatusIcons()

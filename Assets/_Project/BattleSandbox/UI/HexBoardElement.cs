@@ -862,36 +862,46 @@ namespace KingdomSurvival.BattleSandbox
             if (path == null || path.Count < 2)
                 return;
 
-            Color routeColor = new Color(0.62f, 0.86f, 0.92f, 0.86f);
-            if (marksDrawnBelow)
-            {
-                for (int i = 1; i < path.Count; i++)
-                    marks.Add(new BoardMark
-                    {
-                        Kind = BoardMarkKind.Segment, A = layout.GetCenter(path[i - 1]), B = layout.GetCenter(path[i]),
-                        Line = routeColor, LineWidth = 3f
-                    });
-            }
-            else
-            {
-                painter.strokeColor = routeColor;
-                painter.lineWidth = 3f;
-                painter.BeginPath();
-                painter.MoveTo(layout.GetCenter(path[0]));
-                for (int i = 1; i < path.Count; i++)
-                    painter.LineTo(layout.GetCenter(path[i]));
-                painter.Stroke();
-            }
-
+            // Траектория — контуры клеток пути тем же пером, что у клеток хода и сетки;
+            // цвет и толщина — в виде гекса поля («Траектория хода»). Конечная клетка — жирнее.
+            Color routeColor = hexStyle.RouteColor;
+            float width = hexStyle.RouteLineWidth;
+            float radius = Mathf.Max(1f, layout.Size - width * 0.5f);
             for (int i = 1; i < path.Count; i++)
             {
-                PaintCircle(
+                bool last = i == path.Count - 1;
+                PaintHex(
                     painter,
                     layout.GetCenter(path[i]),
-                    4.5f,
+                    radius,
+                    last ? new Color(routeColor.r, routeColor.g, routeColor.b, routeColor.a * 0.16f) : Color.clear,
                     routeColor,
-                    new Color(0.90f, 0.97f, 0.98f, 0.95f),
-                    1.2f);
+                    last ? width * 1.35f : width,
+                    last,
+                    layout.VerticalScale);
+            }
+        }
+
+        private static void DrawUnitShadow(Painter2D painter, HexLayout layout, Vector2 center)
+        {
+            float vertical = Mathf.Max(0.2f, layout.VerticalScale) * 0.55f;
+            Vector2 foot = center + new Vector2(layout.Size * 0.06f, layout.Size * 0.12f * vertical);
+            const int layers = 4, segments = 20;
+            for (int layer = 0; layer < layers; layer++)
+            {
+                // От широкого прозрачного к узкому плотному: край растушёван.
+                float t = layer / (float)(layers - 1);
+                float radius = layout.Size * Mathf.Lerp(0.72f, 0.4f, t);
+                painter.fillColor = new Color(0.06f, 0.07f, 0.02f, 0.15f);
+                painter.BeginPath();
+                for (int i = 0; i < segments; i++)
+                {
+                    float angle = Mathf.PI * 2f * i / segments;
+                    Vector2 point = foot + new Vector2(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius * vertical);
+                    if (i == 0) painter.MoveTo(point); else painter.LineTo(point);
+                }
+                painter.ClosePath();
+                painter.Fill();
             }
         }
 
@@ -914,6 +924,10 @@ namespace KingdomSurvival.BattleSandbox
             {
                 center += targetOffset;
             }
+
+            // Мягкая тень под бойцом: стилизованный овал на земле, края размыты слоями.
+            if (!unit.IsHidden && !unit.IsDefeated && !marksDrawnBelow)
+                DrawUnitShadow(painter, layout, center);
 
             // ПР-16: скрытый Срубник виден подозрительным пнём без имени.
             bool hasBattlefieldSprite = !unit.IsHidden && HasBattlefieldSprite(unit.TypeId);
@@ -1060,6 +1074,20 @@ namespace KingdomSurvival.BattleSandbox
             MarkDirtyRepaint();
         }
 
+        // Идущий сейчас боец: точка ног в долях кадра поля (0..1, Y вниз) — для
+        // прогиба травы на арене. false — никто не идёт.
+        public bool TryGetWalkerFrameShare(out Vector2 share)
+        {
+            share = default;
+            if (!IsAnimating || movementPath == null || string.IsNullOrEmpty(movementUnitId))
+                return false;
+            Rect frame = CalculateLayout().Frame;
+            if (frame.width < 1f || frame.height < 1f)
+                return false;
+            share = new Vector2((movementVisualPosition.x - frame.x) / frame.width, (movementVisualPosition.y - frame.y) / frame.height);
+            return true;
+        }
+
         private void FinishMovementAnimation()
         {
             if (movementAnimationItem == null && movementPath == null)
@@ -1102,6 +1130,7 @@ namespace KingdomSurvival.BattleSandbox
             HashSet<string> visibleTokenIds = new HashSet<string>();
             List<(string id, float key, VisualElement element)> depthEntries =
                 new List<(string id, float key, VisualElement element)>();
+            frontRows.Clear();
             foreach (SandboxUnitState unit in battle.Units)
             {
                 bool shownAlive = IsShownAlive(unit);
@@ -1184,6 +1213,8 @@ namespace KingdomSurvival.BattleSandbox
                         Corpse = corpse
                     });
                     depthEntries.Add((unit.Id, (corpse ? -100000f : 0f) + unitCenter.y, image));
+                    if (!corpse)
+                        NoteFrontRow(layout, unitCenter);
                 }
                 else if (visual != null && !string.IsNullOrEmpty(visual.TokenText))
                 {
@@ -1278,6 +1309,7 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             SyncTerrainObjectImages(layout, depthEntries);
+            AddFrontLayers(layout, depthEntries);
             ApplyDepthOrder(depthEntries);
             SyncTerrainOverlay(layout);
             foreach (VisualElement healthBar in unitHealthBars.Values)

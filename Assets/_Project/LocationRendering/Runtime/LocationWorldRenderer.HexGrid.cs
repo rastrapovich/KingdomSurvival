@@ -235,7 +235,11 @@ namespace KingdomSurvival.LocationRendering
                 switch (mark.Kind)
                 {
                     case BattleMarkKind.Segment:
-                        if (mark.Line.a > .001f && width > 0) AddMarkLine(mark.A, mark.B, width, mark.Line);
+                        if (mark.Line.a > .001f && width > 0)
+                        {
+                            if (mark.Ink && mark.Radius > .01f) AddInkMarkPath(mark, width);
+                            else AddMarkLine(mark.A, mark.B, width, mark.Line);
+                        }
                         break;
                     default:
                         int sides = mark.Kind == BattleMarkKind.Hex ? 6 : 24;
@@ -271,6 +275,32 @@ namespace KingdomSurvival.LocationRendering
             markInkCenter.Add(mark.A);
             BattlefieldInkGrid.Result result = BattlefieldInkGrid.BuildOutlines(markInkCenter, mark.Radius, vertical, null,
                 BattlefieldInkPen.Current ?? new BattlefieldInkPen(), width, Vector2.zero, Mathf.Max(1f, mark.Radius), (uint)mark.Line.GetHashCode(),
+                new BattlefieldInkGrid.Options { PixelScale = frameScale, Endings = true, Calm = true });
+            BattlefieldInkGrid.Triangulate(result.Strokes, 1.1f / Mathf.Max(0.01f, frameScale), inkPositions, inkAlphas, inkIndices);
+            int start = markVertices.Count;
+            for (int i = 0; i < inkPositions.Count; i++)
+            {
+                markVertices.Add(LocationVisualGeometry.PixelToWorld(Location, inkPositions[i]));
+                Color c = mark.Line;
+                c.a *= inkAlphas[i];
+                markColors.Add(c);
+            }
+            foreach (int index in inkIndices)
+                markIndices.Add(start + index);
+        }
+
+        // Отрезок траектории хода пером (как контуры клеток).
+        private readonly List<Vector2> markInkPath = new List<Vector2>(2);
+
+        private void AddInkMarkPath(BattleMark mark, float width)
+        {
+            float frameScale = Target != null && Target.height > 0 && ViewHeight > 0 ? Target.height / ViewHeight : 1f;
+            markInkPath.Clear();
+            markInkPath.Add(mark.A);
+            markInkPath.Add(mark.B);
+            float vertical = mark.VerticalScale > 0 ? mark.VerticalScale : 1f;
+            BattlefieldInkGrid.Result result = BattlefieldInkGrid.BuildPath(markInkPath, Mathf.Max(1f, mark.Radius), vertical, null,
+                BattlefieldInkPen.Current ?? new BattlefieldInkPen(), width, Vector2.zero, 0x7a3fu,
                 new BattlefieldInkGrid.Options { PixelScale = frameScale, Endings = true, Calm = true });
             BattlefieldInkGrid.Triangulate(result.Strokes, 1.1f / Mathf.Max(0.01f, frameScale), inkPositions, inkAlphas, inkIndices);
             int start = markVertices.Count;

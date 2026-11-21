@@ -269,6 +269,14 @@ public partial class PrototypeUIController
         if (worldMapViewport == null || worldMap == null)
             return;
 
+        // Во время панорамы средней кнопкой колесо не масштабирует: смена масштаба
+        // сдвигала полотно, и следующее движение мыши уносило камеру.
+        if (isPanningWorldMap)
+        {
+            evt.StopPropagation();
+            return;
+        }
+
         float factor = evt.delta.y > 0f
             ? 1f / WorldMapZoomStepFactor
             : WorldMapZoomStepFactor;

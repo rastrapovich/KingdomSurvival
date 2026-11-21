@@ -52,8 +52,12 @@ namespace KingdomSurvival.LocationRendering.Editor
             arena = null;
         }
 
+        private Vector2 arenaAreaSize;
+        private double lastArenaRender;
+
         private void PumpArena()
         {
+            if (arena != null && arena.Ready) RenderArenaFrames();
             if (arena == null || !arena.Building) return;
             Stopwatch watch = Stopwatch.StartNew();
             while (arena.Building && watch.Elapsed.TotalMilliseconds < 30) arena.Advance();
@@ -126,6 +130,29 @@ namespace KingdomSurvival.LocationRendering.Editor
             return target;
         }
 
+        // Кадры арены «до» и «после» — в цикле обновления редактора, вне перерисовки окна.
+        private void RenderArenaFrames()
+        {
+            if (EditorApplication.timeSinceStartup - lastArenaRender < 1 / 30.0) return;
+            lastArenaRender = EditorApplication.timeSinceStartup;
+            if (arenaAreaSize.x < 8f || arenaAreaSize.y < 8f || EditorApplication.isPlayingOrWillChangePlaymode) return;
+            Stopwatch watch = Stopwatch.StartNew();
+            float aspect = 16f / 9f;
+            int height = Mathf.Clamp(Mathf.RoundToInt(Mathf.Min(arenaAreaSize.y, arenaAreaSize.x / aspect) * EditorGUIUtility.pixelsPerPoint), 128, 2048);
+            if (compare == CompareMode.SideBySide)
+            {
+                RenderArena(true, ref beforeTexture, height / 2 + 64);
+                RenderArena(false, ref afterTexture, height / 2 + 64);
+            }
+            else
+            {
+                if (compare == CompareMode.Curtain) RenderArena(true, ref beforeTexture, height);
+                RenderArena(false, ref afterTexture, height);
+            }
+            frameMs = Mathf.Lerp(frameMs, (float)watch.Elapsed.TotalMilliseconds, .2f);
+            if (frameLabel != null) frameLabel.text = "кадр " + frameMs.ToString("0.0") + " мс";
+        }
+
         private void DrawArenaPreview(Rect area)
         {
             if (arena == null || !arena.Ready)
@@ -141,15 +168,16 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Event.current.Use();
             }
             if (Event.current.type != EventType.Repaint) return;
-            Stopwatch watch = Stopwatch.StartNew();
+            // Камера арены рисуется не здесь (рендер камеры внутри перерисовки IMGUI с обработкой кадра
+            // вешал редактор и давал чёрный кадр), а в RenderArenaFrames из цикла обновления.
+            arenaAreaSize = area.size;
             float aspect = 16f / 9f;
-            int height = Mathf.Clamp(Mathf.RoundToInt(Mathf.Min(area.height, area.width / aspect) * EditorGUIUtility.pixelsPerPoint), 128, 2048);
             if (compare == CompareMode.SideBySide)
             {
                 Rect leftFrame = Fit(new Rect(area.x, area.y, area.width / 2 - 1, area.height), aspect);
                 Rect rightFrame = Fit(new Rect(area.x + area.width / 2 + 1, area.y, area.width / 2 - 1, area.height), aspect);
-                Texture before = RenderArena(true, ref beforeTexture, height / 2 + 64);
-                Texture after = RenderArena(false, ref afterTexture, height / 2 + 64);
+                Texture before = beforeTexture;
+                Texture after = afterTexture;
                 if (before != null) GUI.DrawTexture(leftFrame, before, ScaleMode.StretchToFill, false);
                 if (after != null) GUI.DrawTexture(rightFrame, after, ScaleMode.StretchToFill, false);
                 Caption(leftFrame, BeforeName(), true);
@@ -158,8 +186,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             else
             {
                 Rect frame = Fit(area, aspect);
-                Texture before = compare == CompareMode.Curtain ? RenderArena(true, ref beforeTexture, height) : null;
-                Texture after = RenderArena(false, ref afterTexture, height);
+                Texture before = compare == CompareMode.Curtain ? beforeTexture : null;
+                Texture after = afterTexture;
                 if (after != null) GUI.DrawTexture(frame, after, ScaleMode.StretchToFill, false);
                 if (compare == CompareMode.Curtain && before != null)
                 {
@@ -170,8 +198,6 @@ namespace KingdomSurvival.LocationRendering.Editor
                     Caption(new Rect(x, frame.y, frame.xMax - x, frame.height), "после", false);
                 }
             }
-            frameMs = Mathf.Lerp(frameMs, (float)watch.Elapsed.TotalMilliseconds, .2f);
-            if (frameLabel != null) frameLabel.text = "кадр " + frameMs.ToString("0.0") + " мс";
             if (status != null)
             {
                 LocationPostEffects post = ArenaGeneratorAsset.FrameFor(MapLabGameViews.ActiveId);

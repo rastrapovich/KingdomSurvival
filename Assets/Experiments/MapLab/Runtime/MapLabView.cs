@@ -1259,6 +1259,9 @@ namespace KingdomSurvival.MapLab
                         if (featureBases.Contains(new Vector2Int(Mathf.RoundToInt(inst.Base.x * 50f), Mathf.RoundToInt(inst.Base.z * 50f))))
                             continue;
                         float w = inst.Width * e.SolidRect.width, h = inst.Height * e.SolidRect.height;
+                        // Низкая трава и мелочь: тень пропорционально меньше (без «луж»).
+                        float smallness = Settings.Stage03.ShadowSoftEdge > 0f ? Mathf.Lerp(0.3f, 1f, Mathf.Clamp01(h / (Settings.Stage03.ShadowSoftEdge * 9f))) : 1f;
+                        w *= smallness;
                         casters.Add(new MapLabObjectShadows.Caster
                         {
                             Base = inst.Base,
@@ -1411,6 +1414,9 @@ namespace KingdomSurvival.MapLab
             m.SetVector("_ColorLevelsOut", entry.ColorLevelsOut);
             m.SetFloat("_Cutoff", entry.Cutoff);
             m.SetFloat("_CardLean", art.CardLean);
+            // Прогиб от прохода бойцов: своя настройка записи, иначе растения гнутся, деревья и камни — нет.
+            bool plant = entry.Role == "grass_tuft" || entry.Role == "grass_ink_tuft" || entry.Kind == MapLabObjectKind.Bush || entry.Kind == MapLabObjectKind.Reed;
+            m.SetFloat("_WalkBend", entry.WalkBend >= 0f ? entry.WalkBend : plant ? 1f : 0f);
             Color tone;
             switch (entry.Category)
             {

@@ -18,6 +18,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
         _MainTex ("Рисунок (RGBA)", 2D) = "white" {}
         _ShadeTex ("Shade (R свет, G затенение)", 2D) = "white" {}
         _Cutoff ("Alpha cutoff", Range(0.05, 0.95)) = 0.5
+        _WalkBend ("Прогиб от прохода бойцов, 0 стоит", Float) = 0
         _CardLean ("Card lean", Range(0, 1)) = 0.35
         _TintColor ("Тон палитры", Color) = (0.5, 0.5, 0.4, 1)
         _TintStrength ("Сила оттенка палитры", Range(0, 1)) = 0
@@ -93,6 +94,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
             CBUFFER_START(UnityPerMaterial)
                 float4 _MainTex_ST;
                 float _Cutoff;
+                float _WalkBend;
                 float _CardLean;
                 float4 _TintColor;
                 float _TintStrength;
@@ -272,6 +274,14 @@ Shader "Kingdom Survival/MapLab/Art Card"
 
             float _MapLabPixelScale;
 
+            // Проход по траве (бой на арене): точки ног и следы — xz мира, радиус, сила.
+            // Низкие карточки (выше _MapLabBendMaxHeight — нет) отклоняют верх от этих точек.
+            float4 _MapLabWalkers[6];
+            float _MapLabWalkerCount;
+            float _MapLabBendMaxHeight;
+            float _MapLabFrontOn;
+            float _MapLabFrontZ;
+
             float3 Hue(float h)
             {
                 return saturate(abs(frac(h + float3(0, 2.0 / 3.0, 1.0 / 3.0)) * 6.0 - 3.0) - 1.0);
@@ -281,6 +291,13 @@ Shader "Kingdom Survival/MapLab/Art Card"
             {
                 Varyings o;
                 float3 basePoint = TransformObjectToWorld(input.positionOS);
+                // Слой «впереди бойца» (арена): рисуются только карточки, чья опора ближе к зрителю, чем ноги бойца.
+                if (_MapLabFrontOn > 0.5 && basePoint.z >= _MapLabFrontZ)
+                {
+                    Varyings hidden = (Varyings)0;
+                    hidden.positionCS = float4(2.0, 2.0, 2.0, 1.0);
+                    return hidden;
+                }
                 float3 camRight = normalize(UNITY_MATRIX_V[0].xyz);
                 float3 camUp = normalize(UNITY_MATRIX_V[1].xyz);
                 float3 toCamera = normalize(UNITY_MATRIX_V[2].xyz);
@@ -297,7 +314,32 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float need = max(0.0, cosPitch / sinPitch - screenScale * dot(up, forward));
                 float push = max(0.0, -y) * need + _DepthMargin;
                 float3 world = basePoint + camRight * input.offset.x + up * y * screenScale + toCamera * push;
+                if (_MapLabWalkerCount > 0.5 && y > 0.01 && _WalkBend > 0.001)
+                {
+                    float2 pushed = 0;
+                    [loop] for (int w = 0; w < 6; w++)
+                    {
+                        if (w >= (int)_MapLabWalkerCount)
+                            break;
+                        float4 wk = _MapLabWalkers[w];
+                        float2 away = basePoint.xz - wk.xy;
+                        float d = length(away);
+                        float f = saturate(1.0 - d / max(wk.z, 1e-3));
+                        f = f * f * (3.0 - 2.0 * f) * wk.w;
+                        pushed += (d > 1e-3 ? away / d : float2(1.0, 0.0)) * f;
+                    }
+                    float len = length(pushed);
+                    float2 dir = len > 1e-4 ? pushed / len : float2(0, 0);
+                    // Верх отклоняется от ног и чуть опускается; основание неподвижно.
+                    float lean = min(len, 1.0) * min(y, 1.4) * 0.85 * _WalkBend;
+                    world.xz += dir * lean;
+                    world.y -= lean * 0.25;
+                }
                 o.positionCS = TransformWorldToHClip(world);
+                // Глубина карточки постоянна и равна глубине опоры (как порядок спрайтов):
+                // высокий ствол не проходит сквозь ближний куст — объект либо перекрывает, либо нет.
+                float4 depthCS = TransformWorldToHClip(basePoint + toCamera * push);
+                o.positionCS.z = depthCS.z / depthCS.w * o.positionCS.w;
                 o.uv = input.uv;
                 o.color = input.color;
                 o.extra = input.extra;

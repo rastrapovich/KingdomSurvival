@@ -55,11 +55,33 @@ Shader "Kingdom Survival/MapLab/Grass"
             CBUFFER_END
 
             float _MapLabPixelScale;
+            float4 _MapLabWalkers[6];
+            float _MapLabWalkerCount;
+            float _MapLabBendMaxHeight;
 
             Varyings Vert(Attributes input)
             {
                 Varyings o;
                 float3 p = TransformObjectToWorld(input.positionOS);
+                if (_MapLabWalkerCount > 0.5 && input.uv.y > 0.01)
+                {
+                    float2 pushed = 0;
+                    [loop] for (int k = 0; k < 6; k++)
+                    {
+                        if (k >= (int)_MapLabWalkerCount) break;
+                        float4 wk = _MapLabWalkers[k];
+                        float2 away = p.xz - wk.xy;
+                        float d = length(away);
+                        float f = saturate(1.0 - d / max(wk.z, 1e-3));
+                        f = f * f * (3.0 - 2.0 * f) * wk.w;
+                        pushed += (d > 1e-3 ? away / d : float2(1.0, 0.0)) * f;
+                    }
+                    float len = length(pushed);
+                    float2 dir = len > 1e-4 ? pushed / len : float2(0, 0);
+                    float lean = min(len, 1.0) * input.uv.y * _MapLabBendMaxHeight * 0.3;
+                    p.xz += dir * lean;
+                    p.y -= lean * 0.25;
+                }
                 float3 side = normalize(UNITY_MATRIX_V[0].xyz);
                 float4 c0 = TransformWorldToHClip(p);
                 float4 c1 = TransformWorldToHClip(p + side);

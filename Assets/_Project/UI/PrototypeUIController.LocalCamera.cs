@@ -213,7 +213,8 @@ public partial class PrototypeUIController
     private void OnLocalBattleWheel(WheelEvent evt)
     {
         evt.StopPropagation();
-        if (localCameraLocked)
+        // Пока зажата средняя кнопка (сдвиг), масштаб не меняется: иначе камера «улетает».
+        if (localCameraLocked || localBattlePanning)
             return;
         StepLocalZoom(evt.delta.y > 0 ? 1f / LocalZoomStep : LocalZoomStep, evt.mousePosition);
     }

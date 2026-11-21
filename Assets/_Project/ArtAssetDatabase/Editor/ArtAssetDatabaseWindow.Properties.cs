@@ -227,6 +227,9 @@ namespace KingdomSurvival.ArtAssets.Editor
             BoolProperty("Избранное", asset.Favorite, value => { asset.Favorite = value; visibleDirty = true; });
             ChoiceProperty("Назначение", ArtAssetLabels.Purposes, ArtAssetLabels.PurposeTitle, asset.Purpose,
                 value => { asset.Purpose = value; visibleDirty = true; });
+            SliderProperty("Гнётся от прохода (арена)", asset.WalkBend, -1f, 2f, value => asset.WalkBend = Mathf.Clamp(value, -1f, 2f),
+                "Трава, бурьян и кусты отклоняются, когда рядом идёт боец. 0 — стоит, 1 — полный прогиб, меньше нуля — автоматически " +
+                "(растения гнутся, деревья, пни и камни стоят).");
             // Старая запись с несколькими ракурсами: основной вид — явный выбор.
             if (asset.ViewCount > 1)
             {

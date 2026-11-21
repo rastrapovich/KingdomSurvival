@@ -165,6 +165,32 @@ namespace KingdomSurvival.BattlefieldDatabase
             return result;
         }
 
+        // Траектория по точкам тем же пером: каждый отрезок — как ребро контура
+        // (нажим, дрожь, разрывы и свободные окончания), рисунок привязан к
+        // положению отрезка относительно anchor в единицах unit.
+        public static Result BuildPath(IReadOnlyList<Vector2> points, float unit, float verticalScale, Func<Vector2, Vector2> raise,
+            BattlefieldInkPen pen, float lineWidth, Vector2 anchor, uint salt, Options options)
+        {
+            Result result = new Result { Strokes = new List<Stroke>() };
+            if (points == null || points.Count < 2 || pen == null || unit <= 0.01f || lineWidth <= 0.001f)
+                return result;
+            verticalScale = Mathf.Max(0.05f, verticalScale);
+            steps = options.Steps > 1 ? options.Steps : DefaultSteps;
+            calm = options.Calm;
+            float pixelScale = Mathf.Max(0.01f, options.PixelScale);
+            float baseWidth = Mathf.Max(lineWidth, pen.MinPixels / pixelScale);
+            for (int i = 1; i < points.Count; i++)
+            {
+                Vector2 a = points[i - 1], b = points[i];
+                long ax = Mathf.RoundToInt((a.x - anchor.x) / unit * 4f), ay = Mathf.RoundToInt((a.y - anchor.y) / verticalScale / unit * 4f);
+                long bx = Mathf.RoundToInt((b.x - anchor.x) / unit * 4f), by = Mathf.RoundToInt((b.y - anchor.y) / verticalScale / unit * 4f);
+                uint seed = unchecked((uint)((ax * 73856093L) ^ (ay * 19349663L) ^ (bx * 83492791L) ^ (by * 2654435761L)) ^ salt * 0x27d4eb2du);
+                result.Edges++;
+                DrawEdge(result, a, b, unit, verticalScale, raise, pen, baseWidth, 1f, options.Endings && pen.Endings, seed);
+            }
+            return result;
+        }
+
         // Радиус решётки по расстоянию между соседними центрами (√3·R); у
         // одиночной клетки — переданный радиус.
         private static float LatticeRadius(IReadOnlyList<Vector2> centers, float verticalScale, float fallback)

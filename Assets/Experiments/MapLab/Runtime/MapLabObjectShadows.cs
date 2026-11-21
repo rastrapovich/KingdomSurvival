@@ -169,6 +169,16 @@ namespace KingdomSurvival.MapLab
                 bandOn = false;
             });
             result.Shapes = count;
+            // Размытый внешний край: смесь маски с её размытой копией (у ствола тень
+            // плотная — её держит контактное поле).
+            float soft = settings.Stage03.ShadowSoftEdge;
+            if (soft > 0.01f)
+            {
+                int radius = Mathf.Clamp(Mathf.RoundToInt(soft / texel), 1, 16);
+                float[] blurred = BoxBlur(BoxBlur(result.Cast, res, radius), res, radius);
+                for (int i = 0; i < blurred.Length; i++)
+                    result.Cast[i] = Mathf.Lerp(result.Cast[i], blurred[i], 0.75f);
+            }
             if (settings.IsStage05 && settings.Stage05.ShadowEdgeLoss > 0f)
                 LiveEdge(result.Cast, res, texel, data.Seed, settings.Stage05);
             result.Milliseconds = (float)watch.Elapsed.TotalMilliseconds;

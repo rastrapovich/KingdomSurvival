@@ -75,6 +75,9 @@ Shader "Kingdom Survival/MapLab/Figure Card"
                 float push = max(0.0, -y) * need + _DepthMargin;
                 float3 world = basePoint + camRight * input.offset.x + up * y * screenScale + toCamera * push;
                 o.positionCS = TransformWorldToHClip(world);
+                // Глубина карточки постоянна (по опоре): фигура не прорезает соседние спрайты.
+                float4 depthCS = TransformWorldToHClip(basePoint + toCamera * push);
+                o.positionCS.z = depthCS.z / depthCS.w * o.positionCS.w;
                 o.uv = input.uv;
                 return o;
             }

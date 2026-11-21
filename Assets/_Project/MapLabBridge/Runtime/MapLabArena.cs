@@ -86,6 +86,36 @@ namespace KingdomSurvival.MapLabBridge
         public System.Func<float> LensPulse;
         public Vector2 ShakeShare;
 
+        // Проход по траве (бой): точки ног бойца и «следы» за ним — кадр поля
+        // (доли высоты кадра, Y вниз) и сила 0..1. Низкие карточки (трава, мелкие
+        // растения) в шейдере отклоняются от этих точек только на время кадра.
+        private const int MaxWalkers = 6;
+        private readonly Vector4[] walkers = new Vector4[MaxWalkers];
+        private int walkerCount;
+
+        public void SetWalkers(IReadOnlyList<(Vector2 Nominal, float Strength)> points)
+        {
+            walkerCount = 0;
+            if (points == null) return;
+            float radius = Spec.HexWorld * 1.3f;
+            for (int i = 0; i < points.Count && walkerCount < MaxWalkers; i++)
+            {
+                if (points[i].Strength <= 0.01f) continue;
+                Vector2 world = ToWorld(points[i].Nominal);
+                walkers[walkerCount++] = new Vector4(WorldOffset.x + world.x, WorldOffset.z + world.y, radius, Mathf.Clamp01(points[i].Strength));
+            }
+        }
+
+        private void ApplyWalkers()
+        {
+            Shader.SetGlobalVectorArray("_MapLabWalkers", walkers);
+            Shader.SetGlobalFloat("_MapLabWalkerCount", walkerCount);
+            // Выше этого карточка не гнётся: деревья и постройки стоят.
+            Shader.SetGlobalFloat("_MapLabBendMaxHeight", walkerCount > 0 ? Spec.HexWorld * 0.7f : 0f);
+        }
+
+        private static void ClearWalkers() => Shader.SetGlobalFloat("_MapLabWalkerCount", 0f);
+
         // Смена вида карты в бою (20.11.2026): свои рисунки вида для общих
         // ассетов подменяются без пересборки; цветокоррекция и так берётся
         // при каждом кадре. false — подмена невозможна (другая палитра или
@@ -301,6 +331,8 @@ namespace KingdomSurvival.MapLabBridge
             s.General.Seed = Spec.Seed;
             s.General.Quality = MapLabQuality.Samples257;
             s.Stage05.WideFrame = false;
+            // Тени арены: край размыт (трава и кусты рядом с бойцами не «лужи»).
+            s.Stage03.ShadowSoftEdge = Spec.HexWorld * 0.16f;
             s.Stage05.FrameWidth = 0f;
             s.Stage05.PaintStreaming = MapLabPaintStreaming.Off;
             // Крупный план: покраска плотнее, чем на карте мира.
@@ -514,6 +546,7 @@ namespace KingdomSurvival.MapLabBridge
             camera.backgroundColor = look != null && look.Grade != null && !look.Grade.IsNeutral ? look.Background : paper;
             MapLabViewGradeShader.Apply(look);
             bool graded = BeginFrame();
+            ApplyWalkers();
             try
             {
                 if (EffectiveFrameMsaa > 1)
@@ -538,6 +571,7 @@ namespace KingdomSurvival.MapLabBridge
             }
             finally
             {
+                ClearWalkers();
                 framePost?.End(camera);
                 MapLabViewGradeShader.Neutral();
             }

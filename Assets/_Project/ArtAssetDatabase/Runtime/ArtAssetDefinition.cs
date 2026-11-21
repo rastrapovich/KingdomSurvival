@@ -465,6 +465,10 @@ namespace KingdomSurvival.ArtAssets
         public ArtAssetView MainView = ArtAssetView.Front;
         // Назначение: общий для карты и арены, только карта или только арена.
         public ArtAssetPurpose Purpose = ArtAssetPurpose.Both;
+        // Гнётся от прохода бойцов (арена): 0 — стоит, 1 — полный прогиб верха.
+        // Меньше нуля — автоматически по роли: трава, бурьян и кусты гнутся,
+        // деревья, пни и камни стоят.
+        public float WalkBend = -1f;
 
         public List<ArtAssetViewSettings> ViewSettings = new List<ArtAssetViewSettings>();
         public List<ArtAssetPart> Parts = new List<ArtAssetPart> { new ArtAssetPart() };

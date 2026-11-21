@@ -151,6 +151,8 @@ namespace KingdomSurvival.MapLabBridge
                 float height = rect.height / asset.SafePixelsPerUnit * scale * boost;
                 Vector2 pivot = asset.Settings(view).Pivot;
                 MapLabArtEntry entry = Entry(IdPrefix + asset.Id, asset, sprite, height, pivot);
+                entry.WalkBend = asset.WalkBend >= 0f ? asset.WalkBend
+                    : role == MapLabDecorRole.LowGrass || role == MapLabDecorRole.TallPlant ? 1f : 0f;
                 set.Entries.Add(entry);
                 if (decor == null || role == null)
                     continue;

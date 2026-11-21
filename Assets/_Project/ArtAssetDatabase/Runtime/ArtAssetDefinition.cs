@@ -469,6 +469,11 @@ namespace KingdomSurvival.ArtAssets
         // Меньше нуля — автоматически по роли: трава, бурьян и кусты гнутся,
         // деревья, пни и камни стоят.
         public float WalkBend = -1f;
+        // Приоритет в генераторе арены, 0–10: вес выбора среди рисунков той же роли
+        // (деревья, трава, бурьян, пни, камни). 1 — обычно, 0,1 — самый редкий
+        // (одна-две штуки на арену), 10 — часто. 0 — генератор рисунок не берёт.
+        public const float MaxArenaPriority = 10f;
+        public float ArenaPriority = 1f;
 
         public List<ArtAssetViewSettings> ViewSettings = new List<ArtAssetViewSettings>();
         public List<ArtAssetPart> Parts = new List<ArtAssetPart> { new ArtAssetPart() };

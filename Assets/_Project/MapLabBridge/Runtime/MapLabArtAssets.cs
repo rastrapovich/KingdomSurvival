@@ -31,6 +31,7 @@ namespace KingdomSurvival.MapLabBridge
         public float HalfWidth;      // полуширина карточки в мире MapLab
         public string ObjectKind;    // вид объекта местности арены (для ArenaObject)
         public bool Pack;            // трава пакета «Grass_*» (15 вариантов × 3 вида)
+        public float Priority = 1f;  // приоритет записи 0–10 (вес выбора среди своей роли)
     }
 
     // Единый каталог: записи Базы ассетов → рисунки MapLab по тому же ID.
@@ -166,6 +167,7 @@ namespace KingdomSurvival.MapLabBridge
                     HalfWidth = height * rect.width / Mathf.Max(1f, rect.height) * 0.5f,
                     ObjectKind = objectKind,
                     Pack = IsGrassPack(asset),
+                    Priority = Mathf.Clamp(asset.ArenaPriority, 0f, ArtAssetDefinition.MaxArenaPriority),
                 });
             }
             return set;
@@ -281,6 +283,45 @@ namespace KingdomSurvival.MapLabBridge
         private static readonly HashSet<string> TallPlants = new HashSet<string>
             { "Reedgrass", "Fireweed", "Nettle", "Burdock", "Fern", "Cattail", "TallCattail", "Raspberry" };
         private static readonly HashSet<string> SmallRocks = new HashSet<string> { "SmallRock", "GroundCobble" };
+
+        // Выбор рисунка по приоритету записи: вес = Priority (1 у всех — равные шансы,
+        // как до появления приоритета). roll — случайное число [0;1).
+        public static MapLabDecorArt Pick(List<MapLabDecorArt> pool, float roll)
+        {
+            float total = 0f;
+            foreach (MapLabDecorArt art in pool)
+                total += Mathf.Max(0f, art.Priority);
+            if (total <= 0f)
+                return pool[(int)(roll * pool.Count) % pool.Count];
+            float at = Mathf.Clamp01(roll) * total;
+            foreach (MapLabDecorArt art in pool)
+            {
+                at -= Mathf.Max(0f, art.Priority);
+                if (at < 0f)
+                    return art;
+            }
+            return pool[pool.Count - 1];
+        }
+
+        // То же для рисунков набора: копии ковра пакета («#carpet») несут приоритет
+        // в Weight, остальные берутся поровну.
+        public static MapLabArtEntry PickEntry(List<MapLabArtEntry> pool, float roll)
+        {
+            float Weight(MapLabArtEntry e) => e.Id != null && e.Id.EndsWith("#carpet") ? Mathf.Max(0f, e.Weight) : 1f;
+            float total = 0f;
+            foreach (MapLabArtEntry e in pool)
+                total += Weight(e);
+            if (total <= 0f)
+                return pool[(int)(roll * pool.Count) % pool.Count];
+            float at = Mathf.Clamp01(roll) * total;
+            foreach (MapLabArtEntry e in pool)
+            {
+                at -= Weight(e);
+                if (at < 0f)
+                    return e;
+            }
+            return pool[pool.Count - 1];
+        }
 
         // Трава пакета «Grass_*» (тег — ID варианта поставки). Высота записи
         // решает только низкая она или высокая; высокая — не бурьян у деревьев.

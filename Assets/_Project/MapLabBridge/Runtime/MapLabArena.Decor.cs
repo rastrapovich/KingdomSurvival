@@ -125,8 +125,8 @@ namespace KingdomSurvival.MapLabBridge
                 }
                 // Валуны чаще пней; рисунок растягивается на ширину клетки.
                 MapLabDecorArt art = boulders.Count > 0 && (stumps.Count == 0 || rng.Value() < look.BlockBoulderShare)
-                    ? boulders[(int)(rng.Value() * boulders.Count) % boulders.Count]
-                    : blockers[(int)(rng.Value() * blockers.Count) % blockers.Count];
+                    ? MapLabArtAssets.Pick(boulders, rng.Value())
+                    : MapLabArtAssets.Pick(blockers, rng.Value());
                 float height = art.Height * (hex * 1.5f) / Mathf.Max(0.05f, art.HalfWidth * 2f);
                 MapLabArtEntry sized = MapLabArtAssets.AddSized(decorSet, art, MapLabArtAssets.BlockSuffix, height);
                 if (sized == null)
@@ -143,7 +143,7 @@ namespace KingdomSurvival.MapLabBridge
                 if (pool.Count == 0)
                     continue;
                 Vector2 p = ToWorld(center);
-                MapLabDecorArt art = pool[(int)(rng.Value() * pool.Count) % pool.Count];
+                MapLabDecorArt art = MapLabArtAssets.Pick(pool, rng.Value());
                 float height = art.Height * (hex * 1.6f) / Mathf.Max(0.05f, art.HalfWidth * 2f);
                 MapLabArtEntry sized = MapLabArtAssets.AddSized(decorSet, art, MapLabArtAssets.ObjectSuffix, height);
                 if (sized == null)
@@ -168,7 +168,7 @@ namespace KingdomSurvival.MapLabBridge
                     int stones = look.RubbleStonesMin + (int)(rng.Value() * Mathf.Max(1, look.RubbleStonesMax - look.RubbleStonesMin + 1));
                     for (int i = 0; i < stones; i++)
                     {
-                        MapLabDecorArt art = small[(int)(rng.Value() * small.Count) % small.Count];
+                        MapLabDecorArt art = MapLabArtAssets.Pick(small, rng.Value());
                         float angle = rng.Value() * Mathf.PI * 2f;
                         Vector2 q = p + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * hex * rng.Range(0.15f, 0.6f);
                         c.Features.Add((q, art.Id, DecorKind));
@@ -213,8 +213,8 @@ namespace KingdomSurvival.MapLabBridge
                 foreach (Vector2 center in centers)
                 {
                     // Группа — одна-две породы, ядро крупнее, к краю моложе.
-                    MapLabDecorArt main = trees[(int)(rng.Value() * trees.Count) % trees.Count];
-                    MapLabDecorArt second = trees[(int)(rng.Value() * trees.Count) % trees.Count];
+                    MapLabDecorArt main = MapLabArtAssets.Pick(trees, rng.Value());
+                    MapLabDecorArt second = MapLabArtAssets.Pick(trees, rng.Value());
                     int count = look.TreesPerGroupMin + (int)(rng.Value() * Mathf.Max(1, look.TreesPerGroupMax - look.TreesPerGroupMin + 1));
                     for (int attempt = 0, placed = 0; attempt < count * 6 && placed < count; attempt++)
                     {
@@ -236,7 +236,7 @@ namespace KingdomSurvival.MapLabBridge
                         List<MapLabDecorArt> pool = extra == 0 ? tall : stumps;
                         if (pool.Count == 0 || rng.Value() > (extra == 0 ? look.WeedChance : look.StumpChance) * Mathf.Min(1f, density))
                             continue;
-                        MapLabDecorArt art = pool[(int)(rng.Value() * pool.Count) % pool.Count];
+                        MapLabDecorArt art = MapLabArtAssets.Pick(pool, rng.Value());
                         for (int attempt = 0; attempt < 6; attempt++)
                         {
                             Vector2 q = center + toward * hex * rng.Range(1.8f, 3.2f) + new Vector2(rng.Range(-1f, 1f), rng.Range(-0.6f, 0.6f)) * hex;
@@ -268,8 +268,8 @@ namespace KingdomSurvival.MapLabBridge
                     if (prng.Value() >= centerDensity / GrassZone.MaxMultiplier)
                         continue;
                     float spread = hex * prng.Range(look.GrassPatchSizeMin, look.GrassPatchSizeMax);
-                    MapLabDecorArt first = low[(int)(prng.Value() * low.Count) % low.Count];
-                    MapLabDecorArt other = low[(int)(prng.Value() * low.Count) % low.Count];
+                    MapLabDecorArt first = MapLabArtAssets.Pick(low, prng.Value());
+                    MapLabDecorArt other = MapLabArtAssets.Pick(low, prng.Value());
                     int count = look.GrassPerPatchMin + (int)(prng.Value() * Mathf.Max(1, look.GrassPerPatchMax - look.GrassPerPatchMin + 1));
                     for (int i = 0; i < count; i++)
                     {
@@ -278,7 +278,7 @@ namespace KingdomSurvival.MapLabBridge
                         Vector2 q = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle) * 0.7f) * spread * radius;
                         MapLabDecorArt art = prng.Value() < 0.7f ? first : other;
                         if (tallGrass.Count > 0 && look.TallGrassShare > 0f && prng.Value() < look.TallGrassShare)
-                            art = tallGrass[(int)(prng.Value() * tallGrass.Count) % tallGrass.Count];
+                            art = MapLabArtAssets.Pick(tallGrass, prng.Value());
                         float lot = prng.Value();
                         // Травинка по своей густоте относительно центра пятна.
                         if (lot >= Mathf.Clamp01(zone.Density(q) / Mathf.Max(0.05f, centerDensity)))
@@ -305,8 +305,8 @@ namespace KingdomSurvival.MapLabBridge
                     if (!zone.Accept(center))
                         continue;
                     float spread = hex * rng.Range(look.GrassPatchSizeMin, look.GrassPatchSizeMax);
-                    MapLabDecorArt first = low[(int)(rng.Value() * low.Count) % low.Count];
-                    MapLabDecorArt other = low[(int)(rng.Value() * low.Count) % low.Count];
+                    MapLabDecorArt first = MapLabArtAssets.Pick(low, rng.Value());
+                    MapLabDecorArt other = MapLabArtAssets.Pick(low, rng.Value());
                     int count = look.GrassPerPatchMin + (int)(rng.Value() * Mathf.Max(1, look.GrassPerPatchMax - look.GrassPerPatchMin + 1));
                     for (int i = 0; i < count; i++)
                     {
@@ -316,7 +316,7 @@ namespace KingdomSurvival.MapLabBridge
                         Vector2 q = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle) * 0.7f) * spread * radius;
                         MapLabDecorArt art = rng.Value() < 0.7f ? first : other;
                         if (tallGrass.Count > 0 && look.TallGrassShare > 0f && rng.Value() < look.TallGrassShare)
-                            art = tallGrass[(int)(rng.Value() * tallGrass.Count) % tallGrass.Count];
+                            art = MapLabArtAssets.Pick(tallGrass, rng.Value());
                         if (!zone.Accept(q))
                             continue;
                         if ((look.GrassClearOfStart > 0f && Near(keep, q, hex * look.GrassClearOfStart)) || Near(blocked, q, hex * 0.75f) || Crowded(q, art.HalfWidth * 0.35f, look.GrassSpacing))
@@ -337,7 +337,7 @@ namespace KingdomSurvival.MapLabBridge
                 int rocks = Mathf.RoundToInt(rng.Range(look.SmallRocksMin, look.SmallRocksMax) * density);
                 for (int i = 0, attempt = 0; i < rocks && attempt < rocks * 8; attempt++)
                 {
-                    MapLabDecorArt art = small[(int)(rng.Value() * small.Count) % small.Count];
+                    MapLabDecorArt art = MapLabArtAssets.Pick(small, rng.Value());
                     Vector2 q = new Vector2(rng.Range(frame.xMin, frame.xMax), rng.Range(frame.yMin, frame.yMax));
                     if (Near(keep, q, hex) || Near(cells, q, hex * 1.3f) || Crowded(q, art.HalfWidth * 0.5f, 0.8f))
                         continue;
@@ -431,7 +431,7 @@ namespace KingdomSurvival.MapLabBridge
                 Grid(look.GrassCarpet, (q, roll) =>
                 {
                     List<MapLabArtEntry> pool = inks.Count > 0 && (tufts.Count == 0 || roll() < look.GrassCarpetInk) ? inks : tufts;
-                    MapLabArtEntry art = pool[(int)(roll() * pool.Count) % pool.Count];
+                    MapLabArtEntry art = MapLabArtAssets.PickEntry(pool, roll());
                     c.Features.Add((q, art.Id, DecorKind));
                     groundArtIds.Add(art.Id);
                     DecorFeatures++;
@@ -453,10 +453,10 @@ namespace KingdomSurvival.MapLabBridge
             if (low.Count > 0)
                 Grid(look.GrassSingles, (q, roll) =>
                 {
-                    MapLabDecorArt art = low[(int)(roll() * low.Count) % low.Count];
+                    MapLabDecorArt art = MapLabArtAssets.Pick(low, roll());
                     if (tallGrass.Count > 0 && look.TallGrassShare > 0f && roll() < look.TallGrassShare)
                     {
-                        MapLabDecorArt tallArt = tallGrass[(int)(roll() * tallGrass.Count) % tallGrass.Count];
+                        MapLabDecorArt tallArt = MapLabArtAssets.Pick(tallGrass, roll());
                         if (OverField(q, tallArt))
                             return;
                         c.Features.Add((q, tallArt.Id, DecorKind));
@@ -493,6 +493,7 @@ namespace KingdomSurvival.MapLabBridge
                     packCopy.Id = packId;
                     packCopy.Texture = packed.Texture;
                     packCopy.WorldHeight = packed.WorldHeight * Mathf.Max(0.1f, scale);
+                    packCopy.Weight = art.Priority;
                     decorSet.Entries.Add(packCopy);
                 }
                 tufts.Add(packCopy);
@@ -521,7 +522,8 @@ namespace KingdomSurvival.MapLabBridge
             }
         }
 
-        private List<MapLabDecorArt> Role(MapLabDecorRole role) => decorArt.FindAll(art => art.Role == role);
+        // Приоритет 0 — рисунок в этой роли не берётся.
+        private List<MapLabDecorArt> Role(MapLabDecorRole role) => decorArt.FindAll(art => art.Role == role && art.Priority > 0f);
     }
 }
 

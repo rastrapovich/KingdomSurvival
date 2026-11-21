@@ -230,6 +230,11 @@ namespace KingdomSurvival.ArtAssets.Editor
             SliderProperty("Гнётся от прохода (арена)", asset.WalkBend, -1f, 2f, value => asset.WalkBend = Mathf.Clamp(value, -1f, 2f),
                 "Трава, бурьян и кусты отклоняются, когда рядом идёт боец. 0 — стоит, 1 — полный прогиб, меньше нуля — автоматически " +
                 "(растения гнутся, деревья, пни и камни стоят).");
+            SliderProperty("Приоритет в генераторе арены", asset.ArenaPriority, 0f, ArtAssetDefinition.MaxArenaPriority,
+                value => asset.ArenaPriority = Mathf.Round(Mathf.Clamp(value, 0f, ArtAssetDefinition.MaxArenaPriority) * 10f) / 10f,
+                "Вес рисунка среди таких же (деревья, трава, бурьян, пни, камни) относительно соседей с приоритетом 1. " +
+                "0 — не брать; 0,1 — редчайший (в 10 раз реже обычного: на арену одна-две штуки); 0,5 — редко; " +
+                "1 — обычно (по умолчанию у всех); 3 — часто; 10 — в 10 раз чаще обычного, главный рисунок группы.");
             // Старая запись с несколькими ракурсами: основной вид — явный выбор.
             if (asset.ViewCount > 1)
             {

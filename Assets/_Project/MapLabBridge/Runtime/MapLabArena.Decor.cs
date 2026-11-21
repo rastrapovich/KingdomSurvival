@@ -477,9 +477,14 @@ namespace KingdomSurvival.MapLabBridge
             // Низкая трава пакета «Grass_*» (три вида) — вместо мелких пучков карты мира.
             // Размер записи уже с множителем арены, ковёр — свой масштаб; нет пакета —
             // как прежде.
+            bool anyPack = false;
             foreach (MapLabDecorArt art in decorArt)
             {
                 if (!art.Pack || art.Role != MapLabDecorRole.LowGrass || decorSet == null)
+                    continue;
+                anyPack = true;
+                // Приоритет 0 — в ковёр не берётся (записи остаются в Базе, но не рисуются).
+                if (art.Priority <= 0f)
                     continue;
                 MapLabArtEntry packed = decorSet.Find(art.Id);
                 if (packed == null || !packed.HasTexture)
@@ -498,7 +503,7 @@ namespace KingdomSurvival.MapLabBridge
                 }
                 (art.Ink ? inks : tufts).Add(packCopy);
             }
-            if (tufts.Count + inks.Count > 0)
+            if (anyPack || tufts.Count + inks.Count > 0)
                 return;
             MapLabArtSet source = MapLabGameAssets.Load()?.ArtSet05;
             if (source == null || decorSet == null)

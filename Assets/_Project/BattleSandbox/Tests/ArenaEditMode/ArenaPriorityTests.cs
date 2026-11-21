@@ -20,12 +20,12 @@ namespace KingdomSurvival.BattleSandbox.Tests
         [Test]
         public void Priority_ScalesHowOftenAssetIsPicked()
         {
-            List<MapLabDecorArt> pool = new List<MapLabDecorArt> { Art("rare", 0.1f), Art("common", 10f) };
+            List<MapLabDecorArt> pool = new List<MapLabDecorArt> { Art("rare", 0.1f), Art("common", 1f) };
             int rare = 0;
             const int rolls = 1000;
             for (int i = 0; i < rolls; i++)
                 if (MapLabArtAssets.Pick(pool, (i + 0.5f) / rolls).Id == "rare") rare++;
-            Assert.That(rare, Is.InRange(5, 15), "0,1 против 10 — около 1 % выборов.");
+            Assert.That(rare, Is.InRange(5, 15), "0,1 против 1: вес 0,01 против 1 — около 1 % выборов.");
         }
 
         [Test]

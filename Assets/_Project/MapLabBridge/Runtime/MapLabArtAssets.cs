@@ -284,19 +284,23 @@ namespace KingdomSurvival.MapLabBridge
             { "Reedgrass", "Fireweed", "Nettle", "Burdock", "Fern", "Cattail", "TallCattail", "Raspberry" };
         private static readonly HashSet<string> SmallRocks = new HashSet<string> { "SmallRock", "GroundCobble" };
 
-        // Выбор рисунка по приоритету записи: вес = Priority (1 у всех — равные шансы,
+        // Вес выбора по приоритету 0–10 — квадрат: 0,1 → 0,01, 1 → 1, 10 → 100 (разрыв
+        // между редким и главным в 10 000 раз). 1 у всех — равные шансы, как раньше.
+        public static float ArenaWeight(float priority) => Mathf.Max(0f, priority) * Mathf.Max(0f, priority);
+
+        // Выбор рисунка по приоритету записи (вес — ArenaWeight; 1 у всех — равные шансы,
         // как до появления приоритета). roll — случайное число [0;1).
         public static MapLabDecorArt Pick(List<MapLabDecorArt> pool, float roll)
         {
             float total = 0f;
             foreach (MapLabDecorArt art in pool)
-                total += Mathf.Max(0f, art.Priority);
+                total += ArenaWeight(art.Priority);
             if (total <= 0f)
                 return pool[(int)(roll * pool.Count) % pool.Count];
             float at = Mathf.Clamp01(roll) * total;
             foreach (MapLabDecorArt art in pool)
             {
-                at -= Mathf.Max(0f, art.Priority);
+                at -= ArenaWeight(art.Priority);
                 if (at < 0f)
                     return art;
             }
@@ -307,7 +311,7 @@ namespace KingdomSurvival.MapLabBridge
         // в Weight, остальные берутся поровну.
         public static MapLabArtEntry PickEntry(List<MapLabArtEntry> pool, float roll)
         {
-            float Weight(MapLabArtEntry e) => e.Id != null && e.Id.EndsWith("#carpet") ? Mathf.Max(0f, e.Weight) : 1f;
+            float Weight(MapLabArtEntry e) => e.Id != null && e.Id.EndsWith("#carpet") ? ArenaWeight(e.Weight) : 1f;
             float total = 0f;
             foreach (MapLabArtEntry e in pool)
                 total += Weight(e);

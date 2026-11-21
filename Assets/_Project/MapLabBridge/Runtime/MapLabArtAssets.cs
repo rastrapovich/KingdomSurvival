@@ -95,7 +95,7 @@ namespace KingdomSurvival.MapLabBridge
             List<ArtAssetDefinition> found = new List<ArtAssetDefinition>();
             foreach (ArtAssetDefinition asset in catalog.assets)
             {
-                if (asset == null || !asset.UsableOnArena || asset.IsAnimated || ArenaObjectKindOf(asset) != null || RoleOf(asset) != role)
+                if (asset == null || !asset.UsableOnArena || asset.IsAnimated || ArenaObjectKindOf(asset) != null || RoleOf(asset) != role || asset.ArenaPriority <= 0f)
                     continue;
                 Sprite sprite = asset.MainSprite(asset.PrimaryView);
                 if (sprite == null || sprite.texture == null || Mathf.Abs(sprite.rect.width - sprite.texture.width) > 1f || Mathf.Abs(sprite.rect.height - sprite.texture.height) > 1f)
@@ -105,7 +105,17 @@ namespace KingdomSurvival.MapLabBridge
             if (found.Count == 0)
                 return null;
             found.Sort((a, b) => string.CompareOrdinal(a.Name, b.Name));
-            ArtAssetDefinition chosen = found[((pick % found.Count) + found.Count) % found.Count];
+            // Выбор по приоритету записи (вес — квадрат), устойчивый по pick.
+            float totalWeight = 0f;
+            foreach (ArtAssetDefinition candidate in found)
+                totalWeight += ArenaWeight(candidate.ArenaPriority);
+            float at = (Mathf.Abs(pick) % 997) / 997f * totalWeight;
+            ArtAssetDefinition chosen = found[found.Count - 1];
+            foreach (ArtAssetDefinition candidate in found)
+            {
+                at -= ArenaWeight(candidate.ArenaPriority);
+                if (at < 0f) { chosen = candidate; break; }
+            }
             ArtAssetView view = chosen.PrimaryView;
             pivot = chosen.Settings(view).Pivot;
             Texture2D own = MapLabMapViews.Active?.FindTexture(IdPrefix + chosen.Id);
@@ -358,6 +368,10 @@ namespace KingdomSurvival.MapLabBridge
 
         public static MapLabDecorRole? RoleOf(ArtAssetDefinition asset)
         {
+            // Трава карты («MapGrass_*») — всегда низкая: высота записи считается по холсту
+            // с большими полями вокруг тонких штрихов и вышла бы «высокой».
+            if (HasTagPrefix(asset, MapGrassPrefix))
+                return MapLabDecorRole.LowGrass;
             if (IsGrassPack(asset))
                 return asset.Height < 0.75f ? MapLabDecorRole.LowGrass : MapLabDecorRole.TallGrass;
             if (asset.Tags != null)

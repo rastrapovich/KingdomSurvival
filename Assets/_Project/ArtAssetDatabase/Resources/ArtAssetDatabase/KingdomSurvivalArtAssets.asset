@@ -40,6 +40,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 3
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.5, y: 0.1}
       FootprintSize: {x: 0.6, y: 0.3}
@@ -180,6 +181,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 3
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.5, y: 0.06}
       FootprintSize: {x: 2.4, y: 0.9}
@@ -373,6 +375,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.43925926, y: 0.08971292}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -511,6 +514,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4372314, y: 0.04186603}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -650,6 +654,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.47197834, y: 0.22527911}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -788,6 +793,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.3151988, y: 0.08971292}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -926,6 +932,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.22396815, y: 0.18301435}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -1065,6 +1072,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.6491768, y: 0.3177831}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -1204,6 +1212,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.29753056, y: 0.25558212}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -1343,6 +1352,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.21700296, y: 0.10326954}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -1481,6 +1491,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.37079346, y: 0.2053429}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -1619,6 +1630,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.28417584, y: 0.08094099}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -1758,6 +1770,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.35498434, y: 0.28110048}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -1897,6 +1910,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.53917235, y: 0.29385966}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -2035,6 +2049,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4940243, y: 0.07137161}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -2173,6 +2188,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.48439354, y: 0.017942583}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -2310,7 +2326,8 @@ MonoBehaviour:
     RandomPhase: 1
     MainView: 0
     Purpose: 2
-    WalkBend: -1
+    WalkBend: 0.989
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.5345444, y: 0.16786283}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -2449,6 +2466,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.43851116, y: 0.24043062}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -2587,6 +2605,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.3929598, y: 0.21730463}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -2725,6 +2744,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4585061, y: 0.20773524}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -2863,6 +2883,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.44525945, y: 0.17025518}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -3001,6 +3022,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.67319363, y: 0.1670654}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -3139,6 +3161,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4276089, y: 0.13038278}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -3277,6 +3300,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.36486635, y: 0.12719299}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -3415,6 +3439,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.6518659, y: 0.1423445}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -3553,6 +3578,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.35330206, y: 0.16228071}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -3691,6 +3717,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4771525, y: 0.2515949}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -3829,6 +3856,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.50860226, y: 0.2069378}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -3968,6 +3996,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.51077235, y: 0.2914673}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -4106,6 +4135,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.45640132, y: 0.017192785}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -4244,6 +4274,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4603974, y: 0.008737316}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -4382,6 +4413,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4837964, y: 0.07695375}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -4520,6 +4552,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.37370092, y: 0.081738435}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -4659,6 +4692,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4537972, y: 0.017192785}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -4797,6 +4831,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4522015, y: 0.0047914316}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -4935,6 +4970,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.46083495, y: 0.013810597}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -5073,6 +5109,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.48763612, y: 0.03692221}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -5211,6 +5248,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4898862, y: 0.014374295}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -5349,6 +5387,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.46313152, y: 0.011555806}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -5487,6 +5526,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.47064587, y: 0.003664036}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -5625,6 +5665,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.45760244, y: 0.007609921}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -5763,6 +5804,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.44177446, y: 0.020574972}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -5901,6 +5943,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.43172857, y: 0.011555806}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -6039,6 +6082,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.46268466, y: 0.009864712}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -6177,6 +6221,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.49255747, y: 0.016629087}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -6315,6 +6360,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.44521996, y: 0.0053551295}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -6453,6 +6499,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.46391714, y: 0.027903045}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -6591,6 +6638,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.47626007, y: 0.01832018}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -6729,6 +6777,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.47302157, y: 0.011555806}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -6867,6 +6916,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.48085082, y: 0.013810597}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -7005,6 +7055,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.43793735, y: 0.012119504}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -7144,6 +7195,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.44574133, y: 0.012119504}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -7282,6 +7334,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.45657697, y: 0.014374295}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -7420,6 +7473,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4803936, y: 0.009864712}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -7558,6 +7612,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4718322, y: 0.025648253}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -7697,6 +7752,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.46940354, y: 0.053833146}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -7836,6 +7892,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.46149763, y: 0.100877196}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -7975,6 +8032,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4471647, y: 0.04106858}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -8114,6 +8172,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.46115914, y: 0.06259968}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -8253,6 +8312,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4524447, y: 0.08014354}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -8392,6 +8452,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.48603085, y: 0.10326954}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -8531,6 +8592,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4424287, y: 0.100079745}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -8670,6 +8732,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.45578542, y: 0.099282295}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -8808,6 +8871,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.48856363, y: 0.014937993}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -8946,6 +9010,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.46362433, y: 0.011555806}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -9084,6 +9149,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.46320695, y: 0.007046223}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -9222,6 +9288,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.45281738, y: 0.009301014}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -9361,6 +9428,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.46904093, y: 0.009301014}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -9499,6 +9567,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4359104, y: 0.013810597}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -9638,6 +9707,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4498955, y: 0.008173619}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -9777,6 +9847,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.48122737, y: 0.034688994}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -9913,6 +9984,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.5, y: 0.119140625}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -10049,6 +10121,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.5, y: 0.119140625}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -10185,6 +10258,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.5, y: 0.119140625}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -10321,6 +10395,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.5, y: 0.119140625}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -10457,6 +10532,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.5, y: 0.119140625}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -10593,6 +10669,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.5, y: 0.119140625}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -10729,6 +10806,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.5, y: 0.119140625}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -10865,6 +10943,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.5, y: 0.119140625}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -11001,6 +11080,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.5, y: 0.119140625}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -11137,6 +11217,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.5, y: 0.119140625}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -11277,6 +11358,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.44650665, y: 0.05078125}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -11416,6 +11498,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4697876, y: 0.05078125}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -11554,6 +11637,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4875859, y: 0.05078125}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -11692,6 +11776,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.47265854, y: 0.05078125}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -11830,6 +11915,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4132339, y: 0.05078125}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -11968,7 +12054,8 @@ MonoBehaviour:
     RandomPhase: 1
     MainView: 0
     Purpose: 2
-    WalkBend: -1
+    WalkBend: 1.162
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.50455666, y: 0.051757812}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -12080,145 +12167,6 @@ MonoBehaviour:
         SheetFrames: []
         SheetNormals: []
         SheetKey: 
-  - Id: asset_35643432e577
-    Name: "\u0421\u0440\u0435\u0434\u043D\u0438\u0439 \u043F\u0443\u0447\u043E\u043A,
-      \u043D\u0430\u043A\u043B\u043E\u043D\u043D\u044B\u0439"
-    Category: 3
-    Tags:
-    - grass-pack-15
-    - Grass_MidTuft_B
-    Favorite: 0
-    Credit: "Kingdom Survival \xB7 \u043F\u0430\u043A\u0435\u0442 \u0430\u0441\u0441\u0435\u0442\u043E\u0432
-      \u0430\u0440\u0435\u043D\u044B, \u043F\u0435\u0440\u0432\u044B\u0439 \u043D\u0430\u0431\u043E\u0440"
-    SourceUrl: 
-    ImportKey: pack69_grass_midtuft_b
-    SourceFolder: 
-    PixelsPerUnit: 875.5556
-    BlocksMovement: 0
-    OccludesLight: 0
-    ShadowLength: 1
-    LitBySun: 1
-    LitByFire: 1
-    SeeThrough: 0
-    SeeThroughAlpha: 0.3
-    SeeThroughSize: 3
-    FramesPerSecond: 8
-    Playback: 0
-    RandomPhase: 1
-    MainView: 0
-    Purpose: 2
-    WalkBend: -1
-    ViewSettings:
-    - Pivot: {x: 0.34546056, y: 0.051757812}
-      FootprintSize: {x: 1.2, y: 0.55}
-      FootprintOffset: {x: 0, y: 0}
-      FootprintMask:
-        Origin: {x: 0, y: 0}
-        Cell: 0.05
-        Columns: 0
-        Rows: 0
-        Bits: 
-    - Pivot: {x: 0.5, y: 0.1}
-      FootprintSize: {x: 1.2, y: 0.55}
-      FootprintOffset: {x: 0, y: 0}
-      FootprintMask:
-        Origin: {x: 0, y: 0}
-        Cell: 0.05
-        Columns: 0
-        Rows: 0
-        Bits: 
-    - Pivot: {x: 0.5, y: 0.1}
-      FootprintSize: {x: 1.2, y: 0.55}
-      FootprintOffset: {x: 0, y: 0}
-      FootprintMask:
-        Origin: {x: 0, y: 0}
-        Cell: 0.05
-        Columns: 0
-        Rows: 0
-        Bits: 
-    - Pivot: {x: 0.5, y: 0.1}
-      FootprintSize: {x: 1.2, y: 0.55}
-      FootprintOffset: {x: 0, y: 0}
-      FootprintMask:
-        Origin: {x: 0, y: 0}
-        Cell: 0.05
-        Columns: 0
-        Rows: 0
-        Bits: 
-    - Pivot: {x: 0.5, y: 0.1}
-      FootprintSize: {x: 1.2, y: 0.55}
-      FootprintOffset: {x: 0, y: 0}
-      FootprintMask:
-        Origin: {x: 0, y: 0}
-        Cell: 0.05
-        Columns: 0
-        Rows: 0
-        Bits: 
-    - Pivot: {x: 0.5, y: 0.1}
-      FootprintSize: {x: 1.2, y: 0.55}
-      FootprintOffset: {x: 0, y: 0}
-      FootprintMask:
-        Origin: {x: 0, y: 0}
-        Cell: 0.05
-        Columns: 0
-        Rows: 0
-        Bits: 
-    Parts:
-    - Id: 541e60720d6d40a18b09a8272854ab0d
-      Name: "\u041E\u0441\u043D\u043E\u0432\u0430"
-      Layer: 2
-      OrderOffset: 0
-      ProjectsShadow: 1
-      FireShadowState: 0
-      Views:
-      - Sprite: {fileID: 21300000, guid: 60ab7086035808b40b9394411c4d25b2, type: 3}
-        NormalMap: {fileID: 0}
-        Offset: {x: 0, y: 0}
-        ShadowSprite: {fileID: 0}
-        Frames: []
-        SheetFrames: []
-        SheetNormals: []
-        SheetKey: 
-      - Sprite: {fileID: 0}
-        NormalMap: {fileID: 0}
-        Offset: {x: 0, y: 0}
-        ShadowSprite: {fileID: 0}
-        Frames: []
-        SheetFrames: []
-        SheetNormals: []
-        SheetKey: 
-      - Sprite: {fileID: 0}
-        NormalMap: {fileID: 0}
-        Offset: {x: 0, y: 0}
-        ShadowSprite: {fileID: 0}
-        Frames: []
-        SheetFrames: []
-        SheetNormals: []
-        SheetKey: 
-      - Sprite: {fileID: 0}
-        NormalMap: {fileID: 0}
-        Offset: {x: 0, y: 0}
-        ShadowSprite: {fileID: 0}
-        Frames: []
-        SheetFrames: []
-        SheetNormals: []
-        SheetKey: 
-      - Sprite: {fileID: 0}
-        NormalMap: {fileID: 0}
-        Offset: {x: 0, y: 0}
-        ShadowSprite: {fileID: 0}
-        Frames: []
-        SheetFrames: []
-        SheetNormals: []
-        SheetKey: 
-      - Sprite: {fileID: 0}
-        NormalMap: {fileID: 0}
-        Offset: {x: 0, y: 0}
-        ShadowSprite: {fileID: 0}
-        Frames: []
-        SheetFrames: []
-        SheetNormals: []
-        SheetKey: 
   - Id: asset_bf990bbd5646
     Name: "\u0421\u0440\u0435\u0434\u043D\u044F\u044F \u0433\u0443\u0441\u0442\u0430\u044F
       \u0437\u0430\u0440\u043E\u0441\u043B\u044C"
@@ -12246,7 +12194,8 @@ MonoBehaviour:
     RandomPhase: 1
     MainView: 0
     Purpose: 2
-    WalkBend: -1
+    WalkBend: 0.87
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.48063126, y: 0.051757812}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -12386,6 +12335,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4706216, y: 0.051757812}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -12524,7 +12474,8 @@ MonoBehaviour:
     RandomPhase: 1
     MainView: 0
     Purpose: 2
-    WalkBend: -1
+    WalkBend: 1.06
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.4754964, y: 0.051757812}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -12663,6 +12614,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.47173616, y: 0.050130207}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -12774,145 +12726,6 @@ MonoBehaviour:
         SheetFrames: []
         SheetNormals: []
         SheetKey: 
-  - Id: asset_69e4c7026ad0
-    Name: "\u0412\u044B\u0441\u043E\u043A\u0438\u0439 \u043F\u0443\u0447\u043E\u043A,
-      \u043D\u0430\u043A\u043B\u043E\u043D\u043D\u044B\u0439"
-    Category: 3
-    Tags:
-    - grass-pack-15
-    - Grass_TallTuft_B
-    Favorite: 0
-    Credit: "Kingdom Survival \xB7 \u043F\u0430\u043A\u0435\u0442 \u0430\u0441\u0441\u0435\u0442\u043E\u0432
-      \u0430\u0440\u0435\u043D\u044B, \u043F\u0435\u0440\u0432\u044B\u0439 \u043D\u0430\u0431\u043E\u0440"
-    SourceUrl: 
-    ImportKey: pack69_grass_talltuft_b
-    SourceFolder: 
-    PixelsPerUnit: 716.6667
-    BlocksMovement: 0
-    OccludesLight: 0
-    ShadowLength: 1
-    LitBySun: 1
-    LitByFire: 1
-    SeeThrough: 0
-    SeeThroughAlpha: 0.3
-    SeeThroughSize: 3
-    FramesPerSecond: 8
-    Playback: 0
-    RandomPhase: 1
-    MainView: 0
-    Purpose: 2
-    WalkBend: -1
-    ViewSettings:
-    - Pivot: {x: 0.573492, y: 0.050130207}
-      FootprintSize: {x: 1.2, y: 0.55}
-      FootprintOffset: {x: 0, y: 0}
-      FootprintMask:
-        Origin: {x: 0, y: 0}
-        Cell: 0.05
-        Columns: 0
-        Rows: 0
-        Bits: 
-    - Pivot: {x: 0.5, y: 0.1}
-      FootprintSize: {x: 1.2, y: 0.55}
-      FootprintOffset: {x: 0, y: 0}
-      FootprintMask:
-        Origin: {x: 0, y: 0}
-        Cell: 0.05
-        Columns: 0
-        Rows: 0
-        Bits: 
-    - Pivot: {x: 0.5, y: 0.1}
-      FootprintSize: {x: 1.2, y: 0.55}
-      FootprintOffset: {x: 0, y: 0}
-      FootprintMask:
-        Origin: {x: 0, y: 0}
-        Cell: 0.05
-        Columns: 0
-        Rows: 0
-        Bits: 
-    - Pivot: {x: 0.5, y: 0.1}
-      FootprintSize: {x: 1.2, y: 0.55}
-      FootprintOffset: {x: 0, y: 0}
-      FootprintMask:
-        Origin: {x: 0, y: 0}
-        Cell: 0.05
-        Columns: 0
-        Rows: 0
-        Bits: 
-    - Pivot: {x: 0.5, y: 0.1}
-      FootprintSize: {x: 1.2, y: 0.55}
-      FootprintOffset: {x: 0, y: 0}
-      FootprintMask:
-        Origin: {x: 0, y: 0}
-        Cell: 0.05
-        Columns: 0
-        Rows: 0
-        Bits: 
-    - Pivot: {x: 0.5, y: 0.1}
-      FootprintSize: {x: 1.2, y: 0.55}
-      FootprintOffset: {x: 0, y: 0}
-      FootprintMask:
-        Origin: {x: 0, y: 0}
-        Cell: 0.05
-        Columns: 0
-        Rows: 0
-        Bits: 
-    Parts:
-    - Id: 4fee94ec6de94b90b009b179b848a1d8
-      Name: "\u041E\u0441\u043D\u043E\u0432\u0430"
-      Layer: 2
-      OrderOffset: 0
-      ProjectsShadow: 1
-      FireShadowState: 0
-      Views:
-      - Sprite: {fileID: 21300000, guid: 0484e1e0ccd8d9a4ebf661fb864da629, type: 3}
-        NormalMap: {fileID: 0}
-        Offset: {x: 0, y: 0}
-        ShadowSprite: {fileID: 0}
-        Frames: []
-        SheetFrames: []
-        SheetNormals: []
-        SheetKey: 
-      - Sprite: {fileID: 0}
-        NormalMap: {fileID: 0}
-        Offset: {x: 0, y: 0}
-        ShadowSprite: {fileID: 0}
-        Frames: []
-        SheetFrames: []
-        SheetNormals: []
-        SheetKey: 
-      - Sprite: {fileID: 0}
-        NormalMap: {fileID: 0}
-        Offset: {x: 0, y: 0}
-        ShadowSprite: {fileID: 0}
-        Frames: []
-        SheetFrames: []
-        SheetNormals: []
-        SheetKey: 
-      - Sprite: {fileID: 0}
-        NormalMap: {fileID: 0}
-        Offset: {x: 0, y: 0}
-        ShadowSprite: {fileID: 0}
-        Frames: []
-        SheetFrames: []
-        SheetNormals: []
-        SheetKey: 
-      - Sprite: {fileID: 0}
-        NormalMap: {fileID: 0}
-        Offset: {x: 0, y: 0}
-        ShadowSprite: {fileID: 0}
-        Frames: []
-        SheetFrames: []
-        SheetNormals: []
-        SheetKey: 
-      - Sprite: {fileID: 0}
-        NormalMap: {fileID: 0}
-        Offset: {x: 0, y: 0}
-        ShadowSprite: {fileID: 0}
-        Frames: []
-        SheetFrames: []
-        SheetNormals: []
-        SheetKey: 
   - Id: asset_976873e8c507
     Name: "\u0412\u044B\u0441\u043E\u043A\u0430\u044F \u0433\u0443\u0441\u0442\u0430\u044F
       \u0437\u0430\u0440\u043E\u0441\u043B\u044C"
@@ -12941,6 +12754,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.48779643, y: 0.050130207}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -13080,6 +12894,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.47788817, y: 0.050130207}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -13219,6 +13034,7 @@ MonoBehaviour:
     MainView: 0
     Purpose: 2
     WalkBend: -1
+    ArenaPriority: 1
     ViewSettings:
     - Pivot: {x: 0.45875633, y: 0.050130207}
       FootprintSize: {x: 1.2, y: 0.55}
@@ -13283,6 +13099,986 @@ MonoBehaviour:
       FireShadowState: 0
       Views:
       - Sprite: {fileID: 21300000, guid: c5f0b0a680ff2b144a393618e552fb36, type: 3}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+  - Id: asset_629e17f7ed08
+    Name: "\u0422\u0440\u0430\u0432\u0430 \u043A\u0430\u0440\u0442\u044B: \u043F\u0443\u0447\u043E\u043A,
+      Tuft A"
+    Category: 3
+    Tags:
+    - grass-pack-15
+    - MapGrass_Tuft_A
+    Favorite: 0
+    Credit: "Kingdom Survival \xB7 \u043F\u0430\u043A\u0435\u0442 \u0430\u0441\u0441\u0435\u0442\u043E\u0432
+      \u0430\u0440\u0435\u043D\u044B, \u043F\u0435\u0440\u0432\u044B\u0439 \u043D\u0430\u0431\u043E\u0440"
+    SourceUrl: 
+    ImportKey: pack69_mapgrass_tuft_a
+    SourceFolder: 
+    PixelsPerUnit: 1886.6666
+    BlocksMovement: 0
+    OccludesLight: 0
+    ShadowLength: 1
+    LitBySun: 1
+    LitByFire: 1
+    SeeThrough: 0
+    SeeThroughAlpha: 0.3
+    SeeThroughSize: 3
+    FramesPerSecond: 8
+    Playback: 0
+    RandomPhase: 1
+    MainView: 0
+    Purpose: 2
+    WalkBend: -1
+    ArenaPriority: 1
+    ViewSettings:
+    - Pivot: {x: 0.47947454, y: 0.23779297}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    Parts:
+    - Id: f68b92f9550147c0b864fca224d0176f
+      Name: "\u041E\u0441\u043D\u043E\u0432\u0430"
+      Layer: 2
+      OrderOffset: 0
+      ProjectsShadow: 1
+      FireShadowState: 0
+      Views:
+      - Sprite: {fileID: 21300000, guid: f3121dcda8279e141aa3089b7354ee82, type: 3}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+  - Id: asset_91be4678e2ac
+    Name: "\u0422\u0440\u0430\u0432\u0430 \u043A\u0430\u0440\u0442\u044B: \u043A\u043E\u043D\u0442\u0443\u0440\u043D\u044B\u0439
+      \u043F\u0443\u0447\u043E\u043A, Arching F"
+    Category: 3
+    Tags:
+    - grass-pack-15
+    - MapGrass_Ink_Arching_F
+    Favorite: 0
+    Credit: "Kingdom Survival \xB7 \u043F\u0430\u043A\u0435\u0442 \u0430\u0441\u0441\u0435\u0442\u043E\u0432
+      \u0430\u0440\u0435\u043D\u044B, \u043F\u0435\u0440\u0432\u044B\u0439 \u043D\u0430\u0431\u043E\u0440"
+    SourceUrl: 
+    ImportKey: pack69_mapgrass_ink_arching_f
+    SourceFolder: 
+    PixelsPerUnit: 2640
+    BlocksMovement: 0
+    OccludesLight: 0
+    ShadowLength: 1
+    LitBySun: 1
+    LitByFire: 1
+    SeeThrough: 0
+    SeeThroughAlpha: 0.3
+    SeeThroughSize: 3
+    FramesPerSecond: 8
+    Playback: 0
+    RandomPhase: 1
+    MainView: 0
+    Purpose: 2
+    WalkBend: -1
+    ArenaPriority: 1
+    ViewSettings:
+    - Pivot: {x: 0.50620246, y: 0.1532751}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    Parts:
+    - Id: a2381f9d49d045bd9812ea5fe4237e25
+      Name: "\u041E\u0441\u043D\u043E\u0432\u0430"
+      Layer: 2
+      OrderOffset: 0
+      ProjectsShadow: 1
+      FireShadowState: 0
+      Views:
+      - Sprite: {fileID: 21300000, guid: 108755f1113e31a459868b21792bf19f, type: 3}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+  - Id: asset_99dad8f26c01
+    Name: "\u0422\u0440\u0430\u0432\u0430 \u043A\u0430\u0440\u0442\u044B: \u043A\u043E\u043D\u0442\u0443\u0440\u043D\u044B\u0439
+      \u043F\u0443\u0447\u043E\u043A, Crooked D"
+    Category: 3
+    Tags:
+    - grass-pack-15
+    - MapGrass_Ink_Crooked_D
+    Favorite: 0
+    Credit: "Kingdom Survival \xB7 \u043F\u0430\u043A\u0435\u0442 \u0430\u0441\u0441\u0435\u0442\u043E\u0432
+      \u0430\u0440\u0435\u043D\u044B, \u043F\u0435\u0440\u0432\u044B\u0439 \u043D\u0430\u0431\u043E\u0440"
+    SourceUrl: 
+    ImportKey: pack69_mapgrass_ink_crooked_d
+    SourceFolder: 
+    PixelsPerUnit: 350
+    BlocksMovement: 0
+    OccludesLight: 0
+    ShadowLength: 1
+    LitBySun: 1
+    LitByFire: 1
+    SeeThrough: 0
+    SeeThroughAlpha: 0.3
+    SeeThroughSize: 3
+    FramesPerSecond: 8
+    Playback: 0
+    RandomPhase: 1
+    MainView: 0
+    Purpose: 2
+    WalkBend: -1
+    ArenaPriority: 1
+    ViewSettings:
+    - Pivot: {x: 0.4663086, y: 0.46142578}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    Parts:
+    - Id: f8b0eef97a30442f8945c50afa1916d6
+      Name: "\u041E\u0441\u043D\u043E\u0432\u0430"
+      Layer: 2
+      OrderOffset: 0
+      ProjectsShadow: 1
+      FireShadowState: 0
+      Views:
+      - Sprite: {fileID: 21300000, guid: 5ca629802a5ddef4190ddca775287077, type: 3}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+  - Id: asset_584296aa244c
+    Name: "\u0422\u0440\u0430\u0432\u0430 \u043A\u0430\u0440\u0442\u044B: \u043A\u043E\u043D\u0442\u0443\u0440\u043D\u044B\u0439
+      \u043F\u0443\u0447\u043E\u043A, Lean Right B"
+    Category: 3
+    Tags:
+    - grass-pack-15
+    - MapGrass_Ink_Lean_Right_B
+    Favorite: 0
+    Credit: "Kingdom Survival \xB7 \u043F\u0430\u043A\u0435\u0442 \u0430\u0441\u0441\u0435\u0442\u043E\u0432
+      \u0430\u0440\u0435\u043D\u044B, \u043F\u0435\u0440\u0432\u044B\u0439 \u043D\u0430\u0431\u043E\u0440"
+    SourceUrl: 
+    ImportKey: pack69_mapgrass_ink_lean_right_b
+    SourceFolder: 
+    PixelsPerUnit: 493.3333
+    BlocksMovement: 0
+    OccludesLight: 0
+    ShadowLength: 1
+    LitBySun: 1
+    LitByFire: 1
+    SeeThrough: 0
+    SeeThroughAlpha: 0.3
+    SeeThroughSize: 3
+    FramesPerSecond: 8
+    Playback: 0
+    RandomPhase: 1
+    MainView: 0
+    Purpose: 2
+    WalkBend: -1
+    ArenaPriority: 1
+    ViewSettings:
+    - Pivot: {x: 0.4922724, y: 0.43798828}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    Parts:
+    - Id: a67d815b9e6f416badf34732078e366a
+      Name: "\u041E\u0441\u043D\u043E\u0432\u0430"
+      Layer: 2
+      OrderOffset: 0
+      ProjectsShadow: 1
+      FireShadowState: 0
+      Views:
+      - Sprite: {fileID: 21300000, guid: fd712f5e54381644799e8fe30071bf52, type: 3}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+  - Id: asset_9d417ebde44d
+    Name: "\u0422\u0440\u0430\u0432\u0430 \u043A\u0430\u0440\u0442\u044B: \u043A\u043E\u043D\u0442\u0443\u0440\u043D\u044B\u0439
+      \u043F\u0443\u0447\u043E\u043A, Low Wide C"
+    Category: 3
+    Tags:
+    - grass-pack-15
+    - MapGrass_Ink_Low_Wide_C
+    Favorite: 0
+    Credit: "Kingdom Survival \xB7 \u043F\u0430\u043A\u0435\u0442 \u0430\u0441\u0441\u0435\u0442\u043E\u0432
+      \u0430\u0440\u0435\u043D\u044B, \u043F\u0435\u0440\u0432\u044B\u0439 \u043D\u0430\u0431\u043E\u0440"
+    SourceUrl: 
+    ImportKey: pack69_mapgrass_ink_low_wide_c
+    SourceFolder: 
+    PixelsPerUnit: 429.99997
+    BlocksMovement: 0
+    OccludesLight: 0
+    ShadowLength: 1
+    LitBySun: 1
+    LitByFire: 1
+    SeeThrough: 0
+    SeeThroughAlpha: 0.3
+    SeeThroughSize: 3
+    FramesPerSecond: 8
+    Playback: 0
+    RandomPhase: 1
+    MainView: 0
+    Purpose: 2
+    WalkBend: -1
+    ArenaPriority: 1
+    ViewSettings:
+    - Pivot: {x: 0.5190047, y: 0.4210823}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    Parts:
+    - Id: e12304e22ce64b32b32c6ab4ffbc5c34
+      Name: "\u041E\u0441\u043D\u043E\u0432\u0430"
+      Layer: 2
+      OrderOffset: 0
+      ProjectsShadow: 1
+      FireShadowState: 0
+      Views:
+      - Sprite: {fileID: 21300000, guid: 53464d821e839514a96a959ad780006b, type: 3}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+  - Id: asset_e23b6fcbb4b8
+    Name: "\u0422\u0440\u0430\u0432\u0430 \u043A\u0430\u0440\u0442\u044B: \u043A\u043E\u043D\u0442\u0443\u0440\u043D\u044B\u0439
+      \u043F\u0443\u0447\u043E\u043A, Sparse E"
+    Category: 3
+    Tags:
+    - grass-pack-15
+    - MapGrass_Ink_Sparse_E
+    Favorite: 0
+    Credit: "Kingdom Survival \xB7 \u043F\u0430\u043A\u0435\u0442 \u0430\u0441\u0441\u0435\u0442\u043E\u0432
+      \u0430\u0440\u0435\u043D\u044B, \u043F\u0435\u0440\u0432\u044B\u0439 \u043D\u0430\u0431\u043E\u0440"
+    SourceUrl: 
+    ImportKey: pack69_mapgrass_ink_sparse_e
+    SourceFolder: 
+    PixelsPerUnit: 2513.3333
+    BlocksMovement: 0
+    OccludesLight: 0
+    ShadowLength: 1
+    LitBySun: 1
+    LitByFire: 1
+    SeeThrough: 0
+    SeeThroughAlpha: 0.3
+    SeeThroughSize: 3
+    FramesPerSecond: 8
+    Playback: 0
+    RandomPhase: 1
+    MainView: 0
+    Purpose: 2
+    WalkBend: -1
+    ArenaPriority: 1
+    ViewSettings:
+    - Pivot: {x: 0.5041158, y: 0.16375546}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    Parts:
+    - Id: c88b4a63fae24f87b36d5d505cf5aa15
+      Name: "\u041E\u0441\u043D\u043E\u0432\u0430"
+      Layer: 2
+      OrderOffset: 0
+      ProjectsShadow: 1
+      FireShadowState: 0
+      Views:
+      - Sprite: {fileID: 21300000, guid: 34b4b6c0a7c27534a98ceec148da82ae, type: 3}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+      - Sprite: {fileID: 0}
+        NormalMap: {fileID: 0}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+        Frames: []
+        SheetFrames: []
+        SheetNormals: []
+        SheetKey: 
+  - Id: asset_65b005e03e0f
+    Name: "\u0422\u0440\u0430\u0432\u0430 \u043A\u0430\u0440\u0442\u044B: \u043A\u043E\u043D\u0442\u0443\u0440\u043D\u044B\u0439
+      \u043F\u0443\u0447\u043E\u043A, Upright A"
+    Category: 3
+    Tags:
+    - grass-pack-15
+    - MapGrass_Ink_Upright_A
+    Favorite: 0
+    Credit: "Kingdom Survival \xB7 \u043F\u0430\u043A\u0435\u0442 \u0430\u0441\u0441\u0435\u0442\u043E\u0432
+      \u0430\u0440\u0435\u043D\u044B, \u043F\u0435\u0440\u0432\u044B\u0439 \u043D\u0430\u0431\u043E\u0440"
+    SourceUrl: 
+    ImportKey: pack69_mapgrass_ink_upright_a
+    SourceFolder: 
+    PixelsPerUnit: 2780
+    BlocksMovement: 0
+    OccludesLight: 0
+    ShadowLength: 1
+    LitBySun: 1
+    LitByFire: 1
+    SeeThrough: 0
+    SeeThroughAlpha: 0.3
+    SeeThroughSize: 3
+    FramesPerSecond: 8
+    Playback: 0
+    RandomPhase: 1
+    MainView: 0
+    Purpose: 2
+    WalkBend: -1
+    ArenaPriority: 1
+    ViewSettings:
+    - Pivot: {x: 0.4507206, y: 0.14279476}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 1.2, y: 0.55}
+      FootprintOffset: {x: 0, y: 0}
+      FootprintMask:
+        Origin: {x: 0, y: 0}
+        Cell: 0.05
+        Columns: 0
+        Rows: 0
+        Bits: 
+    Parts:
+    - Id: 5734a5cc9d5b482ca1b919a0e11a596c
+      Name: "\u041E\u0441\u043D\u043E\u0432\u0430"
+      Layer: 2
+      OrderOffset: 0
+      ProjectsShadow: 1
+      FireShadowState: 0
+      Views:
+      - Sprite: {fileID: 21300000, guid: 2fe04d4ae434d6b4ab3969df928bcc5d, type: 3}
         NormalMap: {fileID: 0}
         Offset: {x: 0, y: 0}
         ShadowSprite: {fileID: 0}

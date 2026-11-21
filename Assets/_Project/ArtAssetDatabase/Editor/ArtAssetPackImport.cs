@@ -32,7 +32,7 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         // Пакет луговой травы (15 вариантов × 3 вида): ID «Grass_*».
         public const string GrassTag = "grass-pack-15";
-        public static bool IsGrass(Entry entry) => entry.Id != null && entry.Id.StartsWith("Grass_", StringComparison.Ordinal);
+        public static bool IsGrass(Entry entry) => entry.Id != null && (entry.Id.StartsWith("Grass_", StringComparison.Ordinal) || entry.Id.StartsWith("MapGrass_", StringComparison.Ordinal));
 
         // Видимая высота силуэта в единицах мира мест (человек ≈ 1,7).
         // Деревья — от предложенного отношения пакета (молодое = 1).

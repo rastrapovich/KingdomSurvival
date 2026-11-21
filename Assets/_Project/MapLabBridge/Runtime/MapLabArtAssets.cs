@@ -30,7 +30,8 @@ namespace KingdomSurvival.MapLabBridge
         public float Height;         // высота карточки в мире MapLab
         public float HalfWidth;      // полуширина карточки в мире MapLab
         public string ObjectKind;    // вид объекта местности арены (для ArenaObject)
-        public bool Pack;            // трава пакета «Grass_*» (15 вариантов × 3 вида)
+        public bool Pack;            // трава пакета «Grass_*» или «MapGrass_*» (трава карты в Базе)
+        public bool Ink;             // контурный (тушевой) пучок травы карты
         public float Priority = 1f;  // приоритет записи 0–10 (вес выбора среди своей роли)
     }
 
@@ -167,6 +168,7 @@ namespace KingdomSurvival.MapLabBridge
                     HalfWidth = height * rect.width / Mathf.Max(1f, rect.height) * 0.5f,
                     ObjectKind = objectKind,
                     Pack = IsGrassPack(asset),
+                    Ink = HasTagPrefix(asset, MapGrassInkPrefix),
                     Priority = Mathf.Clamp(asset.ArenaPriority, 0f, ArtAssetDefinition.MaxArenaPriority),
                 });
             }
@@ -330,13 +332,26 @@ namespace KingdomSurvival.MapLabBridge
         // Трава пакета «Grass_*» (тег — ID варианта поставки). Высота записи
         // решает только низкая она или высокая; высокая — не бурьян у деревьев.
         public const string GrassPackPrefix = "Grass_";
+        // Трава глобальной карты (набор этапа 05), перенесённая в Базу ассетов: «MapGrass_*».
+        public const string MapGrassPrefix = "MapGrass_";
+        public const string MapGrassInkPrefix = "MapGrass_Ink";
+
+        public static bool HasTagPrefix(ArtAssetDefinition asset, string prefix)
+        {
+            if (asset?.Tags == null)
+                return false;
+            foreach (string tag in asset.Tags)
+                if (tag != null && tag.StartsWith(prefix))
+                    return true;
+            return false;
+        }
 
         public static bool IsGrassPack(ArtAssetDefinition asset)
         {
             if (asset?.Tags == null)
                 return false;
             foreach (string tag in asset.Tags)
-                if (tag != null && tag.StartsWith(GrassPackPrefix))
+                if (tag != null && (tag.StartsWith(GrassPackPrefix) || tag.StartsWith(MapGrassPrefix)))
                     return true;
             return false;
         }

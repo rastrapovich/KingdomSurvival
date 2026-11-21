@@ -496,9 +496,9 @@ namespace KingdomSurvival.MapLabBridge
                     packCopy.Weight = art.Priority;
                     decorSet.Entries.Add(packCopy);
                 }
-                tufts.Add(packCopy);
+                (art.Ink ? inks : tufts).Add(packCopy);
             }
-            if (tufts.Count > 0)
+            if (tufts.Count + inks.Count > 0)
                 return;
             MapLabArtSet source = MapLabGameAssets.Load()?.ArtSet05;
             if (source == null || decorSet == null)

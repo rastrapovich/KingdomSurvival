@@ -86,5 +86,64 @@ namespace KingdomSurvival.MapLabBridge.Editor
             report.Add("рисунков видов скопировано: " + copied);
             return string.Join("; ", report);
         }
+
+        // Трава глобальной карты (набор этапа 05, роли grass_tuft и grass_ink_tuft),
+        // которую арена брала для ковра прямо из набора: переносится в Базу ассетов
+        // записями «MapGrass_*» («Только арена»), чтобы управлять ею как остальными
+        // (размер, приоритет). Рисунки видов — из Art/MapViews/<вид>/Map05_<имя>.png.
+        //   -executeMethod KingdomSurvival.MapLabBridge.Editor.GrassPackImport.ImportMapGrassBatch
+        private const float MapGrassHeight = 0.3f;
+
+        public static void ImportMapGrassBatch() => Debug.Log("MAP_GRASS: " + ImportMapGrass());
+
+        [MenuItem("Kingdom Survival/Арена/Перенести траву карты в Базу ассетов")]
+        private static void ImportMapGrassMenu() => EditorUtility.DisplayDialog("Трава карты", ImportMapGrass(), "OK");
+
+        public static string ImportMapGrass()
+        {
+            string[] folders = { "Assets/_Project/Art/MapLabStage05/Grass", "Assets/_Project/Art/MapLabStage05/GrassInk" };
+            string staging = Path.GetFullPath(Staging + "Map");
+            if (Directory.Exists(staging)) Directory.Delete(staging, true);
+            Directory.CreateDirectory(staging);
+            List<string> csv = new List<string> { "ID;Название;Категория;Файл;Группа;Высота_м" };
+            List<(string Id, string Stem)> items = new List<(string, string)>();
+            foreach (string dir in folders)
+            {
+                if (!Directory.Exists(dir)) continue;
+                foreach (string png in Directory.GetFiles(dir, "*.png").OrderBy(p => p, StringComparer.Ordinal))
+                {
+                    string stem = Path.GetFileNameWithoutExtension(png);
+                    string id = "MapGrass_" + (stem.StartsWith("GrassInk_") ? "Ink_" + stem.Substring("GrassInk_".Length) : stem.StartsWith("Grass_") ? stem.Substring("Grass_".Length) : stem);
+                    string name = stem.StartsWith("GrassInk_") ? "Трава карты: контурный пучок, " + stem.Substring("GrassInk_".Length).Replace('_', ' ') : "Трава карты: пучок, " + stem.Substring("Grass_".Length).Replace('_', ' ');
+                    File.Copy(png, Path.Combine(staging, id + ".png"), true);
+                    csv.Add(string.Join(";", id, name, "Vegetation", id + ".png", "низкая", MapGrassHeight.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+                    items.Add((id, stem));
+                }
+            }
+            if (items.Count == 0) return "Нет рисунков травы карты в Art/MapLabStage05.";
+            File.WriteAllLines(Path.Combine(staging, "CATALOG_RU.csv"), csv, new System.Text.UTF8Encoding(false));
+            string imported = ArtAssetPackImport.Import(staging);
+            ArtAssetDatabaseAsset catalog = AssetDatabase.LoadAssetAtPath<ArtAssetDatabaseAsset>(ArtAssetDatabaseAsset.AssetPath);
+            int copied = 0;
+            foreach ((string id, string stem) in items)
+            {
+                string key = ArtAssetPackImport.PackKey(new ArtAssetPackImport.Entry { Id = id });
+                ArtAssetDefinition asset = catalog.assets.FirstOrDefault(a => a != null && string.Equals(a.ImportKey, key, StringComparison.OrdinalIgnoreCase));
+                if (asset == null) continue;
+                asset.Purpose = ArtAssetPurpose.ArenaOnly;
+                EditorUtility.SetDirty(catalog);
+                foreach (string view in new[] { "gloom", "sepia" })
+                {
+                    string source = "Assets/_Project/Art/MapViews/" + view + "/Map05_" + stem + ".png";
+                    if (!File.Exists(source)) continue;
+                    File.Copy(source, "Assets/_Project/Art/MapViews/" + view + "/art_" + asset.Id + ".png", true);
+                    copied++;
+                }
+            }
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            MapLabGeneratorWindow.CollectViewArtBatch();
+            return imported + "; рисунков видов: " + copied;
+        }
     }
 }

@@ -75,6 +75,14 @@ public sealed class WorldMapSetAnimator
         return frozen ? clip.GetFrame(0f) : player.Evaluate(clock);
     }
 
+    // Стоянка без вызова Tick (фигура рисуется иначе): следующий бег
+    // начнётся с первого кадра ходьбы.
+    public void MarkStanding()
+    {
+        wasRunning = false;
+        speedHexesPerSecond = 0f;
+    }
+
     private static bool HasIdle(CreatureAnimationSetData set)
     {
         CreatureAnimationClipData idle = set.FindClip(CreatureAnimationAction.Idle);
@@ -118,7 +126,9 @@ public sealed class WorldMapSetAnimator
     public static Vector4 FrameUv(Sprite sprite, bool mirrored)
     {
         Texture texture = sprite.texture;
-        Rect r = sprite.textureRect;
+        // Берём sprite.rect, а не textureRect: Unity обрезает в textureRect
+        // прозрачные поля, а карточка и опора рассчитаны на полный холст кадра.
+        Rect r = sprite.rect;
         float w = Mathf.Max(1f, texture.width), h = Mathf.Max(1f, texture.height);
         float u0 = (r.xMin + 0.5f) / w, u1 = (r.xMax - 0.5f) / w;
         float v0 = (r.yMin + 0.5f) / h, v1 = (r.yMax - 0.5f) / h;

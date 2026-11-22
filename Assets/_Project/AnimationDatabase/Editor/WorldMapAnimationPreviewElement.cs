@@ -332,6 +332,9 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 text = "Ракурса «" + CreatureAnimationLabels.DirectionTitle(direction) + "» нет — показан ближайший: «" +
                        CreatureAnimationLabels.DirectionTitle(clip.Direction) + "».";
             }
+            // Галочка набора «На стоянке — прежняя фигурка карты»: Ожидание в игре не показывается.
+            if (mapSet != null && mapSet.StandWithMarkerFigure && action == CreatureAnimationAction.Idle)
+                text = "В игре на стоянке — прежняя фигурка карты." + (string.IsNullOrEmpty(text) ? string.Empty : "\n" + text);
             noticeLabel.text = text;
             noticeLabel.style.display = string.IsNullOrEmpty(text) ? DisplayStyle.None : DisplayStyle.Flex;
         }

@@ -308,11 +308,25 @@ public partial class PrototypeUIController
         // анимаций; без набора (или без шейдера фигур) — прежняя фишка.
         WorldMapAnimationDatabaseAsset mapAnimations = WorldMapAnimationDatabaseAsset.Current;
         WorldMapAnimationSetData heroSet = mapAnimations != null ? mapAnimations.HeroSet : null;
+        WorldMapAnimationSetData standSet = null;
+        // На стоянке — прежняя фигурка фишки (если набор так просит и фишка
+        // есть); Tick аниматора пропускаем, но помечаем стоянку, чтобы
+        // следующий бег начался с первого кадра Walk.
+        if (heroSet != null && !running && heroSet.StandWithMarkerFigure &&
+            MapLabGameLive.HeroFrame(worldMapHeroDirection, out _, out _, out _, out _))
+        {
+            worldMapHeroMapAnimator.MarkStanding();
+            standSet = heroSet;
+            heroSet = null;
+        }
         if (heroSet != null && TickWorldMapHeroAnimatedMapLab(world, mapAnimations, heroSet, dt, running, percent, motion))
             return true;
 
         if (!MapLabGameLive.HeroFrame(worldMapHeroDirection, out Texture2D texture, out float worldHeight, out float aspect, out Vector2 pivot))
             return false;
+        // Стоянка при наборе: видимый рост фишки — как у бегущего героя.
+        if (standSet != null)
+            worldHeight = StandMarkerCardHeight(world, mapAnimations, standSet, worldMapHeroDirection, texture, worldHeight, pivot);
 
         float zoom = Mathf.Max(0.0001f, worldMapZoom);
         float pxPerUnit = world.CanvasPixelsPerUnit(worldMapCanvasWidth) * zoom;

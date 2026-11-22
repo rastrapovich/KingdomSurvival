@@ -123,7 +123,8 @@ public partial class PrototypeUIController
         if (frameOutlines.TryGetValue(sprite, out Texture2D cached) && cached != null)
             return cached;
         Texture2D atlas = sprite.texture;
-        Rect r = sprite.textureRect;
+        // Холст кадра — sprite.rect (textureRect обрезан по прозрачным полям).
+        Rect r = sprite.rect;
         float k = Mathf.Min(1f, FrameOutlineMaxHeight / Mathf.Max(1f, r.height));
         int w = Mathf.Max(8, Mathf.RoundToInt(r.width * k)), h = Mathf.Max(8, Mathf.RoundToInt(r.height * k));
         Vector2 scale = new Vector2(r.width / atlas.width, r.height / atlas.height);

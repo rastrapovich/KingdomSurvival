@@ -144,6 +144,11 @@ namespace KingdomSurvival.AnimationDatabase.Tests
             set.SetStrideHexesPerCycle(100f);
             Assert.AreEqual(WorldMapAnimationSetData.MaxHeightInHexes, set.HeightInHexes, 0.0001f);
             Assert.AreEqual(WorldMapAnimationSetData.MaxStrideHexesPerCycle, set.StrideHexesPerCycle, 0.0001f);
+            Assert.IsTrue(set.StandWithMarkerFigure, "По умолчанию на стоянке — прежняя фигурка карты.");
+            set.SetStandWithMarkerFigure(false);
+            Assert.IsFalse(set.StandWithMarkerFigure);
+            set.SetStandWithMarkerFigure(true);
+            Assert.IsTrue(set.StandWithMarkerFigure);
             set.SetHeightInHexes(-1f);
             set.SetStrideHexesPerCycle(0f);
             Assert.AreEqual(WorldMapAnimationSetData.MinHeightInHexes, set.HeightInHexes, 0.0001f);

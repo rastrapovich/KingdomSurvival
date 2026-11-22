@@ -87,7 +87,23 @@ namespace KingdomSurvival.UnitDatabase
         FeedOnNumbed,
         RegenOnWater,
         HiddenStart,
-        Flood
+        Flood,
+        // Бриф завершения 22.11.2026: новые виды — в конце (номера прежних не сдвигаются).
+        Heal,
+        Spell,
+        SpellArea,
+        Dispel
+    }
+
+    // Тип повреждения способности (способ атаки — отдельно: огненная стрела
+    // может остаться обычным снарядом). Номера совпадают с SandboxDamageType.
+    public enum UnitDamageType
+    {
+        Physical,
+        Fire,
+        Cold,
+        Poison,
+        Arcane
     }
 
     // Фирменная способность существа как данные: включается статусом в базе,
@@ -123,6 +139,8 @@ namespace KingdomSurvival.UnitDatabase
         [SerializeField, Tooltip("Только первый успешный удар этой способностью за бой.")] private bool statusPayloadOncePerBattle;
         [SerializeField, Min(0), Tooltip("Срок состояния в собственных ходах цели, 0 — по каталогу.")] private int statusPayloadDuration;
         [SerializeField, Min(0), Tooltip("Тик состояния, 0 — по каталогу.")] private int statusPayloadTick;
+        [SerializeField, Tooltip("Тип повреждения удара способности.")] private UnitDamageType damageType = UnitDamageType.Physical;
+        [SerializeField, Tooltip("Магическая доставка: отменяется «Защитой от чар», отражается «Зеркальной защитой».")] private bool isMagical;
 
         public string Id => id;
         public string Title => title;
@@ -147,6 +165,14 @@ namespace KingdomSurvival.UnitDatabase
         public bool StatusPayloadOncePerBattle => statusPayloadOncePerBattle;
         public int StatusPayloadDuration => statusPayloadDuration;
         public int StatusPayloadTick => statusPayloadTick;
+        public UnitDamageType DamageType => damageType;
+        public bool IsMagical => isMagical;
+
+        public void SetDamage(UnitDamageType type, bool magical)
+        {
+            damageType = type;
+            isMagical = magical;
+        }
 
         public void SetStatusPayload(string statusId, bool oncePerBattle, int payloadDuration, int payloadTick)
         {
@@ -249,6 +275,8 @@ namespace KingdomSurvival.UnitDatabase
         [SerializeField, Min(1)] private int damage = 10;
         [SerializeField, Min(1)] private int movement = 3;
         [SerializeField, Min(0)] private int initiative = 1;
+        // Бриф завершения, этап 4: чародейский запас (0 — без запаса, заклинания ограничены действием и КД).
+        [SerializeField, Min(0), Tooltip("Чародейский запас на бой. 0 — заклинания ограничены только действием и КД.")] private int magicReserve;
         [SerializeField, Min(1)] private int attackRange = 1;
 
         [Header("Изображения")]
@@ -338,6 +366,8 @@ namespace KingdomSurvival.UnitDatabase
         public int Damage => damage;
         public int Movement => movement;
         public int Initiative => initiative;
+        public int MagicReserve => magicReserve;
+        public void SetMagicReserve(int value) => magicReserve = Math.Max(0, value);
         public int AttackRange => attackRange;
         public Sprite Portrait => portrait;
         public PortraitFitMode PortraitFitMode => portraitFitMode;

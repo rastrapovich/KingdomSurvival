@@ -408,10 +408,10 @@ namespace KingdomSurvival.BattleSandbox.Tests
         {
             SandboxBattle battle = Duel(out SandboxUnitState hero, out _);
             PassUntil(battle, "foe");
-            Apply(battle, SandboxStatusCatalog.Frost, "hero", "foe");
-            Apply(battle, SandboxStatusCatalog.Frost, "hero", "foe");
+            Apply(battle, SandboxStatusCatalog.Frost, "hero", null);
+            Apply(battle, SandboxStatusCatalog.Frost, "hero", null);
             Assert.AreEqual(-1, SandboxBattle.StatusMovementMod(hero), "при 2 зарядах −1 движения");
-            Apply(battle, SandboxStatusCatalog.Frost, "hero", "foe");
+            Apply(battle, SandboxStatusCatalog.Frost, "hero", null);
             Assert.IsFalse(hero.HasStatus(SandboxStatusCatalog.Frost));
             Assert.IsTrue(hero.HasStatus(SandboxStatusCatalog.Frozen));
         }

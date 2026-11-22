@@ -65,6 +65,10 @@ namespace KingdomSurvival.BattleSandbox
         // профили ИИ). Пусто — обычный боец.
         public IReadOnlyList<SandboxAbilityDefinition> Abilities { get; }
 
+        // Бриф завершения, этап 4: чародейский запас боевого профиля (0 — заклинания
+        // ограничены только действием и КД). Задаётся в Базе существ.
+        public int MagicReserve { get; }
+
         public SandboxUnitDefinition(
             string id,
             string roleLabel,
@@ -78,8 +82,10 @@ namespace KingdomSurvival.BattleSandbox
             int attackRange,
             IEnumerable<string> tags = null,
             IEnumerable<string> perks = null,
-            IEnumerable<SandboxAbilityDefinition> abilities = null)
+            IEnumerable<SandboxAbilityDefinition> abilities = null,
+            int magicReserve = 0)
         {
+            MagicReserve = Math.Max(0, magicReserve);
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentException("ID типа бойца не может быть пустым.", nameof(id));
 
@@ -119,7 +125,7 @@ namespace KingdomSurvival.BattleSandbox
         // Копия с другими числами (уровень противника) и теми же способностями.
         public SandboxUnitDefinition WithStats(int maxHitPoints, int attack, int defense, int damage, int movement, int initiative, int attackRange)
         {
-            return new SandboxUnitDefinition(Id, RoleLabel, Role, maxHitPoints, attack, defense, damage, movement, initiative, attackRange, tagIds, perkIds, Abilities);
+            return new SandboxUnitDefinition(Id, RoleLabel, Role, maxHitPoints, attack, defense, damage, movement, initiative, attackRange, tagIds, perkIds, Abilities, MagicReserve);
         }
 
         public bool HasTag(string tagId)
@@ -1371,13 +1377,18 @@ namespace KingdomSurvival.BattleSandbox
             target.ReceiveDamage(toHp);
             ResolveDirectHitAfterHp(kind, striker, target, before - target.HitPoints, temporaryAbsorbed);
             OnPassiveDirectHit(kind, striker, target, before, before - target.HitPoints);
+            if (IsDirectHit(kind))
+                AfterTypedHit(striker, target, before - target.HitPoints, hitDamageType);
             int afterMitigation = toHp + temporaryAbsorbed;
             Emit(SandboxCombatEventKind.HitResolved, striker, target, e =>
             {
                 e.Requested = damage; e.AfterMitigation = afterMitigation; e.AbsorbedTemporary = temporaryAbsorbed;
                 e.ActualHp = before - target.HitPoints; e.IsRetaliation = kind == SandboxHitKind.Retaliation || kind == SandboxHitKind.FirstStrike;
                 e.Delivery = kind == SandboxHitKind.Environment ? SandboxDeliveryKind.Surface
+                    : hitMagical ? SandboxDeliveryKind.Spell
                     : striker.Position.DistanceTo(target.Position) > 1 ? SandboxDeliveryKind.Ranged : SandboxDeliveryKind.Melee;
+                e.DamageType = hitDamageType;
+                e.IsMagical = hitMagical;
             });
             hitRecords.Add(new SandboxHitRecord(
                 kind,
@@ -1480,7 +1491,7 @@ namespace KingdomSurvival.BattleSandbox
             if (retaliation && attacker.HasPerk(SandboxPerks.CounterstrikeDamage) && attacker.RetaliationsThisRound == 0)
                 damage++;
             // Пакет состояний: плоские изменения итогового урона (+2 / −1, минимум 1).
-            damage = Math.Max(1, damage + StatusFlatDamage(attacker, target, rangedHit, SandboxDamageType.Physical, consume: false));
+            damage = Math.Max(1, damage + StatusFlatDamage(attacker, target, rangedHit, hitDamageType, consume: false));
             damage = PassiveDamage(attacker, target, rangedHit, damage, consume: false);
 
             SandboxAttackPreview result = new SandboxAttackPreview(

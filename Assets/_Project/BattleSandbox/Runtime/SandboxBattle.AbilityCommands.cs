@@ -151,6 +151,10 @@ namespace KingdomSurvival.BattleSandbox
             {
                 case SandboxAbilityKind.Pounce: return "Нет цели с свободным приземлением в " + ability.PathMin + "–" + ability.PathMax + " гексах прыжка.";
                 case SandboxAbilityKind.Charge: return "Нет свободной прямой для разгона перед целью.";
+                case SandboxAbilityKind.Heal: return "Рядом нет раненого союзника.";
+                case SandboxAbilityKind.Dispel: return "Нет врага с полезным состоянием в дальности.";
+                case SandboxAbilityKind.Spell:
+                case SandboxAbilityKind.SpellArea:
                 case SandboxAbilityKind.StunSpit:
                 case SandboxAbilityKind.Call:
                 case SandboxAbilityKind.VineGrab:
@@ -252,6 +256,13 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxAbilityKind.Call:
                     foreach (SandboxUnitState target in Opponents(unit))
                         yield return new SandboxAbilityCommand { AbilityId = id, TargetUnitId = target.Id, KeyCell = target.Position };
+                    break;
+                case SandboxAbilityKind.Heal:
+                case SandboxAbilityKind.Spell:
+                case SandboxAbilityKind.SpellArea:
+                case SandboxAbilityKind.Dispel:
+                    foreach (SandboxAbilityCommand extended in EnumerateExtended(unit, ability))
+                        yield return extended;
                     break;
                 case SandboxAbilityKind.VineGrab:
                     SandboxLink vine = links.FirstOrDefault(item => item.SourceId == unit.Id && item.Kind == SandboxLinkKind.Vine);
@@ -402,6 +413,11 @@ namespace KingdomSurvival.BattleSandbox
                     }
                     return preview;
                 }
+                case SandboxAbilityKind.Heal:
+                case SandboxAbilityKind.Spell:
+                case SandboxAbilityKind.SpellArea:
+                case SandboxAbilityKind.Dispel:
+                    return EvaluateExtended(unit, ability, command, target);
                 case SandboxAbilityKind.StunSpit:
                 {
                     if (!IsLiveOpponent(unit, target)) return SandboxAbilityPreview.Invalid("Цель недоступна.");
@@ -988,6 +1004,12 @@ namespace KingdomSurvival.BattleSandbox
                     }
                     break;
                 }
+                case SandboxAbilityKind.Heal:
+                case SandboxAbilityKind.Spell:
+                case SandboxAbilityKind.SpellArea:
+                case SandboxAbilityKind.Dispel:
+                    body = ExecuteExtended(unit, ability, command, target, preview);
+                    break;
                 case SandboxAbilityKind.StunSpit:
                     body = " → " + target.DisplayLabel + ": " + Strike(unit, target, ability.DamageMultiplier, false, preview);
                     if (!target.IsDefeated)
@@ -1238,7 +1260,7 @@ namespace KingdomSurvival.BattleSandbox
             SandboxStatusProfile profile = ability.StatusPayloadDuration > 0 || ability.StatusPayloadTick > 0
                 ? new SandboxStatusProfile { ProfileId = key, Duration = ability.StatusPayloadDuration, Tick = ability.StatusPayloadTick }
                 : null;
-            SandboxStatusApplyResult result = ApplyStatus(ability.StatusPayloadId, target, unit, profile);
+            SandboxStatusApplyResult result = ApplyStatus(ability.StatusPayloadId, target, unit, profile, supernatural: ability.IsMagical);
             if (!result.Applied)
                 return " " + result.Message;
             unit.passive.UsedInBattle.Add(key);

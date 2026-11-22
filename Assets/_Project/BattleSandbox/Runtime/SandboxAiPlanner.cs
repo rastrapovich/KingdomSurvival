@@ -310,6 +310,33 @@ namespace KingdomSurvival.BattleSandbox
             double damage = 1.0 + preview.Damage + kill;
             switch (ability.Kind)
             {
+                // Бриф завершения, этап 16: новые действия по фактическому результату.
+                case SandboxAbilityKind.Heal:
+                {
+                    if (target == null) return -1;
+                    int missing = target.MaxHitPoints - target.HitPoints;
+                    int actual = Math.Min(missing, Math.Max(0, ability.Amount));
+                    if (actual <= 0) return -1; // не лечить полное HP ради пустого события
+                    double urgency = target.HitPoints * 2 <= target.MaxHitPoints ? 2.0 : 0.0;
+                    return actual * 1.1 + urgency + battle.UpcomingTickDamage(target) * 0.5;
+                }
+                case SandboxAbilityKind.Spell:
+                {
+                    double payload = !string.IsNullOrEmpty(ability.StatusPayloadId) && target != null &&
+                                     battle.PreviewStatusRejection(ability.StatusPayloadId, target, unit) == null ? 1.5 : 0;
+                    return damage + payload;
+                }
+                case SandboxAbilityKind.SpellArea:
+                {
+                    if (!command.TargetCell.HasValue) return -1;
+                    double value = 0;
+                    foreach (SandboxUnitState hit in battle.Units.Where(u => !u.IsDefeated && !u.IsOffBoard && u != unit &&
+                                                                             u.Position.DistanceTo(command.TargetCell.Value) <= Math.Max(1, ability.Push)))
+                        value += hit.Team == unit.Team ? -2.5 : 1.0 + Math.Max(1, unit.Damage);
+                    return value;
+                }
+                case SandboxAbilityKind.Dispel:
+                    return preview.IsValid ? 2.0 : -1;
                 case SandboxAbilityKind.Pounce:
                 case SandboxAbilityKind.Charge:
                     return damage + 0.6 + (preview.ForcedCell.HasValue ? 0.5 : 0);

@@ -203,7 +203,8 @@ namespace KingdomSurvival.BattleSandbox
                     source.AttackRange,
                     source.TagIds,
                     null,
-                    ConvertAbilities(source));
+                    ConvertAbilities(source),
+                    source.MagicReserve);
 
                 sources.Add(source);
                 visuals[source.Id] = MakeVisual(source, animations, UnitArtViews.ActiveViewId);
@@ -280,7 +281,9 @@ namespace KingdomSurvival.BattleSandbox
                     ability.StatusPayloadId,
                     ability.StatusPayloadOncePerBattle,
                     ability.StatusPayloadDuration,
-                    ability.StatusPayloadTick));
+                    ability.StatusPayloadTick,
+                    (SandboxDamageType)(int)ability.DamageType,
+                    ability.IsMagical));
             }
             return result;
         }

@@ -20,7 +20,9 @@ namespace KingdomSurvival.BattleSandbox
         Poison,
         Smoke,
         Ice,
-        Electric
+        Electric,
+        // Иней на земле от холодного удара: шаг на клетку +1 для всех, без урона.
+        Rime
     }
 
     public enum SandboxImpulse
@@ -65,6 +67,7 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxEffectKind.Poison: return "ядовитая жижа";
                 case SandboxEffectKind.Smoke: return "дым";
                 case SandboxEffectKind.Ice: return "лёд";
+                case SandboxEffectKind.Rime: return "иней на земле";
                 default: return "ток в воде";
             }
         }
@@ -187,6 +190,7 @@ namespace KingdomSurvival.BattleSandbox
                     case SandboxEffectKind.Tar:
                     case SandboxEffectKind.Roots:
                     case SandboxEffectKind.Thorns:
+                    case SandboxEffectKind.Rime:
                         cost = Math.Max(cost, 2);
                         break;
                     case SandboxEffectKind.Web:
@@ -232,6 +236,9 @@ namespace KingdomSurvival.BattleSandbox
                 if (done.Contains(group.Key))
                     continue;
                 if (group.Key == SandboxEffectKind.Electric && (HasBridgeAt(cell) || IsFrozen(cell)))
+                    continue;
+                // «Не бьёт током от воды»: контактный ток наэлектризованной воды не действует.
+                if (group.Key == SandboxEffectKind.Electric && HasPassive(unit, SandboxPassiveKind.ElectricWaterImmune))
                     continue;
                 done.Add(group.Key);
                 int damage = group.Max(e => e.Damage);

@@ -106,6 +106,45 @@ namespace KingdomSurvival.BattleSandbox
             T("passive.20261119b.036", "Иней поверх слабости")
                 .React(E.Applied, negative, X.ApplyToEventTarget, S.AppliedByOwner, L.PerRound, effectStatus: SandboxStatusCatalog.Frost,
                     effectProfile: P("thin_rime", duration: 1, mode: "thin_rime"));
+
+            RegisterSupportAndMagic();
+        }
+
+        // Этапы 3–4: теги лечения, заклинаний и типов урона.
+        private static void RegisterSupportAndMagic()
+        {
+            const string p = "passive.status.20261120.";
+            const string q = "passive.20261119.";
+            const string b = "passive.20261119b.";
+            T(q + "136", "Умелые руки лекаря").R(K.HealOtherBonus, 2, limit: L.PerOwnTurn);
+            T(q + "098", "Хороший пациент").R(K.HealReceivedBonus, 1, limit: L.PerRound);
+            T(p + "032", "Хвори мешают лечению").R(K.HealReceivedPenaltyWhileStatus, 1, limit: L.PerRound, statuses: Ids("070"));
+            T(p + "002", "Вытягивает отраву").Heal(K.OnHealOther, X.RemoveFromEventTarget, SandboxStatusCatalog.Poison, L.PerBattle);
+            T(p + "004", "Чистая перевязь").Heal(K.OnHealOther, X.RemoveFromEventTarget, "status.002|status.193", L.PerOwnTurn);
+            T(p + "016", "Подрезает путы").Heal(K.OnHealOther, X.RemoveFromEventTarget, "status.046|status.022|status.047", L.PerOwnTurn, range: 1);
+            T(b + "026", "Лекарь крепнет от помощи").Heal(K.OnHealOther, X.HealSelf, limit: L.PerOwnTurn, value: 1);
+            T(b + "027", "Целебное напутствие").Heal(K.OnHealOther, X.GrantAttackCharge, limit: L.PerOwnTurn, value: 1);
+            T(b + "028", "Перевязь с оберегом").Heal(K.OnHealOther, X.ApplyToEventTarget, "status.135", L.PerOwnTurn,
+                profile: new SandboxStatusProfile { ProfileId = "healing_ward", Duration = 1, Value = -2, Uses = 1 });
+            T(b + "029", "Сила после исцеления").Heal(K.OnHealOther, X.ApplyToEventTarget, "status.148", L.PerTargetPerRound,
+                profile: new SandboxStatusProfile { ProfileId = "heal_buffer", Duration = 1, Value = 2 });
+            T(q + "128", "Сифон чужой силы").R(K.HealOnDispelMagical, 2, limit: L.PerBattle);
+            T(b + "043", "Оберег ближних чар").R(K.SpellCastSelfStatus, limit: L.PerOwnTurn, status: "status.148",
+                profile: new SandboxStatusProfile { ProfileId = "close_ward", Duration = 1, Value = 2 });
+            T(b + "024", "Бережёт своих внутри чар").R(K.AreaSpellSparesAllies);
+            T(b + "025", "Жатва чужой жизни").R(K.OnKillHealSelf, 2, limit: L.PerOwnTurn);
+            T(b + "044", "Копит грозовую искру").R(K.SparkCharge, 2, limit: L.PerOwnTurn);
+            T(q + "127", "Крадёт запас сил").R(K.MagicRestoreOnHit, 1, limit: L.PerOwnTurn);
+            T(q + "235", "Отнимает чародейский запас").R(K.MagicStealAtStart, 1, value2: 2);
+            T(q + "024", "Жаростойкая шкура").R(K.IncomingPercent, 40, C.FireDamage);
+            T(q + "056", "Легко воспламеняется").R(K.IncomingPercent, -50, C.FireDamage);
+            T(q + "129", "Непроницаемый для обычного").R(K.IncomingFlat, -2, C.NonMagical);
+            T(q + "132", "Пробивает поглощение").R(K.PierceFlatReduction, 1);
+            T(p + "008", "Копоть в глазах").R(K.OnHitApplyStatus, status: "status.168", when: C.TargetHasStatus, when2: C.FireDamage, limit: L.PerBattle,
+                statuses: Ids("168", "003"), profile: P("soot", duration: 1));
+            T(b + "034", "От удара стынет земля").R(K.ColdHitRimeCell, limit: L.PerOwnTurn);
+            T(b + "035", "Промораживает насквозь").R(K.ColdHitMarkNext, 1, limit: L.PerOwnTurn);
+            T(b + "045", "Не бьёт током от воды").R(K.ElectricWaterImmune);
         }
     }
 }

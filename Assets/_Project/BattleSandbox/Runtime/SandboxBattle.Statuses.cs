@@ -207,11 +207,24 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
 
+            int profileReduction = 0;
             if (target != null)
             {
                 foreach ((SandboxStatusInstance instance, SandboxStatusOp op) in OpsOf(target, SandboxStatusOpKind.IncomingFlat).ToList())
                 {
                     bool enemy = attacker != null && attacker.Team != target.Team;
+                    // Явный разовый профиль покрова (−2 «Перевязи с оберегом») — отдельно от предела.
+                    if (instance.ProfileValue < 0 && op.Value < 0)
+                    {
+                        if (op.Filter == SandboxStatusFilter.Physical && type != SandboxDamageType.Physical)
+                            continue;
+                        if (instance.UsesLeft <= 0 && instance.Definition.Uses == 0 && instance.ProfileId.Length > 0 && instance.charges.Count == 0)
+                            continue;
+                        profileReduction = Math.Max(profileReduction, -instance.ProfileValue);
+                        if (consume && instance.UsesLeft > 0)
+                            ConsumeUse(target, instance, "покров израсходован");
+                        continue;
+                    }
                     switch (op.Filter)
                     {
                         case SandboxStatusFilter.Physical: if (type != SandboxDamageType.Physical) continue; break;
@@ -248,10 +261,20 @@ namespace KingdomSurvival.BattleSandbox
                         ConsumeUse(target, instance, "израсходовано");
                 }
             }
-            return Math.Min(SandboxStatusRules.MaxFlatBonus, bonus) - Math.Min(SandboxStatusRules.MaxFlatReduction, reduction);
+            int totalReduction = Math.Max(Math.Min(SandboxStatusRules.MaxFlatReduction, reduction), profileReduction);
+            if (attacker != null)
+            {
+                foreach ((SandboxPassiveDefinition _, SandboxPassiveRule pierce) in Rules(attacker, SandboxPassiveKind.PierceFlatReduction))
+                    totalReduction = Math.Max(0, totalReduction - pierce.Value);
+            }
+            return Math.Min(SandboxStatusRules.MaxFlatBonus, bonus) - totalReduction;
         }
 
         private readonly Dictionary<string, int> markConsumedAtRoot = new Dictionary<string, int>(StringComparer.Ordinal);
+        private readonly Dictionary<string, int> wardBlockedAt = new Dictionary<string, int>(StringComparer.Ordinal);
+        private readonly Dictionary<string, int> frostChargesThisRound = new Dictionary<string, int>(StringComparer.Ordinal);
+        // Реакция «Лёд сковывает слабого» вправе добавить второй заряд от источника за раунд.
+        internal bool allowSecondFrostCharge;
 
         private void ConsumeUse(SandboxUnitState owner, SandboxStatusInstance instance, string what)
         {
@@ -337,6 +360,8 @@ namespace KingdomSurvival.BattleSandbox
 
             bool magical = supernatural || (profile != null && profile.Supernatural) || def.Supernatural;
             bool hostile = def.IsHarmful && source != null && source.Team != target.Team;
+            if (hostile && magical && wardBlockedAt.TryGetValue(target.Id, out int blockedRoot) && blockedRoot == currentRootAction)
+                return Reject(result, "«Защита от чар» уже отменила это заклинание", target);
             if (hostile && magical && !reflected)
             {
                 SandboxStatusInstance mirror = target.statuses.FirstOrDefault(item => item.Definition.HasSpecial("MirrorSupernatural") && item.UsesLeft > 0);
@@ -390,6 +415,15 @@ namespace KingdomSurvival.BattleSandbox
                     RemoveStatusInstance(target, other, "взаимно отменено");
                     return Reject(result, "«" + def.Name + "» и «" + other.Definition.Name + "» взаимно отменились", target);
                 }
+            }
+
+            if (statusId == SandboxStatusCatalog.Frost && source != null && (profile == null || profile.Mode != "thin_rime"))
+            {
+                string frostKey = target.Id + "|" + source.Id + "|" + Round;
+                frostChargesThisRound.TryGetValue(frostKey, out int already);
+                if (already >= (allowSecondFrostCharge ? 2 : 1))
+                    return Reject(result, "иней от этого источника уже лёг в этом раунде", target);
+                frostChargesThisRound[frostKey] = already + 1;
             }
 
             SandboxStatusInstance existing = FindStatus(target, statusId);
@@ -479,7 +513,9 @@ namespace KingdomSurvival.BattleSandbox
                     RemoveStatusInstance(target, old, "снято «" + def.Name + "»");
             }
             foreach (SandboxStatusOp op in def.Ops.Where(op => op.Kind == SandboxStatusOpKind.TemporaryHitPoints))
-                instance.TemporaryHitPoints = Math.Max(instance.TemporaryHitPoints, op.Value);
+                instance.TemporaryHitPoints = Math.Max(instance.TemporaryHitPoints, profile != null && profile.Value > 0 ? profile.Value : op.Value);
+            if (profile != null && profile.Uses > 0)
+                instance.UsesLeft = profile.Uses;
 
             target.statuses.Add(instance);
             StatusRevision++;
@@ -678,6 +714,17 @@ namespace KingdomSurvival.BattleSandbox
             {
                 Log(target.DisplayLabel + ": «Краткая неуязвимость» — удар не снимает HP.");
                 return 0;
+            }
+            if (hitMagical && striker.Team != target.Team)
+            {
+                SandboxStatusInstance ward = target.statuses.FirstOrDefault(item => item.Definition.HasSpecial("WardSupernatural") && item.UsesLeft > 0);
+                if (ward != null)
+                {
+                    ConsumeUse(target, ward, "погасила чары");
+                    wardBlockedAt[target.Id] = currentRootAction;
+                    Log(target.DisplayLabel + ": «Защита от чар» отменяет заклинание.");
+                    return 0;
+                }
             }
             SandboxStatusInstance shield = target.statuses.FirstOrDefault(item => item.Definition.Has(SandboxStatusOpKind.AbsorbHit) && item.UsesLeft > 0);
             if (shield != null)
@@ -980,6 +1027,7 @@ namespace KingdomSurvival.BattleSandbox
 
         private void ProcessStatusRoundStart()
         {
+            frostChargesThisRound.Clear();
             foreach (SandboxUnitState unit in units.Where(item => !item.IsDefeated).ToList())
             {
                 foreach (SandboxStatusInstance instance in unit.statuses.Where(item => item.Definition.Clock == SandboxStatusClock.RoundTrigger &&

@@ -34,7 +34,14 @@ namespace KingdomSurvival.BattleSandbox
         FeedOnNumbed,
         RegenOnWater,
         HiddenStart,
-        Flood
+        Flood,
+
+        // Бриф завершения (22.11.2026), этапы 3–4: активные, в конце списка —
+        // числовые значения прежних видов в данных не сдвигаются.
+        Heal,
+        Spell,
+        SpellArea,
+        Dispel
     }
 
     // Способность как данные: числа из Базы существ, без кода под существо.
@@ -78,7 +85,9 @@ namespace KingdomSurvival.BattleSandbox
             string statusPayloadId = null,
             bool statusPayloadOncePerBattle = false,
             int statusPayloadDuration = 0,
-            int statusPayloadTick = 0)
+            int statusPayloadTick = 0,
+            SandboxDamageType damageType = SandboxDamageType.Physical,
+            bool isMagical = false)
         {
             Id = string.IsNullOrWhiteSpace(id) ? kind.ToString() : id;
             Title = string.IsNullOrWhiteSpace(title) ? Id : title;
@@ -100,7 +109,14 @@ namespace KingdomSurvival.BattleSandbox
             StatusPayloadOncePerBattle = statusPayloadOncePerBattle;
             StatusPayloadDuration = Math.Max(0, statusPayloadDuration);
             StatusPayloadTick = Math.Max(0, statusPayloadTick);
+            DamageType = damageType;
+            IsMagical = isMagical || kind == SandboxAbilityKind.Spell || kind == SandboxAbilityKind.SpellArea || kind == SandboxAbilityKind.Dispel;
         }
+
+        // Тип повреждения и магическая доставка (способ атаки и тип урона — разные вещи:
+        // огненная стрела может быть обычным снарядом).
+        public SandboxDamageType DamageType { get; }
+        public bool IsMagical { get; }
 
         // Пакет состояний: состояние удара способности (данные Базы существ).
         public string StatusPayloadId { get; }
@@ -115,7 +131,21 @@ namespace KingdomSurvival.BattleSandbox
 
         public static bool IsActiveKind(SandboxAbilityKind kind)
         {
-            return kind >= SandboxAbilityKind.Pounce && kind <= SandboxAbilityKind.LayEgg;
+            return (kind >= SandboxAbilityKind.Pounce && kind <= SandboxAbilityKind.LayEgg) ||
+                   kind == SandboxAbilityKind.Heal || kind == SandboxAbilityKind.Spell ||
+                   kind == SandboxAbilityKind.SpellArea || kind == SandboxAbilityKind.Dispel;
+        }
+
+        public static string DamageTypeLabel(SandboxDamageType type)
+        {
+            switch (type)
+            {
+                case SandboxDamageType.Fire: return "огонь";
+                case SandboxDamageType.Cold: return "холод";
+                case SandboxDamageType.Poison: return "яд";
+                case SandboxDamageType.Supernatural: return "чары";
+                default: return "физический";
+            }
         }
 
         public string TypeLabel => IsActive
@@ -181,6 +211,14 @@ namespace KingdomSurvival.BattleSandbox
                     return new SandboxAbilityDefinition(id, title ?? "Скрыт до броска", kind);
                 case SandboxAbilityKind.Flood:
                     return new SandboxAbilityDefinition(id, title ?? "Разлив", kind, amount: 2, duration: 2, limit: 12);
+                case SandboxAbilityKind.Heal:
+                    return new SandboxAbilityDefinition(id, title ?? "Лечение", kind, rangeMin: 0, rangeMax: 1, amount: 4);
+                case SandboxAbilityKind.Spell:
+                    return new SandboxAbilityDefinition(id, title ?? "Заклинание", kind, cooldown: 2, rangeMin: 1, rangeMax: 3, damageMultiplier: 1.00m);
+                case SandboxAbilityKind.SpellArea:
+                    return new SandboxAbilityDefinition(id, title ?? "Заклинание по площади", kind, cooldown: 3, rangeMin: 1, rangeMax: 3, damageMultiplier: 1.00m, push: 1);
+                case SandboxAbilityKind.Dispel:
+                    return new SandboxAbilityDefinition(id, title ?? "Развеять чары", kind, cooldown: 2, rangeMin: 0, rangeMax: 3, amount: 1);
                 default:
                     return new SandboxAbilityDefinition(id, title, kind);
             }
@@ -216,6 +254,11 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxAbilityKind.RegenOnWater: return "В начале своего хода на мелкой воде восстанавливает " + a.Amount + "% HP (вверх, минимум 1).";
                 case SandboxAbilityKind.HiddenStart: return "Если разведка не заметила — начинает бой скрытым (виден подозрительный пень). Раскрывается своей атакой, уроном или контактом.";
                 case SandboxAbilityKind.Flood: return "Каждую " + a.Duration + "-ю свою активацию объявляет " + a.Amount + " клетки разлива у воды; они станут мелкой водой на следующем ходу. Не больше " + a.Limit + " клеток за бой.";
+                case SandboxAbilityKind.Heal: return "Себя или союзника в " + a.RangeMax + " гексе: +" + a.Amount + " HP, не выше максимума. Яд и кровотечение лечение само не снимает. 1 действие вместо атаки.";
+                case SandboxAbilityKind.Spell: return "Адресное заклинание: цель в " + a.RangeMin + "–" + a.RangeMax + " гексах по линии видимости, один удар " + m + " (" + SandboxAbilityDefinition.DamageTypeLabel(a.DamageType) + ")" +
+                                                      (string.IsNullOrEmpty(a.StatusPayloadId) ? string.Empty : ", затем состояние") + ". Защита от чар отменяет.";
+                case SandboxAbilityKind.SpellArea: return "Заклинание по площади: клетка в " + a.RangeMax + " гексах и соседние в радиусе " + Math.Max(1, a.Push) + ", удар " + m + " (" + SandboxAbilityDefinition.DamageTypeLabel(a.DamageType) + ") по всем, кто там стоит, включая своих.";
+                case SandboxAbilityKind.Dispel: return "Снимает одно полезное состояние с врага в " + a.RangeMax + " гексах по линии видимости.";
                 default: return a.Description;
             }
         }

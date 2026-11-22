@@ -26,6 +26,8 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxPassiveLimit.PerBattle: return !rt.UsedInBattle.Contains(rule.Key);
                 case SandboxPassiveLimit.PerTargetPerBattle:
                     return targetId == null || !rt.UsedOnTargets.TryGetValue(rule.Key, out HashSet<string> set) || !set.Contains(targetId);
+                case SandboxPassiveLimit.PerTargetPerRound:
+                    return targetId == null || !rt.UsedOnTargets.TryGetValue(rule.Key + "@" + Round, out HashSet<string> roundSet) || !roundSet.Contains(targetId);
                 default: return true;
             }
         }
@@ -39,9 +41,11 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxPassiveLimit.PerRound: rt.LastRound[rule.Key] = Round; break;
                 case SandboxPassiveLimit.PerBattle: rt.UsedInBattle.Add(rule.Key); break;
                 case SandboxPassiveLimit.PerTargetPerBattle:
+                case SandboxPassiveLimit.PerTargetPerRound:
                     if (targetId == null) break;
-                    if (!rt.UsedOnTargets.TryGetValue(rule.Key, out HashSet<string> set))
-                        rt.UsedOnTargets[rule.Key] = set = new HashSet<string>(StringComparer.Ordinal);
+                    string setKey = rule.Limit == SandboxPassiveLimit.PerTargetPerRound ? rule.Key + "@" + Round : rule.Key;
+                    if (!rt.UsedOnTargets.TryGetValue(setKey, out HashSet<string> set))
+                        rt.UsedOnTargets[setKey] = set = new HashSet<string>(StringComparer.Ordinal);
                     set.Add(targetId);
                     break;
             }
@@ -129,6 +133,10 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxPassiveCondition.RememberedAttacker: return other != null && self.passive.RememberedAttackerId == other.Id;
                 case SandboxPassiveCondition.AvengedKiller: return other != null && self.passive.KillersOfAllies.Contains(other.Id);
                 case SandboxPassiveCondition.FirstAttackOnTarget: return other != null && !self.passive.AttackedTargets.Contains(other.Id);
+                case SandboxPassiveCondition.FireDamage: return hitDamageType == SandboxDamageType.Fire;
+                case SandboxPassiveCondition.ColdDamage: return hitDamageType == SandboxDamageType.Cold;
+                case SandboxPassiveCondition.MagicalHit: return hitMagical;
+                case SandboxPassiveCondition.NonMagical: return !hitMagical;
                 case SandboxPassiveCondition.SelfHasStatus:
                     return rule.StatusIds.Any(id => self.HasStatus(id) || (id == SandboxStatusCatalog.Parasite && GetAttachedParasite(self) != null));
                 case SandboxPassiveCondition.SelfIsLinkPartner:
@@ -279,17 +287,40 @@ namespace KingdomSurvival.BattleSandbox
                 }
                 flat -= target.passive.Stack("reduction.hits");
             }
+            if (target != null && hitDamageType == SandboxDamageType.Cold && art.ColdMarkTargetId == target.Id && art.ColdMarkExpires >= target.ActivationCount)
+            {
+                flat += art.ColdMarkValue;
+                if (consume)
+                    art.ColdMarkTargetId = null;
+            }
+            if (hitMagical && art.Sparks >= 3 && Rules(attacker, SandboxPassiveKind.SparkCharge).Any(pair => LimitReady(attacker, pair.Rule, null)))
+            {
+                flat += Rules(attacker, SandboxPassiveKind.SparkCharge).First().Rule.Value;
+                if (consume)
+                {
+                    art.Sparks = 0;
+                    MarkUsed(attacker, Rules(attacker, SandboxPassiveKind.SparkCharge).First().Rule, null);
+                    art.Counters["spark.discharged"] = currentRootAction;
+                }
+            }
             int result = damage + flat;
             if (target != null)
             {
                 int percent = 0;
+                int increase = 0;
                 foreach ((SandboxPassiveDefinition _, SandboxPassiveRule rule) in Rules(target, SandboxPassiveKind.IncomingPercent))
                 {
-                    if (Both(rule, target, attacker, ranged))
+                    if (!Both(rule, target, attacker, ranged))
+                        continue;
+                    if (rule.Value > 0)
                         percent = Math.Max(percent, rule.Value);
+                    else
+                        increase = Math.Max(increase, -rule.Value);
                 }
                 if (percent > 0)
                     result = result * (100 - percent) / 100;
+                if (increase > 0)
+                    result = result * (100 + increase) / 100;
             }
             return Math.Max(1, result);
         }
@@ -508,8 +539,31 @@ namespace KingdomSurvival.BattleSandbox
                         if (striker.HitPoints > before)
                             Log(striker.DisplayLabel + ": «" + def.Name + "» +" + (striker.HitPoints - before) + " HP.");
                     }
+                    if (hitMagical && hpTaken > 0)
+                    {
+                        foreach ((SandboxPassiveDefinition _, SandboxPassiveRule spark) in Rules(striker, SandboxPassiveKind.SparkCharge))
+                        {
+                            if (rt.Counter("spark.discharged") != currentRootAction)
+                                rt.Sparks = Math.Min(3, rt.Sparks + 1);
+                        }
+                        SandboxPassiveRule refill = ReadyRule(striker, SandboxPassiveKind.MagicRestoreOnHit);
+                        if (refill != null && rt.MagicSpent > 0)
+                        {
+                            MarkUsed(striker, refill, null);
+                            rt.MagicSpent = Math.Max(0, rt.MagicSpent - refill.Value);
+                            Log(striker.DisplayLabel + ": " + RuleName(refill) + " — запас +" + refill.Value + ".");
+                        }
+                    }
                     if (target.IsDefeated)
+                    {
+                        SandboxPassiveRule harvest = hitMagical && !target.HasTag("nature.returned") ? ReadyRule(striker, SandboxPassiveKind.OnKillHealSelf) : null;
+                        if (harvest != null)
+                        {
+                            MarkUsed(striker, harvest, null);
+                            HealLog(striker, harvest.Value, RuleName(harvest).Trim('«', '»'));
+                        }
                         OnPassiveKill(striker, target, ranged);
+                    }
                 }
 
                 // --- цель ---
@@ -781,6 +835,15 @@ namespace KingdomSurvival.BattleSandbox
                 {
                     RemoveStatus(unit, rule.StatusIds[1], "«" + def.Name + "»");
                 }
+            }
+            foreach ((SandboxPassiveDefinition def, SandboxPassiveRule rule) in Rules(unit, SandboxPassiveKind.MagicStealAtStart))
+            {
+                SandboxUnitState victim = units.Where(u => !u.IsDefeated && u.Team != unit.Team && MagicLeft(u) > 0 && u.Position.DistanceTo(unit.Position) <= rule.Value2)
+                    .OrderBy(u => u.Position.DistanceTo(unit.Position)).ThenBy(u => u.Id, StringComparer.Ordinal).FirstOrDefault();
+                if (victim == null)
+                    continue;
+                victim.passive.MagicSpent += rule.Value;
+                Log(unit.DisplayLabel + ": «" + def.Name + "» — у " + victim.DisplayLabel + " −" + rule.Value + " чародейского запаса.");
             }
             if (!StrongControlled(unit))
             {

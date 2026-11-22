@@ -212,8 +212,12 @@ namespace KingdomSurvival.BattleSandbox
                     return true;
                 }
                 case SandboxReactionEffect.AddCharge:
+                {
                     if (bearer.IsDefeated || instance == null || !bearer.statuses.Contains(instance)) return false;
-                    return ApplyStatus(statusId, bearer, owner).Applied;
+                    allowSecondFrostCharge = true;
+                    try { return ApplyStatus(statusId, bearer, owner).Applied; }
+                    finally { allowSecondFrostCharge = false; }
+                }
                 case SandboxReactionEffect.HealSelf:
                 {
                     if (owner.IsDefeated || owner.HitPoints >= owner.MaxHitPoints) return false;

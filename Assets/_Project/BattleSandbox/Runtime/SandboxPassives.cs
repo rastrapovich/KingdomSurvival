@@ -100,6 +100,22 @@ namespace KingdomSurvival.BattleSandbox
         HolderImmobilizedView,
         RootsApplyStatusOnce,
         FearBreaksGrapple,
+        // Этапы 3–4: лечение, магия, типы урона.
+        HealOtherBonus,
+        HealReceivedBonus,
+        HealReceivedPenaltyWhileStatus,
+        OnHealOther,
+        HealOnDispelMagical,
+        SpellCastSelfStatus,
+        AreaSpellSparesAllies,
+        OnKillHealSelf,
+        SparkCharge,
+        MagicRestoreOnHit,
+        MagicStealAtStart,
+        PierceFlatReduction,
+        ColdHitRimeCell,
+        ColdHitMarkNext,
+        ElectricWaterImmune,
         // Прежнее правило под другим ID (Стая, ходьба по местности).
         Alias,
         // Политика без собственного эффекта (совпадает с общим правилом).
@@ -143,7 +159,11 @@ namespace KingdomSurvival.BattleSandbox
         FirstAttackOnTarget,
         SelfHasStatus,
         SelfIsLinkPartner,
-        Retaliation
+        Retaliation,
+        FireDamage,
+        ColdDamage,
+        MagicalHit,
+        NonMagical
     }
 
     // Событие состояния для реакции тега.
@@ -199,6 +219,7 @@ namespace KingdomSurvival.BattleSandbox
         PerRound,
         PerBattle,
         PerTargetPerBattle,
+        PerTargetPerRound,
         EveryNth
     }
 
@@ -282,6 +303,12 @@ namespace KingdomSurvival.BattleSandbox
         internal bool BelowHalfDone;
         // Невосприимчивость, полученная реакциями: statusId или statusId@sourceId.
         internal readonly HashSet<string> GrantedImmunities = new HashSet<string>(StringComparer.Ordinal);
+        // Чародейский запас (если задан в Базе существ), искры, метка холода.
+        public int MagicSpent { get; internal set; }
+        public int Sparks { get; internal set; }
+        internal string ColdMarkTargetId;
+        internal int ColdMarkExpires = -1;
+        internal int ColdMarkValue;
         public int Counter(string key) => Counters.TryGetValue(key, out int value) ? value : 0;
         public int Stack(string key) => Stacks.TryGetValue(key, out int value) ? value : 0;
     }
@@ -346,6 +373,16 @@ namespace KingdomSurvival.BattleSandbox
                     Kind = kind, Value = value, Value2 = value2, Condition = when, Condition2 = when2, ConditionParam = param ?? string.Empty,
                     Limit = limit, LimitN = n, Profile = profile,
                     StatusIds = statuses ?? (status != null ? new[] { status } : Array.Empty<string>())
+                });
+                return this;
+            }
+
+            public B Heal(SandboxPassiveKind kind, SandboxReactionEffect effect, string effectStatus = null, SandboxPassiveLimit limit = SandboxPassiveLimit.None,
+                int value = 0, int range = 0, SandboxStatusProfile profile = null)
+            {
+                Def.Add(new SandboxPassiveRule
+                {
+                    Kind = kind, Effect = effect, EffectStatus = effectStatus, Limit = limit, Value = value, Value2 = range, EffectProfile = profile
                 });
                 return this;
             }

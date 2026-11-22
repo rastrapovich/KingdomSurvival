@@ -151,9 +151,9 @@ namespace KingdomSurvival.BattleSandbox
             Def("status.132", "Щит одного попадания", "defense", Good()).Own(2).Uses(1).Op(new SandboxStatusOp(SandboxStatusOpKind.AbsorbHit, consumesUse: true));
             Def("status.135", "Каменная кожа", "defense", Good()).Own(2).Op(new SandboxStatusOp(SandboxStatusOpKind.IncomingFlat, -1, SandboxStatusFilter.Physical));
             Def("status.136", "Защита от стрел", "defense", Good()).Own(2).Op(new SandboxStatusOp(SandboxStatusOpKind.IncomingFlat, -1, SandboxStatusFilter.Ranged));
-            Def("status.137", "Защита от чар", "defense", Good()).Own(1).Uses(1).Op(Special("WardSupernatural"));
+            Def("status.137", "Защита от чар", "defense", Good()).Own(1).Uses(1).Op(Special("WardSupernatural")).Magic();
             Def("status.138", "Огненный покров", "defense", Good()).Own(2).Op(new SandboxStatusOp(SandboxStatusOpKind.ContactRetort, 1, SandboxStatusFilter.Melee, damageType: SandboxDamageType.Fire));
-            Def("status.139", "Зеркальная защита", "defense", Good()).Own(2).Uses(1).Op(Special("MirrorSupernatural"));
+            Def("status.139", "Зеркальная защита", "defense", Good()).Own(2).Uses(1).Op(Special("MirrorSupernatural")).Magic();
             Def("status.142", "Краткая неуязвимость", "defense", Good()).UntilStart().Op(Op(SandboxStatusOpKind.Invulnerable));
 
             // ---------- Лечение и сохранение жизни ----------

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using KingdomSurvival.WorldMapVisual;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -386,8 +387,12 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                     tooltip = "Фигура героя на карте будет ходить по кадрам этого набора (нужны кадры ходьбы)."
                 });
             }
+            else
+            {
+                AddHeroMoveSpeed();
+            }
 
-            Slider height = LiveSlider("Рост на карте, клеток", WorldMapAnimationSetData.MinHeightInHexes, WorldMapAnimationSetData.MaxHeightInHexes, set.HeightInHexes,
+            Slider height =LiveSlider("Рост на карте, клеток", WorldMapAnimationSetData.MinHeightInHexes, WorldMapAnimationSetData.MaxHeightInHexes, set.HeightInHexes,
                 "Высота холста кадра в ширинах клетки карты. Фигура занимает около 77% холста, поэтому 0,4 даёт рост около трети клетки — как у прежней фишки. " +
                 "Масштаб просмотра колесом мыши сюда не влияет.",
                 value => SelectedSet?.SetHeightInHexes(value));
@@ -459,6 +464,69 @@ namespace KingdomSurvival.AnimationDatabase.Editor
         {
             WorldMapAnimationSetData hero = database.FindSet(database.HeroSetId);
             return hero != null ? "«" + hero.DisplayName + "»" : "не назначен";
+        }
+
+        // Скорость героя по карте — общая настройка движения (ассет
+        // KingdomSurvivalWorldMapMovement, «Генератор карты» → «Время и
+        // движение»): здесь тот же ползунок, отдельного значения нет. Границы —
+        // как у Range поля heroRunSpeedHexesPerSecond.
+        private const float MinHeroMoveSpeed = 0.1f;
+        private const float MaxHeroMoveSpeed = 12f;
+
+        private void AddHeroMoveSpeed()
+        {
+            WorldMapMovementSettingsAsset movement = AssetDatabase.LoadAssetAtPath<WorldMapMovementSettingsAsset>(WorldMapMovementSettingsAsset.AssetPath);
+            SerializedObject serialized = movement != null ? new SerializedObject(movement) : null;
+            SerializedProperty speedProperty = serialized?.FindProperty("heroRunSpeedHexesPerSecond");
+            if (speedProperty == null)
+            {
+                Label missing = new Label("Настройки движения карты не найдены: скорость героя задаётся в «Генераторе карты».");
+                missing.style.whiteSpace = WhiteSpace.Normal;
+                missing.style.fontSize = 10f;
+                missing.style.color = ErrorColor;
+                setPanel.Add(missing);
+                return;
+            }
+
+            const string label = "Скорость по карте, клеток/с";
+            Label hint = new Label(HeroMoveSpeedText(movement));
+            hint.style.whiteSpace = WhiteSpace.Normal;
+            hint.style.fontSize = 10f;
+            hint.style.color = HintColor;
+            Slider slider = new Slider(label, MinHeroMoveSpeed, MaxHeroMoveSpeed)
+            {
+                value = speedProperty.floatValue,
+                showInputField = true,
+                tooltip = "Сколько клеток карты в секунду реального времени герой проходит по открытой местности (на ×1). " +
+                          "Это общая скорость движения по карте — та же настройка, что «Генератор карты» → «Время и движение»; " +
+                          "группы мира идут со своей долей от неё, местность замедляет или ускоряет. В игре применяется сразу."
+            };
+            slider.style.marginTop = 4f;
+            slider.labelElement.style.minWidth = 130f;
+            slider.RegisterValueChangedCallback(evt =>
+            {
+                OpenUndoGroup(label);
+                serialized.Update();
+                speedProperty.floatValue = Mathf.Clamp(evt.newValue, MinHeroMoveSpeed, MaxHeroMoveSpeed);
+                serialized.ApplyModifiedProperties();
+                hint.text = HeroMoveSpeedText(movement);
+                if (EditorApplication.isPlaying)
+                    WorldMapVisualRuntime.ApplyMovementRules();
+            });
+            slider.RegisterCallback<PointerUpEvent>(_ => CloseUndoGroup(), TrickleDown.TrickleDown);
+            slider.RegisterCallback<PointerCaptureOutEvent>(_ => CloseUndoGroup(), TrickleDown.TrickleDown);
+            slider.RegisterCallback<FocusOutEvent>(_ => CloseUndoGroup(), TrickleDown.TrickleDown);
+            setPanel.Add(slider);
+            setPanel.Add(hint);
+        }
+
+        private static string HeroMoveSpeedText(WorldMapMovementSettingsAsset movement)
+        {
+            float speed = Mathf.Max(MinHeroMoveSpeed, movement.HeroRunSpeedHexesPerSecond);
+            string text = "Общая настройка движения карты (та же, что в «Генераторе карты» → «Время и движение»).";
+            if (movement.IndependentTime)
+                text += " Клетка открытой местности ≈ " + (movement.WorldGameHoursPerRealSecond / speed).ToString("0.##") + " игровых ч.";
+            return text;
         }
 
         private static string SlideFreeText(WorldMapAnimationSetData set)

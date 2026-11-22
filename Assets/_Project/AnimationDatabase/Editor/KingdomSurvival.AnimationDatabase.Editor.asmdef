@@ -4,6 +4,7 @@
   "references": [
     "KingdomSurvival.AnimationDatabase",
     "KingdomSurvival.UnitDatabase",
+    "KingdomSurvival.WorldMapVisual",
     "Unity.2D.Sprite.Editor"
   ],
   "includePlatforms": [

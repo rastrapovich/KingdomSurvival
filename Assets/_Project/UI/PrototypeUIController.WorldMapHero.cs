@@ -229,6 +229,19 @@ public partial class PrototypeUIController
         if (TickWorldMapHeroMapLab(dt, running))
             return;
 
+        // Набор героя из раздела «Глобальная карта» Базы анимаций — вместо
+        // боевого набора (settings.HeroAnimationSetId).
+        WorldMapAnimationDatabaseAsset mapAnimations = WorldMapAnimationDatabaseAsset.Current;
+        WorldMapAnimationSetData mapSet = mapAnimations != null ? mapAnimations.HeroSet : null;
+        if (mapSet != null)
+        {
+            Vector2 percent = idleAtStart
+                ? new Vector2(WorldMapNavigation.CapitalXPercent, WorldMapNavigation.CapitalYPercent)
+                : new Vector2(expedition.CurrentMapXPercent, expedition.CurrentMapYPercent);
+            TickWorldMapHeroFigureFromMapSet(dt, settings, mapAnimations, mapSet, running, percent, ground);
+            return;
+        }
+
         CreatureAnimationSetData set = ResolveWorldMapHeroAnimationSet(settings);
         if (set == null)
         {
@@ -293,6 +306,78 @@ public partial class PrototypeUIController
         worldMapHeroImage.style.translate = new Translate(
             ground.x - pivotX * width + cellOffset.x * width,
             ground.y - (1f - set.Pivot.y) * height - cellOffset.y * height);
+    }
+
+    private readonly WorldMapSetAnimator worldMapHeroFlatAnimator = new WorldMapSetAnimator();
+    private WorldMapFacing worldMapHeroFlatFacing = WorldMapFacing.Down;
+    private Vector2 worldMapHeroFlatLastPercent;
+    private bool worldMapHeroFlatHasLast;
+
+    // Герой без живой карты MapLab — экранная картинка из набора карты.
+    // Сектор — по смещению фигуры на экране, размер — от ширины клетки.
+    private void TickWorldMapHeroFigureFromMapSet(
+        float dt,
+        WorldMapMovementSettingsAsset settings,
+        WorldMapAnimationDatabaseAsset database,
+        WorldMapAnimationSetData set,
+        bool running,
+        Vector2 percent,
+        Vector2 ground)
+    {
+        Vector2 motion = worldMapHeroFlatHasLast ? percent - worldMapHeroFlatLastPercent : Vector2.zero;
+        worldMapHeroFlatLastPercent = percent;
+        worldMapHeroFlatHasLast = true;
+        Vector2 screen = new Vector2(motion.x * worldMapCanvasWidth, motion.y * worldMapCanvasHeight);
+        if (screen.sqrMagnitude > 1e-6f)
+            worldMapHeroFlatFacing = WorldMapFacingLabels.FromScreenDirection(screen.x, screen.y);
+
+        WorldMapHexGrid grid = WorldMapNavigation.Grid;
+        float hexPercent = (float)(grid.HexWidth / grid.CanvasWidth * 100.0);
+        float stepHexes = WorldMapSetAnimator.GroundHexes(
+            motion,
+            worldMapCanvasHeight / Mathf.Max(1f, worldMapCanvasWidth),
+            1f,
+            hexPercent);
+        CreatureAnimationDirection direction = database.GetDirection(worldMapHeroFlatFacing);
+        bool sync = settings != null && settings.SyncWalkCadence;
+        Sprite sprite = worldMapHeroFlatAnimator.Tick(set, direction, running, dt, stepHexes, sync);
+        if (sprite == null)
+        {
+            ShowWorldMapHeroFallback(ground);
+            return;
+        }
+
+        if (!ReferenceEquals(worldMapHeroImage.sprite, sprite))
+            worldMapHeroImage.sprite = sprite;
+
+        // Высота холста кадра — в ширинах клетки карты; опора набора стоит
+        // в точке героя (как в бою — ноги не прыгают при смене кадров).
+        Vector2 canvas = WorldMapSetAnimator.CanvasOf(set.Animation, sprite);
+        float height = set.HeightInHexes * hexPercent / 100f * worldMapCanvasWidth * Mathf.Max(0.0001f, worldMapZoom);
+        float width = height * canvas.x / Mathf.Max(1f, canvas.y);
+        bool flip = worldMapHeroFlatAnimator.IsMirrored;
+        Vector2 pivot = WorldMapSetAnimator.CardPivot(set.Animation, worldMapHeroFlatAnimator.Clip, flip);
+        // Картинку отражает scale -1 вокруг центра; опора X уже зеркальная.
+        float scaleX = flip ? -1f : 1f;
+        if (worldMapHeroImage.style.scale.value.value.x != scaleX)
+            worldMapHeroImage.style.scale = new Scale(new Vector3(scaleX, 1f, 1f));
+
+        if (worldMapHeroFallback.style.display != DisplayStyle.None)
+            worldMapHeroFallback.style.display = DisplayStyle.None;
+        if (worldMapHeroImage.style.display != DisplayStyle.Flex)
+            worldMapHeroImage.style.display = DisplayStyle.Flex;
+        if (Mathf.Abs(worldMapHeroAppliedSize.x - width) > 0.01f ||
+            Mathf.Abs(worldMapHeroAppliedSize.y - height) > 0.01f)
+        {
+            worldMapHeroImage.style.width = width;
+            worldMapHeroImage.style.height = height;
+            worldMapHeroAppliedSize = new Vector2(width, height);
+        }
+
+        // pivot.y — от низа кадра, translate — от верха.
+        worldMapHeroImage.style.translate = new Translate(
+            ground.x - pivot.x * width,
+            ground.y - (1f - pivot.y) * height);
     }
 
     private void ShowWorldMapHeroFallback(Vector2 ground)

@@ -112,7 +112,8 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             string spritePrefix,
             IReadOnlyList<string> framePaths,
             Vector2Int canvas,
-            IReadOnlyList<string> normalPaths = null)
+            IReadOnlyList<string> normalPaths = null,
+            bool mipmaps = false)
         {
             CreatureAnimationEditorData.EnsureFolder(folder);
             List<CreatureAnimationAtlasPage> pages = ComputeLayout(framePaths.Count, canvas);
@@ -167,7 +168,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             List<Sprite> sprites = new List<Sprite>();
             for (int pageIndex = 0; pageIndex < pages.Count; pageIndex++)
             {
-                ImportAsSlicedSprite(pagePaths[pageIndex], pages[pageIndex], pageSpriteNames[pageIndex], normalPages[pageIndex]);
+                ImportAsSlicedSprite(pagePaths[pageIndex], pages[pageIndex], pageSpriteNames[pageIndex], normalPages[pageIndex], mipmaps);
                 Dictionary<string, Sprite> byName = AssetDatabase.LoadAllAssetsAtPath(pagePaths[pageIndex])
                     .OfType<Sprite>()
                     .ToDictionary(sprite => sprite.name, StringComparer.Ordinal);
@@ -183,7 +184,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
 
         // Импорт: Sprite (2D and UI), альфа, без мип-карт, билинейная
         // фильтрация, сжатие высокого качества без уменьшения разрешения.
-        private static void ImportAsSlicedSprite(string assetPath, CreatureAnimationAtlasPage page, IReadOnlyList<string> spriteNames, Texture2D normalPage = null)
+        private static void ImportAsSlicedSprite(string assetPath, CreatureAnimationAtlasPage page, IReadOnlyList<string> spriteNames, Texture2D normalPage = null, bool mipmaps = false)
         {
             AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceSynchronousImport);
             TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(assetPath);
@@ -194,7 +195,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             importer.spriteImportMode = SpriteImportMode.Multiple;
             importer.alphaSource = TextureImporterAlphaSource.FromInput;
             importer.alphaIsTransparency = true;
-            importer.mipmapEnabled = false;
+            importer.mipmapEnabled = mipmaps;
             importer.isReadable = false;
             importer.filterMode = FilterMode.Bilinear;
             importer.wrapMode = TextureWrapMode.Clamp;

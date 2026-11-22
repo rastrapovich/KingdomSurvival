@@ -36,6 +36,8 @@ namespace KingdomSurvival.AnimationDatabase.Editor
         [SerializeField] private string selectedUnitId;
         [SerializeField] private CreatureAnimationAction selectedAction = CreatureAnimationAction.Idle;
         [SerializeField] private CreatureAnimationDirection selectedDirection = CreatureAnimationDirection.Front;
+        // Раздел окна: 0 — «Существа (бой)», 1 — «Глобальная карта».
+        [SerializeField] private int sectionIndex;
 
         private CreatureAnimationDatabaseAsset database;
         private UnitDatabaseAsset units;
@@ -51,6 +53,10 @@ namespace KingdomSurvival.AnimationDatabase.Editor
         private VisualElement setPanel;
         private ScrollView detailPanel;
         private VisualElement reviewOverlay;
+        private VisualElement battleRoot;
+        private WorldMapAnimationSection mapSection;
+        private ToolbarToggle battleSectionToggle;
+        private ToolbarToggle mapSectionToggle;
         private bool advancedOpen;
         private bool directionMapOpen;
         private bool pivotUndoGroupOpen;
@@ -113,11 +119,16 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 return;
             }
 
+            BuildSectionBar();
+            battleRoot = new VisualElement();
+            battleRoot.style.flexGrow = 1f;
+            rootVisualElement.Add(battleRoot);
+
             BuildToolbar();
 
             TwoPaneSplitView split = new TwoPaneSplitView(0, 280f, TwoPaneSplitViewOrientation.Horizontal);
             split.style.flexGrow = 1f;
-            rootVisualElement.Add(split);
+            battleRoot.Add(split);
             split.Add(BuildListPane());
             split.Add(BuildMainPane());
 
@@ -128,6 +139,59 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             if (string.IsNullOrEmpty(selectedUnitId) && visibleUnits.Count > 0)
                 selectedUnitId = visibleUnits[0].Id;
             SelectUnit(selectedUnitId);
+            ApplySection();
+        }
+
+        // Переключатель разделов окна: бой | глобальная карта.
+        private void BuildSectionBar()
+        {
+            Toolbar bar = new Toolbar();
+            bar.style.height = 26f;
+            battleSectionToggle = new ToolbarToggle { text = "Существа (бой)", tooltip = "Анимации существ боевой арены." };
+            mapSectionToggle = new ToolbarToggle { text = "Глобальная карта", tooltip = "Анимации фигур, которые ходят по основной карте (герой, позже группы мира)." };
+            battleSectionToggle.RegisterValueChangedCallback(evt =>
+            {
+                if (evt.newValue)
+                    SwitchSection(0);
+                else if (sectionIndex == 0)
+                    battleSectionToggle.SetValueWithoutNotify(true);
+            });
+            mapSectionToggle.RegisterValueChangedCallback(evt =>
+            {
+                if (evt.newValue)
+                    SwitchSection(1);
+                else if (sectionIndex == 1)
+                    mapSectionToggle.SetValueWithoutNotify(true);
+            });
+            bar.Add(battleSectionToggle);
+            bar.Add(mapSectionToggle);
+            rootVisualElement.Add(bar);
+        }
+
+        private void SwitchSection(int index)
+        {
+            if (sectionIndex == index)
+                return;
+            sectionIndex = index;
+            ApplySection();
+        }
+
+        // Раздел карты создаётся при первом показе: база карты появляется,
+        // только когда её открыли.
+        private void ApplySection()
+        {
+            if (battleRoot == null)
+                return;
+            if (sectionIndex == 1 && mapSection == null)
+            {
+                mapSection = new WorldMapAnimationSection();
+                rootVisualElement.Add(mapSection);
+            }
+            battleSectionToggle?.SetValueWithoutNotify(sectionIndex == 0);
+            mapSectionToggle?.SetValueWithoutNotify(sectionIndex == 1);
+            battleRoot.style.display = sectionIndex == 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            if (mapSection != null)
+                mapSection.style.display = sectionIndex == 1 ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         private void BuildToolbar()
@@ -159,7 +223,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             messageLabel.style.marginRight = 8f;
             messageLabel.style.overflow = Overflow.Hidden;
             toolbar.Add(messageLabel);
-            rootVisualElement.Add(toolbar);
+            battleRoot.Add(toolbar);
         }
 
         private static void AddToolbarButton(Toolbar toolbar, string text, Action action, string tooltip)
@@ -1525,6 +1589,8 @@ namespace KingdomSurvival.AnimationDatabase.Editor
 
         private void OnWindowDragUpdated(DragUpdatedEvent evt)
         {
+            if (sectionIndex != 0)
+                return;
             DragAndDrop.visualMode = SelectedUnit != null && HasDroppableContent()
                 ? DragAndDropVisualMode.Copy
                 : DragAndDropVisualMode.Rejected;
@@ -1533,7 +1599,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
         // Папка, брошенная в окно, разбирается как папка существа.
         private void OnWindowDragPerform(DragPerformEvent evt)
         {
-            if (SelectedUnit == null)
+            if (sectionIndex != 0 || SelectedUnit == null)
                 return;
             DragAndDrop.AcceptDrag();
             List<Sprite> sprites = SpritesFrom(DragAndDrop.objectReferences);

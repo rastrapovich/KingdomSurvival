@@ -15,9 +15,10 @@ namespace KingdomSurvival.MapLabBridge
         {
             public GameObject Root;
             public Transform Card, Shadow;
-            public Mesh CardMesh, ShadowMesh;
+            public Mesh CardMesh, LineMesh, ShadowMesh;
             public Material Fill, XRayFill, XRayLine, ShadowMaterial;
             public Vector2 Size, Pivot;
+            public Vector4 Uv;
         }
 
         private static readonly Dictionary<string, Figure> figures = new Dictionary<string, Figure>();
@@ -33,6 +34,17 @@ namespace KingdomSurvival.MapLabBridge
         // рост в единицах мира; pivot — опора на рисунке (0..1); lift —
         // подскок при беге (мир). outline — контур силуэта для закрытой части.
         public static bool Place(MapLabGameLive.World w, string key, Texture2D texture, Texture2D outline, Vector2 navPercent, float worldHeight, float aspect, Vector2 pivot, float lift, bool shadow)
+        {
+            return Place(w, key, texture, FullUv, outline, navPercent, worldHeight, aspect, pivot, lift, shadow);
+        }
+
+        // Целая текстура: UV (0, 0)–(1, 1).
+        public static readonly Vector4 FullUv = new Vector4(0f, 0f, 1f, 1f);
+
+        // uv — прямоугольник кадра в текстуре (атлас): (uMin, vMin, uMax, vMax);
+        // uMin > uMax — кадр показывается отражённым. Контур (outline) —
+        // отдельная текстура целого кадра: он отражается вместе с кадром.
+        public static bool Place(MapLabGameLive.World w, string key, Texture2D texture, Vector4 uv, Texture2D outline, Vector2 navPercent, float worldHeight, float aspect, Vector2 pivot, float lift, bool shadow)
         {
             if (w == null || !w.Ready || texture == null || !Available)
                 return false;
@@ -53,8 +65,17 @@ namespace KingdomSurvival.MapLabBridge
             {
                 f.Size = size;
                 f.Pivot = pivot;
-                BuildCard(f.CardMesh, size, pivot);
+                f.Uv = uv;
+                BuildCard(f.CardMesh, size, pivot, uv);
+                BuildCard(f.LineMesh, size, pivot, LineUv(uv));
                 BuildShadow(f.ShadowMesh, worldHeight);
+            }
+            else if ((uv - f.Uv).sqrMagnitude > 1e-12f)
+            {
+                // Кадр сменился, размер тот же — меняются только UV карточки.
+                f.Uv = uv;
+                SetCardUv(f.CardMesh, uv);
+                SetCardUv(f.LineMesh, LineUv(uv));
             }
             float lean = w.View.Settings != null ? w.View.Settings.Art.CardLean : 0.3f;
             foreach (Material m in new[] { f.Fill, f.XRayFill, f.XRayLine })
@@ -78,7 +99,7 @@ namespace KingdomSurvival.MapLabBridge
             {
                 if (f.Root != null)
                     Kill(f.Root);
-                foreach (Object o in new Object[] { f.CardMesh, f.ShadowMesh, f.Fill, f.XRayFill, f.XRayLine, f.ShadowMaterial })
+                foreach (Object o in new Object[] { f.CardMesh, f.LineMesh, f.ShadowMesh, f.Fill, f.XRayFill, f.XRayLine, f.ShadowMaterial })
                     if (o != null)
                         Kill(o);
             }
@@ -100,6 +121,7 @@ namespace KingdomSurvival.MapLabBridge
             f.Root = new GameObject("MapLab Figure " + key) { hideFlags = HideFlags.HideAndDontSave, layer = MapLabGameLive.Layer };
             f.Root.transform.SetParent(w.View.transform, false);
             f.CardMesh = new Mesh { name = "Figure Card", hideFlags = HideFlags.HideAndDontSave };
+            f.LineMesh = new Mesh { name = "Figure Outline Card", hideFlags = HideFlags.HideAndDontSave };
             f.ShadowMesh = new Mesh { name = "Figure Shadow", hideFlags = HideFlags.HideAndDontSave };
             // Видимая часть — обычная глубина; закрытая — заливка 15% и контур.
             f.Fill = MakeMaterial(4f, 1f, Color.white, 0.35f, 3000);
@@ -113,7 +135,7 @@ namespace KingdomSurvival.MapLabBridge
             {
                 GameObject part = new GameObject(m.name) { hideFlags = HideFlags.HideAndDontSave, layer = MapLabGameLive.Layer };
                 part.transform.SetParent(f.Card, false);
-                part.AddComponent<MeshFilter>().sharedMesh = f.CardMesh;
+                part.AddComponent<MeshFilter>().sharedMesh = ReferenceEquals(m, f.XRayLine) ? f.LineMesh : f.CardMesh;
                 MeshRenderer r = part.AddComponent<MeshRenderer>();
                 r.sharedMaterial = m;
                 r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -142,17 +164,32 @@ namespace KingdomSurvival.MapLabBridge
 
         // Карточка: опора в начале координат, углы — смещения по кадру (как у
         // карточек MapLab: x вправо, y вверх от опоры).
-        private static void BuildCard(Mesh mesh, Vector2 size, Vector2 pivot)
+        private static void BuildCard(Mesh mesh, Vector2 size, Vector2 pivot, Vector4 uv)
         {
             float left = -pivot.x * size.x, right = (1f - pivot.x) * size.x;
             float bottom = -pivot.y * size.y, top = (1f - pivot.y) * size.y;
             mesh.Clear();
             mesh.vertices = new Vector3[4];
-            mesh.uv = new[] { new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(0f, 1f) };
+            SetCardUv(mesh, uv);
             mesh.uv2 = new[] { new Vector2(left, bottom), new Vector2(right, bottom), new Vector2(right, top), new Vector2(left, top) };
             mesh.triangles = new[] { 0, 2, 1, 0, 3, 2 };
             mesh.bounds = new Bounds(Vector3.up * size.y * 0.5f, new Vector3(size.x + size.y, size.y * 2f, size.x + size.y) * 2f);
         }
+
+        private static readonly Vector2[] uvBuffer = new Vector2[4];
+
+        // Порядок вершин карточки: левый низ, правый низ, правый верх, левый верх.
+        private static void SetCardUv(Mesh mesh, Vector4 uv)
+        {
+            uvBuffer[0] = new Vector2(uv.x, uv.y);
+            uvBuffer[1] = new Vector2(uv.z, uv.y);
+            uvBuffer[2] = new Vector2(uv.z, uv.w);
+            uvBuffer[3] = new Vector2(uv.x, uv.w);
+            mesh.uv = uvBuffer;
+        }
+
+        // Контур — целая текстура кадра, отражается вместе с кадром.
+        private static Vector4 LineUv(Vector4 uv) => uv.x > uv.z ? new Vector4(1f, 0f, 0f, 1f) : FullUv;
 
         // Плоская тень на земле: овал под ногами, чуть вправо (свет слева сверху).
         private static void BuildShadow(Mesh mesh, float height)

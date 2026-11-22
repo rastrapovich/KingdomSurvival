@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using KingdomSurvival.AnimationDatabase;
 using KingdomSurvival.MapLabBridge;
 using KingdomSurvival.WorldMapVisual;
 using UnityEngine;
@@ -302,6 +303,14 @@ public partial class PrototypeUIController
         if (motion.sqrMagnitude > 1e-8f)
             worldMapHeroDirection = KingdomSurvivalDirection(motion.x, motion.y);
         worldMapHeroLastPercent = percent;
+
+        // Анимированный набор героя из раздела «Глобальная карта» Базы
+        // анимаций; без набора (или без шейдера фигур) — прежняя фишка.
+        WorldMapAnimationDatabaseAsset mapAnimations = WorldMapAnimationDatabaseAsset.Current;
+        WorldMapAnimationSetData heroSet = mapAnimations != null ? mapAnimations.HeroSet : null;
+        if (heroSet != null && TickWorldMapHeroAnimatedMapLab(world, mapAnimations, heroSet, dt, running, percent, motion))
+            return true;
+
         if (!MapLabGameLive.HeroFrame(worldMapHeroDirection, out Texture2D texture, out float worldHeight, out float aspect, out Vector2 pivot))
             return false;
 
@@ -344,6 +353,55 @@ public partial class PrototypeUIController
         }
         worldMapHeroImage.style.translate = new Translate(ground2.x - pivot.x * width, ground2.y - (1f - pivot.y) * height - bob);
         UpdateHeroFigureLook(percent, texture, ground2, width, height, pivot, bob);
+        return true;
+    }
+
+    private readonly WorldMapSetAnimator worldMapHeroMapAnimator = new WorldMapSetAnimator();
+
+    // Герой — анимация набора карты в сцене MapLab. True — фигура поставлена.
+    private bool TickWorldMapHeroAnimatedMapLab(
+        MapLabGameLive.World world,
+        WorldMapAnimationDatabaseAsset database,
+        WorldMapAnimationSetData set,
+        float dt,
+        bool running,
+        Vector2 percent,
+        Vector2 motion)
+    {
+        if (!MapLabLiveFigures.Available)
+            return false;
+        WorldMapMovementSettingsAsset settings = WorldMapVisualRuntime.LoadMovementSettings();
+        WorldMapHexGrid grid = WorldMapNavigation.Grid;
+        float hexPercent = (float)(grid.HexWidth / grid.CanvasWidth * 100.0);
+        // Шаг по земле (карта сжата наклоном камеры по высоте).
+        float stepHexes = WorldMapSetAnimator.GroundHexes(
+            motion,
+            worldMapCanvasHeight / Mathf.Max(1f, worldMapCanvasWidth),
+            worldMapMapLab != null ? worldMapMapLab.HeightScale : 1f,
+            hexPercent);
+
+        CreatureAnimationDirection direction = database.GetDirection((WorldMapFacing)(((worldMapHeroDirection % 6) + 6) % 6));
+        bool sync = settings != null && settings.SyncWalkCadence;
+        Sprite sprite = worldMapHeroMapAnimator.Tick(set, direction, running, dt, stepHexes, sync);
+        if (sprite == null || sprite.texture == null)
+            return false;
+
+        bool mirrored = worldMapHeroMapAnimator.IsMirrored;
+        Vector2 canvas = WorldMapSetAnimator.CanvasOf(set.Animation, sprite);
+        float aspect = canvas.x / Mathf.Max(1f, canvas.y);
+        // Рост — в ширинах клетки карты; ширина клетки в мире — из процентов.
+        float hexWorldWidth = hexPercent / 100f * world.Play.width;
+        float worldHeight = set.HeightInHexes * hexWorldWidth;
+        Vector2 pivot = WorldMapSetAnimator.CardPivot(set.Animation, worldMapHeroMapAnimator.Clip, mirrored);
+
+        // Анимированная фигура сама качает корпус — подскока (bob) нет.
+        if (!MapLabLiveFigures.Place(world, "hero", sprite.texture, WorldMapSetAnimator.FrameUv(sprite, mirrored), FrameOutline(sprite), percent, worldHeight, aspect, pivot, 0f, true))
+            return false;
+
+        worldMapHeroImage.style.display = DisplayStyle.None;
+        HideHeroFigureLook();
+        if (worldMapHeroFallback != null)
+            worldMapHeroFallback.style.display = DisplayStyle.None;
         return true;
     }
 

@@ -1,0 +1,123 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 444e50a01526faf4faae6d14c9b5abe0, type: 3}
+  m_Name: KingdomSurvivalWorldMapAnimations
+  m_EditorClassIdentifier: KingdomSurvival.AnimationDatabase::KingdomSurvival.AnimationDatabase.WorldMapAnimationDatabaseAsset
+  schemaVersion: 1
+  directionMap:
+  - direction: 0
+    facing: 0
+  - direction: 1
+    facing: 1
+  - direction: 2
+    facing: 2
+  - direction: 3
+    facing: 3
+  - direction: 4
+    facing: 4
+  - direction: 5
+    facing: 5
+  sets:
+  - animation:
+      id: hero
+      displayName: "\u0413\u0435\u0440\u043E\u0439"
+      pivot: {x: 0.5, y: 0.12109375}
+      fieldScale: 1
+      canvasSize: {x: 1024, y: 1024}
+      walkHexesPerCycle: 1
+      mirrorMissingDirections: 0
+      clips:
+      - action: 1
+        clipKey: 
+        framesPerSecond: 12
+        playback: 0
+        impactTime: 0.5
+        useSourceTiming: 0
+        skipLastFrames: 0
+        skipLastFrame: 0
+        sourceFramesPerSecond: 24
+        directions:
+        - direction: 0
+          frames:
+          - {fileID: -2107864158, guid: 6454622f09ef9fb40b58dd872939e857, type: 3}
+          - {fileID: -953012681, guid: 6454622f09ef9fb40b58dd872939e857, type: 3}
+          - {fileID: -83370925, guid: 6454622f09ef9fb40b58dd872939e857, type: 3}
+          - {fileID: -575712858, guid: 6454622f09ef9fb40b58dd872939e857, type: 3}
+          - {fileID: -914862334, guid: 6454622f09ef9fb40b58dd872939e857, type: 3}
+          - {fileID: -601039184, guid: 6454622f09ef9fb40b58dd872939e857, type: 3}
+          - {fileID: 543760078, guid: 6454622f09ef9fb40b58dd872939e857, type: 3}
+          - {fileID: 276784242, guid: 6454622f09ef9fb40b58dd872939e857, type: 3}
+          sourceFrameNumbers: 0100000002000000030000000400000005000000060000000700000008000000
+          offset: {x: 0, y: 0}
+        - direction: 1
+          frames:
+          - {fileID: -219938316, guid: 5611a4ca70dc46d4583ad5566c1d25fe, type: 3}
+          - {fileID: -1599648441, guid: 5611a4ca70dc46d4583ad5566c1d25fe, type: 3}
+          - {fileID: 3356236, guid: 5611a4ca70dc46d4583ad5566c1d25fe, type: 3}
+          - {fileID: -2019495168, guid: 5611a4ca70dc46d4583ad5566c1d25fe, type: 3}
+          - {fileID: 1039328704, guid: 5611a4ca70dc46d4583ad5566c1d25fe, type: 3}
+          - {fileID: -1909476180, guid: 5611a4ca70dc46d4583ad5566c1d25fe, type: 3}
+          - {fileID: -834403052, guid: 5611a4ca70dc46d4583ad5566c1d25fe, type: 3}
+          - {fileID: -1281218845, guid: 5611a4ca70dc46d4583ad5566c1d25fe, type: 3}
+          sourceFrameNumbers: 0100000002000000030000000400000005000000060000000700000008000000
+          offset: {x: 0, y: 0}
+        - direction: 2
+          frames:
+          - {fileID: 2032283355, guid: 5aaff92dd7482d84d80b2b73e22e7388, type: 3}
+          - {fileID: 1818987589, guid: 5aaff92dd7482d84d80b2b73e22e7388, type: 3}
+          - {fileID: -504982738, guid: 5aaff92dd7482d84d80b2b73e22e7388, type: 3}
+          - {fileID: 1521641003, guid: 5aaff92dd7482d84d80b2b73e22e7388, type: 3}
+          - {fileID: 560100135, guid: 5aaff92dd7482d84d80b2b73e22e7388, type: 3}
+          - {fileID: -970897955, guid: 5aaff92dd7482d84d80b2b73e22e7388, type: 3}
+          - {fileID: 1198341645, guid: 5aaff92dd7482d84d80b2b73e22e7388, type: 3}
+          - {fileID: -1057890443, guid: 5aaff92dd7482d84d80b2b73e22e7388, type: 3}
+          sourceFrameNumbers: 0100000002000000030000000400000005000000060000000700000008000000
+          offset: {x: 0, y: 0}
+        - direction: 3
+          frames:
+          - {fileID: -1006796251, guid: 4db5412862b05ab4db07125a83646fa1, type: 3}
+          - {fileID: 649069190, guid: 4db5412862b05ab4db07125a83646fa1, type: 3}
+          - {fileID: -1776802415, guid: 4db5412862b05ab4db07125a83646fa1, type: 3}
+          - {fileID: -95839019, guid: 4db5412862b05ab4db07125a83646fa1, type: 3}
+          - {fileID: -1380344012, guid: 4db5412862b05ab4db07125a83646fa1, type: 3}
+          - {fileID: -1998951269, guid: 4db5412862b05ab4db07125a83646fa1, type: 3}
+          - {fileID: -1323185561, guid: 4db5412862b05ab4db07125a83646fa1, type: 3}
+          - {fileID: -2068424007, guid: 4db5412862b05ab4db07125a83646fa1, type: 3}
+          sourceFrameNumbers: 0100000002000000030000000400000005000000060000000700000008000000
+          offset: {x: 0, y: 0}
+        - direction: 4
+          frames:
+          - {fileID: 1512785437, guid: 98fed98ed3efdd84ab4fb0feaefe819e, type: 3}
+          - {fileID: -2089952858, guid: 98fed98ed3efdd84ab4fb0feaefe819e, type: 3}
+          - {fileID: 523565832, guid: 98fed98ed3efdd84ab4fb0feaefe819e, type: 3}
+          - {fileID: -1226270749, guid: 98fed98ed3efdd84ab4fb0feaefe819e, type: 3}
+          - {fileID: 859083087, guid: 98fed98ed3efdd84ab4fb0feaefe819e, type: 3}
+          - {fileID: -596409565, guid: 98fed98ed3efdd84ab4fb0feaefe819e, type: 3}
+          - {fileID: -1249169948, guid: 98fed98ed3efdd84ab4fb0feaefe819e, type: 3}
+          - {fileID: 1706010373, guid: 98fed98ed3efdd84ab4fb0feaefe819e, type: 3}
+          sourceFrameNumbers: 0100000002000000030000000400000005000000060000000700000008000000
+          offset: {x: 0, y: 0}
+        - direction: 5
+          frames:
+          - {fileID: -728106448, guid: 9d35706c267ea8345895bce88fa5d464, type: 3}
+          - {fileID: -1852668391, guid: 9d35706c267ea8345895bce88fa5d464, type: 3}
+          - {fileID: 763636620, guid: 9d35706c267ea8345895bce88fa5d464, type: 3}
+          - {fileID: -606759511, guid: 9d35706c267ea8345895bce88fa5d464, type: 3}
+          - {fileID: -1801759550, guid: 9d35706c267ea8345895bce88fa5d464, type: 3}
+          - {fileID: 1194174458, guid: 9d35706c267ea8345895bce88fa5d464, type: 3}
+          - {fileID: -621821365, guid: 9d35706c267ea8345895bce88fa5d464, type: 3}
+          - {fileID: 554304249, guid: 9d35706c267ea8345895bce88fa5d464, type: 3}
+          sourceFrameNumbers: 0100000002000000030000000400000005000000060000000700000008000000
+          offset: {x: 0, y: 0}
+    heightInHexes: 0.4
+    strideHexesPerCycle: 0.5
+  heroSetId: hero

@@ -106,10 +106,40 @@ public partial class PrototypeUIController
             return null;
         if (figureOutlines.TryGetValue(source, out Texture2D cached) && cached != null)
             return cached;
-        int w = source.width, h = source.height;
+        Texture2D outline = BuildFigureOutline(source, Vector2.one, Vector2.zero, source.width, source.height, source.name);
+        figureOutlines[source] = outline;
+        return outline;
+    }
+
+    // Контуры кадров анимации (кадры лежат в атласах): по прямоугольнику кадра
+    // и в уменьшенном разрешении — контуру полный размер не нужен.
+    private static readonly Dictionary<Sprite, Texture2D> frameOutlines = new Dictionary<Sprite, Texture2D>();
+    private const int FrameOutlineMaxHeight = 256;
+
+    private static Texture2D FrameOutline(Sprite sprite)
+    {
+        if (sprite == null || sprite.texture == null)
+            return null;
+        if (frameOutlines.TryGetValue(sprite, out Texture2D cached) && cached != null)
+            return cached;
+        Texture2D atlas = sprite.texture;
+        Rect r = sprite.textureRect;
+        float k = Mathf.Min(1f, FrameOutlineMaxHeight / Mathf.Max(1f, r.height));
+        int w = Mathf.Max(8, Mathf.RoundToInt(r.width * k)), h = Mathf.Max(8, Mathf.RoundToInt(r.height * k));
+        Vector2 scale = new Vector2(r.width / atlas.width, r.height / atlas.height);
+        Vector2 offset = new Vector2(r.x / atlas.width, r.y / atlas.height);
+        Texture2D outline = BuildFigureOutline(atlas, scale, offset, w, h, sprite.name);
+        frameOutlines[sprite] = outline;
+        return outline;
+    }
+
+    // Светлый контур силуэта области (uvScale, uvOffset) текстуры source в
+    // картинке w × h. Читаемость исходной текстуры не нужна (Blit).
+    private static Texture2D BuildFigureOutline(Texture2D source, Vector2 uvScale, Vector2 uvOffset, int w, int h, string name)
+    {
         RenderTexture rt = RenderTexture.GetTemporary(w, h, 0, RenderTextureFormat.ARGB32);
         RenderTexture keep = RenderTexture.active;
-        Graphics.Blit(source, rt);
+        Graphics.Blit(source, rt, uvScale, uvOffset);
         RenderTexture.active = rt;
         Texture2D readable = new Texture2D(w, h, TextureFormat.RGBA32, false);
         readable.ReadPixels(new Rect(0, 0, w, h), 0, 0);
@@ -165,10 +195,9 @@ public partial class PrototypeUIController
         Color32[] result = new Color32[w * h];
         for (int i = 0; i < result.Length; i++)
             result[i] = grown[i] && !mask[i] ? line : clear;
-        Texture2D outline = new Texture2D(w, h, TextureFormat.RGBA32, false) { name = source.name + " · контур", wrapMode = TextureWrapMode.Clamp };
+        Texture2D outline = new Texture2D(w, h, TextureFormat.RGBA32, false) { name = name + " · контур", wrapMode = TextureWrapMode.Clamp };
         outline.SetPixels32(result);
         outline.Apply(false, true);
-        figureOutlines[source] = outline;
         return outline;
     }
 }

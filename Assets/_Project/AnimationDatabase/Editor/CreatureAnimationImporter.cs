@@ -159,14 +159,92 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 package.AddError("Не выбран набор анимаций.");
                 return false;
             }
-            if (!Validate(package, set, out Vector2Int canvas))
+            return ApplyCore(
+                database,
+                set,
+                package,
+                mode,
+                CreatureAnimationEditorData.ManagedFolder(set.Id),
+                false,
+                false,
+                (action, clipKey) => GetOrAddClipFromTemplate(database, set, action, clipKey),
+                out report);
+        }
+
+        // Раздел «Глобальная карта»: те же разбор и атласы, но владелец — база
+        // карты, атласы — в отдельной папке WorldMap, мипмапы включены (фигура
+        // на карте мелкая), образец боевой базы не применяется: новое действие
+        // получает значения по умолчанию (12 к/с, цикл, 0 пропусков).
+        public static bool ApplyToWorldMap(
+            WorldMapAnimationDatabaseAsset database,
+            WorldMapAnimationSetData mapSet,
+            CreatureAnimationImportPackage package,
+            CreatureAnimationImportMode mode,
+            out string report)
+        {
+            report = string.Empty;
+            if (database == null || mapSet == null)
+            {
+                package.AddError("Не выбран набор анимаций карты.");
+                return false;
+            }
+            CreatureAnimationSetData set = mapSet.Animation;
+            // «Заменить» всё содержимое набора: прежний холст не мешает новому
+            // размеру кадров (кадры одного набора всё равно должны быть одного холста).
+            bool replacesEverything = mode == CreatureAnimationImportMode.Replace && CoversAllExistingCells(package, set);
+            return ApplyCore(
+                database,
+                set,
+                package,
+                mode,
+                WorldMapAnimationEditorData.ManagedFolder(set.Id),
+                true,
+                replacesEverything,
+                (action, clipKey) => set.GetOrAddClip(action, clipKey),
+                out report);
+        }
+
+        // Все ячейки набора с кадрами входят в выбранные группы пакета.
+        private static bool CoversAllExistingCells(CreatureAnimationImportPackage package, CreatureAnimationSetData set)
+        {
+            HashSet<string> covered = new HashSet<string>(StringComparer.Ordinal);
+            foreach (CreatureAnimationImportGroup group in package.ChosenGroups)
+            {
+                foreach (CreatureAnimationImportCell cell in group.Cells.Values)
+                    covered.Add(group.ChosenAction.Value + "|" + group.ClipKey + "|" + cell.Direction);
+            }
+            foreach (CreatureAnimationClipData clip in set.Clips)
+            {
+                if (clip == null)
+                    continue;
+                foreach (CreatureAnimationFrames cell in clip.Directions)
+                {
+                    if (cell != null && cell.HasFrames && !covered.Contains(clip.Action + "|" + clip.ClipKey + "|" + cell.Direction))
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        private static bool ApplyCore(
+            UnityEngine.Object owner,
+            CreatureAnimationSetData set,
+            CreatureAnimationImportPackage package,
+            CreatureAnimationImportMode mode,
+            string folder,
+            bool mipmaps,
+            bool ignoreExistingCanvas,
+            Func<CreatureAnimationAction, string, CreatureAnimationClipData> getOrAddClip,
+            out string report)
+        {
+            report = string.Empty;
+            if (!Validate(package, ignoreExistingCanvas ? null : set, out Vector2Int canvas))
                 return false;
 
             List<(CreatureAnimationImportGroup group, CreatureAnimationImportCell cell)> cells = package.ChosenGroups
                 .SelectMany(group => group.Cells.Values.Select(cell => (group, cell)))
                 .ToList();
             Dictionary<CreatureAnimationImportCell, List<Sprite>> built = new Dictionary<CreatureAnimationImportCell, List<Sprite>>();
-            string folder = CreatureAnimationEditorData.ManagedFolder(set.Id);
             string stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss-fff");
             try
             {
@@ -189,7 +267,8 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                         canvas,
                         cell.Frames.All(frame => !string.IsNullOrEmpty(frame.NormalPath))
                             ? cell.Frames.Select(frame => frame.NormalPath).ToList()
-                            : null);
+                            : null,
+                        mipmaps);
                 }
             }
             catch (Exception exception)
@@ -203,10 +282,10 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             }
 
             List<CreatureAnimationImportChange> changes = DescribeChanges(package, set);
-            Undo.RecordObject(database, "Загрузка анимаций");
+            Undo.RecordObject(owner, "Загрузка анимаций");
             foreach ((CreatureAnimationImportGroup group, CreatureAnimationImportCell cell) in cells)
             {
-                CreatureAnimationClipData clip = GetOrAddClipFromTemplate(database, set, group.ChosenAction.Value, group.ClipKey);
+                CreatureAnimationClipData clip = getOrAddClip(group.ChosenAction.Value, group.ClipKey);
                 CreatureAnimationFrames target = clip.GetOrAddDirection(cell.Direction);
                 if (mode == CreatureAnimationImportMode.Append)
                     target.AppendFrames(built[cell], cell.Numbers);
@@ -215,9 +294,9 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             }
             if (canvas != Vector2Int.zero)
                 set.SetCanvasSize(canvas);
-            EditorUtility.SetDirty(database);
-            if (EditorUtility.IsPersistent(database))
-                AssetDatabase.SaveAssetIfDirty(database);
+            EditorUtility.SetDirty(owner);
+            if (EditorUtility.IsPersistent(owner))
+                AssetDatabase.SaveAssetIfDirty(owner);
             CreatureAnimationEditorData.NotifyChanged();
 
             int normalCells = cells.Count(entry => entry.cell.Frames.Count > 0 && entry.cell.Frames.All(frame => !string.IsNullOrEmpty(frame.NormalPath)));
@@ -357,6 +436,9 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { CreatureAnimationEditorData.ArtRoot }))
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
+                // Атласы раздела «Глобальная карта» принадлежат другой базе.
+                if (path.StartsWith(WorldMapAnimationEditorData.ArtRoot + "/", StringComparison.OrdinalIgnoreCase))
+                    continue;
                 // Только атласы, собранные импортом (имя «набор__действие__время»).
                 if (Path.GetFileName(path).Contains("__") && !used.Contains(path))
                     unused.Add(path);

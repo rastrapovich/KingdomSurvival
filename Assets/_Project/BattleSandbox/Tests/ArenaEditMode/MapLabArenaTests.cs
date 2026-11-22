@@ -218,6 +218,77 @@ namespace KingdomSurvival.BattleSandbox.Tests
             return null;
         }
 
+        // Арена с рекой (брод и мост): ни одной травинки на воде по готовому
+        // рельефу (только камыш MapLab), а штрихи воды течут — кадры в разные
+        // моменты различаются. Кадры — в Logs/MapLabArena/river_flow_*.png.
+        [Test]
+        public void RiverArena_NoGrassOnWater_AndStrokesFlow()
+        {
+            if (!MapLabArena.Available)
+                Assert.Ignore("Нет MapLabGameAssets с профилем — арена MapLab выключена.");
+            int rivers = 0, grass = 0;
+            bool flowChecked = false;
+            foreach (bool author in new[] { false, true })
+            foreach (SandboxArenaTheme theme in new[] { SandboxArenaTheme.Ford, SandboxArenaTheme.FordBridge })
+            for (int seed = 1; seed <= 3; seed++)
+            {
+                SandboxBattle battle = SandboxRoster.CreateBattle(SandboxRoster.PlayerRoster.Take(2).ToList(), SandboxRoster.EnemyRoster.Take(2), seed, theme: theme);
+                // Настройки по умолчанию и текущие настройки автора («Генератор арен», ковёр травы).
+                MapLabArena arena = MapLabArena.Build(author ? MapLabArenaDriver.BuildSpec(null, battle) : DefaultSpec(battle));
+                try
+                {
+                    Assert.That(arena.Ready, Is.True, arena.Error);
+                    if (!arena.HasRiver)
+                        continue;
+                    rivers++;
+                    KingdomSurvival.MapLab.MapLabData data = arena.View.Data;
+                    HashSet<string> dry = data.Composition.DryOnlyFeatures;
+                    foreach (KingdomSurvival.MapLab.MapLabFeatureSprite sprite in data.FeatureSprites)
+                    {
+                        if (!dry.Contains(sprite.ArtId))
+                            continue;
+                        grass++;
+                        Assert.That(KingdomSurvival.MapLab.MapLabArtBuilder.NearWater(data, sprite.Point), Is.False,
+                            $"{theme} seed {seed}: трава {sprite.ArtId} на воде в {sprite.Point}");
+                    }
+                    if (flowChecked || !author)
+                        continue;
+                    flowChecked = true;
+                    Color[] first = Frame(arena, "river_flow_0");
+                    System.Threading.Thread.Sleep(900);
+                    Color[] second = Frame(arena, "river_flow_1");
+                    int changed = 0;
+                    for (int i = 0; i < first.Length; i++)
+                        if (Mathf.Abs(first[i].r - second[i].r) + Mathf.Abs(first[i].g - second[i].g) + Mathf.Abs(first[i].b - second[i].b) > 0.03f)
+                            changed++;
+                    Assert.That(changed, Is.GreaterThan(first.Length / 2000), "штрихи реки движутся между кадрами");
+                    Assert.That(changed, Is.LessThan(first.Length / 5), "меняется только вода, не весь кадр");
+                }
+                finally
+                {
+                    arena.Dispose();
+                }
+            }
+            Assert.That(rivers, Is.GreaterThan(0), "арены брода собрались с рекой");
+            Assert.That(grass, Is.GreaterThan(0), "трава на арене есть (на суше)");
+
+            Color[] Frame(MapLabArena arena, string name)
+            {
+                RenderTexture rt = arena.Render(1280, 720);
+                RenderTexture previous = RenderTexture.active;
+                RenderTexture.active = rt;
+                Texture2D image = new Texture2D(rt.width, rt.height, TextureFormat.RGBA32, false);
+                image.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+                RenderTexture.active = previous;
+                Color[] pixels = image.GetPixels();
+                string directory = Path.Combine(Directory.GetCurrentDirectory(), "Logs", "MapLabArena");
+                Directory.CreateDirectory(directory);
+                File.WriteAllBytes(Path.Combine(directory, name + ".png"), image.EncodeToPNG());
+                Object.DestroyImmediate(image);
+                return pixels;
+            }
+        }
+
         // Виды карты на арене: кадр поля в каждом включённом виде (Обычный,
         // Мрачный, Сепия…) отличается от обычного, цветокоррекция вида снята
         // после кадра. Кадры — в Logs/MapLabArena/arena_view_<вид>.png.

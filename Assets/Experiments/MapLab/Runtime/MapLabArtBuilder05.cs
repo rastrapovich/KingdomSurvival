@@ -481,6 +481,10 @@ namespace KingdomSurvival.MapLab
             List<Vector2> used = new List<Vector2>();
             foreach ((Vector2 p, string visual, string kind) in c.Features)
             {
+                // Трава на воде не растёт: точка или пятно пучка у воды по готовому
+                // рельефу (русло, броды, мели, озеро) — деталь пропускается.
+                if (c.DryOnlyFeatures.Count > 0 && c.DryOnlyFeatures.Contains(visual) && NearWater(data, p))
+                    continue;
                 List<(string Id, int Count)> parts = FeatureParts(visual);
                 float room = FeatureRoom(c, p);
                 used.Clear();
@@ -543,6 +547,22 @@ namespace KingdomSurvival.MapLab
         }
 
         public static int LastFeatureParts;
+
+        // Точка или пятно вокруг неё (рисунок пучка) у воды: уровень воды выше
+        // земли с запасом на кромку берега.
+        public static bool NearWater(MapLabData data, Vector2 p)
+        {
+            const float reach = 0.6f, margin = 0.25f;
+            if (data.IsUnderWater(p.x, p.y, margin))
+                return true;
+            for (int i = 0; i < 8; i++)
+            {
+                float a = i * Mathf.PI * 0.25f;
+                if (data.IsUnderWater(p.x + Mathf.Cos(a) * reach, p.y + Mathf.Sin(a) * reach, margin))
+                    return true;
+            }
+            return false;
+        }
 
         public static List<(string Id, int Count)> FeatureParts(string visual)
         {

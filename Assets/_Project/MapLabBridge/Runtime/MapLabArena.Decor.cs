@@ -290,7 +290,7 @@ namespace KingdomSurvival.MapLabBridge
                         Add(q, art.Id, art.HalfWidth * 0.35f);
                         if (art.Role != MapLabDecorRole.TallGrass)
                             groundArtIds.Add(art.Id);
-                        grassPoints.Add(q);
+                        grassPoints.Add(q); c.DryOnlyFeatures.Add(art.Id);
                     }
                 }
             }
@@ -326,7 +326,7 @@ namespace KingdomSurvival.MapLabBridge
                         Add(q, art.Id, art.HalfWidth * 0.35f);
                         if (art.Role != MapLabDecorRole.TallGrass)
                             groundArtIds.Add(art.Id);
-                        grassPoints.Add(q);
+                        grassPoints.Add(q); c.DryOnlyFeatures.Add(art.Id);
                     }
                 }
             }
@@ -437,7 +437,7 @@ namespace KingdomSurvival.MapLabBridge
                     c.Features.Add((q, art.Id, DecorKind));
                     groundArtIds.Add(art.Id);
                     DecorFeatures++;
-                    grassPoints.Add(q);
+                    grassPoints.Add(q); c.DryOnlyFeatures.Add(art.Id);
                 });
             List<MapLabDecorArt> tallGrass = Role(MapLabDecorRole.TallGrass);
             // Высокая трава закрывала бы бойцов: мимо клеток поля и клеток за ней на экране.
@@ -463,13 +463,13 @@ namespace KingdomSurvival.MapLabBridge
                             return;
                         c.Features.Add((q, tallArt.Id, DecorKind));
                         DecorFeatures++;
-                        grassPoints.Add(q);
+                        grassPoints.Add(q); c.DryOnlyFeatures.Add(tallArt.Id);
                         return;
                     }
                     c.Features.Add((q, art.Id, DecorKind));
                     groundArtIds.Add(art.Id);
                     DecorFeatures++;
-                    grassPoints.Add(q);
+                    grassPoints.Add(q); c.DryOnlyFeatures.Add(art.Id);
                 });
         }
 

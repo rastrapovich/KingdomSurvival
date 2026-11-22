@@ -119,15 +119,15 @@ namespace KingdomSurvival.UnitDatabase.Tests
         }
 
         [Test]
-        public void Militia_UsesStaticFigure_UntilAnimationsAreNeeded()
+        public void Militia_UsesAssignedAnimationSet()
         {
             UnitDatabaseAsset database = Resources.Load<UnitDatabaseAsset>(UnitDatabaseAsset.ResourcesPath);
             UnitDefinitionData militia = database.FindById("militia");
             Assert.IsNotNull(militia);
-            Assert.IsTrue(militia.StaticFigureOnly);
+            Assert.IsFalse(militia.StaticFigureOnly, "подключённые анимации ополченца включены");
             Assert.AreEqual("militia", militia.AnimationSetId, "набор ополченца остаётся привязанным");
-            Assert.AreEqual(string.Empty, militia.ActiveAnimationSetId);
-            Assert.IsNotNull(militia.BattlefieldSprite, "статичная фигура есть");
+            Assert.AreEqual("militia", militia.ActiveAnimationSetId);
+            Assert.IsNotNull(militia.BattlefieldSprite, "запасная статичная фигура сохранена");
         }
     }
 }

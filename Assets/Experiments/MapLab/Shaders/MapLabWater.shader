@@ -28,6 +28,9 @@ Shader "Kingdom Survival/MapLab/Water"
         _ShoreTex ("Этап 05: высота над водой (общая граница берега)", 2D) = "white" {}
         _ShoreRect ("Этап 05: мир → uv берега", Vector) = (0, 0, 0.004, 0.004)
         _DepthPush ("Этап 05: сдвиг к камере", Float) = 0
+        _FlowSpeed ("Течение: скорость штрихов (ед./с)", Float) = 0.55
+        _FlowLife ("Течение: жизнь штриха (с)", Float) = 6.5
+        _FlowWiggle ("Течение: извив штрихов", Float) = 1
     }
 
     SubShader
@@ -50,7 +53,7 @@ Shader "Kingdom Survival/MapLab/Water"
                 float3 positionOS : POSITION;
                 float2 uv : TEXCOORD0;
                 float2 flow : TEXCOORD1;
-                float3 channel : TEXCOORD2;   // этап 05: x — вдоль русла, y — поперёк (мир), z — 1 река / 0 озеро
+                float3 channel : TEXCOORD2;   // этап 05: x — вдоль русла, y — поперёк (мир), z — полуширина ленты реки (≥ 1) / 0 озеро
             };
 
             struct Varyings
@@ -87,7 +90,14 @@ Shader "Kingdom Survival/MapLab/Water"
                 float4 _Strokes05;
                 float4 _ShoreRect;
                 float _DepthPush;
+                float _FlowSpeed;
+                float _FlowLife;
+                float _FlowWiggle;
             CBUFFER_END
+
+            // Часы течения (с), общие для всех вод: MapLabWaterClock ставит их
+            // перед каждым кадром (и вне Play Mode, и при ручном Camera.Render).
+            float _MapLabWaterTime;
 
             Varyings Vert(Attributes input)
             {
@@ -159,24 +169,40 @@ Shader "Kingdom Survival/MapLab/Water"
             // Этап 05: штрихи воды тем же языком, что перо (MAP_STYLE_GUIDE §2.5):
             // основная линия очень разной длины → просвет → короткий штрих → редкие
             // уменьшающиеся точки или сокращённый вариант; часть ячеек — только точки.
-            float StrokeField05(float2 q, float rowSpacing, float cellLength, float chance, out float inkMask)
+            // Течение: у каждой ячейки свой цикл жизни длиной life (с) со своим
+            // сдвигом фазы — штрих проявляется, вытягивается, потом сжимается и
+            // растворяется, а следующий цикл собирает в ячейке новый штрих (другие
+            // жребии формы). life ≤ 0 — неподвижный рисунок, как прежде.
+            float StrokeField05(float2 q, float rowSpacing, float cellLength, float chance, float t, float life, out float inkMask)
             {
                 float row = floor(q.y / rowSpacing);
                 float rowShift = Hash21(float2(row, 7.1)) * cellLength;
                 float u = (q.x + rowShift) / cellLength;
                 float cell = floor(u);
-                float h = Hash21(float2(cell, row));
-                float h2 = Hash21(float2(cell + 31.7, row - 3.3));
-                float h3 = Hash21(float2(cell - 12.9, row + 5.1));
-                float h4 = Hash21(float2(cell + 4.4, row + 17.3));
-                float h5 = Hash21(float2(cell - 7.7, row - 11.9));
-                float h6 = Hash21(float2(cell + 23.1, row + 2.6));
+                float fade = 1.0;
+                float2 key = float2(cell, row);
+                if (life > 0.0)
+                {
+                    float lt = t / life + Hash21(float2(cell * 0.71 + 3.1, row * 1.37 - 8.2));
+                    float cycle = fmod(floor(lt), 61.0);
+                    float phase = frac(lt);
+                    fade = smoothstep(0.0, 0.24, phase) * (1.0 - smoothstep(0.6, 1.0, phase));
+                    key += float2(cycle * 7.31, cycle * 3.17);
+                }
+                float h = Hash21(key);
+                float h2 = Hash21(key + float2(31.7, -3.3));
+                float h3 = Hash21(key + float2(-12.9, 5.1));
+                float h4 = Hash21(key + float2(4.4, 17.3));
+                float h5 = Hash21(key + float2(-7.7, -11.9));
+                float h6 = Hash21(key + float2(23.1, 2.6));
                 float group = Noise21(float2(q.x / (cellLength * 3.1), row * 0.37));
                 float present = step(h, chance * lerp(0.35, 1.6, group));
                 float x = frac(u) * cellLength;
                 float y = (frac(q.y / rowSpacing) - 0.5) * rowSpacing + (h5 - 0.5) * rowSpacing * 0.3;
                 float2 aa = max(fwidth(q), 1e-3) * float2(1.2, 1.0);
-                float halfW = lerp(0.04, 0.085, h2);
+                // Проявляясь и растворяясь, штрих тоньше и короче.
+                float grow = lerp(0.5, 1.0, fade);
+                float halfW = lerp(0.04, 0.085, h2) * lerp(0.55, 1.0, fade);
                 float limit = cellLength * 0.96;
                 float s = 0;
                 float px;
@@ -187,23 +213,23 @@ Shader "Kingdom Survival/MapLab/Water"
                     float dw = halfW * lerp(0.95, 1.25, h6);
                     for (int k = 0; k < 3; k++)
                     {
-                        float hk = Hash21(float2(cell + k * 3.7, row - k * 1.3));
+                        float hk = Hash21(key + float2(k * 3.7, -k * 1.3));
                         if (k > 0 && hk < 0.45)
                             break;
                         float len = dw * lerp(1.8, 3.2, hk);
                         if (px + len > limit)
                             break;
                         s = max(s, WaterSeg(x, y + (hk - 0.5) * halfW, px, px + len, dw, aa, 1.0));
-                        px += len + lerp(0.12, 0.32, Hash21(float2(row + k, cell * 0.7)));
+                        px += (len + lerp(0.12, 0.32, Hash21(float2(key.y + k, key.x * 0.7)))) * grow;
                         dw *= lerp(0.65, 0.9, hk);
                     }
                     inkMask = 0;
-                    return present * s;
+                    return present * s * fade;
                 }
                 // Основная линия: от коротких до длинных (70/25/5 по весу).
                 float lengthT = h4 < 0.55 ? lerp(0.06, 0.22, h4 / 0.55) : (h4 < 0.92 ? lerp(0.22, 0.5, (h4 - 0.55) / 0.37) : lerp(0.55, 0.78, (h4 - 0.92) / 0.08));
                 float start = cellLength * lerp(0.02, 0.96 - lengthT - 0.1, h5);
-                float stop = start + cellLength * lengthT;
+                float stop = start + cellLength * lengthT * grow;
                 s = WaterSeg(x, y, start, stop, halfW, aa, 0.45);
                 px = stop;
                 // Завершение: полная цепочка, только точка, только штрих или потерянный конец.
@@ -212,8 +238,8 @@ Shader "Kingdom Survival/MapLab/Water"
                     float dashW = halfW * lerp(0.7, 0.9, h2);
                     if (h6 < 0.55)
                     {
-                        px += lerp(0.16, 0.32, h3);
-                        float dash = lerp(0.14, 0.36, h5);
+                        px += lerp(0.16, 0.32, h3) * grow;
+                        float dash = lerp(0.14, 0.36, h5) * grow;
                         if (px + dash < limit)
                             s = max(s, WaterSeg(x, y, px, px + dash, dashW, aa, 1.0));
                         px += dash;
@@ -224,8 +250,8 @@ Shader "Kingdom Survival/MapLab/Water"
                     {
                         if (k >= dots)
                             break;
-                        float hk = Hash21(float2(cell - k * 5.3, row + k * 2.9));
-                        px += lerp(0.12, 0.28, hk) * (1.0 + k * 0.35);
+                        float hk = Hash21(key + float2(-k * 5.3, k * 2.9));
+                        px += lerp(0.12, 0.28, hk) * (1.0 + k * 0.35) * grow;
                         float len = dw * lerp(1.7, 3.0, hk);
                         if (px + len > limit)
                             break;
@@ -237,8 +263,23 @@ Shader "Kingdom Survival/MapLab/Water"
                 // Редкие длинные тонкие линии синей туши.
                 float fu = abs(frac(u) - 0.5);
                 float fv = abs(frac(q.y / rowSpacing) - 0.5) * rowSpacing;
-                inkMask = step(0.965, Hash21(float2(cell * 0.5, row + 91.0))) * saturate((0.46 - fu) * cellLength / max(1e-3, aa.x)) * saturate((0.03 - fv) / max(1e-3, aa.y));
-                return present * s;
+                inkMask = step(0.965, Hash21(float2(key.x * 0.5, key.y + 91.0))) * fade * saturate((0.46 * grow - fu) * cellLength / max(1e-3, aa.x)) * saturate((0.03 - fv) / max(1e-3, aa.y));
+                return present * s * fade;
+            }
+
+            // Течение реки в координатах русла (вдоль, поперёк): ряд штрихов плывёт
+            // вниз по течению своей скоростью — у середины быстрее, у берегов
+            // медленнее (ряд целиком, штрих не рвётся); по штриху бежит мягкая
+            // волна, и он извивается, как след на живой воде.
+            float2 FlowCoords(float2 q, float rowSpacing, float halfWidth, float speed, float wiggle, float t)
+            {
+                float row = floor(q.y / rowSpacing);
+                float across = saturate(abs((row + 0.5) * rowSpacing) / max(0.5, halfWidth));
+                float rowSpeed = speed * lerp(1.2, 0.4, across * across) * lerp(0.85, 1.12, Hash21(float2(row, 3.3)));
+                q.x -= t * rowSpeed;
+                float bend = sin(q.x * 1.7 + t * 1.9 + row * 2.3) * 0.055 + sin(q.x * 0.63 - t * 1.15 + row * 0.9) * 0.045;
+                q.y += bend * wiggle;
+                return q;
             }
 
             float4 Frag(Varyings i) : SV_Target
@@ -267,15 +308,19 @@ Shader "Kingdom Survival/MapLab/Water"
                     float s05;
                     if (river > 0.5)
                     {
-                        float2 q = float2(i.channel.x, i.channel.y);
-                        s05 = StrokeField05(q, 0.95, 3.4, 0.56, ink05) * _Strokes05.x;
+                        // z — полуширина ленты русла (у старых сеток 1).
+                        float2 q = FlowCoords(float2(i.channel.x, i.channel.y), 0.95, i.channel.z, _FlowSpeed, _FlowWiggle, _MapLabWaterTime);
+                        s05 = StrokeField05(q, 0.95, 3.4, 0.56, _MapLabWaterTime, _FlowLife, ink05) * _Strokes05.x;
                     }
                     else
                     {
                         // Озеро: общее медленное направление, реже и спокойнее; середина пустая.
                         float2 dir = normalize(float2(0.94, 0.34));
+                        // Озеро почти стоит: медленный дрейф, слабый извив, долгая жизнь штриха.
                         float2 q = float2(dot(world, dir), dot(world, float2(-dir.y, dir.x)));
-                        s05 = StrokeField05(q, 1.3, 4.4, 0.24, ink05) * _Strokes05.y * lerp(1.0, 0.35, deep05);
+                        q.x -= _MapLabWaterTime * _FlowSpeed * 0.15;
+                        q.y += sin(q.x * 0.9 + _MapLabWaterTime * 0.6 + floor(q.y / 1.3) * 1.7) * 0.04 * _FlowWiggle;
+                        s05 = StrokeField05(q, 1.3, 4.4, 0.24, _MapLabWaterTime, _FlowLife * 1.6, ink05) * _Strokes05.y * lerp(1.0, 0.35, deep05);
                         ink05 *= 0.6;
                     }
                     if (mode != 0)
@@ -291,7 +336,7 @@ Shader "Kingdom Survival/MapLab/Water"
 
                 float2 flow = normalize(i.flow + float2(1e-4, 0));
                 float2 perp = float2(-flow.y, flow.x);
-                float along = dot(world, flow);
+                float along = dot(world, flow) - _MapLabWaterTime * _FlowSpeed * 1.5;
                 float across = dot(world, perp);
                 float wobble = SAMPLE_TEXTURE2D(_WaterTex, sampler_WaterTex, world / 41.0).g - 0.5;
                 float4 strokes = SAMPLE_TEXTURE2D(_WaterTex, sampler_WaterTex, float2(along / 42.0, (across + wobble * 4.0) / 24.0));

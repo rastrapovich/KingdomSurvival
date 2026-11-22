@@ -84,6 +84,9 @@ namespace KingdomSurvival.MapLab
         // 12У-E: видимые объекты плана (детали мест, видимые места): позиция
         // и ID рисунка в наборе выбранных мест. Скрытые места сюда не попадают.
         public readonly List<(Vector2 Position, string Visual, string Kind)> Features = new List<(Vector2, string, string)>();
+        // Рисунки деталей, которые не ставятся на воду (трава): проверка по
+        // готовому рельефу — деталь у воды пропускается целиком.
+        public readonly HashSet<string> DryOnlyFeatures = new HashSet<string>();
         // Долины: линия, полуширина, глубина (доля диапазона).
         public readonly List<Vector2> ValleyLine = new List<Vector2>();
         public float ValleyHalfWidth;

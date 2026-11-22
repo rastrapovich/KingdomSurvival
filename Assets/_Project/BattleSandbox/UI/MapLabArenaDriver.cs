@@ -404,7 +404,8 @@ namespace KingdomSurvival.BattleSandbox
             // каждые ~1/30 с, пока она идёт.
             // Идущий боец гнёт траву: кадр каждые ~1/30 с, пока он идёт и трава возвращается.
             bool walking = UpdateWalkers();
-            bool animating = (frameBinding != null && frameBinding.Animating) || walking;
+            // Река течёт (штрихи воды плывут и пересобираются): кадр каждые ~1/30 с.
+            bool animating = (frameBinding != null && frameBinding.Animating) || walking || arena.HasRiver;
             if (shown != null && size == lastSize && (animating ? Time.realtimeSinceStartup - renderedAt < 1f / 30f
                     : Time.realtimeSinceStartup - readyAt > SettleSeconds || Time.realtimeSinceStartup - renderedAt < 0.1f))
                 return;

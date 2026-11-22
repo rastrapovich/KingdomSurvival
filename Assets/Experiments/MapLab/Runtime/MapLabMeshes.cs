@@ -376,8 +376,8 @@ namespace KingdomSurvival.MapLab
                     uv0.Add(right);
                     uv1.Add(tangent);
                     uv1.Add(tangent);
-                    uv2.Add(new Vector3(along, half, 1f));
-                    uv2.Add(new Vector3(along, -half, 1f));
+                    uv2.Add(new Vector3(along, half, Mathf.Max(1f, half)));
+                    uv2.Add(new Vector3(along, -half, Mathf.Max(1f, half)));
                     if (rowStart >= 0 && !insideLake)
                     {
                         indices.Add(rowStart); indices.Add(start); indices.Add(start + 1);

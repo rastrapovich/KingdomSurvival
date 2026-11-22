@@ -886,7 +886,10 @@ public static partial class WorldPopulationService
         WorldMapHexGrid grid = state.GeneratedMap.CreateGrid();
         double now = ContinuousSimulationSystem.GetAbsoluteHours(state);
         MapPointData at = GroupPosition(state, group, now, grid, out _, out _, out _);
-        if (grid.DistanceHexes(heroX, heroY, at.XPercent, at.YPercent) > Settings.TalkHexes)
+        // 22.11.2026: заговорить можно только вплотную — радиус
+        // взаимодействия карты (прежнее TalkHexes — не дальше него).
+        double talk = Math.Min(Settings.TalkHexes, WorldMapNavigation.InteractionRadiusHexes);
+        if (grid.DistanceHexes(heroX, heroY, at.XPercent, at.YPercent) > talk)
             return false;
         if (group.Behavior != WorldPopulationBehavior.Peaceful && group.Behavior != WorldPopulationBehavior.Patrol)
             return false;

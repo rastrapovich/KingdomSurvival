@@ -291,7 +291,12 @@ public partial class PrototypeUIController
                 string role = worldMapPendingRole, settlement = worldMapPendingSettlement;
                 worldMapPendingRole = null;
                 worldMapPendingSettlement = null;
-                EnterBuildingNow(settlement, role);
+                // Входят только от самой двери: не дошёл — стоит рядом.
+                if (!WorldMapDoor(settlement, role, out Vector2 door) ||
+                    HeroNearWorldMapPoint(door.x, door.y, WorldMapNavigation.InteractionRadiusHexes))
+                    EnterBuildingNow(settlement, role);
+                else
+                    AddReport("К двери отсюда не подойти.");
             }
         }
         // Цели зданий — у поселений, видимых на карте, и у тех, чьи здания
@@ -526,7 +531,7 @@ public partial class PrototypeUIController
             SettlementCampService.ReturnToCamp(gameState);
         // Уже у этой двери — сразу внутрь.
         if (expedition != null && expedition.Phase == CommanderState.AtLocation && expedition.LocationId == settlementId
-            && HeroNearWorldMapPoint(door.x, door.y, 0.4) && !ContinuousSimulationSystem.IsExpeditionRunning(gameState))
+            && HeroNearWorldMapPoint(door.x, door.y, WorldMapNavigation.InteractionRadiusHexes) && !ContinuousSimulationSystem.IsExpeditionRunning(gameState))
         {
             EnterBuildingNow(settlementId, role);
             return;

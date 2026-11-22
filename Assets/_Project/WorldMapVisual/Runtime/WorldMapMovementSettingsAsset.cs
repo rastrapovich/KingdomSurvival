@@ -27,6 +27,8 @@ namespace KingdomSurvival.WorldMapVisual
         [SerializeField, Range(0.05f, 24f)] private float travelHoursPerHex = 1.5f;
         [Tooltip("На каком расстоянии (в клетках) от фактического пути замечается скрытое место.")]
         [SerializeField, Range(0.25f, 6f)] private float discoveryRadiusHexes = WorldMapMovementRules.DefaultDiscoveryRadiusHexes;
+        [Tooltip("Вплотную: на каком расстоянии (в клетках) герой может войти в здание, осмотреть место, заговорить с группой и считается дошедшим до цели приказа.")]
+        [SerializeField, Range(0.1f, 2f)] private float interactionRadiusHexes = WorldMapMovementRules.DefaultInteractionRadiusHexes;
 
         [Header("Туман войны (свободная игра)")]
         [Tooltip("Радиус (в клетках) вокруг пути героя, в котором местность открывается навсегда.")]
@@ -131,6 +133,7 @@ namespace KingdomSurvival.WorldMapVisual
         }
         public float TravelHoursPerHex => travelHoursPerHex;
         public float DiscoveryRadiusHexes => discoveryRadiusHexes;
+        public float InteractionRadiusHexes => interactionRadiusHexes;
         public float FogRevealRadiusHexes => fogRevealRadiusHexes;
         public Color FogColor => fogColor;
         public float FogEdgeSoftness => Mathf.Clamp01(fogEdgeSoftness);
@@ -179,6 +182,7 @@ namespace KingdomSurvival.WorldMapVisual
                 TravelHoursPerHex = travelHoursPerHex,
                 DiscoveryRadiusHexes = discoveryRadiusHexes,
                 FogRevealRadiusHexes = fogRevealRadiusHexes,
+                InteractionRadiusHexes = interactionRadiusHexes,
                 IndependentTime = independentTime,
                 WorldGameHoursPerRealSecond = worldGameHoursPerRealSecond
             };

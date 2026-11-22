@@ -7,6 +7,7 @@ using System.Collections.Generic;
 // недостижима, и сглаживание: из ломаной по центрам клеток выкидываются
 // промежуточные точки, если прямой отрезок проходим и не дороже.
 // Результат — точки в пикселях полотна; первая — точный старт.
+// preferCheapTerrain = false — прямой путь героя без поиска выгоды.
 public static class WorldMapPathfinder
 {
     public readonly struct PathPoint
@@ -27,6 +28,33 @@ public static class WorldMapPathfinder
     private const double SmoothingCostTolerance = 1.02;
 
     public static List<PathPoint> FindPath(
+        WorldMapTerrainLayer layer,
+        WorldMapMovementRules rules,
+        double startX,
+        double startY,
+        double targetX,
+        double targetY,
+        out bool reachedTarget,
+        bool preferCheapTerrain = true)
+    {
+        bool previous = uniformCost;
+        uniformCost = !preferCheapTerrain;
+        try
+        {
+            return FindPathCore(layer, rules, startX, startY, targetX, targetY, out reachedTarget);
+        }
+        finally
+        {
+            uniformCost = previous;
+        }
+    }
+
+    // Прямой путь героя (22.11.2026): местность не влияет на выбор пути —
+    // все проходимые клетки стоят одинаково. Прямая до цели берётся без
+    // поиска, иначе — геометрически кратчайший обход непроходимого.
+    [ThreadStatic] private static bool uniformCost;
+
+    private static List<PathPoint> FindPathCore(
         WorldMapTerrainLayer layer,
         WorldMapMovementRules rules,
         double startX,
@@ -59,6 +87,13 @@ public static class WorldMapPathfinder
 
         // Неразмеченная карта — сплошная открытая местность: прямая без A*.
         if (layer.IsEmpty && rules.IsTraversable(WorldMapGameplayTerrainType.OpenGround))
+        {
+            reachedTarget = true;
+            result.Add(new PathPoint(targetX, targetY));
+            return result;
+        }
+
+        if (uniformCost && targetPassable && IsStraightLineClear(layer, rules, startX, startY, targetX, targetY, start))
         {
             reachedTarget = true;
             result.Add(new PathPoint(targetX, targetY));
@@ -102,7 +137,7 @@ public static class WorldMapPathfinder
             parent[i] = -1;
         }
 
-        double minCost = rules.MinPathCost;
+        double minCost = uniformCost ? 1.0 : rules.MinPathCost;
         int startIndex = grid.IndexOf(start);
         int targetIndex = grid.IndexOf(target);
         bool targetPassable = IsPassable(layer, rules, target, start);
@@ -277,6 +312,8 @@ public static class WorldMapPathfinder
 
     private static double CellCost(WorldMapTerrainLayer layer, WorldMapMovementRules rules, WorldMapHexCell cell)
     {
+        if (uniformCost)
+            return 1.0;
         WorldMapGameplayTerrainType terrain = layer.Get(cell);
         return rules.IsTraversable(terrain) ? rules.PathCost(terrain) : 1.0;
     }

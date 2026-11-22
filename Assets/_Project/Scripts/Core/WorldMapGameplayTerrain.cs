@@ -211,6 +211,9 @@ public sealed class WorldMapMovementRules
     // Бриф правок (19 пунктов) п. 1: радиус, в котором герой открывает
     // туман войны (рабочее число).
     public const float DefaultFogRevealRadiusHexes = 2.5f;
+    // Запрос пользователя 22.11.2026: с постройками, местами, группами и
+    // целью приказа герой взаимодействует только вплотную (рабочее число).
+    public const float DefaultInteractionRadiusHexes = 0.5f;
     public const float MinSpeedMultiplier = 0.05f;
 
     private static WorldMapMovementRules current = CreateDefault();
@@ -242,6 +245,12 @@ public sealed class WorldMapMovementRules
             : DefaultWorldGameHoursPerRealSecond;
     public float DiscoveryRadiusHexes = DefaultDiscoveryRadiusHexes;
     public float FogRevealRadiusHexes = DefaultFogRevealRadiusHexes;
+    public float InteractionRadiusHexes = DefaultInteractionRadiusHexes;
+
+    public double SafeInteractionRadiusHexes =>
+        InteractionRadiusHexes > 0.01f && !float.IsNaN(InteractionRadiusHexes)
+            ? InteractionRadiusHexes
+            : DefaultInteractionRadiusHexes;
     public List<WorldMapTerrainRule> Terrain = new List<WorldMapTerrainRule>();
 
     public static WorldMapMovementRules CreateDefault()
@@ -357,6 +366,7 @@ public sealed class WorldMapMovementRules
             TravelHoursPerHex = TravelHoursPerHex,
             DiscoveryRadiusHexes = DiscoveryRadiusHexes,
             FogRevealRadiusHexes = FogRevealRadiusHexes,
+            InteractionRadiusHexes = InteractionRadiusHexes,
             IndependentTime = IndependentTime,
             WorldGameHoursPerRealSecond = WorldGameHoursPerRealSecond
         };

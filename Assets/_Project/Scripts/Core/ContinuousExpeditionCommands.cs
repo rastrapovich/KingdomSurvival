@@ -42,7 +42,7 @@ public static class ContinuousExpeditionCommands
 
         float exactStartX = expedition.CurrentMapXPercent;
         float exactStartY = expedition.CurrentMapYPercent;
-        List<MapPointData> route = WorldMapNavigation.FindPath(
+        List<MapPointData> route = WorldMapNavigation.FindHeroPath(
             exactStartX,
             exactStartY,
             WorldMapNavigation.CapitalXPercent,

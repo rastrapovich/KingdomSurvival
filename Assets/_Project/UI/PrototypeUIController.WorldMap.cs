@@ -67,6 +67,7 @@ public partial class PrototypeUIController
     private Label worldMapZoomIndicatorLabel;
     private Toggle worldMapGridToggle;
     private Toggle worldMapFollowToggle;
+    private Toggle worldMapRouteToggle;
 
     // Эти поля оставлены для совместимости со старым прототипным UI.
     // Подтверждение цели больше не используется: клик сразу отдаёт приказ.
@@ -111,6 +112,7 @@ public partial class PrototypeUIController
         worldMapZoomIndicatorLabel = root.Q<Label>("world-map-zoom-indicator");
         worldMapGridToggle = root.Q<Toggle>("world-map-grid-toggle");
         worldMapFollowToggle = root.Q<Toggle>("world-map-follow-toggle");
+        worldMapRouteToggle = root.Q<Toggle>("world-map-route-toggle");
 
         // Слои-заготовки (WM-02) пока ничего не рисуют, но не должны перехватывать
         // клики по карте — как и остальные декоративные/маршрутные слои.
@@ -231,6 +233,12 @@ public partial class PrototypeUIController
             worldMapFollowToggle.SetValueWithoutNotify(IsWorldMapCameraFollowEnabled());
             worldMapFollowToggle.RegisterValueChangedCallback(OnWorldMapFollowToggleChanged);
         }
+        WorldMapNavigation.PreferProfitableRoutes = IsWorldMapProfitableRouteEnabled();
+        if (worldMapRouteToggle != null)
+        {
+            worldMapRouteToggle.SetValueWithoutNotify(WorldMapNavigation.PreferProfitableRoutes);
+            worldMapRouteToggle.RegisterValueChangedCallback(OnWorldMapRouteToggleChanged);
+        }
     }
 
     private void UnregisterWorldMapNavControlCallbacks()
@@ -248,6 +256,8 @@ public partial class PrototypeUIController
             worldMapGridToggle.UnregisterValueChangedCallback(OnWorldMapGridToggleChanged);
         if (worldMapFollowToggle != null)
             worldMapFollowToggle.UnregisterValueChangedCallback(OnWorldMapFollowToggleChanged);
+        if (worldMapRouteToggle != null)
+            worldMapRouteToggle.UnregisterValueChangedCallback(OnWorldMapRouteToggleChanged);
     }
 
     private void ResetWorldMapSelection()

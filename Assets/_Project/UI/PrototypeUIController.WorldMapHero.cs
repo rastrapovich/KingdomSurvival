@@ -453,6 +453,20 @@ public partial class PrototypeUIController
         return settings != null && settings.CameraFollowsHero;
     }
 
+    // Галочка «Выгодный путь» (22.11.2026): выбор игрока, по умолчанию
+    // выключена — герой идёт строго к точке клика напрямик.
+    private const string WorldMapProfitableRoutePrefKey = "KingdomSurvival.WorldMap.ProfitableRoute";
+
+    private static bool IsWorldMapProfitableRouteEnabled() =>
+        PlayerPrefs.GetInt(WorldMapProfitableRoutePrefKey, 0) != 0;
+
+    private void OnWorldMapRouteToggleChanged(ChangeEvent<bool> evt)
+    {
+        PlayerPrefs.SetInt(WorldMapProfitableRoutePrefKey, evt.newValue ? 1 : 0);
+        PlayerPrefs.Save();
+        WorldMapNavigation.PreferProfitableRoutes = evt.newValue;
+    }
+
     private void OnWorldMapFollowToggleChanged(ChangeEvent<bool> evt)
     {
         PlayerPrefs.SetInt(WorldMapFollowPrefKey, evt.newValue ? 1 : 0);

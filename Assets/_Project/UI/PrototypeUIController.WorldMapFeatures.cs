@@ -239,14 +239,19 @@ public partial class PrototypeUIController
 
     private GeneratedMapSite worldMapPendingFeature;
     private Rect worldMapPendingFeatureRect;
+    private Vector2 worldMapPendingFeatureBeside;
 
     private void WalkToWorldMapFeature(GeneratedMapSite site, Rect union)
     {
         if (gameState == null || isGameOver || site == null)
             return;
         HideWorldMapInfoCard();
-        // Уже рядом — карточка сразу.
-        if (HeroNearWorldMapPoint(site.XPercent, site.YPercent, 1.2))
+        // Подходят к месту сбоку-спереди, не встают на рисунок.
+        Vector2 beside = new Vector2(union.xMax + union.width * 0.15f, union.yMax + union.height * 0.05f);
+        // Рисунок сдвинут по высоте земли; путь — в координатах земли.
+        beside.y -= MapLabGameLive.ElevationShiftPercent(MapLabGameLive.Current, beside.x, beside.y);
+        // Уже вплотную — карточка сразу.
+        if (HeroNearWorldMapFeature(site, beside))
         {
             ShowWorldMapFeatureCard(site, union);
             return;
@@ -259,11 +264,16 @@ public partial class PrototypeUIController
         }
         worldMapPendingFeature = site;
         worldMapPendingFeatureRect = union;
-        // Подходят к месту сбоку-спереди, не встают на рисунок.
-        Vector2 beside = new Vector2(union.xMax + union.width * 0.15f, union.yMax + union.height * 0.05f);
-        // Рисунок сдвинут по высоте земли; путь — в координатах земли.
-        beside.y -= MapLabGameLive.ElevationShiftPercent(MapLabGameLive.Current, beside.x, beside.y);
+        worldMapPendingFeatureBeside = beside;
         GoToWorldMapPoint(beside.x, beside.y);
+    }
+
+    // Деталь места осматривают вплотную: у точки подхода или у самого места.
+    private bool HeroNearWorldMapFeature(GeneratedMapSite site, Vector2 beside)
+    {
+        double radius = WorldMapNavigation.InteractionRadiusHexes;
+        return HeroNearWorldMapPoint(beside.x, beside.y, radius) ||
+               HeroNearWorldMapPoint(site.XPercent, site.YPercent, radius);
     }
 
     private bool HeroNearWorldMapPoint(float x, float y, double hexes)
@@ -287,14 +297,16 @@ public partial class PrototypeUIController
         {
             MapPointData end = expedition.Route[expedition.Route.Count - 1];
             WorldMapHexGrid grid = WorldMapNavigation.Grid;
-            if (grid != null && grid.DistanceHexes(end.XPercent, end.YPercent, site.XPercent, site.YPercent) > 1.5)
+            Vector2 beside = worldMapPendingFeatureBeside;
+            if (grid != null && grid.DistanceHexes(end.XPercent, end.YPercent, beside.x, beside.y) > 1.0 &&
+                grid.DistanceHexes(end.XPercent, end.YPercent, site.XPercent, site.YPercent) > 1.0)
                 worldMapPendingFeature = null;
             return;
         }
         if (running)
             return;
         worldMapPendingFeature = null;
-        if (HeroNearWorldMapPoint(site.XPercent, site.YPercent, 1.5))
+        if (HeroNearWorldMapFeature(site, worldMapPendingFeatureBeside))
             ShowWorldMapFeatureCard(site, worldMapPendingFeatureRect);
     }
 

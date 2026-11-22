@@ -226,6 +226,22 @@ public class ExpeditionData
     public string InterruptedTargetLocationId;
     public float InterruptedTargetXPercent;
     public float InterruptedTargetYPercent;
+
+    // 22.11.2026: точка, куда игрок приказал идти, и место приказа. Прибытие
+    // в место засчитывается, только если герой дошёл до точки вплотную
+    // (WorldMapNavigation.ReachedOrderPoint); иначе — остановка рядом.
+    public bool HasOrderTarget;
+    public string OrderTargetLocationId;
+    public float OrderTargetXPercent;
+    public float OrderTargetYPercent;
+
+    public void SetOrderTarget(string locationId, float xPercent, float yPercent)
+    {
+        HasOrderTarget = true;
+        OrderTargetLocationId = locationId;
+        OrderTargetXPercent = WorldMapNavigation.ClampMapX(xPercent);
+        OrderTargetYPercent = WorldMapNavigation.ClampMapY(yPercent);
+    }
 }
 
 [Serializable]
@@ -596,7 +612,7 @@ public class GameState
             isScoutingTarget = false;
         }
 
-        List<MapPointData> route = WorldMapNavigation.FindPath(
+        List<MapPointData> route = WorldMapNavigation.FindHeroPath(
             WorldMapNavigation.CapitalXPercent,
             WorldMapNavigation.CapitalYPercent,
             targetXPercent,
@@ -629,6 +645,7 @@ public class GameState
             PendingDecision = null,
             HasInterruptedRoute = false
         };
+        expedition.SetOrderTarget(location.Id, targetXPercent, targetYPercent);
 
         // Порядок мест задаёт игрок (подготовка), а не порядок списка бойцов.
         expedition.FighterIds.AddRange(selectedFighterIds);
@@ -695,7 +712,7 @@ public class GameState
         if (location == null)
             location = GetOrCreateRouteWaypoint(targetXPercent, targetYPercent);
 
-        List<MapPointData> route = WorldMapNavigation.FindPath(
+        List<MapPointData> route = WorldMapNavigation.FindHeroPath(
             ActiveExpedition.CurrentMapXPercent,
             ActiveExpedition.CurrentMapYPercent,
             targetXPercent,
@@ -709,6 +726,7 @@ public class GameState
         }
 
         ActiveExpedition.LocationId = location.Id;
+        ActiveExpedition.SetOrderTarget(location.Id, targetXPercent, targetYPercent);
         ActiveExpedition.Phase = CommanderState.TravellingToLocation;
         CancelRoadActivity(ActiveExpedition);
         ActiveExpedition.RemainingRouteCells = routeCells;
@@ -1037,7 +1055,7 @@ public class GameState
         float targetX = expedition.InterruptedTargetXPercent;
         float targetY = expedition.InterruptedTargetYPercent;
 
-        List<MapPointData> route = WorldMapNavigation.FindPath(
+        List<MapPointData> route = WorldMapNavigation.FindHeroPath(
             expedition.CurrentMapXPercent,
             expedition.CurrentMapYPercent,
             targetX,
@@ -1064,6 +1082,7 @@ public class GameState
         }
 
         expedition.LocationId = targetLocationId;
+        expedition.SetOrderTarget(targetLocationId, targetX, targetY);
         expedition.Phase = resumePhase == CommanderState.ReturningToCastle
             ? CommanderState.ReturningToCastle
             : CommanderState.TravellingToLocation;
@@ -1199,6 +1218,19 @@ public class GameState
             default:
                 return "бойцов";
         }
+    }
+
+    // Герой не дошёл до места приказа вплотную (цель недостижима): он
+    // остановился там, где стоит, — место не открывается.
+    public LocationData StopShortOfOrderTarget()
+    {
+        if (!HasActiveExpedition)
+            return null;
+        ExpeditionData expedition = ActiveExpedition;
+        LocationData waypoint = GetOrCreateRouteWaypoint(expedition.CurrentMapXPercent, expedition.CurrentMapYPercent);
+        expedition.LocationId = waypoint.Id;
+        expedition.HasOrderTarget = false;
+        return waypoint;
     }
 
     private LocationData GetOrCreateRouteWaypoint(

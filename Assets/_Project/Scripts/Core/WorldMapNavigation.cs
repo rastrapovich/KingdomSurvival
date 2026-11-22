@@ -83,7 +83,30 @@ public static class WorldMapNavigation
         float startXPercent,
         float startYPercent,
         float targetXPercent,
-        float targetYPercent)
+        float targetYPercent) =>
+        FindPath(startXPercent, startYPercent, targetXPercent, targetYPercent, true);
+
+    // Галочка «Выгодный путь» на карте (22.11.2026). Выключена — герой идёт
+    // строго к точке клика напрямик (обход только непроходимого и построек);
+    // включена — прежний поиск: дороги дешевле, путь притягивается к дороге.
+    // Выбор игрока; интерфейс выставляет его при запуске и по переключателю.
+    public static bool PreferProfitableRoutes;
+
+    // Путь героя по приказу игрока — с учётом галочки «Выгодный путь».
+    // Остальные потребители (группы мира, оценки, истории) берут FindPath.
+    public static List<MapPointData> FindHeroPath(
+        float startXPercent,
+        float startYPercent,
+        float targetXPercent,
+        float targetYPercent) =>
+        FindPath(startXPercent, startYPercent, targetXPercent, targetYPercent, PreferProfitableRoutes);
+
+    public static List<MapPointData> FindPath(
+        float startXPercent,
+        float startYPercent,
+        float targetXPercent,
+        float targetYPercent,
+        bool preferProfitable)
     {
         WorldMapTerrainLayer layer = ActiveLayer;
         WorldMapHexGrid grid = layer.Grid;
@@ -101,7 +124,8 @@ public static class WorldMapNavigation
             grid.PercentToPixelY(startYPercent),
             grid.PercentToPixelX(targetX),
             grid.PercentToPixelY(targetY),
-            out _);
+            out _,
+            preferProfitable);
 
         for (int i = 1; i < points.Count; i++)
         {
@@ -116,7 +140,42 @@ public static class WorldMapNavigation
             route.RemoveAt(1);
         }
         // 12У-H: основания построек и предметов мест обходятся.
-        return WorldMapObstacles.Avoid(FollowRoads(route, layer, grid), IsTraversableAtPercent);
+        List<MapPointData> shaped = preferProfitable ? FollowRoads(route, layer, grid) : route;
+        return WorldMapObstacles.Avoid(shaped, IsTraversableAtPercent);
+    }
+
+    // Взаимодействие только вплотную (22.11.2026): здание, место, группа,
+    // цель приказа — на расстоянии не больше радиуса взаимодействия.
+    public static double InteractionRadiusHexes => WorldMapMovementRules.Current.SafeInteractionRadiusHexes;
+
+    public static bool IsWithinInteraction(float fromXPercent, float fromYPercent, float toXPercent, float toYPercent) =>
+        IsWithinHexes(fromXPercent, fromYPercent, toXPercent, toYPercent, InteractionRadiusHexes);
+
+    // Дошёл ли герой до точки приказа вплотную. Точка на основании постройки
+    // засчитывается у её края (путь выталкивает к краю); точка в
+    // непроходимой клетке — из соседней с ней клетки.
+    public static bool ReachedOrderPoint(float heroXPercent, float heroYPercent, float targetXPercent, float targetYPercent)
+    {
+        double radius = InteractionRadiusHexes;
+        if (DistanceHexes(heroXPercent, heroYPercent, targetXPercent, targetYPercent) <= radius + 0.0001)
+            return true;
+
+        int obstacle = WorldMapObstacles.At(targetXPercent, targetYPercent);
+        if (obstacle >= 0)
+        {
+            WorldMapObstacle o = WorldMapObstacles.Items[obstacle];
+            float nx = Math.Max(o.XMin, Math.Min(o.XMax, heroXPercent));
+            float ny = Math.Max(o.YMin, Math.Min(o.YMax, heroYPercent));
+            if (DistanceHexes(heroXPercent, heroYPercent, nx, ny) <= radius + 0.0001)
+                return true;
+        }
+
+        if (!IsTraversableAtPercent(targetXPercent, targetYPercent))
+        {
+            WorldMapHexGrid grid = Grid;
+            return grid.CellAtPercent(heroXPercent, heroYPercent).DistanceTo(grid.CellAtPercent(targetXPercent, targetYPercent)) <= 1;
+        }
+        return false;
     }
 
     // 12У-H: на дорожных клетках путь идёт по нарисованной линии дороги —

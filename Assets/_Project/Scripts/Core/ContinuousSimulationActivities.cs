@@ -488,6 +488,18 @@ public static partial class ContinuousSimulationSystem
         expedition.Phase = CommanderState.AtLocation;
         commander.State = CommanderState.AtLocation;
         LocationData location = state.FindLocation(expedition.LocationId);
+        // 22.11.2026: место открывается, только если герой дошёл до точки
+        // приказа вплотную; недостижимая цель — остановка рядом без входа.
+        if (location != null && !location.IsWaypoint && expedition.HasOrderTarget &&
+            expedition.OrderTargetLocationId == location.Id &&
+            !WorldMapNavigation.ReachedOrderPoint(
+                expedition.CurrentMapXPercent, expedition.CurrentMapYPercent,
+                expedition.OrderTargetXPercent, expedition.OrderTargetYPercent))
+        {
+            state.StopShortOfOrderTarget();
+            batch.Result.Messages.Add("Ближе к «" + location.Name + "» отсюда не подойти.");
+            location = null;
+        }
         if (location != null && !location.IsWaypoint)
         {
             FeatureDispatcher.Raise(new FeatureEvent

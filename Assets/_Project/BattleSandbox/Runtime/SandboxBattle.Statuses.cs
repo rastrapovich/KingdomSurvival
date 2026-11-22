@@ -426,6 +426,14 @@ namespace KingdomSurvival.BattleSandbox
                 frostChargesThisRound[frostKey] = already + 1;
             }
 
+            if (statusId == GuardedId && source != null)
+            {
+                if (source.Position.DistanceTo(target.Position) != 1)
+                    return Reject(result, source.DisplayLabel + " должен стоять рядом, чтобы прикрыть", target);
+                if (units.Any(u => u != target && u.statuses.Any(s => s.StatusId == GuardedId && s.SourceUnitId == source.Id)))
+                    return Reject(result, source.DisplayLabel + " уже прикрывает другого", target);
+            }
+
             SandboxStatusInstance existing = FindStatus(target, statusId);
             if (existing != null)
             {
@@ -614,6 +622,12 @@ namespace KingdomSurvival.BattleSandbox
         // неуязвимость учитываются. Возвращает реально снятые HP.
         private int DealStatusDamage(SandboxUnitState target, int amount, SandboxUnitState source, string label, SandboxDamageType type)
         {
+            if (target != null && target.IsDying && amount > 0)
+            {
+                if (!(source != null && source.Team == target.Team) && !StatusHas(target, SandboxStatusOpKind.Invulnerable))
+                    FinalizeDeath(target, label + " добивает лежащего");
+                return 0;
+            }
             if (target == null || target.IsDefeated || amount <= 0)
                 return 0;
             bool hostile = source == null || source.Team != target.Team;
@@ -1090,6 +1104,9 @@ namespace KingdomSurvival.BattleSandbox
             if (statusesClearedAtEnd)
                 return;
             statusesClearedAtEnd = true;
+            foreach (SandboxBattleObject cocoon in objects.Where(o => o.Kind == SandboxObjectKind.Cocoon))
+                cocoon.HitPoints = 0;
+            pendingBlasts.Clear();
             foreach (SandboxUnitState unit in units)
             {
                 unit.statuses.Clear();

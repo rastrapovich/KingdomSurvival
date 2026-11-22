@@ -67,7 +67,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
             Assert.AreEqual(89, SandboxStatusCatalog.All.Count);
             Assert.AreEqual(89, SandboxStatusCatalog.All.Select(def => def.Id).Distinct().Count());
             string[] pending = SandboxStatusCatalog.All.Where(def => !def.IsExecutable).Select(def => def.Id).OrderBy(id => id).ToArray();
-            CollectionAssert.AreEqual(new[] { "status.054", "status.059", "status.061", "status.107", "status.150", "status.203" }, pending,
+            CollectionAssert.IsEmpty(pending,
                 "незавершённые исполнители должны быть явно перечислены в отчёте покрытия");
             Assert.IsTrue(SandboxStatusCatalog.All.All(def => def.Ops.Count > 0 || def.ImmuneTo.Count > 0));
         }

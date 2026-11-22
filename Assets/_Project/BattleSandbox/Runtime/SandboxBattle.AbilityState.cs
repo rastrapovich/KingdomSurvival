@@ -160,7 +160,7 @@ namespace KingdomSurvival.BattleSandbox
 
         // Мёртвые, не съеденные тела: доступны Костяному садовнику.
         public IEnumerable<SandboxUnitState> Corpses =>
-            units.Where(unit => unit.IsDefeated && !unit.CorpseConsumed);
+            units.Where(unit => unit.IsDefeated && !unit.IsDying && !unit.CorpseConsumed);
 
         public SandboxUnitState GetAttachedParasite(SandboxUnitState host)
         {
@@ -244,6 +244,7 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
             CheckStatusLinkDistances();
+            RecomputeSurrounded();
         }
 
         private void UpdateLinkObjectCells(SandboxLink link)
@@ -374,6 +375,8 @@ namespace KingdomSurvival.BattleSandbox
             objects.RemoveAll(item => item.IsDestroyed && item.Kind != SandboxObjectKind.Tendril);
             // Пакет состояний: Отложенный взрыв и Приговор (раунд R+2).
             ProcessStatusRoundStart();
+            ProcessDeathBlastsAtRoundStart();
+            ProcessCocoonsAtRoundStart();
         }
 
         // ---------- Начало активации ----------
@@ -478,6 +481,9 @@ namespace KingdomSurvival.BattleSandbox
             bool controlled = ProcessStatusActivationStart(unit);
             if (unit.IsDefeated)
                 return false;
+            // Этапы 8–9: «Смятение» и «Подчинение» — детерминированный ход политикой.
+            if (!controlled && ProcessForcedActivation(unit))
+                return false;
             if (controlled)
             {
                 // Сильный контроль: активация имеет Start и End, но без
@@ -529,6 +535,7 @@ namespace KingdomSurvival.BattleSandbox
             // Пакет состояний: истечение по собственным ходам и ходам источника;
             // окончание оцепенения открывает прежнее окно NumbImmunity.
             ProcessPassiveActivationEnd(unit);
+            ProcessRemainsAtActivationEnd(unit);
             ProcessStatusActivationEnd(unit);
 
             if (tollPreparedAt.TryGetValue(unit.Id, out int preparedAt) && preparedAt < unit.ActivationCount &&
@@ -559,8 +566,17 @@ namespace KingdomSurvival.BattleSandbox
 
         private void OnUnitDefeated(SandboxUnitState dead)
         {
+            // Этап 11: «При смерти» — не окончательная смерть (нет наград, кокона, трупа).
+            if (dead.IsDying || (!defeatProcessed.Contains(dead.Id) && TryEnterDying(dead)))
+            {
+                RecomputeSurrounded();
+                return;
+            }
             if (!defeatProcessed.Add(dead.Id))
                 return;
+            Emit(SandboxCombatEventKind.FinalDeath, null, dead);
+            TryCreateCocoon(dead);
+            OnFinalDeathPassives(dead);
             OnPassiveUnitDefeated(dead);
             OnStatusUnitDefeated(dead);
             foreach (SandboxLink link in links.Where(item => item.SourceId == dead.Id || item.TargetId == dead.Id).ToList())

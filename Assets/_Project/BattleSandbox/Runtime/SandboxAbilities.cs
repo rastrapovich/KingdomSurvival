@@ -326,6 +326,8 @@ namespace KingdomSurvival.BattleSandbox
         PullFree,
         CutThread,
         AttackObject,
+        // Бриф завершения, этап 11: спасти соседа «При смерти» за 1 действие.
+        Rescue,
         // Пакет состояний: очищение себя или соседнего союзника за 1 действие.
         CleanseStatus
     }
@@ -355,7 +357,9 @@ namespace KingdomSurvival.BattleSandbox
         StoneWall,
         Bridge,
         RootNest,
-        RitualStone
+        RitualStone,
+        // Бриф завершения, этап 12: кокон выводка (не объект местности).
+        Cocoon
     }
 
     // Разрушаемый объект боя: лоза, нить, яйцо, жгут. Не боец: нет
@@ -373,7 +377,10 @@ namespace KingdomSurvival.BattleSandbox
         public bool CreatedThisActivation { get; internal set; }
         public string HeldUnitId { get; internal set; }
         public bool IsDestroyed => HitPoints <= 0;
-        public bool IsTerrain => Kind >= SandboxObjectKind.Boulder;
+        public bool IsTerrain => Kind >= SandboxObjectKind.Boulder && Kind != SandboxObjectKind.Cocoon;
+        // Кокон «Зародыша в теле»: сторона и источник фиксируются при создании.
+        public SandboxTeam SnapshotTeam { get; internal set; }
+        public string SourceId { get; internal set; }
         // Неразрушимый объект местности (валун, мост) — HitPoints не убывают.
         public bool Indestructible { get; internal set; }
 
@@ -386,6 +393,7 @@ namespace KingdomSurvival.BattleSandbox
                     case SandboxObjectKind.Vine: return "Лоза";
                     case SandboxObjectKind.Thread: return "Нить";
                     case SandboxObjectKind.Egg: return "Яйцо";
+                    case SandboxObjectKind.Cocoon: return "Кокон";
                     case SandboxObjectKind.Tendril: return "Жгут";
                     default: return SandboxTerrainObjects.Get(Kind).Label;
                 }

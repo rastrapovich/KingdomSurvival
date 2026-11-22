@@ -204,7 +204,8 @@ namespace KingdomSurvival.BattleSandbox
                     source.TagIds,
                     null,
                     ConvertAbilities(source),
-                    source.MagicReserve);
+                    source.MagicReserve,
+                    source.CanBeRescuedInBattle);
 
                 sources.Add(source);
                 visuals[source.Id] = MakeVisual(source, animations, UnitArtViews.ActiveViewId);

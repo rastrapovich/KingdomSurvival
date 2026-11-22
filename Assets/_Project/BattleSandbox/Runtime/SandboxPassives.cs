@@ -127,6 +127,15 @@ namespace KingdomSurvival.BattleSandbox
         MoveAfterKill,
         SecondShot,
         SecondMeleeHit,
+        // Этапы 7–12: окружение, спасение, призывы, гибель.
+        MomentumBreaksRing,
+        RescuedTemporaryPool,
+        GrowOnAllySummon,
+        SplitIntoBrood,
+        DelayedDeathBlast,
+        LeaveRemains,
+        ConsumeRemains,
+        SharedFateLink,
         // Прежнее правило под другим ID (Стая, ходьба по местности).
         Alias,
         // Политика без собственного эффекта (совпадает с общим правилом).
@@ -326,6 +335,10 @@ namespace KingdomSurvival.BattleSandbox
         internal int FollowUpRoot = -1;
         internal HexCoord ActivationStartPosition;
         public int MoveAfterActionBudget { get; internal set; }
+        // «При смерти»: одно спасение за бой, начало окна, окончательная смерть.
+        public bool RescueUsed { get; internal set; }
+        internal int DyingSinceActivation;
+        internal bool ForceFinalDeath;
         public int Counter(string key) => Counters.TryGetValue(key, out int value) ? value : 0;
         public int Stack(string key) => Stacks.TryGetValue(key, out int value) ? value : 0;
     }

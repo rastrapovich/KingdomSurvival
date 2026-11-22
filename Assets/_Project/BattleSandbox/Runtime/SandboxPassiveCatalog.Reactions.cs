@@ -109,6 +109,24 @@ namespace KingdomSurvival.BattleSandbox
 
             RegisterSupportAndMagic();
             RegisterMovementAndSequences();
+            RegisterLifecycle();
+        }
+
+        // Этапы 7–12: окружение, спасение, призывы и гибель.
+        private static void RegisterLifecycle()
+        {
+            const string p = "passive.status.20261120.";
+            const string q = "passive.20261119.";
+            T(p + "077", "Разгон разрывает кольцо").R(K.MomentumBreaksRing, limit: L.PerBattle);
+            T(p + "063", "Не даст захватить разум умирающего").React(E.Attempt, Ids("059", "060", "061"), X.Cancel, S.Self, ownerRequires: "status.150");
+            T(p + "064", "Спасённый держится крепче").R(K.RescuedTemporaryPool, limit: L.PerBattle,
+                profile: new SandboxStatusProfile { ProfileId = "rescued", Duration = 2, Value = 1 });
+            T(q + "170", "Растёт от призыва").R(K.GrowOnAllySummon, 1, limit: L.PerRound, value2: 3);
+            T(q + "165", "Распадается на выводок").R(K.SplitIntoBrood, 2);
+            T(q + "260", "Взрывоопасная гибель").R(K.DelayedDeathBlast, 3);
+            T("ecology.dangerous_remains", "Опасные останки").R(K.LeaveRemains, 1);
+            T(q + "213", "Поглощает останки").R(K.ConsumeRemains, 2, limit: L.PerOwnTurn);
+            T("myth.shared_fate", "Делит связь").R(K.SharedFateLink);
         }
 
         // Этапы 5–6: реакции на движение и несколько попаданий одного действия.

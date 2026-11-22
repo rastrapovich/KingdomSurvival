@@ -66,8 +66,7 @@ namespace KingdomSurvival.BattleSandbox
             Def("status.011", "Болевое эхо", "dot", Bad()).Own(2).Op(Special("PainEcho", 2)).Clean(SA, "очистить").Magic();
             Def("status.012", "Кровавая порча", "dot", Bad()).Own(1).Op(Op(SandboxStatusOpKind.NoVoluntaryMove)).Clean(SA, "освободиться").Magic();
             Def("status.203", "Зародыш в теле", "dot", Bad()).Own(2).Op(Tick(1)).Op(Special("IncubationCocoon"))
-                .Clean(SA, "очистить заражение")
-                .Pending("Кокон при гибели носителя: нужен объект-кокон 3 HP и вылупление выводка (временная заготовка 3/1/0/1/2/0/1) — тики работают, кокон не создаётся.");
+                .Clean(SA, "очистить заражение");
 
             // ---------- Стихии, вещества и наложения ----------
             Def("status.014", "Озябший", "coat", Bad()).Own(1).Op(Mod(SandboxStatusOpKind.MovementMod, -1)).Clean(SA, "согреться");
@@ -93,8 +92,7 @@ namespace KingdomSurvival.BattleSandbox
             Def("status.044", "Захват", "move", Bad()).Facade().Op(Special("EngulfLink"));
             Def("status.046", "В сети", "move", Bad()).Own(2).Op(Op(SandboxStatusOpKind.NoVoluntaryMove)).Clean(SA, "снять сеть");
             Def("status.047", "Запутан", "move", Bad()).Own(2).Op(Mod(SandboxStatusOpKind.MovementMod, -1)).Clean(SA, "распутаться");
-            Def("status.054", "Окружён", "move", Bad()).Facade().Op(Special("Surrounded", 1))
-                .Pending("Пересчитываемая расстановка: +1 цена первого выхода из соседства 2 врагов без соседнего союзника — нужен учёт в цене пути BuildReachable.");
+            Def("status.054", "Окружён", "move", Bad()).Forever().Op(Special("Surrounded", 1));
             Def("status.194", "Ранящее перемещение", "move", Bad()).Own(2).Op(Special("PainfulMovement", 2)).Clean(SA, "перевязать");
 
             // ---------- Страх, воля и управление ----------
@@ -103,11 +101,9 @@ namespace KingdomSurvival.BattleSandbox
             Def("status.056", "Паника", "mind", Bad()).Own(1).Strong().Op(Special("FleeFromSource", 2)).Op(Op(SandboxStatusOpKind.NoOffense)).Clean(A, "ободрить").SourceBound();
             Def("status.057", "Ужас", "mind", Bad()).Own(1).Op(Op(SandboxStatusOpKind.CannotTargetSource)).Clean(SA, "ободрить").SourceBound();
             Def("status.058", "Скованный страхом", "mind", Bad()).Own(1).Strong().Op(Op(SandboxStatusOpKind.NoVoluntaryMove)).Op(Op(SandboxStatusOpKind.NoOffense)).Clean(A, "ободрить").SourceBound();
-            Def("status.059", "Смятение", "mind", Bad()).Own(1).Strong().Op(Special("Confusion")).Op(Op(SandboxStatusOpKind.RemoveOnDamageFromSourceSide)).Clean(A, "привести в чувство")
-                .Pending("Принудительная атака ближайшей живой цели любой стороны: нужен исполнитель хода вне выбора игрока/ИИ и разрешение атаки по своим.");
+            Def("status.059", "Смятение", "mind", Bad()).Own(1).Strong().Op(Special("Confusion")).Op(Op(SandboxStatusOpKind.RemoveOnDamageFromSourceSide)).Clean(A, "привести в чувство");
             Def("status.060", "Очарование", "mind", Bad()).Own(2).Op(Op(SandboxStatusOpKind.CannotTargetSource)).Op(Op(SandboxStatusOpKind.RemoveOnDamageFromSourceSide)).Clean(SA, "очистить").SourceBound().Magic();
-            Def("status.061", "Подчинение", "mind", Bad()).Own(1).Strong().Op(Special("Domination")).Op(Op(SandboxStatusOpKind.RemoveOnDamageFromSourceSide)).Clean(A, "очистить").SourceBound().Magic()
-                .Pending("Передача управления на 1 активацию стороне источника без смены принадлежности/наград: нужен режим управления в ходе ИИ и запрет самоубийственных действий.");
+            Def("status.061", "Подчинение", "mind", Bad()).Own(1).Strong().Op(Special("Domination")).Op(Op(SandboxStatusOpKind.RemoveOnDamageFromSourceSide)).Clean(A, "очистить").SourceBound().Magic();
             Def("status.065", "Спровоцирован", "mind", Bad()).Own(1).Op(Op(SandboxStatusOpKind.MustTargetSource)).Clean(SA, "очистить").SourceBound();
             Def("status.066", "Деморализация", "mind", Bad()).Own(1).Op(new SandboxStatusOp(SandboxStatusOpKind.AttackMod, -2, SandboxStatusFilter.Ranged)).Clean(SA, "ободрить");
             Def("status.067", "Сломленный дух", "mind", Bad()).Own(2).Op(Mod(SandboxStatusOpKind.AttackMod, -1)).Clean(SA, "ободрить");
@@ -134,8 +130,7 @@ namespace KingdomSurvival.BattleSandbox
             Def("status.102", "Отмеченная цель", "mark", Bad()).Own(2).Uses(2).Op(new SandboxStatusOp(SandboxStatusOpKind.IncomingAttackMod, 1, consumesUse: true)).Clean(SA, "очистить");
             Def("status.105", "Приговор", "mark", Bad()).Rounds(2).Op(Special("DelayedSentence", 3)).Clean(SA, "очистить").SourceBound().Magic();
             Def("status.106", "Вызов на поединок", "mark", Bad()).Source(2).Op(new SandboxStatusOp(SandboxStatusOpKind.AttackMod, 1, SandboxStatusFilter.VsSource)).Op(Special("DuelMirror", 1)).Clean(SA, "очистить связь").SourceBound();
-            Def("status.107", "Под защитой союзника", "mark", Good()).Own(2).Uses(1).Op(Special("Bodyguard")).SourceBound()
-                .Pending("Перехват направленной атаки соседним защитником с расчётом по его Защите: нужна подмена цели в TryAttack/способностях до формулы.");
+            Def("status.107", "Под защитой союзника", "mark", Good()).Own(2).Uses(1).Op(Special("Bodyguard")).SourceBound();
             Def("status.109", "Связанные раны", "mark", Good()).Own(2).Op(Special("SharedWounds")).Clean(SA, "разорвать связь").SourceBound();
             Def("status.110", "Привязка к источнику", "mark", Bad()).Facade().Op(Special("SourceBinding"));
 
@@ -159,8 +154,7 @@ namespace KingdomSurvival.BattleSandbox
             // ---------- Лечение и сохранение жизни ----------
             Def("status.146", "Постепенное восстановление", "heal", Good()).Own(3).Op(Mod(SandboxStatusOpKind.TickHeal, 1));
             Def("status.148", "Запас временной жизни", "heal", Good()).Own(2).Op(Mod(SandboxStatusOpKind.TemporaryHitPoints, 3));
-            Def("status.150", "При смерти", "heal", Bad()).Own(1).Op(Special("Dying")).Clean(A, "спасти")
-                .Pending("Нужна явная поддержка спасения у участника (флаг Базы существ/героя) и состояние «0 HP, но не погиб» в OnUnitDefeated; без неё бой сохраняет прежнее поражение.");
+            Def("status.150", "При смерти", "heal", Bad()).Own(1).Op(Special("Dying")).Clean(A, "спасти");
 
             // ---------- Темп и мобильность ----------
             Def("status.156", "Ускоренное перемещение", "tempo", Good()).Own(2).Op(Mod(SandboxStatusOpKind.MovementMod, 1));

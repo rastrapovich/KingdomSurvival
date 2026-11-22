@@ -988,6 +988,7 @@ namespace KingdomSurvival.BattleSandbox
             }
             if (from == unit.Position && unit.statuses.Any(item => item.Mode == "thin_rime"))
                 extra = Math.Max(extra, 1);
+            extra += SurroundExitCost(unit, from, to);
             if (from == unit.Position)
             {
                 foreach (SandboxStatusInstance sticky in unit.statuses.Where(item => item.Mode == "sticky_exit"))
@@ -1016,6 +1017,7 @@ namespace KingdomSurvival.BattleSandbox
         private void AfterPassiveVoluntaryMove(SandboxUnitState unit, HexCoord origin)
         {
             unit.passive.AttackedSinceMove = false;
+            AfterSurroundExit(unit, origin);
             foreach (SandboxStatusInstance rime in unit.statuses.Where(item => item.Mode == "thin_rime").ToList())
                 RemoveStatusInstance(unit, rime, "тонкий иней сброшен шагом", endReason: SandboxStatusEndReason.Consumed);
             foreach (SandboxStatusInstance sticky in unit.statuses.Where(item => item.Mode == "sticky_exit").ToList())

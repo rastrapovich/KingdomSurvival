@@ -1317,6 +1317,9 @@ namespace KingdomSurvival.BattleSandbox
             }
             // Пакет состояний: очищение себя или соседнего союзника за 1 действие.
             result.AddRange(StatusCleanseActions(unit));
+            // Этап 11: спасти соседа «При смерти».
+            foreach (SandboxUnitState fallen in units.Where(u => CanRescue(unit, u)).OrderBy(u => u.Id, StringComparer.Ordinal))
+                result.Add(new SandboxContextAction { Kind = SandboxContextActionKind.Rescue, TargetUnitId = fallen.Id, Label = "Спасти " + fallen.DisplayLabel });
 
             SandboxUnitState own = GetAttachedParasite(unit);
             if (own != null && own.Team != unit.Team)
@@ -1337,7 +1340,9 @@ namespace KingdomSurvival.BattleSandbox
 
             // Бриф «Поверхности арены»: разрушаемые объекты местности (плетень,
             // корневое гнездо) — та же команда «Ударить»; дальним — по линии огня.
-            foreach (SandboxBattleObject item in objects.Where(item => !item.IsDestroyed && (item.OwnerId != null || (item.IsTerrain && !item.Indestructible)))
+            foreach (SandboxBattleObject item in objects.Where(item => !item.IsDestroyed &&
+                                                                       (item.OwnerId != null || (item.Kind == SandboxObjectKind.Cocoon && item.SnapshotTeam != unit.Team) ||
+                                                                        (item.IsTerrain && !item.Indestructible)))
                          .OrderBy(item => item.Id, StringComparer.Ordinal))
             {
                 SandboxUnitState owner = item.OwnerId != null ? GetUnit(item.OwnerId) : null;
@@ -1366,6 +1371,15 @@ namespace KingdomSurvival.BattleSandbox
             if (match == null)
                 return false;
             SandboxUnitState unit = GetUnit(unitId);
+            if (match.Kind == SandboxContextActionKind.Rescue)
+            {
+                message = PerformRescue(unit, GetUnit(match.TargetUnitId));
+                unit.ActionPoints = 0;
+                unit.RemainingMovement = 0;
+                unit.HasAttacked = true;
+                EvaluateBattleOutcome();
+                return true;
+            }
             if (match.Kind == SandboxContextActionKind.CleanseStatus)
             {
                 message = ExecuteCleanse(unit, match);

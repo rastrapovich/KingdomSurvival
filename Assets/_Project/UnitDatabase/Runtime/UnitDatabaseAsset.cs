@@ -277,6 +277,8 @@ namespace KingdomSurvival.UnitDatabase
         [SerializeField, Min(0)] private int initiative = 1;
         // Бриф завершения, этап 4: чародейский запас (0 — без запаса, заклинания ограничены действием и КД).
         [SerializeField, Min(0), Tooltip("Чародейский запас на бой. 0 — заклинания ограничены только действием и КД.")] private int magicReserve;
+        // Этап 11: «При смерти» вместо окончательной смерти (одно спасение за бой). По умолчанию нет.
+        [SerializeField, Tooltip("В бою при 0 HP ложится «При смерти»: соседний союзник может спасти до конца её следующего хода.")] private bool canBeRescuedInBattle;
         [SerializeField, Min(1)] private int attackRange = 1;
 
         [Header("Изображения")]
@@ -368,6 +370,8 @@ namespace KingdomSurvival.UnitDatabase
         public int Initiative => initiative;
         public int MagicReserve => magicReserve;
         public void SetMagicReserve(int value) => magicReserve = Math.Max(0, value);
+        public bool CanBeRescuedInBattle => canBeRescuedInBattle;
+        public void SetCanBeRescued(bool value) => canBeRescuedInBattle = value;
         public int AttackRange => attackRange;
         public Sprite Portrait => portrait;
         public PortraitFitMode PortraitFitMode => portraitFitMode;

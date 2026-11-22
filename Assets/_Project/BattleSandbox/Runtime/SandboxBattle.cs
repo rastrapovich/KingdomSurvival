@@ -69,6 +69,10 @@ namespace KingdomSurvival.BattleSandbox
         // ограничены только действием и КД). Задаётся в Базе существ.
         public int MagicReserve { get; }
 
+        // Этап 11: может ли участник лечь «При смерти» вместо окончательной смерти.
+        // Только явная настройка Базы существ; по умолчанию нет.
+        public bool CanBeRescuedInBattle { get; }
+
         public SandboxUnitDefinition(
             string id,
             string roleLabel,
@@ -83,9 +87,11 @@ namespace KingdomSurvival.BattleSandbox
             IEnumerable<string> tags = null,
             IEnumerable<string> perks = null,
             IEnumerable<SandboxAbilityDefinition> abilities = null,
-            int magicReserve = 0)
+            int magicReserve = 0,
+            bool canBeRescuedInBattle = false)
         {
             MagicReserve = Math.Max(0, magicReserve);
+            CanBeRescuedInBattle = canBeRescuedInBattle;
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentException("ID типа бойца не может быть пустым.", nameof(id));
 
@@ -125,7 +131,7 @@ namespace KingdomSurvival.BattleSandbox
         // Копия с другими числами (уровень противника) и теми же способностями.
         public SandboxUnitDefinition WithStats(int maxHitPoints, int attack, int defense, int damage, int movement, int initiative, int attackRange)
         {
-            return new SandboxUnitDefinition(Id, RoleLabel, Role, maxHitPoints, attack, defense, damage, movement, initiative, attackRange, tagIds, perkIds, Abilities, MagicReserve);
+            return new SandboxUnitDefinition(Id, RoleLabel, Role, maxHitPoints, attack, defense, damage, movement, initiative, attackRange, tagIds, perkIds, Abilities, MagicReserve, CanBeRescuedInBattle);
         }
 
         public bool HasTag(string tagId)
@@ -233,6 +239,10 @@ namespace KingdomSurvival.BattleSandbox
         public int Initiative => Definition.Initiative;
         public int AttackRange => SandboxTerrainRules.GetEffectiveAttackRange(this);
         public bool IsDefeated => HitPoints <= 0;
+        // Этап 11: лежит «При смерти» (0 HP, ещё не окончательная смерть).
+        public bool IsDying { get; internal set; }
+        // Призыв вступает в бой не раньше этого раунда.
+        public int ActsFromRound { get; internal set; }
         public int DamageTaken => Math.Max(0, MaxHitPoints - HitPoints);
         public bool IsDamaged => DamageTaken > 0;
         public bool CanRetaliate => !IsDefeated && !HasRetaliatedThisRound && !IsOffBoard && !IsHidden &&
@@ -516,6 +526,7 @@ namespace KingdomSurvival.BattleSandbox
             PrepareStartingWater();
             SyncGroundWater();
             InitializeAbilityState();
+            InitializeStatusPassives();
             ResetRoundRetaliations();
             BuildRoundOrder();
             currentTurnIndex = 0;
@@ -940,7 +951,16 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState attacker = GetUnit(attackerId);
             SandboxUnitState target = GetUnit(targetId);
             ClearPendingRetaliation();
-            string revealNote = RevealAttacker(attacker);
+            // Этап 10: «Под защитой союзника» — удар уходит защитнику до расчёта урона.
+            SandboxUnitState intercepted = InterceptTarget(attacker, target);
+            string interceptNote = string.Empty;
+            if (intercepted != target)
+            {
+                interceptNote = intercepted.DisplayLabel + " закрывает " + target.DisplayLabel + " собой. ";
+                target = intercepted;
+                preview = BuildAttackPreview(attacker, target, attacker.Position);
+            }
+            string revealNote = interceptNote + RevealAttacker(attacker);
 
             // «Упреждающий удар»: носитель в защитной стойке отвечает на ближнюю
             // атаку до удара противника.
@@ -1001,7 +1021,7 @@ namespace KingdomSurvival.BattleSandbox
             // Бриф завершения, этапы 5–6: месть соседа, второй выстрел сразу.
             ResolveAvengers(attacker, target);
             if (rangedAttack)
-                message += ResolveFollowUpHit(attacker, target, true);
+                message += ResolveFollowUpHit(attacker, GetUnit(targetId) ?? target, true);
             EvaluateBattleOutcome();
             if (Phase == SandboxBattlePhase.InProgress &&
                 attacker.AttackRange == 1 &&
@@ -1304,7 +1324,7 @@ namespace KingdomSurvival.BattleSandbox
             turnOrderIds.Clear();
             turnOrderIds.AddRange(
                 units
-                    .Where(unit => !unit.IsDefeated)
+                    .Where(unit => (!unit.IsDefeated || unit.IsDying) && unit.ActsFromRound <= Round)
                     .OrderByDescending(unit => GetRoundInitiative(unit))
                     .ThenBy(unit => unit.Team)
                     .ThenBy(unit => unit.Id, StringComparer.Ordinal)
@@ -1344,6 +1364,14 @@ namespace KingdomSurvival.BattleSandbox
                 }
 
                 SandboxUnitState candidate = GetUnit(turnOrderIds[currentTurnIndex]);
+                if (candidate != null && candidate.IsDying)
+                {
+                    // Окно спасения существует в часах: пропущенная активация лежащего.
+                    ProcessDownedActivation(candidate);
+                    EvaluateBattleOutcome();
+                    currentTurnIndex++;
+                    continue;
+                }
                 if (candidate != null && !candidate.IsDefeated)
                 {
                     candidate.BeginActivation();
@@ -1395,6 +1423,8 @@ namespace KingdomSurvival.BattleSandbox
 
             bool playersAlive = units.Any(unit => unit.Team == SandboxTeam.Player && !unit.IsDefeated);
             bool enemiesAlive = units.Any(unit => unit.Team == SandboxTeam.Enemy && !unit.IsDefeated);
+            // Этап 12: ожидающий враждебный кокон — видимая оставшаяся угроза.
+            enemiesAlive |= objects.Any(o => o.Kind == SandboxObjectKind.Cocoon && !o.IsDestroyed && o.SnapshotTeam == SandboxTeam.Enemy);
             bool leaderFell = !string.IsNullOrEmpty(LeaderUnitId) &&
                               units.Any(unit => unit.Id == LeaderUnitId && unit.IsDefeated);
 
@@ -1435,6 +1465,13 @@ namespace KingdomSurvival.BattleSandbox
             // Пакет состояний: щит, неуязвимость, перенос, временные HP, расход зарядов.
             int toHp = ResolveDirectHitBeforeHp(kind, striker, target, damage, out int temporaryAbsorbed);
             toHp = PassiveCheatDeath(kind, target, toHp);
+            // Этап 11: положительный остаток повреждения по лежащему — окончательная смерть.
+            if (target.IsDying)
+            {
+                if (toHp > 0)
+                    FinalizeDeath(target, striker.DisplayLabel + " добивает");
+                return;
+            }
             target.ReceiveDamage(toHp);
             ResolveDirectHitAfterHp(kind, striker, target, before - target.HitPoints, temporaryAbsorbed);
             OnPassiveDirectHit(kind, striker, target, before, before - target.HitPoints);

@@ -22,7 +22,9 @@ namespace KingdomSurvival.BattleSandbox
         Ice,
         Electric,
         // Иней на земле от холодного удара: шаг на клетку +1 для всех, без урона.
-        Rime
+        Rime,
+        // Опасные останки: стоящий в конце хода теряет HP.
+        Remains
     }
 
     public enum SandboxImpulse
@@ -68,6 +70,7 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxEffectKind.Smoke: return "дым";
                 case SandboxEffectKind.Ice: return "лёд";
                 case SandboxEffectKind.Rime: return "иней на земле";
+                case SandboxEffectKind.Remains: return "опасные останки";
                 default: return "ток в воде";
             }
         }

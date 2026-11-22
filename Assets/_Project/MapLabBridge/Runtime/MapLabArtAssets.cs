@@ -169,6 +169,7 @@ namespace KingdomSurvival.MapLabBridge
                 MapLabArtEntry entry = Entry(IdPrefix + asset.Id, asset, sprite, height, pivot);
                 entry.WalkBend = asset.WalkBend >= 0f ? asset.WalkBend
                     : role == MapLabDecorRole.LowGrass || role == MapLabDecorRole.TallPlant || role == MapLabDecorRole.TallGrass ? 1f : 0f;
+                entry.NoCastShadow = HasTagPrefix(asset, MapGrassInkPrefix);
                 set.Entries.Add(entry);
                 if (decor == null || role == null)
                     continue;

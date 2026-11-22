@@ -432,8 +432,7 @@ namespace KingdomSurvival.MapLabBridge
             if (tufts.Count + inks.Count > 0)
                 Grid(look.GrassCarpet, (q, roll) =>
                 {
-                    List<MapLabArtEntry> pool = inks.Count > 0 && (tufts.Count == 0 || roll() < look.GrassCarpetInk) ? inks : tufts;
-                    MapLabArtEntry art = MapLabArtAssets.PickEntry(pool, roll());
+                    MapLabArtEntry art = PickCarpet(tufts, inks, look.GrassCarpetInk, roll());
                     c.Features.Add((q, art.Id, DecorKind));
                     groundArtIds.Add(art.Id);
                     DecorFeatures++;
@@ -471,6 +470,29 @@ namespace KingdomSurvival.MapLabBridge
                     DecorFeatures++;
                     grassPoints.Add(q); c.DryOnlyFeatures.Add(art.Id);
                 });
+        }
+
+        // Рисунок ковра: один общий жребий по приоритету записей (пучки и контурная
+        // трава вместе). Доля контурных — множитель веса (0,5 — поровну при равном
+        // приоритете), а не отдельная доля поля: прежде единственный пучок с
+        // приоритетом 0,1 получал всю «не контурную» долю ковра и заполнял поле.
+        public static MapLabArtEntry PickCarpet(List<MapLabArtEntry> tufts, List<MapLabArtEntry> inks, float inkShare, float roll)
+        {
+            float share = Mathf.Clamp01(inkShare);
+            float tuftFactor = inks.Count > 0 ? (1f - share) * 2f : 1f;
+            float inkFactor = tufts.Count > 0 ? share * 2f : 1f;
+            float Weight(MapLabArtEntry e, float factor) => factor * (e.Id != null && e.Id.EndsWith("#carpet") ? MapLabArtAssets.ArenaWeight(e.Weight) : 1f);
+            float total = 0f;
+            foreach (MapLabArtEntry e in tufts) total += Weight(e, tuftFactor);
+            foreach (MapLabArtEntry e in inks) total += Weight(e, inkFactor);
+            if (total <= 0f)
+                return MapLabArtAssets.PickEntry(inks.Count > 0 ? inks : tufts, roll);
+            float at = Mathf.Clamp01(roll) * total;
+            foreach (MapLabArtEntry e in tufts)
+                if ((at -= Weight(e, tuftFactor)) < 0f) return e;
+            foreach (MapLabArtEntry e in inks)
+                if ((at -= Weight(e, inkFactor)) < 0f) return e;
+            return inks.Count > 0 ? inks[inks.Count - 1] : tufts[tufts.Count - 1];
         }
 
         // Пучки травы карты (набор этапа 05) — копии в наборе арены своего размера.

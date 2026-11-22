@@ -78,6 +78,8 @@ namespace KingdomSurvival.MapLab
         public bool Enabled = true;
         [Tooltip("Гнётся от прохода бойцов (арена): 0 — стоит, 1 — полный прогиб; меньше нуля — по виду рисунка.")]
         public float WalkBend = -1f;
+        [Tooltip("Без силуэтной тени на арене (тонкая контурная трава: тень дала бы двойной штрих).")]
+        public bool NoCastShadow;
         [Tooltip("Равномерный масштаб рисунка (1 — как калибровано). Основание и проходимость не меняются.")]
         [Range(0.25f, 4f)] public float SizeScale = 1f;
         [Tooltip("Яркость, 1 — без изменений.")]

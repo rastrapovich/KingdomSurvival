@@ -19,6 +19,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
         _ShadeTex ("Shade (R свет, G затенение)", 2D) = "white" {}
         _Cutoff ("Alpha cutoff", Range(0.05, 0.95)) = 0.5
         _WalkBend ("Прогиб от прохода бойцов, 0 стоит", Float) = 0
+        _CastShadow ("Отбрасывает силуэтную тень (арена)", Float) = 0
         _CardLean ("Card lean", Range(0, 1)) = 0.35
         _TintColor ("Тон палитры", Color) = (0.5, 0.5, 0.4, 1)
         _TintStrength ("Сила оттенка палитры", Range(0, 1)) = 0
@@ -53,6 +54,47 @@ Shader "Kingdom Survival/MapLab/Art Card"
     SubShader
     {
         Tags { "RenderType" = "TransparentCutout" "Queue" = "AlphaTest" "RenderPipeline" = "UniversalPipeline" }
+        HLSLINCLUDE
+        #include "MapLabCommon.hlsl"
+        TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
+        TEXTURE2D(_ShadeTex); SAMPLER(sampler_ShadeTex);
+
+        CBUFFER_START(UnityPerMaterial)
+            float4 _MainTex_ST;
+            float _Cutoff;
+            float _WalkBend;
+            float _CardLean;
+            float4 _TintColor;
+            float _TintStrength;
+            float4 _ShadowTint;
+            float _GroundShade;
+            float _MapSize;
+            float _DepthMargin;
+            float _Saturation;
+            float _AlphaView;
+            float _Ghost;
+            float4 _GhostColor;
+            float4 _AccentInk;
+            float _AccentOpacity;
+            float4 _AccentLight;
+            float _AccentLightStrength;
+            float _AccentHighlight;
+            float _AccentOn;
+            float _DiagMode;
+            float4 _DetailFade;
+            float _AlphaToMask;
+            float _BlendAlpha;
+            float4 _SpriteStrokes;
+            float4 _StrokeDry;
+            float4 _StrokeLush;
+            float4 _ColorAdjust;
+            float4 _ColorLevels;
+            float4 _ColorLevelsOut;
+            float _ViewGradeSkip;
+            float _CastShadow;
+        CBUFFER_END
+        ENDHLSL
+
 
         Pass
         {
@@ -90,42 +132,6 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float3 cardPos : TEXCOORD6;   // мир в плоскости карточки (x вправо, y вверх), z — seed экземпляра
             };
 
-            TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
-            TEXTURE2D(_ShadeTex); SAMPLER(sampler_ShadeTex);
-
-            CBUFFER_START(UnityPerMaterial)
-                float4 _MainTex_ST;
-                float _Cutoff;
-                float _WalkBend;
-                float _CardLean;
-                float4 _TintColor;
-                float _TintStrength;
-                float4 _ShadowTint;
-                float _GroundShade;
-                float _MapSize;
-                float _DepthMargin;
-                float _Saturation;
-                float _AlphaView;
-                float _Ghost;
-                float4 _GhostColor;
-                float4 _AccentInk;
-                float _AccentOpacity;
-                float4 _AccentLight;
-                float _AccentLightStrength;
-                float _AccentHighlight;
-                float _AccentOn;
-                float _DiagMode;
-                float4 _DetailFade;
-                float _AlphaToMask;
-                float _BlendAlpha;
-                float4 _SpriteStrokes;
-                float4 _StrokeDry;
-                float4 _StrokeLush;
-                float4 _ColorAdjust;
-                float4 _ColorLevels;
-                float4 _ColorLevelsOut;
-                float _ViewGradeSkip;
-            CBUFFER_END
 
             float StrokeHash(float2 p)
             {
@@ -438,6 +444,75 @@ Shader "Kingdom Survival/MapLab/Art Card"
                     return float4(lerp(lerp(float3(0.82, 0.82, 0.78), float3(0.95, 0.85, 0.2), bandMask), float3(0.75, 0.1, 0.05), edgeMask), 1);
                 c = MapLabSaturate(c, _Saturation);
                 return float4(lerp(MapLabViewGrade(c), c, _ViewGradeSkip), outAlpha);
+            }
+            ENDHLSL
+        }
+
+        // Силуэтная тень на земле (арена боя): карточка стоймя, тень — тот же рисунок, наклонённый на землю
+        // по направлению света; цвет и плотность — одни для деревьев, кустов, камней и бойцов.
+        Pass
+        {
+            Name "SilhouetteShadow"
+            // Свой LightMode: действующий Renderer2D рисует для каждого тега только
+            // первый проход без тега — второй проход без тега не рисовался вовсе.
+            // Universal2D идёт раньше SRPDefaultUnlit: тень ложится до карточки.
+            Tags { "LightMode" = "Universal2D" }
+            ZWrite Off
+            ZTest LEqual
+            Cull Off
+            Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
+            Offset -1, -1
+
+            HLSLPROGRAM
+            #pragma vertex VertS
+            #pragma fragment FragS
+
+            // xy — смещение тени по земле (x, z мира) на единицу высоты, z — плотность, w — включено.
+            float4 _MapLabShadow;
+            float4 _MapLabShadowColor;
+
+            struct AttributesS
+            {
+                float3 positionOS : POSITION;
+                float2 uv : TEXCOORD0;
+                float2 offset : TEXCOORD1;
+            };
+
+            struct VaryingsS
+            {
+                float4 positionCS : SV_POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            VaryingsS VertS(AttributesS input)
+            {
+                VaryingsS o = (VaryingsS)0;
+                if (_MapLabShadow.w < 0.5 || _CastShadow < 0.5)
+                {
+                    o.positionCS = float4(2.0, 2.0, 2.0, 1.0);
+                    return o;
+                }
+                float3 basePoint = TransformObjectToWorld(input.positionOS);
+                // Силуэт «падает» на землю сдвигом: основание остаётся на месте и
+                // вдоль кадра (camRight), верх рисунка уходит по свету (_MapLabShadow.xy —
+                // смещение по земле на единицу высоты; арена отводит его от оси кадра,
+                // чтобы тень не сжималась в нитку). Каждый куст — своя тень-копия.
+                float3 camRight = normalize(UNITY_MATRIX_V[0].xyz);
+                camRight = normalize(float3(camRight.x, 0, camRight.z) + 1e-5);
+                float height = max(0.0, input.offset.y);
+                float3 world = basePoint + camRight * input.offset.x + float3(_MapLabShadow.x, 0.0, _MapLabShadow.y) * height;
+                world.y += 0.05;
+                o.positionCS = TransformWorldToHClip(world);
+                o.uv = input.uv;
+                return o;
+            }
+
+            float4 FragS(VaryingsS i) : SV_Target
+            {
+                float a = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv).a;
+                a = smoothstep(_Cutoff - 0.08, _Cutoff + 0.08, a) * _MapLabShadow.z;
+                clip(a - 0.004);
+                return float4(_MapLabShadowColor.rgb, a);
             }
             ENDHLSL
         }

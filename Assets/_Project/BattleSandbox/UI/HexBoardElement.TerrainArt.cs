@@ -92,6 +92,87 @@ namespace KingdomSurvival.BattleSandbox
             SyncUnitImages();
         }
 
+        // Тени бойцов на арене: тот же рисунок бойца, опрокинутый и наклонённый на землю по свету —
+        // силуэт, а не пятно; цвет и плотность те же, что у теней растений (проход шейдера карточек).
+        private sealed class UnitShadow { public VisualElement Box; public Image Picture; }
+        private readonly Dictionary<string, UnitShadow> unitShadows = new Dictionary<string, UnitShadow>();
+        private readonly HashSet<string> shadowSeen = new HashSet<string>();
+
+        // Куда падает тень на экране (единичный вектор, Y вниз); задаёт арена.
+        public Vector2 ShadowDirection { get; set; } = new Vector2(1f, 0.1f);
+        // Оси тени на экране в долях рисунка бойца (Y вниз): «верх» рисунка ложится
+        // вдоль Along, его правая сторона — вдоль Across. Те же оси, что у силуэтных
+        // теней кустов и деревьев арены (MapLabArena.ShadowScreenAxes).
+        public Vector2 ShadowAlong { get; set; } = new Vector2(0.4f, -0.2f);
+        public Vector2 ShadowAcross { get; set; } = Vector2.right;
+
+        private bool UnitShadowsOn => Relief != null && terrainOverlayTexture != null;
+
+        private void SyncUnitShadow(SandboxUnitState unit, Image image, Vector2 ground, bool corpse, List<(string id, float key, VisualElement element)> depthEntries)
+        {
+            if (!UnitShadowsOn || corpse || image == null || image.sprite == null) return;
+            if (!unitShadows.TryGetValue(unit.Id, out UnitShadow shadow))
+            {
+                shadow = new UnitShadow { Box = new VisualElement { pickingMode = PickingMode.Ignore }, Picture = new Image { pickingMode = PickingMode.Ignore } };
+                shadow.Box.style.position = Position.Absolute;
+                shadow.Picture.style.position = Position.Absolute;
+                shadow.Picture.style.left = shadow.Picture.style.top = 0f;
+                shadow.Picture.style.width = Length.Percent(100);
+                shadow.Picture.style.height = Length.Percent(100);
+                shadow.Picture.tintColor = new Color(0.07f, 0.09f, 0.03f, 1f);
+                shadow.Box.Add(shadow.Picture);
+                unitShadows[unit.Id] = shadow;
+            }
+            shadowSeen.Add(unit.Id);
+            if (shadow.Box.parent != this) Add(shadow.Box);
+            float left = image.style.left.value.value, top = image.style.top.value.value;
+            shadow.Box.style.left = left;
+            shadow.Box.style.top = top;
+            shadow.Box.style.width = image.style.width.value.value;
+            shadow.Box.style.height = image.style.height.value.value;
+            shadow.Box.style.opacity = image.resolvedStyle.opacity * KingdomSurvival.MapLabBridge.MapLabArena.SilhouetteShadowOpacity;
+            // Ноги — неподвижная точка. Тень — сдвиг рисунка, как у кустов и деревьев
+            // арены: правая сторона рисунка остаётся вдоль кадра (Across), верх уходит
+            // по свету (Along). Линейная карта M (столбцы: M·(1,0) = Across,
+            // M·(0,1) = −Along) раскладывается в поворот·масштаб·поворот: внешний
+            // поворот и масштаб — у рамки, внутренний поворот — у картинки (UI Toolkit
+            // применяет масштаб до поворота, иначе сдвиг не собрать).
+            Vector2 origin = new Vector2(ground.x - left, ground.y - top);
+            shadow.Box.style.transformOrigin = new TransformOrigin(origin.x, origin.y, 0f);
+            shadow.Picture.style.transformOrigin = new TransformOrigin(origin.x, origin.y, 0f);
+            Vector2 along = ShadowAlong.sqrMagnitude > 1e-6f ? ShadowAlong : new Vector2(0.4f, -0.2f);
+            Vector2 across = ShadowAcross.sqrMagnitude > 1e-6f ? ShadowAcross : Vector2.right;
+            float m00 = across.x, m01 = -along.x, m10 = across.y, m11 = -along.y;
+            float e = (m00 + m11) * 0.5f, f = (m00 - m11) * 0.5f, g = (m10 + m01) * 0.5f, h = (m10 - m01) * 0.5f;
+            float q = Mathf.Sqrt(e * e + h * h), r = Mathf.Sqrt(f * f + g * g);
+            float a1 = Mathf.Atan2(g, f), a2 = Mathf.Atan2(h, e);
+            float outer = (a2 + a1) * 0.5f * Mathf.Rad2Deg, inner = (a2 - a1) * 0.5f * Mathf.Rad2Deg;
+            float sx = q + r, sy = q - r;
+            if (Mathf.Abs(sy) < 0.02f) sy = sy < 0f ? -0.02f : 0.02f;
+            shadow.Box.style.rotate = new Rotate(new Angle(outer, AngleUnit.Degree));
+            shadow.Box.style.scale = new Scale(new Vector3(sx, sy, 1f));
+            shadow.Picture.style.rotate = new Rotate(new Angle(inner, AngleUnit.Degree));
+            shadow.Picture.sprite = image.sprite;
+            shadow.Picture.scaleMode = image.scaleMode;
+            Vector3 flip = image.style.scale.value.value;
+            shadow.Picture.style.scale = new Scale(new Vector3(flip.x < 0f ? -1f : 1f, 1f, 1f));
+            shadow.Box.style.display = image.style.display.value == DisplayStyle.None ? DisplayStyle.None : DisplayStyle.Flex;
+            depthEntries.Add(("shadow:" + unit.Id, ground.y - 0.4f, shadow.Box));
+        }
+
+        private void FinishUnitShadows()
+        {
+            List<string> gone = null;
+            foreach (KeyValuePair<string, UnitShadow> pair in unitShadows)
+                if (!shadowSeen.Contains(pair.Key))
+                {
+                    pair.Value.Box.RemoveFromHierarchy();
+                    (gone ??= new List<string>()).Add(pair.Key);
+                }
+            if (gone != null) foreach (string id in gone) unitShadows.Remove(id);
+            shadowSeen.Clear();
+        }
+
         private void NoteFrontRow(HexLayout layout, Vector2 unitCenter)
         {
             Rect frame = layout.Frame;

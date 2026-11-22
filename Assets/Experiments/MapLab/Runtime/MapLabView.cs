@@ -1237,6 +1237,9 @@ namespace KingdomSurvival.MapLab
             if (!Settings.IsStage03 || !Settings.Stage03.ObjectShadows)
                 return false;
             casters = new List<MapLabObjectShadows.Caster>();
+            // Арена: тени рисуют карточки по своему силуэту — пятен-эллипсов нет (рельеф и свет остаются).
+            if (Settings.Stage03.SilhouetteShadows)
+                return true;
             HashSet<MapLabObjectKind> replaced = artPlan != null ? artPlan.Replaced : new HashSet<MapLabObjectKind>();
             // Детали мест (любой категории) — одно правило тени по основанию
             // рисунка ниже; их карточки в общем цикле пропускаются.
@@ -1417,6 +1420,8 @@ namespace KingdomSurvival.MapLab
             // Прогиб от прохода бойцов: своя настройка записи, иначе растения гнутся, деревья и камни — нет.
             bool plant = entry.Role == "grass_tuft" || entry.Role == "grass_ink_tuft" || entry.Kind == MapLabObjectKind.Bush || entry.Kind == MapLabObjectKind.Reed;
             m.SetFloat("_WalkBend", entry.WalkBend >= 0f ? entry.WalkBend : plant ? 1f : 0f);
+            // Силуэтная тень (только арена: глобальный переключатель выключен в остальных мирах).
+            m.SetFloat("_CastShadow", !entry.NoCastShadow && entry.Role != "grass_ink_tuft" && (entry.Category == MapLabArtCategory.Vegetation || entry.Category == MapLabArtCategory.Rock || entry.Category == MapLabArtCategory.Prop) ? 1f : 0f);
             Color tone;
             switch (entry.Category)
             {

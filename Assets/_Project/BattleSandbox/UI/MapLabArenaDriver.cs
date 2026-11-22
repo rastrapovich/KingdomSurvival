@@ -520,6 +520,9 @@ namespace KingdomSurvival.BattleSandbox
                 RemoveLoadingScreen();
             }
             board.ShadowDirection = arena.ShadowScreenDirection();
+            arena.ShadowScreenAxes(out Vector2 shadowAlong, out Vector2 shadowAcross);
+            board.ShadowAlong = shadowAlong;
+            board.ShadowAcross = shadowAcross;
             RenderFronts();
             board.SetTerrainOverlay(arena.OverlayTexture);
             board.MarkDirtyRepaint();

@@ -926,7 +926,7 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             // Мягкая тень под бойцом: стилизованный овал на земле, края размыты слоями.
-            if (!unit.IsHidden && !unit.IsDefeated && !marksDrawnBelow)
+            if (!unit.IsHidden && !unit.IsDefeated && !marksDrawnBelow && !UnitShadowsOn)
                 DrawUnitShadow(painter, layout, center);
 
             // ПР-16: скрытый Срубник виден подозрительным пнём без имени.
@@ -1215,6 +1215,7 @@ namespace KingdomSurvival.BattleSandbox
                     depthEntries.Add((unit.Id, (corpse ? -100000f : 0f) + unitCenter.y, image));
                     if (!corpse)
                         NoteFrontRow(layout, unitCenter);
+                    SyncUnitShadow(unit, image, unitCenter, corpse, depthEntries);
                 }
                 else if (visual != null && !string.IsNullOrEmpty(visual.TokenText))
                 {
@@ -1310,6 +1311,7 @@ namespace KingdomSurvival.BattleSandbox
 
             SyncTerrainObjectImages(layout, depthEntries);
             AddFrontLayers(layout, depthEntries);
+            FinishUnitShadows();
             ApplyDepthOrder(depthEntries);
             SyncTerrainOverlay(layout);
             foreach (VisualElement healthBar in unitHealthBars.Values)

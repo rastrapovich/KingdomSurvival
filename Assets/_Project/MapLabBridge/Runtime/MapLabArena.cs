@@ -122,9 +122,9 @@ namespace KingdomSurvival.MapLabBridge
         private static readonly int ShadowColorId = Shader.PropertyToID("_MapLabShadowColor");
 
         public static readonly Color SilhouetteShadowColor = new Color(0.07f, 0.09f, 0.03f, 1f);
-        public const float SilhouetteShadowOpacity = 0.34f;
-        // Длина тени в долях высоты и угол: свет слева сверху, тень падает вправо и чуть к зрителю.
-        public const float SilhouetteShadowLength = 0.5f;
+        public const float SilhouetteShadowOpacity = 0.42f;
+        // Длина тени в долях высоты: свет слева, тень падает вправо и назад (см. ShadowGround).
+        public const float SilhouetteShadowLength = 0.75f;
 
         private void SetShadows(bool on)
         {
@@ -133,11 +133,39 @@ namespace KingdomSurvival.MapLabBridge
                 Shader.SetGlobalVector(ShadowId, Vector4.zero);
                 return;
             }
-            Vector3 light = view != null && view.Settings != null ? view.Settings.LightDirection : new Vector3(-0.62f, 0.72f, 0.06f);
-            float rise = Mathf.Max(0.15f, light.y);
-            Vector2 ground = new Vector2(-light.x, -light.z) / rise * SilhouetteShadowLength;
+            Vector2 ground = ShadowGround();
             Shader.SetGlobalVector(ShadowId, new Vector4(ground.x, ground.y, SilhouetteShadowOpacity, 1f));
             Shader.SetGlobalColor(ShadowColorId, SilhouetteShadowColor);
+        }
+
+        // Тень по земле (x, z мира) на единицу высоты рисунка — общая для карточек и бойцов.
+        // Силуэт ложится сдвигом (основание вдоль кадра, верх — по этому вектору): при свете
+        // сбоку вектор почти вдоль кадра и тень сжалась бы в нитку, поэтому он отводится
+        // назад (от зрителя) не меньше чем на 25°.
+        public Vector2 ShadowGround()
+        {
+            Vector3 light = view != null && view.Settings != null ? view.Settings.LightDirection : new Vector3(-0.62f, 0.72f, 0.06f);
+            float rise = Mathf.Max(0.15f, light.y);
+            Vector2 g = new Vector2(-light.x, -light.z) / rise * SilhouetteShadowLength;
+            float length = g.magnitude;
+            if (length < 1e-4f)
+                return new Vector2(0f, SilhouetteShadowLength * 0.5f);
+            const float minSin = 0.423f; // sin 25°
+            if (Mathf.Abs(g.y) < length * minSin)
+                g = new Vector2(Mathf.Sign(g.x) * length * 0.906f, length * minSin);
+            return g;
+        }
+
+        // Оси тени на экране в долях рисунка бойца (Y вниз): правая сторона рисунка —
+        // вдоль кадра (Across = (1, 0)), верх — вдоль Along (вектор ShadowGround с
+        // глубиной, сжатой наклоном камеры). Тот же сдвиг, что в проходе
+        // «SilhouetteShadow» шейдера карточек.
+        public void ShadowScreenAxes(out Vector2 along, out Vector2 across)
+        {
+            Vector2 g = ShadowGround();
+            float s = sin > 0.05f ? sin : 0.77f;
+            along = new Vector2(g.x, -g.y * s);
+            across = Vector2.right;
         }
 
         // Направление тени на экране (единичный вектор, Y вниз) — для теней бойцов доски.

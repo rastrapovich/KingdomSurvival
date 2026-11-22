@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using KingdomSurvival.BattlefieldDatabase;
+using KingdomSurvival.MapLab;
 using KingdomSurvival.MapLabBridge;
 using NUnit.Framework;
 using UnityEngine;
@@ -216,6 +217,32 @@ namespace KingdomSurvival.BattleSandbox.Tests
                 if (BattlefieldReliefMath.DrapedHexContains(relief, frame, FrameCenter(spec, cells, cell, frame), size, spec.VerticalScale, point))
                     return cell;
             return null;
+        }
+
+        // Приоритет ковра — общий для пучков и контурной травы: единственный пучок
+        // с приоритетом 0,1 рядом с контурными приоритета 1 почти не встречается
+        // (прежде он забирал всю «не контурную» долю ковра).
+        [Test]
+        public void CarpetPick_LowPriorityTuft_IsRare()
+        {
+            MapLabArtEntry Art(string id, float priority) => new MapLabArtEntry { Id = id + "#carpet", Weight = priority };
+            List<MapLabArtEntry> tufts = new List<MapLabArtEntry> { Art("tuft", 0.1f) };
+            List<MapLabArtEntry> inks = new List<MapLabArtEntry> { Art("ink_a", 1f), Art("ink_b", 1.5f), Art("ink_c", 1f) };
+            int tuft = 0, total = 2000;
+            for (int i = 0; i < total; i++)
+                if (MapLabArena.PickCarpet(tufts, inks, 0.3f, (i + 0.5f) / total).Id == "tuft#carpet")
+                    tuft++;
+            Assert.That(tuft / (float)total, Is.LessThan(0.02f), "пучок с приоритетом 0,1 — редкость");
+            // Равный приоритет: доля контурных — как задана.
+            tufts = new List<MapLabArtEntry> { Art("tuft", 1f) };
+            inks = new List<MapLabArtEntry> { Art("ink_a", 1f) };
+            int inkCount = 0;
+            for (int i = 0; i < total; i++)
+                if (MapLabArena.PickCarpet(tufts, inks, 0.3f, (i + 0.5f) / total).Id == "ink_a#carpet")
+                    inkCount++;
+            Assert.That(inkCount / (float)total, Is.EqualTo(0.3f).Within(0.01f));
+            // Приоритет 0 у всех пучков — только контурные.
+            Assert.That(MapLabArena.PickCarpet(new List<MapLabArtEntry>(), inks, 0.3f, 0.1f).Id, Is.EqualTo("ink_a#carpet"));
         }
 
         // Арена с рекой (брод и мост): ни одной травинки на воде по готовому

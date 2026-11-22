@@ -370,6 +370,8 @@ namespace KingdomSurvival.MapLab
         public bool ObjectShadows = true;
         [Tooltip("Размытие внешнего края падающей тени, ед. мира (0 — как есть). Арена боя задаёт своё.")]
         public float ShadowSoftEdge = 0f;
+        [Tooltip("Тени объектов рисуют сами карточки по силуэту (арена боя); пятна-эллипсы не строятся.")]
+        public bool SilhouetteShadows = false;
         public MapLabInkStyle InkStyle = new MapLabInkStyle();
 
         [Header("Мазки (мировой масштаб)")]

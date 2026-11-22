@@ -19,7 +19,6 @@ namespace KingdomSurvival.BattleSandbox
 
         private readonly Dictionary<string, Image> terrainArtImages = new Dictionary<string, Image>();
         private readonly Dictionary<string, (Texture2D Texture, Vector2 Pivot)> terrainArtCache = new Dictionary<string, (Texture2D, Vector2)>();
-        private string terrainArtCacheView;
 
         // Вид разрушаемого объекта, рисуемый доской (null — не этим слоем).
         private static string BoardArtKind(SandboxBattleObject item)
@@ -30,20 +29,8 @@ namespace KingdomSurvival.BattleSandbox
             return item.IsDestroyed ? kind + "_broken" : kind;
         }
 
-        // Рисунки — в текущем виде карты: смена вида сбрасывает кэш.
-        private void EnsureArtCacheView()
-        {
-            string view = KingdomSurvival.MapLab.MapLabMapViews.ActiveId;
-            if (terrainArtCacheView != view)
-            {
-                terrainArtCache.Clear();
-                terrainArtCacheView = view;
-            }
-        }
-
         private (Texture2D Texture, Vector2 Pivot) BoardArt(string kind, HexCoord cell)
         {
-            EnsureArtCacheView();
             int pick = Mathf.Abs(cell.Q * 73856093 ^ cell.R * 19349663);
             string key = kind + "@" + pick % 7;
             if (!terrainArtCache.TryGetValue(key, out (Texture2D, Vector2) art))
@@ -270,7 +257,6 @@ namespace KingdomSurvival.BattleSandbox
         private (Texture2D Texture, Vector2 Pivot) VegetationArt(HexCoord cell, SandboxVegetation vegetation)
         {
             MapLabDecorRole role = vegetation == SandboxVegetation.Forest ? MapLabDecorRole.Tree : MapLabDecorRole.TallPlant;
-            EnsureArtCacheView();
             int pick = Mathf.Abs(cell.Q * 92821 ^ cell.R * 68917);
             string key = "veg:" + role + "@" + pick % 7;
             if (!terrainArtCache.TryGetValue(key, out (Texture2D, Vector2) art))

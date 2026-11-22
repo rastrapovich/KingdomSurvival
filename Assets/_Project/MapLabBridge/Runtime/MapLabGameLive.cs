@@ -26,8 +26,6 @@ namespace KingdomSurvival.MapLabBridge
         {
             public GeneratedWorldMap Plan;
             public string ServicesKey;
-            // Вид карты, с которым собран мир (палитра и свои рисунки вида).
-            public string ViewKey = string.Empty;
             public Color Paper = Color.white;
             public MapLabView View;
             public Camera Camera;
@@ -110,7 +108,6 @@ namespace KingdomSurvival.MapLabBridge
             {
                 Debug.LogException(exception);
             }
-            MapLabViewGradeShader.Neutral();
         }
 
         public static World Current => current;
@@ -125,27 +122,8 @@ namespace KingdomSurvival.MapLabBridge
             }
         }
 
-        // Готовая живая карта переходит на выбранный вид без пересборки, если
-        // у видов одна палитра (свои рисунки — подмена текстур). true — карта уже
-        // в выбранном виде.
-        public static bool TryApplyActiveView()
-        {
-            World w = current;
-            if (w == null || !w.Ready)
-                return false;
-            MapLabMapView look = MapLabMapViews.Active;
-            string key = MapLabMapViews.BuildKey(look);
-            if (w.ViewKey == key)
-                return true;
-            if (!w.View.SwapLook(look))
-                return false;
-            w.ViewKey = key;
-            return true;
-        }
-
         public static bool Matches(GeneratedWorldMap plan, string servicesKey) =>
-            current != null && ReferenceEquals(current.Plan, plan) && current.ServicesKey == servicesKey
-            && current.ViewKey == MapLabMapViews.BuildKey(MapLabMapViews.Active);
+            current != null && ReferenceEquals(current.Plan, plan) && current.ServicesKey == servicesKey;
 
         public static void Clear()
         {
@@ -191,8 +169,7 @@ namespace KingdomSurvival.MapLabBridge
             if (Matches(plan, key))
                 return current;
             Clear();
-            MapLabMapView look = MapLabMapViews.Active;
-            World w = new World { Plan = plan, ServicesKey = key, ViewKey = MapLabMapViews.BuildKey(look) };
+            World w = new World { Plan = plan, ServicesKey = key };
             current = w;
             MapLabGameAssets assets = MapLabGameAssets.Load();
             w.Watch = System.Diagnostics.Stopwatch.StartNew();
@@ -237,9 +214,6 @@ namespace KingdomSurvival.MapLabBridge
                     if (w.ForestSet != null)
                         view.ArtSet03 = w.ForestSet;
                 }
-                // Вид карты: своя палитра и свои рисунки вида (цветокоррекция —
-                // при каждом рендере, без пересборки).
-                view.SetLook(look);
                 view.CameraRig = w.Rig;
                 view.Settings = w.Settings;
                 w.PendingView = view;
@@ -497,19 +471,9 @@ namespace KingdomSurvival.MapLabBridge
                 if (cameras[i] != w.Camera && (cameras[i].cullingMask & (1 << Layer)) != 0)
                     cameras[i].cullingMask &= ~(1 << Layer);
             w.Camera.targetTexture = w.Target;
-            // Цветокоррекция выбранного вида — только на время этого рендера.
-            MapLabMapView active = MapLabMapViews.Active;
-            w.Camera.backgroundColor = active != null && active.Grade != null && !active.Grade.IsNeutral ? active.Background : w.Paper;
-            MapLabViewGradeShader.Apply(active);
+            w.Camera.backgroundColor = w.Paper;
             Shader.SetGlobalFloat("_MapLabPixelScale", 1f);
-            try
-            {
-                w.Camera.Render();
-            }
-            finally
-            {
-                MapLabViewGradeShader.Neutral();
-            }
+            w.Camera.Render();
             w.Camera.targetTexture = null;
             return w.Target;
         }

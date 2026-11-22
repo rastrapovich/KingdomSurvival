@@ -81,12 +81,10 @@ namespace KingdomSurvival.LocationRendering
                 if (key?.Post != null) yield return key.Post;
             foreach (LocationFrameZone zone in Definition.FrameZones ?? new List<LocationFrameZone>())
                 if (zone?.Post != null) yield return zone.Post;
-            foreach (LocationViewFrame view in Sky.ViewFrames)
-                if (view != null && view.Own && view.Post != null) yield return view.Post;
         }
 
         // Набор материалов по нынешним данным (окна сравнивают с BuiltSpriteStructure).
-        public string CurrentSpriteStructure => SpriteStructureKey(Sky.PostFor(LocationFrameViews.ActiveViewId), ExtraPosts().Append(Sky.Post));
+        public string CurrentSpriteStructure => SpriteStructureKey(Sky.Post, ExtraPosts().Append(Sky.Post));
 
         // ------------------------------------------------------------------
         // Итог настроек кадра: основные → ключи суток (по часу) → зоны (по
@@ -156,8 +154,7 @@ namespace KingdomSurvival.LocationRendering
         private void UpdateEffectivePost()
         {
             if (Sky.Post == null) Sky.Post = new LocationPostEffects();
-            // Своя обработка у текущего вида карты — если включена, иначе общая.
-            LocationPostEffects basePost = Sky.PostFor(LocationFrameViews.ActiveViewId);
+            LocationPostEffects basePost = Sky.Post;
             basePost.Repair();
             LocationFrameKeys keys = Sky.FrameKeys;
             List<LocationFrameZone> zones = Definition.FrameZones;

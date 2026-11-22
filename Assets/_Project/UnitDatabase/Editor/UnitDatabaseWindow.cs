@@ -546,7 +546,6 @@ namespace KingdomSurvival.UnitDatabase.Editor
             BuildTagToggles(tagsCard, unit.FindPropertyRelative("tagIds"));
             grid.Add(tagsCard);
 
-            grid.Add(BuildViewSwitch());
             grid.Add(BuildPortraitCard(unit));
             grid.Add(BuildBattlefieldCard(unit, data));
             BuildAnimationCard(grid);
@@ -637,7 +636,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
         private VisualElement BattlefieldNormalRow(UnitDefinitionData data)
         {
             VisualElement row = new VisualElement { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap, alignItems = Align.Center } };
-            Sprite sprite = data.BattlefieldSpriteFor(EditedViewId);
+            Sprite sprite = data.ActiveBattlefieldSprite;
             bool has = CreatureAnimationNormals.HasNormal(sprite);
             Label label = new Label(sprite == null ? "Нормаль: нет рисунка" : has ? "Нормаль: подключена" : "Нормаль: нет");
             label.style.minWidth = 140f;
@@ -740,7 +739,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
         private VisualElement BuildPortraitCard(SerializedProperty unit)
         {
             PortraitSizeDefinition preset = PortraitSizeTable.Get(PortraitSize.S);
-            VisualElement card = Card("ПОРТРЕТ" + ViewSuffix(), 270f);
+            VisualElement card = Card("ПОРТРЕТ", 270f);
 
             VisualElement frame = new VisualElement();
             frame.style.alignSelf = Align.Center;
@@ -763,8 +762,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
             RegisterArtDrop(card, UnitArtKind.Portrait);
 
             card.Add(BuildArtButtons(UnitArtKind.Portrait));
-            card.Add(ArtFileField(unit, UnitArtKind.Portrait));
-            card.Add(ViewSlotNote(UnitArtKind.Portrait));
+            card.Add(SpriteField(unit, ArtProperty(UnitArtKind.Portrait)));
             card.Add(EnumPopup(unit, "portraitFitMode", "Вписывание", FitNames));
             SerializedProperty offset = unit.FindPropertyRelative("portraitOffsetNormalized");
             card.Add(FloatSlider(unit.FindPropertyRelative("portraitScale"), "Масштаб", 0.2f, 4f, "Масштаб портрета в рамке."));
@@ -781,7 +779,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
         private VisualElement BuildBattlefieldCard(SerializedProperty unit, UnitDefinitionData data)
         {
-            VisualElement card = Card("ПОЛЕВАЯ МИНИАТЮРА" + ViewSuffix(), 290f);
+            VisualElement card = Card("ПОЛЕВАЯ МИНИАТЮРА", 290f);
 
             battlefieldViewport = new VisualElement
             {
@@ -815,14 +813,13 @@ namespace KingdomSurvival.UnitDatabase.Editor
             RegisterArtDrop(card, UnitArtKind.Battlefield);
 
             card.Add(BuildArtButtons(UnitArtKind.Battlefield));
-            card.Add(ArtFileField(unit, UnitArtKind.Battlefield));
-            card.Add(ViewSlotNote(UnitArtKind.Battlefield));
+            card.Add(SpriteField(unit, ArtProperty(UnitArtKind.Battlefield)));
             card.Add(BattlefieldNormalRow(data));
             SerializedProperty offset = unit.FindPropertyRelative("battlefieldOffset");
             card.Add(FloatSlider(unit.FindPropertyRelative("battlefieldScale"), "Масштаб", 0.1f, 4f, "Размер миниатюры на поле."));
             card.Add(FloatSlider(offset.FindPropertyRelative("x"), "Сдвиг X", -200f, 200f, "Сдвиг по горизонтали, пиксели поля."));
             card.Add(FloatSlider(offset.FindPropertyRelative("y"), "Сдвиг Y", -200f, 200f, "Сдвиг по вертикали, пиксели поля."));
-            card.Add(Hint(!string.IsNullOrEmpty(data.AnimationSetIdFor(EditedViewId))
+            card.Add(Hint(!string.IsNullOrEmpty(data.ActiveAnimationSetId)
                 ? "У существа есть набор анимаций: в бою размер и опору задаёт набор, а эта миниатюра — запасная."
                 : "Центр гекса на 15% выше нижнего края рамки. У противника миниатюра в бою отражена."));
             return card;
@@ -893,12 +890,11 @@ namespace KingdomSurvival.UnitDatabase.Editor
             }
 
             UnitDefinitionData unit = database.Units[selectedUnitIndex];
-            portraitPreview.SetPortrait(unit, EditedViewId);
-            RefreshViewSlotNotes(unit);
+            portraitPreview.SetPortrait(unit);
 
             // Как на поле: квадратная рамка × масштаб, центр гекса на 15% выше
             // её нижнего края, затем смещение.
-            battlefieldPreview.sprite = unit.BattlefieldSpriteFor(EditedViewId);
+            battlefieldPreview.sprite = unit.ActiveBattlefieldSprite;
             float box = FieldBaseBoxSize * Mathf.Max(0.1f, unit.BattlefieldScale);
             Vector2 anchor = new Vector2(FieldViewportWidth * 0.5f, FieldViewportHeight * FieldAnchorY);
             battlefieldPreview.style.width = box;
@@ -975,7 +971,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
             UnitDefinitionData unit = database.Units[selectedUnitIndex];
             if (!ConfirmReplace(kind, unit))
                 return;
-            Sprite sprite = UnitArtImporter.ImportExternal(path, unit.Id, kind, EditedViewId, out string error);
+            Sprite sprite = UnitArtImporter.ImportExternal(path, unit.Id, kind, out string error);
             if (sprite == null)
             {
                 EditorUtility.DisplayDialog("Картинка не загружена", error ?? "Неизвестная ошибка.", "Закрыть");
@@ -986,7 +982,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
         private bool ConfirmReplace(UnitArtKind kind, UnitDefinitionData unit)
         {
-            Sprite current = CurrentSlotSprite(unit, kind);
+            Sprite current = kind == UnitArtKind.Portrait ? unit.Portrait : unit.BattlefieldSprite;
             return current == null || EditorUtility.DisplayDialog(
                 "Заменить " + UnitArtImporter.KindTitle(kind) + "?",
                 (string.IsNullOrWhiteSpace(unit.DisplayLabel) ? unit.Id : unit.DisplayLabel) + ": сейчас «" + current.name +
@@ -1002,10 +998,8 @@ namespace KingdomSurvival.UnitDatabase.Editor
             if (selectedUnitIndex < 0 || selectedUnitIndex >= unitsProperty.arraySize)
                 return;
             serializedDatabase.Update();
-            // «Обычный» — поле существа, другой вид — его слот (заводится
-            // при первой картинке).
-            SerializedProperty property = ArtSlotProperty(
-                unitsProperty.GetArrayElementAtIndex(selectedUnitIndex), kind, sprite != null);
+            SerializedProperty property = unitsProperty.GetArrayElementAtIndex(selectedUnitIndex)
+                .FindPropertyRelative(ArtProperty(kind));
             if (property == null || property.objectReferenceValue == sprite)
                 return;
             property.objectReferenceValue = sprite;

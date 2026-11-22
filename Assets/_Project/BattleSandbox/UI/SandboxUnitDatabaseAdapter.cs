@@ -133,28 +133,6 @@ namespace KingdomSurvival.BattleSandbox
         }
 
         public IReadOnlyDictionary<string, SandboxUnitVisual> Visuals => visuals;
-
-        // Смена вида карты в бою (20.11.2026): рисунки бойцов — заново из
-        // Базы существ для выбранного вида. Без базы (запасной набор) — нечего менять.
-        private List<UnitDefinitionData> viewSources;
-        public string ViewId { get; private set; } = UnitArtViews.ClassicId;
-
-        internal void SetViewSources(List<UnitDefinitionData> sources, string viewId)
-        {
-            viewSources = sources;
-            ViewId = viewId ?? UnitArtViews.ClassicId;
-        }
-
-        // true — рисунки пересобраны (вид сменился).
-        public bool ApplyView(string viewId)
-        {
-            if (viewSources == null || string.IsNullOrEmpty(viewId) || viewId == ViewId)
-                return false;
-            ViewId = viewId;
-            foreach (UnitDefinitionData source in viewSources)
-                visuals[source.Id] = SandboxUnitDatabaseAdapter.MakeVisual(source, AnimationDatabase, viewId);
-            return true;
-        }
     }
 
     internal static class SandboxUnitDatabaseAdapter
@@ -176,7 +154,6 @@ namespace KingdomSurvival.BattleSandbox
             Dictionary<string, SandboxUnitVisual> visuals =
                 new Dictionary<string, SandboxUnitVisual>(StringComparer.Ordinal);
             HashSet<string> acceptedIds = new HashSet<string>(StringComparer.Ordinal);
-            List<UnitDefinitionData> sources = new List<UnitDefinitionData>();
             Dictionary<string, SandboxUnitDefinition> creatures =
                 new Dictionary<string, SandboxUnitDefinition>(StringComparer.Ordinal);
 
@@ -208,8 +185,7 @@ namespace KingdomSurvival.BattleSandbox
                     source.CanBeRescuedInBattle,
                     source.Ammo);
 
-                sources.Add(source);
-                visuals[source.Id] = MakeVisual(source, animations, UnitArtViews.ActiveViewId);
+                visuals[source.Id] = MakeVisual(source, animations);
 
                 // ПР-16: выведенное из набора существо не предлагается в
                 // полигоне, но старые ссылки кампании его находят.
@@ -228,27 +204,26 @@ namespace KingdomSurvival.BattleSandbox
             {
                 AnimationDatabase = animations
             };
-            content.SetViewSources(sources, UnitArtViews.ActiveViewId);
             content.AllUnits.AddRange(options);
             foreach (KeyValuePair<string, SandboxUnitDefinition> creature in creatures)
                 content.CreaturesById[creature.Key] = creature.Value;
             return content;
         }
 
-        // Рисунки вида (пустой слот — «Обычный»); у «статичной фигуры»
+        // Рисунки «Обычного»; у «статичной фигуры»
         // набора анимаций нет, ссылка в базе цела.
-        internal static SandboxUnitVisual MakeVisual(UnitDefinitionData source, CreatureAnimationDatabaseAsset animations, string viewId)
+        internal static SandboxUnitVisual MakeVisual(UnitDefinitionData source, CreatureAnimationDatabaseAsset animations)
         {
             return new SandboxUnitVisual(
-                source.PortraitFor(viewId),
-                source.BattlefieldSpriteFor(viewId),
+                source.ActivePortrait,
+                source.ActiveBattlefieldSprite,
                 source.BattlefieldScale,
                 source.BattlefieldOffset,
                 source.Category == UnitCategory.Creature
                     ? SandboxUnitVisual.MakeTokenText(source.DisplayLabel)
                     : string.Empty,
                 SandboxUnitVisual.TokenScaleFor(source.Size),
-                animations != null ? animations.FindSet(source.AnimationSetIdFor(viewId)) : null);
+                animations != null ? animations.FindSet(source.ActiveAnimationSetId) : null);
         }
 
         // ПР-16: в бой идут только активные способности с подключённой механикой.

@@ -141,7 +141,6 @@ namespace KingdomSurvival.MapLab.Editor
         private void OnDisable()
         {
             Undo.undoRedoPerformed -= OnUndoRedo;
-            MapLabViewGradeShader.Neutral();
             DestroyFieldView();
             if (preview != null)
             {
@@ -255,8 +254,6 @@ namespace KingdomSurvival.MapLab.Editor
                 }
                 bool dirty = view.Settings != null && EditorUtility.IsDirty(view.Settings);
                 GUILayout.Label(dirty ? "● есть несохранённые изменения" : "сохранено", dirty ? EditorStyles.boldLabel : EditorStyles.miniLabel);
-                GUILayout.Space(12f);
-                DrawViewPopup();
                 GUILayout.FlexibleSpace();
                 GUIContent service = new GUIContent("Сервис ▾", "Подключить пакеты арта, калибровка, подробные настройки, правила генератора игры, подготовка рисунка для игры.");
                 Rect serviceRect = GUILayoutUtility.GetRect(service, EditorStyles.toolbarDropDown);
@@ -390,7 +387,7 @@ namespace KingdomSurvival.MapLab.Editor
 
             EditorGUILayout.Space(6);
             look |= DrawLookGroup(s, a);
-            DrawViewsGroup();
+            DrawFogCloudsGroup();
 
             fineOpen = EditorGUILayout.BeginFoldoutHeaderGroup(fineOpen, "Точная настройка · переопределения");
             if (fineOpen)
@@ -475,7 +472,7 @@ namespace KingdomSurvival.MapLab.Editor
         private bool DrawLookGroup(MapLabSettings s, MapLabAuthorProfile a)
         {
             bool look = false;
-            lookOpen = EditorGUILayout.BeginFoldoutHeaderGroup(lookOpen, "Общие для всех видов · внешний вид, мир не меняет");
+            lookOpen = EditorGUILayout.BeginFoldoutHeaderGroup(lookOpen, "Внешний вид, мир не меняет");
             if (lookOpen)
             {
                 EditorGUI.BeginChangeCheck();
@@ -543,7 +540,6 @@ namespace KingdomSurvival.MapLab.Editor
                     s.RegionPlan = null;
                     planReport = null;
                 }
-                PrepareLookForGenerate();
                 bool ok = view.Generate((stage, fraction) => EditorUtility.DisplayCancelableProgressBar("Генератор карты", stage, fraction));
                 if (!ok)
                     throw new Exception("генерация не выполнена (проверьте профиль и шейдеры)");
@@ -610,16 +606,7 @@ namespace KingdomSurvival.MapLab.Editor
                 cam.cullingMask &= ~GameWorldLayers;
                 RenderTexture keep = cam.targetTexture;
                 cam.targetTexture = preview;
-                // Вид карты: цветокоррекция только на время этого рендера.
-                MapLabViewGradeShader.Apply(MapLabMapViews.Active);
-                try
-                {
-                    cam.Render();
-                }
-                finally
-                {
-                    MapLabViewGradeShader.Neutral();
-                }
+                cam.Render();
                 cam.targetTexture = keep;
                 previewDirty = false;
             }
@@ -1005,9 +992,6 @@ namespace KingdomSurvival.MapLab.Editor
             EditorGUI.DrawRect(pr, groundBackground ? new Color(0.62f, 0.62f, 0.33f) : new Color(0.5f, 0.5f, 0.5f));
             if (Shown(e) != null)
                 GUI.DrawTexture(pr, Shown(e), ScaleMode.ScaleToFit, true);
-            MapLabMapView look = MapLabMapViews.Active;
-            if (look != null && look.Id != MapLabMapViews.ClassicId)
-                EditorGUILayout.LabelField(look.FindTexture(e, out bool skewed) != null ? "Рисунок вида «" + look.Name + "» (поля ниже — общие для всех видов)." : skewed ? "У вида «" + look.Name + "» рисунок другого холста — показан основной." : "У вида «" + look.Name + "» своего рисунка нет — показан основной.", EditorStyles.wordWrappedMiniLabel);
 
             EditorGUI.BeginChangeCheck();
             Texture2D texture = (Texture2D)EditorGUILayout.ObjectField(new GUIContent("Изображение", "«Заменить…»: выбрать другой PNG; ID, вес, цвет и калибровка сохраняются."), e.Texture, typeof(Texture2D), false);

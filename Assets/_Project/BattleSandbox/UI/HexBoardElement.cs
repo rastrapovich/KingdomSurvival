@@ -143,7 +143,6 @@ namespace KingdomSurvival.BattleSandbox
         public HexBoardElement()
         {
             name = "battle-sandbox-board";
-            InitTerrainLook();
             style.flexGrow = 1f;
             style.minWidth = 620f;
             style.minHeight = 520f;

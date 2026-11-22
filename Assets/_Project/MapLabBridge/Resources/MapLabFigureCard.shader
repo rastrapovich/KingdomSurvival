@@ -32,7 +32,6 @@ Shader "Kingdom Survival/MapLab/Figure Card"
             #pragma vertex Vert
             #pragma fragment Frag
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Assets/Experiments/MapLab/Shaders/MapLabGrade.hlsl"
 
             struct Attributes
             {
@@ -87,7 +86,6 @@ Shader "Kingdom Survival/MapLab/Figure Card"
                 float4 tex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
                 clip(tex.a - _Cutoff);
                 float4 r = tex * _Color;
-                r.rgb = MapLabViewGrade(r.rgb);
                 return r;
             }
             ENDHLSL

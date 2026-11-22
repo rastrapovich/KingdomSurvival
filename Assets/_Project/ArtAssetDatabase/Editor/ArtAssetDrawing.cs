@@ -13,11 +13,6 @@ namespace KingdomSurvival.ArtAssets.Editor
     // Рисуются уже загруженные текстуры — отдельные превью не создаются.
     public static class ArtAssetDrawing
     {
-        // Виды карты (подключает мост MapLab, KingdomSurvival.MapLabBridge.Editor):
-        // рисунок ассета в выбранном виде карты — для показа в Базе ассетов.
-        // null или нет своего рисунка — основной рисунок.
-        public static System.Func<ArtAssetDefinition, Sprite, Texture2D> ViewTexture;
-
         public readonly struct Layout
         {
             public readonly LocationResolvedVisual Resolved;
@@ -166,17 +161,6 @@ namespace KingdomSurvival.ArtAssets.Editor
                     Texture2D normal = NormalPreview(NormalOf(asset, sprite, layout.Resolved.ShownView));
                     if (normal != null) GUI.DrawTexture(gui, normal, ScaleMode.StretchToFill, true, 0, color, 0, 0);
                     else EditorGUI.DrawRect(gui, new Color(.5f, .5f, 1, .25f));
-                    continue;
-                }
-                // Рисунок вида карты — только для одиночного рисунка во весь холст
-                // (так его берут карта и арена).
-                Texture2D own = ViewTexture != null && seconds < 0 && sprite != null && sprite.texture != null
-                                && Mathf.Abs(sprite.rect.width - sprite.texture.width) < 1f && Mathf.Abs(sprite.rect.height - sprite.texture.height) < 1f
-                    ? ViewTexture(asset, sprite) : null;
-                if (own != null)
-                {
-                    if (Event.current.type == EventType.Repaint)
-                        GUI.DrawTexture(gui, own, ScaleMode.StretchToFill, true, 0, color, 0, 0);
                     continue;
                 }
                 DrawSprite(gui, sprite, false, color);

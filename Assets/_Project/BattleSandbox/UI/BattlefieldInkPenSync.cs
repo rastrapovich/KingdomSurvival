@@ -7,9 +7,8 @@ namespace KingdomSurvival.BattleSandbox
 {
     // Перо сетки боя = перо дорог MapLab (MAP_STYLE_GUIDE.md §5 «Единое перо»):
     // цвет, толщина, плотность, нажим, разрывы и окончания берутся из профиля
-    // рисунка игры (MapLabGameAssets.Profile, Stage05). Вид карты с тушью
-    // (сепия) красит и сетку своим цветом туши. Длины пера заданы в ед. мира
-    // MapLab, у сетки — в радиусах гекса (радиус клетки арены — 3 ед.).
+    // рисунка игры (MapLabGameAssets.Profile, Stage05). Длины пера заданы
+    // в ед. мира MapLab, у сетки — в радиусах гекса (радиус клетки арены — 3 ед.).
     public static class BattlefieldInkPenSync
     {
         private const float ArenaHexWorld = 3f;
@@ -17,8 +16,6 @@ namespace KingdomSurvival.BattleSandbox
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Initialize()
         {
-            MapLabMapViews.ActiveChanged -= Apply;
-            MapLabMapViews.ActiveChanged += Apply;
             Apply();
         }
 
@@ -41,9 +38,6 @@ namespace KingdomSurvival.BattleSandbox
                 pen.Grain = s5.InkGrain;
                 pen.Endings = s5.InkEndings;
             }
-            MapLabMapView view = MapLabMapViews.Active;
-            if (view != null && view.Grade != null && !view.Grade.IsNeutral && view.Grade.InkStrength > 0f)
-                pen.Color = Color.Lerp(pen.Color, view.Grade.InkColor, Mathf.Clamp01(view.Grade.InkStrength));
             BattlefieldInkPen.Current = pen;
         }
     }

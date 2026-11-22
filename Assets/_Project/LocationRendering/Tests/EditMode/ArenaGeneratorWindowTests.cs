@@ -24,7 +24,6 @@ namespace KingdomSurvival.LocationRendering.Tests
         {
             if (!MapLabArena.Available)
                 Assert.Ignore("Нет MapLabGameAssets с профилем — арена MapLab выключена.");
-            string view = MapLabGameViews.ActiveId;
             EditorPrefs.SetInt("KS.ArenaGenerator.Mode", 0);
             ArenaGeneratorWindow.Open();
             ArenaGeneratorWindow window = EditorWindow.GetWindow<ArenaGeneratorWindow>();
@@ -41,14 +40,6 @@ namespace KingdomSurvival.LocationRendering.Tests
                 Debug.Log("Генератор арен (окно): " + window.StatusText + "\n" + window.ReportText);
                 Save(window.PreviewDriver.Arena, "window_preview.png");
 
-                // Виды карты: каждый — свой кадр той же арены.
-                foreach (string id in new[] { MapLabMapViews.ClassicId, MapLabMapViews.GloomId, MapLabMapViews.SepiaId })
-                {
-                    MapLabGameViews.Select(id);
-                    window.PreviewDriver.Arena.ApplyActiveLook();
-                    Save(window.PreviewDriver.Arena, "window_view_" + id + ".png");
-                }
-                MapLabGameViews.Select(view);
 
                 ArenaGeneratorWindow.OpenFrame();
                 yield return null;
@@ -67,7 +58,6 @@ namespace KingdomSurvival.LocationRendering.Tests
             }
             finally
             {
-                MapLabGameViews.Select(view);
                 window.Close();
             }
         }

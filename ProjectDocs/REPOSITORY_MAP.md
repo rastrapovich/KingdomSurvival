@@ -2,7 +2,7 @@
 
 Сюжетная основа 04.11.2026 — [актуальный канон v1.68](../KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_68.md) §6, [NARRATIVE.md](NARRATIVE.md) §26.4 и [LORE.md](LORE.md) §17.2. Дом — [архивное направление под вопросом](Archive/HOME_DESIGN_ON_HOLD_2026-11-04.md); его старый лор и прежняя обязательная тема отменены.
 
-Дополнительные утверждённые виды карты: [MAP_VIEWS_STYLE_CANON.md](MAP_VIEWS_STYLE_CANON.md).
+Дополнительные виды карты (sepia/gloom) отменены 22.11.2026; прежний канон — [Archive/MAP_VIEWS_STYLE_CANON.md](Archive/MAP_VIEWS_STYLE_CANON.md).
 
 Проверено по локальному checkout 02.11.2026. Это справочник путей, а не новый канон. Рабочие правила — [AGENTS.md](../AGENTS.md). Пути в таблицах ниже указаны от корня репозитория; Markdown-ссылки разрешаются из ProjectDocs. При изменении структуры обновляй карту.
 

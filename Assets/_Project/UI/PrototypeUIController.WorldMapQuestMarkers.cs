@@ -8,9 +8,8 @@ using UnityEngine.UIElements;
 // «?» над известным, но ещё не исследованным местом и «!» там, где сейчас
 // можно взять новое поручение (WorldMapMarkerService — одно вычисление для
 // метки, подсказки и карточки). Отдельный слой поверх карты: позиция следует
-// месту, размер на экране постоянный, символ фронтальный и не проходит через
-// цветокоррекцию вида карты; картинка — по стилю выбранного вида (classic,
-// sepia, gloom; неизвестный вид — classic). Пересчёт — при обновлении панели
+// месту, размер на экране постоянный, символ фронтальный; картинка — один набор
+// символов (WorldMapMarkerArt). Пересчёт — при обновлении панели
 // карты (открытие, загрузка, открытие и исследование мест, поручения, сутки),
 // а не каждый кадр; каждый кадр — только положение. Клик — то же, что клик по
 // месту: отряд идёт к нему (у места — вход). Задание не принимается и место не
@@ -258,7 +257,6 @@ public partial class PrototypeUIController
         if (!shown || worldMapViewport == null)
             return;
         WorldMapMarkerArt art = WorldMapMarkerArt.Load();
-        WorldMapMarkerStyle style = art != null ? art.Find(MapLabGameViews.ActiveId) : null;
         float symbolHeight = art != null ? art.SymbolHeight : 32f;
         float gap = art != null ? art.Gap : 8f;
         float spacing = art != null ? art.MinSpacing : 26f;
@@ -271,13 +269,13 @@ public partial class PrototypeUIController
         {
             VisualElement element = marker.Element;
             bool quest = marker.Info.Kind == WorldMapMarkerKind.QuestAvailable;
-            WorldMapMarkerSymbol symbol = style == null ? null : quest ? style.Exclamation : style.Question;
+            WorldMapMarkerSymbol symbol = art == null ? null : quest ? art.Exclamation : art.Question;
             if (symbol?.Texture == null)
             {
                 element.style.display = DisplayStyle.None;
                 continue;
             }
-            string styleId = style.Id + (quest ? "!" : "?");
+            string styleId = quest ? "!" : "?";
             if (marker.StyleId != styleId)
             {
                 element.style.backgroundImage = new StyleBackground(Background.FromTexture2D(symbol.Texture));

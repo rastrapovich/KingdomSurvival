@@ -66,7 +66,6 @@ public partial class PrototypeUIController
         picture.style.height = height;
         picture.style.backgroundImage = new StyleBackground(Background.FromTexture2D(texture));
         picture.style.unityBackgroundScaleMode = ScaleMode.StretchToFill;
-        picture.style.unityBackgroundImageTintColor = MapLabGameViews.UiTint;
         VisualElement glow = new VisualElement { pickingMode = PickingMode.Ignore };
         glow.style.position = Position.Absolute;
         glow.style.left = glow.style.top = glow.style.right = glow.style.bottom = 0;

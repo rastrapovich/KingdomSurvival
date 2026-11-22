@@ -33,7 +33,7 @@ public partial class PrototypeUIController
         worldMapLiveImage.style.top = 0;
         worldMapLiveImage.style.right = 0;
         worldMapLiveImage.style.bottom = 0;
-        worldMapLiveImage.style.backgroundColor = MapLabGameViews.Background(new Color(0.86f, 0.82f, 0.72f));
+        worldMapLiveImage.style.backgroundColor = new Color(0.86f, 0.82f, 0.72f);
         worldMapViewport.Insert(0, worldMapLiveImage);
         worldMapLiveLabel = new Label("Рисуем карту…") { pickingMode = PickingMode.Ignore };
         worldMapLiveLabel.style.position = Position.Absolute;
@@ -139,7 +139,6 @@ public partial class PrototypeUIController
     // Каждый кадр: камера MapLab рисует видимую часть полотна.
     private void TickWorldMapLive()
     {
-        ApplyWorldMapViewIfChanged();
         PollWorldMapLiveBuild();
         MapLabGameLive.World world = MapLabGameLive.Current;
         bool active = worldMapMapLab != null && world != null && world.Ready && gameState != null && gameState.HasGeneratedMap
@@ -183,7 +182,7 @@ public partial class PrototypeUIController
             return;
         if (worldMapLiveMargins[0] == null)
         {
-            Color fog = WorldMapViewFogColor();
+            Color fog = WorldMapFogColor();
             fog.a = 1f;
             int index = worldMapViewport.IndexOf(worldMapLiveImage) + 1;
             for (int i = 0; i < 4; i++)

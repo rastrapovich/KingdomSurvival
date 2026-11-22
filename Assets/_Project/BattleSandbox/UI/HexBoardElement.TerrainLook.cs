@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using KingdomSurvival.BattlefieldDatabase;
-using KingdomSurvival.MapLab;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -11,10 +10,7 @@ namespace KingdomSurvival.BattleSandbox
     // поверхностей доски.
     //   • Слитые пятна: одна заливка на связный участок по маске гексов
     //     (контур — граница участка), без перекрытия соседних заливок и швов.
-    //   • Три вида карты: classic — природные спокойные заливки; gloom —
-    //     приглушённые серо-бурые массы с сизо-лиловыми тенями; sepia —
-    //     кремовые поверхности и тёмно-коричневая тушь без цветного остатка.
-    //     Вид меняет только палитру — клетки, логика и попадание мышью те же.
+    //   • Спокойные природные заливки; клетки, логика и попадание мышью те же.
     //   • Временная область появляется и исчезает за 0,4 с; логика и урон не
     //     ждут анимации.
     // Это временная читаемая графика до художественных ассетов, не арт.
@@ -22,7 +18,6 @@ namespace KingdomSurvival.BattleSandbox
     {
         private const float EffectFadeSeconds = 0.4f;
 
-        private string terrainViewId = MapLabMapViews.ClassicId;
         private float effectFade = 1f;
         private bool effectFillDone;
         private readonly Dictionary<(HexCoord, SandboxEffectKind), float> effectShownAt = new Dictionary<(HexCoord, SandboxEffectKind), float>();
@@ -34,57 +29,17 @@ namespace KingdomSurvival.BattleSandbox
         // Клетки, где MapLab-арена уже нарисовала объект местности артом.
         public readonly HashSet<HexCoord> ArtBackedObjects = new HashSet<HexCoord>();
 
-        private void InitTerrainLook()
-        {
-            RegisterCallback<AttachToPanelEvent>(_ =>
-            {
-                MapLabMapViews.ActiveChanged -= OnMapViewChanged;
-                MapLabMapViews.ActiveChanged += OnMapViewChanged;
-            });
-            RegisterCallback<DetachFromPanelEvent>(_ => MapLabMapViews.ActiveChanged -= OnMapViewChanged);
-        }
-
-        private void OnMapViewChanged()
-        {
-            MarkDirtyRepaint();
-            SyncUnitImages();
-        }
-
         private void BeginTerrainFrame()
         {
-            string id = MapLabMapViews.Active?.Id;
-            terrainViewId = string.IsNullOrEmpty(id) ? MapLabMapViews.ClassicId : id;
             effectFade = 1f;
             effectFillDone = false;
         }
 
-        // Цвет поверхности в текущем виде с учётом появления области.
+        // Цвет поверхности с учётом появления области.
         private Color Tc(float r, float g, float b, float a)
         {
-            Color c = Tone(new Color(r, g, b, a));
+            Color c = new Color(r, g, b, a);
             c.a *= effectFade;
-            return c;
-        }
-
-        private Color Tone(Color c)
-        {
-            if (terrainViewId == MapLabMapViews.SepiaId)
-            {
-                // Монохром: кремовая поверхность ↔ тёмно-коричневая тушь.
-                float lum = c.r * 0.30f + c.g * 0.59f + c.b * 0.11f;
-                Color ink = new Color(0.30f, 0.20f, 0.12f), cream = new Color(0.93f, 0.86f, 0.72f);
-                Color mono = Color.Lerp(ink, cream, Mathf.Clamp01(lum * 1.15f));
-                return new Color(mono.r, mono.g, mono.b, Mathf.Min(1f, c.a * 1.1f));
-            }
-            if (terrainViewId == MapLabMapViews.GloomId)
-            {
-                // Матовые серо-бурые массы, тени уходят в сизо-лиловый.
-                Color.RGBToHSV(c, out float h, out float s, out float v);
-                Color muted = Color.HSVToRGB(h, s * 0.45f, v * 0.78f);
-                Color shadow = new Color(0.36f, 0.33f, 0.44f);
-                Color mixed = Color.Lerp(muted, shadow, Mathf.Clamp01((0.55f - v) * 0.6f));
-                return new Color(mixed.r, mixed.g, mixed.b, c.a);
-            }
             return c;
         }
 

@@ -104,7 +104,7 @@ Shader "Kingdom Survival/MapLab/Grass"
                 float cover = saturate((1.0 - abs(i.uv.x)) / aa);
                 float a = cover * i.fade * _Opacity;
                 clip(a - 0.004);
-                return float4(MapLabViewGrade(i.color.rgb), a);
+                return float4(i.color.rgb, a);
             }
             ENDHLSL
         }

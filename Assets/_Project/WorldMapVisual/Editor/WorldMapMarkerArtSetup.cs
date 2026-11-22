@@ -4,14 +4,13 @@ using UnityEngine;
 
 namespace KingdomSurvival.WorldMapVisual.Editor
 {
-    // Метки карты: PNG из Assets/_Project/Art/MapMarkers/<стиль>/
+    // Метки карты: PNG из Assets/_Project/Art/MapMarkers/classic/
     // (MapMarker_Question.png, MapMarker_Exclamation.png) → ассет
     // WorldMapMarkerArt в Resources. Импорт — UI-картинка: без mipmaps, Clamp,
     // Bilinear, прозрачность, без сжатия (края символа на 24–48 px чистые).
     // Видимая часть символа считается по альфе исходного PNG.
     public static class WorldMapMarkerArtSetup
     {
-        private static readonly string[] StyleIds = { "classic", "sepia", "gloom" };
         private const string QuestionFile = "MapMarker_Question.png";
         private const string ExclamationFile = "MapMarker_Exclamation.png";
 
@@ -37,20 +36,11 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 asset = ScriptableObject.CreateInstance<WorldMapMarkerArt>();
                 AssetDatabase.CreateAsset(asset, WorldMapMarkerArt.AssetPath);
             }
-            int complete = 0;
-            asset.Styles.Clear();
-            foreach (string id in StyleIds)
-            {
-                WorldMapMarkerStyle style = new WorldMapMarkerStyle { Id = id };
-                style.Question = Symbol(WorldMapMarkerArt.ArtRoot + "/" + id + "/" + QuestionFile);
-                style.Exclamation = Symbol(WorldMapMarkerArt.ArtRoot + "/" + id + "/" + ExclamationFile);
-                if (style.IsComplete)
-                    complete++;
-                asset.Styles.Add(style);
-            }
+            asset.Question = Symbol(WorldMapMarkerArt.ArtRoot + "/" + QuestionFile);
+            asset.Exclamation = Symbol(WorldMapMarkerArt.ArtRoot + "/" + ExclamationFile);
             EditorUtility.SetDirty(asset);
             AssetDatabase.SaveAssetIfDirty(asset);
-            return $"стилей с обоими символами: {complete} из {StyleIds.Length} ({WorldMapMarkerArt.AssetPath}).";
+            return (asset.IsComplete ? "оба символа на месте" : "нет одного из символов") + $" ({WorldMapMarkerArt.AssetPath}).";
         }
 
         private static WorldMapMarkerSymbol Symbol(string path)

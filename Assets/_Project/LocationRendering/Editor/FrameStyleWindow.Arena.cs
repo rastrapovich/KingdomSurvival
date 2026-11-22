@@ -13,8 +13,8 @@ namespace KingdomSurvival.LocationRendering.Editor
 {
     // Окно «Обработка кадра» × генерируемая арена боя (21.11.2026): первая
     // строка списка мест — арена. Предпросмотр — настоящий кадр арены MapLab
-    // (земля и слой объектов) с её обработкой кадра: общей или своей у вида
-    // карты; сравнение «до / после», «Холст», удар (всплеск, вспышка,
+    // (земля и слой объектов) с её общей обработкой кадра;
+    // сравнение «до / после», «Холст», удар (всплеск, вспышка,
     // тряска) и снимок для LUT. Данные — ассет «Генератора арен».
     public sealed partial class FrameStyleWindow
     {
@@ -78,7 +78,6 @@ namespace KingdomSurvival.LocationRendering.Editor
             {
                 Database = database,
                 DirectPost = () => arenaAsset.Frame.Common,
-                ViewFrames = () => arenaAsset.Frame.Views,
                 DirectTitle = "Правится: обработка кадра арен боя (все дорожные бои и полигон)",
                 Sections = ArenaGeneratorWindow.ArenaFrameSections,
                 DirectNote = ArenaGeneratorWindow.ArenaFrameNote,
@@ -93,7 +92,6 @@ namespace KingdomSurvival.LocationRendering.Editor
                     canvas?.MarkDirtyRepaint();
                 },
                 Rebuild = BuildPanel,
-                ViewSelected = () => { arena?.ApplyActiveLook(); canvas?.MarkDirtyRepaint(); },
                 Pulse = strength => arenaFrame?.Hit(strength),
                 Hit = strength => arenaFrame?.Hit(strength),
                 Snapshot = Snapshot,
@@ -105,7 +103,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         private Texture RenderArena(bool before, ref RenderTexture target, int height)
         {
             LocationFrameStyle style = before && compareSource == CompareSource.Style ? database?.FindFrameStyle(EditorPrefs.GetString("KS.FrameEffects.Style", "")) : null;
-            arena.Spec.Frame = before ? style?.Post : ArenaGeneratorAsset.FrameFor(MapLabGameViews.ActiveId);
+            arena.Spec.Frame = before ? style?.Post : ArenaGeneratorAsset.CurrentFrame();
             arenaFrame?.BeforeRender();
             RenderTexture ground = arena.Render(Mathf.RoundToInt(height * 16f / 9f), height);
             if (ground == null) return null;
@@ -200,9 +198,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
             if (status != null)
             {
-                LocationPostEffects post = ArenaGeneratorAsset.FrameFor(MapLabGameViews.ActiveId);
-                status.text = (post != null ? "Обработка кадра арены включена" : "Обработка кадра арены ВЫКЛЮЧЕНА") + " · вид «" + MapLabGameViews.ActiveName + "»" +
-                              (arenaAsset != null && arenaAsset.Frame.Views.Exists(v => v != null && v.ViewId == MapLabGameViews.ActiveId && v.Own) ? " — своя обработка" : " — общая обработка") +
+                LocationPostEffects post = ArenaGeneratorAsset.CurrentFrame();
+                status.text = (post != null ? "Обработка кадра арены включена" : "Обработка кадра арены ВЫКЛЮЧЕНА") +
                               " · seed " + arenaSeed + (compare == CompareMode.Curtain ? " · шторка — перетаскиванием" : "");
             }
             // Вспышка, тряска, плёнка, облака — кадр каждую перерисовку окна.
@@ -219,7 +216,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         private Texture2D ArenaSnapshot()
         {
             if (arena == null || !arena.Ready) return null;
-            LocationPostEffects post = ArenaGeneratorAsset.FrameFor(MapLabGameViews.ActiveId);
+            LocationPostEffects post = ArenaGeneratorAsset.CurrentFrame();
             Texture2D lut = post?.Tone?.Lut;
             RenderTexture shot = null;
             try

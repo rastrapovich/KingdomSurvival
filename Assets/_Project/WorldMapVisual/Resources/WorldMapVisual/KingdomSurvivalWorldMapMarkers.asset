@@ -15,55 +15,19 @@ MonoBehaviour:
   SymbolHeight: 32
   Gap: 8
   MinSpacing: 26
-  Styles:
-  - Id: classic
-    Question:
-      Texture: {fileID: 2800000, guid: b3f5e3878e6b35b48849ed833280dff7, type: 3}
-      Visible:
-        serializedVersion: 2
-        x: 0.25279108
-        y: 0.1291866
-        width: 0.47926635
-        height: 0.7703349
-    Exclamation:
-      Texture: {fileID: 2800000, guid: c9465f47b0589ab4890ffb0fdd720d8b, type: 3}
-      Visible:
-        serializedVersion: 2
-        x: 0.38118023
-        y: 0.12838915
-        width: 0.22727273
-        height: 0.7719298
-  - Id: sepia
-    Question:
-      Texture: {fileID: 2800000, guid: adb39b0e5130ee14284c024e808c5ad5, type: 3}
-      Visible:
-        serializedVersion: 2
-        x: 0.26555023
-        y: 0.14274321
-        width: 0.46411484
-        height: 0.74082935
-    Exclamation:
-      Texture: {fileID: 2800000, guid: b57cfe151ab34e7489ffb9ecba9e2750, type: 3}
-      Visible:
-        serializedVersion: 2
-        x: 0.38118023
-        y: 0.14274321
-        width: 0.23524721
-        height: 0.74242425
-  - Id: gloom
-    Question:
-      Texture: {fileID: 2800000, guid: 06dcfff6eec95df49b4597508bbb53ee, type: 3}
-      Visible:
-        serializedVersion: 2
-        x: 0.26395535
-        y: 0.121212125
-        width: 0.46251994
-        height: 0.7751196
-    Exclamation:
-      Texture: {fileID: 2800000, guid: 6877e4f1a25b3cb4a9cd210fbe360acd, type: 3}
-      Visible:
-        serializedVersion: 2
-        x: 0.38516745
-        y: 0.120414674
-        width: 0.21132377
-        height: 0.7783094
+  Question:
+    Texture: {fileID: 2800000, guid: b3f5e3878e6b35b48849ed833280dff7, type: 3}
+    Visible:
+      serializedVersion: 2
+      x: 0.25279108
+      y: 0.1291866
+      width: 0.47926635
+      height: 0.7703349
+  Exclamation:
+    Texture: {fileID: 2800000, guid: c9465f47b0589ab4890ffb0fdd720d8b, type: 3}
+    Visible:
+      serializedVersion: 2
+      x: 0.38118023
+      y: 0.12838915
+      width: 0.22727273
+      height: 0.7719298

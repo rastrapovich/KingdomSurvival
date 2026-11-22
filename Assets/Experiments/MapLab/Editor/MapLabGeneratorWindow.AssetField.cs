@@ -370,8 +370,6 @@ namespace KingdomSurvival.MapLab.Editor
                 fieldView.CameraRig = cameraObject.AddComponent<MapLabCameraRig>();
             }
             fieldView.Settings = fieldSettings;
-            // Поле сравнения — в выбранном виде карты (те же рисунки, что на карте).
-            fieldView.SetLook(MapLabMapViews.Active);
             if (view.CameraRig != null && view.CameraRig.Camera != null)
                 view.CameraRig.Camera.cullingMask &= ~(1 << FieldLayer);
             return fieldView;

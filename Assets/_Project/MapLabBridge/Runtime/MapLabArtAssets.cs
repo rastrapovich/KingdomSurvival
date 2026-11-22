@@ -80,8 +80,7 @@ namespace KingdomSurvival.MapLabBridge
             ArtAssetDefinition chosen = found[((pick % found.Count) + found.Count) % found.Count];
             ArtAssetView view = chosen.PrimaryView;
             pivot = chosen.Settings(view).Pivot;
-            Texture2D own = MapLabMapViews.Active?.FindTexture(IdPrefix + chosen.Id);
-            return own != null ? own : chosen.MainSprite(view).texture;
+            return chosen.MainSprite(view).texture;
         }
 
         // Рисунок декора арены по роли (бурьян, дерево…) — для слоя доски
@@ -118,8 +117,7 @@ namespace KingdomSurvival.MapLabBridge
             }
             ArtAssetView view = chosen.PrimaryView;
             pivot = chosen.Settings(view).Pivot;
-            Texture2D own = MapLabMapViews.Active?.FindTexture(IdPrefix + chosen.Id);
-            return own != null ? own : chosen.MainSprite(view).texture;
+            return chosen.MainSprite(view).texture;
         }
 
         public static bool HasArenaObjectArt(string kind)

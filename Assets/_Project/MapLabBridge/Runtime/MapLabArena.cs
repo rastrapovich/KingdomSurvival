@@ -176,16 +176,6 @@ namespace KingdomSurvival.MapLabBridge
             return d.sqrMagnitude > 1e-6f ? d.normalized : Vector2.right;
         }
 
-        // Смена вида карты в бою (20.11.2026): свои рисунки вида для общих
-        // ассетов подменяются без пересборки; цветокоррекция и так берётся
-        // при каждом кадре. false — подмена невозможна (другая палитра или
-        // незнакомые материалы): остаётся прежний рисунок с новой цветокоррекцией.
-        public bool ApplyActiveLook()
-        {
-            if (!Ready)
-                return false;
-            return view.SwapLook(MapLabMapViews.Active);
-        }
         public float Mean => mean;
 
         private MapLabView view;
@@ -296,9 +286,6 @@ namespace KingdomSurvival.MapLabBridge
                 marker.AutoPlace = false;
                 marker.enabled = false;
                 assets.ApplyTo(view);
-                // Вид карты: своя палитра и свои рисунки вида для общих ассетов
-                // (трава, камни, реквизит); цветокоррекция — при каждом кадре.
-                view.SetLook(MapLabMapViews.Active);
                 view.CameraRig = rig;
                 view.Settings = settings;
                 view.FeatureExtraSets = new List<MapLabArtSet>();
@@ -602,10 +589,7 @@ namespace KingdomSurvival.MapLabBridge
             view.PumpStreaming(false);
             StripOtherCameras();
             Shader.SetGlobalFloat("_MapLabPixelScale", 1f);
-            // Цветокоррекция выбранного вида карты — только на время кадра поля.
-            MapLabMapView look = MapLabMapViews.Active;
-            camera.backgroundColor = look != null && look.Grade != null && !look.Grade.IsNeutral ? look.Background : paper;
-            MapLabViewGradeShader.Apply(look);
+            camera.backgroundColor = paper;
             bool graded = BeginFrame();
             ApplyWalkers();
             SetShadows(true);
@@ -636,7 +620,6 @@ namespace KingdomSurvival.MapLabBridge
                 ClearWalkers();
                 SetShadows(false);
                 framePost?.End(camera);
-                MapLabViewGradeShader.Neutral();
             }
             return target;
         }

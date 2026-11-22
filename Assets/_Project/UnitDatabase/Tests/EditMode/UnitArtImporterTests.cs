@@ -66,24 +66,6 @@ namespace KingdomSurvival.UnitDatabase.Tests
         }
 
         [Test]
-        public void ViewArt_NamedByView_AndKeptFromCleanup()
-        {
-            Sprite gloom = UnitArtImporter.ImportExternal(WritePng("gloom.png", 64, 64), UnitId, UnitArtKind.Battlefield, UnitArtViews.GloomId, out string error);
-            Assert.IsNotNull(gloom, error);
-            string path = AssetDatabase.GetAssetPath(gloom);
-            createdAssets.Add(path);
-            StringAssert.StartsWith(UnitArtImporter.BattlefieldFolder + "/" + UnitId + "__field__gloom__", path);
-
-            UnitDatabaseAsset database = ScriptableObject.CreateInstance<UnitDatabaseAsset>();
-            CollectionAssert.Contains(UnitArtImporter.FindUnused(database), path, "без ссылки — в очистку");
-            UnitDefinitionData unit = UnitDefinitionData.CreateCreature(UnitId, "Проба", UnitSize.Medium, 10, 1, 1, 1, 3, 3, 1, null, null);
-            unit.GetOrAddViewArt(UnitArtViews.GloomId).SetBattlefieldSprite(gloom);
-            database.AddUnitIfMissing(unit);
-            CollectionAssert.DoesNotContain(UnitArtImporter.FindUnused(database), path, "рисунок вида занят существом");
-            Object.DestroyImmediate(database);
-        }
-
-        [Test]
         public void BrokenOrWrongFile_IsRejected_WithoutChanges()
         {
             string broken = Path.Combine(sourceFolder, "broken.png");

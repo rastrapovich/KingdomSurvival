@@ -375,61 +375,31 @@ namespace KingdomSurvival.BattleSandbox.Tests
             }
         }
 
-        // Виды карты на арене: кадр поля в каждом включённом виде (Обычный,
-        // Мрачный, Сепия…) отличается от обычного, цветокоррекция вида снята
-        // после кадра. Кадры — в Logs/MapLabArena/arena_view_<вид>.png.
+        // Кадр поля арены рисуется; снимок — в Logs/MapLabArena/arena_frame.png.
         [Test]
-        public void ArenaFrame_FollowsSelectedMapView_AndResetsGrade()
+        public void ArenaFrame_Renders()
         {
             if (!MapLabArena.Available)
                 Assert.Ignore("Нет MapLabGameAssets с профилем — арена MapLab выключена.");
-            string saved = KingdomSurvival.MapLab.MapLabMapViews.ActiveId;
-            Dictionary<string, Color> means = new Dictionary<string, Color>();
+            MapLabArena arena = MapLabArena.Build(MapLabArenaDriver.BuildSpec(null, Battle(5)));
             try
             {
-                foreach (KingdomSurvival.MapLab.MapLabMapView view in KingdomSurvival.MapLab.MapLabMapViews.Load().EnabledViews())
-                {
-                    KingdomSurvival.MapLab.MapLabMapViews.ActiveId = view.Id;
-                    MapLabArena arena = MapLabArena.Build(MapLabArenaDriver.BuildSpec(null, Battle(5)));
-                    try
-                    {
-                        Assert.That(arena.Ready, Is.True, arena.Error);
-                        RenderTexture rt = arena.Render(1280, 720);
-                        Assert.That(rt, Is.Not.Null);
-                        Assert.That(Shader.GetGlobalVector("_MapLabGrade").x, Is.EqualTo(0f), "Коррекция вида снята после кадра арены.");
-                        RenderTexture previous = RenderTexture.active;
-                        RenderTexture.active = rt;
-                        Texture2D image = new Texture2D(rt.width, rt.height, TextureFormat.RGBA32, false);
-                        image.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
-                        RenderTexture.active = previous;
-                        Color sum = Color.clear;
-                        Color[] pixels = image.GetPixels();
-                        foreach (Color c in pixels)
-                            sum += c;
-                        means[view.Id] = sum / pixels.Length;
-                        string directory = Path.Combine(Directory.GetCurrentDirectory(), "Logs", "MapLabArena");
-                        Directory.CreateDirectory(directory);
-                        File.WriteAllBytes(Path.Combine(directory, "arena_view_" + view.Id + ".png"), image.EncodeToPNG());
-                        Object.DestroyImmediate(image);
-                    }
-                    finally
-                    {
-                        arena.Dispose();
-                    }
-                }
+                Assert.That(arena.Ready, Is.True, arena.Error);
+                RenderTexture rt = arena.Render(1280, 720);
+                Assert.That(rt, Is.Not.Null);
+                RenderTexture previous = RenderTexture.active;
+                RenderTexture.active = rt;
+                Texture2D image = new Texture2D(rt.width, rt.height, TextureFormat.RGBA32, false);
+                image.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+                RenderTexture.active = previous;
+                string directory = Path.Combine(Directory.GetCurrentDirectory(), "Logs", "MapLabArena");
+                Directory.CreateDirectory(directory);
+                File.WriteAllBytes(Path.Combine(directory, "arena_frame.png"), image.EncodeToPNG());
+                Object.DestroyImmediate(image);
             }
             finally
             {
-                KingdomSurvival.MapLab.MapLabMapViews.ActiveId = saved;
-            }
-            Assert.That(means.ContainsKey(KingdomSurvival.MapLab.MapLabMapViews.ClassicId), Is.True);
-            Color classic = means[KingdomSurvival.MapLab.MapLabMapViews.ClassicId];
-            foreach (KeyValuePair<string, Color> pair in means)
-            {
-                if (pair.Key == KingdomSurvival.MapLab.MapLabMapViews.ClassicId)
-                    continue;
-                float difference = Mathf.Abs(pair.Value.r - classic.r) + Mathf.Abs(pair.Value.g - classic.g) + Mathf.Abs(pair.Value.b - classic.b);
-                Assert.That(difference, Is.GreaterThan(0.03f), "Вид «" + pair.Key + "» меняет кадр арены.");
+                arena.Dispose();
             }
         }
 

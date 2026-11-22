@@ -15,7 +15,7 @@ namespace KingdomSurvival.LocationRendering.Editor
     // вручную полей боя Базы локаций. Слева — общие настройки генерации
     // обычной арены боя (клетки, деревья, трава, пни, камни, рельеф, река),
     // их запоминает игра (ArenaGeneratorAsset); вкладка «Обработка кадра» —
-    // общая и своя у каждого вида карты. Справа — предпросмотр той же
+    // одна общая обработка. Справа — предпросмотр той же
     // сборкой, что в бою (доска, сетка, кадр арены MapLab), и галерея
     // вариаций: все темы на одном seed или одна тема на разных seed.
     public sealed partial class ArenaGeneratorWindow : EditorWindow
@@ -248,23 +248,6 @@ namespace KingdomSurvival.LocationRendering.Editor
             bar.Add(new Button(() => { Seed--; seed.SetValueWithoutNotify(Seed); RequestRebuild(0); }) { text = "◀", tooltip = "Предыдущий seed" });
             bar.Add(new Button(() => { Seed++; seed.SetValueWithoutNotify(Seed); RequestRebuild(0); }) { text = "▶", tooltip = "Следующий seed" });
             bar.Add(new Button(() => { Seed = UnityEngine.Random.Range(1, 100000); seed.SetValueWithoutNotify(Seed); RequestRebuild(0); }) { text = "Случайный" });
-
-            List<(string Id, string Name)> views = MapLabGameViews.All();
-            if (views.Count > 0)
-            {
-                int current = Mathf.Max(0, views.FindIndex(item => item.Id == MapLabGameViews.ActiveId));
-                PopupField<string> view = new PopupField<string>("Вид", views.Select(item => item.Name).ToList(), current);
-                view.labelElement.style.minWidth = 30;
-                view.style.width = 170;
-                view.tooltip = "Вид карты — тот же выбор, что в игре: рисунки вида и его обработка кадра.";
-                view.RegisterValueChangedCallback(_ =>
-                {
-                    MapLabGameViews.Select(views[view.index].Id);
-                    driver?.RequestRedraw();
-                    if (CurrentMode == Mode.Frame) BuildLeft();
-                });
-                bar.Add(view);
-            }
 
             SliderInt fighters = new SliderInt("Бойцы", 1, 6) { value = Fighters, showInputField = true };
             fighters.labelElement.style.minWidth = 44;

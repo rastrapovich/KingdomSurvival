@@ -160,7 +160,7 @@ namespace KingdomSurvival.BattleSandbox
                 HillLiftHexes = look.HillLiftHexes,
                 DecorDensity = look.DecorDensity,
                 AssetScale = look.AssetScale,
-                Frame = ArenaGeneratorAsset.FrameFor(MapLabGameViews.ActiveId),
+                Frame = ArenaGeneratorAsset.CurrentFrame(),
             };
             StringBuilder key = new StringBuilder(field != null ? field.Id : string.Empty);
             foreach (HexCoord cell in BattlefieldFrame.ActiveCells(field))
@@ -292,7 +292,6 @@ namespace KingdomSurvival.BattleSandbox
             CreateLoadingScreen();
             surface.schedule.Execute(Tick).Every(0);
             surface.RegisterCallback<DetachFromPanelEvent>(_ => Dispose());
-            MapLabGameViews.Changed += OnViewChanged;
         }
 
         public float LiftShare(Vector2 frameShare) => attached ? arena.LiftShare(frameShare) : 0f;
@@ -386,12 +385,6 @@ namespace KingdomSurvival.BattleSandbox
             {
                 frameVersion = ArenaGeneratorAsset.Version;
                 RequestFrame();
-            }
-            if (lookPending)
-            {
-                lookPending = false;
-                if (!arena.ApplyActiveLook())
-                    UnityEngine.Debug.LogWarning("[MapLabArena] Рисунки вида «" + MapLabGameViews.ActiveName + "» без пересборки арены не подменяются — меняется только цвет.");
             }
             Rect frame = surface.FrameRect;
             if (frame.width < 2f || frame.height < 2f)
@@ -496,8 +489,8 @@ namespace KingdomSurvival.BattleSandbox
         {
             if (disposed || !arena.Ready || requestedSize.x < 8)
                 return;
-            // Обработка кадра арены — по виду карты (своя у вида или общая).
-            arena.Spec.Frame = ArenaGeneratorAsset.FrameFor(MapLabGameViews.ActiveId);
+            // Обработка кадра арены — общая (ArenaGeneratorAsset).
+            arena.Spec.Frame = ArenaGeneratorAsset.CurrentFrame();
             frameBinding?.BeforeRender();
             RenderTexture target = arena.Render(requestedSize.x, requestedSize.y);
             if (target != null && shown != target)
@@ -528,26 +521,11 @@ namespace KingdomSurvival.BattleSandbox
             board.MarkDirtyRepaint();
         }
 
-        // Вид карты сменился (кнопкой в бою или на карте): подменить рисунки
-        // вида и перерисовать кадр; арена ещё строится — вид возьмётся при
-        // первом кадре (цветокоррекция) и подменится по готовности.
-        private bool lookPending;
-
-        private void OnViewChanged()
-        {
-            if (disposed)
-                return;
-            lookPending = true;
-            readyAt = Time.realtimeSinceStartup;
-            renderedAt = -1f;
-        }
-
         public void Dispose()
         {
             if (disposed)
                 return;
             disposed = true;
-            MapLabGameViews.Changed -= OnViewChanged;
             if (current == this)
                 current = null;
             if (surface.Relief == this)

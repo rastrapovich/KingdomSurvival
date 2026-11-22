@@ -256,15 +256,6 @@ MonoBehaviour:
     battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 0251aae93d75fc14587fc834f2c220f1, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 0c6c849a78ff21b4582b95a212444967, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - passive.status.20261120.019
@@ -299,15 +290,6 @@ MonoBehaviour:
     battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 22d388e5c7e3d9d44bb4454b5b263b67, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: db10c7027be41454ebd1c764a75a4647, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.human
@@ -340,15 +322,6 @@ MonoBehaviour:
     battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 1ff66fa94d87f7942999bdbd7ba02e73, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: ca3d2b5422b2b054895b96f0fdfa85fb, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.human
@@ -411,15 +384,6 @@ MonoBehaviour:
     battlefieldScale: 1.2
     battlefieldOffset: {x: -9, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 4571e6f538bd9fa4db31b872640ba952, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: e900f2302a4f7a8489051024685b252d, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.human
@@ -452,15 +416,6 @@ MonoBehaviour:
     battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: f0efa5a5ce3aae847856cb80d60e9234, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 847cf16bd65e05049a9551c2eaf3fdab, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.human
@@ -492,15 +447,6 @@ MonoBehaviour:
     battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: militia
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 2bbcee4bdae56a44eb0474598f5334dc, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 3a411377e2d33264ebe13c019369ef91, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.human
@@ -532,15 +478,6 @@ MonoBehaviour:
     battlefieldScale: 1.1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 36d21b60092e0c647b617ddebcfc9757, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 7c1172c5c589a1d43b83838a14a72e4f, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast
@@ -572,15 +509,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 1ae5b568ae4da2945b0914935e96cf71, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 25909c472c368d14cafa6a28e3f901ac, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast
@@ -612,15 +540,6 @@ MonoBehaviour:
     battlefieldScale: 2.2
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: a89d68053ac4c814e82b350ea3bdaff3, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: e797b7f657fef384b81453ec4eee0668, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast
@@ -653,15 +572,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 25f8c841d4db0484aa9d9383d613789d, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 50343f75805e706449c52639161e3400, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - tactic.pack_hunter
@@ -695,15 +605,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: b2b7aae383b050144bfd9c2677909ab8, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 9de3cab9d4d6ab645a9c55e1a21ba2c9, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast
@@ -765,15 +666,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 2f9c985f72792984584aac9188441d52, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 3cb094a20ce3d2c47b346ed3586bfcf3, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast
@@ -832,15 +724,6 @@ MonoBehaviour:
     battlefieldScale: 1.27
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: a42a4d5ece6cbdc4d96e0b15ebbe740d, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 6008cc606c9372d459f5836c08966abd, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast
@@ -899,15 +782,6 @@ MonoBehaviour:
     battlefieldScale: 1.45
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 54ab04d68d5d49a4dbd3af1713453d65, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: fd5fbab4fcaa1764d9b4e807bc7fc817, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast
@@ -965,15 +839,6 @@ MonoBehaviour:
     battlefieldScale: 0.85
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 58bcb15bfaf95934ab30d62f7fde8d94, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: e8e36579d066a1b43a6d553bddec0e4e, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds: []
     size: 1
@@ -1004,15 +869,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 62c5025e8c4c7ac469052fb0c9684ce6, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 93bf1d4e387d9294ebc7bb43bc8ea211, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds: []
     size: 1
@@ -1043,15 +899,6 @@ MonoBehaviour:
     battlefieldScale: 1.43
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 3bdd70d0afac67944aea71538fa214e0, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 2ad5f527185764844b8a579ca438dcad, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast
@@ -1146,15 +993,6 @@ MonoBehaviour:
     battlefieldScale: 1.48
     battlefieldOffset: {x: 0, y: 114}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: b2fa84bcdb2d6924998be39e222bf193, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: d7d5787a4c846ee4997163601084101b, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast
@@ -1243,15 +1081,6 @@ MonoBehaviour:
     battlefieldScale: 0.8
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: ce78a6f05abae3343a8f3f3bd16df9d9, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 3ae31188e7dd6ed439c89592cdac8308, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - passive.20261119.052
@@ -1311,15 +1140,6 @@ MonoBehaviour:
     battlefieldScale: 1.74
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 48f96f0bcfa760045b4474becd1505b8, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: f8d3479eac457f64b8ae3ba525982497, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - combat.ranged
@@ -1352,15 +1172,6 @@ MonoBehaviour:
     battlefieldScale: 1.15
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 96b82bafcb824c34da707bf3ebfec2ca, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: d4fdd680da15c46469438ea590842dd0, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - combat.ranged
@@ -1418,15 +1229,6 @@ MonoBehaviour:
     battlefieldScale: 2.1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: a73e972c8ad999f43be8332b591153e7, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 6b4e82495cc3e974db917d242464bf4e, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - body.sticky
@@ -1488,15 +1290,6 @@ MonoBehaviour:
     battlefieldScale: 2.03
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 56841e6951c8d644e8d238267acf489f, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: e8422aa109c5e534c87fa694c50c9dd9, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - trait.exposed_flanks
@@ -1530,15 +1323,6 @@ MonoBehaviour:
     battlefieldScale: 1.89
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 2d05a0cdd862c63469ef6a5de43e1a0f, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 8a4167f4d9c2fb54f95de13dabb0c1e2, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds: []
     size: 2
@@ -1597,15 +1381,6 @@ MonoBehaviour:
     battlefieldScale: 1.94
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: e6d5417e133f12b44b816d22a2796639, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 1d942f212482bc847b7802785b0a9985, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - trait.human_slayer
@@ -1667,15 +1442,6 @@ MonoBehaviour:
     battlefieldScale: 1.71
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 5b804a305264d1f4b914ad3449620f69, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 5b455d5c48a79be4a8248275a154e776, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast
@@ -1736,7 +1502,6 @@ MonoBehaviour:
     battlefieldScale: 1.25
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt: []
     staticFigureOnly: 0
     tagIds: []
     size: 0
@@ -1826,15 +1591,6 @@ MonoBehaviour:
     battlefieldScale: 1.36
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 3d305eb1c5825834982ee440d16a97e6, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 58c2a2e8e60e55b429e9127468af2d43, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - passive.status.20261120.015
@@ -1896,15 +1652,6 @@ MonoBehaviour:
     battlefieldScale: 1.19
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 824aedb812cd8b745b21dfd8c64e54f3, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: e714f7040d57a784893a404da4cef0ac, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds: []
     size: 2
@@ -1996,15 +1743,6 @@ MonoBehaviour:
     battlefieldScale: 1.8
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 438e6083e8e18e046bf1daa2f4965861, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 63556a53bb73a3b429d7a0c2e0f2df58, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast
@@ -2067,15 +1805,6 @@ MonoBehaviour:
     battlefieldScale: 1.62
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt:
-    - viewId: gloom
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 945235dde258a9847b248234a7b6f9cc, type: 3}
-      animationSetId: 
-    - viewId: sepia
-      portrait: {fileID: 0}
-      battlefieldSprite: {fileID: 21300000, guid: 385b15c99f7c3a74f98a0e73eea39568, type: 3}
-      animationSetId: 
     staticFigureOnly: 0
     tagIds:
     - species.beast
@@ -2164,7 +1893,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt: []
     staticFigureOnly: 0
     tagIds: []
     size: 2
@@ -2226,7 +1954,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt: []
     staticFigureOnly: 0
     tagIds: []
     size: 0
@@ -2284,7 +2011,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt: []
     staticFigureOnly: 0
     tagIds: []
     size: 2
@@ -2341,7 +2067,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt: []
     staticFigureOnly: 0
     tagIds: []
     size: 0
@@ -2402,7 +2127,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt: []
     staticFigureOnly: 0
     tagIds: []
     size: 2
@@ -2493,7 +2217,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt: []
     staticFigureOnly: 0
     tagIds: []
     size: 2
@@ -2554,7 +2277,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt: []
     staticFigureOnly: 0
     tagIds: []
     size: 2
@@ -2614,7 +2336,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt: []
     staticFigureOnly: 0
     tagIds: []
     size: 0
@@ -2677,7 +2398,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    viewArt: []
     staticFigureOnly: 0
     tagIds: []
     size: 0

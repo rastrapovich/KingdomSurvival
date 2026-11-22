@@ -73,7 +73,7 @@ namespace KingdomSurvival.MapLabBridge
             if (plan == null || !plan.IsValid || !Enabled)
                 return null;
             string servicesKey = ServicesKey(services);
-            if (ReferenceEquals(plan, cachedMap) && cached != null && cachedServices == servicesKey + "|" + ViewKey())
+            if (ReferenceEquals(plan, cachedMap) && cached != null && cachedServices == servicesKey)
                 return cached;
             Clear();
             MapLabGameAssets assets = MapLabGameAssets.Load();
@@ -82,7 +82,7 @@ namespace KingdomSurvival.MapLabBridge
                 SaveDisk(plan, assets, result, servicesKey);
             cachedMap = plan;
             cached = result;
-            cachedServices = servicesKey + "|" + ViewKey();
+            cachedServices = servicesKey;
             return result;
         }
 
@@ -95,7 +95,7 @@ namespace KingdomSurvival.MapLabBridge
             if (assets == null || assets.ArtSetPoi == null || string.IsNullOrEmpty(figureSet))
                 return null;
             MapLabArtEntry entry = assets.ArtSetPoi.Find(figureSet + "_" + WorldMapActorMotion.Directions[((direction % 6) + 6) % 6]);
-            return entry != null && entry.HasTexture ? ViewTexture(entry) : null;
+            return entry != null && entry.HasTexture ? entry.Texture : null;
         }
 
         // Рисунок здания услуги (для подсветки на экране карты).
@@ -106,7 +106,7 @@ namespace KingdomSurvival.MapLabBridge
             if (assets == null || assets.ArtSetPoi == null || id == null)
                 return null;
             MapLabArtEntry entry = assets.ArtSetPoi.Find(id);
-            return entry != null ? ViewTexture(entry) : null;
+            return entry != null ? entry.Texture : null;
         }
 
         // Запись рисунка по ID (набор мест, затем этап 05); null — нет.
@@ -133,7 +133,7 @@ namespace KingdomSurvival.MapLabBridge
             MapLabArtEntry entry = parts.Count > 0 ? ArtEntry(parts[0].Id) : null;
             if (entry == null)
                 return false;
-            texture = ViewTexture(entry);
+            texture = entry.Texture;
             worldHeight = MapLabArtBuilder.FeatureWorldHeight(entry);
             aspect = entry.Aspect;
             pivot = entry.Pivot;
@@ -149,7 +149,7 @@ namespace KingdomSurvival.MapLabBridge
             MapLabArtEntry entry = assets.ArtSetPoi != null ? assets.ArtSetPoi.Find(artId) : null;
             if ((entry == null || !entry.HasTexture) && assets.ArtSet05 != null)
                 entry = assets.ArtSet05.Find(artId);
-            return entry != null ? ViewTexture(entry) : null;
+            return entry != null ? entry.Texture : null;
         }
 
         public static string ServicesKey(IDictionary<string, List<string>> services)
@@ -178,32 +178,10 @@ namespace KingdomSurvival.MapLabBridge
             foreach (char c in plan.TerrainCells + "|" + print + "|" + plan.HexesAcross)
                 hash = (hash ^ c) * 16777619;
             // r — версия рисунка снимка (палитра, покраска): старый кэш не показывается.
-            return $"s{plan.Seed}_h{hash:x8}_a{MapLabData.AlgorithmVersion}_r2_t{assets.TexelsPerUnit:0.#}_p{assets.PitchDegrees:0}_w{ViewKey()}";
+            return $"s{plan.Seed}_h{hash:x8}_a{MapLabData.AlgorithmVersion}_r2_t{assets.TexelsPerUnit:0.#}_p{assets.PitchDegrees:0}";
         }
 
         private static string CacheFolder => Path.Combine(Application.persistentDataPath, "MapLabMapCache");
-
-        // Рисунок ассета в выбранном виде карты: свой PNG вида или основной.
-        public static Texture2D ViewTexture(MapLabArtEntry entry)
-        {
-            if (entry == null)
-                return null;
-            MapLabMapView look = MapLabMapViews.Active;
-            Texture2D own = look != null ? look.FindTexture(entry, out _) : null;
-            return own != null ? own : entry.Texture;
-        }
-
-        // Ключ вида для кэша снимка: ID, пересборочная часть и цветокоррекция.
-        private static string ViewKey()
-        {
-            MapLabMapView look = MapLabMapViews.Active;
-            if (look == null)
-                return "none";
-            uint h = 2166136261;
-            foreach (char c in look.BuildKey + JsonUtility.ToJson(look.Grade))
-                h = unchecked((h ^ c) * 16777619);
-            return look.Id + "-" + h.ToString("x8");
-        }
 
         public static Result Bake(GeneratedWorldMap plan, MapLabGameAssets assets, IDictionary<string, List<string>> services = null)
         {
@@ -242,7 +220,6 @@ namespace KingdomSurvival.MapLabBridge
                 marker.AutoPlace = false;
                 marker.enabled = false;
                 assets.ApplyTo(view);
-                view.SetLook(MapLabMapViews.Active);
                 view.CameraRig = rig;
                 view.Settings = settings;
                 if (!view.Generate(null))
@@ -303,16 +280,7 @@ namespace KingdomSurvival.MapLabBridge
                         cameraObject.transform.SetPositionAndRotation(target - rotation * Vector3.forward * distance, rotation);
                         view.OnCameraChanged();
                         view.PumpStreaming(true);
-                        Texture2D texture;
-                        MapLabViewGradeShader.Apply(MapLabMapViews.Active);
-                        try
-                        {
-                            texture = RenderTile(cam, tw, th);
-                        }
-                        finally
-                        {
-                            MapLabViewGradeShader.Neutral();
-                        }
+                        Texture2D texture = RenderTile(cam, tw, th);
                         result.Tiles.Add((texture, new Rect(left * 100f / width, top * 100f / height, tw * 100f / width, th * 100f / height)));
                     }
                 }

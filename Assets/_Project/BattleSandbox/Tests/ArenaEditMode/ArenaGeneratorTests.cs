@@ -9,7 +9,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
 {
     // «Генератор арен» (20.11.2026): общие настройки генерации меняют клетки
     // и рисунок арены, по умолчанию — прежние арены; обработка кадра арены
-    // общая или своя у вида, меняет кадр и не трогает прозрачность слоя
+    // общая, меняет кадр и не трогает прозрачность слоя
     // объектов.
     public sealed class ArenaGeneratorTests
     {
@@ -90,20 +90,6 @@ namespace KingdomSurvival.BattleSandbox.Tests
             Assert.That(valid, Is.GreaterThan(6), "широкая река чаще всего проходит проверку связности");
             Assert.That(wideDeep, Is.GreaterThan(narrowDeep), "русло шире");
             Assert.That(rowsWithFord, Is.GreaterThanOrEqualTo(3), "три брода в разных рядах");
-        }
-
-        [Test]
-        public void FrameSettings_ViewUsesOwnOnlyWhenEnabled()
-        {
-            ArenaFrameSettings frame = new ArenaFrameSettings();
-            frame.Repair();
-            Assert.That(frame.Views.Select(v => v.ViewId), Is.SupersetOf(ArenaFrameSettings.KnownViews));
-            Assert.That(frame.For("gloom"), Is.SameAs(frame.Common));
-            LocationViewFrame gloom = frame.View("gloom");
-            gloom.Own = true;
-            Assert.That(frame.For("gloom"), Is.SameAs(gloom.Post));
-            Assert.That(frame.For("sepia"), Is.SameAs(frame.Common));
-            Assert.That(frame.For(null), Is.SameAs(frame.Common));
         }
 
         [Test]
@@ -209,19 +195,6 @@ namespace KingdomSurvival.BattleSandbox.Tests
             Debug.Log($"Генератор арен: доля травы на поле — ровно {even:0.00}, поляна {glade:0.00}, гуще за полем {edges:0.00}.");
             Assert.That(glade, Is.GreaterThan(even + .1f), "поляна: на поле травы заметно больше");
             Assert.That(edges, Is.LessThan(even - .1f), "гуще за полем: на поле травы заметно меньше");
-        }
-
-        [Test]
-        public void LocationSky_ViewUsesOwnFrameOnlyWhenEnabled()
-        {
-            LocationVisualDefinition visual = new LocationVisualDefinition { UseWorldLighting = false };
-            LocationSky sky = new LocationSky(visual, new LocationWorldLighting());
-            Assert.That(sky.PostFor("gloom"), Is.SameAs(sky.Post), "без своей — общая");
-            LocationViewFrame gloom = LocationFrameViews.Get(sky.ViewFrames, "gloom");
-            Assert.That(sky.PostFor("gloom"), Is.SameAs(sky.Post), "запись есть, но своя выключена — общая");
-            gloom.Own = true;
-            Assert.That(sky.PostFor("gloom"), Is.SameAs(gloom.Post));
-            Assert.That(sky.PostFor("sepia"), Is.SameAs(sky.Post));
         }
 
         [Test]

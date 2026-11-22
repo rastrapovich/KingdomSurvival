@@ -237,7 +237,7 @@ Shader "Kingdom Survival/MapLab/Solid"
                 float4 p = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, i.positionWS.xz / 23.0 + float2(0.11, 0.53));
                 c *= 1.0 + (p.a - 0.5) * _Paper * 0.15;
                 c = MapLabSaturate(c, _Saturation);
-                return float4(MapLabViewGrade(c), 1);
+                return float4(c, 1);
             }
             ENDHLSL
         }

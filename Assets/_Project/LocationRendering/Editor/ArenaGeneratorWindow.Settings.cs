@@ -13,7 +13,7 @@ using UnityEngine.UIElements;
 namespace KingdomSurvival.LocationRendering.Editor
 {
     // Левая панель «Генератора арен»: настройки генерации (все — в ассете,
-    // их берёт игра) и обработка кадра арены (общая и своя у вида).
+    // их берёт игра) и обработка кадра арены (одна общая).
     public sealed partial class ArenaGeneratorWindow
     {
         private VisualElement section;
@@ -223,13 +223,11 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void BuildFrame()
         {
             asset.Frame.Repair();
-            Help("Обработка кадра генерируемой арены боя — те же правила, что у мест: «Общая» действует во всех видах карты без своей; " +
-                 "у вида можно включить свою. Выбор вида здесь меняет вид и в предпросмотре (и в игре — та же настройка, что кнопка «Вид: …» в бою).");
+            Help("Обработка кадра генерируемой арены боя — те же правила, что у мест: одна общая обработка действует на всех аренах.");
             FrameEffectsEditor editor = new FrameEffectsEditor
             {
                 Database = AssetDatabase.LoadAssetAtPath<LocalLocationDatabaseAsset>(LocalLocationDatabaseAsset.AssetPath),
                 DirectPost = () => asset.Frame.Common,
-                ViewFrames = () => asset.Frame.Views,
                 DirectTitle = "Правится: обработка кадра арен боя",
                 Sections = ArenaFrameSections,
                 DirectNote = ArenaFrameNote,
@@ -242,7 +240,6 @@ namespace KingdomSurvival.LocationRendering.Editor
                     if (rebuild) BuildLeft();
                 },
                 Rebuild = BuildLeft,
-                ViewSelected = () => driver?.RequestRedraw(),
                 Pulse = strength => ArenaFrameBinding.Current?.Hit(strength),
                 Hit = strength => ArenaFrameBinding.Current?.Hit(strength),
             };
@@ -257,8 +254,6 @@ namespace KingdomSurvival.LocationRendering.Editor
         public const string ArenaFrameNote = "На арене действуют: цвет, свет и линза (со всплеском, вспышкой и тряской при ударе), тон, холст и воздух (облака, лучи), " +
                                              "игровые состояния (красные края по здоровью вождя, вспышка, затемнение, полосы) и персонажи (подкраска и яркость фигур доски). " +
                                              "Эффекты рисунков и частицы атмосферы — свойства мира места: у рисунка арены MapLab их нет.";
-
-        private static string ViewName(string id) => MapLabGameViews.All().FirstOrDefault(item => item.Id == id).Name ?? id;
 
         // ------------------------------------------------------------------
         // Поля

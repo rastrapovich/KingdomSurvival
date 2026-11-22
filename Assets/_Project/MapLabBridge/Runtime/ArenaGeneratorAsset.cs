@@ -81,10 +81,10 @@ namespace KingdomSurvival.MapLabBridge
             return -1;
         }
 
-        // Обработка кадра арены для вида карты (null — выключена).
-        public static LocationPostEffects FrameFor(string viewId)
+        // Общая обработка кадра арены (null — выключена).
+        public static LocationPostEffects CurrentFrame()
         {
-            LocationPostEffects post = Load().Frame?.For(viewId);
+            LocationPostEffects post = Load().Frame?.Common;
             return post != null && post.Enabled ? post : null;
         }
 
@@ -221,33 +221,16 @@ namespace KingdomSurvival.MapLabBridge
         public MapLabArenaLook Clone() => (MapLabArenaLook)MemberwiseClone();
     }
 
-    // Обработка кадра арены: общая для всех видов карты и своя у вида.
+    // Обработка кадра арены: одна общая для всех арен.
     [Serializable]
     public sealed class ArenaFrameSettings
     {
         public LocationPostEffects Common = new LocationPostEffects();
-        public List<LocationViewFrame> Views = new List<LocationViewFrame>();
-
-        public static readonly string[] KnownViews = { MapLabMapViews.ClassicId, MapLabMapViews.GloomId, MapLabMapViews.SepiaId };
 
         public void Repair()
         {
             Common ??= new LocationPostEffects();
             Common.Repair();
-            Views ??= new List<LocationViewFrame>();
-            Views.RemoveAll(item => item == null || string.IsNullOrEmpty(item.ViewId));
-            foreach (string id in KnownViews)
-                View(id);
-            foreach (LocationViewFrame view in Views)
-            {
-                view.Post ??= new LocationPostEffects();
-                view.Post.Repair();
-            }
         }
-
-        public LocationViewFrame View(string viewId) => LocationFrameViews.Get(Views, viewId);
-
-        // Своя у вида — если включена; иначе общая (то же правило, что у мест).
-        public LocationPostEffects For(string viewId) => LocationFrameViews.Pick(Views, Common, viewId);
     }
 }

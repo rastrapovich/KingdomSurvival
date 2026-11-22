@@ -76,8 +76,8 @@ namespace KingdomSurvival.MapLabBridge.Editor
 
         private static bool cloudsOpen;
 
-        // Числа облаков тумана войны (рисунки — у видов карты, раздел
-        // «Виды карты» → «Облака тумана войны»). Игра подхватывает сразу.
+        // Числа облаков тумана войны (рисунки — окно «Генератор карты» →
+        // «Облака тумана войны»). Игра подхватывает сразу.
         private static void DrawFogClouds(WorldMapMovementSettingsAsset asset)
         {
             cloudsOpen = EditorGUILayout.Foldout(cloudsOpen, "Облака тумана войны (игра)", true);

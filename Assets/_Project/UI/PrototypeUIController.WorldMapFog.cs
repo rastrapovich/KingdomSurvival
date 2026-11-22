@@ -123,10 +123,17 @@ public partial class PrototypeUIController
         worldMapFog.style.backgroundSize = new BackgroundSize(Length.Percent(100f), Length.Percent(100f));
     }
 
+    // Цвет тумана войны — из настроек движения по карте (ассет KingdomSurvivalWorldMapMovement).
+    private static Color WorldMapFogColor()
+    {
+        WorldMapMovementSettingsAsset settings = WorldMapVisualRuntime.LoadMovementSettings();
+        return settings != null ? settings.FogColor : new Color(0.055f, 0.06f, 0.07f, 0.86f);
+    }
+
     private void RedrawWorldMapFog(WorldMapHexGrid grid)
     {
         WorldMapMovementSettingsAsset settings = WorldMapVisualRuntime.LoadMovementSettings();
-        Color fogColor = WorldMapViewFogColor();
+        Color fogColor = WorldMapFogColor();
         float softness = settings != null ? settings.FogEdgeSoftness : 0.45f;
         byte full = (byte)Mathf.RoundToInt(Mathf.Clamp01(fogColor.a) * 255f);
         byte edge = (byte)Mathf.RoundToInt(full * (1f - softness));

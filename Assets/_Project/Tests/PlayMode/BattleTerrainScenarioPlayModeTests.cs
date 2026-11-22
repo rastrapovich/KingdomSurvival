@@ -154,8 +154,6 @@ public sealed class BattleTerrainScenarioPlayModeTests
         List<MonoBehaviour> found = new List<MonoBehaviour>();
         yield return OpenSandbox(found);
         MonoBehaviour sandbox = found[0];
-        string savedView = MapLabMapViews.ActiveId;
-        MapLabMapViews.ActiveId = MapLabMapViews.ClassicId;
 
         (string Name, SandboxArenaTheme Theme, int Seed, string[] Fighters, string[] Enemies)[] scenarios =
         {
@@ -214,19 +212,16 @@ public sealed class BattleTerrainScenarioPlayModeTests
 
             if (s.Theme == SandboxArenaTheme.RuinedHillfort)
             {
-                // Вид меняет рисунок арены при сборке: тот же seed и состав заново.
-                foreach (string view in new[] { MapLabMapViews.ClassicId, MapLabMapViews.GloomId, MapLabMapViews.SepiaId })
+                // Повторная сборка: тот же seed и состав заново — раскладка не меняется.
                 {
-                    MapLabMapViews.ActiveId = view;
                     yield return StartScenario(sandbox, s.Theme, s.Seed, s.Fighters, s.Enemies);
                     SandboxBattle again = (SandboxBattle)Member(sandbox, "battle");
-                    Assert.AreEqual(battle.GroundCells.Count, again.GroundCells.Count, "Вид не меняет раскладку.");
+                    Assert.AreEqual(battle.GroundCells.Count, again.GroundCells.Count, "Повторная сборка не меняет раскладку.");
                     again.AddEffect(again.Units.First(u => u.Team == SandboxTeam.Enemy).Position.Neighbors().First(c => again.CanPlaceEffect(c, SandboxEffectKind.Fire) && again.GetUnitAt(c) == null), SandboxEffectKind.Fire, 2);
                     Invoke(sandbox, "RefreshBattleScreen");
                     for (int i = 0; i < 40; i++) yield return null;
-                    yield return Shot(s.Name + "_view_" + view);
+                    yield return Shot(s.Name + "_rebuild");
                 }
-                MapLabMapViews.ActiveId = MapLabMapViews.ClassicId;
 
                 // Плетень — слой доски: целый, затем сломанный (обломки).
                 yield return StartScenario(sandbox, s.Theme, s.Seed, s.Fighters, s.Enemies);
@@ -253,7 +248,6 @@ public sealed class BattleTerrainScenarioPlayModeTests
             if (objectsAfterFirst < 0)
                 objectsAfterFirst = objects;
         }
-        MapLabMapViews.ActiveId = savedView;
 
         // Замеры (до/после): прежний генератор против темы; путь и ход ИИ.
         Measure(null, "прежний генератор");

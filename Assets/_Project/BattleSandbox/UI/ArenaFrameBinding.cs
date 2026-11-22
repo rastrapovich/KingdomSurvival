@@ -9,7 +9,7 @@ namespace KingdomSurvival.BattleSandbox
     // (цвет, тон, линза) — внутри MapLabArena; здесь — проход «Холста» на
     // камере арены, всплеск линзы, вспышка и тряска при ударе, красные края
     // по здоровью вождя и подкраска фигур доски (раздел «Персонажи»).
-    // Обработка — общая или своя у текущего вида карты (ArenaGeneratorAsset).
+    // Обработка — общая (ArenaGeneratorAsset).
     public sealed class ArenaFrameBinding : IDisposable
     {
         // Последняя связка (кнопки проверки удара в окнах редактора).
@@ -27,7 +27,7 @@ namespace KingdomSurvival.BattleSandbox
             this.board = board;
             State = new ArenaFrameState
             {
-                PostSource = () => ArenaGeneratorAsset.FrameFor(MapLabGameViews.ActiveId),
+                PostSource = () => ArenaGeneratorAsset.CurrentFrame(),
                 LeaderHealth = () => board != null ? board.LeaderHealthShare : 1f,
             };
             if (arena != null)

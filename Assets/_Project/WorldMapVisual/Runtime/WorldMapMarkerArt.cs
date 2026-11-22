@@ -1,13 +1,11 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace KingdomSurvival.WorldMapVisual
 {
     // Рисунки меток карты мира («?» — неисследованное место, «!» — можно взять
-    // задание) по стилям видов карты: classic, sepia, gloom. Неизвестный вид —
-    // classic. Это UI-маркеры, не ассеты окружения: подбираются по ID вида,
-    // смысл и привязка метки от стиля не зависят. Видимая часть символа
+    // задание): один набор символов. Это UI-маркеры, не ассеты окружения;
+    // смысл и привязка метки от рисунка не зависят. Видимая часть символа
     // (alpha ≥ 128) — для размера без учёта прозрачных полей PNG.
     // Ассет создаёт и обновляет «Kingdom Survival → Карта → Метки карты: собрать».
     [CreateAssetMenu(fileName = "KingdomSurvivalWorldMapMarkers", menuName = "Kingdom Survival/Карта/Метки карты")]
@@ -15,8 +13,7 @@ namespace KingdomSurvival.WorldMapVisual
     {
         public const string ResourcesPath = "WorldMapVisual/KingdomSurvivalWorldMapMarkers";
         public const string AssetPath = "Assets/_Project/WorldMapVisual/Resources/WorldMapVisual/KingdomSurvivalWorldMapMarkers.asset";
-        public const string ArtRoot = "Assets/_Project/Art/MapMarkers";
-        public const string ClassicStyle = "classic";
+        public const string ArtRoot = "Assets/_Project/Art/MapMarkers/classic";
 
         [Tooltip("Высота видимой части символа на экране, px.")]
         [Range(16f, 64f)] public float SymbolHeight = 32f;
@@ -25,22 +22,10 @@ namespace KingdomSurvival.WorldMapVisual
         [Tooltip("Наименьшее расстояние между соседними метками, px (плотная деревня).")]
         [Range(0f, 40f)] public float MinSpacing = 26f;
 
-        public List<WorldMapMarkerStyle> Styles = new List<WorldMapMarkerStyle>();
+        public WorldMapMarkerSymbol Question = new WorldMapMarkerSymbol();
+        public WorldMapMarkerSymbol Exclamation = new WorldMapMarkerSymbol();
 
-        public WorldMapMarkerStyle Find(string styleId)
-        {
-            WorldMapMarkerStyle found = null, classic = null;
-            foreach (WorldMapMarkerStyle style in Styles)
-            {
-                if (style == null)
-                    continue;
-                if (style.Id == styleId)
-                    found = style;
-                if (style.Id == ClassicStyle)
-                    classic = style;
-            }
-            return found != null && found.IsComplete ? found : classic;
-        }
+        public bool IsComplete => Question?.Texture != null && Exclamation?.Texture != null;
 
         private static WorldMapMarkerArt loaded;
         private static bool searched;
@@ -54,16 +39,6 @@ namespace KingdomSurvival.WorldMapVisual
             }
             return loaded;
         }
-    }
-
-    [Serializable]
-    public sealed class WorldMapMarkerStyle
-    {
-        public string Id = WorldMapMarkerArt.ClassicStyle;
-        public WorldMapMarkerSymbol Question = new WorldMapMarkerSymbol();
-        public WorldMapMarkerSymbol Exclamation = new WorldMapMarkerSymbol();
-
-        public bool IsComplete => Question?.Texture != null && Exclamation?.Texture != null;
     }
 
     [Serializable]

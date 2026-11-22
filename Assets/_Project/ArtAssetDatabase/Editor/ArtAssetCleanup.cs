@@ -15,8 +15,7 @@ namespace KingdomSurvival.ArtAssets.Editor
     //     прежние записи до одного вида);
     //   - ни одного размещения в местах (объекты и раскидка Базы локаций);
     //   - не слот объекта арены (тег arena-object:…).
-    // Удаление: запись уходит из каталога, её файлы (рисунок, нормали, кадры,
-    // рисунки видов карты) — в резервную папку Logs/ArtCleanupBackup/<дата>
+    // Удаление: запись уходит из каталога, её файлы (рисунок, нормали, кадры) — в резервную папку Logs/ArtCleanupBackup/<дата>
     // (вне Assets, в Git не идёт); файл, на который ссылается оставшаяся
     // запись, не трогается.
     public static class ArtAssetCleanup
@@ -33,7 +32,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                 .ToList();
         }
 
-        // Пути файлов записи (рисунки, нормали, кадры, листы, рисунки видов карты).
+        // Пути файлов записи (рисунки, нормали, кадры, листы).
         public static HashSet<string> FilesOf(ArtAssetDefinition asset)
         {
             HashSet<string> paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -53,14 +52,6 @@ namespace KingdomSurvival.ArtAssets.Editor
                 foreach (Sprite sprite in view.SheetFrames ?? new List<Sprite>()) Add(sprite);
                 foreach (Texture2D normal in view.SheetNormals ?? new List<Texture2D>()) Add(normal);
             }
-            // Рисунки видов карты: Art/MapViews/<вид>/art_<ID>.png.
-            string root = "Assets/_Project/Art/MapViews";
-            if (AssetDatabase.IsValidFolder(root))
-                foreach (string folder in AssetDatabase.GetSubFolders(root))
-                {
-                    string candidate = folder + "/art_" + asset.Id + ".png";
-                    if (File.Exists(candidate)) paths.Add(candidate);
-                }
             return paths;
         }
 

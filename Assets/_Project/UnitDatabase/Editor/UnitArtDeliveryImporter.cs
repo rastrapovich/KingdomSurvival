@@ -8,34 +8,32 @@ using UnityEngine;
 
 namespace KingdomSurvival.UnitDatabase.Editor
 {
-    // Загрузка художественной поставки целиком (19.11.2026,
-    // ProjectDocs/CREATURE_VIEWS_ART_BRIEF.md): папка с файлами
-    // «<ID существа>__portrait|field__<ID вида>.png» в любых подпапках.
-    // Рисунок «Обычного» становится основным полем существа, рисунок
-    // другого вида — его слотом вида. Каждый файл проходит через
+    // Загрузка художественной поставки целиком: папка с файлами
+    // «<ID существа>__portrait|field__classic.png» в любых подпапках.
+    // Рисунок становится основным полем существа. Каждый файл проходит через
     // UnitArtImporter (копия в управляемую папку, импорт Sprite).
+    // Файлы с другим третьим элементом имени (в том числе прежние рисунки
+    // других видов облика) не импортируются: пропускаются с пояснением.
     public static class UnitArtDeliveryImporter
     {
         public const string FolderArgument = "-unitArtDeliveryFolder";
+        private const string DeliverySuffix = "classic";
 
         public readonly struct DeliveryFile
         {
-            public DeliveryFile(string path, string unitId, UnitArtKind kind, string viewId)
+            public DeliveryFile(string path, string unitId, UnitArtKind kind)
             {
                 Path = path;
                 UnitId = unitId;
                 Kind = kind;
-                ViewId = viewId;
             }
 
             public string Path { get; }
             public string UnitId { get; }
             public UnitArtKind Kind { get; }
-            public string ViewId { get; }
         }
 
-        // Имя файла → существо, вид рисунка и вид карты. Null — имя не по
-        // правилу поставки.
+        // Имя файла → существо и вид рисунка. Null — имя не по правилу поставки.
         public static DeliveryFile? Parse(string path)
         {
             if (!UnitArtImporter.IsImageFile(path))
@@ -50,12 +48,12 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 kind = UnitArtKind.Battlefield;
             else
                 return null;
-            if (!UnitArtViews.Ids.Contains(parts[2]))
+            if (parts[2] != DeliverySuffix)
                 return null;
-            return new DeliveryFile(path, parts[0], kind, parts[2]);
+            return new DeliveryFile(path, parts[0], kind);
         }
 
-        [MenuItem("Kingdom Survival/База существ/Загрузить поставку рисунков по видам…")]
+        [MenuItem("Kingdom Survival/База существ/Загрузить поставку рисунков…")]
         private static void ImportFromMenu()
         {
             string folder = EditorUtility.OpenFolderPanel("Папка поставки рисунков", string.Empty, string.Empty);
@@ -91,7 +89,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 if (parsed == null)
                 {
                     if (UnitArtImporter.IsImageFile(path))
-                        report.AppendLine("Пропущен (имя не по правилу): " + System.IO.Path.GetFileName(path));
+                        report.AppendLine("Пропущен (имя не по правилу; рисунки видов не поддерживаются): " + System.IO.Path.GetFileName(path));
                     continue;
                 }
                 if (database.FindById(parsed.Value.UnitId) == null)
@@ -102,37 +100,26 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 files.Add(parsed.Value);
             }
 
-            Undo.RecordObject(database, "Поставка рисунков по видам");
-            int classic = 0;
-            int views = 0;
-            List<(string unitId, string property, Sprite sprite)> classicFields = new List<(string, string, Sprite)>();
+            Undo.RecordObject(database, "Поставка рисунков");
+            int loaded = 0;
+            List<(string unitId, string property, Sprite sprite)> fields = new List<(string, string, Sprite)>();
             foreach (DeliveryFile file in files)
             {
-                Sprite sprite = UnitArtImporter.ImportExternal(file.Path, file.UnitId, file.Kind, file.ViewId, out string error);
+                Sprite sprite = UnitArtImporter.ImportExternal(file.Path, file.UnitId, file.Kind, out string error);
                 if (sprite == null)
                 {
                     report.AppendLine("Ошибка: " + error);
                     continue;
                 }
-                if (UnitArtViews.IsClassic(file.ViewId))
-                {
-                    classicFields.Add((file.UnitId, file.Kind == UnitArtKind.Portrait ? "portrait" : "battlefieldSprite", sprite));
-                    classic++;
-                    continue;
-                }
-                UnitViewArtData slot = database.FindById(file.UnitId).GetOrAddViewArt(file.ViewId);
-                if (file.Kind == UnitArtKind.Portrait)
-                    slot.SetPortrait(sprite);
-                else
-                    slot.SetBattlefieldSprite(sprite);
-                views++;
+                fields.Add((file.UnitId, file.Kind == UnitArtKind.Portrait ? "portrait" : "battlefieldSprite", sprite));
+                loaded++;
             }
             EditorUtility.SetDirty(database);
 
-            // Поля «Обычного» закрыты — через SerializedObject, как окно Базы.
+            // Поля существа закрыты — через SerializedObject, как окно Базы.
             SerializedObject serialized = new SerializedObject(database);
             SerializedProperty units = serialized.FindProperty("units");
-            foreach ((string unitId, string property, Sprite sprite) in classicFields)
+            foreach ((string unitId, string property, Sprite sprite) in fields)
             {
                 for (int i = 0; i < units.arraySize; i++)
                 {
@@ -146,8 +133,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
             serialized.ApplyModifiedProperties();
             AssetDatabase.SaveAssets();
 
-            report.Insert(0, "Загружено: " + (classic + views) + " (основные рисунки — " + classic + ", слоты видов — " + views + ")." +
-                             Environment.NewLine);
+            report.Insert(0, "Загружено: " + loaded + "." + Environment.NewLine);
             return report.ToString();
         }
     }

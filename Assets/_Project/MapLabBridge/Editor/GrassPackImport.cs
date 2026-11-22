@@ -4,18 +4,14 @@ using System.IO;
 using System.Linq;
 using KingdomSurvival.ArtAssets;
 using KingdomSurvival.ArtAssets.Editor;
-using KingdomSurvival.MapLab.Editor;
 using UnityEditor;
 using UnityEngine;
 
 namespace KingdomSurvival.MapLabBridge.Editor
 {
-    // Пакет луговой травы «15 вариантов × 3 вида» (папка с CATALOG_RU.csv,
-    // classic/, gloom/, sepia/):
+    // Пакет луговой травы «15 вариантов» (папка с CATALOG_RU.csv и classic/):
     //   • classic → записи Базы ассетов через ArtAssetPackImport (группа и высота
     //     из CSV, назначение «Карта и арена», теги grass-pack-15 и Grass_<ID>);
-    //   • gloom/sepia → Art/MapViews/<вид>/art_<ID записи>.png (имя Grass_* —
-    //     ID поставки, не ID записи Базы) и сбор рисунков видов.
     // Повторный запуск обновляет те же записи (по ключу пакета).
     //   -executeMethod KingdomSurvival.MapLabBridge.Editor.GrassPackImport.ImportBatch -grassFolder <папка>
     public static class GrassPackImport
@@ -33,7 +29,7 @@ namespace KingdomSurvival.MapLabBridge.Editor
         [MenuItem("Kingdom Survival/Арена/Импорт луговой травы…")]
         private static void ImportMenu()
         {
-            string folder = EditorUtility.OpenFolderPanel("Папка пакета травы (CATALOG_RU.csv, classic, gloom, sepia)", "", "");
+            string folder = EditorUtility.OpenFolderPanel("Папка пакета травы (CATALOG_RU.csv, classic)", "", "");
             if (!string.IsNullOrEmpty(folder))
                 EditorUtility.DisplayDialog("Луговая трава", Import(folder), "OK");
         }
@@ -53,7 +49,6 @@ namespace KingdomSurvival.MapLabBridge.Editor
             string imported = ArtAssetPackImport.Import(staging);
             ArtAssetDatabaseAsset catalog = AssetDatabase.LoadAssetAtPath<ArtAssetDatabaseAsset>(ArtAssetDatabaseAsset.AssetPath);
             List<string> report = new List<string> { imported };
-            int copied = 0;
             foreach (ArtAssetPackImport.Entry entry in ArtAssetPackImport.ReadCatalog(staging))
             {
                 string key = ArtAssetPackImport.PackKey(entry);
@@ -65,32 +60,16 @@ namespace KingdomSurvival.MapLabBridge.Editor
                 }
                 asset.Purpose = ArtAssetPurpose.ArenaOnly;
                 EditorUtility.SetDirty(catalog);
-                foreach (string view in new[] { "gloom", "sepia" })
-                {
-                    string source = Path.Combine(folder, view, entry.Id + "_" + view + ".png");
-                    if (!File.Exists(source))
-                    {
-                        report.Add(entry.Id + ": нет " + view);
-                        continue;
-                    }
-                    string targetFolder = "Assets/_Project/Art/MapViews/" + view;
-                    Directory.CreateDirectory(targetFolder);
-                    // Кайма вида очищается так же, как у classic; альфа и холст прежние.
-                    ArtAssetPackImport.Defringe(source, Path.Combine(targetFolder, "art_" + asset.Id + ".png"));
-                    copied++;
-                }
             }
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            MapLabGeneratorWindow.CollectViewArtBatch();
-            report.Add("рисунков видов скопировано: " + copied);
             return string.Join("; ", report);
         }
 
         // Трава глобальной карты (набор этапа 05, роли grass_tuft и grass_ink_tuft),
         // которую арена брала для ковра прямо из набора: переносится в Базу ассетов
         // записями «MapGrass_*» («Только арена»), чтобы управлять ею как остальными
-        // (размер, приоритет). Рисунки видов — из Art/MapViews/<вид>/Map05_<имя>.png.
+        // (размер, приоритет).
         //   -executeMethod KingdomSurvival.MapLabBridge.Editor.GrassPackImport.ImportMapGrassBatch
         private const float MapGrassHeight = 0.3f;
 
@@ -124,7 +103,6 @@ namespace KingdomSurvival.MapLabBridge.Editor
             File.WriteAllLines(Path.Combine(staging, "CATALOG_RU.csv"), csv, new System.Text.UTF8Encoding(false));
             string imported = ArtAssetPackImport.Import(staging);
             ArtAssetDatabaseAsset catalog = AssetDatabase.LoadAssetAtPath<ArtAssetDatabaseAsset>(ArtAssetDatabaseAsset.AssetPath);
-            int copied = 0;
             foreach ((string id, string stem) in items)
             {
                 string key = ArtAssetPackImport.PackKey(new ArtAssetPackImport.Entry { Id = id });
@@ -132,18 +110,10 @@ namespace KingdomSurvival.MapLabBridge.Editor
                 if (asset == null) continue;
                 asset.Purpose = ArtAssetPurpose.ArenaOnly;
                 EditorUtility.SetDirty(catalog);
-                foreach (string view in new[] { "gloom", "sepia" })
-                {
-                    string source = "Assets/_Project/Art/MapViews/" + view + "/Map05_" + stem + ".png";
-                    if (!File.Exists(source)) continue;
-                    File.Copy(source, "Assets/_Project/Art/MapViews/" + view + "/art_" + asset.Id + ".png", true);
-                    copied++;
-                }
             }
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            MapLabGeneratorWindow.CollectViewArtBatch();
-            return imported + "; рисунков видов: " + copied;
+            return imported;
         }
     }
 }

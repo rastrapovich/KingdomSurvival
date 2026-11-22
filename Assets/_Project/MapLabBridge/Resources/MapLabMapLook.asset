@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dc7ffdc1d90201469095da150dcf5b8, type: 3}
+  m_Name: MapLabMapLook
+  m_EditorClassIdentifier: KingdomSurvival.MapLab::KingdomSurvival.MapLab.MapLabMapLook
+  FogClouds:
+  - {fileID: 2800000, guid: 09f10f9e03f6b454c8e263b7c030e88c, type: 3}
+  - {fileID: 2800000, guid: c9c483c9aab5b00489959a2513a27a20, type: 3}
+  - {fileID: 2800000, guid: 202403d9a2b7a934cba7e757c79f212c, type: 3}
+  - {fileID: 2800000, guid: 2930cbd5113732a4688775c11474fb06, type: 3}
+  - {fileID: 2800000, guid: a0e813728a608444187fc7f1dccd7569, type: 3}
+  FogCloudBrightness: 0.95
+  FogCloudHue: 0
+  FogCloudSaturation: 0.8
+  FogCloudLevels:
+    InputBlack: 0
+    InputWhite: 255
+    Gamma: 0.95
+    OutputBlack: 40
+    OutputWhite: 222

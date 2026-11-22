@@ -18,8 +18,7 @@ using UnityEngine.UIElements;
 // раз отплывает от героя и тает, затем убирается из слоя. Проверяются только
 // облака в корзинах пространственной сетки рядом с отрезком; полный проход —
 // лишь при новом открытии тумана, не чаще нескольких раз в секунду.
-// Смена вида меняет только рисунки облаков. Рисунки видов — окно
-// «Генератор карты» → «Виды карты» → «Облака тумана войны»; числа — ассет
+// Рисунки облаков — окно «Генератор карты» → «Облака тумана войны»; числа — ассет
 // настроек движения, раздел «Облака тумана войны».
 public partial class PrototypeUIController
 {
@@ -254,11 +253,11 @@ public partial class PrototypeUIController
         return by * worldMapFogCloudBucketColumns + bx;
     }
 
-    // Рисунки облаков выбранного вида. Смена вида — только смена картинок:
-    // раскладка, рассеянные облака и данные исследования не трогаются.
+    // Рисунки облаков (облик карты MapLabMapLook). Смена картинок или их цвета —
+    // только смена картинок: раскладка, рассеянные облака и данные исследования не трогаются.
     private void ApplyWorldMapFogCloudTextures(WorldMapMovementSettingsAsset settings)
     {
-        List<Texture2D> textures = MapLabGameViews.FogCloudsAdjusted(out string fallback, out string adjustKey);
+        List<Texture2D> textures = MapLabGameLook.FogCloudsAdjusted(out string adjustKey);
         string shadowKey = settings == null ? "-" : settings.FogCloudShadows + "|" + settings.FogCloudShadowOffsetHexes.x + "|" + settings.FogCloudShadowOffsetHexes.y + "|" +
             settings.FogCloudShadowScale + "|" + settings.FogCloudShadowBlur + "|" + settings.FogCloudShadowColor;
         string key = adjustKey + ":" + shadowKey + ":";
@@ -271,10 +270,8 @@ public partial class PrototypeUIController
         worldMapFogCloudsCovering = textures.Count > 0;
 
         string warning = textures.Count == 0
-            ? "Облака тумана: у вида «" + MapLabGameViews.ActiveName + "» и у вида «Обычный» нет рисунков облаков — показана только маска тумана (Генератор карты → Виды карты → Облака тумана войны)."
-            : fallback != null
-                ? "Облака тумана: у вида «" + MapLabGameViews.ActiveName + "» нет своих рисунков облаков — взяты облака вида «" + fallback + "»."
-                : null;
+            ? "Облака тумана: у облика карты нет рисунков облаков — показана только маска тумана (Генератор карты → Облака тумана войны)."
+            : null;
         if (warning != null && warning != worldMapFogCloudsWarned)
             Debug.LogWarning(warning);
         worldMapFogCloudsWarned = warning;
@@ -465,7 +462,7 @@ public partial class PrototypeUIController
         {
             if (!worldMapFogCloudShadowTextures.TryGetValue(textures[i], out Texture2D shadow) || shadow == null)
             {
-                shadow = MapLabGameViews.CreateFogCloudShadow(textures[i], FogCloudShadowPad, blur);
+                shadow = MapLabGameLook.CreateFogCloudShadow(textures[i], FogCloudShadowPad, blur);
                 worldMapFogCloudShadowTextures[textures[i]] = shadow;
             }
             if (shadow != null)

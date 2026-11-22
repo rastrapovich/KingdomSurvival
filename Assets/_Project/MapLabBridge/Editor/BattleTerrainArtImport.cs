@@ -3,18 +3,16 @@ using System.IO;
 using System.Linq;
 using KingdomSurvival.ArtAssets;
 using KingdomSurvival.ArtAssets.Editor;
-using KingdomSurvival.MapLab.Editor;
 using UnityEditor;
 using UnityEngine;
 
 namespace KingdomSurvival.MapLabBridge.Editor
 {
     // Бриф «Поверхности арены»: импорт набора объектов местности арены
-    // (BATTLE_TERRAIN_ART_REQUEST.md) — папка с classic/, gloom/, sepia/.
+    // (BATTLE_TERRAIN_ART_REQUEST.md) — папка с classic/.
     //   • classic → запись Базы ассетов: «Только арена», PPU 108, опора из
     //     набора (центр, 12 % высоты), тег слота arena-object:<вид>;
-    //   • gloom/sepia → Art/MapViews/<вид>/art_<ID записи>.png и сбор рисунков
-    //     видов. Повторный запуск обновляет те же записи (по имени).
+    //   Повторный запуск обновляет те же записи (по имени).
     //   -executeMethod KingdomSurvival.MapLabBridge.Editor.BattleTerrainArtImport.ImportBatch -terrainArtFolder <папка>
     public static class BattleTerrainArtImport
     {
@@ -45,7 +43,7 @@ namespace KingdomSurvival.MapLabBridge.Editor
         [MenuItem("Kingdom Survival/Арена/Импорт объектов местности…")]
         private static void ImportMenu()
         {
-            string folder = EditorUtility.OpenFolderPanel("Папка набора (classic, gloom, sepia)", "", "");
+            string folder = EditorUtility.OpenFolderPanel("Папка набора (classic)", "", "");
             if (!string.IsNullOrEmpty(folder))
                 EditorUtility.DisplayDialog("Объекты местности арены", Import(folder), "OK");
         }
@@ -81,22 +79,12 @@ namespace KingdomSurvival.MapLabBridge.Editor
                 asset.Tags ??= new List<string>();
                 asset.Tags.RemoveAll(tag => tag != null && tag.StartsWith(MapLabArtAssets.ArenaObjectTagPrefix));
                 asset.Tags.Add(MapLabArtAssets.ArenaObjectTagPrefix + kind);
-                foreach (string view in new[] { "gloom", "sepia" })
-                {
-                    string source = Path.Combine(folder, view, file + "_" + view + ".png");
-                    if (!File.Exists(source))
-                        continue;
-                    string targetFolder = "Assets/_Project/Art/MapViews/" + view;
-                    Directory.CreateDirectory(targetFolder);
-                    File.Copy(source, Path.Combine(targetFolder, "art_" + asset.Id + ".png"), true);
-                }
                 report.Add(file + " → " + asset.Id + " (" + kind + ")");
             }
             catalog.MarkChanged();
             EditorUtility.SetDirty(catalog);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            MapLabGeneratorWindow.CollectViewArtBatch();
             return string.Join("; ", report);
         }
     }

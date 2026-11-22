@@ -331,7 +331,7 @@ Shader "Kingdom Survival/MapLab/Water"
                     c05 = MapLabShadow(c05, (1.0 - shade05.r) * _CastShadow * 0.7, _ShadowTint.rgb);
                     float4 p05 = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, world / 23.0 + float2(0.11, 0.53));
                     c05 *= 1.0 + (p05.a - 0.5) * _Paper * 0.1;
-                    return float4(MapLabViewGrade(MapLabSaturate(c05, _Saturation)), 1);
+                    return float4(MapLabSaturate(c05, _Saturation), 1);
                 }
 
                 float2 flow = normalize(i.flow + float2(1e-4, 0));
@@ -364,7 +364,7 @@ Shader "Kingdom Survival/MapLab/Water"
                 float4 p = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, world / 23.0 + float2(0.11, 0.53));
                 c *= 1.0 + (p.a - 0.5) * _Paper * 0.15;
                 c = MapLabSaturate(c, _Saturation);
-                return float4(MapLabViewGrade(c), 1);
+                return float4(c, 1);
             }
             ENDHLSL
         }

@@ -334,7 +334,9 @@ namespace KingdomSurvival.BattleSandbox
         // Бриф «Поверхности арены»: урон поверхности (огонь, колючки, яд, ток).
         Environment,
         // Пакет состояний: фиксированный урон состояния (тик, взрыв, перенос).
-        Status
+        Status,
+        // Бриф завершения, этап 5: удар-реакция (за выход, месть за соседа).
+        Reaction
     }
 
     // ПР-12З: запись одного удара. Исход уже применён моделью; представление
@@ -552,7 +554,7 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState unit = GetUnit(unitId);
             Dictionary<HexCoord, int> result = new Dictionary<HexCoord, int>();
             if (HasPendingRetaliation || unit == null || unit.IsDefeated ||
-                unit.ActionPoints <= 0 || unit.RemainingMovement <= 0 || unit.IsOffBoard)
+                (unit.ActionPoints <= 0 && unit.passive.MoveAfterActionBudget <= 0) || unit.RemainingMovement <= 0 || unit.IsOffBoard)
                 return result;
             result = BuildReachable(unit, unit.RemainingMovement);
             FilterStatusReachable(unit, result);
@@ -640,7 +642,7 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState unit = CurrentUnit;
             if (Phase != SandboxBattlePhase.InProgress || unit == null || unit.Id != unitId)
                 return false;
-            if (unit.ActionPoints <= 0)
+            if (unit.ActionPoints <= 0 && unit.passive.MoveAfterActionBudget <= 0)
             {
                 message = "У бойца не осталось действий.";
                 return false;
@@ -667,10 +669,19 @@ namespace KingdomSurvival.BattleSandbox
             int movementCost = reachable[destination];
             // Бриф «Поверхности арены»: шаг за шагом — опасность клеток пути
             // один раз на вид за цикл; павший останавливается на своей клетке.
+            bool leaveInterrupted = false;
             if (SandboxMovementPath.TryBuild(this, unitId, destination, out IReadOnlyList<HexCoord> steps, out _) && steps.Count > 1)
             {
                 for (int i = 1; i < steps.Count && !unit.IsDefeated; i++)
                 {
+                    // Бриф завершения, этап 5: реакции на уход — до пересечения ребра.
+                    if (!ResolveLeaveReactions(unit, steps[i - 1], steps[i]))
+                    {
+                        destination = unit.Position;
+                        movementCost = destination == origin ? 0 : reachable.TryGetValue(destination, out int traveled) ? traveled : movementCost;
+                        leaveInterrupted = true;
+                        break;
+                    }
                     SetUnitPosition(unit, steps[i]);
                     ApplyHazardsAt(unit, steps[i]);
                     if (!unit.IsDefeated)
@@ -690,7 +701,11 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
             SetUnitPosition(unit, destination);
+            if (unit.passive.MoveAfterActionBudget > 0 && unit.ActionPoints <= 0)
+                unit.passive.MoveAfterActionBudget = 0;
             unit.MovedThisActivation = unit.MovedThisActivation || destination != origin;
+            if (destination != origin)
+                ResolvePursuers(unit, origin);
             if (destination != origin)
             {
                 // Пакет состояний/тегов: темп, липкий отход, маскировка в движении.
@@ -708,6 +723,13 @@ namespace KingdomSurvival.BattleSandbox
                 unit.RemainingMovement = 0;
                 unit.ActsWithoutMovement = true;
                 message += " Нить останавливает движение — можно ударить с места, встать в стойку или закончить ход.";
+                return true;
+            }
+            if (leaveInterrupted && !unit.IsDefeated && unit.ActionPoints > 0)
+            {
+                unit.RemainingMovement = 0;
+                unit.ActsWithoutMovement = true;
+                message += " Движение прервано реакцией — можно действовать с места.";
                 return true;
             }
             if (unit.RemainingMovement == 0)
@@ -923,7 +945,7 @@ namespace KingdomSurvival.BattleSandbox
             // «Упреждающий удар»: носитель в защитной стойке отвечает на ближнюю
             // атаку до удара противника.
             string firstStrike = string.Empty;
-            if (target.IsGuarding && target.HasPerk(SandboxPerks.FirstStrike) && target.CanRetaliate &&
+            if (((target.IsGuarding && target.HasPerk(SandboxPerks.FirstStrike)) || HasPassive(target, SandboxPassiveKind.RetaliateFirst)) && target.CanRetaliate &&
                 attacker.AttackRange == 1 && attacker.Position.DistanceTo(target.Position) == 1)
             {
                 int counter = BuildAttackPreview(target, attacker, target.Position, retaliation: true).Damage;
@@ -973,22 +995,59 @@ namespace KingdomSurvival.BattleSandbox
             message += RevealTarget(target);
 
             EvaluateBattleOutcome();
+            bool rangedAttack = attacker.Position.DistanceTo(target.Position) > 1;
+            if (!rangedAttack)
+                attacker.passive.HitAndRunTargets.Add(target.Id);
+            // Бриф завершения, этапы 5–6: месть соседа, второй выстрел сразу.
+            ResolveAvengers(attacker, target);
+            if (rangedAttack)
+                message += ResolveFollowUpHit(attacker, target, true);
+            EvaluateBattleOutcome();
             if (Phase == SandboxBattlePhase.InProgress &&
                 attacker.AttackRange == 1 &&
-                !target.IsDefeated &&
+                !target.IsDefeated && !attacker.IsDefeated &&
                 !HasPassive(attacker, SandboxPassiveKind.NoProvokedRetaliation) &&
                 target.CanRetaliate &&
                 attacker.Position.DistanceTo(target.Position) == 1)
             {
                 pendingRetaliationDefenderId = target.Id;
                 pendingRetaliationAttackerId = attacker.Id;
+                pendingSequenceAttackerId = attacker.Id;
+                pendingSequenceTargetId = target.Id;
             }
             else if (Phase != SandboxBattlePhase.InProgress)
             {
                 ClearPendingRetaliation();
             }
+            else if (!rangedAttack)
+            {
+                message += FinishMeleeSequence(attacker, target);
+            }
 
             return true;
+        }
+
+        private string pendingSequenceAttackerId;
+        private string pendingSequenceTargetId;
+
+        // После ответа (или без него): второе ближнее попадание и «Удар и возврат».
+        private string FinishMeleeSequence(SandboxUnitState attacker, SandboxUnitState target)
+        {
+            pendingSequenceAttackerId = null;
+            pendingSequenceTargetId = null;
+            if (attacker == null || attacker.IsDefeated || Phase != SandboxBattlePhase.InProgress)
+                return string.Empty;
+            string note = ResolveFollowUpHit(attacker, target, false);
+            if (HasPassive(attacker, SandboxPassiveKind.StrikeAndReturn) && CurrentUnit == attacker &&
+                attacker.Position != attacker.passive.ActivationStartPosition && IsFreeCell(attacker.passive.ActivationStartPosition) &&
+                attacker.MovedThisActivation)
+            {
+                HexCoord back = attacker.passive.ActivationStartPosition;
+                SetUnitPosition(attacker, back);
+                note += " " + attacker.DisplayLabel + " возвращается на " + back + " («Удар и возврат»).";
+            }
+            EvaluateBattleOutcome();
+            return note;
         }
 
         public SandboxAttackPreview PreviewPendingRetaliation()
@@ -1039,6 +1098,8 @@ namespace KingdomSurvival.BattleSandbox
                       preview.Damage + " урона" +
                       (attacker.IsDefeated ? " и выводит атакующего из строя." : StillStandingNote(attacker, attackerStanding) + ".");
             message += ResolveAfterReaction();
+            if (pendingSequenceAttackerId == attacker.Id)
+                message += FinishMeleeSequence(attacker, GetUnit(pendingSequenceTargetId));
             EvaluateBattleOutcome();
             return true;
         }
@@ -1436,6 +1497,8 @@ namespace KingdomSurvival.BattleSandbox
             if (HasPackBonus(attacker, target, attackPosition))
                 effectiveAttack += SandboxCombatTagRules.PackAttackBonus;
             bool rangedHit = attackPosition.DistanceTo(target.Position) > 1;
+            if (halfAttackHit)
+                effectiveAttack *= 0.5m;
             // Пакет состояний: временные модификаторы Атаки (предел ±2).
             effectiveAttack = Math.Max(0m, effectiveAttack + StatusAttackMod(attacker, target, rangedHit, retaliation: retaliation));
             // Пакет тегов: постоянные условия — отдельно от предела состояний.

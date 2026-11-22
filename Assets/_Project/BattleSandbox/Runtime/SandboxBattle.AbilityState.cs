@@ -519,6 +519,7 @@ namespace KingdomSurvival.BattleSandbox
 
         private void ProcessActivationEnd(SandboxUnitState unit)
         {
+            unit.passive.MoveAfterActionBudget = 0;
             // Окно иммунитета многонога закрывается в конце хода без оцепенения.
             if (unit.NumbImmunityCounted && !unit.IsNumbed)
             {

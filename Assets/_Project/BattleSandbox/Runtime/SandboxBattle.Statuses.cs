@@ -674,7 +674,8 @@ namespace KingdomSurvival.BattleSandbox
         }
 
         private static bool IsDirectHit(SandboxHitKind kind) =>
-            kind == SandboxHitKind.Attack || kind == SandboxHitKind.FirstStrike || kind == SandboxHitKind.Retaliation || kind == SandboxHitKind.Ability;
+            kind == SandboxHitKind.Attack || kind == SandboxHitKind.FirstStrike || kind == SandboxHitKind.Retaliation || kind == SandboxHitKind.Ability ||
+            kind == SandboxHitKind.Reaction;
 
         // Вызывается из ApplyHit до снятия HP: щиты, неуязвимость, перенос,
         // расход зарядов. Возвращает урон, который дойдёт до HP цели.

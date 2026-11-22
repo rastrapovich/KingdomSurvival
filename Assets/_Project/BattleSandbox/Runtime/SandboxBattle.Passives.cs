@@ -585,6 +585,15 @@ namespace KingdomSurvival.BattleSandbox
                             trt.ChargedAttackExpires = target.ActivationCount + rule.Value2;
                         }
                     }
+                    if (!target.IsDefeated && !ranged && hpTaken == 0 && kind != SandboxHitKind.Reaction)
+                    {
+                        SandboxPassiveRule prick = ReadyRule(target, SandboxPassiveKind.BlockRetort);
+                        if (prick != null && !striker.IsDefeated && striker.Position.DistanceTo(target.Position) == 1)
+                        {
+                            MarkUsed(target, prick, null);
+                            DealStatusDamage(striker, prick.Value, target, RuleName(prick), SandboxDamageType.Physical);
+                        }
+                    }
                     if (!target.IsDefeated && !ranged)
                     {
                         foreach ((SandboxPassiveDefinition def, SandboxPassiveRule rule) in Rules(target, SandboxPassiveKind.OnHitTakenApplyStatusToAttacker).ToList())
@@ -670,6 +679,14 @@ namespace KingdomSurvival.BattleSandbox
         private void OnPassiveKill(SandboxUnitState killer, SandboxUnitState victim, bool ranged)
         {
             SandboxPassiveRuntime rt = killer.passive;
+            SandboxPassiveRule rush = CurrentUnit == killer && string.IsNullOrEmpty(victim.SpawnedBySourceId) ? ReadyRule(killer, SandboxPassiveKind.MoveAfterKill) : null;
+            if (rush != null)
+            {
+                MarkUsed(killer, rush, null);
+                rt.MoveAfterActionBudget = rush.Value;
+                killer.RemainingMovement = Math.Max(killer.RemainingMovement, rush.Value);
+                Log(killer.DisplayLabel + ": " + RuleName(rush) + " — +" + rush.Value + " движения (без атаки).");
+            }
             foreach ((SandboxPassiveDefinition def, SandboxPassiveRule rule) in Rules(killer, SandboxPassiveKind.OnKillOutgoingNextTurn))
             {
                 rt.OutgoingNextTurnActivation = killer.ActivationCount + 1;
@@ -797,6 +814,9 @@ namespace KingdomSurvival.BattleSandbox
         {
             SandboxPassiveRuntime rt = unit.passive;
             bool lastTurnNoAttack = rt.Counter("turn.noattack") > 0;
+            rt.HitAndRunTargets.Clear();
+            rt.ActivationStartPosition = unit.Position;
+            rt.MoveAfterActionBudget = 0;
             rt.TookDamageThisTurn = false;
             rt.AttackedThisTurn = false;
             rt.ShotThisTurn = false;

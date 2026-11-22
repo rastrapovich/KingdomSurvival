@@ -116,6 +116,17 @@ namespace KingdomSurvival.BattleSandbox
         ColdHitRimeCell,
         ColdHitMarkNext,
         ElectricWaterImmune,
+        // Этапы 5–6: реакции на движение и несколько попаданий.
+        LeaveAdjacencyStrike,
+        HitAndRun,
+        FollowRetreatingEnemy,
+        AvengeAdjacentAlly,
+        BlockRetort,
+        RetaliateFirst,
+        StrikeAndReturn,
+        MoveAfterKill,
+        SecondShot,
+        SecondMeleeHit,
         // Прежнее правило под другим ID (Стая, ходьба по местности).
         Alias,
         // Политика без собственного эффекта (совпадает с общим правилом).
@@ -309,6 +320,12 @@ namespace KingdomSurvival.BattleSandbox
         internal string ColdMarkTargetId;
         internal int ColdMarkExpires = -1;
         internal int ColdMarkValue;
+        // Реакции и последовательности: цели удара в этот ход, корень второго попадания,
+        // позиция начала хода, движение после убийства.
+        internal readonly HashSet<string> HitAndRunTargets = new HashSet<string>(StringComparer.Ordinal);
+        internal int FollowUpRoot = -1;
+        internal HexCoord ActivationStartPosition;
+        public int MoveAfterActionBudget { get; internal set; }
         public int Counter(string key) => Counters.TryGetValue(key, out int value) ? value : 0;
         public int Stack(string key) => Stacks.TryGetValue(key, out int value) ? value : 0;
     }

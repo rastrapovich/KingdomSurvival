@@ -108,6 +108,24 @@ namespace KingdomSurvival.BattleSandbox
                     effectProfile: P("thin_rime", duration: 1, mode: "thin_rime"));
 
             RegisterSupportAndMagic();
+            RegisterMovementAndSequences();
+        }
+
+        // Этапы 5–6: реакции на движение и несколько попаданий одного действия.
+        private static void RegisterMovementAndSequences()
+        {
+            const string q = "passive.20261119.";
+            T(q + "249", "Оппортунист").R(K.LeaveAdjacencyStrike, 0, limit: L.PerRound);
+            T(q + "103", "Бьёт уходящего по ногам").R(K.LeaveAdjacencyStrike, 1, limit: L.PerRound);
+            T("passive.20261119b.008", "Бьёт и отступает").R(K.HitAndRun);
+            T("tactic.pursuer", "Идёт следом").R(K.FollowRetreatingEnemy, limit: L.PerRound);
+            T("passive.20261119b.010", "Мстит за соседнего").R(K.AvengeAdjacentAlly, limit: L.PerRound);
+            T(q + "112", "Автоматический укол").R(K.BlockRetort, 1, limit: L.PerRound);
+            T(q + "207", "Ответ прежде удара").R(K.RetaliateFirst);
+            T(q + "020", "Удар и возврат").R(K.StrikeAndReturn);
+            T(q + "086", "Победа окрыляет").R(K.MoveAfterKill, 2, limit: L.PerOwnTurn);
+            T(q + "226", "Два выстрела").R(K.SecondShot);
+            T(q + "227", "Два ближних удара").R(K.SecondMeleeHit);
         }
 
         // Этапы 3–4: теги лечения, заклинаний и типов урона.

@@ -38,7 +38,7 @@ MonoBehaviour:
       clips:
       - action: 1
         clipKey: 
-        framesPerSecond: 12
+        framesPerSecond: 14.7
         playback: 0
         impactTime: 0.5
         useSourceTiming: 0
@@ -118,6 +118,7 @@ MonoBehaviour:
           - {fileID: 554304249, guid: 9d35706c267ea8345895bce88fa5d464, type: 3}
           sourceFrameNumbers: 0100000002000000030000000400000005000000060000000700000008000000
           offset: {x: 0, y: 0}
-    heightInHexes: 0.4
-    strideHexesPerCycle: 0.5
+    heightInHexes: 0.3
+    strideHexesPerCycle: 0.81
+    syncCadenceToSpeed: 0
   heroSetId: hero

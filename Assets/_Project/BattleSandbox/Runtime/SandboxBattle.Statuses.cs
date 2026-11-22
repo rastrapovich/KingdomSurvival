@@ -75,13 +75,16 @@ namespace KingdomSurvival.BattleSandbox
         }
 
         // Сумма временных модификаторов Атаки от состояний (предел ±2).
-        internal int StatusAttackMod(SandboxUnitState attacker, SandboxUnitState target, bool ranged, bool consume = false)
+        internal int StatusAttackMod(SandboxUnitState attacker, SandboxUnitState target, bool ranged, bool consume = false, bool retaliation = false)
         {
             if (attacker == null)
                 return 0;
             int sum = 0;
             foreach ((SandboxStatusInstance instance, SandboxStatusOp op) in OpsOf(attacker, SandboxStatusOpKind.AttackMod))
             {
+                if (retaliation && attacker.IsGuarding &&
+                    Rules(attacker, SandboxPassiveKind.RetaliationIgnoresStatus).Any(pair => pair.Rule.StatusIds.Contains(instance.StatusId)))
+                    continue;
                 switch (op.Filter)
                 {
                     case SandboxStatusFilter.Melee: if (!ranged) sum += V(instance, op); break;
@@ -149,8 +152,10 @@ namespace KingdomSurvival.BattleSandbox
         }
 
         // Базовый Урон до формулы: однотипные уменьшения не складываются.
-        internal static int StatusBaseDamage(SandboxUnitState attacker, bool ranged)
+        internal int StatusBaseDamage(SandboxUnitState attacker, bool ranged)
         {
+            if (ReadyRule(attacker, SandboxPassiveKind.BasePenaltyIgnoreOnce) != null && (attacker.HasStatus("status.099") || attacker.HasStatus("status.088")))
+                return Math.Max(1, attacker.Damage);
             int strongest = 0;
             foreach ((SandboxStatusInstance instance, SandboxStatusOp op) in OpsOf(attacker, SandboxStatusOpKind.BaseDamageMod))
             {
@@ -165,6 +170,9 @@ namespace KingdomSurvival.BattleSandbox
         // больше +2, из уменьшений действует сильнейшее (не больше 1).
         internal int StatusFlatDamage(SandboxUnitState attacker, SandboxUnitState target, bool ranged, SandboxDamageType type, bool consume)
         {
+            // «Снимает тяжесть удара»: штраф «Ослаблен ударом» один раз не действует.
+            bool ignorePenalty = attacker != null && ReadyRule(attacker, SandboxPassiveKind.BasePenaltyIgnoreOnce) != null &&
+                                 (attacker.HasStatus("status.088") || attacker.HasStatus("status.099"));
             int bonus = 0;
             int reduction = 0;
             void Count(int value)
@@ -177,6 +185,8 @@ namespace KingdomSurvival.BattleSandbox
             {
                 if (op.ConsumesUse && instance.UsesLeft <= 0)
                     continue;
+                if (ignorePenalty && instance.StatusId == "status.088")
+                    continue;
                 Count(op.Value);
                 if (consume && op.ConsumesUse)
                     ConsumeUse(attacker, instance, "израсходовано");
@@ -184,6 +194,19 @@ namespace KingdomSurvival.BattleSandbox
             // «Не подпускает палача»: сокращение 1, общее с остальными плоскими (берётся большее).
             if (GuardAuraReduction(attacker, target, consume))
                 Count(-1);
+            if (target != null && attacker != null && attacker.Team != target.Team)
+            {
+                foreach ((SandboxPassiveDefinition _, SandboxPassiveRule vow) in Rules(target, SandboxPassiveKind.VowReduceWhileStatus))
+                {
+                    SandboxStatusInstance curse = vow.StatusIds.Select(id => FindStatus(target, id)).FirstOrDefault(item => item != null);
+                    if (curse == null || target.passive.UsedInBattle.Contains(vow.Key + "@" + curse.InstanceId))
+                        continue;
+                    Count(-vow.Value);
+                    if (consume)
+                        target.passive.UsedInBattle.Add(vow.Key + "@" + curse.InstanceId);
+                }
+            }
+
             if (target != null)
             {
                 foreach ((SandboxStatusInstance instance, SandboxStatusOp op) in OpsOf(target, SandboxStatusOpKind.IncomingFlat).ToList())
@@ -205,6 +228,13 @@ namespace KingdomSurvival.BattleSandbox
                                 continue;
                             if (consume)
                                 instance.StoredValue = 1;
+                            SandboxPassiveRule mend = ReadyRule(target, SandboxPassiveKind.StatusExtraDamageReduceOnce, null, instance.StatusId);
+                            if (mend != null)
+                            {
+                                if (consume)
+                                    MarkUsed(target, mend, null);
+                                continue;
+                            }
                             break;
                         default:
                             if (op.Value > 0 && !enemy)
@@ -221,8 +251,20 @@ namespace KingdomSurvival.BattleSandbox
             return Math.Min(SandboxStatusRules.MaxFlatBonus, bonus) - Math.Min(SandboxStatusRules.MaxFlatReduction, reduction);
         }
 
+        private readonly Dictionary<string, int> markConsumedAtRoot = new Dictionary<string, int>(StringComparer.Ordinal);
+
         private void ConsumeUse(SandboxUnitState owner, SandboxStatusInstance instance, string what)
         {
+            // «Клинок находит метку»: несколько попаданий одного действия тратят 1 заряд метки.
+            if ((instance.StatusId == "status.098" || instance.StatusId == "status.102") && CurrentUnit != null)
+            {
+                SandboxPassiveRule once = ReadyRule(CurrentUnit, SandboxPassiveKind.MarkConsumeOncePerAction);
+                string key = instance.InstanceId;
+                if (once != null && markConsumedAtRoot.TryGetValue(key, out int root) && root == currentRootAction)
+                    return;
+                if (once != null)
+                    markConsumedAtRoot[key] = currentRootAction;
+            }
             instance.UsesLeft = Math.Max(0, instance.UsesLeft - 1);
             StatusRevision++;
             if (instance.UsesLeft <= 0)
@@ -302,7 +344,14 @@ namespace KingdomSurvival.BattleSandbox
                 {
                     ConsumeUse(target, mirror, "отразила чары");
                     Log(target.DisplayLabel + ": «Зеркальная защита» возвращает «" + def.Name + "» в " + source.DisplayLabel + ".");
-                    SandboxStatusApplyResult back = ApplyStatusInternal(statusId, source, target, profile, supernatural, reflected: true);
+                    SandboxPassiveRule mirrorGuard = ReadyRule(source, SandboxPassiveKind.ReflectImmunityOnce);
+                    if (mirrorGuard != null)
+                    {
+                        MarkUsed(source, mirrorGuard, null);
+                        Log(source.DisplayLabel + ": " + RuleName(mirrorGuard) + " — отражённое состояние не проходит.");
+                    }
+                    else
+                        ApplyStatusInternal(statusId, source, target, profile, supernatural, reflected: true);
                     return Reject(result, "отражено в источник");
                 }
                 SandboxStatusInstance ward = target.statuses.FirstOrDefault(item => item.Definition.HasSpecial("WardSupernatural") && item.UsesLeft > 0);
@@ -319,6 +368,17 @@ namespace KingdomSurvival.BattleSandbox
 
             if (def.StrongControl && (target.StrongControlGuard || target.statuses.Any(item => item.Definition.StrongControl)))
                 return Reject(result, target.DisplayLabel + " невосприимчив: защита от повторного сильного контроля", target);
+
+            // Бриф завершения, этап 2: реакции до наложения (отмена/замена/срок).
+            string requested = statusId;
+            string reactionBlock = ReactionAttempt(ref statusId, target, source, ref profile);
+            if (reactionBlock != null)
+            {
+                Emit(SandboxCombatEventKind.StatusRejected, source, target, e => { e.StatusId = requested; e.Note = reactionBlock; });
+                return Reject(result, reactionBlock, target);
+            }
+            if (statusId != requested)
+                return ApplyStatusInternal(statusId, target, source, profile, supernatural, reflected);
 
             // Взаимная отмена удачи и невезения.
             if (statusId == SandboxStatusCatalog.GoodLuck || statusId == SandboxStatusCatalog.BadLuck)
@@ -348,6 +408,7 @@ namespace KingdomSurvival.BattleSandbox
                     result.Instance = existing;
                     result.Message = target.DisplayLabel + ": «" + def.Name + "» — срок обновлён.";
                     Log(result.Message);
+                    Emit(SandboxCombatEventKind.StatusRefreshed, source, target, e => { e.StatusId = statusId; e.StatusInstanceId = existing.InstanceId; e.ProfileId = existing.ProfileId; });
                     return result;
                 }
                 int maxCharges = existing.ProfileMaxCharges > 0 ? existing.ProfileMaxCharges : def.MaxCharges;
@@ -359,7 +420,10 @@ namespace KingdomSurvival.BattleSandbox
                 result.Instance = existing;
                 result.Message = target.DisplayLabel + ": «" + def.Name + "» — заряд " + existing.charges.Count + ".";
                 Log(result.Message);
-                AfterChargeAdded(target, existing, source);
+                Emit(SandboxCombatEventKind.StatusChargeChanged, source, target, e => { e.StatusId = statusId; e.StatusInstanceId = existing.InstanceId; e.Requested = existing.charges.Count; });
+                DispatchStatusReaction(SandboxReactionEvent.ChargeAdded, statusId, existing, target, source);
+                if (target.statuses.Contains(existing))
+                    AfterChargeAdded(target, existing, source);
                 return result;
             }
 
@@ -432,6 +496,18 @@ namespace KingdomSurvival.BattleSandbox
             result.Message = target.DisplayLabel + " получает «" + def.Name + "»" +
                              (source != null && source != target ? " от " + source.DisplayLabel : string.Empty) + ".";
             Log(result.Message);
+            Emit(SandboxCombatEventKind.StatusApplied, source, target, e => { e.StatusId = statusId; e.StatusInstanceId = instance.InstanceId; e.ProfileId = instance.ProfileId; });
+            if (source != null && statusId == SandboxStatusCatalog.Fear)
+            {
+                SandboxLink grip = links.FirstOrDefault(link => link.Kind == SandboxLinkKind.Engulf && link.SourceId == target.Id);
+                SandboxPassiveRule loosen = grip != null ? ReadyRule(source, SandboxPassiveKind.FearBreaksGrapple) : null;
+                if (loosen != null)
+                {
+                    MarkUsed(source, loosen, null);
+                    RemoveLink(grip, RuleName(loosen) + " — страх ослабил хватку.");
+                }
+            }
+            DispatchStatusReaction(SandboxReactionEvent.Applied, statusId, instance, target, source);
             return result;
         }
 
@@ -447,7 +523,7 @@ namespace KingdomSurvival.BattleSandbox
 
         private void AfterChargeAdded(SandboxUnitState target, SandboxStatusInstance instance, SandboxUnitState source)
         {
-            if (instance.Definition.HasSpecial("FrostToFreeze") && instance.charges.Count >= 3)
+            if (instance.Definition.HasSpecial("FrostToFreeze") && instance.Mode != "thin_rime" && instance.charges.Count >= 3)
             {
                 RemoveStatusInstance(target, instance, "иней сковал льдом");
                 ApplyStatusInternal(SandboxStatusCatalog.Frozen, target, source, null, false, false);
@@ -460,20 +536,27 @@ namespace KingdomSurvival.BattleSandbox
                 unit.HitPoints = unit.MaxHitPoints;
         }
 
-        public bool RemoveStatus(SandboxUnitState unit, string statusId, string reason)
+        public bool RemoveStatus(SandboxUnitState unit, string statusId, string reason,
+            SandboxStatusEndReason endReason = SandboxStatusEndReason.CleansedByPassive, SandboxUnitState actor = null)
         {
             SandboxStatusInstance instance = FindStatus(unit, statusId);
             if (instance == null)
                 return false;
-            RemoveStatusInstance(unit, instance, reason);
+            RemoveStatusInstance(unit, instance, reason, endReason: endReason, actor: actor);
             return true;
         }
 
-        private void RemoveStatusInstance(SandboxUnitState unit, SandboxStatusInstance instance, string reason, bool expired = false)
+        private void RemoveStatusInstance(SandboxUnitState unit, SandboxStatusInstance instance, string reason, bool expired = false,
+            SandboxStatusEndReason? endReason = null, SandboxUnitState actor = null)
         {
             if (unit == null || !unit.statuses.Remove(instance))
                 return;
             StatusRevision++;
+            SandboxStatusEndReason why = expired ? SandboxStatusEndReason.Expired : endReason ?? SandboxStatusEndReason.Consumed;
+            Emit(SandboxCombatEventKind.StatusEnded, actor, unit, e =>
+            {
+                e.StatusId = instance.StatusId; e.StatusInstanceId = instance.InstanceId; e.ProfileId = instance.ProfileId; e.EndReason = why;
+            });
             ClampHitPointsToMax(unit);
             if (instance.StatusId == SandboxStatusCatalog.Numbed && expired)
             {
@@ -484,6 +567,8 @@ namespace KingdomSurvival.BattleSandbox
             if (!string.IsNullOrEmpty(reason) && !unit.IsDefeated)
                 Log(unit.DisplayLabel + ": «" + instance.Definition.Name + "» " + (expired ? "закончилось" : "снято") +
                     (expired || string.IsNullOrEmpty(reason) ? "." : " — " + reason + "."));
+            if (why != SandboxStatusEndReason.BattleEnded && !unit.IsDefeated)
+                DispatchStatusReaction(SandboxReactionEvent.Ended, instance.StatusId, instance, unit, actor, why);
         }
 
         // ---------- Урон и лечение ----------
@@ -540,14 +625,14 @@ namespace KingdomSurvival.BattleSandbox
             {
                 SandboxStatusDefinition def = instance.Definition;
                 if (def.Has(SandboxStatusOpKind.RemoveOnHpDamage))
-                    RemoveStatusInstance(target, instance, "фактический урон");
+                    RemoveStatusInstance(target, instance, "фактический урон", endReason: SandboxStatusEndReason.BrokenByDamage, actor: source);
                 else if (direct && def.Has(SandboxStatusOpKind.RemoveOnDirectHpHit))
-                    RemoveStatusInstance(target, instance, "прямое попадание раскалывает лёд");
+                    RemoveStatusInstance(target, instance, "прямое попадание раскалывает лёд", endReason: SandboxStatusEndReason.BrokenByDamage, actor: source);
                 else if (def.Has(SandboxStatusOpKind.RemoveOnDamageFromSourceSide) && source != null)
                 {
                     SandboxUnitState origin = GetUnit(instance.SourceUnitId);
                     if (origin != null && origin.Team == source.Team)
-                        RemoveStatusInstance(target, instance, "урон от стороны источника");
+                        RemoveStatusInstance(target, instance, "урон от стороны источника", endReason: SandboxStatusEndReason.BrokenByDamage, actor: source);
                 }
             }
         }
@@ -578,6 +663,12 @@ namespace KingdomSurvival.BattleSandbox
             StatusAttackMod(striker, target, ranged, consume: true);
             StatusFlatDamage(striker, target, ranged, SandboxDamageType.Physical, consume: true);
             PassiveAttackMod(striker, target, ranged, striker.Position, consume: true);
+            SandboxPassiveRule heavy = ReadyRule(striker, SandboxPassiveKind.BasePenaltyIgnoreOnce);
+            if (heavy != null && (striker.HasStatus("status.099") || striker.HasStatus("status.088")))
+            {
+                MarkUsed(striker, heavy, null);
+                Log(striker.DisplayLabel + ": " + RuleName(heavy) + " — штраф урона в этом ударе не действует.");
+            }
             PassiveDefenseMod(target, striker, ranged, consume: true);
             PassiveDamage(striker, target, ranged, damage, consume: true);
 
@@ -610,12 +701,29 @@ namespace KingdomSurvival.BattleSandbox
                     if (moved > 0)
                     {
                         damage -= moved;
+                        SandboxPassiveRule survive = ReadyRule(partner, SandboxPassiveKind.SharedWoundsSurviveOnce);
+                        if (survive != null && moved >= partner.HitPoints)
+                        {
+                            MarkUsed(partner, survive, null);
+                            moved = Math.Max(0, partner.HitPoints - 1);
+                            RemoveStatusInstance(target, shared, RuleName(survive) + " — связь прекращена", endReason: SandboxStatusEndReason.CleansedByPassive, actor: partner);
+                        }
                         DealStatusDamage(partner, moved, null, "связанные раны (перенос от " + target.DisplayLabel + ")", SandboxDamageType.Physical);
                     }
                 }
             }
+            bool hadPool = target.HasStatus("status.148");
             int remaining = AbsorbTemporary(target, damage);
             temporaryAbsorbed = damage - remaining;
+            if (hadPool && !target.HasStatus("status.148") && striker.Team != target.Team)
+            {
+                SandboxPassiveRule regrow = ReadyRule(target, SandboxPassiveKind.TempPoolExhaustedRegen);
+                if (regrow != null)
+                {
+                    MarkUsed(target, regrow, null);
+                    ApplyStatus(regrow.StatusIds[0], target, target);
+                }
+            }
             return remaining;
         }
 
@@ -630,13 +738,24 @@ namespace KingdomSurvival.BattleSandbox
             if (hpTaken > 0 && striker.Team != target.Team)
             {
                 foreach (SandboxStatusInstance echo in target.statuses.Where(item => item.Definition.HasSpecial("PainEcho")))
-                    echo.StoredValue = Math.Min(echo.Definition.Ops.First(op => op.Kind == SandboxStatusOpKind.Special).Value, hpTaken / 2);
+                {
+                    int remembered = hpTaken;
+                    SandboxPassiveRule dull = ReadyRule(target, SandboxPassiveKind.PainEchoReduceOnce);
+                    if (dull != null)
+                    {
+                        MarkUsed(target, dull, null);
+                        remembered = Math.Max(0, remembered - dull.Value);
+                    }
+                    echo.StoredValue = Math.Min(echo.Definition.Ops.First(op => op.Kind == SandboxStatusOpKind.Special).Value, remembered / 2);
+                }
             }
             // Временный вампиризм: половина снятых HP, не больше 2 за собственный ход.
             if (hpTaken > 0 && striker.Team != target.Team && !striker.IsDefeated)
             {
                 foreach ((SandboxStatusInstance instance, SandboxStatusOp op) in OpsOf(striker, SandboxStatusOpKind.Vampirism).ToList())
                 {
+                    if (Rules(striker, SandboxPassiveKind.NoVampirismWhileStatus).Any(pair => pair.Rule.StatusIds.Any(striker.HasStatus)))
+                        continue;
                     int allowed = Math.Max(0, op.Value - instance.StoredValue);
                     int heal = Math.Min(allowed, hpTaken / 2);
                     if (heal <= 0)
@@ -651,7 +770,17 @@ namespace KingdomSurvival.BattleSandbox
             if (contact && hpTaken + temporaryAbsorbed > 0 && !striker.IsDefeated && striker.Team != target.Team)
             {
                 foreach ((SandboxStatusInstance instance, SandboxStatusOp op) in OpsOf(target, SandboxStatusOpKind.ContactRetort).ToList())
-                    DealStatusDamage(striker, op.Value, target, "«" + instance.Definition.Name + "» обжигает", op.DamageType);
+                {
+                    int retort = op.Value;
+                    SandboxPassiveRule shieldRule = ReadyRule(striker, SandboxPassiveKind.RetortReduceOncePerRound);
+                    if (shieldRule != null)
+                    {
+                        MarkUsed(striker, shieldRule, null);
+                        retort = Math.Max(0, retort - shieldRule.Value);
+                    }
+                    if (retort > 0)
+                        DealStatusDamage(striker, retort, target, "«" + instance.Definition.Name + "» обжигает", op.DamageType);
+                }
             }
         }
 
@@ -728,7 +857,14 @@ namespace KingdomSurvival.BattleSandbox
                     continue;
                 }
                 budget -= dealt;
-                DealStatusDamage(unit, dealt, GetUnit(instance.SourceUnitId), "«" + instance.Definition.Name + "»", type);
+                int tickTaken = DealStatusDamage(unit, dealt, GetUnit(instance.SourceUnitId), "«" + instance.Definition.Name + "»", type);
+                Emit(SandboxCombatEventKind.StatusTick, GetUnit(instance.SourceUnitId), unit, e =>
+                {
+                    e.StatusId = instance.StatusId; e.StatusInstanceId = instance.InstanceId; e.Requested = dealt; e.ActualHp = tickTaken;
+                    e.Delivery = SandboxDeliveryKind.Tick; e.DamageType = type;
+                });
+                if (unit.statuses.Contains(instance) || !unit.IsDefeated)
+                    DispatchStatusReaction(SandboxReactionEvent.Tick, instance.StatusId, instance, unit, GetUnit(instance.SourceUnitId), amount: tickTaken);
                 if (instance.Definition.HasSpecial("PainEcho"))
                     RemoveStatusInstance(unit, instance, "эхо отозвалось");
             }
@@ -756,9 +892,12 @@ namespace KingdomSurvival.BattleSandbox
                 {
                     if (instance.AppliedAtSourceActivation >= source.ActivationCount)
                         continue;
-                    if (source.Position.DistanceTo(target.Position) >= SandboxStatusRules.DrainLinkBreakDistance)
+                    int breakAt = Rules(target, SandboxPassiveKind.DrainLinkShortRange).Any()
+                        ? Rules(target, SandboxPassiveKind.DrainLinkShortRange).First().Rule.Value + 1
+                        : SandboxStatusRules.DrainLinkBreakDistance;
+                    if (source.Position.DistanceTo(target.Position) >= breakAt)
                     {
-                        RemoveStatusInstance(target, instance, "пара слишком далеко — связь порвалась");
+                        RemoveStatusInstance(target, instance, "пара слишком далеко — связь порвалась", endReason: SandboxStatusEndReason.BrokenByDistance);
                         continue;
                     }
                     int taken = DealStatusDamage(target, 1, source, "«" + instance.Definition.Name + "»", SandboxDamageType.Supernatural);
@@ -772,6 +911,32 @@ namespace KingdomSurvival.BattleSandbox
         private void ProcessStatusActivationEnd(SandboxUnitState unit)
         {
             StatusRevision++;
+            // «Сбивает пламя с товарища»: союзник в стойке и под Горением рядом с носителем.
+            if (unit.IsGuarding && unit.HasStatus(SandboxStatusCatalog.Burning))
+            {
+                foreach (SandboxUnitState helper in units.Where(u => u != unit && !u.IsDefeated && u.Team == unit.Team && u.Position.DistanceTo(unit.Position) == 1)
+                             .OrderBy(u => u.Id, StringComparer.Ordinal))
+                {
+                    SandboxPassiveRule douse = ReadyRule(helper, SandboxPassiveKind.AllyGuardExtinguish);
+                    if (douse == null)
+                        continue;
+                    MarkUsed(helper, douse, null);
+                    RemoveStatus(unit, SandboxStatusCatalog.Burning, RuleName(douse) + " (" + helper.DisplayLabel + ")", actor: helper);
+                    break;
+                }
+            }
+            // «Щит любит ожидание»: не атаковал со щитом — срок щита +1 раз за бой.
+            SandboxStatusInstance waitingShield = FindStatus(unit, "status.132");
+            if (waitingShield != null && !unit.passive.AttackedThisTurn)
+            {
+                SandboxPassiveRule patience = ReadyRule(unit, SandboxPassiveKind.ShieldExtendIfWaited);
+                if (patience != null)
+                {
+                    MarkUsed(unit, patience, null);
+                    ExtendInstance(waitingShield, patience.Value, 0);
+                    Log(unit.DisplayLabel + ": " + RuleName(patience) + " — щит держится на ход дольше.");
+                }
+            }
             int activation = unit.ActivationCount;
             foreach (SandboxStatusInstance instance in unit.statuses.ToList())
             {
@@ -825,7 +990,14 @@ namespace KingdomSurvival.BattleSandbox
                     unit.statuses.Remove(instance);
                     SandboxStatusOp op = instance.Definition.Ops.First(item => item.Kind == SandboxStatusOpKind.Special);
                     bool sentence = op.Executor == "DelayedSentence";
-                    DealStatusDamage(unit, op.Value, GetUnit(instance.SourceUnitId), sentence ? "«Приговор» исполнен" : "«Отложенный взрыв»",
+                    int blast = op.Value;
+                    SandboxPassiveRule ward = ReadyRule(unit, SandboxPassiveKind.DelayedTriggerReduceOnce, null, instance.StatusId);
+                    if (ward != null)
+                    {
+                        MarkUsed(unit, ward, null);
+                        blast = Math.Max(1, blast - ward.Value);
+                    }
+                    DealStatusDamage(unit, blast, GetUnit(instance.SourceUnitId), sentence ? "«Приговор» исполнен" : "«Отложенный взрыв»",
                         sentence ? SandboxDamageType.Supernatural : SandboxDamageType.Fire);
                 }
             }
@@ -844,7 +1016,7 @@ namespace KingdomSurvival.BattleSandbox
                         continue;
                     SandboxUnitState other = GetUnit(instance.SourceUnitId);
                     if (other == null || other.IsDefeated || other.Position.DistanceTo(target.Position) > SandboxStatusRules.LinkBreakDistance)
-                        RemoveStatusInstance(target, instance, "дальше " + SandboxStatusRules.LinkBreakDistance + " гексов — связь прекращена");
+                        RemoveStatusInstance(target, instance, "дальше " + SandboxStatusRules.LinkBreakDistance + " гексов — связь прекращена", endReason: SandboxStatusEndReason.BrokenByDistance);
                 }
             }
         }
@@ -859,7 +1031,7 @@ namespace KingdomSurvival.BattleSandbox
                 foreach (SandboxStatusInstance instance in unit.statuses.Where(item => item.SourceUnitId == dead.Id &&
                                                                                      (item.Definition.RemovedOnSourceDeath ||
                                                                                       item.Definition.Clock == SandboxStatusClock.SourceActivations)).ToList())
-                    RemoveStatusInstance(unit, instance, "источник пал");
+                    RemoveStatusInstance(unit, instance, "источник пал", endReason: SandboxStatusEndReason.SourceFinalDeath, actor: dead);
             }
         }
 
@@ -945,6 +1117,13 @@ namespace KingdomSurvival.BattleSandbox
                 if (instance.StoredValue >= cap)
                     continue;
                 instance.StoredValue++;
+                SandboxPassiveRule mend = ReadyRule(unit, SandboxPassiveKind.StatusExtraDamageReduceOnce, null, instance.StatusId);
+                if (mend != null)
+                {
+                    MarkUsed(unit, mend, null);
+                    Log(unit.DisplayLabel + ": " + RuleName(mend) + " — урон перемещения поглощён.");
+                    continue;
+                }
                 DealStatusDamage(unit, 1, GetUnit(instance.SourceUnitId), "«" + instance.Definition.Name + "»", SandboxDamageType.Physical);
             }
         }
@@ -995,7 +1174,7 @@ namespace KingdomSurvival.BattleSandbox
             if (instance == null)
                 return "Состояния уже нет.";
             string name = instance.Definition.Name;
-            RemoveStatusInstance(target, instance, null);
+            RemoveStatusInstance(target, instance, null, endReason: SandboxStatusEndReason.CleansedByAction, actor: unit);
             return target == unit
                 ? unit.DisplayLabel + ": " + instance.Definition.CleanseVerb + " — «" + name + "» снято."
                 : unit.DisplayLabel + " помогает " + target.DisplayLabel + ": «" + name + "» снято.";
@@ -1033,6 +1212,8 @@ namespace KingdomSurvival.BattleSandbox
                 string id = hold.Kind == SandboxLinkKind.Engulf ? SandboxStatusCatalog.Grappled : SandboxStatusCatalog.Rooted;
                 result.Add(FacadeView(id, GetUnit(hold.SourceId), "Добровольное движение запрещено; атака с места и «Вырваться» доступны."));
             }
+            if (Rules(unit, SandboxPassiveKind.HolderImmobilizedView).Any() && links.Any(link => link.Kind == SandboxLinkKind.Engulf && link.SourceId == unit.Id))
+                result.Add(FacadeView("status.043", null, "Держит захват — сам не двигается («Удерживает с усилием»)."));
             if (unit.IsGuarding)
             {
                 SandboxStatusView guard = FacadeView(SandboxStatusCatalog.Guard, null,

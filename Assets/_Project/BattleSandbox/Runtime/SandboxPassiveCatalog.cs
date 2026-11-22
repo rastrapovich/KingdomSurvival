@@ -162,6 +162,8 @@ namespace KingdomSurvival.BattleSandbox
             T("trait.height_adapted", "Цепкий").Alias(SandboxTerrainTags.Highlander);
             T("movement.wetland_walker", "Ходит по жиже").Alias(SandboxTerrainTags.SwampWalker);
             T("passive.20261119.247", "Не вязнет в паутине").Alias(SandboxTerrainTags.SpiderStep);
+
+            RegisterStatusReactions();
         }
     }
 }

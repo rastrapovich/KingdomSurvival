@@ -890,6 +890,7 @@ namespace KingdomSurvival.BattleSandbox
 
         public bool TryUseAbility(string unitId, SandboxAbilityCommand command, out string message)
         {
+            BeginRootAction();
             SandboxUnitState unit = GetUnit(unitId);
             SandboxAbilityDefinition ability = unit?.Definition.Abilities.FirstOrDefault(item => command != null && item.Id == command.AbilityId);
             SandboxAbilityPreview preview = PreviewAbility(unitId, command);
@@ -1018,6 +1019,13 @@ namespace KingdomSurvival.BattleSandbox
                         links.Add(link);
                         UpdateLinkObjectCells(link);
                         body += " Захвачен (" + holder.Label.ToLowerInvariant() + " " + holder.HitPoints + " HP).";
+                        // «Не терпит чужих корней»: первые корни за бой — смола на носителе.
+                        SandboxPassiveRule tar = ability.Kind == SandboxAbilityKind.VineGrab ? ReadyRule(target, SandboxPassiveKind.RootsApplyStatusOnce) : null;
+                        if (tar != null)
+                        {
+                            MarkUsed(target, tar, null);
+                            ApplyStatus(tar.StatusIds[0], target, target);
+                        }
                         if (ability.Kind == SandboxAbilityKind.VineGrab)
                         {
                             HexCoord? pull = FindPullCell(target, unit.Position, unit.Position);
@@ -1326,6 +1334,7 @@ namespace KingdomSurvival.BattleSandbox
 
         public bool TryContextAction(string unitId, SandboxContextAction action, out string message)
         {
+            BeginRootAction();
             message = "Действие недоступно.";
             if (action == null)
                 return false;
@@ -1342,6 +1351,14 @@ namespace KingdomSurvival.BattleSandbox
                 {
                     // Отдельное действие «Прилива сил» не тратит обычное действие.
                     unit.SupportActions--;
+                    SandboxPassiveRule refund = match.TargetUnitId == unit.Id && unit.HasStatus("status.185")
+                        ? ReadyRule(unit, SandboxPassiveKind.SupportRefundMovement) : null;
+                    if (refund != null)
+                    {
+                        MarkUsed(unit, refund, null);
+                        unit.RemainingMovement = Math.Min(unit.Movement, unit.RemainingMovement + refund.Value);
+                        message += " " + RuleName(refund) + ": +" + refund.Value + " движения.";
+                    }
                     SandboxStatusInstance surge = unit.statuses.FirstOrDefault(item => item.StatusId == SandboxStatusCatalog.ExtraSupport);
                     if (surge != null)
                         RemoveStatusInstance(unit, surge, "израсходован");
@@ -1365,6 +1382,9 @@ namespace KingdomSurvival.BattleSandbox
                     SandboxLink link = links.First(item => item.Kind == SandboxLinkKind.Attach && item.TargetId == host.Id);
                     message = unit.DisplayLabel + " срывает паразита" + (host == unit ? " с себя." : " с " + host.DisplayLabel + ".");
                     RemoveLink(link, "сорван действием.");
+                    // Паразит — фасад status.008: снятие действием — то же событие окончания.
+                    if (host == unit)
+                        DispatchStatusReaction(SandboxReactionEvent.Ended, SandboxStatusCatalog.Parasite, null, host, unit, SandboxStatusEndReason.CleansedByAction);
                     break;
                 }
                 case SandboxContextActionKind.BreakFree:

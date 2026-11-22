@@ -129,6 +129,10 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxPassiveCondition.RememberedAttacker: return other != null && self.passive.RememberedAttackerId == other.Id;
                 case SandboxPassiveCondition.AvengedKiller: return other != null && self.passive.KillersOfAllies.Contains(other.Id);
                 case SandboxPassiveCondition.FirstAttackOnTarget: return other != null && !self.passive.AttackedTargets.Contains(other.Id);
+                case SandboxPassiveCondition.SelfHasStatus:
+                    return rule.StatusIds.Any(id => self.HasStatus(id) || (id == SandboxStatusCatalog.Parasite && GetAttachedParasite(self) != null));
+                case SandboxPassiveCondition.SelfIsLinkPartner:
+                    return units.Any(u => u.statuses.Any(item => item.SourceUnitId == self.Id && (item.StatusId == "status.107" || item.StatusId == SandboxStatusCatalog.SharedWounds)));
                 default: return false;
             }
         }
@@ -482,6 +486,18 @@ namespace KingdomSurvival.BattleSandbox
                     }
                     if (hpTaken > 0)
                         PassiveSplash(striker, target, ranged, hpBefore - target.HitPoints >= 0 ? hpTaken : 0);
+                    foreach ((SandboxPassiveDefinition def, SandboxPassiveRule rule) in Rules(striker, SandboxPassiveKind.ShortenTargetBuffOnHit).ToList())
+                    {
+                        if (target.IsDefeated || !LimitReady(striker, rule, target.Id))
+                            continue;
+                        if (rule.StatusIds.Contains("status.146") && hpTaken <= 0)
+                            continue;
+                        SandboxStatusInstance buff = rule.StatusIds.Select(id => FindStatus(target, id)).FirstOrDefault(item => item != null);
+                        if (buff == null)
+                            continue;
+                        MarkUsed(striker, rule, target.Id);
+                        ShortenInstance(target, buff, rule.Value, def.Name);
+                    }
                     foreach ((SandboxPassiveDefinition def, SandboxPassiveRule rule) in Rules(striker, SandboxPassiveKind.OnHitHealSelf))
                     {
                         if (hpTaken <= 0 || striker.IsDefeated || !Both(rule, striker, target, ranged) || !LimitReady(striker, rule, target.Id))
@@ -528,7 +544,21 @@ namespace KingdomSurvival.BattleSandbox
                         }
                     }
                     if (!target.IsDefeated)
+                    {
                         PassiveBelowHalf(target, hpBefore);
+                        int quarter = target.Definition.MaxHitPoints;
+                        SandboxStatusInstance wounds = FindStatus(target, "status.199");
+                        if (wounds != null && hpBefore * 4 >= quarter && target.HitPoints * 4 < quarter)
+                        {
+                            SandboxPassiveRule keep = ReadyRule(target, SandboxPassiveKind.WoundStrengthExtend);
+                            if (keep != null)
+                            {
+                                MarkUsed(target, keep, null);
+                                ExtendInstance(wounds, keep.Value, keep.Value2);
+                                Log(target.DisplayLabel + ": " + RuleName(keep) + " — «Сила от ран» продлена.");
+                            }
+                        }
+                    }
                 }
             }
             finally
@@ -752,6 +782,35 @@ namespace KingdomSurvival.BattleSandbox
                     RemoveStatus(unit, rule.StatusIds[1], "«" + def.Name + "»");
                 }
             }
+            if (!StrongControlled(unit))
+            {
+                SandboxPassiveRule sentry = ReadyRule(unit, SandboxPassiveKind.WakeAdjacentSleeper);
+                SandboxUnitState sleeper = sentry == null ? null : units.Where(u => u != unit && !u.IsDefeated && u.Team == unit.Team && u.HasStatus("status.030") &&
+                                                                                    u.Position.DistanceTo(unit.Position) == 1)
+                    .OrderBy(u => u.HitPoints * 1000 / Math.Max(1, u.MaxHitPoints)).ThenBy(u => u.Id, StringComparer.Ordinal).FirstOrDefault();
+                if (sleeper != null)
+                {
+                    MarkUsed(unit, sentry, null);
+                    RemoveStatus(sleeper, "status.030", RuleName(sentry) + " (" + unit.DisplayLabel + ")", actor: unit);
+                }
+            }
+            foreach ((SandboxPassiveDefinition def, SandboxPassiveRule rule) in Rules(unit, SandboxPassiveKind.StartRemoveMagicalStatus))
+            {
+                SandboxStatusInstance curse = unit.statuses.Where(item => rule.StatusIds.Contains(item.StatusId) && item.AppliedAtActivation < unit.ActivationCount)
+                    .OrderBy(item => item.EffectiveDuration - item.Elapsed).ThenBy(item => item.Sequence).FirstOrDefault();
+                if (curse != null)
+                    RemoveStatusInstance(unit, curse, "«" + def.Name + "»", endReason: SandboxStatusEndReason.CleansedByPassive, actor: unit);
+            }
+            if (unit.WasGuardingAtStart)
+            {
+                SandboxPassiveRule stance = ReadyRule(unit, SandboxPassiveKind.GuardStartShortenStatus);
+                SandboxStatusInstance weak = stance != null ? FindStatus(unit, stance.StatusIds[0]) : null;
+                if (weak != null)
+                {
+                    MarkUsed(unit, stance, null);
+                    ShortenInstance(unit, weak, stance.Value, RuleName(stance).Trim('«', '»'));
+                }
+            }
             if (rt.GrantedAttackUntilActivation >= 0 && rt.GrantedAttackUntilActivation < unit.ActivationCount)
                 rt.Stacks["attack.untilTurn"] = 0;
             rt.Counters["turn.noattack.prev"] = lastTurnNoAttack ? 1 : 0;
@@ -844,6 +903,8 @@ namespace KingdomSurvival.BattleSandbox
                 foreach ((SandboxPassiveDefinition _, SandboxPassiveRule rule) in Rules(holder, SandboxPassiveKind.LeaveAdjacentCost))
                     extra = Math.Max(extra, rule.Value);
             }
+            if (from == unit.Position && unit.statuses.Any(item => item.Mode == "thin_rime"))
+                extra = Math.Max(extra, 1);
             if (from == unit.Position)
             {
                 foreach (SandboxStatusInstance sticky in unit.statuses.Where(item => item.Mode == "sticky_exit"))
@@ -872,6 +933,8 @@ namespace KingdomSurvival.BattleSandbox
         private void AfterPassiveVoluntaryMove(SandboxUnitState unit, HexCoord origin)
         {
             unit.passive.AttackedSinceMove = false;
+            foreach (SandboxStatusInstance rime in unit.statuses.Where(item => item.Mode == "thin_rime").ToList())
+                RemoveStatusInstance(unit, rime, "тонкий иней сброшен шагом", endReason: SandboxStatusEndReason.Consumed);
             foreach (SandboxStatusInstance sticky in unit.statuses.Where(item => item.Mode == "sticky_exit").ToList())
             {
                 SandboxUnitState source = GetUnit(sticky.SourceUnitId);

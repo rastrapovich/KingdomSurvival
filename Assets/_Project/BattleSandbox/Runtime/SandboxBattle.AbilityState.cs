@@ -763,6 +763,13 @@ namespace KingdomSurvival.BattleSandbox
                     source.Position = target.Position;
                     note += " " + source.DisplayLabel + " цепляется за " + target.DisplayLabel + ".";
                 }
+                else if (ReadyRule(target, SandboxPassiveKind.GrappleBreakOnce) is SandboxPassiveRule slip)
+                {
+                    // «Скользкая хватка»: первый Захват за бой срывается сразу.
+                    MarkUsed(target, slip, null);
+                    source.AbilityReadyAt[pending.AbilityId] = source.ActivationCount + ability.Cooldown + 1;
+                    note += " " + target.DisplayLabel + " выскальзывает из захвата (" + RuleName(slip) + ").";
+                }
                 else
                 {
                     links.Add(new SandboxLink

@@ -275,8 +275,12 @@ namespace KingdomSurvival.BattleSandbox
             HitPoints = definition.MaxHitPoints;
         }
 
+        // Был ли в стойке в момент начала собственной активации (теги «в стойке на старте хода»).
+        public bool WasGuardingAtStart { get; internal set; }
+
         internal void BeginActivation()
         {
+            WasGuardingAtStart = IsGuarding;
             ActionPoints = ActionsPerActivation;
             RemainingMovement = Movement;
             HasAttacked = false;
@@ -619,6 +623,7 @@ namespace KingdomSurvival.BattleSandbox
 
         public bool TryMove(string unitId, HexCoord destination, out string message)
         {
+            BeginRootAction();
             message = "Перемещение недоступно.";
             if (HasPendingRetaliation)
             {
@@ -896,6 +901,7 @@ namespace KingdomSurvival.BattleSandbox
 
         public bool TryAttack(string attackerId, string targetId, out string message)
         {
+            BeginRootAction();
             SandboxAttackPreview preview = PreviewAttack(attackerId, targetId);
             if (!preview.IsValid)
             {
@@ -1274,6 +1280,7 @@ namespace KingdomSurvival.BattleSandbox
                 if (candidate != null && !candidate.IsDefeated)
                 {
                     candidate.BeginActivation();
+                    BeginRootAction();
                     // Отложенные события, тики, регенерация и ограничения
                     // состояний — до выбора действия (бриф §15.2).
                     bool keepsTurn = ProcessActivationStart(candidate);
@@ -1364,6 +1371,14 @@ namespace KingdomSurvival.BattleSandbox
             target.ReceiveDamage(toHp);
             ResolveDirectHitAfterHp(kind, striker, target, before - target.HitPoints, temporaryAbsorbed);
             OnPassiveDirectHit(kind, striker, target, before, before - target.HitPoints);
+            int afterMitigation = toHp + temporaryAbsorbed;
+            Emit(SandboxCombatEventKind.HitResolved, striker, target, e =>
+            {
+                e.Requested = damage; e.AfterMitigation = afterMitigation; e.AbsorbedTemporary = temporaryAbsorbed;
+                e.ActualHp = before - target.HitPoints; e.IsRetaliation = kind == SandboxHitKind.Retaliation || kind == SandboxHitKind.FirstStrike;
+                e.Delivery = kind == SandboxHitKind.Environment ? SandboxDeliveryKind.Surface
+                    : striker.Position.DistanceTo(target.Position) > 1 ? SandboxDeliveryKind.Ranged : SandboxDeliveryKind.Melee;
+            });
             hitRecords.Add(new SandboxHitRecord(
                 kind,
                 striker.Id,
@@ -1411,7 +1426,7 @@ namespace KingdomSurvival.BattleSandbox
                 effectiveAttack += SandboxCombatTagRules.PackAttackBonus;
             bool rangedHit = attackPosition.DistanceTo(target.Position) > 1;
             // Пакет состояний: временные модификаторы Атаки (предел ±2).
-            effectiveAttack = Math.Max(0m, effectiveAttack + StatusAttackMod(attacker, target, rangedHit));
+            effectiveAttack = Math.Max(0m, effectiveAttack + StatusAttackMod(attacker, target, rangedHit, retaliation: retaliation));
             // Пакет тегов: постоянные условия — отдельно от предела состояний.
             effectiveAttack = Math.Max(0m, effectiveAttack + PassiveAttackMod(attacker, target, rangedHit, attackPosition));
             decimal effectiveDefense = SandboxCombatTagRules.GetEffectiveDefense(target);

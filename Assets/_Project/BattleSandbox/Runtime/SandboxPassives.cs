@@ -72,6 +72,34 @@ namespace KingdomSurvival.BattleSandbox
         ChargeAttackAfterDamageTaken,
         StackAttackAfterAlliesFell,
         FirstMeleeHitPerRoundDefense,
+        // Реакция на событие состояния (этап 2 брифа завершения).
+        StatusReaction,
+        // Правила в конкретной точке расчёта (числа — в Value/StatusIds).
+        StatusExtraDamageReduceOnce,
+        BasePenaltyIgnoreOnce,
+        MarkConsumeOncePerAction,
+        DelayedTriggerReduceOnce,
+        PainEchoReduceOnce,
+        DrainLinkShortRange,
+        SharedWoundsSurviveOnce,
+        ShortenTargetBuffOnHit,
+        ReflectImmunityOnce,
+        RetortReduceOncePerRound,
+        ShieldExtendIfWaited,
+        TempPoolExhaustedRegen,
+        NoVampirismWhileStatus,
+        WoundStrengthExtend,
+        SupportRefundMovement,
+        RetaliationIgnoresStatus,
+        VowReduceWhileStatus,
+        GuardStartShortenStatus,
+        AllyGuardExtinguish,
+        WakeAdjacentSleeper,
+        StartRemoveMagicalStatus,
+        GrappleBreakOnce,
+        HolderImmobilizedView,
+        RootsApplyStatusOnce,
+        FearBreaksGrapple,
         // Прежнее правило под другим ID (Стая, ходьба по местности).
         Alias,
         // Политика без собственного эффекта (совпадает с общим правилом).
@@ -112,7 +140,56 @@ namespace KingdomSurvival.BattleSandbox
         NotArmoredSelf,
         RememberedAttacker,
         AvengedKiller,
-        FirstAttackOnTarget
+        FirstAttackOnTarget,
+        SelfHasStatus,
+        SelfIsLinkPartner,
+        Retaliation
+    }
+
+    // Событие состояния для реакции тега.
+    public enum SandboxReactionEvent
+    {
+        Attempt,
+        Applied,
+        ChargeAdded,
+        Tick,
+        Ended
+    }
+
+    // Чьё событие слушает носитель.
+    public enum SandboxReactionScope
+    {
+        Self,
+        // Союзник носителя в радиусе Value2 (не сам носитель).
+        AllyNear,
+        // Любой боец, на которого состояние наложил сам носитель.
+        AppliedByOwner,
+        // Состояние, источник которого — носитель (метка носителя на ком угодно).
+        OwnerIsSource,
+        // Любой боец (условие отбирает нужное).
+        Anyone
+    }
+
+    public enum SandboxReactionEffect
+    {
+        Cancel,
+        Replace,
+        ApplyToSelf,
+        ApplyToEventTarget,
+        ApplyToEventActor,
+        ApplyToNearestAlly,
+        RemoveFromSelf,
+        RemoveFromEventTarget,
+        SetDuration,
+        AddCharge,
+        HealSelf,
+        DamageEventActor,
+        ImmuneSameStatusSameSource,
+        ImmuneSameStatus,
+        ShortenSelfStatus,
+        RemoveOneChargeFromSelf,
+        // Заряд +Value Атаки к следующему удару, до конца следующего своего хода.
+        GrantAttackCharge
     }
 
     public enum SandboxPassiveLimit
@@ -138,6 +215,19 @@ namespace KingdomSurvival.BattleSandbox
         public string[] StatusIds { get; internal set; } = Array.Empty<string>();
         public SandboxStatusProfile Profile { get; internal set; }
         public string AliasOf { get; internal set; } = string.Empty;
+        // Реакции на состояния.
+        public SandboxReactionEvent ReactEvent { get; internal set; }
+        public SandboxReactionScope Scope { get; internal set; }
+        public SandboxReactionEffect Effect { get; internal set; }
+        // Причины окончания, на которые реагирует правило (пусто — любые).
+        public SandboxStatusEndReason[] EndReasons { get; internal set; } = Array.Empty<SandboxStatusEndReason>();
+        // Состояние-результат эффекта (наложить/снять/заменить на).
+        public string EffectStatus { get; internal set; }
+        public SandboxStatusProfile EffectProfile { get; internal set; }
+        // Носитель должен иметь / не иметь состояние; цель события должна иметь.
+        public string OwnerRequires { get; internal set; }
+        public string OwnerLacks { get; internal set; }
+        public string[] EventTargetRequiresAny { get; internal set; } = Array.Empty<string>();
         public string Key { get; internal set; } = string.Empty;
     }
 
@@ -190,6 +280,8 @@ namespace KingdomSurvival.BattleSandbox
         internal bool ShotThisTurn;
         internal bool AttackedSinceMove = true;
         internal bool BelowHalfDone;
+        // Невосприимчивость, полученная реакциями: statusId или statusId@sourceId.
+        internal readonly HashSet<string> GrantedImmunities = new HashSet<string>(StringComparer.Ordinal);
         public int Counter(string key) => Counters.TryGetValue(key, out int value) ? value : 0;
         public int Stack(string key) => Stacks.TryGetValue(key, out int value) ? value : 0;
     }
@@ -254,6 +346,21 @@ namespace KingdomSurvival.BattleSandbox
                     Kind = kind, Value = value, Value2 = value2, Condition = when, Condition2 = when2, ConditionParam = param ?? string.Empty,
                     Limit = limit, LimitN = n, Profile = profile,
                     StatusIds = statuses ?? (status != null ? new[] { status } : Array.Empty<string>())
+                });
+                return this;
+            }
+
+            public B React(SandboxReactionEvent on, string[] statuses, SandboxReactionEffect effect, SandboxReactionScope scope = SandboxReactionScope.Self,
+                SandboxPassiveLimit limit = SandboxPassiveLimit.None, string effectStatus = null, SandboxStatusProfile effectProfile = null,
+                int value = 0, int range = 0, string ownerRequires = null, string ownerLacks = null, string[] targetRequiresAny = null,
+                SandboxStatusEndReason[] reasons = null)
+            {
+                Def.Add(new SandboxPassiveRule
+                {
+                    Kind = SandboxPassiveKind.StatusReaction, ReactEvent = on, StatusIds = statuses, Effect = effect, Scope = scope, Limit = limit,
+                    EffectStatus = effectStatus, EffectProfile = effectProfile, Value = value, Value2 = range, OwnerRequires = ownerRequires,
+                    OwnerLacks = ownerLacks, EventTargetRequiresAny = targetRequiresAny ?? Array.Empty<string>(),
+                    EndReasons = reasons ?? Array.Empty<SandboxStatusEndReason>()
                 });
                 return this;
             }

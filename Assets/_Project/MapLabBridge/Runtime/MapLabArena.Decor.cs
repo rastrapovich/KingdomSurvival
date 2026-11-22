@@ -229,12 +229,14 @@ namespace KingdomSurvival.MapLabBridge
                         Add(q, art.Id, art.HalfWidth * 0.5f);
                         placed++;
                     }
-                    // У края группы, ближе к полю — пень или бурьян.
+                    // У края группы, ближе к полю — пень и до WeedsPerGroup растений бурьяна.
                     Vector2 toward = (frameCenter - center).normalized;
-                    for (int extra = 0; extra < 2; extra++)
+                    int weeds = Mathf.Max(0, look.WeedsPerGroup);
+                    for (int extra = 0; extra < weeds + 1; extra++)
                     {
-                        List<MapLabDecorArt> pool = extra == 0 ? tall : stumps;
-                        if (pool.Count == 0 || rng.Value() > (extra == 0 ? look.WeedChance : look.StumpChance) * Mathf.Min(1f, density))
+                        bool stump = extra == weeds;
+                        List<MapLabDecorArt> pool = stump ? stumps : tall;
+                        if (pool.Count == 0 || rng.Value() > (stump ? look.StumpChance : look.WeedChance) * Mathf.Min(1f, density))
                             continue;
                         MapLabDecorArt art = MapLabArtAssets.Pick(pool, rng.Value());
                         for (int attempt = 0; attempt < 6; attempt++)
@@ -246,6 +248,35 @@ namespace KingdomSurvival.MapLabBridge
                             break;
                         }
                     }
+                }
+            }
+
+            // 2б. Куртины бурьяна по окраине: 1–3 растения рядом, мимо клеток поля
+            // (рисунок не закрывает клетку) и стартов. Свой поток случайности —
+            // прочий декор от числа куртин не зависит.
+            if (tall.Count > 0 && look.WeedClumps > 0f)
+            {
+                MapLabRandom wrng = MapLabRandom.ForStream(Spec.Seed, "arena-weeds", MapLabData.AlgorithmVersion);
+                int clumps = Mathf.RoundToInt(look.WeedClumps * Mathf.Min(2f, density));
+                for (int i = 0, attempts = 0; i < clumps && attempts < clumps * 12; attempts++)
+                {
+                    Vector2 center = new Vector2(wrng.Range(frame.xMin - hex, frame.xMax + hex), wrng.Range(frame.yMin - hex, frame.yMax));
+                    if (Near(keep, center, hex * 1.5f) || Near(blocked, center, hex) || OnRiver(center))
+                        continue;
+                    int plants = 1 + (int)(wrng.Value() * 3f);
+                    int added = 0;
+                    for (int k = 0; k < plants * 4 && added < plants; k++)
+                    {
+                        MapLabDecorArt art = MapLabArtAssets.Pick(tall, wrng.Value());
+                        Vector2 q = center + new Vector2(wrng.Range(-0.7f, 0.7f), wrng.Range(-0.4f, 0.4f)) * hex;
+                        if (!InView(q, art.Height, art.HalfWidth) || OnRiver(q) || Covers(q, art.Height, art.HalfWidth, hex * 1.0f) || Crowded(q, art.HalfWidth * 0.4f, 0.6f))
+                            continue;
+                        Add(q, art.Id, art.HalfWidth * 0.4f);
+                        c.DryOnlyFeatures.Add(art.Id);
+                        added++;
+                    }
+                    if (added > 0)
+                        i++;
                 }
             }
 

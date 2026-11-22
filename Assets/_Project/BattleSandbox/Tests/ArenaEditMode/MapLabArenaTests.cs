@@ -219,6 +219,48 @@ namespace KingdomSurvival.BattleSandbox.Tests
             return null;
         }
 
+        // Бурьян заметен: несколько растений у групп деревьев и куртины по окраине
+        // (на настройках по умолчанию), а куртины не закрывают клетки поля
+        // (проверка AssertDecorLeavesCellsVisible). Без куртин и с одним растением
+        // на группу бурьяна заметно меньше.
+        [Test]
+        public void Weeds_AreVisible_AtGroupsAndInClumps()
+        {
+            if (!MapLabArena.Available)
+                Assert.Ignore("Нет MapLabGameAssets с профилем — арена MapLab выключена.");
+            HashSet<string> weedIds = new HashSet<string>();
+            foreach (KingdomSurvival.ArtAssets.ArtAssetDefinition a in KingdomSurvival.ArtAssets.ArtAssetDatabaseAsset.Current.assets)
+                if (a != null && a.UsableOnArena && a.ArenaPriority > 0f && MapLabArtAssets.ArenaObjectKindOf(a) == null && MapLabArtAssets.RoleOf(a) == MapLabDecorRole.TallPlant)
+                    weedIds.Add(MapLabArtAssets.IdPrefix + a.Id);
+            if (weedIds.Count == 0)
+                Assert.Ignore("В Базе ассетов нет бурьяна для арены.");
+            int Count(MapLabArenaLook look, bool checkCells)
+            {
+                int total = 0;
+                for (int seed = 1; seed <= 3; seed++)
+                {
+                    MapLabArenaSpec spec = DefaultSpec(Battle(seed));
+                    spec.Look = look;
+                    MapLabArena arena = MapLabArena.Build(spec);
+                    try
+                    {
+                        Assert.That(arena.Ready, Is.True, arena.Error);
+                        foreach (var f in arena.View.Data.Composition.Features)
+                            if (weedIds.Contains(f.Visual))
+                                total++;
+                        if (checkCells)
+                            AssertDecorLeavesCellsVisible(arena, spec);
+                    }
+                    finally { arena.Dispose(); }
+                }
+                return total;
+            }
+            int more = Count(new MapLabArenaLook(), true);
+            int fewer = Count(new MapLabArenaLook { WeedsPerGroup = 1, WeedClumps = 0f }, false);
+            Assert.That(more, Is.GreaterThanOrEqualTo(3 * 8), "в среднем не меньше 8 растений бурьяна на арену");
+            Assert.That(more, Is.GreaterThan(fewer * 2), "куртины и несколько растений у группы — бурьяна заметно больше");
+        }
+
         // Роль рисунка — по тегам, а не по высоте холста: низкие растения пакета
         // с высоким холстом (модуль низкой травы, побеги, черника) — трава пятен и
         // россыпи, а не бурьян у групп деревьев (по одному на группу).

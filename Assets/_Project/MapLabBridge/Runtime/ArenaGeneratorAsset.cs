@@ -156,6 +156,10 @@ namespace KingdomSurvival.MapLabBridge
         // Пни и бурьян у края групп, со стороны поля (вероятность на группу).
         public float WeedChance = 0.65f;
         public float StumpChance = 0.65f;
+        // Бурьяна у края группы — до стольких растений (каждое — с вероятностью WeedChance).
+        public int WeedsPerGroup = 3;
+        // Куртины бурьяна (1–3 растения) по окраине кадра, мимо клеток поля, штук на арену.
+        public float WeedClumps = 6f;
         public float WeedScale = 1f;
 
         // Низкая трава — рисунками Базы ассетов, пятнами с паузами.

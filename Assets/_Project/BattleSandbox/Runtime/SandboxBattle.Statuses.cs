@@ -85,6 +85,9 @@ namespace KingdomSurvival.BattleSandbox
                 if (retaliation && attacker.IsGuarding &&
                     Rules(attacker, SandboxPassiveKind.RetaliationIgnoresStatus).Any(pair => pair.Rule.StatusIds.Contains(instance.StatusId)))
                     continue;
+                // Этап 13: «Не слабеет от ран», «Ночная выдержка».
+                if (StatusPenaltyIgnored(attacker, instance, V(instance, op)))
+                    continue;
                 switch (op.Filter)
                 {
                     case SandboxStatusFilter.Melee: if (!ranged) sum += V(instance, op); break;
@@ -319,6 +322,9 @@ namespace KingdomSurvival.BattleSandbox
                 if (def.Has(SandboxStatusOpKind.CannotTargetSource) && instance.SourceUnitId == target.Id)
                     return "«" + def.Name + "»: нельзя нападать на источник.";
             }
+            // Этап 13: стрелок с конечным запасом снарядов.
+            if (ranged && SandboxCapabilityFacts.UsesAmmo(attacker) && attacker.AmmoLeft <= 0)
+                return "Боевые снаряды кончились.";
             SandboxStatusInstance provoked = attacker.statuses.FirstOrDefault(item => item.Definition.Has(SandboxStatusOpKind.MustTargetSource));
             if (provoked != null && provoked.SourceUnitId != target.Id)
             {

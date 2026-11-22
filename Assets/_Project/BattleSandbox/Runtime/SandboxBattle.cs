@@ -72,6 +72,8 @@ namespace KingdomSurvival.BattleSandbox
         // Этап 11: может ли участник лечь «При смерти» вместо окончательной смерти.
         // Только явная настройка Базы существ; по умолчанию нет.
         public bool CanBeRescuedInBattle { get; }
+        // Этап 13: боевые снаряды стрелка; 0 — бесконечные природные выстрелы.
+        public int Ammo { get; }
 
         public SandboxUnitDefinition(
             string id,
@@ -88,8 +90,10 @@ namespace KingdomSurvival.BattleSandbox
             IEnumerable<string> perks = null,
             IEnumerable<SandboxAbilityDefinition> abilities = null,
             int magicReserve = 0,
-            bool canBeRescuedInBattle = false)
+            bool canBeRescuedInBattle = false,
+            int ammo = 0)
         {
+            Ammo = Math.Max(0, ammo);
             MagicReserve = Math.Max(0, magicReserve);
             CanBeRescuedInBattle = canBeRescuedInBattle;
             if (string.IsNullOrWhiteSpace(id))
@@ -131,7 +135,7 @@ namespace KingdomSurvival.BattleSandbox
         // Копия с другими числами (уровень противника) и теми же способностями.
         public SandboxUnitDefinition WithStats(int maxHitPoints, int attack, int defense, int damage, int movement, int initiative, int attackRange)
         {
-            return new SandboxUnitDefinition(Id, RoleLabel, Role, maxHitPoints, attack, defense, damage, movement, initiative, attackRange, tagIds, perkIds, Abilities, MagicReserve, CanBeRescuedInBattle);
+            return new SandboxUnitDefinition(Id, RoleLabel, Role, maxHitPoints, attack, defense, damage, movement, initiative, attackRange, tagIds, perkIds, Abilities, MagicReserve, CanBeRescuedInBattle, Ammo);
         }
 
         public bool HasTag(string tagId)
@@ -231,7 +235,7 @@ namespace KingdomSurvival.BattleSandbox
         public string DisplayLabel => IsHidden ? "Неизвестная угроза" : Definition.RoleLabel;
         public SandboxUnitRole Role => Definition.Role;
         // Временное изменение MaxHP состояниями — не урон; возврат не лечит.
-        public int MaxHitPoints => Math.Max(1, Definition.MaxHitPoints + passive.BonusMaxHitPoints + SandboxBattle.StatusMaxHitPointsMod(this));
+        public int MaxHitPoints => Math.Max(1, Definition.MaxHitPoints - SandboxBattle.PassiveMaxHpPenalty(this) + passive.BonusMaxHitPoints + SandboxBattle.StatusMaxHitPointsMod(this));
         public int Attack => Definition.Attack;
         public int Defense => Definition.Defense;
         public int Damage => Definition.Damage;
@@ -288,8 +292,12 @@ namespace KingdomSurvival.BattleSandbox
             Definition = definition ?? throw new ArgumentNullException(nameof(definition));
             Team = team;
             Position = position;
-            HitPoints = definition.MaxHitPoints;
+            HitPoints = MaxHitPoints;
+            AmmoLeft = definition.Ammo;
         }
+
+        // Этап 13: оставшиеся боевые снаряды (при Definition.Ammo > 0).
+        public int AmmoLeft { get; internal set; }
 
         // Был ли в стойке в момент начала собственной активации (теги «в стойке на старте хода»).
         public bool WasGuardingAtStart { get; internal set; }
@@ -584,8 +592,10 @@ namespace KingdomSurvival.BattleSandbox
             return reachable;
         }
 
-        private Dictionary<HexCoord, int> BuildReachable(SandboxUnitState unit, int budget)
+        private Dictionary<HexCoord, int> BuildReachable(SandboxUnitState unit, int budget, bool includeTransit = false)
         {
+            bool flyer = HasPassive(unit, SandboxPassiveKind.FlyOverLowObstacles);
+            HashSet<HexCoord> transit = null;
             Dictionary<HexCoord, int> result = new Dictionary<HexCoord, int>();
 
             Dictionary<HexCoord, int> costs = new Dictionary<HexCoord, int>
@@ -608,8 +618,14 @@ namespace KingdomSurvival.BattleSandbox
 
                 foreach (HexCoord next in current.Neighbors())
                 {
+                    bool flyOver = false;
                     if (!IsInside(next) || !IsEnterableFor(unit, next))
-                        continue;
+                    {
+                        // Этап 13, «полёт»: над низкой преградой — по обычной цене, без остановки.
+                        if (!flyer || !CanFlyOver(unit, next))
+                            continue;
+                        flyOver = true;
+                    }
                     if (GetUnitAt(next) != null && next != unit.Position)
                         continue;
                     // Нить останавливает движение на своём гексе: дальше этой
@@ -617,7 +633,7 @@ namespace KingdomSurvival.BattleSandbox
                     if (current != unit.Position && IsMovementStopCell(unit, current))
                         continue;
 
-                    int stepCost = GetStepCost(unit, next) + PassiveExtraStepCost(unit, current, next);
+                    int stepCost = (flyOver ? 1 : GetStepCost(unit, next)) + PassiveExtraStepCost(unit, current, next);
                     int newCost = costs[current] + stepCost;
                     if (newCost > budget)
                         continue;
@@ -628,12 +644,16 @@ namespace KingdomSurvival.BattleSandbox
 
                     costs[next] = newCost;
                     frontier.Add(next);
+                    if (flyOver)
+                        (transit ??= new HashSet<HexCoord>()).Add(next);
+                    else
+                        transit?.Remove(next);
                 }
             }
 
             foreach (KeyValuePair<HexCoord, int> pair in costs)
             {
-                if (pair.Key != unit.Position)
+                if (pair.Key != unit.Position && (includeTransit || transit == null || !transit.Contains(pair.Key)))
                     result[pair.Key] = pair.Value;
             }
 
@@ -1540,6 +1560,8 @@ namespace KingdomSurvival.BattleSandbox
             effectiveAttack = Math.Max(0m, effectiveAttack + StatusAttackMod(attacker, target, rangedHit, retaliation: retaliation));
             // Пакет тегов: постоянные условия — отдельно от предела состояний.
             effectiveAttack = Math.Max(0m, effectiveAttack + PassiveAttackMod(attacker, target, rangedHit, attackPosition));
+            // Этап 13: темнота ослабляет обычный дальний удар.
+            effectiveAttack = Math.Max(0m, effectiveAttack - DarknessAttackPenalty(attacker, rangedHit, !retaliation && abilityMultiplier == 1m));
             decimal effectiveDefense = SandboxCombatTagRules.GetEffectiveDefense(target);
             effectiveDefense = Math.Max(0m, effectiveDefense + PassiveDefenseMod(target, attacker, rangedHit) - PassiveIgnoreDefense(attacker, target, rangedHit));
             // Бриф «Поверхности арены»: укрытие леса/зарослей — только от
@@ -1593,6 +1615,10 @@ namespace KingdomSurvival.BattleSandbox
             // Пакет состояний: плоские изменения итогового урона (+2 / −1, минимум 1).
             damage = Math.Max(1, damage + StatusFlatDamage(attacker, target, rangedHit, hitDamageType, consume: false));
             damage = PassiveDamage(attacker, target, rangedHit, damage, consume: false);
+            // Этап 13: фланговая доплата и ослабленный ответ.
+            damage += FlankBonus(attacker, target, rangedHit);
+            if (retaliation)
+                damage = Math.Max(1, damage - RetortPenalty(attacker));
 
             SandboxAttackPreview result = new SandboxAttackPreview(
                 true,

@@ -137,6 +137,16 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxPassiveCondition.ColdDamage: return hitDamageType == SandboxDamageType.Cold;
                 case SandboxPassiveCondition.MagicalHit: return hitMagical;
                 case SandboxPassiveCondition.NonMagical: return !hitMagical;
+                case SandboxPassiveCondition.SelfInForest: return !self.IsOffBoard && GetVegetation(self.Position) == SandboxVegetation.Forest;
+                case SandboxPassiveCondition.SelfInThicket:
+                    return !self.IsOffBoard && (GetVegetation(self.Position) == SandboxVegetation.Forest || GetVegetation(self.Position) == SandboxVegetation.Brush);
+                case SandboxPassiveCondition.BeyondHalfRange:
+                    return other != null && self.Position.DistanceTo(other.Position) * 2 > Math.Max(1, self.AttackRange);
+                case SandboxPassiveCondition.EvenRound: return Round % 2 == 0;
+                case SandboxPassiveCondition.FirstOwnActivation: return self.ActivationCount <= 1;
+                case SandboxPassiveCondition.SelfHpBelowHalf: return self.HitPoints * 2 < baseMax;
+                case SandboxPassiveCondition.Dark: return IsDark;
+                case SandboxPassiveCondition.StraightRun: return CurrentUnit == self && self.passive.StraightSteps >= 3;
                 case SandboxPassiveCondition.SelfHasStatus:
                     return rule.StatusIds.Any(id => self.HasStatus(id) || (id == SandboxStatusCatalog.Parasite && GetAttachedParasite(self) != null));
                 case SandboxPassiveCondition.SelfIsLinkPartner:
@@ -213,6 +223,9 @@ namespace KingdomSurvival.BattleSandbox
                     continue;
                 foreach ((SandboxPassiveDefinition _, SandboxPassiveRule rule) in Rules(bearer, kind))
                 {
+                    // Этап 13: аура только для получателя с тегом («Поводырь мёртвых»).
+                    if (rule.Condition == SandboxPassiveCondition.TargetTag && !unit.HasTag(rule.ConditionParam))
+                        continue;
                     if (kind == SandboxPassiveKind.AuraEnemyDefense && rule.StatusIds.Any(id => IsPassiveImmune(unit, id)))
                         continue;
                     if (!found || Math.Abs(rule.Value) > Math.Abs(value))
@@ -248,6 +261,8 @@ namespace KingdomSurvival.BattleSandbox
             }
             if (AuraFrom(target, SandboxPassiveKind.AuraEnemyDefense, allies: false, out int dread))
                 sum += dread;
+            // Этап 13: аура защиты союзников и уклонение.
+            sum += AllyDefenseAura(target, attacker, ranged) + DodgeDefense(target, attacker);
             return sum;
         }
 
@@ -286,6 +301,7 @@ namespace KingdomSurvival.BattleSandbox
                         flat += rule.Value;
                 }
                 flat -= target.passive.Stack("reduction.hits");
+                flat -= ShellReduction(target);
             }
             if (target != null && hitDamageType == SandboxDamageType.Cold && art.ColdMarkTargetId == target.Id && art.ColdMarkExpires >= target.ActivationCount)
             {
@@ -303,7 +319,7 @@ namespace KingdomSurvival.BattleSandbox
                     art.Counters["spark.discharged"] = currentRootAction;
                 }
             }
-            int result = damage + flat;
+            int result = OutgoingPercentAdjust(attacker, target, ranged, damage + flat);
             if (target != null)
             {
                 int percent = 0;
@@ -623,6 +639,7 @@ namespace KingdomSurvival.BattleSandbox
                         }
                     }
                 }
+                CapabilityOnDirectHit(kind, striker, target, ranged, hpTaken);
             }
             finally
             {
@@ -815,6 +832,8 @@ namespace KingdomSurvival.BattleSandbox
             SandboxPassiveRuntime rt = unit.passive;
             bool lastTurnNoAttack = rt.Counter("turn.noattack") > 0;
             rt.HitAndRunTargets.Clear();
+            rt.StraightSteps = 0;
+            rt.LastStepDirection = -1;
             rt.ActivationStartPosition = unit.Position;
             rt.MoveAfterActionBudget = 0;
             rt.TookDamageThisTurn = false;
@@ -897,6 +916,7 @@ namespace KingdomSurvival.BattleSandbox
             if (rt.GrantedAttackUntilActivation >= 0 && rt.GrantedAttackUntilActivation < unit.ActivationCount)
                 rt.Stacks["attack.untilTurn"] = 0;
             rt.Counters["turn.noattack.prev"] = lastTurnNoAttack ? 1 : 0;
+            CapabilityActivationStart(unit);
         }
 
         // Добавка к движению в начале хода (до удержаний и NoVoluntaryMove).
@@ -922,7 +942,7 @@ namespace KingdomSurvival.BattleSandbox
                     }
                 }
             }
-            return bonus;
+            return bonus + CapabilityMovementStart(unit);
         }
 
         private void ProcessPassiveActivationEnd(SandboxUnitState unit)
@@ -957,6 +977,7 @@ namespace KingdomSurvival.BattleSandbox
                     RemoveStatus(unit, removed, "«" + def.Name + "»");
                 }
             }
+            CapabilityActivationEnd(unit, still);
             rt.Counters["turn.noattack"] = rt.AttackedThisTurn ? 0 : 1;
         }
 
@@ -1003,6 +1024,10 @@ namespace KingdomSurvival.BattleSandbox
 
         private void AfterPassiveStep(SandboxUnitState unit, HexCoord previous, HexCoord cell)
         {
+            // Этап 13, «Разгон по прямой»: шаги одного направления подряд.
+            int direction = previous.GetNeighborIndex(cell);
+            unit.passive.StraightSteps = direction >= 0 && direction == unit.passive.LastStepDirection ? unit.passive.StraightSteps + 1 : 1;
+            unit.passive.LastStepDirection = direction;
             foreach (SandboxUnitState spiny in units.Where(u => !u.IsDefeated && !u.IsOffBoard && u.Team != unit.Team &&
                                                                 u.Position.DistanceTo(cell) == 1 && u.Position.DistanceTo(previous) != 1).ToList())
             {
@@ -1012,12 +1037,16 @@ namespace KingdomSurvival.BattleSandbox
                         DealStatusDamage(unit, rule.Value, spiny, "«" + def.Name + "» (" + spiny.DisplayLabel + ")", SandboxDamageType.Physical);
                 }
             }
+            CheckRootBinds();
         }
 
         private void AfterPassiveVoluntaryMove(SandboxUnitState unit, HexCoord origin)
         {
             unit.passive.AttackedSinceMove = false;
             AfterSurroundExit(unit, origin);
+            // Этап 13: носитель «Связывающих корней» сдвинулся — связь распадается.
+            if (unit.Position != origin)
+                CheckRootBinds(unit);
             foreach (SandboxStatusInstance rime in unit.statuses.Where(item => item.Mode == "thin_rime").ToList())
                 RemoveStatusInstance(unit, rime, "тонкий иней сброшен шагом", endReason: SandboxStatusEndReason.Consumed);
             foreach (SandboxStatusInstance sticky in unit.statuses.Where(item => item.Mode == "sticky_exit").ToList())

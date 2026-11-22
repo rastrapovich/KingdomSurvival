@@ -771,6 +771,8 @@ namespace KingdomSurvival.BattleSandbox
             SetUnitPosition(unit, cell);
             string note = " " + unit.DisplayLabel + " " + verb + " → " + cell + ".";
             ApplyHazardsAt(unit, cell);
+            if (!unit.IsDefeated)
+                AfterForcedShift(unit, cell);
             if (!unit.IsDefeated && verb == "отброшен")
                 note += SlideOnIce(unit, from, cell);
             cell = unit.Position;
@@ -1444,6 +1446,12 @@ namespace KingdomSurvival.BattleSandbox
                 {
                     SandboxBattleObject item = GetObject(match.ObjectId);
                     int damage = Math.Max(1, unit.Damage);
+                    // Этап 13, «Ломает заграждения»: разрушаемые препятствия (не кокон).
+                    if (item.IsTerrain)
+                    {
+                        foreach ((SandboxPassiveDefinition _, SandboxPassiveRule rule) in Rules(unit, SandboxPassiveKind.ObstacleDamageMultiplier))
+                            damage = Math.Max(damage, Math.Max(1, unit.Damage) * Math.Max(1, rule.Value));
+                    }
                     item.HitPoints = Math.Max(0, item.HitPoints - damage);
                     message = unit.DisplayLabel + " бьёт " + item.Label.ToLowerInvariant() + ": −" + damage + " HP" +
                               (item.IsDestroyed ? " — разрушено." : " (осталось " + item.HitPoints + ").");

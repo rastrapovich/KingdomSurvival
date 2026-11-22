@@ -105,7 +105,7 @@ namespace KingdomSurvival.BattleSandbox
                 Take(2);
             switch (GetVegetation(cell))
             {
-                case SandboxVegetation.Forest: Take(Has(SandboxTerrainTags.ForestWalker) ? 1 : r.ForestCost); break;
+                case SandboxVegetation.Forest: Take(Has(SandboxTerrainTags.ForestWalker) || HasPassive(unit, SandboxPassiveKind.ForestStride) ? 1 : r.ForestCost); break;
                 case SandboxVegetation.Brush: Take(Has(SandboxTerrainTags.ForestWalker) ? 1 : r.BrushCost); break;
             }
             return cost;

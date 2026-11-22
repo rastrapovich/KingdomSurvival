@@ -279,6 +279,7 @@ namespace KingdomSurvival.UnitDatabase
         [SerializeField, Min(0), Tooltip("Чародейский запас на бой. 0 — заклинания ограничены только действием и КД.")] private int magicReserve;
         // Этап 11: «При смерти» вместо окончательной смерти (одно спасение за бой). По умолчанию нет.
         [SerializeField, Tooltip("В бою при 0 HP ложится «При смерти»: соседний союзник может спасти до конца её следующего хода.")] private bool canBeRescuedInBattle;
+        [SerializeField, Min(0), Tooltip("Боевые снаряды стрелка на бой. 0 — бесконечные природные выстрелы.")] private int ammo;
         [SerializeField, Min(1)] private int attackRange = 1;
 
         [Header("Изображения")]
@@ -372,6 +373,8 @@ namespace KingdomSurvival.UnitDatabase
         public void SetMagicReserve(int value) => magicReserve = Math.Max(0, value);
         public bool CanBeRescuedInBattle => canBeRescuedInBattle;
         public void SetCanBeRescued(bool value) => canBeRescuedInBattle = value;
+        public int Ammo => ammo;
+        public void SetAmmo(int value) => ammo = Math.Max(0, value);
         public int AttackRange => attackRange;
         public Sprite Portrait => portrait;
         public PortraitFitMode PortraitFitMode => portraitFitMode;

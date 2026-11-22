@@ -164,6 +164,7 @@ namespace KingdomSurvival.BattleSandbox
             T("passive.20261119.247", "Не вязнет в паутине").Alias(SandboxTerrainTags.SpiderStep);
 
             RegisterStatusReactions();
+            RegisterCapabilities();
         }
     }
 }

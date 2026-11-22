@@ -559,6 +559,9 @@ namespace KingdomSurvival.UnitDatabase.Editor
             abilitiesCard.Add(new PropertyField(unit.FindPropertyRelative("abilities"), "Способности"));
             grid.Add(abilitiesCard);
 
+            // Бриф завершения, этап 14: каталог тегов, способностей, состояний и боевых фактов.
+            grid.Add(BuildCatalogCard(unit, data));
+
             Foldout tagEditor = new Foldout { text = "Справочник тегов базы", value = false };
             tagEditor.style.marginTop = 4f;
             tagEditor.Add(new PropertyField(tagsProperty, "Теги базы"));

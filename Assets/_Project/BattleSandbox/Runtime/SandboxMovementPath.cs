@@ -31,13 +31,15 @@ namespace KingdomSurvival.BattleSandbox
             if (!reachable.TryGetValue(destination, out movementCost))
                 return false;
 
+            // Этап 13: пролётные клетки «полёта» участвуют в маршруте, но не конечные.
+            reachable = battle.GetTransitCosts(unitId);
             List<HexCoord> reversed = new List<HexCoord> { destination };
             HexCoord current = destination;
             int currentCost = movementCost;
 
             while (current != unit.Position)
             {
-                int stepCost = battle.GetStepCost(unit, current);
+                int stepCost = battle.GetTransitStepCost(unit, current);
                 bool found = false;
                 HexCoord bestPredecessor = default;
                 int bestPredecessorCost = 0;

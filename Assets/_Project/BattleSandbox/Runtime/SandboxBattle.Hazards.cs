@@ -24,7 +24,9 @@ namespace KingdomSurvival.BattleSandbox
         // Иней на земле от холодного удара: шаг на клетку +1 для всех, без урона.
         Rime,
         // Опасные останки: стоящий в конце хода теряет HP.
-        Remains
+        Remains,
+        // Липкий след после принудительного сдвига (этап 13): шаг +1, без урона.
+        Sticky
     }
 
     public enum SandboxImpulse
@@ -71,6 +73,7 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxEffectKind.Ice: return "лёд";
                 case SandboxEffectKind.Rime: return "иней на земле";
                 case SandboxEffectKind.Remains: return "опасные останки";
+                case SandboxEffectKind.Sticky: return "липкий след";
                 default: return "ток в воде";
             }
         }
@@ -194,6 +197,7 @@ namespace KingdomSurvival.BattleSandbox
                     case SandboxEffectKind.Roots:
                     case SandboxEffectKind.Thorns:
                     case SandboxEffectKind.Rime:
+                    case SandboxEffectKind.Sticky:
                         cost = Math.Max(cost, 2);
                         break;
                     case SandboxEffectKind.Web:

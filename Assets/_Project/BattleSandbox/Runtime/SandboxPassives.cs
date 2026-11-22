@@ -136,6 +136,29 @@ namespace KingdomSurvival.BattleSandbox
         LeaveRemains,
         ConsumeRemains,
         SharedFateLink,
+        // Этап 13: факты способностей (тело, оружие, местность, свет, снаряды).
+        OutgoingPercent,
+        AuraAllyDefense,
+        AuraAllyRegen,
+        RetortWeakenOnHit,
+        FlyOverLowObstacles,
+        ObstacleDamageMultiplier,
+        FlankBonusReduction,
+        IgnoreDarkness,
+        StatusAttackPenaltyIgnore,
+        DodgeDefense,
+        DodgeReduction,
+        ForestStride,
+        MaxHitPointsPercent,
+        BreakWeapon,
+        IgnoreFatigue,
+        DestroyAmmo,
+        RootBindOnHit,
+        ReflectEvenRounds,
+        AmbushFirstActivation,
+        ForceShell,
+        StickyTrailAfterShift,
+        QuietPhase,
         // Прежнее правило под другим ID (Стая, ходьба по местности).
         Alias,
         // Политика без собственного эффекта (совпадает с общим правилом).
@@ -183,7 +206,17 @@ namespace KingdomSurvival.BattleSandbox
         FireDamage,
         ColdDamage,
         MagicalHit,
-        NonMagical
+        NonMagical,
+        // Этап 13.
+        SelfInForest,
+        SelfInThicket,
+        BeyondHalfRange,
+        EvenRound,
+        FirstOwnActivation,
+        SelfHpBelowHalf,
+        Dark,
+        // Свой ход, не меньше трёх шагов по прямой.
+        StraightRun
     }
 
     // Событие состояния для реакции тега.
@@ -339,6 +372,13 @@ namespace KingdomSurvival.BattleSandbox
         public bool RescueUsed { get; internal set; }
         internal int DyingSinceActivation;
         internal bool ForceFinalDeath;
+        // Этап 13: ослабленный ответ, связь корней, силовой покров, снаряды.
+        internal int RetortPenalty;
+        internal int RetortPenaltyUntilActivation = -1;
+        internal string RootBindTargetId;
+        public int ShellCharges { get; internal set; }
+        public int StraightSteps { get; internal set; }
+        internal int LastStepDirection = -1;
         public int Counter(string key) => Counters.TryGetValue(key, out int value) ? value : 0;
         public int Stack(string key) => Stacks.TryGetValue(key, out int value) ? value : 0;
     }

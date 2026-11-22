@@ -188,7 +188,7 @@ tag;passive.20261119.129;Непроницаемый для обычного;;д�
 tag;passive.20261119.130;Опора соседей;;да;;CapabilityTagTests;;AuraAllyDefense;да;да;да;механизм;нет;нет
 tag;passive.20261119.131;Точность против уклонения;;да;;CapabilityTagTests;;DodgeReduction;да;да;да;механизм;нет;нет
 tag;passive.20261119.132;Пробивает поглощение;;да;;;;PierceFlatReduction;да;да;да;дымовой;нет;нет
-tag;passive.20261119.136;Умелые руки лекаря;★;да;;SupportAndTypedDamageTests;;HealOtherBonus;да;да;да;механизм;нет;нет
+tag;passive.20261119.136;Умелые руки лекаря;★;да;;SupportAndTypedDamageTests;healer;HealOtherBonus;да;да;да;механизм;нет;нет
 tag;passive.20261119.138;Сосуд живучести;★;да;;;;ActivationEndHealPercent;да;да;да;дымовой;нет;нет
 tag;passive.20261119.149;Смертельная отрава;★;да;;;;;да;да;да;дымовой;нет;нет
 tag;passive.20261119.158;Считает павших;★;да;;;;StackAttackAfterAlliesFell;да;да;да;дымовой;нет;нет

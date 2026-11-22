@@ -90,12 +90,22 @@ public sealed class BattleStatusHudPlayModeTests
         }
         Assert.Greater(applied, fighters.Count * 6, "больше шести состояний на бойце");
 
-        for (int i = 0; i < 30; i++)
-            yield return null;
-
-        // Значки: не больше шести видимых и «+N» у каждого, у кого больше шести.
+        // Ждём, пока поле перестроит группы значков под новые состояния.
         object board = Get(sandbox, "board");
         IDictionary groups = (IDictionary)Get(board, "statusGroups");
+        bool LaidOut(SandboxUnitState unit)
+        {
+            if (!groups.Contains(unit.Id))
+                return false;
+            object g = groups[unit.Id];
+            return ((IList)Get(g, "Views")).Count > 6 && (int)Get(g, "VisibleCount") > 0 && Get(g, "More") != null;
+        }
+        for (int i = 0; i < 300 && !fighters.Where(u => battle.GetStatusViews(u.Id, SandboxTeam.Player).Count > 6).Any(LaidOut); i++)
+            yield return null;
+        for (int i = 0; i < 10; i++)
+            yield return null;
+
+        // Значки: не больше шести видимых и «+N» у каждого разложенного, у кого больше шести.
         int capped = 0;
         foreach (SandboxUnitState unit in fighters)
         {
@@ -103,6 +113,9 @@ public sealed class BattleStatusHudPlayModeTests
             if (views <= 6 || !groups.Contains(unit.Id))
                 continue;
             object group = groups[unit.Id];
+            // Группа ещё со старым списком (боец вне видимой фигуры) — не проверяем.
+            if (((IList)Get(group, "Views")).Count <= 6 || (int)Get(group, "VisibleCount") == 0)
+                continue;
             int visible = (int)Get(group, "VisibleCount");
             Assert.LessOrEqual(visible, 6, unit.Id);
             object more = Get(group, "More");

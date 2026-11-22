@@ -16,7 +16,9 @@ namespace KingdomSurvival.UnitDatabase.Tests
                 UnitDatabaseAsset.ResourcesPath);
 
             Assert.That(database, Is.Not.Null);
-            Assert.That(database.Units.Count, Is.EqualTo(9 + 22 + 7), "9 исходных типов, 22 существа каталога ПР-12Ж (без Криволапа и Бивнестого громилы) и 7 существ второго эшелона ПР-16.");
+            Assert.That(database.Units.Count, Is.EqualTo(9 + 22 + 7 + TestPresetIds.Count), "9 исходных типов, 22 существа каталога ПР-12Ж (без Криволапа и Бивнестого громилы), 7 существ второго эшелона ПР-16 и проверочные пресеты огня/холода.");
+            Assert.That(TestPresetIds.All(id => database.FindById(id) != null && database.FindById(id).ExcludedFromNewEncounters), Is.True,
+                "проверочные пресеты не попадают в новые встречи");
             Assert.That(
                 database.Units.Select(unit => unit.Id).Distinct().Count(),
                 Is.EqualTo(database.Units.Count));
@@ -30,7 +32,7 @@ namespace KingdomSurvival.UnitDatabase.Tests
                 UnitDatabaseAsset.ResourcesPath);
             // Каталог ПР-12Ж сознательно шире: от Шешки до Чернолоба.
             UnitDefinitionData[] original = database.Units
-                .Where(unit => !UnitCatalogIds.Contains(unit.Id))
+                .Where(unit => !UnitCatalogIds.Contains(unit.Id) && !TestPresetIds.Contains(unit.Id))
                 .ToArray();
 
             Assert.That(original.Length, Is.EqualTo(9));
@@ -43,6 +45,9 @@ namespace KingdomSurvival.UnitDatabase.Tests
             Assert.That(original.All(unit =>
                 unit.Damage >= 3 && unit.Damage <= 5), Is.True);
         }
+
+        // Бриф завершения боя (22.11.2026): проверочные носители заклинаний огня и холода для полигона.
+        private static readonly HashSet<string> TestPresetIds = new HashSet<string> { "test_fire_caster", "test_cold_caster" };
 
         private static readonly HashSet<string> UnitCatalogIds = new HashSet<string>(
             KingdomSurvival.UnitDatabase.Editor.UnitCatalogSeed.Creatures().Select(unit => unit.Id)

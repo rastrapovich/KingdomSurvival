@@ -165,32 +165,72 @@ MonoBehaviour:
     displayLabel: "\u0421\u0442\u0430\u044F (\u043F\u0430\u043A\u0435\u0442)"
     category: "\u041F\u0430\u0441\u0441\u0438\u0432"
     color: {r: 0.45, g: 0.38, b: 0.52, a: 1}
-    description: "\u041D\u043E\u0432\u044B\u0439 ID \u0442\u043E\u0433\u043E \u0436\u0435 \u043F\u0440\u0430\u0432\u0438\u043B\u0430 \u00AB\u0421\u0442\u0430\u044F\u00BB (combat.pack): \u0438\u0441\u043F\u043E\u043B\u043D\u044F\u0435\u0442\u0441\u044F \u043E\u0434\u0438\u043D \u0440\u0430\u0437, \u0432\u0442\u043E\u0440\u043E\u0433\u043E \u0431\u043E\u043D\u0443\u0441\u0430 \u043D\u0435\u0442."
+    description: "\u041D\u043E\u0432\u044B\u0439 ID \u0442\u043E\u0433\u043E \u0436\u0435
+      \u043F\u0440\u0430\u0432\u0438\u043B\u0430 \xAB\u0421\u0442\u0430\u044F\xBB
+      (combat.pack): \u0438\u0441\u043F\u043E\u043B\u043D\u044F\u0435\u0442\u0441\u044F
+      \u043E\u0434\u0438\u043D \u0440\u0430\u0437, \u0432\u0442\u043E\u0440\u043E\u0433\u043E
+      \u0431\u043E\u043D\u0443\u0441\u0430 \u043D\u0435\u0442."
   - id: passive.20261119.052
     displayLabel: "\u042F\u0434\u043E\u0432\u0438\u0442\u0430\u044F \u0430\u0442\u0430\u043A\u0430"
     category: "\u041F\u0430\u0441\u0441\u0438\u0432"
     color: {r: 0.45, g: 0.38, b: 0.52, a: 1}
-    description: "\u041F\u0435\u0440\u0432\u043E\u0435 \u043E\u0431\u044B\u0447\u043D\u043E\u0435 \u043F\u043E\u043F\u0430\u0434\u0430\u043D\u0438\u0435 \u0441 \u0443\u0440\u043E\u043D\u043E\u043C \u0437\u0430 \u0441\u0432\u043E\u0439 \u0445\u043E\u0434: \u041E\u0442\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 1 \u0443\u0440\u043E\u043D \u00D7 2 \u0445\u043E\u0434\u0430; \u043F\u043E\u0432\u0442\u043E\u0440 \u043E\u0442 \u0442\u043E\u0433\u043E \u0436\u0435 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0430 \u043E\u0431\u043D\u043E\u0432\u043B\u044F\u0435\u0442 \u0441\u0440\u043E\u043A."
+    description: "\u041F\u0435\u0440\u0432\u043E\u0435 \u043E\u0431\u044B\u0447\u043D\u043E\u0435
+      \u043F\u043E\u043F\u0430\u0434\u0430\u043D\u0438\u0435 \u0441 \u0443\u0440\u043E\u043D\u043E\u043C
+      \u0437\u0430 \u0441\u0432\u043E\u0439 \u0445\u043E\u0434: \u041E\u0442\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435
+      1 \u0443\u0440\u043E\u043D \xD7 2 \u0445\u043E\u0434\u0430; \u043F\u043E\u0432\u0442\u043E\u0440
+      \u043E\u0442 \u0442\u043E\u0433\u043E \u0436\u0435 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0430
+      \u043E\u0431\u043D\u043E\u0432\u043B\u044F\u0435\u0442 \u0441\u0440\u043E\u043A."
   - id: body.sticky
     displayLabel: "\u041B\u0438\u043F\u043A\u0430\u044F \u043F\u043E\u0432\u0435\u0440\u0445\u043D\u043E\u0441\u0442\u044C"
     category: "\u041F\u0430\u0441\u0441\u0438\u0432"
     color: {r: 0.45, g: 0.38, b: 0.52, a: 1}
-    description: "\u041F\u043E\u0441\u043B\u0435 \u0431\u043B\u0438\u0436\u043D\u0435\u0433\u043E \u043F\u043E\u043F\u0430\u0434\u0430\u043D\u0438\u044F \u043F\u043E \u043D\u043E\u0441\u0438\u0442\u0435\u043B\u044E \u043F\u0435\u0440\u0432\u044B\u0439 \u043E\u0442\u0445\u043E\u0434 \u043D\u0430\u043F\u0430\u0432\u0448\u0435\u0433\u043E \u0438\u0437 \u0441\u043E\u0441\u0435\u0434\u0441\u0442\u0432\u0430 \u0441\u0442\u043E\u0438\u0442 +1 \u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435 (\u0434\u043E \u043A\u043E\u043D\u0446\u0430 \u0435\u0433\u043E \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0435\u0433\u043E \u0445\u043E\u0434\u0430)."
+    description: "\u041F\u043E\u0441\u043B\u0435 \u0431\u043B\u0438\u0436\u043D\u0435\u0433\u043E
+      \u043F\u043E\u043F\u0430\u0434\u0430\u043D\u0438\u044F \u043F\u043E \u043D\u043E\u0441\u0438\u0442\u0435\u043B\u044E
+      \u043F\u0435\u0440\u0432\u044B\u0439 \u043E\u0442\u0445\u043E\u0434 \u043D\u0430\u043F\u0430\u0432\u0448\u0435\u0433\u043E
+      \u0438\u0437 \u0441\u043E\u0441\u0435\u0434\u0441\u0442\u0432\u0430 \u0441\u0442\u043E\u0438\u0442
+      +1 \u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435 (\u0434\u043E \u043A\u043E\u043D\u0446\u0430
+      \u0435\u0433\u043E \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0435\u0433\u043E
+      \u0445\u043E\u0434\u0430)."
   - id: passive.status.20261120.015
-    displayLabel: "\u041A\u043E\u0440\u043D\u0438 \u0434\u0435\u0440\u0436\u0430\u0442 \u0434\u043E\u0431\u044B\u0447\u0443"
+    displayLabel: "\u041A\u043E\u0440\u043D\u0438 \u0434\u0435\u0440\u0436\u0430\u0442
+      \u0434\u043E\u0431\u044B\u0447\u0443"
     category: "\u041F\u0430\u0441\u0441\u0438\u0432"
     color: {r: 0.45, g: 0.38, b: 0.52, a: 1}
-    description: "\u041F\u0435\u0440\u0432\u043E\u0435 \u043F\u043E\u043F\u0430\u0434\u0430\u043D\u0438\u0435 \u0437\u0430 \u0441\u0432\u043E\u0439 \u0445\u043E\u0434 \u043F\u043E \u0446\u0435\u043B\u0438 \u043F\u043E\u0434 \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0439 \u043B\u043E\u0437\u043E\u0439: +1 \u0443\u0440\u043E\u043D."
+    description: "\u041F\u0435\u0440\u0432\u043E\u0435 \u043F\u043E\u043F\u0430\u0434\u0430\u043D\u0438\u0435
+      \u0437\u0430 \u0441\u0432\u043E\u0439 \u0445\u043E\u0434 \u043F\u043E \u0446\u0435\u043B\u0438
+      \u043F\u043E\u0434 \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0439
+      \u043B\u043E\u0437\u043E\u0439: +1 \u0443\u0440\u043E\u043D."
   - id: trait.exposed_flanks
     displayLabel: "\u041E\u0442\u043A\u0440\u044B\u0442\u044B\u0435 \u0431\u043E\u043A\u0430"
     category: "\u041F\u0430\u0441\u0441\u0438\u0432"
     color: {r: 0.45, g: 0.38, b: 0.52, a: 1}
-    description: "\u22122 \u0417\u0430\u0449\u0438\u0442\u044B, \u043F\u043E\u043A\u0430 \u0440\u044F\u0434\u043E\u043C \u0441\u0442\u043E\u044F\u0442 \u0445\u043E\u0442\u044F \u0431\u044B \u0434\u0432\u0430 \u0432\u0440\u0430\u0433\u0430."
+    description: "\u22122 \u0417\u0430\u0449\u0438\u0442\u044B, \u043F\u043E\u043A\u0430
+      \u0440\u044F\u0434\u043E\u043C \u0441\u0442\u043E\u044F\u0442 \u0445\u043E\u0442\u044F
+      \u0431\u044B \u0434\u0432\u0430 \u0432\u0440\u0430\u0433\u0430."
   - id: passive.status.20261120.019
-    displayLabel: "\u041D\u0435 \u043F\u043E\u0434\u043F\u0443\u0441\u043A\u0430\u0435\u0442 \u043F\u0430\u043B\u0430\u0447\u0430"
+    displayLabel: "\u041D\u0435 \u043F\u043E\u0434\u043F\u0443\u0441\u043A\u0430\u0435\u0442
+      \u043F\u0430\u043B\u0430\u0447\u0430"
     category: "\u041F\u0430\u0441\u0441\u0438\u0432"
     color: {r: 0.45, g: 0.38, b: 0.52, a: 1}
-    description: "\u041F\u0435\u0440\u0432\u044B\u0439 \u043F\u0440\u044F\u043C\u043E\u0439 \u0443\u0434\u0430\u0440 \u0437\u0430 \u0440\u0430\u0443\u043D\u0434 \u043F\u043E \u0441\u043E\u0441\u0435\u0434\u043D\u0435\u043C\u0443 \u0441\u043E\u044E\u0437\u043D\u0438\u043A\u0443 \u043F\u043E\u0434 \u041E\u0433\u043B\u0443\u0448\u0435\u043D\u0438\u0435\u043C, \u041F\u0430\u0440\u0430\u043B\u0438\u0447\u043E\u043C, \u041E\u043A\u0430\u043C\u0435\u043D\u0435\u043D\u0438\u0435\u043C \u0438\u043B\u0438 \u0417\u0430\u043C\u043E\u0440\u043E\u0437\u043A\u043E\u0439: \u22121 \u0443\u0440\u043E\u043D (\u043C\u0438\u043D\u0438\u043C\u0443\u043C 1)."
+    description: "\u041F\u0435\u0440\u0432\u044B\u0439 \u043F\u0440\u044F\u043C\u043E\u0439
+      \u0443\u0434\u0430\u0440 \u0437\u0430 \u0440\u0430\u0443\u043D\u0434 \u043F\u043E
+      \u0441\u043E\u0441\u0435\u0434\u043D\u0435\u043C\u0443 \u0441\u043E\u044E\u0437\u043D\u0438\u043A\u0443
+      \u043F\u043E\u0434 \u041E\u0433\u043B\u0443\u0448\u0435\u043D\u0438\u0435\u043C,
+      \u041F\u0430\u0440\u0430\u043B\u0438\u0447\u043E\u043C, \u041E\u043A\u0430\u043C\u0435\u043D\u0435\u043D\u0438\u0435\u043C
+      \u0438\u043B\u0438 \u0417\u0430\u043C\u043E\u0440\u043E\u0437\u043A\u043E\u0439:
+      \u22121 \u0443\u0440\u043E\u043D (\u043C\u0438\u043D\u0438\u043C\u0443\u043C
+      1)."
+  - id: passive.20261119.136
+    displayLabel: "\u0423\u043C\u0435\u043B\u044B\u0435 \u0440\u0443\u043A\u0438
+      \u043B\u0435\u043A\u0430\u0440\u044F"
+    category: "\u0416\u0438\u0432\u0443\u0447\u0435\u0441\u0442\u044C \u0438 \u043B\u0435\u0447\u0435\u043D\u0438\u0435"
+    color: {r: 0.42, g: 0.36, b: 0.52, a: 1}
+    description: "\u041F\u0435\u0440\u0432\u043E\u0435 \u043B\u0435\u0447\u0435\u043D\u0438\u0435
+      \u0441\u043E\u044E\u0437\u043D\u0438\u043A\u0430 \u0432 \u0441\u0432\u043E\u0439
+      \u0445\u043E\u0434 \u0432\u043E\u0441\u0441\u0442\u0430\u043D\u0430\u0432\u043B\u0438\u0432\u0430\u0435\u0442
+      \u0434\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u043E
+      2 HP; \u0441\u0430\u043C\u043E\u0438\u0441\u0446\u0435\u043B\u0435\u043D\u0438\u0435
+      \u0431\u043E\u043D\u0443\u0441 \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0430\u0435\u0442."
   units:
   - id: guard
     displayLabel: "\u0413\u0432\u0430\u0440\u0434\u0435\u0435\u0446"
@@ -202,6 +242,9 @@ MonoBehaviour:
     damage: 3
     movement: 3
     initiative: 3
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: e9cb8b2f45daa1a40b823e581181495a, type: 3}
     portraitFitMode: 0
@@ -242,6 +285,9 @@ MonoBehaviour:
     damage: 3
     movement: 3
     initiative: 5
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 4
     portrait: {fileID: 21300000, guid: 0b39d94e566b9cf40889e5bbd6e033fc, type: 3}
     portraitFitMode: 0
@@ -280,6 +326,9 @@ MonoBehaviour:
     damage: 3
     movement: 3
     initiative: 3
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: adfa986d00e084b4fa0392de0f5296bc, type: 3}
     portraitFitMode: 0
@@ -303,8 +352,39 @@ MonoBehaviour:
     staticFigureOnly: 0
     tagIds:
     - species.human
+    - passive.20261119.136
     size: 0
-    abilities: []
+    abilities:
+    - id: healer.heal
+      title: "\u041B\u0435\u0447\u0435\u043D\u0438\u0435"
+      description: "\u0421\u0435\u0431\u044F \u0438\u043B\u0438 \u0441\u043E\u044E\u0437\u043D\u0438\u043A\u0430
+        \u0432 1 \u0433\u0435\u043A\u0441\u0435: +4 HP, \u043D\u0435 \u0432\u044B\u0448\u0435
+        \u043C\u0430\u043A\u0441\u0438\u043C\u0443\u043C\u0430. \u042F\u0434 \u0438
+        \u043A\u0440\u043E\u0432\u043E\u0442\u0435\u0447\u0435\u043D\u0438\u0435
+        \u043B\u0435\u0447\u0435\u043D\u0438\u0435 \u0441\u0430\u043C\u043E \u043D\u0435
+        \u0441\u043D\u0438\u043C\u0430\u0435\u0442. 1 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435
+        \u0432\u043C\u0435\u0441\u0442\u043E \u0430\u0442\u0430\u043A\u0438."
+      brick: 10
+      status: 1
+      kind: 24
+      cooldown: 0
+      rangeMin: 0
+      rangeMax: 1
+      pathMin: 0
+      pathMax: 0
+      damageMultiplier: 1
+      amount: 4
+      objectHitPoints: 0
+      duration: 0
+      limit: 0
+      push: 0
+      spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: spearman
@@ -317,6 +397,9 @@ MonoBehaviour:
     damage: 3
     movement: 3
     initiative: 4
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 51acca60166dd6f45af792883484dd10, type: 3}
     portraitFitMode: 0
@@ -355,6 +438,9 @@ MonoBehaviour:
     damage: 3
     movement: 4
     initiative: 6
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 7b14bce6713a4924aa3f8f29ec862c7f, type: 3}
     portraitFitMode: 0
@@ -392,6 +478,9 @@ MonoBehaviour:
     damage: 3
     movement: 4
     initiative: 2
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 931a5308e70517f4eaf359dc83940088, type: 3}
     portraitFitMode: 0
@@ -429,6 +518,9 @@ MonoBehaviour:
     damage: 3
     movement: 4
     initiative: 5
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 38ad592ba7ed0d34fb6c5850a05ee886, type: 3}
     portraitFitMode: 0
@@ -466,6 +558,9 @@ MonoBehaviour:
     damage: 4
     movement: 4
     initiative: 4
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 37bde86bd6dd15648822d4bd4583c4de, type: 3}
     portraitFitMode: 0
@@ -503,6 +598,9 @@ MonoBehaviour:
     damage: 5
     movement: 3
     initiative: 2
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: cec1b078908051043a8bf56e62af74f3, type: 3}
     portraitFitMode: 0
@@ -541,6 +639,9 @@ MonoBehaviour:
     damage: 3
     movement: 5
     initiative: 6
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 3959685f63f21ba4da8da8647656e8ff, type: 3}
     portraitFitMode: 0
@@ -580,6 +681,9 @@ MonoBehaviour:
     damage: 4
     movement: 5
     initiative: 8
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: a30d1790807b0f64d88af9a747292590, type: 3}
     portraitFitMode: 0
@@ -633,6 +737,8 @@ MonoBehaviour:
       statusPayloadOncePerBattle: 1
       statusPayloadDuration: 2
       statusPayloadTick: 1
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: boar
@@ -645,6 +751,9 @@ MonoBehaviour:
     damage: 4
     movement: 4
     initiative: 4
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: eeb9b221603e7ae4785a66444dedbadd, type: 3}
     portraitFitMode: 0
@@ -691,6 +800,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: bear
@@ -703,6 +818,9 @@ MonoBehaviour:
     damage: 5
     movement: 3
     initiative: 2
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 117a7dfd513444c42a9200f32a1e14cd, type: 3}
     portraitFitMode: 0
@@ -749,6 +867,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: elk_bull
@@ -761,6 +885,9 @@ MonoBehaviour:
     damage: 4
     movement: 5
     initiative: 5
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: ba3ac5877434a984aaf7be843fb4456b, type: 3}
     portraitFitMode: 0
@@ -806,6 +933,12 @@ MonoBehaviour:
       limit: 0
       push: 1
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: sheshka
@@ -818,6 +951,9 @@ MonoBehaviour:
     damage: 2
     movement: 5
     initiative: 8
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 64d0f158fa88677458307b2c067733ab, type: 3}
     portraitFitMode: 0
@@ -854,6 +990,9 @@ MonoBehaviour:
     damage: 3
     movement: 4
     initiative: 6
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 6e9c748401c51ce4dadab885c79f1dd3, type: 3}
     portraitFitMode: 0
@@ -890,6 +1029,9 @@ MonoBehaviour:
     damage: 2
     movement: 5
     initiative: 7
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: cbe4ba9263b64844b9411cb9633f63f0, type: 3}
     portraitFitMode: 0
@@ -940,6 +1082,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     - id: blood_kleshchen.spit
       title: "\u041E\u0448\u0435\u043B\u043E\u043C\u043B\u044F\u044E\u0449\u0438\u0439
         \u043F\u043B\u0435\u0432\u043E\u043A"
@@ -966,6 +1114,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: padalny_mnogonog
@@ -978,6 +1132,9 @@ MonoBehaviour:
     damage: 3
     movement: 4
     initiative: 5
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: f72ea622d77cf514a97fbba61db1c1ea, type: 3}
     portraitFitMode: 0
@@ -1028,6 +1185,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     - id: padalny_mnogonog.feed
       title: "\u041A\u043E\u0440\u043C\u0438\u0442\u0441\u044F"
       description: "\u0418\u0418: \u043F\u0440\u0435\u0436\u0434\u0435 \u0432\u0441\u0435\u0433\u043E
@@ -1048,6 +1211,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: shipovik
@@ -1060,6 +1229,9 @@ MonoBehaviour:
     damage: 3
     movement: 3
     initiative: 6
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 4
     portrait: {fileID: 21300000, guid: 876615baefb51084fbbd8479b1e4c7a2, type: 3}
     portraitFitMode: 0
@@ -1107,6 +1279,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: kosteplyuy
@@ -1119,6 +1297,9 @@ MonoBehaviour:
     damage: 4
     movement: 3
     initiative: 4
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 3
     portrait: {fileID: 21300000, guid: f6323bac5c6cf2f4e8f4fab11b5f9888, type: 3}
     portraitFitMode: 0
@@ -1157,6 +1338,9 @@ MonoBehaviour:
     damage: 3
     movement: 4
     initiative: 8
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 5
     portrait: {fileID: 21300000, guid: 4dc0b847480c12b4e8a6159e7f9b342a, type: 3}
     portraitFitMode: 0
@@ -1202,6 +1386,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: tinny_polzun
@@ -1214,6 +1404,9 @@ MonoBehaviour:
     damage: 3
     movement: 2
     initiative: 2
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 372e64b55f30e4a4eb8ec8b30822c989, type: 3}
     portraitFitMode: 0
@@ -1263,6 +1456,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: kamnespin
@@ -1275,6 +1474,9 @@ MonoBehaviour:
     damage: 3
     movement: 2
     initiative: 2
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 4b8add4012a1d5a41903cd3f0f2e9d21, type: 3}
     portraitFitMode: 0
@@ -1314,6 +1516,9 @@ MonoBehaviour:
     damage: 4
     movement: 2
     initiative: 2
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: b911f54392fe2034784b33efddf00a74, type: 3}
     portraitFitMode: 0
@@ -1360,6 +1565,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: srubnik
@@ -1372,6 +1583,9 @@ MonoBehaviour:
     damage: 4
     movement: 3
     initiative: 7
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 8bc922927e059db4cbe11937ca5b52fb, type: 3}
     portraitFitMode: 0
@@ -1421,6 +1635,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: pepelny_vepr
@@ -1433,6 +1653,9 @@ MonoBehaviour:
     damage: 4
     movement: 4
     initiative: 5
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 6d98911f461c80f45959fcd2df6a2e42, type: 3}
     portraitFitMode: 0
@@ -1481,6 +1704,12 @@ MonoBehaviour:
       limit: 0
       push: 1
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: beregovik
@@ -1493,6 +1722,9 @@ MonoBehaviour:
     damage: 4
     movement: 3
     initiative: 4
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: e13b1409b001e654eb3501ffb3298091, type: 3}
     portraitFitMode: 0
@@ -1530,6 +1762,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     - id: beregovik.wet
       title: "\u0421\u0438\u043B\u044C\u043D\u0435\u0435 \u0443 \u0432\u043E\u0434\u044B"
       description: "\u041D\u0430 \u043C\u043E\u043A\u0440\u043E\u043C \u0433\u0435\u043A\u0441\u0435
@@ -1551,6 +1789,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 1
     exclusionNote: "\u0420\u0435\u0448\u0435\u043D\u0438\u0435 19.11.2026: \xAB\u0443\u0431\u0440\u0430\u0442\u044C,
       \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0443\u0436\u0435\u043D\xBB. \u041D\u0435
@@ -1568,6 +1812,9 @@ MonoBehaviour:
     damage: 3
     movement: 1
     initiative: 3
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 3
     portrait: {fileID: 21300000, guid: 797712a8912d11346b1256b07800c560, type: 3}
     portraitFitMode: 0
@@ -1617,6 +1864,12 @@ MonoBehaviour:
       limit: 4
       push: 1
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: zvonnik
@@ -1629,6 +1882,9 @@ MonoBehaviour:
     damage: 4
     movement: 3
     initiative: 5
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 2
     portrait: {fileID: 21300000, guid: bc61c2bbbe7754846a68dd7752c02f98, type: 3}
     portraitFitMode: 0
@@ -1677,6 +1933,12 @@ MonoBehaviour:
       limit: 2
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     - id: zvonnik.toll
       title: "\u0411\u044C\u0451\u0442 \u043E\u0442\u043C\u0435\u0447\u0435\u043D\u043D\u044B\u0445"
       description: "\u0412\u0442\u043E\u0440\u0430\u044F \u0447\u0430\u0441\u0442\u044C
@@ -1702,6 +1964,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: belorev
@@ -1714,6 +1982,9 @@ MonoBehaviour:
     damage: 5
     movement: 3
     initiative: 3
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 2dc8e0c556f561b46a258dbe303ad40b, type: 3}
     portraitFitMode: 0
@@ -1764,6 +2035,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: chernolob
@@ -1776,6 +2053,9 @@ MonoBehaviour:
     damage: 5
     movement: 3
     initiative: 2
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 10e4bba9c0945e245953ff40d1bb7121, type: 3}
     portraitFitMode: 0
@@ -1825,6 +2105,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     - id: chernolob.telegraph
       title: "\u041F\u043E\u043A\u0430\u0437\u0430\u043D\u043D\u044B\u0439 \u0440\u044B\u0432\u043E\u043A"
       description: "\u041B\u0438\u043D\u0438\u044F \u0440\u044B\u0432\u043A\u0430
@@ -1846,6 +2132,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: podkopen
@@ -1858,6 +2150,9 @@ MonoBehaviour:
     damage: 4
     movement: 3
     initiative: 4
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 6921b41ad65740741aad4bbcd680c190, type: 3}
     portraitFitMode: 0
@@ -1899,6 +2194,12 @@ MonoBehaviour:
       limit: 0
       push: 1
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: golosoed
@@ -1911,6 +2212,9 @@ MonoBehaviour:
     damage: 3
     movement: 4
     initiative: 6
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: f7d7b7d5febb384429cc15f04405e544, type: 3}
     portraitFitMode: 0
@@ -1948,6 +2252,12 @@ MonoBehaviour:
       limit: 0
       push: 1
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: kostyanoi_sadovnik
@@ -1960,6 +2270,9 @@ MonoBehaviour:
     damage: 4
     movement: 3
     initiative: 3
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 6da5539a09fa4174f9de83ade56ae1e7, type: 3}
     portraitFitMode: 0
@@ -1996,6 +2309,12 @@ MonoBehaviour:
       limit: 0
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: nitnik
@@ -2008,6 +2327,9 @@ MonoBehaviour:
     damage: 3
     movement: 4
     initiative: 5
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 367387fd3b541b0438e4216e2f9852d0, type: 3}
     portraitFitMode: 0
@@ -2048,6 +2370,12 @@ MonoBehaviour:
       limit: 2
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: rechnoy_uzel
@@ -2060,6 +2388,9 @@ MonoBehaviour:
     damage: 5
     movement: 1
     initiative: 2
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 97b21d3b5761e504790a77315573a07f, type: 3}
     portraitFitMode: 0
@@ -2098,6 +2429,12 @@ MonoBehaviour:
       limit: 3
       push: 1
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     - id: rechnoy_uzel.flood
       title: "\u0420\u0430\u0437\u043B\u0438\u0432"
       description: "\u041A\u0430\u0436\u0434\u0443\u044E 2-\u044E \u0441\u0432\u043E\u044E
@@ -2123,6 +2460,12 @@ MonoBehaviour:
       limit: 12
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: khozyain_temnoy_yamy
@@ -2136,6 +2479,9 @@ MonoBehaviour:
     damage: 5
     movement: 2
     initiative: 3
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: 1be8de5f421908348abf71118430b7ac, type: 3}
     portraitFitMode: 0
@@ -2176,6 +2522,12 @@ MonoBehaviour:
       limit: 4
       push: 0
       spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
   - id: gnezdovaya_matka
@@ -2188,6 +2540,9 @@ MonoBehaviour:
     damage: 3
     movement: 1
     initiative: 2
+    magicReserve: 0
+    canBeRescuedInBattle: 0
+    ammo: 0
     attackRange: 1
     portrait: {fileID: 21300000, guid: e92823ef61d1a9a4e8f7c6bfcf4976e1, type: 3}
     portraitFitMode: 0
@@ -2226,5 +2581,137 @@ MonoBehaviour:
       limit: 3
       push: 0
       spawnUnitId: blood_kleshchen
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 0
+      isMagical: 0
     excludedFromNewEncounters: 0
     exclusionNote: 
+  - id: test_fire_caster
+    displayLabel: "\u041F\u0440\u043E\u0431\u0430: \u043E\u0433\u043D\u0435\u043D\u043D\u044B\u0439
+      \u0437\u0430\u043A\u043B\u0438\u043D\u0430\u0442\u0435\u043B\u044C"
+    category: 1
+    combatRole: 6
+    maxHitPoints: 14
+    attack: 2
+    defense: 1
+    damage: 3
+    movement: 3
+    initiative: 4
+    magicReserve: 3
+    canBeRescuedInBattle: 0
+    ammo: 0
+    attackRange: 1
+    portrait: {fileID: 0}
+    portraitFitMode: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
+    portraitOffset: {x: 0, y: 0}
+    battlefieldSprite: {fileID: 0}
+    battlefieldScale: 1
+    battlefieldOffset: {x: 0, y: 0}
+    animationSetId: 
+    viewArt: []
+    staticFigureOnly: 0
+    tagIds: []
+    size: 0
+    abilities:
+    - id: test_fire_caster.spell
+      title: "\u041E\u0433\u043D\u0435\u043D\u043D\u0430\u044F \u0438\u0441\u043A\u0440\u0430"
+      description: "\u0410\u0434\u0440\u0435\u0441\u043D\u043E\u0435 \u0437\u0430\u043A\u043B\u0438\u043D\u0430\u043D\u0438\u0435:
+        \u0446\u0435\u043B\u044C \u0432 1\u20133 \u0433\u0435\u043A\u0441\u0430\u0445
+        \u043F\u043E \u043B\u0438\u043D\u0438\u0438 \u0432\u0438\u0434\u0438\u043C\u043E\u0441\u0442\u0438,
+        \u043E\u0434\u0438\u043D \u0443\u0434\u0430\u0440 \xD71 (\u043E\u0433\u043E\u043D\u044C).
+        \u0417\u0430\u0449\u0438\u0442\u0430 \u043E\u0442 \u0447\u0430\u0440 \u043E\u0442\u043C\u0435\u043D\u044F\u0435\u0442."
+      brick: 10
+      status: 1
+      kind: 25
+      cooldown: 2
+      rangeMin: 1
+      rangeMax: 3
+      pathMin: 0
+      pathMax: 0
+      damageMultiplier: 1
+      amount: 0
+      objectHitPoints: 0
+      duration: 0
+      limit: 0
+      push: 0
+      spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 1
+      isMagical: 1
+    excludedFromNewEncounters: 1
+    exclusionNote: "\u041F\u0440\u043E\u0432\u0435\u0440\u043E\u0447\u043D\u044B\u0439
+      \u043F\u0440\u0435\u0441\u0435\u0442 \u043F\u043E\u043B\u0438\u0433\u043E\u043D\u0430
+      (\u043E\u0433\u043E\u043D\u044C/\u0445\u043E\u043B\u043E\u0434): \u043D\u0435
+      \u0434\u043B\u044F \u0432\u0441\u0442\u0440\u0435\u0447."
+  - id: test_cold_caster
+    displayLabel: "\u041F\u0440\u043E\u0431\u0430: \u043B\u0435\u0434\u044F\u043D\u043E\u0439
+      \u0437\u0430\u043A\u043B\u0438\u043D\u0430\u0442\u0435\u043B\u044C"
+    category: 1
+    combatRole: 6
+    maxHitPoints: 14
+    attack: 2
+    defense: 1
+    damage: 3
+    movement: 3
+    initiative: 4
+    magicReserve: 3
+    canBeRescuedInBattle: 0
+    ammo: 0
+    attackRange: 1
+    portrait: {fileID: 0}
+    portraitFitMode: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
+    portraitOffset: {x: 0, y: 0}
+    battlefieldSprite: {fileID: 0}
+    battlefieldScale: 1
+    battlefieldOffset: {x: 0, y: 0}
+    animationSetId: 
+    viewArt: []
+    staticFigureOnly: 0
+    tagIds: []
+    size: 0
+    abilities:
+    - id: test_cold_caster.spell
+      title: "\u041B\u0435\u0434\u044F\u043D\u043E\u0439 \u0443\u043A\u043E\u043B"
+      description: "\u0410\u0434\u0440\u0435\u0441\u043D\u043E\u0435 \u0437\u0430\u043A\u043B\u0438\u043D\u0430\u043D\u0438\u0435:
+        \u0446\u0435\u043B\u044C \u0432 1\u20133 \u0433\u0435\u043A\u0441\u0430\u0445
+        \u043F\u043E \u043B\u0438\u043D\u0438\u0438 \u0432\u0438\u0434\u0438\u043C\u043E\u0441\u0442\u0438,
+        \u043E\u0434\u0438\u043D \u0443\u0434\u0430\u0440 \xD71 (\u0445\u043E\u043B\u043E\u0434).
+        \u0417\u0430\u0449\u0438\u0442\u0430 \u043E\u0442 \u0447\u0430\u0440 \u043E\u0442\u043C\u0435\u043D\u044F\u0435\u0442."
+      brick: 10
+      status: 1
+      kind: 25
+      cooldown: 2
+      rangeMin: 1
+      rangeMax: 3
+      pathMin: 0
+      pathMax: 0
+      damageMultiplier: 1
+      amount: 0
+      objectHitPoints: 0
+      duration: 0
+      limit: 0
+      push: 0
+      spawnUnitId: 
+      statusPayloadId: 
+      statusPayloadOncePerBattle: 0
+      statusPayloadDuration: 0
+      statusPayloadTick: 0
+      damageType: 2
+      isMagical: 1
+    excludedFromNewEncounters: 1
+    exclusionNote: "\u041F\u0440\u043E\u0432\u0435\u0440\u043E\u0447\u043D\u044B\u0439
+      \u043F\u0440\u0435\u0441\u0435\u0442 \u043F\u043E\u043B\u0438\u0433\u043E\u043D\u0430
+      (\u043E\u0433\u043E\u043D\u044C/\u0445\u043E\u043B\u043E\u0434): \u043D\u0435
+      \u0434\u043B\u044F \u0432\u0441\u0442\u0440\u0435\u0447."

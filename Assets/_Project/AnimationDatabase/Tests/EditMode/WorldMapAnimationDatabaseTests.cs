@@ -137,6 +137,7 @@ namespace KingdomSurvival.AnimationDatabase.Tests
             WorldMapAnimationSetData set = database.AddSet(SetId, "Тест");
             Assert.AreEqual(WorldMapAnimationSetData.DefaultHeightInHexes, set.HeightInHexes, 0.0001f);
             Assert.AreEqual(WorldMapAnimationSetData.DefaultStrideHexesPerCycle, set.StrideHexesPerCycle, 0.0001f);
+            Assert.IsFalse(set.SyncCadenceToSpeed, "по умолчанию бег идёт с «Кадров в секунду» набора");
             Assert.AreEqual(WorldMapAnimationSetData.DefaultPivot, set.Animation.Pivot);
 
             set.SetHeightInHexes(100f);

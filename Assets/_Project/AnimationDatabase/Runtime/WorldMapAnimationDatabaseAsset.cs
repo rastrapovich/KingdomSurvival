@@ -103,6 +103,9 @@ namespace KingdomSurvival.AnimationDatabase
         [SerializeField] private CreatureAnimationSetData animation = new CreatureAnimationSetData();
         [SerializeField] private float heightInHexes = DefaultHeightInHexes;
         [SerializeField] private float strideHexesPerCycle = DefaultStrideHexesPerCycle;
+        // Подгонять темп «Ходьбы» под фактическую скорость фигуры (по «Шагу
+        // ходьбы»). Выключено — кадры идут ровно с «Кадров в секунду» набора.
+        [SerializeField] private bool syncCadenceToSpeed;
 
         public CreatureAnimationSetData Animation => animation ?? (animation = new CreatureAnimationSetData());
         public string Id => Animation.Id;
@@ -122,6 +125,8 @@ namespace KingdomSurvival.AnimationDatabase
 
         public void SetHeightInHexes(float value) { heightInHexes = Mathf.Clamp(value, MinHeightInHexes, MaxHeightInHexes); }
         public void SetStrideHexesPerCycle(float value) { strideHexesPerCycle = Mathf.Clamp(value, MinStrideHexesPerCycle, MaxStrideHexesPerCycle); }
+        public bool SyncCadenceToSpeed => syncCadenceToSpeed;
+        public void SetSyncCadenceToSpeed(bool value) { syncCadenceToSpeed = value; }
 
         // Есть кадры передвижения хотя бы в одном ракурсе.
         public bool HasWalk

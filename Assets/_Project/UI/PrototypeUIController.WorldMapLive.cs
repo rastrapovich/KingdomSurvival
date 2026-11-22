@@ -370,7 +370,6 @@ public partial class PrototypeUIController
     {
         if (!MapLabLiveFigures.Available)
             return false;
-        WorldMapMovementSettingsAsset settings = WorldMapVisualRuntime.LoadMovementSettings();
         WorldMapHexGrid grid = WorldMapNavigation.Grid;
         float hexPercent = (float)(grid.HexWidth / grid.CanvasWidth * 100.0);
         // Шаг по земле (карта сжата наклоном камеры по высоте).
@@ -381,7 +380,7 @@ public partial class PrototypeUIController
             hexPercent);
 
         CreatureAnimationDirection direction = database.GetDirection((WorldMapFacing)(((worldMapHeroDirection % 6) + 6) % 6));
-        bool sync = settings != null && settings.SyncWalkCadence;
+        bool sync = set.SyncCadenceToSpeed;
         Sprite sprite = worldMapHeroMapAnimator.Tick(set, direction, running, dt, stepHexes, sync);
         if (sprite == null || sprite.texture == null)
             return false;

@@ -339,7 +339,7 @@ public partial class PrototypeUIController
             1f,
             hexPercent);
         CreatureAnimationDirection direction = database.GetDirection(worldMapHeroFlatFacing);
-        bool sync = settings != null && settings.SyncWalkCadence;
+        bool sync = set.SyncCadenceToSpeed;
         Sprite sprite = worldMapHeroFlatAnimator.Tick(set, direction, running, dt, stepHexes, sync);
         if (sprite == null)
         {

@@ -407,6 +407,33 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                     s?.SetStrideHexesPerCycle(value);
                     speed.text = SlideFreeText(s);
                 });
+            // Подгонка темпа под скорость: выключена — «Кадров в секунду» действуют
+            // напрямую; включена — темп считается от «Шага ходьбы».
+            Toggle sync = new Toggle("Подгонять темп под скорость движения")
+            {
+                value = set.SyncCadenceToSpeed,
+                tooltip = "Выключено: бег идёт ровно с «Кадров в секунду» этого набора, при любой скорости по карте. " +
+                          "Включено: темп бега пересчитывается от «Шага ходьбы» и скорости фигуры, чтобы ноги не скользили; «Кадров в секунду» тогда почти не влияют."
+            };
+            sync.style.marginTop = 4f;
+            void ShowStride(bool on)
+            {
+                stride.style.display = on ? DisplayStyle.Flex : DisplayStyle.None;
+                speed.style.display = on ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+            sync.RegisterValueChangedCallback(evt =>
+            {
+                WorldMapAnimationSetData s = SelectedSet;
+                if (s == null)
+                    return;
+                Undo.RecordObject(database, "Подгонка темпа");
+                s.SetSyncCadenceToSpeed(evt.newValue);
+                EditorUtility.SetDirty(database);
+                ShowStride(evt.newValue);
+                preview.Rebuild();
+            });
+            ShowStride(set.SyncCadenceToSpeed);
+            setPanel.Add(sync);
             setPanel.Add(stride);
             setPanel.Add(speed);
 

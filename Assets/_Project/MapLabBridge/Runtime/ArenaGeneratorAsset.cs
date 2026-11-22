@@ -26,6 +26,15 @@ namespace KingdomSurvival.MapLabBridge
         public MapLabArenaLook Look = new MapLabArenaLook();
         public ArenaFrameSettings Frame = new ArenaFrameSettings();
 
+        // «Стандартная тема» — Tactics и Look выше: общие настройки, которыми
+        // пользуются все темы без своих. У темы могут быть свои (клетки боя и
+        // рисунок арены); обработка кадра общая.
+        public List<ArenaThemeProfile> ThemeProfiles = new List<ArenaThemeProfile>();
+
+        // Только окно генератора: показ «Стандартной» темы — настройки по темам
+        // временно не применяются (предпросмотр общих). Не сохраняется.
+        public static bool PreviewStandard;
+
         private static ArenaGeneratorAsset cached;
 
         // Номер правки настроек (окно генератора): идущий бой перерисовывает
@@ -52,6 +61,26 @@ namespace KingdomSurvival.MapLabBridge
 
         public static MapLabArenaLook CurrentLook => Load().Look ?? new MapLabArenaLook();
 
+        // Рисунок арены для темы: свой профиль темы, иначе стандартный.
+        public static MapLabArenaLook LookFor(SandboxArenaTheme theme) =>
+            Load().Profile(SandboxArenaThemes.Id(theme))?.Look ?? CurrentLook;
+
+        public ArenaThemeProfile Profile(string themeId)
+        {
+            if (PreviewStandard || ThemeProfiles == null) return null;
+            foreach (ArenaThemeProfile profile in ThemeProfiles)
+                if (profile != null && profile.ThemeId == themeId) return profile;
+            return null;
+        }
+
+        public int ProfileIndex(string themeId)
+        {
+            if (ThemeProfiles == null) return -1;
+            for (int i = 0; i < ThemeProfiles.Count; i++)
+                if (ThemeProfiles[i] != null && ThemeProfiles[i].ThemeId == themeId) return i;
+            return -1;
+        }
+
         // Обработка кадра арены для вида карты (null — выключена).
         public static LocationPostEffects FrameFor(string viewId)
         {
@@ -70,6 +99,7 @@ namespace KingdomSurvival.MapLabBridge
         {
             Repair();
             SandboxArenaGenerationSettings.Current = Tactics;
+            SandboxArenaGenerationSettings.Resolver = theme => Profile(SandboxArenaThemes.Id(theme))?.Tactics;
         }
 
         public void Repair()
@@ -78,7 +108,23 @@ namespace KingdomSurvival.MapLabBridge
             Look ??= new MapLabArenaLook();
             Frame ??= new ArenaFrameSettings();
             Frame.Repair();
+            ThemeProfiles ??= new List<ArenaThemeProfile>();
+            ThemeProfiles.RemoveAll(profile => profile == null);
+            foreach (ArenaThemeProfile profile in ThemeProfiles)
+            {
+                profile.Tactics ??= new SandboxArenaGenerationSettings();
+                profile.Look ??= new MapLabArenaLook();
+            }
         }
+    }
+
+    // Свои настройки одной темы: клетки боя и рисунок арены.
+    [Serializable]
+    public sealed class ArenaThemeProfile
+    {
+        public string ThemeId;
+        public SandboxArenaGenerationSettings Tactics = new SandboxArenaGenerationSettings();
+        public MapLabArenaLook Look = new MapLabArenaLook();
     }
 
     // Рисунок арены MapLab: всё, что не меняет клеток и правил боя (свой поток

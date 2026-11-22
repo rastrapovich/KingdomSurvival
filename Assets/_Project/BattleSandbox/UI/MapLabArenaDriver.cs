@@ -149,7 +149,8 @@ namespace KingdomSurvival.BattleSandbox
             Rect gridArea = BattlefieldFrame.GetGridArea(field);
             BattlefieldGridLayout layout = BattlefieldFrame.ComputeLayout(new Rect(0f, 0f, BattlefieldFrame.Aspect, 1f), gridArea);
             // Рисунок — по общим настройкам «Генератора арен» (их запоминает игра).
-            MapLabArenaLook look = ArenaGeneratorAsset.CurrentLook.Clone();
+            // У темы раскладки могут быть свои настройки рисунка (иначе стандартные).
+            MapLabArenaLook look = (battle?.ArenaReport != null ? ArenaGeneratorAsset.LookFor(battle.ArenaReport.Theme) : ArenaGeneratorAsset.CurrentLook).Clone();
             MapLabArenaSpec spec = new MapLabArenaSpec
             {
                 Aspect = BattlefieldFrame.Aspect,
@@ -517,6 +518,7 @@ namespace KingdomSurvival.BattleSandbox
                 board.PaintedSurfaces = VisibleSurfaces();
                 RemoveLoadingScreen();
             }
+            board.ShadowDirection = arena.ShadowScreenDirection();
             RenderFronts();
             board.SetTerrainOverlay(arena.OverlayTexture);
             board.MarkDirtyRepaint();

@@ -32,7 +32,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         private MapLabArenaDriver driver;
         private SandboxBattle previewBattle;
         private double rebuildAt = -1, saveAt = -1, ignoreUntil;
-        private bool reportedReady;
+        private bool reportedReady, galleryAllThemes;
 
         private enum Mode { Generation, Frame }
 
@@ -48,10 +48,11 @@ namespace KingdomSurvival.LocationRendering.Editor
             set => EditorPrefs.SetInt(PrefsKey + "Seed", value);
         }
 
-        // -1 — тема по seed (как случайная в игре), иначе номер темы.
+        // -2 — «Стандартная тема» (общие настройки, предпросмотр на обычной теме по seed),
+        // -1 — тема по seed (правка идёт в стандартные), иначе номер темы.
         private static int ThemeIndex
         {
-            get => EditorPrefs.GetInt(PrefsKey + "Theme", -1);
+            get => EditorPrefs.GetInt(PrefsKey + "Theme", -2);
             set => EditorPrefs.SetInt(PrefsKey + "Theme", value);
         }
 
@@ -114,6 +115,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             EditorApplication.update -= Pump;
             EditorApplication.playModeStateChanged -= OnPlayMode;
             Undo.undoRedoPerformed -= OnUndo;
+            ArenaGeneratorAsset.PreviewStandard = false;
             ReleasePreview();
             CancelGallery();
             if (asset != null) AssetDatabase.SaveAssetIfDirty(asset);
@@ -122,6 +124,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void OnPlayMode(PlayModeStateChange change)
         {
             // Арена боя и предпросмотр — миры MapLab на одном слое: вместе нельзя.
+            if (change == PlayModeStateChange.ExitingEditMode) ArenaGeneratorAsset.PreviewStandard = false;
             if (change == PlayModeStateChange.ExitingEditMode || change == PlayModeStateChange.ExitingPlayMode)
             {
                 ReleasePreview();
@@ -228,13 +231,13 @@ namespace KingdomSurvival.LocationRendering.Editor
             bar.style.paddingLeft = bar.style.paddingRight = 6;
             bar.style.paddingTop = bar.style.paddingBottom = 4;
 
-            List<string> themes = new List<string> { "Тема по seed" };
+            List<string> themes = new List<string> { "Стандартная тема (общая)", "Тема по seed" };
             themes.AddRange(SandboxArenaThemes.All.Select(SandboxArenaThemes.Label));
-            PopupField<string> theme = new PopupField<string>("Тема", themes, Mathf.Clamp(ThemeIndex + 1, 0, themes.Count - 1));
+            PopupField<string> theme = new PopupField<string>("Тема", themes, Mathf.Clamp(ThemeIndex + 2, 0, themes.Count - 1));
             theme.labelElement.style.minWidth = 40;
             theme.style.width = 260;
-            theme.tooltip = "Тема арены. «Тема по seed» — как подбирает игра без явной темы (обычные пресеты по кругу).";
-            theme.RegisterValueChangedCallback(_ => { ThemeIndex = theme.index - 1; RequestRebuild(0); });
+            theme.tooltip = "«Стандартная тема» — общие настройки, которые берут все темы без своих (предпросмотр на обычной теме по seed). «Тема по seed» — как подбирает игра; правки идут в стандартные. У каждой темы можно завести свои настройки.";
+            theme.RegisterValueChangedCallback(_ => { ThemeIndex = theme.index - 2; BuildLeft(); RequestRebuild(0); });
             bar.Add(theme);
 
             IntegerField seed = new IntegerField("Seed") { value = Seed, isDelayed = true };
@@ -292,6 +295,8 @@ namespace KingdomSurvival.LocationRendering.Editor
         private SandboxBattle CreateBattle(SandboxArenaTheme theme, int seed)
         {
             // Бойцы отряда и случайные существа Базы существ (по seed), а не заглушки.
+            // «Стандартная тема» — предпросмотр общих настроек; галерея всех тем — каждая со своими.
+            ArenaGeneratorAsset.PreviewStandard = ThemeIndex == -2 && !galleryAllThemes;
             ArenaPreviewContent.Pick(seed, Mathf.Clamp(Fighters, 1, 6), Mathf.Clamp(Enemies, 1, 8),
                 out List<SandboxUnitDefinition> ours, out List<SandboxUnitDefinition> theirs);
             asset.Activate();
@@ -351,6 +356,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
             CancelGallery();
             ReleasePreview();
+            galleryAllThemes = false;
             galleryHost.style.display = DisplayStyle.None;
             previewHost.style.display = DisplayStyle.Flex;
             BattlefieldDefinitionData field = Field;

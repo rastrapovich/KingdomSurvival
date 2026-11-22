@@ -28,7 +28,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             // Привязка полей шлёт первое «изменение» — не пересобирать из-за него.
             ignoreUntil = EditorApplication.timeSinceStartup + .4;
             if (CurrentMode == Mode.Frame) BuildFrame();
-            else BuildGeneration();
+            else { BuildGeneration(); LockIfNoProfile(); }
         }
 
         // ------------------------------------------------------------------
@@ -37,6 +37,7 @@ namespace KingdomSurvival.LocationRendering.Editor
 
         private void BuildGeneration()
         {
+            BuildThemeBanner();
             Help("Общие настройки генерации обычной арены боя (дорожный бой, полигон). Игра их запоминает: ассет " +
                  ArenaGeneratorAsset.AssetPath + ". Правка пересобирает предпросмотр справа; клетки и рисунок те же, что в бою. " +
                  "По умолчанию — прежние арены (те же seed дают те же клетки и декор).");
@@ -74,10 +75,10 @@ namespace KingdomSurvival.LocationRendering.Editor
             }), "Мало деревьев и травы");
             AddButton(presets, "Сбросить всё", () =>
             {
-                if (!EditorUtility.DisplayDialog("Сбросить настройки генератора?", "Тактика клеток и рисунок арены вернутся к прежним значениям. Обработка кадра не меняется. Ctrl+Z — вернуть.", "Сбросить", "Отмена")) return;
+                if (!EditorUtility.DisplayDialog("Сбросить настройки генератора?", "Тактика клеток и рисунок арены этой темы вернутся к прежним значениям. Обработка кадра не меняется. Ctrl+Z — вернуть.", "Сбросить", "Отмена")) return;
                 Undo.RecordObject(asset, "Сбросить генератор арен");
-                asset.Tactics = new SandboxArenaGenerationSettings();
-                asset.Look = new MapLabArenaLook();
+                ActiveTactics = new SandboxArenaGenerationSettings();
+                ActiveLook = new MapLabArenaLook();
                 ignoreUntil = 0;
                 MarkChanged(true);
                 serialized.Update();
@@ -162,7 +163,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void ApplyLook(Action<MapLabArenaLook> change)
         {
             Undo.RecordObject(asset, "Генератор арен: набор");
-            change(asset.Look);
+            change(ActiveLook);
             ignoreUntil = 0;
             MarkChanged(true);
             serialized.Update();
@@ -282,7 +283,7 @@ namespace KingdomSurvival.LocationRendering.Editor
 
         private void F(string path, string label, float min, float max, string tooltip = null)
         {
-            SerializedProperty property = serialized.FindProperty(path);
+            SerializedProperty property = serialized.FindProperty(ProfilePath(path));
             if (property == null) { section.Add(new Label("нет поля " + path)); return; }
             Slider slider = new Slider(label, min, max) { showInputField = true, tooltip = tooltip };
             slider.labelElement.style.minWidth = 190;
@@ -293,7 +294,7 @@ namespace KingdomSurvival.LocationRendering.Editor
 
         private void I(string path, string label, int min, int max, string tooltip = null)
         {
-            SerializedProperty property = serialized.FindProperty(path);
+            SerializedProperty property = serialized.FindProperty(ProfilePath(path));
             if (property == null) { section.Add(new Label("нет поля " + path)); return; }
             SliderInt slider = new SliderInt(label, min, max) { showInputField = true, tooltip = tooltip };
             slider.labelElement.style.minWidth = 190;
@@ -304,7 +305,7 @@ namespace KingdomSurvival.LocationRendering.Editor
 
         private void B(string path, string label, string tooltip = null)
         {
-            SerializedProperty property = serialized.FindProperty(path);
+            SerializedProperty property = serialized.FindProperty(ProfilePath(path));
             if (property == null) { section.Add(new Label("нет поля " + path)); return; }
             Toggle toggle = new Toggle(label) { tooltip = tooltip };
             toggle.labelElement.style.minWidth = 190;

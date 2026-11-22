@@ -100,8 +100,14 @@ namespace KingdomSurvival.BattleSandbox
         public static SandboxArenaGenerationSettings Current
         {
             get => current;
-            set => current = value ?? new SandboxArenaGenerationSettings();
+            set { current = value ?? new SandboxArenaGenerationSettings(); Resolver = null; }
         }
+
+        // Настройки по теме (окно «Генератор арен»: у темы могут быть свои). Нет
+        // разрешителя — общие Current. Присвоение Current разрешитель сбрасывает.
+        public static Func<SandboxArenaTheme, SandboxArenaGenerationSettings> Resolver;
+
+        public static SandboxArenaGenerationSettings For(SandboxArenaTheme theme) => Resolver?.Invoke(theme) ?? current;
 
         public float FreeShare = 0.60f;
         public float SpecialShare = 0.25f;
@@ -270,7 +276,7 @@ namespace KingdomSurvival.BattleSandbox
             ICollection<HexCoord> blocked = null,
             string source = null)
         {
-            SandboxArenaGenerationSettings settings = SandboxArenaGenerationSettings.Current;
+            SandboxArenaGenerationSettings settings = SandboxArenaGenerationSettings.For(theme);
             HashSet<HexCoord> disabled = blocked != null ? new HashSet<HexCoord>(blocked) : new HashSet<HexCoord>();
             List<HexCoord> players = units.Where(u => u.Team == SandboxTeam.Player).Select(u => u.Position).ToList();
             List<HexCoord> enemies = units.Where(u => u.Team != SandboxTeam.Player).Select(u => u.Position).ToList();

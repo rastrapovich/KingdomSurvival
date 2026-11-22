@@ -34,6 +34,7 @@ namespace KingdomSurvival.LocationRendering.Editor
 
         private void StartGallery(bool allThemes)
         {
+            galleryAllThemes = allThemes;
             if (UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 status.text = "Во время игры галерея выключена.";

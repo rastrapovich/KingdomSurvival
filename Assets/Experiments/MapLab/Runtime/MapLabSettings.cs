@@ -569,6 +569,11 @@ namespace KingdomSurvival.MapLab
         public bool IsStage04 => Stage03.Look >= MapLabLook.Stage04;
         public bool IsStage05 => Stage03.Look == MapLabLook.Stage05;
 
+        // Глобальная карта: деревья, кусты, камни, реквизит и постройки отбрасывают
+        // тень по силуэту своей карточки (начинается у основания по построению);
+        // пятна-эллипсы маски для них не строятся. Арена рисует свои силуэтные тени сама.
+        public bool MapCardShadows => IsStage05 && Stage03.ObjectShadows && Stage05.CardShadows && !Stage03.SilhouetteShadows;
+
         // Фактический предел приближения: на этапе 05 — ZoomMax (2–4), прежний
         // предел рига (8) ограничивается им; на ранних этапах — предел рига.
         // 12У-C: Zoom считается от «всей карты», поэтому предел растёт со

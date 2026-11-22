@@ -178,7 +178,7 @@ namespace KingdomSurvival.MapLabBridge
             foreach (char c in plan.TerrainCells + "|" + print + "|" + plan.HexesAcross)
                 hash = (hash ^ c) * 16777619;
             // r — версия рисунка снимка (палитра, покраска): старый кэш не показывается.
-            return $"s{plan.Seed}_h{hash:x8}_a{MapLabData.AlgorithmVersion}_r2_t{assets.TexelsPerUnit:0.#}_p{assets.PitchDegrees:0}";
+            return $"s{plan.Seed}_h{hash:x8}_a{MapLabData.AlgorithmVersion}_r3_t{assets.TexelsPerUnit:0.#}_p{assets.PitchDegrees:0}";
         }
 
         private static string CacheFolder => Path.Combine(Application.persistentDataPath, "MapLabMapCache");

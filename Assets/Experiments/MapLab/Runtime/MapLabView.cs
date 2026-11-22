@@ -31,6 +31,7 @@ namespace KingdomSurvival.MapLab
         public Shader SolidShader;
         public Shader LinesShader;
         public Shader ArtCardShader;
+        public Shader CardShadowShader;
         public Shader ContactShader;
         public Shader InkShader;
 
@@ -67,6 +68,8 @@ namespace KingdomSurvival.MapLab
         private readonly Dictionary<string, GameObject> groups = new Dictionary<string, GameObject>();
         private static Texture2D cachedDetail, cachedWater, cachedAtlas;
         private readonly Dictionary<MapLabArtEntry, Material> artMaterials = new Dictionary<MapLabArtEntry, Material>();
+        // Силуэтные тени карточек глобальной карты: свой материал на рисунок.
+        private readonly Dictionary<MapLabArtEntry, Material> shadowMaterials = new Dictionary<MapLabArtEntry, Material>();
         private MapLabArtBuilder.Plan artPlan;
         private bool buildingSprites;
         // Этап 03: тайлы краски, обзорная копия, перо, тени объектов, кадр домов.
@@ -392,6 +395,7 @@ namespace KingdomSurvival.MapLab
                     DestroySafe(owned[i]);
             owned.Clear();
             artMaterials.Clear();
+            shadowMaterials.Clear();
             moduleMaterials.Clear();
             cliffMaterials.Clear();
             DrawnCliffs06 = false;
@@ -429,6 +433,7 @@ namespace KingdomSurvival.MapLab
             if (SolidShader == null) SolidShader = Shader.Find("Kingdom Survival/MapLab/Solid");
             if (LinesShader == null) LinesShader = Shader.Find("Kingdom Survival/MapLab/Lines");
             if (ArtCardShader == null) ArtCardShader = Shader.Find("Kingdom Survival/MapLab/Art Card");
+            if (CardShadowShader == null) CardShadowShader = Shader.Find("Kingdom Survival/MapLab/Card Shadow");
             if (ContactShader == null) ContactShader = Shader.Find("Kingdom Survival/MapLab/Contact");
             if (InkShader == null) InkShader = Shader.Find("Kingdom Survival/MapLab/Ink");
             if (GrassShader == null) GrassShader = Shader.Find("Kingdom Survival/MapLab/Grass");
@@ -1181,7 +1186,11 @@ namespace KingdomSurvival.MapLab
             HashSet<Vector2Int> featureBases = new HashSet<Vector2Int>();
             foreach (MapLabFeatureSprite f in data.FeatureSprites)
                 featureBases.Add(new Vector2Int(Mathf.RoundToInt(f.Base.x * 50f), Mathf.RoundToInt(f.Base.z * 50f)));
-            if (artPlan != null)
+            // Глобальная карта: тень рисуют сами карточки (силуэт у основания, см.
+            // ConfigureArtMaterial) — пятна-эллипсы и заметание для них не строятся,
+            // иначе тень двоится и отрывается от объекта.
+            bool cardShadows = Settings.MapCardShadows;
+            if (artPlan != null && !cardShadows)
             {
                 foreach (KeyValuePair<MapLabArtEntry, List<MapLabArtInstance>> pair in artPlan.Cards)
                 {
@@ -1212,6 +1221,8 @@ namespace KingdomSurvival.MapLab
             }
             foreach (MapLabFeatureSprite f in data.FeatureSprites)
             {
+                if (cardShadows)
+                    break;
                 float w = Mathf.Max(0.2f, f.SolidWidth > 0f ? f.SolidWidth : f.Width * 0.7f);
                 float h = Mathf.Max(0.2f, f.SolidHeight > 0f ? f.SolidHeight : f.Height * 0.8f);
                 Vector3 at = f.Base + Vector3.up * 0.03f;
@@ -1231,6 +1242,8 @@ namespace KingdomSurvival.MapLab
                 {
                     case MapLabObjectKind.House:
                     case MapLabObjectKind.Barn:
+                        if (cardShadows && replaced.Contains(o.Kind))
+                            break;
                         // Здание услуги: высота тени — по его рисунку (Scale задан при
                         // подборе рисунка; у столба объявлений — низкая).
                         float buildingHeight = o.Kind == MapLabObjectKind.House ? 3.4f : 2.6f;
@@ -1325,7 +1338,48 @@ namespace KingdomSurvival.MapLab
                 List<Mesh> meshes = MapLabArtBuilder.BuildMeshes(data, entry, plan.Cards[entry], 64f);
                 for (int i = 0; i < meshes.Count; i++)
                     AddRenderer(group, meshes[i].name, meshes[i], material);
+                // Глобальная карта: тот же меш второй раз — силуэтная тень (проход без
+                // тега после рельефа и до карточек), мелочь тени не даёт.
+                if (CastsMapShadow(entry) && CardShadowShader != null)
+                {
+                    Material shadow = ShadowMaterial(entry);
+                    for (int i = 0; i < meshes.Count; i++)
+                    {
+                        AddRenderer(group, meshes[i].name + " Shadow", meshes[i], shadow);
+                    }
+                }
             }
+        }
+
+        // Отбрасывает ли карточка силуэтную тень на глобальной карте.
+        private bool CastsMapShadow(MapLabArtEntry entry)
+        {
+            if (entry == null || Settings == null || !Settings.MapCardShadows || entry.NoCastShadow || entry.Role == "grass_ink_tuft" || MapLabArtBuilder.IsDetail05(entry))
+                return false;
+            return entry.Category == MapLabArtCategory.Vegetation || entry.Category == MapLabArtCategory.Rock
+                || entry.Category == MapLabArtCategory.Prop || entry.Category == MapLabArtCategory.Building;
+        }
+
+        private Material ShadowMaterial(MapLabArtEntry entry)
+        {
+            if (shadowMaterials.TryGetValue(entry, out Material material) && material != null)
+                return material;
+            material = Own(new Material(CardShadowShader) { name = "MapLab Card Shadow " + entry.Id });
+            shadowMaterials[entry] = material;
+            ConfigureShadowMaterial(material, entry);
+            return material;
+        }
+
+        // Тень по свету вправо и назад, плотность и цвет — настройки Stage05.
+        private void ConfigureShadowMaterial(Material m, MapLabArtEntry entry)
+        {
+            MapLabStage05Settings s5 = Settings.Stage05;
+            Vector2 ground = MapLabObjectShadows.CardGround(Settings.LightDirection, s5.CardShadowLength, s5.CardShadowMinAngle);
+            m.SetTexture("_MainTex", ArtTexture(entry));
+            m.SetFloat("_Cutoff", entry.Cutoff);
+            m.SetVector("_SilShadow", new Vector4(ground.x, ground.y, s5.CardShadowOpacity, 1f));
+            m.SetColor("_SilShadowColor", s5.CardShadowColor);
+            m.SetFloat("_SilShadowSoft", s5.CardShadowSoft);
         }
 
         private Material ArtMaterial(MapLabArtEntry entry)
@@ -1355,7 +1409,8 @@ namespace KingdomSurvival.MapLab
             bool plant = entry.Role == "grass_tuft" || entry.Role == "grass_ink_tuft" || entry.Kind == MapLabObjectKind.Bush || entry.Kind == MapLabObjectKind.Reed;
             m.SetFloat("_WalkBend", entry.WalkBend >= 0f ? entry.WalkBend : plant ? 1f : 0f);
             // Силуэтная тень (только арена: глобальный переключатель выключен в остальных мирах).
-            m.SetFloat("_CastShadow", !entry.NoCastShadow && entry.Role != "grass_ink_tuft" && (entry.Category == MapLabArtCategory.Vegetation || entry.Category == MapLabArtCategory.Rock || entry.Category == MapLabArtCategory.Prop) ? 1f : 0f);
+            // На глобальной карте тень рисует отдельный проход по силуэту (MapCardShadow), здесь её нет.
+            m.SetFloat("_CastShadow", !Settings.MapCardShadows && !entry.NoCastShadow && entry.Role != "grass_ink_tuft" && (entry.Category == MapLabArtCategory.Vegetation || entry.Category == MapLabArtCategory.Rock || entry.Category == MapLabArtCategory.Prop) ? 1f : 0f);
             Color tone;
             switch (entry.Category)
             {
@@ -1466,6 +1521,12 @@ namespace KingdomSurvival.MapLab
                 DestroySafe(m);
             }
             artMaterials.Clear();
+            foreach (Material m in shadowMaterials.Values)
+            {
+                owned.Remove(m);
+                DestroySafe(m);
+            }
+            shadowMaterials.Clear();
             BuildObjects();
             ApplyMaterialSettings();
             ApplyVisibility();
@@ -1749,6 +1810,8 @@ namespace KingdomSurvival.MapLab
             ApplyGroundTextures(t, s);
             foreach (KeyValuePair<MapLabArtEntry, Material> pair in artMaterials)
                 ConfigureArtMaterial(pair.Value, pair.Key);
+            foreach (KeyValuePair<MapLabArtEntry, Material> pair in shadowMaterials)
+                ConfigureShadowMaterial(pair.Value, pair.Key);
             if (CameraRig != null)
                 CameraRig.Bind(this, false);
         }

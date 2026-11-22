@@ -358,6 +358,13 @@ namespace KingdomSurvival.MapLab
             private void ApplyLakes()
             {
                 MapLabNoise edge = Noise("lake-edge");
+                // Сухой коридор вдоль линий дорог: у кромки воды полотно и зазор остаются
+                // сушей (вода огибает дорогу заливом, а не накрывает её).
+                float lakeUnit = SmallestLobeRadius();
+                float roadClear = settings.RoadsAndFields.RoadWidth * 0.5f + Mathf.Max(0f, composition.LakeRoadClearance);
+                float[] roadLine = composition.Lakes.Count > 0 && composition.Roads.Count > 0 && composition.LakeRoadClearance > 0f && lakeUnit > 0f
+                    ? RoadLineDistance(roadClear + lakeUnit + 2f)
+                    : null;
                 for (int k = 0; k < composition.Lakes.Count; k++)
                 {
                     MapLabComposition.Lake source = composition.Lakes[k];
@@ -384,6 +391,8 @@ namespace KingdomSurvival.MapLab
                                 f = Mathf.Min(f, (di - 1f) * 0.45f + edge.Fbm(p.x / 6f, p.y / 6f, 2) * 0.06f);
                             }
                             int index = data.Index(x, z);
+                            if (roadLine != null && roadLine[index] < float.MaxValue)
+                                f = Mathf.Min(f, (roadLine[index] - roadClear) / lakeUnit);
                             field[index] = f;
                             if (Mathf.Abs(f) < 0.05f)
                                 ring.Add(data.Heights[index]);
@@ -591,10 +600,12 @@ namespace KingdomSurvival.MapLab
                     RelaxRoad(points);
                     SnapEnd(points, true);
                     SnapEnd(points, false);
+                    float roadWidth = source.Kind == MapLabRoadKind.Road ? roads.RoadWidth : roads.PathWidth;
+                    KeepRoadOutOfLakes(points, roadWidth);
                     MapLabPolyline road = new MapLabPolyline
                     {
                         Kind = source.Kind,
-                        Width = source.Kind == MapLabRoadKind.Road ? roads.RoadWidth : roads.PathWidth,
+                        Width = roadWidth,
                     };
                     road.Points.AddRange(MapLabGeometry.Resample(points, 1f));
                     data.Roads.Add(road);
@@ -669,6 +680,94 @@ namespace KingdomSurvival.MapLab
                         points[i] = p;
                     }
                     MapLabGeometry.Smooth(points, 1, 0.35f);
+                }
+            }
+
+            // Наименьший радиус лепестка озёр композиции (0 — озёр нет): единица
+            // перевода поля озера (1 − d / радиус) в расстояние.
+            private float SmallestLobeRadius()
+            {
+                float reference = float.MaxValue;
+                foreach (MapLabComposition.Lake lake in composition.Lakes)
+                    foreach (Vector4 lobe in lake.Lobes)
+                        reference = Mathf.Min(reference, Mathf.Max(1f, Mathf.Min(lobe.z, lobe.w)));
+                return reference == float.MaxValue ? 0f : reference;
+            }
+
+            // Расстояние до линий дорог и троп композиции (по контрольным точкам, как
+            // их ведёт BuildRoads) в пределах reach; дальше — float.MaxValue. Нужно,
+            // чтобы озеро не накрывало полотно линий плана (ApplyLakes).
+            private float[] RoadLineDistance(float reach)
+            {
+                float[] distance = new float[n * n];
+                for (int i = 0; i < distance.Length; i++)
+                    distance[i] = float.MaxValue;
+                foreach (MapLabComposition.Road source in composition.Roads)
+                {
+                    if (source.Control.Count < 2)
+                        continue;
+                    List<Vector2> line = MapLabGeometry.CatmullRom(source.Control, 2f);
+                    for (int s = 0; s + 1 < line.Count; s++)
+                    {
+                        Vector2 a = line[s], b = line[s + 1];
+                        int x0 = Mathf.Max(0, Mathf.FloorToInt((Mathf.Min(a.x, b.x) - reach) / data.Cell));
+                        int x1 = Mathf.Min(n - 1, Mathf.CeilToInt((Mathf.Max(a.x, b.x) + reach) / data.Cell));
+                        int z0 = Mathf.Max(0, Mathf.FloorToInt((Mathf.Min(a.y, b.y) - reach) / data.Cell));
+                        int z1 = Mathf.Min(n - 1, Mathf.CeilToInt((Mathf.Max(a.y, b.y) + reach) / data.Cell));
+                        for (int z = z0; z <= z1; z++)
+                            for (int x = x0; x <= x1; x++)
+                            {
+                                float d = MapLabGeometry.DistanceToSegment(World(x, z), a, b, out _);
+                                int index = data.Index(x, z);
+                                if (d < distance[index])
+                                    distance[index] = d;
+                            }
+                    }
+                }
+                return distance;
+            }
+
+            // Дорога и тропа никогда не уходят в воду озера: точки, оказавшиеся в
+            // кромке воды (с зазором LakeRoadClearance от края полотна), отодвигаются
+            // по спаду поля озера на берег. Концы линии — клетки суши плана — не
+            // трогаются. Мосты ставятся только через реки (PlaceBridges).
+            private void KeepRoadOutOfLakes(List<Vector2> points, float roadWidth)
+            {
+                if (composition.Lakes.Count == 0 || points.Count < 3)
+                    return;
+                float reference = SmallestLobeRadius();
+                if (reference <= 0f)
+                    return;
+                // Поле озера: f = 1 − d / радиус; запас в единицах поля.
+                float margin = (roadWidth * 0.5f + Mathf.Max(0f, composition.LakeRoadClearance)) / reference;
+                for (int pass = 0; pass < 3; pass++)
+                {
+                    bool moved = false;
+                    for (int i = 1; i < points.Count - 1; i++)
+                    {
+                        for (int guard = 0; guard < 12; guard++)
+                        {
+                            Vector2 p = points[i];
+                            if (!data.Contains(p.x, p.y))
+                                break;
+                            float f = data.Bilinear(data.LakeField, p.x, p.y);
+                            if (f <= -margin)
+                                break;
+                            const float e = 1.2f;
+                            Vector2 g = new Vector2(
+                                data.Bilinear(data.LakeField, p.x + e, p.y) - data.Bilinear(data.LakeField, p.x - e, p.y),
+                                data.Bilinear(data.LakeField, p.x, p.y + e) - data.Bilinear(data.LakeField, p.x, p.y - e));
+                            if (g.sqrMagnitude < 1e-8f)
+                                break;
+                            points[i] = p - g.normalized * Mathf.Clamp((f + margin) * reference + 0.15f, 0.2f, 3f);
+                            moved = true;
+                        }
+                    }
+                    if (!moved)
+                        break;
+                    // Лёгкое сглаживание убирает изломы; следующий проход вернёт края на сушу.
+                    if (pass < 2)
+                        MapLabGeometry.Smooth(points, 1, 0.25f);
                 }
             }
 

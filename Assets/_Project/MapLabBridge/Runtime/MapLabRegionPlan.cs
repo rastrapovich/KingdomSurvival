@@ -17,6 +17,12 @@ namespace KingdomSurvival.MapLabBridge
         // HexesAcross клеток). Деревня MapLab ~ 34 ед. — около четырёх клеток.
         public const float UnitsPerHex = 9f;
 
+        // Радиус лепестка воды на клетку озера, в клетках пути. Вода рисуется внутри
+        // клеток озера и не доходит до центров соседних проходимых клеток (1 клетка
+        // от центра) вместе с неровностью кромки (до ±16%): дорога, герой и группы
+        // мира не оказываются под водой. Клетка озера — ≈0,58 клетки до вершины.
+        public const float LakeLobeHexes = 0.75f;
+
         public struct Mapping
         {
             public float Frame, PlayWidth, PlayHeight, OffsetZ;
@@ -207,7 +213,7 @@ namespace KingdomSurvival.MapLabBridge
                     {
                         grid.CellCenter(grid.CellAt(cell), out double px, out double py);
                         Vector2 w = m.ToWorld(grid.PixelToPercentX(px), (float)(py / grid.CanvasHeight * 100.0));
-                        lake.Lobes.Add(new Vector4(w.x, w.y, hexWorld * 0.95f, hexWorld * 0.95f));
+                        lake.Lobes.Add(new Vector4(w.x, w.y, hexWorld * LakeLobeHexes, hexWorld * LakeLobeHexes));
                         sum += w;
                     }
                     lake.Center = sum / cluster.Count;

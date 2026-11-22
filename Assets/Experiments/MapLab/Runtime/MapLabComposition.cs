@@ -98,6 +98,10 @@ namespace KingdomSurvival.MapLab
         public bool HasSettlement;
         public bool Pier;
         public float LakeLevelFraction = 0.3f;
+        // Зазор между кромкой воды озера и краем дорожного полотна, ед.: дорога
+        // и тропа не касаются воды (MapLabGenerator.KeepRoadOutOfLakes). 0 — не
+        // отодвигать; кромка воды озёр плана и так не доходит до проходимых клеток.
+        public float LakeRoadClearance = 0.6f;
         public float MapEdgeForest; // сила рамки леса у краёв карты
         public Vector2 FlatStrokeDirection = new Vector2(1f, 0.3f);
 

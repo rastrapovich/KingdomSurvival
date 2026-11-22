@@ -106,6 +106,20 @@ namespace KingdomSurvival.MapLab
         [Tooltip("Размер зон живого края в мире, ед. (крупнее пиксельного шума).")]
         [Range(1f, 12f)] public float ShadowEdgeScale = 4.5f;
 
+        [Header("Тень карточек по силуэту (глобальная карта)")]
+        [Tooltip("Тень деревьев, кустов, камней, реквизита и построек — силуэт самой карточки, прижатый к основанию. Выключено — прежние пятна маски.")]
+        public bool CardShadows = true;
+        [Tooltip("Длина тени по земле в долях высоты рисунка.")]
+        [Range(0.2f, 1.5f)] public float CardShadowLength = 1f;
+        [Tooltip("Плотность тени (0–1).")]
+        [Range(0f, 1f)] public float CardShadowOpacity = 0.5f;
+        [Tooltip("Цвет тени — тёмный оливковый, не чёрный.")]
+        public Color CardShadowColor = new Color(0.07f, 0.09f, 0.03f, 1f);
+        [Tooltip("Наименьший угол тени к оси кадра, градусов: тень уходит назад от зрителя не меньше, чем на него (при свете сбоку и пологой камере иначе ложится нитью).")]
+        [Range(10f, 70f)] public float CardShadowMinAngle = 45f;
+        [Tooltip("Мягкость края тени: сдвиг мипа рисунка (0 — чёткий силуэт).")]
+        [Range(0f, 4f)] public float CardShadowSoft = 2f;
+
         [Header("Уступы")]
         [Tooltip("Ширина неравных плоскостей стены, ед.")]
         public Vector2 CliffPlaneWidth = new Vector2(1.6f, 5.2f);

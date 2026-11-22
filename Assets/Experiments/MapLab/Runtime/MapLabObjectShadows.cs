@@ -27,6 +27,24 @@ namespace KingdomSurvival.MapLab
             z1 = Mathf.Min(z1, bandHi);
         }
 
+        // Тень карточки по силуэту: смещение по земле (x, z мира) на единицу высоты
+        // рисунка. Основание остаётся на месте, верх уходит по свету; чтобы тень не
+        // сжималась в нитку при свете вдоль кадра, она отводится назад (+z, от
+        // зрителя) не меньше чем на minAngleDeg. Тот же способ, что у арены.
+        public static Vector2 CardGround(Vector3 light, float length, float minAngleDeg)
+        {
+            float rise = Mathf.Max(0.15f, light.y);
+            Vector2 g = new Vector2(-light.x, -light.z) / rise * length;
+            float magnitude = g.magnitude;
+            if (magnitude < 1e-4f)
+                return new Vector2(0f, length * 0.5f);
+            float minSin = Mathf.Sin(Mathf.Clamp(minAngleDeg, 1f, 80f) * Mathf.Deg2Rad);
+            // Тень всегда уходит назад не меньше заданного угла — никогда к зрителю.
+            if (g.y < magnitude * minSin)
+                g = new Vector2((g.x >= 0f ? 1f : -1f) * magnitude * Mathf.Sqrt(1f - minSin * minSin), magnitude * minSin);
+            return g;
+        }
+
         public sealed class Result
         {
             public bool Gradient;

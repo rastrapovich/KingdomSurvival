@@ -310,6 +310,34 @@ public static class WorldMapRegionValidator
             }
         }
 
+        // H11: дорога и тропа не идут по клеткам озёр: вода на рисунке не должна
+        // накрывать линию, а путь — обрываться в озере (реки пересекаются только
+        // по мосту: клетки моста — дорога, а не вода).
+        if (map.Roads != null && map.LakeCells != null && map.LakeCells.Count > 0)
+        {
+            HashSet<int> lakeCells = new HashSet<int>(map.LakeCells);
+            foreach (GeneratedMapLine line in map.Roads)
+            {
+                if (line == null)
+                    continue;
+                int bad = -1;
+                if (line.Cells != null)
+                    foreach (int c in line.Cells)
+                        if (lakeCells.Contains(c)) { bad = c; break; }
+                if (bad < 0 && line.Points != null)
+                    foreach (MapPointData p in line.Points)
+                    {
+                        int c = grid.IndexOf(grid.CellAtPercent(p.XPercent, p.YPercent));
+                        if (lakeCells.Contains(c)) { bad = c; break; }
+                    }
+                if (bad < 0)
+                    continue;
+                grid.CellCenter(grid.CellAt(bad), out double bx, out double by);
+                float px = grid.PixelToPercentX(bx), py = grid.PixelToPercentY(by);
+                Add("H11", true, $"{(line.Kind == GeneratedMapLine.TrailKind ? "Тропа" : "Дорога")} проходит по клетке озера {At(px, py)}: путь обрывается в воде.", px, py);
+            }
+        }
+
         // H06: обязательное содержание стоит на карте.
         if (map.Report != null && map.Report.RequiredLocations != null)
         {

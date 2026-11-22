@@ -26,6 +26,8 @@ namespace KingdomSurvival.UnitDatabase.Editor
         [SerializeField] private bool catalogExecutableOnly;
         [SerializeField] private bool catalogAssignedOnly;
         [SerializeField] private string catalogCategory = string.Empty;
+        [SerializeField] private string catalogStatus = string.Empty;
+        [SerializeField] private string catalogRole = string.Empty;
 
         private static List<CatalogTag> catalogTags;
         private static Dictionary<string, string> catalogCategoryLabels;
@@ -53,6 +55,8 @@ namespace KingdomSurvival.UnitDatabase.Editor
             public bool deleted;
             public bool archived;
             public string[] statusIds;
+            public string[] statusRoles;
+            public string statusNote;
             public BankDetails details;
         }
 
@@ -75,6 +79,10 @@ namespace KingdomSurvival.UnitDatabase.Editor
             public bool Archived;
             public bool EngineOnly;
             public string[] StatusIds = Array.Empty<string>();
+            public string[] StatusRoles = Array.Empty<string>();
+            public string StatusNote = string.Empty;
+            // Alias: исполняется правилом другой семьи (один итоговый исполнитель).
+            public string Family = string.Empty;
             public bool Executable;
             public string Haystack;
             public bool ReadOnly => Trash || Archived;
@@ -128,6 +136,9 @@ namespace KingdomSurvival.UnitDatabase.Editor
                         Trash = record.deleted,
                         Archived = record.archived,
                         StatusIds = record.statusIds ?? Array.Empty<string>(),
+                        StatusRoles = record.statusRoles ?? Array.Empty<string>(),
+                        StatusNote = record.statusNote ?? string.Empty,
+                        Family = SandboxPassiveCatalog.Get(record.id)?.Family ?? string.Empty,
                         Executable = SandboxPassiveCatalog.Get(record.id) != null
                     });
                 }
@@ -160,7 +171,8 @@ namespace KingdomSurvival.UnitDatabase.Editor
             }
             foreach (CatalogTag tag in catalogTags)
             {
-                string statuses = string.Join(" ", tag.StatusIds.Select(id => id + " " + (SandboxStatusCatalog.Get(id)?.Name ?? string.Empty)));
+                string statuses = string.Join(" ", tag.StatusIds.Select(id => id + " " + (SandboxStatusCatalog.Get(id)?.Name ?? string.Empty))) + " " +
+                                  string.Join(" ", tag.StatusRoles.Select(RoleLabel));
                 tag.Haystack = Normalize(tag.Name + " " + tag.Id + " " + tag.Effect + " " + tag.Activation + " " + statuses);
             }
             return catalogTags;
@@ -266,7 +278,38 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 RefreshTagCatalog(data);
             });
             filters.Add(category);
+
+            List<string> statusChoices = new List<string> { string.Empty };
+            statusChoices.AddRange(tags.SelectMany(tag => tag.StatusIds).Distinct().OrderBy(id => id, StringComparer.Ordinal));
+            PopupField<string> status = new PopupField<string>(statusChoices, Math.Max(0, statusChoices.IndexOf(catalogStatus ?? string.Empty)),
+                StatusChoiceLabel, StatusChoiceLabel);
+            status.style.width = 230f;
+            status.RegisterValueChangedCallback(evt =>
+            {
+                catalogStatus = evt.newValue;
+                RefreshTagCatalog(data);
+            });
+            filters.Add(status);
+
+            List<string> roles = new List<string> { string.Empty };
+            roles.AddRange(tags.SelectMany(tag => tag.StatusRoles).Distinct().OrderBy(RoleLabel));
+            PopupField<string> role = new PopupField<string>(roles, Math.Max(0, roles.IndexOf(catalogRole ?? string.Empty)), RoleLabel, RoleLabel);
+            role.style.width = 190f;
+            role.RegisterValueChangedCallback(evt =>
+            {
+                catalogRole = evt.newValue;
+                RefreshTagCatalog(data);
+            });
+            filters.Add(role);
             card.Add(filters);
+
+            VisualElement bulk = new VisualElement();
+            bulk.style.flexDirection = FlexDirection.Row;
+            bulk.style.marginBottom = 4f;
+            bulk.Add(new Button(() => SetSelectedTags(true)) { text = "Назначить выбранные" });
+            bulk.Add(new Button(() => SetSelectedTags(false)) { text = "Снять выбранные" });
+            bulk.Add(Hint("Выбор нескольких строк — Ctrl/Shift. Корзина и архив не назначаются."));
+            card.Add(bulk);
 
             catalogCount = new Label();
             catalogCount.style.color = HintColor;
@@ -277,7 +320,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
             {
                 itemsSource = catalogRows,
                 virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight,
-                selectionType = SelectionType.None,
+                selectionType = SelectionType.Multiple,
                 makeItem = MakeTagRow,
                 bindItem = (element, index) => BindTagRow(element, (CatalogTag)catalogRows[index], data)
             };
@@ -288,6 +331,39 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
         private static string CategoryLabel(string key) =>
             catalogCategoryLabels != null && catalogCategoryLabels.TryGetValue(key ?? string.Empty, out string label) ? label : key;
+
+        private static string StatusChoiceLabel(string id) =>
+            string.IsNullOrEmpty(id) ? "Все состояния" : (SandboxStatusCatalog.Get(id)?.Name ?? id) + " (" + id + ")";
+
+        private static string RoleLabel(string role)
+        {
+            switch (role)
+            {
+                case "": case null: return "Любая связь";
+                case "apply": return "накладывает";
+                case "react": return "реагирует";
+                case "resist": return "сопротивляется";
+                case "support": return "поддерживает";
+                case "cleanse": return "снимает";
+                case "self": return "на себе";
+                case "amplify": return "усиливает";
+                case "dispel": return "развеивает";
+                case "drawback": return "недостаток";
+                case "exploit": return "пользуется";
+                default: return role;
+            }
+        }
+
+        private void SetSelectedTags(bool enabled)
+        {
+            if (catalogList == null)
+                return;
+            foreach (CatalogTag tag in catalogList.selectedItems.OfType<CatalogTag>().ToList())
+            {
+                if (!tag.ReadOnly)
+                    SetUnitTag(tag, enabled);
+            }
+        }
 
         private static Toggle FilterToggle(string label, bool value, Action<bool> changed)
         {
@@ -312,6 +388,8 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 if (catalogExecutableOnly && !tag.Executable) continue;
                 if (catalogAssignedOnly && (data == null || !data.HasTag(tag.Id))) continue;
                 if (!string.IsNullOrEmpty(catalogCategory) && tag.Category != catalogCategory) continue;
+                if (!string.IsNullOrEmpty(catalogStatus) && !tag.StatusIds.Contains(catalogStatus)) continue;
+                if (!string.IsNullOrEmpty(catalogRole) && !tag.StatusRoles.Contains(catalogRole)) continue;
                 if (words.Any(word => !tag.Haystack.Contains(word))) continue;
                 catalogRows.Add(tag);
             }
@@ -376,10 +454,14 @@ namespace KingdomSurvival.UnitDatabase.Editor
             string statuses = tag.StatusIds.Length == 0
                 ? string.Empty
                 : " · состояния: " + string.Join(", ", tag.StatusIds.Select(id => SandboxStatusCatalog.Get(id)?.Name ?? id));
+            string roles = tag.StatusRoles.Length == 0 ? string.Empty : " (" + string.Join(", ", tag.StatusRoles.Select(RoleLabel)) + ")";
+            string alias = !string.IsNullOrEmpty(tag.Family) && tag.Family != tag.Id ? " · исполняется правилом семьи " + tag.Family + " (без двойного бонуса)" : string.Empty;
+            string reason = tag.ReadOnly ? (tag.Trash ? " · в корзине: только просмотр" : " · в архиве: только просмотр") : string.Empty;
             row.Q<Label>("meta").text = tag.Id + " · " + CategoryLabel(tag.Category) +
                                         (string.IsNullOrEmpty(tag.PassiveType) ? string.Empty : " · " + tag.PassiveType) +
                                         (tag.Executable ? " · исполняется" : " · нет исполнителя") +
-                                        (tag.EngineOnly ? " · движок" : string.Empty) + statuses;
+                                        (tag.EngineOnly ? " · движок" : string.Empty) + statuses + roles + alias + reason +
+                                        (string.IsNullOrEmpty(tag.StatusNote) ? string.Empty : " · " + tag.StatusNote);
         }
 
         private void SetUnitTag(CatalogTag tag, bool enabled)

@@ -243,6 +243,10 @@ namespace KingdomSurvival.BattleSandbox
         {
             if (unit == null)
                 return false;
+            // Бриф завершения, этап 15: лежащий «При смерти» остаётся на поле со
+            // значком состояния и полосой HP — его можно спасти или добить.
+            if (unit.IsDying)
+                return true;
             // ПР-16: сидящий на бойце, ушедший под землю и ждущий места не
             // занимают гекс — на поле их показывают метки, а не фигура.
             if (!unit.IsDefeated && unit.IsOffBoard)

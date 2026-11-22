@@ -1,344 +1,344 @@
-kind;id;name;star;executable;block;tests;assigned
-status;status.001;Отравление;★;да;;;каталог состояний
-status;status.002;Кровотечение;★;да;;StatusReactionTagTests;каталог состояний
-status;status.003;Горение;★;да;;;каталог состояний
-status;status.006;Тлеющее проклятие;★;да;;StatusEngineTests StatusReactionTagTests;каталог состояний
-status;status.007;Мучительная связь;★;да;;StatusReactionTagTests;каталог состояний
-status;status.008;Паразит на теле;★;да;;;каталог состояний
-status;status.009;Ужас, нарастающий со временем;★;да;;;каталог состояний
-status;status.010;Отложенный взрыв;★;да;;StatusEngineTests StatusReactionTagTests;каталог состояний
-status;status.011;Болевое эхо;★;да;;;каталог состояний
-status;status.012;Кровавая порча;★;да;;;каталог состояний
-status;status.014;Озябший;★;да;;;каталог состояний
-status;status.015;Покрыт инеем;★;да;;;каталог состояний
-status;status.018;Облит смолой;★;да;;;каталог состояний
-status;status.019;Кислотное разъедание брони;★;да;;;каталог состояний
-status;status.168;Ослепление;★;да;;StatusReactionTagTests;каталог состояний
-status;status.022;Покрыт паутиной;★;да;;;каталог состояний
-status;status.023;Опутан корнями;★;да;;;каталог состояний
-status;status.025;Оглушение;★;да;;;каталог состояний
-status;status.026;Ошеломление;★;да;;CapabilityTagTests;каталог состояний
-status;status.027;Оцепенение;★;да;;;каталог состояний
-status;status.028;Паралич;★;да;;;каталог состояний
-status;status.030;Сон;★;да;;StatusEngineTests;каталог состояний
-status;status.032;Окаменение;★;да;;;каталог состояний
-status;status.033;Заморожен;★;да;;;каталог состояний
-status;status.041;Замедление;★;да;;PassiveEngineTests StatusReactionTagTests;каталог состояний
-status;status.043;Обездвиживание;★;да;;CapabilityTagTests;каталог состояний
-status;status.044;Захват;★;да;;;каталог состояний
-status;status.046;В сети;★;да;;;каталог состояний
-status;status.047;Запутан;★;да;;;каталог состояний
-status;status.054;Окружён;★;да;;;каталог состояний
-status;status.055;Страх;★;да;;;каталог состояний
-status;status.056;Паника;★;да;;;каталог состояний
-status;status.057;Ужас;★;да;;StatusEngineTests StatusReactionTagTests;каталог состояний
-status;status.058;Скованный страхом;★;да;;;каталог состояний
-status;status.059;Смятение;★;да;;;каталог состояний
-status;status.060;Очарование;★;да;;;каталог состояний
-status;status.061;Подчинение;★;да;;;каталог состояний
-status;status.065;Спровоцирован;★;да;;StatusPreviewAiTests;каталог состояний
-status;status.066;Деморализация;★;да;;CapabilityTagTests;каталог состояний
-status;status.067;Сломленный дух;★;да;;StatusEngineTests;каталог состояний
-status;status.068;Отчаяние;★;да;;;каталог состояний
-status;status.070;Чума;★;да;;StatusEngineTests;каталог состояний
-status;status.071;Слабость;★;да;;StatusEngineTests StatusReactionTagTests SupportAndTypedDamageTests;каталог состояний
-status;status.072;Обессиленный;★;да;;;каталог состояний
-status;status.077;Высасывание жизненной силы;★;да;;StatusEngineTests;каталог состояний
-status;status.078;Дурнота;★;да;;StatusEngineTests;каталог состояний
-status;status.079;Тошнота;★;да;;StatusPreviewAiTests;каталог состояний
-status;status.084;Забывчивость стрелка;★;да;;StatusReactionTagTests;каталог состояний
-status;status.087;Отяжеление;★;да;;;каталог состояний
-status;status.088;Ослаблен ударом;★;да;;StatusReactionTagTests;каталог состояний
-status;status.098;Роковая метка;★;да;;CapabilityTagTests StatusEngineTests;каталог состояний
-status;status.099;Проклятие слабого удара;★;да;;StatusReactionTagTests;каталог состояний
-status;status.101;Метка добычи;★;да;;StatusReactionTagTests;каталог состояний
-status;status.102;Отмеченная цель;★;да;;;каталог состояний
-status;status.105;Приговор;★;да;;;каталог состояний
-status;status.106;Вызов на поединок;★;да;;StatusReactionTagTests;каталог состояний
-status;status.107;Под защитой союзника;★;да;;;каталог состояний
-status;status.109;Связанные раны;★;да;;;каталог состояний
-status;status.110;Привязка к источнику;★;да;;;каталог состояний
-status;status.113;Свирепость;★;да;;StatusReactionTagTests;каталог состояний
-status;status.114;Временный вампиризм;★;да;;;каталог состояний
-status;status.117;Кровожадность;★;да;;StatusReactionTagTests;каталог состояний
-status;status.119;Боевой подъём;★;да;;;каталог состояний
-status;status.130;Защитная стойка;★;да;;;каталог состояний
-status;status.132;Щит одного попадания;★;да;;OpportunityAndMultiHitTests StatusEngineTests StatusPreviewAiTests;каталог состояний
-status;status.135;Каменная кожа;★;да;;;каталог состояний
-status;status.136;Защита от стрел;★;да;;;каталог состояний
-status;status.137;Защита от чар;★;да;;SupportAndTypedDamageTests;каталог состояний
-status;status.138;Огненный покров;★;да;;StatusReactionTagTests;каталог состояний
-status;status.139;Зеркальная защита;★;да;;;каталог состояний
-status;status.142;Краткая неуязвимость;★;да;;;каталог состояний
-status;status.146;Постепенное восстановление;★;да;;StatusEngineTests;каталог состояний
-status;status.148;Запас временной жизни;★;да;;StatusEngineTests;каталог состояний
-status;status.150;При смерти;★;да;;;каталог состояний
-status;status.156;Ускоренное перемещение;★;да;;StatusReactionTagTests;каталог состояний
-status;status.158;Перехват инициативы;★;да;;;каталог состояний
-status;status.159;Прилив сил;★;да;;;каталог состояний
-status;status.161;Набранный темп;★;да;;;каталог состояний
-status;status.171;Невидимость;★;да;;;каталог состояний
-status;status.185;Повреждена нога;★;да;;;каталог состояний
-status;status.186;Повреждена рука;★;да;;CapabilityTagTests;каталог состояний
-status;status.187;Контузия головы;★;да;;;каталог состояний
-status;status.188;Порча невезения;★;да;;;каталог состояний
-status;status.189;Боевая удача;★;да;;;каталог состояний
-status;status.190;Воодушевление;★;да;;;каталог состояний
-status;status.193;Рваная рана;★;да;;;каталог состояний
-status;status.194;Ранящее перемещение;★;да;;;каталог состояний
-status;status.199;Сила от ран;★;да;;;каталог состояний
-status;status.203;Зародыш в теле;★;да;;StatusEngineTests;каталог состояний
-tag;tactic.pack_hunter;Стая;★;да;;PassiveEngineTests;wolf
-tag;tactic.isolation_hunter;Охотник;★;да;;;
-tag;tactic.wounded_hunter;Чует слабину;★;да;;;
-tag;trait.exposed_flanks;Открытые бока;★;да;;PassiveEngineTests;kamnespin
-tag;trait.ranged_resistant;Прикрыт от обстрела;★;да;;;
-tag;trait.height_adapted;Цепкий;★;да;;;
-tag;tactic.last_ally_standing;Загнанный одиночка;★;да;;;
-tag;trait.anchored;Крепкая опора;★;да;;;
-tag;trait.venomous_flesh;Ядовитая плоть;★;да;;PassiveEngineTests;
-tag;trait.bloodless;Без кровотока;★;да;;PassiveEngineTests;
-tag;movement.wetland_walker;Ходит по жиже;★;да;;;
-tag;body.spiny;Колючий;★;да;;;
-tag;body.sticky;Липкая поверхность;★;да;;PassiveEngineTests;tinny_polzun
-tag;trait.rest_knitter;Срастается в покое;★;да;;;
-tag;ecology.dangerous_remains;Опасные останки;★;да;;;
-tag;tactic.zone_holder;Мешает пройти;★;да;;;
-tag;tactic.pursuer;Идёт следом;★;да;;OpportunityAndMultiHitTests;
-tag;tactic.slow_turner;Долго разворачивается;★;да;;;
-tag;tactic.shot_exhausted;Открывается после выстрела;★;да;;PassiveEngineTests;
-tag;resist.biological_poison;Иммунитет к яду;★;да;;StatusPreviewAiTests;
-tag;resist.fearless;Не поддаётся страху;★;да;;;
-tag;resist.short_stun;Быстро приходит в себя;★;да;;;
-tag;myth.shared_fate;Делит связь;★;да;;;
-tag;candidate.ks.0104;Неуверенность;★;да;;CapabilityTagTests;
-tag;candidate.ks.0113;Рваный темп;★;да;;;
-tag;candidate.ks.0127;Липкий след;★;да;;CapabilityTagTests;
-tag;candidate.ks.0129;Регенерация;★;да;;;
-tag;candidate.ks.0262;Тихая фаза;★;да;;CapabilityTagTests;
-tag;candidate.ks.0282;Лечение по очереди;★;да;;;
-tag;candidate.ks.0292;Опасность первого укуса;★;да;;;
-tag;passive.20261119.002;Дух ополчения;★;да;;;
-tag;passive.20261119.003;Крепкая кольчуга;★;да;;;
-tag;passive.20261119.004;Гроза крылатых;★;да;;;
-tag;passive.20261119.005;Разгон по прямой;★;да;;;
-tag;passive.20261119.007;Строевой наставник;★;да;;;
-tag;passive.20261119.009;Удар с оцепенением;★;да;;PassiveEngineTests;
-tag;passive.20261119.010;Сбивающий облик;★;да;;;
-tag;passive.20261119.012;Изнуряющая пыль;★;да;;;
-tag;passive.20261119.013;Слаженность рощи;★;да;;;
-tag;passive.20261119.014;Хранитель поросли;★;да;;;
-tag;passive.20261119.016;Соседний всплеск;★;да;;;
-tag;passive.20261119.019;Неиссякаемый ответ;★;да;;;
-tag;passive.20261119.020;Удар и возврат;★;да;;;
-tag;passive.20261119.021;Подавление;★;да;;;
-tag;passive.20261119.022;Три пасти;★;да;;;
-tag;passive.20261119.023;Сбрасывает порчу;★;да;;StatusReactionTagTests;
-tag;passive.20261119.024;Жаростойкая шкура;★;да;;SupportAndTypedDamageTests;
-tag;passive.20261119.025;Не загорается;★;да;;;
-tag;passive.20261119.027;Пустоты между костями;★;да;;;
-tag;passive.20261119.029;Чумной распад;★;да;;;
-tag;passive.20261119.031;Пьёт жизненную силу;★;да;;;
-tag;passive.20261119.032;Поводырь мёртвых;★;да;;;
-tag;passive.20261119.033;Копит ярость ударов;★;да;;;
-tag;passive.20261119.035;Сквозистое тело;★;да;;;
-tag;passive.20261119.036;Страшный укус;★;да;;;
-tag;passive.20261119.037;Звереет от боли;★;да;;;
-tag;passive.20261119.038;Боевая спячка;★;да;;;
-tag;passive.20261119.040;полёт;★;да;;;
-tag;passive.20261119.041;Бьёт через строй;★;да;;;
-tag;passive.20261119.042;Гнетущее присутствие;★;да;;;
-tag;passive.20261119.043;Охотник;★;да;;;
-tag;passive.20261119.044;Великанобой;★;да;;;
-tag;passive.20261119.046;Несгибаемый разум;★;да;;;
-tag;passive.20261119.050;Безответный удар;★;да;;;
-tag;passive.20261119.052;Ядовитая атака;★;да;;OpportunityAndMultiHitTests PassiveEngineTests StatusPreviewAiTests;shipovik
-tag;passive.20261119.056;Легко воспламеняется;★;да;;;
-tag;passive.20261119.057;Ломает заграждения;;да;;;
-tag;passive.20261119.060;Вожак ловчих;★;да;;;
-tag;passive.20261119.061;Учится держать удар;★;да;;;
-tag;passive.20261119.062;Запоминает противника;★;да;;;
-tag;passive.20261119.065;Привыкает к боли;★;да;;;
-tag;passive.20261119.066;Безумие потерь;★;да;;;
-tag;passive.20261119.068;Меткое ослабление;★;да;;;
-tag;passive.20261119.069;Пристреливается;★;да;;;
-tag;passive.20261119.070;Рвущие удары;★;да;;;
-tag;passive.20261119.071;Девять жизней;★;да;;;
-tag;passive.20261119.073;Добивает раненых;★;да;;;
-tag;passive.20261119.076;Стойкий к состояниям;★;да;;;
-tag;passive.20261119.077;Работает в окружении;★;да;;;
-tag;passive.20261119.083;Подавляет темпом;★;да;;;
-tag;passive.20261119.084;Воин-одиночка;★;да;;;
-tag;passive.20261119.086;Победа окрыляет;★;да;;;
-tag;passive.20261119.092;Вкус победы;★;да;;;
-tag;passive.20261119.095;На последнем дыхании;;да;;;
-tag;passive.20261119.096;Мститель;;да;;;
-tag;passive.20261119.097;Пользуется сумятицей;;да;;;
-tag;passive.20261119.098;Хороший пациент;;да;;;
-tag;passive.20261119.099;Ищет стык доспеха;;да;;;
-tag;passive.20261119.100;Фехтовальная защита;;да;;;
-tag;passive.20261119.101;Ночная выдержка;★;да;;;
-tag;passive.20261119.102;Ночная стрельба;;да;;;
-tag;passive.20261119.103;Бьёт уходящего по ногам;★;да;;OpportunityAndMultiHitTests;
-tag;passive.20261119.107;Скрытый фланг;★;да;;;
-tag;passive.20261119.112;Автоматический укол;★;да;;;
-tag;passive.20261119.127;Крадёт запас сил;;да;;;
-tag;passive.20261119.128;Сифон чужой силы;;да;;SupportAndTypedDamageTests;
-tag;passive.20261119.129;Непроницаемый для обычного;;да;;;
-tag;passive.20261119.130;Опора соседей;;да;;;
-tag;passive.20261119.131;Точность против уклонения;;да;;;
-tag;passive.20261119.132;Пробивает поглощение;;да;;;
-tag;passive.20261119.136;Умелые руки лекаря;★;да;;SupportAndTypedDamageTests;
-tag;passive.20261119.138;Сосуд живучести;★;да;;;
-tag;passive.20261119.149;Смертельная отрава;★;да;;;
-tag;passive.20261119.158;Считает павших;★;да;;;
-tag;passive.20261119.164;Последний взрыв;★;да;;PassiveEngineTests;
-tag;passive.20261119.165;Распадается на выводок;★;да;;;
-tag;passive.20261119.166;Последний дар защиты;★;да;;;
-tag;passive.20261119.167;Последний целебный выдох;★;да;;;
-tag;passive.20261119.168;Передаёт натиск;★;да;;;
-tag;passive.20261119.170;Растёт от призыва;★;да;;;
-tag;passive.20261119.177;Кровь быстро свёртывается;★;да;;;
-tag;passive.20261119.178;Плохо сворачивается кровь;★;да;;;
-tag;passive.20261119.180;Силен неповреждённым;★;да;;;
-tag;passive.20261119.181;Отчаянно увёртлив;★;да;;;
-tag;passive.20261119.183;Горяч на старте;★;да;;;
-tag;passive.20261119.194;Знает лесную схватку;★;да;;;
-tag;passive.20261119.195;Хрупкий;★;да;;;
-tag;passive.20261119.196;Дрожит перед зверем;★;да;;;
-tag;passive.20261119.197;Растерян в первом раунде;★;да;;;
-tag;passive.20261119.198;Лесная защита;★;да;;;
-tag;passive.20261119.199;Хозяин холмов;★;да;;;
-tag;passive.20261119.200;Болотная стойка;★;да;;;
-tag;passive.20261119.202;Тяжёлые снаряды;★;да;;;
-tag;passive.20261119.204;Разбивает оружие;★;да;;;
-tag;passive.20261119.206;Первое парирование;★;да;;;
-tag;passive.20261119.207;Ответ прежде удара;★;да;;;
-tag;passive.20261119.208;Не слабеет от ран;★;да;;;
-tag;passive.20261119.210;Не устаёт в бою;;да;;;
-tag;passive.20261119.211;Затаптывает слабого;★;да;;;
-tag;passive.20261119.212;Отнимает боезапас;★;да;;;
-tag;passive.20261119.213;Поглощает останки;★;да;;;
-tag;passive.20261119.219;Замедляющий удар;★;да;;;
-tag;passive.20261119.220;Слабеет вместе с телом;★;да;;;
-tag;passive.20261119.225;Питается победой;★;да;;;
-tag;passive.20261119.226;Два выстрела;★;да;;OpportunityAndMultiHitTests;
-tag;passive.20261119.227;Два ближних удара;★;да;;OpportunityAndMultiHitTests;
-tag;passive.20261119.228;Связывающие корни;★;да;;;
-tag;passive.20261119.230;Старящий удар;★;да;;;
-tag;passive.20261119.232;Разъедающая слюна;★;да;;;
-tag;passive.20261119.235;Отнимает чародейский запас;;да;;;
-tag;passive.20261119.236;Мёртвая тревога;★;да;;;
-tag;passive.20261119.242;Зловонная близость;★;да;;;
-tag;passive.20261119.244;Сопротивляется оружию;★;да;;;
-tag;passive.20261119.247;Не вязнет в паутине;★;да;;;
-tag;passive.20261119.249;Оппортунист;★;да;;OpportunityAndMultiHitTests;
-tag;passive.20261119.256;Живучий;★;да;;PassiveEngineTests;
-tag;passive.20261119.257;Разлетается осколками;★;да;;;
-tag;passive.20261119.260;Взрывоопасная гибель;★;да;;;
-tag;passive.20261119.261;Маскируется в движении;★;да;;;
-tag;passive.20261119.264;Отражающий покров;★;да;;;
-tag;passive.20261119.267;Второе дыхание;★;да;;;
-tag;passive.20261119b.008;Бьёт и отступает;★;да;;OpportunityAndMultiHitTests;
-tag;passive.20261119b.010;Мстит за соседнего;★;да;;OpportunityAndMultiHitTests;
-tag;passive.20261119b.016;Первый бросок из засады;★;да;;;
-tag;passive.20261119b.021;Порча ведёт клинок;★;да;;;
-tag;passive.20261119b.024;Бережёт своих внутри чар;;да;;SupportAndTypedDamageTests;
-tag;passive.20261119b.025;Жатва чужой жизни;;да;;;
-tag;passive.20261119b.026;Лекарь крепнет от помощи;★;да;;;
-tag;passive.20261119b.027;Целебное напутствие;★;да;;;
-tag;passive.20261119b.028;Перевязь с оберегом;★;да;;;
-tag;passive.20261119b.029;Сила после исцеления;★;да;;;
-tag;passive.20261119b.034;От удара стынет земля;★;да;;;
-tag;passive.20261119b.035;Промораживает насквозь;★;да;;;
-tag;passive.20261119b.036;Иней поверх слабости;★;да;;StatusReactionTagTests;
-tag;passive.20261119b.038;Вода затягивает раны;★;да;;;
-tag;passive.20261119b.039;Заросли кормят тело;★;да;;;
-tag;passive.20261119b.043;Оберег ближних чар;;да;;;
-tag;passive.20261119b.044;Копит грозовую искру;;да;;;
-tag;passive.20261119b.045;Не бьёт током от воды;;да;;;
-tag;passive.20261119b.046;Силовой покров разряжается;;да;;;
-tag;passive.20261119b.047;Подступ к открытому врагу;★;да;;;
-tag;passive.20261119b.057;Победа обращает в страх;★;да;;;
-tag;passive.20261119b.064;Стреляет в слабое место;;да;;;
-tag;passive.20261119b.065;Кованый наконечник;★;да;;;
-tag;passive.status.20261120.001;Едкая смесь;★;да;;;
-tag;passive.status.20261120.002;Вытягивает отраву;★;да;;SupportAndTypedDamageTests;
-tag;passive.status.20261120.003;Противоядие наготове;;да;;;
-tag;passive.status.20261120.004;Чистая перевязь;;да;;;
-tag;passive.status.20261120.005;Пьёт из открытой раны;;да;;;
-tag;passive.status.20261120.006;След крови;★;да;;;
-tag;passive.status.20261120.007;Затягивает рваные края;;да;;;
-tag;passive.status.20261120.008;Копоть в глазах;★;да;;;
-tag;passive.status.20261120.009;Смолистый плевок;★;да;;;
-tag;passive.status.20261120.010;Сбивает пламя с товарища;;да;;;
-tag;passive.status.20261120.011;Огонь будит ярость;★;да;;;
-tag;passive.status.20261120.012;Тепло под кольчугой;★;да;;;
-tag;passive.status.20261120.013;Лёд сковывает слабого;;да;;;
-tag;passive.status.20261120.014;Осколок освобождения;;да;;;
-tag;passive.status.20261120.015;Корни держат добычу;★;да;;;lozovy_khvatun
-tag;passive.status.20261120.016;Подрезает путы;★;да;;;
-tag;passive.status.20261120.017;Скользкая хватка;;да;;;
-tag;passive.status.20261120.018;Удерживает с усилием;;да;;;
-tag;passive.status.20261120.019;Не подпускает палача;★;да;;PassiveEngineTests;guard
-tag;passive.status.20261120.020;Память о мороке;;да;;;
-tag;passive.status.20261120.021;Слышит родной голос;;да;;;
-tag;passive.status.20261120.022;Не спит стоя;;да;;;
-tag;passive.status.20261120.023;Чуткий часовой;;да;;;
-tag;passive.status.20261120.024;Трудно устрашить повторно;★;да;;;
-tag;passive.status.20261120.025;Крепнет рядом с вожаком;★;да;;;
-tag;passive.status.20261120.026;Охотится на паникующего;★;да;;;
-tag;passive.status.20261120.027;Не видит страшного;;да;;;
-tag;passive.status.20261120.028;Страх ослабляет хватку;;да;;;
-tag;passive.status.20261120.029;Не ведётся на вызов;;да;;;
-tag;passive.status.20261120.030;Вызов держит строй;★;да;;;
-tag;passive.status.20261120.031;Охотник на дурман;;да;;;
-tag;passive.status.20261120.032;Хвори мешают лечению;;да;;;
-tag;passive.status.20261120.033;Чистит заразу отдыхом;★;да;;;
-tag;passive.status.20261120.034;Снимает тяжесть удара;;да;;;
-tag;passive.status.20261120.035;Клинок находит метку;;да;;;
-tag;passive.status.20261120.036;Метка не прячется;;да;;;
-tag;passive.status.20261120.037;Запоминает сорванную добычу;;да;;;
-tag;passive.status.20261120.038;Оберег от приговора;;да;;;
-tag;passive.status.20261120.039;Сбивает отсчёт порчи;;да;;;
-tag;passive.status.20261120.040;Не кормит болевое эхо;;да;;;
-tag;passive.status.20261120.041;Рвёт мучительную связь;★;да;;;
-tag;passive.status.20261120.042;Связь укрепляет стража;;да;;;
-tag;passive.status.20261120.043;Разрывает связь на исходе;;да;;;
-tag;passive.status.20261120.044;Зависть к чужому покрову;;да;;;
-tag;passive.status.20261120.045;Берегущий заговор;;да;;;
-tag;passive.status.20261120.046;Зеркало не обманешь дважды;;да;;;
-tag;passive.status.20261120.047;Заслон от пылающей кожи;;да;;;
-tag;passive.status.20261120.048;Щит любит ожидание;;да;;;
-tag;passive.status.20261120.049;Второе дыхание покрова;;да;;;
-tag;passive.status.20261120.050;Обрывает чужую подпитку;;да;;;
-tag;passive.status.20261120.051;Жизнь не впрок;;да;;;
-tag;passive.status.20261120.052;Силу ран бережёт;;да;;;
-tag;passive.status.20261120.053;Кровожадность выдаёт;;да;;;
-tag;passive.status.20261120.054;Завершает бой хладнокровно;;да;;;
-tag;passive.status.20261120.055;Сдерживает удачу;;да;;;
-tag;passive.status.20261120.056;Удача утешает;;да;;;
-tag;passive.status.20261120.057;Шаг вопреки слабости;;да;;;
-tag;passive.status.20261120.058;Сбитый темп отрезвляет;;да;;;
-tag;passive.status.20261120.059;Не уронит инициативу;;да;;;
-tag;passive.status.20261120.060;Помощь возвращает шаг;;да;;;
-tag;passive.status.20261120.061;Не бросает оружие от боли;;да;;;
-tag;passive.status.20261120.062;Опора при контузии;;да;;;
-tag;passive.status.20261120.063;Не даст захватить разум умирающего;;да;;;
-tag;passive.status.20261120.064;Спасённый держится крепче;;да;;;
-tag;passive.status.20261120.065;Выдавливает паразита;★;да;;;
-tag;passive.status.20261120.066;Носитель заразы слабеет;;да;;;
-tag;passive.status.20261120.067;Не терпит чужих корней;;да;;;
-tag;passive.status.20261120.068;Очищение оставляет оберег;;да;;;
-tag;passive.status.20261120.069;Проклятие цепляется за ослабленного;;да;;;
-tag;passive.status.20261120.070;Обет держит удар;;да;;;
-tag;passive.status.20261120.071;Цена чужого воодушевления;;да;;;
-tag;passive.status.20261120.072;Порча ищет прореху;;да;;;
-tag;passive.status.20261120.073;Точный ответ на ослепление;;да;;;
-tag;passive.status.20261120.074;Стойка удерживает силы;;да;;;
-tag;passive.status.20261120.075;Собирается после встряски;;да;;;
-tag;passive.status.20261120.076;В оцепенении бережётся стрел;;да;;;
-tag;passive.status.20261120.077;Разгон разрывает кольцо;;да;;;
-tag;passive.status.20261120.078;Последняя искра надежды;;да;;;
-tag;passive.status.20261120.079;Руки помнят выстрел;;да;;;
-tag;passive.status.20261120.080;Покров оставляет брешь;;да;;;
+kind;id;name;star;executable;block;tests;assigned;handler;imported;configurable;reachable;verifiedEditMode;verifiedPlayMode;verifiedManual
+status;status.001;Отравление;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.002;Кровотечение;★;да;;StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.003;Горение;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.006;Тлеющее проклятие;★;да;;StatusEngineTests StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.007;Мучительная связь;★;да;;StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.008;Паразит на теле;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.009;Ужас, нарастающий со временем;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.010;Отложенный взрыв;★;да;;StatusEngineTests StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.011;Болевое эхо;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.012;Кровавая порча;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.014;Озябший;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.015;Покрыт инеем;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.018;Облит смолой;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.019;Кислотное разъедание брони;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.168;Ослепление;★;да;;StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.022;Покрыт паутиной;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.023;Опутан корнями;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.025;Оглушение;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.026;Ошеломление;★;да;;CapabilityTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.027;Оцепенение;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.028;Паралич;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.030;Сон;★;да;;StatusEngineTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.032;Окаменение;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.033;Заморожен;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.041;Замедление;★;да;;PassiveEngineTests StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.043;Обездвиживание;★;да;;CapabilityTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.044;Захват;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.046;В сети;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.047;Запутан;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.054;Окружён;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.055;Страх;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.056;Паника;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.057;Ужас;★;да;;StatusEngineTests StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.058;Скованный страхом;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.059;Смятение;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.060;Очарование;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.061;Подчинение;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.065;Спровоцирован;★;да;;StatusPreviewAiTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.066;Деморализация;★;да;;CapabilityTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.067;Сломленный дух;★;да;;StatusEngineTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.068;Отчаяние;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.070;Чума;★;да;;StatusEngineTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.071;Слабость;★;да;;StatusEngineTests StatusReactionTagTests SupportAndTypedDamageTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.072;Обессиленный;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.077;Высасывание жизненной силы;★;да;;StatusEngineTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.078;Дурнота;★;да;;StatusEngineTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.079;Тошнота;★;да;;StatusPreviewAiTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.084;Забывчивость стрелка;★;да;;StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.087;Отяжеление;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.088;Ослаблен ударом;★;да;;StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.098;Роковая метка;★;да;;CapabilityTagTests StatusEngineTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.099;Проклятие слабого удара;★;да;;StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.101;Метка добычи;★;да;;StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.102;Отмеченная цель;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.105;Приговор;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.106;Вызов на поединок;★;да;;StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.107;Под защитой союзника;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.109;Связанные раны;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.110;Привязка к источнику;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.113;Свирепость;★;да;;StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.114;Временный вампиризм;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.117;Кровожадность;★;да;;StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.119;Боевой подъём;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.130;Защитная стойка;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.132;Щит одного попадания;★;да;;OpportunityAndMultiHitTests StatusEngineTests StatusPreviewAiTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.135;Каменная кожа;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.136;Защита от стрел;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.137;Защита от чар;★;да;;SupportAndTypedDamageTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.138;Огненный покров;★;да;;StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.139;Зеркальная защита;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.142;Краткая неуязвимость;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.146;Постепенное восстановление;★;да;;StatusEngineTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.148;Запас временной жизни;★;да;;StatusEngineTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.150;При смерти;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.156;Ускоренное перемещение;★;да;;StatusReactionTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.158;Перехват инициативы;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.159;Прилив сил;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.161;Набранный темп;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.171;Невидимость;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.185;Повреждена нога;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.186;Повреждена рука;★;да;;CapabilityTagTests;каталог состояний;;да;да;да;механизм;нет;нет
+status;status.187;Контузия головы;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.188;Порча невезения;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.189;Боевая удача;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.190;Воодушевление;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.193;Рваная рана;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.194;Ранящее перемещение;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.199;Сила от ран;★;да;;;каталог состояний;;да;да;да;дымовой;нет;нет
+status;status.203;Зародыш в теле;★;да;;StatusEngineTests;каталог состояний;;да;да;да;механизм;нет;нет
+tag;tactic.pack_hunter;Стая;★;да;;PassiveEngineTests;wolf;Alias;да;да;да;механизм;нет;нет
+tag;tactic.isolation_hunter;Охотник;★;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;tactic.wounded_hunter;Чует слабину;★;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;trait.exposed_flanks;Открытые бока;★;да;;PassiveEngineTests;kamnespin;DefenseMod;да;да;да;механизм;нет;нет
+tag;trait.ranged_resistant;Прикрыт от обстрела;★;да;;;;DefenseMod;да;да;да;дымовой;нет;нет
+tag;trait.height_adapted;Цепкий;★;да;;;;Alias;да;да;да;дымовой;нет;нет
+tag;tactic.last_ally_standing;Загнанный одиночка;★;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;trait.anchored;Крепкая опора;★;да;;;;PushReduction;да;да;да;дымовой;нет;нет
+tag;trait.venomous_flesh;Ядовитая плоть;★;да;;PassiveEngineTests;;;да;да;да;механизм;нет;нет
+tag;trait.bloodless;Без кровотока;★;да;;PassiveEngineTests;;StatusImmunity;да;да;да;механизм;нет;нет
+tag;movement.wetland_walker;Ходит по жиже;★;да;;;;Alias;да;да;да;дымовой;нет;нет
+tag;body.spiny;Колючий;★;да;;;;EnterAdjacentDamage;да;да;да;дымовой;нет;нет
+tag;body.sticky;Липкая поверхность;★;да;;PassiveEngineTests;tinny_polzun;;да;да;да;механизм;нет;нет
+tag;trait.rest_knitter;Срастается в покое;★;да;;;;ActivationEndRestHeal;да;да;да;дымовой;нет;нет
+tag;ecology.dangerous_remains;Опасные останки;★;да;;;;LeaveRemains;да;да;да;дымовой;нет;нет
+tag;tactic.zone_holder;Мешает пройти;★;да;;;;LeaveAdjacentCost;да;да;да;дымовой;нет;нет
+tag;tactic.pursuer;Идёт следом;★;да;;OpportunityAndMultiHitTests;;FollowRetreatingEnemy;да;да;да;механизм;нет;нет
+tag;tactic.slow_turner;Долго разворачивается;★;да;;;;NoMeleeRetaliationAfterMove;да;да;да;дымовой;нет;нет
+tag;tactic.shot_exhausted;Открывается после выстрела;★;да;;PassiveEngineTests;;NoMeleeRetaliationAfterShot;да;да;да;механизм;нет;нет
+tag;resist.biological_poison;Иммунитет к яду;★;да;;StatusPreviewAiTests;;StatusImmunity;да;да;да;механизм;нет;нет
+tag;resist.fearless;Не поддаётся страху;★;да;;;;StatusImmunity;да;да;да;дымовой;нет;нет
+tag;resist.short_stun;Быстро приходит в себя;★;да;;;;Policy;да;да;да;дымовой;нет;нет
+tag;myth.shared_fate;Делит связь;★;да;;;;SharedFateLink;да;да;да;дымовой;нет;нет
+tag;candidate.ks.0104;Неуверенность;★;да;;CapabilityTagTests;;AttackMod;да;да;да;механизм;нет;нет
+tag;candidate.ks.0113;Рваный темп;★;да;;;;MovementBonusAfterNoAttack;да;да;да;дымовой;нет;нет
+tag;candidate.ks.0127;Липкий след;★;да;;CapabilityTagTests;;StickyTrailAfterShift;да;да;да;механизм;нет;нет
+tag;candidate.ks.0129;Регенерация;★;да;;;;ActivationStartHeal;да;да;да;дымовой;нет;нет
+tag;candidate.ks.0262;Тихая фаза;★;да;;CapabilityTagTests;;QuietPhase;да;да;да;механизм;нет;нет
+tag;candidate.ks.0282;Лечение по очереди;★;да;;;;ActivationStartHealAlly;да;да;да;дымовой;нет;нет
+tag;candidate.ks.0292;Опасность первого укуса;★;да;;;;OnHitApplyStatus;да;да;да;дымовой;нет;нет
+tag;passive.20261119.002;Дух ополчения;★;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.003;Крепкая кольчуга;★;да;;;;IncomingPercent;да;да;да;дымовой;нет;нет
+tag;passive.20261119.004;Гроза крылатых;★;да;;CapabilityTagTests;;OutgoingPercent;да;да;да;механизм;нет;нет
+tag;passive.20261119.005;Разгон по прямой;★;да;;CapabilityTagTests UnitDatabaseCatalogTests;;AttackMod;да;да;да;механизм;нет;нет
+tag;passive.20261119.007;Строевой наставник;★;да;;;;AuraAllyAttack;да;да;да;дымовой;нет;нет
+tag;passive.20261119.009;Удар с оцепенением;★;да;;PassiveEngineTests;;;да;да;да;механизм;нет;нет
+tag;passive.20261119.010;Сбивающий облик;★;да;;;;;да;да;да;дымовой;нет;нет
+tag;passive.20261119.012;Изнуряющая пыль;★;да;;;;;да;да;да;дымовой;нет;нет
+tag;passive.20261119.013;Слаженность рощи;★;да;;CapabilityTagTests;;AuraAllyDefense;да;да;да;механизм;нет;нет
+tag;passive.20261119.014;Хранитель поросли;★;да;;CapabilityTagTests;;AuraAllyRegen;да;да;да;механизм;нет;нет
+tag;passive.20261119.016;Соседний всплеск;★;да;;;;OnHitSplashAdjacentToTarget;да;да;да;дымовой;нет;нет
+tag;passive.20261119.019;Неиссякаемый ответ;★;да;;;;Retaliations;да;да;да;дымовой;нет;нет
+tag;passive.20261119.020;Удар и возврат;★;да;;;;StrikeAndReturn;да;да;да;дымовой;нет;нет
+tag;passive.20261119.021;Подавление;★;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.022;Три пасти;★;да;;;;OnHitSplashFlank;да;да;да;дымовой;нет;нет
+tag;passive.20261119.023;Сбрасывает порчу;★;да;;StatusReactionTagTests;;StartRemoveMagicalStatus;да;да;да;механизм;нет;нет
+tag;passive.20261119.024;Жаростойкая шкура;★;да;;SupportAndTypedDamageTests;;IncomingPercent;да;да;да;механизм;нет;нет
+tag;passive.20261119.025;Не загорается;★;да;;;;StatusImmunity;да;да;да;дымовой;нет;нет
+tag;passive.20261119.027;Пустоты между костями;★;да;;;;IncomingPercent;да;да;да;дымовой;нет;нет
+tag;passive.20261119.029;Чумной распад;★;да;;;;OnDeathApplyStatus;да;да;да;дымовой;нет;нет
+tag;passive.20261119.031;Пьёт жизненную силу;★;да;;;;OnHitHealSelf;да;да;да;дымовой;нет;нет
+tag;passive.20261119.032;Поводырь мёртвых;★;да;;CapabilityTagTests;;AuraAllyAttack;да;да;да;механизм;нет;нет
+tag;passive.20261119.033;Копит ярость ударов;★;да;;;;StackOutgoingPerAttack;да;да;да;дымовой;нет;нет
+tag;passive.20261119.035;Сквозистое тело;★;да;;;;IncomingPercent;да;да;да;дымовой;нет;нет
+tag;passive.20261119.036;Страшный укус;★;да;;CapabilityTagTests;;RetortWeakenOnHit;да;да;да;механизм;нет;нет
+tag;passive.20261119.037;Звереет от боли;★;да;;;;ChargeAttackAfterDamageTaken;да;да;да;дымовой;нет;нет
+tag;passive.20261119.038;Боевая спячка;★;да;;;;ActivationEndRestSleep;да;да;да;дымовой;нет;нет
+tag;passive.20261119.040;полёт;★;да;;CapabilityTagTests;;FlyOverLowObstacles;да;да;да;механизм;нет;нет
+tag;passive.20261119.041;Бьёт через строй;★;да;;;;OnHitSplashBehindTarget;да;да;да;дымовой;нет;нет
+tag;passive.20261119.042;Гнетущее присутствие;★;да;;;;AuraEnemyInitiative;да;да;да;дымовой;нет;нет
+tag;passive.20261119.043;Охотник;★;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.044;Великанобой;★;да;;CapabilityTagTests;;IgnoreDefense;да;да;да;механизм;нет;нет
+tag;passive.20261119.046;Несгибаемый разум;★;да;;;;StatusImmunity;да;да;да;дымовой;нет;нет
+tag;passive.20261119.050;Безответный удар;★;да;;;;NoProvokedRetaliation;да;да;да;дымовой;нет;нет
+tag;passive.20261119.052;Ядовитая атака;★;да;;OpportunityAndMultiHitTests PassiveEngineTests StatusPreviewAiTests;shipovik;;да;да;да;механизм;нет;нет
+tag;passive.20261119.056;Легко воспламеняется;★;да;;;;IncomingPercent;да;да;да;дымовой;нет;нет
+tag;passive.20261119.057;Ломает заграждения;;да;;CapabilityTagTests;;ObstacleDamageMultiplier;да;да;да;механизм;нет;нет
+tag;passive.20261119.060;Вожак ловчих;★;да;;;;AuraAllyMovementStart;да;да;да;дымовой;нет;нет
+tag;passive.20261119.061;Учится держать удар;★;да;;;;StackDefensePerHitTaken;да;да;да;дымовой;нет;нет
+tag;passive.20261119.062;Запоминает противника;★;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.065;Привыкает к боли;★;да;;;;StackReductionPerDamageTaken;да;да;да;дымовой;нет;нет
+tag;passive.20261119.066;Безумие потерь;★;да;;;;AttackMod DefenseMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.068;Меткое ослабление;★;да;;;;;да;да;да;дымовой;нет;нет
+tag;passive.20261119.069;Пристреливается;★;да;;;;StackAttackAfterMiss;да;да;да;дымовой;нет;нет
+tag;passive.20261119.070;Рвущие удары;★;да;;;;;да;да;да;дымовой;нет;нет
+tag;passive.20261119.071;Девять жизней;★;да;;;;CheatDeathOnce;да;да;да;дымовой;нет;нет
+tag;passive.20261119.073;Добивает раненых;★;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.076;Стойкий к состояниям;★;да;;;;StatusMaxDuration;да;да;да;дымовой;нет;нет
+tag;passive.20261119.077;Работает в окружении;★;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.083;Подавляет темпом;★;да;;;;;да;да;да;дымовой;нет;нет
+tag;passive.20261119.084;Воин-одиночка;★;да;;;;AttackMod DefenseMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.086;Победа окрыляет;★;да;;;;MoveAfterKill;да;да;да;дымовой;нет;нет
+tag;passive.20261119.092;Вкус победы;★;да;;;;OnKillOutgoingNextTurn;да;да;да;дымовой;нет;нет
+tag;passive.20261119.095;На последнем дыхании;;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.096;Мститель;;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.097;Пользуется сумятицей;;да;;CapabilityTagTests;;OutgoingFlat;да;да;да;механизм;нет;нет
+tag;passive.20261119.098;Хороший пациент;;да;;;;HealReceivedBonus;да;да;да;дымовой;нет;нет
+tag;passive.20261119.099;Ищет стык доспеха;;да;;;;IgnoreDefense;да;да;да;дымовой;нет;нет
+tag;passive.20261119.100;Фехтовальная защита;;да;;CapabilityTagTests;;FlankBonusReduction;да;да;да;механизм;нет;нет
+tag;passive.20261119.101;Ночная выдержка;★;да;;;;StatusAttackPenaltyIgnore;да;да;да;дымовой;нет;нет
+tag;passive.20261119.102;Ночная стрельба;;да;;CapabilityTagTests;;IgnoreDarkness;да;да;да;механизм;нет;нет
+tag;passive.20261119.103;Бьёт уходящего по ногам;★;да;;OpportunityAndMultiHitTests;;LeaveAdjacencyStrike;да;да;да;механизм;нет;нет
+tag;passive.20261119.107;Скрытый фланг;★;да;;;;OutgoingFlat;да;да;да;дымовой;нет;нет
+tag;passive.20261119.112;Автоматический укол;★;да;;;;BlockRetort;да;да;да;дымовой;нет;нет
+tag;passive.20261119.127;Крадёт запас сил;;да;;;;MagicRestoreOnHit;да;да;да;дымовой;нет;нет
+tag;passive.20261119.128;Сифон чужой силы;;да;;SupportAndTypedDamageTests;;HealOnDispelMagical;да;да;да;механизм;нет;нет
+tag;passive.20261119.129;Непроницаемый для обычного;;да;;;;IncomingFlat;да;да;да;дымовой;нет;нет
+tag;passive.20261119.130;Опора соседей;;да;;CapabilityTagTests;;AuraAllyDefense;да;да;да;механизм;нет;нет
+tag;passive.20261119.131;Точность против уклонения;;да;;CapabilityTagTests;;DodgeReduction;да;да;да;механизм;нет;нет
+tag;passive.20261119.132;Пробивает поглощение;;да;;;;PierceFlatReduction;да;да;да;дымовой;нет;нет
+tag;passive.20261119.136;Умелые руки лекаря;★;да;;SupportAndTypedDamageTests;;HealOtherBonus;да;да;да;механизм;нет;нет
+tag;passive.20261119.138;Сосуд живучести;★;да;;;;ActivationEndHealPercent;да;да;да;дымовой;нет;нет
+tag;passive.20261119.149;Смертельная отрава;★;да;;;;;да;да;да;дымовой;нет;нет
+tag;passive.20261119.158;Считает павших;★;да;;;;StackAttackAfterAlliesFell;да;да;да;дымовой;нет;нет
+tag;passive.20261119.164;Последний взрыв;★;да;;PassiveEngineTests;;OnDeathDamage;да;да;да;механизм;нет;нет
+tag;passive.20261119.165;Распадается на выводок;★;да;;;;SplitIntoBrood;да;да;да;дымовой;нет;нет
+tag;passive.20261119.166;Последний дар защиты;★;да;;;;OnDeathDefenseToAlly;да;да;да;дымовой;нет;нет
+tag;passive.20261119.167;Последний целебный выдох;★;да;;;;OnDeathHealAllies;да;да;да;дымовой;нет;нет
+tag;passive.20261119.168;Передаёт натиск;★;да;;;;OnDeathAttackToAlly;да;да;да;дымовой;нет;нет
+tag;passive.20261119.170;Растёт от призыва;★;да;;;;GrowOnAllySummon;да;да;да;дымовой;нет;нет
+tag;passive.20261119.177;Кровь быстро свёртывается;★;да;;;;StatusDurationDelta;да;да;да;дымовой;нет;нет
+tag;passive.20261119.178;Плохо сворачивается кровь;★;да;;;;StatusDurationDelta;да;да;да;дымовой;нет;нет
+tag;passive.20261119.180;Силен неповреждённым;★;да;;;;OutgoingFlat;да;да;да;дымовой;нет;нет
+tag;passive.20261119.181;Отчаянно увёртлив;★;да;;;;DefenseMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.183;Горяч на старте;★;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.194;Знает лесную схватку;★;да;;CapabilityTagTests;;AttackMod;да;да;да;механизм;нет;нет
+tag;passive.20261119.195;Хрупкий;★;да;;CapabilityTagTests;;MaxHitPointsPercent;да;да;да;механизм;нет;нет
+tag;passive.20261119.196;Дрожит перед зверем;★;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.197;Растерян в первом раунде;★;да;;;;InitiativeMod DefenseMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.198;Лесная защита;★;да;;CapabilityTagTests;;DefenseMod ForestStride;да;да;да;механизм;нет;нет
+tag;passive.20261119.199;Хозяин холмов;★;да;;;;DefenseMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.200;Болотная стойка;★;да;;;;DefenseMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.202;Тяжёлые снаряды;★;да;;;;OnHitApplyStatus;да;да;да;дымовой;нет;нет
+tag;passive.20261119.204;Разбивает оружие;★;да;;CapabilityTagTests;;BreakWeapon;да;да;да;механизм;нет;нет
+tag;passive.20261119.206;Первое парирование;★;да;;;;FirstMeleeHitPerRoundDefense;да;да;да;дымовой;нет;нет
+tag;passive.20261119.207;Ответ прежде удара;★;да;;;;RetaliateFirst;да;да;да;дымовой;нет;нет
+tag;passive.20261119.208;Не слабеет от ран;★;да;;CapabilityTagTests;;StatusAttackPenaltyIgnore;да;да;да;механизм;нет;нет
+tag;passive.20261119.210;Не устаёт в бою;;да;;CapabilityTagTests;;IgnoreFatigue;да;да;да;механизм;нет;нет
+tag;passive.20261119.211;Затаптывает слабого;★;да;;;;OnKillStepIntoCell;да;да;да;дымовой;нет;нет
+tag;passive.20261119.212;Отнимает боезапас;★;да;;CapabilityTagTests;;DestroyAmmo;да;да;да;механизм;нет;нет
+tag;passive.20261119.213;Поглощает останки;★;да;;;;ConsumeRemains;да;да;да;дымовой;нет;нет
+tag;passive.20261119.219;Замедляющий удар;★;да;;;;;да;да;да;дымовой;нет;нет
+tag;passive.20261119.220;Слабеет вместе с телом;★;да;;;;OutgoingPercent OutgoingPercent;да;да;да;дымовой;нет;нет
+tag;passive.20261119.225;Питается победой;★;да;;;;OnKillMaxHitPoints;да;да;да;дымовой;нет;нет
+tag;passive.20261119.226;Два выстрела;★;да;;OpportunityAndMultiHitTests;;SecondShot;да;да;да;механизм;нет;нет
+tag;passive.20261119.227;Два ближних удара;★;да;;OpportunityAndMultiHitTests;;SecondMeleeHit;да;да;да;механизм;нет;нет
+tag;passive.20261119.228;Связывающие корни;★;да;;CapabilityTagTests;;RootBindOnHit;да;да;да;механизм;нет;нет
+tag;passive.20261119.230;Старящий удар;★;да;;;;;да;да;да;дымовой;нет;нет
+tag;passive.20261119.232;Разъедающая слюна;★;да;;;;;да;да;да;дымовой;нет;нет
+tag;passive.20261119.235;Отнимает чародейский запас;;да;;;;MagicStealAtStart;да;да;да;дымовой;нет;нет
+tag;passive.20261119.236;Мёртвая тревога;★;да;;;;AuraEnemyDefense;да;да;да;дымовой;нет;нет
+tag;passive.20261119.242;Зловонная близость;★;да;;;;AuraEnemyAttack;да;да;да;дымовой;нет;нет
+tag;passive.20261119.244;Сопротивляется оружию;★;да;;;;IncomingFlat;да;да;да;дымовой;нет;нет
+tag;passive.20261119.247;Не вязнет в паутине;★;да;;;;Alias;да;да;да;дымовой;нет;нет
+tag;passive.20261119.249;Оппортунист;★;да;;NewSystemsAiPreviewTests OpportunityAndMultiHitTests;;LeaveAdjacencyStrike;да;да;да;механизм;нет;нет
+tag;passive.20261119.256;Живучий;★;да;;PassiveEngineTests;;CheatDeathOnce;да;да;да;механизм;нет;нет
+tag;passive.20261119.257;Разлетается осколками;★;да;;;;OnDeathDamage;да;да;да;дымовой;нет;нет
+tag;passive.20261119.260;Взрывоопасная гибель;★;да;;;;DelayedDeathBlast;да;да;да;дымовой;нет;нет
+tag;passive.20261119.261;Маскируется в движении;★;да;;;;IncomingAttackMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119.264;Отражающий покров;★;да;;CapabilityTagTests;;ReflectEvenRounds;да;да;да;механизм;нет;нет
+tag;passive.20261119.267;Второе дыхание;★;да;;;;BelowHalfOnce;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.008;Бьёт и отступает;★;да;;OpportunityAndMultiHitTests;;HitAndRun;да;да;да;механизм;нет;нет
+tag;passive.20261119b.010;Мстит за соседнего;★;да;;OpportunityAndMultiHitTests;;AvengeAdjacentAlly;да;да;да;механизм;нет;нет
+tag;passive.20261119b.016;Первый бросок из засады;★;да;;CapabilityTagTests;;AmbushFirstActivation OutgoingFlat;да;да;да;механизм;нет;нет
+tag;passive.20261119b.021;Порча ведёт клинок;★;да;;;;;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.024;Бережёт своих внутри чар;;да;;SupportAndTypedDamageTests;;AreaSpellSparesAllies;да;да;да;механизм;нет;нет
+tag;passive.20261119b.025;Жатва чужой жизни;;да;;;;OnKillHealSelf;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.026;Лекарь крепнет от помощи;★;да;;;;OnHealOther;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.027;Целебное напутствие;★;да;;;;OnHealOther;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.028;Перевязь с оберегом;★;да;;;;OnHealOther;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.029;Сила после исцеления;★;да;;;;OnHealOther;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.034;От удара стынет земля;★;да;;;;ColdHitRimeCell;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.035;Промораживает насквозь;★;да;;;;ColdHitMarkNext;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.036;Иней поверх слабости;★;да;;StatusReactionTagTests;;;да;да;да;механизм;нет;нет
+tag;passive.20261119b.038;Вода затягивает раны;★;да;;;;ActivationStartHeal;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.039;Заросли кормят тело;★;да;;CapabilityTagTests;;ActivationStartHeal;да;да;да;механизм;нет;нет
+tag;passive.20261119b.043;Оберег ближних чар;;да;;;;SpellCastSelfStatus;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.044;Копит грозовую искру;;да;;;;SparkCharge;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.045;Не бьёт током от воды;;да;;;;ElectricWaterImmune;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.046;Силовой покров разряжается;;да;;CapabilityTagTests;;ForceShell;да;да;да;механизм;нет;нет
+tag;passive.20261119b.047;Подступ к открытому врагу;★;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.057;Победа обращает в страх;★;да;;;;OnKillApplyStatusNearestEnemy;да;да;да;дымовой;нет;нет
+tag;passive.20261119b.064;Стреляет в слабое место;;да;;CapabilityTagTests;;OutgoingFlat;да;да;да;механизм;нет;нет
+tag;passive.20261119b.065;Кованый наконечник;★;да;;;;IgnoreDefense;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.001;Едкая смесь;★;да;;;;;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.002;Вытягивает отраву;★;да;;SupportAndTypedDamageTests;;OnHealOther;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.003;Противоядие наготове;;да;;StatusReactionTagTests;;StatusReaction:Attempt;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.004;Чистая перевязь;;да;;;;OnHealOther;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.005;Пьёт из открытой раны;;да;;;;StatusReaction:Tick;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.006;След крови;★;да;;StatusReactionTagTests;;StatusReaction:Applied;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.007;Затягивает рваные края;;да;;;;StatusExtraDamageReduceOnce;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.008;Копоть в глазах;★;да;;;;OnHitApplyStatus;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.009;Смолистый плевок;★;да;;;;OnHitApplyStatus;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.010;Сбивает пламя с товарища;;да;;;;AllyGuardExtinguish;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.011;Огонь будит ярость;★;да;;StatusReactionTagTests;;StatusReaction:Tick;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.012;Тепло под кольчугой;★;да;;;;ActivationStartStatusDecay;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.013;Лёд сковывает слабого;;да;;StatusReactionTagTests;;;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.014;Осколок освобождения;;да;;;;StatusReaction:Ended;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.015;Корни держат добычу;★;да;;;lozovy_khvatun;OutgoingFlat;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.016;Подрезает путы;★;да;;;;OnHealOther;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.017;Скользкая хватка;;да;;;;GrappleBreakOnce;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.018;Удерживает с усилием;;да;;;;HolderImmobilizedView;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.019;Не подпускает палача;★;да;;PassiveEngineTests;guard;AuraAllyGuardStrongControlled;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.020;Память о мороке;;да;;;;StatusReaction:Ended;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.021;Слышит родной голос;;да;;;;StatusReaction:Ended;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.022;Не спит стоя;;да;;;;StatusCancelOnce;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.023;Чуткий часовой;;да;;;;WakeAdjacentSleeper;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.024;Трудно устрашить повторно;★;да;;StatusReactionTagTests;;StatusReaction:Ended;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.025;Крепнет рядом с вожаком;★;да;;;;StatusReaction:Attempt;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.026;Охотится на паникующего;★;да;;;;;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.027;Не видит страшного;;да;;StatusReactionTagTests;;StatusReaction:Attempt;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.028;Страх ослабляет хватку;;да;;;;FearBreaksGrapple;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.029;Не ведётся на вызов;;да;;;;StatusCancelOnce;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.030;Вызов держит строй;★;да;;StatusReactionTagTests;;StatusReaction:Applied;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.031;Охотник на дурман;;да;;;;OutgoingFlat;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.032;Хвори мешают лечению;;да;;;;HealReceivedPenaltyWhileStatus;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.033;Чистит заразу отдыхом;★;да;;;;ActivationEndRestCleanse;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.034;Снимает тяжесть удара;;да;;;;BasePenaltyIgnoreOnce;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.035;Клинок находит метку;;да;;;;MarkConsumeOncePerAction;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.036;Метка не прячется;;да;;;;StatusReaction:Attempt;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.037;Запоминает сорванную добычу;;да;;;;StatusReaction:Ended;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.038;Оберег от приговора;;да;;StatusReactionTagTests;;DelayedTriggerReduceOnce;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.039;Сбивает отсчёт порчи;;да;;;;StatusReaction:Ended;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.040;Не кормит болевое эхо;;да;;;;PainEchoReduceOnce;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.041;Рвёт мучительную связь;★;да;;StatusReactionTagTests;;DrainLinkShortRange;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.042;Связь укрепляет стража;;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.043;Разрывает связь на исходе;;да;;;;SharedWoundsSurviveOnce;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.044;Зависть к чужому покрову;;да;;;;ShortenTargetBuffOnHit;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.045;Берегущий заговор;;да;;;;Policy;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.046;Зеркало не обманешь дважды;;да;;;;ReflectImmunityOnce;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.047;Заслон от пылающей кожи;;да;;StatusReactionTagTests;;RetortReduceOncePerRound;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.048;Щит любит ожидание;;да;;;;ShieldExtendIfWaited;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.049;Второе дыхание покрова;;да;;;;TempPoolExhaustedRegen;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.050;Обрывает чужую подпитку;;да;;;;ShortenTargetBuffOnHit;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.051;Жизнь не впрок;;да;;;;NoVampirismWhileStatus;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.052;Силу ран бережёт;;да;;;;WoundStrengthExtend;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.053;Кровожадность выдаёт;;да;;StatusReactionTagTests;;;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.054;Завершает бой хладнокровно;;да;;;;StatusReaction:Applied;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.055;Сдерживает удачу;;да;;StatusReactionTagTests;;StatusReaction:Attempt;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.056;Удача утешает;;да;;;;StatusReaction:Applied;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.057;Шаг вопреки слабости;;да;;StatusReactionTagTests;;StatusReaction:Attempt;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.058;Сбитый темп отрезвляет;;да;;;;StatusReaction:Attempt;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.059;Не уронит инициативу;;да;;;;StatusReaction:Attempt;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.060;Помощь возвращает шаг;;да;;;;SupportRefundMovement;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.061;Не бросает оружие от боли;;да;;;;StatusReaction:Attempt;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.062;Опора при контузии;;да;;;;RetaliationIgnoresStatus;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.063;Не даст захватить разум умирающего;;да;;;;StatusReaction:Attempt;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.064;Спасённый держится крепче;;да;;;;RescuedTemporaryPool;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.065;Выдавливает паразита;★;да;;StatusReactionTagTests;;StatusReaction:Ended;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.066;Носитель заразы слабеет;;да;;;;AttackMod;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.067;Не терпит чужих корней;;да;;;;RootsApplyStatusOnce;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.068;Очищение оставляет оберег;;да;;;;StatusReaction:Ended;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.069;Проклятие цепляется за ослабленного;;да;;;;StatusReaction:Applied;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.070;Обет держит удар;;да;;;;VowReduceWhileStatus;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.071;Цена чужого воодушевления;;да;;;;StatusReaction:Applied;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.072;Порча ищет прореху;;да;;;;StatusReaction:Applied;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.073;Точный ответ на ослепление;;да;;;;StatusReaction:Applied;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.074;Стойка удерживает силы;;да;;;;GuardStartShortenStatus;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.075;Собирается после встряски;;да;;;;StatusReaction:Ended;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.076;В оцепенении бережётся стрел;;да;;;;StatusReaction:Applied;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.077;Разгон разрывает кольцо;;да;;;;MomentumBreaksRing;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.078;Последняя искра надежды;;да;;;;StatusReaction:Attempt;да;да;да;дымовой;нет;нет
+tag;passive.status.20261120.079;Руки помнят выстрел;;да;;StatusReactionTagTests;;StatusReaction:Attempt;да;да;да;механизм;нет;нет
+tag;passive.status.20261120.080;Покров оставляет брешь;;да;;StatusReactionTagTests;;StatusReaction:Ended;да;да;да;механизм;нет;нет

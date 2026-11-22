@@ -38,6 +38,51 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
             preview.UpcomingTicks = UpcomingTickDamage(target);
+            // Этап 16: перехват защитником и спасение — видно до удара.
+            SandboxUnitState guard = PreviewInterceptor(attacker, target);
+            if (guard != target)
+                preview.Notes.Add("«Под защитой союзника»: удар примет " + guard.DisplayLabel + ".");
+            if (target.IsDying)
+                preview.Notes.Add("«При смерти»: удар — окончательная гибель.");
+        }
+
+        // Кто примет удар по цели (без изменения состояния).
+        public SandboxUnitState PreviewInterceptor(SandboxUnitState attacker, SandboxUnitState target)
+        {
+            if (attacker == null || target == null || attacker.Team == target.Team)
+                return target;
+            SandboxStatusInstance cover = target.statuses.FirstOrDefault(s => s.StatusId == GuardedId);
+            SandboxUnitState guardian = cover != null ? GetUnit(cover.SourceUnitId) : null;
+            return guardian != null && CanGuardNow(guardian, target) ? guardian : target;
+        }
+
+        // Кто ударит за выход из соседства на маршруте к клетке (предпросмотр пути и ИИ).
+        public IReadOnlyList<SandboxUnitState> LeaveReactorsOnPath(string unitId, HexCoord destination)
+        {
+            List<SandboxUnitState> result = new List<SandboxUnitState>();
+            SandboxUnitState mover = GetUnit(unitId);
+            if (mover == null || !SandboxMovementPath.TryBuild(this, unitId, destination, out IReadOnlyList<HexCoord> steps, out _))
+                return result;
+            for (int i = 1; i < steps.Count; i++)
+            {
+                foreach (SandboxUnitState reactor in units.Where(u => u.Team != mover.Team && u.Position.DistanceTo(steps[i - 1]) == 1 &&
+                                                                      u.Position.DistanceTo(steps[i]) > 1).OrderBy(u => u.Id, StringComparer.Ordinal))
+                {
+                    if (result.Contains(reactor) || !CanReact(reactor) || ReadyRule(reactor, SandboxPassiveKind.LeaveAdjacencyStrike) == null)
+                        continue;
+                    if (mover.passive.HitAndRunTargets.Contains(reactor.Id) && HasPassive(mover, SandboxPassiveKind.HitAndRun))
+                        continue;
+                    result.Add(reactor);
+                }
+            }
+            return result;
+        }
+
+        // Объект — кокон стороны противника (его стоит разбить до вылупления).
+        public bool IsEnemyCocoon(SandboxUnitState unit, string objectId)
+        {
+            SandboxBattleObject item = string.IsNullOrEmpty(objectId) ? null : GetObject(objectId);
+            return unit != null && item != null && !item.IsDestroyed && item.Kind == SandboxObjectKind.Cocoon && item.SnapshotTeam != unit.Team;
         }
 
         // Ожидаемый урон по HP без изменения состояния (щиты, неуязвимость,

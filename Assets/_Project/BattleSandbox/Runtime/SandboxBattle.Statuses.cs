@@ -1265,7 +1265,7 @@ namespace KingdomSurvival.BattleSandbox
         {
             List<SandboxStatusView> result = new List<SandboxStatusView>();
             SandboxUnitState unit = GetUnit(unitId);
-            if (unit == null || unit.IsDefeated)
+            if (unit == null || (unit.IsDefeated && !unit.IsDying))
                 return result;
             bool enemyView = viewer != unit.Team;
             if (enemyView && (unit.IsHidden || unit.IsUnderground || unit.AwaitingPlacement || unit.HasStatus(SandboxStatusCatalog.Invisible)))

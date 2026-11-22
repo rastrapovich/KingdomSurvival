@@ -490,8 +490,9 @@ namespace KingdomSurvival.BattleSandbox
                 // движения и действия; срок расходуется в конце.
                 unit.ActionPoints = 0;
                 unit.RemainingMovement = 0;
-                Log(unit.DisplayLabel + " пропускает ход: «" +
-                    unit.statuses.First(item => item.Definition.Has(SandboxStatusOpKind.SkipActivation)).Definition.Name + "».");
+                // Сдерживающее состояние могло истечь в этом же начале хода — имя берётся, если оно ещё есть.
+                SandboxStatusInstance skip = unit.statuses.FirstOrDefault(item => item.Definition.Has(SandboxStatusOpKind.SkipActivation));
+                Log(unit.DisplayLabel + " пропускает ход" + (skip != null ? ": «" + skip.Definition.Name + "»." : " (контроль)."));
                 return false;
             }
 

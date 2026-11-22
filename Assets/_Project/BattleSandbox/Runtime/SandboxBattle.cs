@@ -922,7 +922,8 @@ namespace KingdomSurvival.BattleSandbox
 
             SandboxUnitState attacker = GetUnit(attackerId);
             SandboxUnitState target = GetUnit(targetId);
-            if (attacker == null || target == null || attacker.IsDefeated || target.IsDefeated)
+            // Этап 11/16: лежащего «При смерти» можно добить обычным ударом.
+            if (attacker == null || target == null || attacker.IsDefeated || (target.IsDefeated && !target.IsDying))
                 return SandboxAttackPreview.Invalid("Цель недоступна.");
             if (CurrentUnit == null || CurrentUnit.Id != attackerId)
                 return SandboxAttackPreview.Invalid("Сейчас ход другого участника.");
@@ -1641,7 +1642,7 @@ namespace KingdomSurvival.BattleSandbox
             return !HasPendingRetaliation &&
                    Phase == SandboxBattlePhase.InProgress &&
                    attacker != null && target != null &&
-                   !attacker.IsDefeated && !target.IsDefeated &&
+                   !attacker.IsDefeated && (!target.IsDefeated || target.IsDying) &&
                    CurrentUnit != null && CurrentUnit.Id == attacker.Id &&
                    attacker.Team != target.Team &&
                    attacker.ActionPoints > 0 &&

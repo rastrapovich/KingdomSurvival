@@ -74,7 +74,10 @@ namespace KingdomSurvival.BattleSandbox
                 double score = context.Kind == SandboxContextActionKind.BreakFree || context.Kind == SandboxContextActionKind.RemoveParasite
                     ? 3.5
                     : context.Kind == SandboxContextActionKind.PullFree ? 3.0
-                    : context.Kind == SandboxContextActionKind.CleanseStatus ? battle.CleanseValue(context) : -1;
+                    : context.Kind == SandboxContextActionKind.CleanseStatus ? battle.CleanseValue(context)
+                    // Этап 16: спасти лежащего «При смерти» союзника, разбить кокон врага.
+                    : context.Kind == SandboxContextActionKind.Rescue ? 7.0
+                    : context.Kind == SandboxContextActionKind.AttackObject && battle.IsEnemyCocoon(unit, context.ObjectId) ? 4.0 : -1;
                 if (score > bestScore)
                 {
                     bestScore = score;
@@ -131,7 +134,7 @@ namespace KingdomSurvival.BattleSandbox
 
             // Сначала — цели с текущей позиции (прежнее правило).
             List<SandboxUnitState> inPlace = battle.Units
-                .Where(other => !other.IsDefeated && other.Team != unit.Team && battle.PreviewAttack(unit.Id, other.Id).IsValid)
+                .Where(other => (!other.IsDefeated || other.IsDying) && other.Team != unit.Team && battle.PreviewAttack(unit.Id, other.Id).IsValid)
                 .ToList();
             if (plain && inPlace.Count > 0)
             {
@@ -148,7 +151,7 @@ namespace KingdomSurvival.BattleSandbox
                 return null;
 
             SandboxUnitState best = null;
-            foreach (SandboxUnitState other in battle.Units.Where(item => !item.IsDefeated && item.Team != unit.Team &&
+            foreach (SandboxUnitState other in battle.Units.Where(item => (!item.IsDefeated || item.IsDying) && item.Team != unit.Team &&
                                                                           !item.IsUnderground && !item.AwaitingPlacement)
                          .OrderBy(item => item.Id, StringComparer.Ordinal))
             {
@@ -181,6 +184,12 @@ namespace KingdomSurvival.BattleSandbox
         private static double AttackValue(SandboxBattle battle, SandboxUnitState unit, SandboxUnitState target, HexCoord from, int damage)
         {
             double value = 1.0 + damage + (damage >= target.HitPoints ? 6 : 0) + (target.MaxHitPoints - target.HitPoints) * 0.05;
+            // Этап 16: удар по подопечному примет защитник — ценность ниже.
+            if (battle.PreviewInterceptor(unit, target) != target)
+                value -= 2;
+            // Добить лежащего «При смерти» врага, пока его не спасли.
+            if (target.IsDying)
+                value += 3;
             if (unit.HasTag(SandboxCombatTagRules.Pack))
             {
                 if (battle.HasPackBonus(unit, target, from))
@@ -273,7 +282,9 @@ namespace KingdomSurvival.BattleSandbox
                 // Под угрозой — отойти, оставив движение на выстрел.
                 HexCoord? retreat = battle.GetReachable(unit.Id)
                     .Where(pair => pair.Value < unit.RemainingMovement)
-                    .OrderByDescending(pair => NearestThreat(battle, unit, pair.Key))
+                    // Этап 16: маршрут без удара за выход из соседства — раньше.
+                    .OrderBy(pair => battle.LeaveReactorsOnPath(unit.Id, pair.Key).Count)
+                    .ThenByDescending(pair => NearestThreat(battle, unit, pair.Key))
                     .ThenBy(pair => pair.Value)
                     .ThenBy(pair => pair.Key)
                     .Select(pair => (HexCoord?)pair.Key)

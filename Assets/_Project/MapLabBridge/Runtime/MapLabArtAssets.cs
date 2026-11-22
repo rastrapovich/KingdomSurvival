@@ -158,7 +158,9 @@ namespace KingdomSurvival.MapLabBridge
                 // Фигуры бойцов на арене крупнее людей мест: мелочь (трава, камешки,
                 // бурьян) увеличивается, иначе рядом с ними теряется.
                 float boost = !arena || role == null ? 1f
-                    : role == MapLabDecorRole.LowGrass ? 2.2f
+                    // Увеличение мелочи — только мелким рисункам: низкие растения с высоким
+                    // холстом (модули травы, черника) остаются прежнего размера.
+                    : role == MapLabDecorRole.LowGrass ? (asset.Height < 0.75f ? 2.2f : 1.5f)
                     : role == MapLabDecorRole.SmallRock ? 2f
                     : role == MapLabDecorRole.TallPlant || role == MapLabDecorRole.TallGrass ? 1.5f : 1f;
                 // Размер по роли из «Генератора арен» (деревья, трава, бурьян).
@@ -296,6 +298,13 @@ namespace KingdomSurvival.MapLabBridge
         private static readonly HashSet<string> TallPlants = new HashSet<string>
             { "Reedgrass", "Fireweed", "Nettle", "Burdock", "Fern", "Cattail", "TallCattail", "Raspberry" };
         private static readonly HashSet<string> SmallRocks = new HashSet<string> { "SmallRock", "GroundCobble" };
+        // Низкие растения пакета арены: холст у них высокий (до 1,8 ед.), и по высоте
+        // они уходили в «бурьян у деревьев» — по одному у края группы, почти не видно.
+        // Это трава пятен и россыпи (роль «низкая трава»), приоритет — среди неё.
+        private static readonly HashSet<string> LowPlants = new HashSet<string>
+            { "LowGrassModule", "SparseLowGrass", "ThinSparseGrass", "GrassCarpet", "GrassShoots", "Plantain", "WildRosette", "Lingonberry", "Bilberry", "WildStrawberry" };
+        // Кочковатые злаки — высокая трава пятен, не бурьян.
+        private static readonly HashSet<string> TallGrasses = new HashSet<string> { "TuftedHairgrass" };
 
         // Вес выбора по приоритету 0–10 — квадрат: 0,1 → 0,01, 1 → 1, 10 → 100 (разрыв
         // между редким и главным в 10 000 раз). 1 у всех — равные шансы, как раньше.
@@ -388,6 +397,8 @@ namespace KingdomSurvival.MapLabBridge
                 {
                     if (string.IsNullOrEmpty(tag)) continue;
                     if (TallPlants.Contains(tag)) return MapLabDecorRole.TallPlant;
+                    if (LowPlants.Contains(tag)) return MapLabDecorRole.LowGrass;
+                    if (TallGrasses.Contains(tag)) return MapLabDecorRole.TallGrass;
                     if (SmallRocks.Contains(tag)) return MapLabDecorRole.SmallRock;
                 }
             float height = asset.Height;

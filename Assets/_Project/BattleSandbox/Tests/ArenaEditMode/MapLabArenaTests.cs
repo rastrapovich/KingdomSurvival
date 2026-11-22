@@ -219,6 +219,23 @@ namespace KingdomSurvival.BattleSandbox.Tests
             return null;
         }
 
+        // Роль рисунка — по тегам, а не по высоте холста: низкие растения пакета
+        // с высоким холстом (модуль низкой травы, побеги, черника) — трава пятен и
+        // россыпи, а не бурьян у групп деревьев (по одному на группу).
+        [Test]
+        public void LowPlantTags_AreLowGrass_NotWeeds()
+        {
+            KingdomSurvival.ArtAssets.ArtAssetDefinition Asset(string tag, float height) => new KingdomSurvival.ArtAssets.ArtAssetDefinition
+            {
+                Name = tag, Category = KingdomSurvival.ArtAssets.ArtAssetCategory.Vegetation,
+                Tags = new List<string> { "arena-pack-69", tag },
+            };
+            foreach (string tag in new[] { "LowGrassModule", "SparseLowGrass", "ThinSparseGrass", "GrassCarpet", "GrassShoots", "Bilberry", "WildStrawberry" })
+                Assert.That(MapLabArtAssets.RoleOf(Asset(tag, 1.5f)), Is.EqualTo(MapLabDecorRole.LowGrass), tag);
+            Assert.That(MapLabArtAssets.RoleOf(Asset("TuftedHairgrass", 0.87f)), Is.EqualTo(MapLabDecorRole.TallGrass));
+            Assert.That(MapLabArtAssets.RoleOf(Asset("Nettle", 1.3f)), Is.EqualTo(MapLabDecorRole.TallPlant));
+        }
+
         // Приоритет ковра — общий для пучков и контурной травы: единственный пучок
         // с приоритетом 0,1 рядом с контурными приоритета 1 почти не встречается
         // (прежде он забирал всю «не контурную» долю ковра).

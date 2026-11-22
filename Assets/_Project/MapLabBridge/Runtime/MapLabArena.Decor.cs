@@ -285,10 +285,10 @@ namespace KingdomSurvival.MapLabBridge
                             continue;
                         if ((look.GrassClearOfStart > 0f && Near(keep, q, hex * look.GrassClearOfStart)) || Near(blocked, q, hex * 0.75f) || OnRiver(q) || Crowded(q, art.HalfWidth * 0.35f, look.GrassSpacing))
                             continue;
-                        if (art.Role == MapLabDecorRole.TallGrass && Covers(q, art.Height, art.HalfWidth, hex * 0.9f))
+                        if (Standing(art) && Covers(q, art.Height, art.HalfWidth, hex * 0.9f))
                             continue;
                         Add(q, art.Id, art.HalfWidth * 0.35f);
-                        if (art.Role != MapLabDecorRole.TallGrass)
+                        if (!Standing(art))
                             groundArtIds.Add(art.Id);
                         grassPoints.Add(q); c.DryOnlyFeatures.Add(art.Id);
                     }
@@ -321,10 +321,10 @@ namespace KingdomSurvival.MapLabBridge
                             continue;
                         if ((look.GrassClearOfStart > 0f && Near(keep, q, hex * look.GrassClearOfStart)) || Near(blocked, q, hex * 0.75f) || OnRiver(q) || Crowded(q, art.HalfWidth * 0.35f, look.GrassSpacing))
                             continue;
-                        if (art.Role == MapLabDecorRole.TallGrass && Covers(q, art.Height, art.HalfWidth, hex * 0.9f))
+                        if (Standing(art) && Covers(q, art.Height, art.HalfWidth, hex * 0.9f))
                             continue;
                         Add(q, art.Id, art.HalfWidth * 0.35f);
-                        if (art.Role != MapLabDecorRole.TallGrass)
+                        if (!Standing(art))
                             groundArtIds.Add(art.Id);
                         grassPoints.Add(q); c.DryOnlyFeatures.Add(art.Id);
                     }
@@ -465,12 +465,21 @@ namespace KingdomSurvival.MapLabBridge
                         grassPoints.Add(q); c.DryOnlyFeatures.Add(tallArt.Id);
                         return;
                     }
+                    // Низкое растение с рисунком выше гекса — как высокая трава: мимо клеток, в слое объектов.
+                    if (Standing(art) && OverField(q, art))
+                        return;
                     c.Features.Add((q, art.Id, DecorKind));
-                    groundArtIds.Add(art.Id);
+                    if (!Standing(art))
+                        groundArtIds.Add(art.Id);
                     DecorFeatures++;
                     grassPoints.Add(q); c.DryOnlyFeatures.Add(art.Id);
                 });
         }
+
+        // Стоящее растение: высокая трава или любой рисунок травы выше 0,8 гекса
+        // (модули низкой травы пакета арены с высоким холстом). Не ложится на клетки
+        // поля и не уходит в «пол» под сеткой — иначе закрывал бы бойцов и клетки.
+        private bool Standing(MapLabDecorArt art) => art.Role == MapLabDecorRole.TallGrass || art.Height > Spec.HexWorld * 0.8f;
 
         // Рисунок ковра: один общий жребий по приоритету записей (пучки и контурная
         // трава вместе). Доля контурных — множитель веса (0,5 — поровну при равном

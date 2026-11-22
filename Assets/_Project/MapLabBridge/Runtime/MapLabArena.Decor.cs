@@ -283,7 +283,7 @@ namespace KingdomSurvival.MapLabBridge
                         // Травинка по своей густоте относительно центра пятна.
                         if (lot >= Mathf.Clamp01(zone.Density(q) / Mathf.Max(0.05f, centerDensity)))
                             continue;
-                        if ((look.GrassClearOfStart > 0f && Near(keep, q, hex * look.GrassClearOfStart)) || Near(blocked, q, hex * 0.75f) || Crowded(q, art.HalfWidth * 0.35f, look.GrassSpacing))
+                        if ((look.GrassClearOfStart > 0f && Near(keep, q, hex * look.GrassClearOfStart)) || Near(blocked, q, hex * 0.75f) || OnRiver(q) || Crowded(q, art.HalfWidth * 0.35f, look.GrassSpacing))
                             continue;
                         if (art.Role == MapLabDecorRole.TallGrass && Covers(q, art.Height, art.HalfWidth, hex * 0.9f))
                             continue;
@@ -319,7 +319,7 @@ namespace KingdomSurvival.MapLabBridge
                             art = MapLabArtAssets.Pick(tallGrass, rng.Value());
                         if (!zone.Accept(q))
                             continue;
-                        if ((look.GrassClearOfStart > 0f && Near(keep, q, hex * look.GrassClearOfStart)) || Near(blocked, q, hex * 0.75f) || Crowded(q, art.HalfWidth * 0.35f, look.GrassSpacing))
+                        if ((look.GrassClearOfStart > 0f && Near(keep, q, hex * look.GrassClearOfStart)) || Near(blocked, q, hex * 0.75f) || OnRiver(q) || Crowded(q, art.HalfWidth * 0.35f, look.GrassSpacing))
                             continue;
                         if (art.Role == MapLabDecorRole.TallGrass && Covers(q, art.Height, art.HalfWidth, hex * 0.9f))
                             continue;
@@ -368,6 +368,8 @@ namespace KingdomSurvival.MapLabBridge
 
             bool Clear(Vector2 q)
             {
+                if (OnRiver(q))
+                    return false;
                 foreach (Vector2 point in blocked)
                     if (Vector2.Distance(point, q) < hex * 0.6f)
                         return false;
@@ -528,6 +530,16 @@ namespace KingdomSurvival.MapLabBridge
         }
 
         // Приоритет 0 — рисунок в этой роли не берётся.
+        // Точка на воде реки (клетки русла, броды, мост): трава не растёт — только камыш MapLab.
+        private bool OnRiver(Vector2 q)
+        {
+            float reach = Spec.HexWorld * 0.95f;
+            foreach (Vector2 cell in riverWorld)
+                if (Vector2.Distance(cell, q) < reach)
+                    return true;
+            return false;
+        }
+
         private List<MapLabDecorArt> Role(MapLabDecorRole role) => decorArt.FindAll(art => art.Role == role && art.Priority > 0f);
     }
 }

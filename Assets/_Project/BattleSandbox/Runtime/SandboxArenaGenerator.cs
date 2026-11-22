@@ -612,21 +612,23 @@ namespace KingdomSurvival.BattleSandbox
             List<HexCoord> far = river.Where(c => c.R <= 1 || c.R >= 5).ToList();
             // Широкое русло переходится только всем рядом: брод и мост — на ряд.
             List<HexCoord> RowOf(HexCoord cell) => wide ? river.Where(c => c.R == cell.R).ToList() : new List<HexCoord> { cell };
-            if (bridge)
-            {
-                HexCoord deck = middle[b.Rng.Next(middle.Count)];
-                foreach (HexCoord cell in RowOf(deck))
-                    b.ObjectOver(SandboxObjectKind.Bridge, cell);
-            }
-            else
+            // Мост через реку — всегда (и у «Берега и брода», где к нему добавлены броды).
+            HexCoord deck = middle[b.Rng.Next(middle.Count)];
+            foreach (HexCoord cell in RowOf(deck))
+                b.ObjectOver(SandboxObjectKind.Bridge, cell);
+            if (!bridge)
             {
                 int fords = Math.Max(1, Math.Min(3, b.Settings.FordCount));
-                HexCoord shortFord = middle[b.Rng.Next(middle.Count)];
+                List<HexCoord> shortPool = middle.Where(c => c.R != deck.R).ToList();
+                if (shortPool.Count == 0) shortPool = middle;
+                HexCoord shortFord = shortPool[b.Rng.Next(shortPool.Count)];
                 foreach (HexCoord cell in RowOf(shortFord))
                     b.Ground(cell, SandboxGround.ShallowWater);
                 if (fords >= 2)
                 {
-                    HexCoord farFord = far[b.Rng.Next(far.Count)];
+                    HexCoord farFord = far[0];
+                    List<HexCoord> farPool = far.Where(c => c.R != deck.R).ToList();
+                    if (farPool.Count > 0) farFord = farPool[b.Rng.Next(farPool.Count)];
                     foreach (HexCoord cell in RowOf(farFord))
                         b.Ground(cell, SandboxGround.ShallowWater);
                     foreach (HexCoord cell in farFord.Neighbors().Where(river.Contains).Take(b.Simple ? 0 : 1))

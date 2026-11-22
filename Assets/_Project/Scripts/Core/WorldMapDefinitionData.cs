@@ -35,6 +35,10 @@ public sealed class WorldMapDefinitionData
     // 12У-H: линии дорог и троп (как нарисованы) — путь героя по дорожным
     // клеткам идёт по самой линии, а не наискось по центрам клеток.
     [NonSerialized] public List<List<MapPointData>> RoadLines = new List<List<MapPointData>>();
+    // 22.11.2026: пролёты мостов и бродов плана — парами точек «берег →
+    // берег» (GeneratedWorldMap.BridgeSpans). Реку герой переходит только по
+    // пролёту, а не наискось по клетке переправы.
+    [NonSerialized] public List<MapPointData> BridgeSpans = new List<MapPointData>();
     public List<WorldMapSpawnSlotDefinition> SpawnSlots = new List<WorldMapSpawnSlotDefinition>();
 
     public bool IsValid =>

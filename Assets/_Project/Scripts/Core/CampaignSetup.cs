@@ -55,7 +55,7 @@ public sealed class CampaignMapOptions
         float relief = Level(Relief, 0.4f, 1.8f);
         p.HillsShare *= relief;
         p.MountainsShare *= relief;
-        p.CliffsShare *= Level(Relief, 0.5f, 1.5f);
+        p.LedgeCount = (int)Math.Round(p.LedgeCount * Level(Relief, 0.5f, 1.5f));
         p.LakesShare *= Level(Water, 0.35f, 2f);
         p.RiverCount = (int)Math.Round(p.RiverCount * Level(Water, 0.34f, 1.67f));
         p.ForestShare *= Level(Forest, 0.3f, 1.9f);

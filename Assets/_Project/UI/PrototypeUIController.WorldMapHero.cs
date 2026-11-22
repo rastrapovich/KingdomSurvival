@@ -1,4 +1,5 @@
 using KingdomSurvival.AnimationDatabase;
+using KingdomSurvival.MapLabBridge;
 using KingdomSurvival.WorldMapVisual;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -565,7 +566,12 @@ public partial class PrototypeUIController
         Color color = settings != null ? settings.ClickMarkerColor : new Color(0.96f, 0.88f, 0.62f, 0.9f);
         color.a *= 1f - t;
 
-        Vector2 position = MapPercentToWorldMapViewport(worldMapClickMarkerXPercent, worldMapClickMarkerYPercent);
+        // На живой карте отметка лежит на нарисованной земле (со сдвигом высоты).
+        MapLabGameLive.World liveWorld = MapLabGameLive.Current;
+        float markerShift = worldMapMapLab != null && liveWorld != null && liveWorld.Ready
+            ? MapLabGameLive.ElevationShiftPercent(liveWorld, worldMapClickMarkerXPercent, worldMapClickMarkerYPercent)
+            : 0f;
+        Vector2 position = MapPercentToWorldMapViewport(worldMapClickMarkerXPercent, worldMapClickMarkerYPercent + markerShift);
         worldMapClickMarker.style.display = DisplayStyle.Flex;
         worldMapClickMarker.style.width = size;
         worldMapClickMarker.style.height = size * 0.5f;

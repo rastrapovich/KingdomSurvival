@@ -60,7 +60,7 @@ namespace KingdomSurvival.MapLabBridge.Editor
             float relief = MapLabAuthor.Factor(a.Relief, 0.4f, 1.8f);
             p.HillsShare = d.HillsShare * relief;
             p.MountainsShare = d.MountainsShare * relief;
-            p.CliffsShare = d.CliffsShare * MapLabAuthor.Factor(a.Relief, 0.5f, 1.5f);
+            p.LedgeCount = Mathf.RoundToInt(d.LedgeCount * MapLabAuthor.Factor(a.Relief, 0.5f, 1.5f));
             p.LakesShare = d.LakesShare * MapLabAuthor.Factor(a.Water, 0.35f, 2f);
             p.RiverCount = Mathf.RoundToInt(d.RiverCount * MapLabAuthor.Factor(a.Water, 0.34f, 1.67f));
             p.ForestShare = d.ForestShare * MapLabAuthor.Factor(a.Forest, 0.3f, 1.9f);
@@ -95,7 +95,7 @@ namespace KingdomSurvival.MapLabBridge.Editor
             target.RegionKind = p.RegionKind;
             target.HillsShare = p.HillsShare;
             target.MountainsShare = p.MountainsShare;
-            target.CliffsShare = p.CliffsShare;
+            target.LedgeCount = p.LedgeCount;
             target.LakesShare = p.LakesShare;
             target.RiverCount = p.RiverCount;
             target.ForestShare = p.ForestShare;

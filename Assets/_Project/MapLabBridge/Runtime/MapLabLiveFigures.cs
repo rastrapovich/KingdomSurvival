@@ -43,7 +43,7 @@ namespace KingdomSurvival.MapLabBridge
                 figures[key] = f = Create(w, key);
             float x = w.Play.xMin + navPercent.x / 100f * w.Play.width;
             float z = w.Play.yMax - navPercent.y / 100f * w.Play.height;
-            float y = w.View.Data.SampleHeight(x, z);
+            float y = MapLabGameLive.GroundHeight(w, x, z);
             f.Root.SetActive(true);
             f.Card.position = new Vector3(x, y + lift, z);
             f.Shadow.position = new Vector3(x, y + 0.04f, z);

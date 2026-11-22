@@ -775,12 +775,20 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 Slider("Хребты", S.MountainRidges, 0, 1, v => S.MountainRidges = v, true, "0 — округлые возвышенности, 1 — вытянутые гряды");
                 Slider("Доля холмов", S.HillsShare, 0, 0.6f, v => S.HillsShare = v, true);
                 Slider("Доля гор", S.MountainsShare, 0, 0.3f, v => S.MountainsShare = v, true);
-                Slider("Скалы среди гор", S.CliffsShare, 0, 1, v => S.CliffsShare = v, true, "Самые крутые горы становятся непроходимыми скалами");
+                IntSlider("Уступы, штук", S.LedgeCount, 0, 12, v => S.LedgeCount = v, true);
+                IntSlider("Длина уступа, мин., клеток", S.LedgeMinLengthHexes, 4, 30, v => S.LedgeMinLengthHexes = v, true);
+                IntSlider("Длина уступа, макс., клеток", S.LedgeMaxLengthHexes, 4, 40, v => S.LedgeMaxLengthHexes = v, true);
+                Slider("Проходимые концы, клеток", S.LedgeEndHexes, 1, 4, v => S.LedgeEndHexes = v, true, "Столько клеток у каждого конца обрыва — травяной склон, проход наверх");
+                IntSlider("Просвет между уступами", S.LedgeSpacingHexes, 2, 12, v => S.LedgeSpacingHexes = v, true);
+                IntSlider("Проход посередине от длины", S.LedgeGapMinLengthHexes, 0, 40, v => S.LedgeGapMinLengthHexes = v, true);
+                Slider("Наименьший перепад высоты", S.LedgeMinDrop, 0, 0.3f, v => S.LedgeMinDrop = v, true);
             }, () =>
             {
                 WorldMapGenerationSettings d = WorldMapGenerationSettings.CreateDefault();
                 S.ReliefScaleHexes = d.ReliefScaleHexes; S.ReliefDetail = d.ReliefDetail; S.ReliefRoughness = d.ReliefRoughness;
-                S.MountainRidges = d.MountainRidges; S.HillsShare = d.HillsShare; S.MountainsShare = d.MountainsShare; S.CliffsShare = d.CliffsShare;
+                S.MountainRidges = d.MountainRidges; S.HillsShare = d.HillsShare; S.MountainsShare = d.MountainsShare;
+                S.LedgeCount = d.LedgeCount; S.LedgeMinLengthHexes = d.LedgeMinLengthHexes; S.LedgeMaxLengthHexes = d.LedgeMaxLengthHexes; S.LedgeEndHexes = d.LedgeEndHexes;
+                S.LedgeSpacingHexes = d.LedgeSpacingHexes; S.LedgeGapMinLengthHexes = d.LedgeGapMinLengthHexes; S.LedgeMinDrop = d.LedgeMinDrop;
             });
         }
 

@@ -141,7 +141,24 @@ public sealed class WorldMapGenerationSettings
     public float MountainRidges = 0.45f;
     public float HillsShare = 0.16f;
     public float MountainsShare = 0.05f;
+    // Устарело (оставлено для совместимости ассета и сохранений): разбросанные
+    // «скалы среди гор» больше не создаются — препятствия рельефа — уступы.
     public float CliffsShare = 0.2f;
+
+    // Уступы: дуга скального обрыва по границе возвышенности. Снизу не зайти и
+    // сверху не спрыгнуть — только обойти там, где обрыв сходит в склон.
+    // Рабочие числа, не канон.
+    public int LedgeCount = 2;
+    public int LedgeMinLengthHexes = 8;
+    public int LedgeMaxLengthHexes = 16;
+    // Проходимые концы: ближе этого к концу линии клетки не скалы.
+    public float LedgeEndHexes = 1.5f;
+    // Минимальный просвет до других уступов, стартовой площадки и края.
+    public int LedgeSpacingHexes = 5;
+    // Уступ не короче этого получает проход посередине (0 — без проходов).
+    public int LedgeGapMinLengthHexes = 13;
+    // Наименьший перепад высоты поперёк линии (0..1 нормированной высоты).
+    public float LedgeMinDrop = 0.03f;
 
     // Вода.
     public float LakesShare = 0.025f;
@@ -416,6 +433,13 @@ public sealed class WorldMapGenerationSettings
         HillsShare = Clamp(HillsShare, 0f, 0.8f);
         MountainsShare = Clamp(MountainsShare, 0f, 0.5f);
         CliffsShare = Clamp(CliffsShare, 0f, 1f);
+        LedgeCount = Math.Max(0, Math.Min(24, LedgeCount));
+        LedgeMinLengthHexes = Math.Max(4, Math.Min(60, LedgeMinLengthHexes));
+        LedgeMaxLengthHexes = Math.Max(LedgeMinLengthHexes, Math.Min(80, LedgeMaxLengthHexes));
+        LedgeEndHexes = Clamp(LedgeEndHexes, 1f, 4f);
+        LedgeSpacingHexes = Math.Max(2, Math.Min(20, LedgeSpacingHexes));
+        LedgeGapMinLengthHexes = Math.Max(0, Math.Min(80, LedgeGapMinLengthHexes));
+        LedgeMinDrop = Clamp(LedgeMinDrop, 0f, 0.5f);
         LakesShare = Clamp(LakesShare, 0f, 0.3f);
         RiverCount = Math.Max(0, Math.Min(24, RiverCount));
         RiverMinLengthHexes = Math.Max(2, Math.Min(400, RiverMinLengthHexes));
@@ -479,6 +503,19 @@ public sealed class WorldMapGenerationSettings
 
 // Река, дорога или тропа: клетки разметки и сглаженная линия для рисунка.
 // Ширина задаётся в клетках пути и растёт от истока к устью.
+// Уступ: линия обрыва (проценты холста, y вниз) и клетки-скалы вдоль неё.
+// Плато — слева по ходу линии, как её видит игрок на экране карты (при
+// UpperSide = -1 — справа). Концы линии длиннее цепочки Cliffs на
+// LedgeEndHexes клеток: там обрыв сходит в травяной склон — проход наверх.
+[Serializable]
+public sealed class GeneratedMapLedge
+{
+    public List<MapPointData> Points = new List<MapPointData>();
+    public List<int> Cells = new List<int>();
+    public float UpperSide = 1f;
+    public float HeightScale = 1f;
+}
+
 [Serializable]
 public sealed class GeneratedMapLine
 {
@@ -601,6 +638,9 @@ public sealed class GeneratedWorldMap
     // последняя клетка суши перед водой и первая за ней на пути дороги.
     // Пусто у карт, созданных раньше, — рисунок тогда по-старому.
     public List<MapPointData> BridgeSpans = new List<MapPointData>();
+    // Уступы: дуги скального обрыва (клетки Cliffs лежат вдоль линии). Пусто у
+    // карт, созданных раньше: тогда клетки Cliffs рисуются горами.
+    public List<GeneratedMapLedge> Ledges = new List<GeneratedMapLedge>();
     public List<GeneratedSpawnSlot> SpawnSlots = new List<GeneratedSpawnSlot>();
 
     // 12У-D: структура региона. Пусто у карт, созданных раньше.
@@ -654,6 +694,10 @@ public sealed class GeneratedWorldMap
             foreach (GeneratedMapLine line in Roads)
                 if (line?.Points != null && line.Points.Count >= 2)
                     data.RoadLines.Add(new List<MapPointData>(line.Points));
+        if (BridgeSpans != null)
+            foreach (MapPointData point in BridgeSpans)
+                if (point != null)
+                    data.BridgeSpans.Add(new MapPointData(point.XPercent, point.YPercent));
 
         if (SpawnSlots != null)
         {

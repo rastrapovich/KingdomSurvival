@@ -184,7 +184,7 @@ public static class WorldMapRegionKinds
             case WorldMapRegionKind.HillAndLedge:
                 s.HillsShare = Math.Min(0.5f, s.HillsShare * 1.6f * J(0.2f));
                 s.MountainsShare = Math.Min(0.25f, s.MountainsShare * 1.6f * J(0.3f));
-                s.CliffsShare = Math.Min(1f, s.CliffsShare * 1.5f);
+                s.LedgeCount = Math.Min(24, s.LedgeCount + 2);
                 s.MountainRidges = Math.Min(1f, s.MountainRidges + 0.15f);
                 s.RiverCount = Math.Max(1, s.RiverCount - random.Next(0, 2));
                 s.ForestOnHills = Math.Min(1f, s.ForestOnHills * J(0.3f));

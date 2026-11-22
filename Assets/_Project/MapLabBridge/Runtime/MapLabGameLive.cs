@@ -5,6 +5,7 @@ using KingdomSurvival.MapLab;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
+using BridgeData = KingdomSurvival.MapLab.MapLabBridge;
 using Object = UnityEngine.Object;
 
 namespace KingdomSurvival.MapLabBridge
@@ -33,6 +34,9 @@ namespace KingdomSurvival.MapLabBridge
             public MapLabSettings Settings;
             public Rect Play;
             public float Mean, Pitch, Sin, Cos;
+            // Наибольший сдвиг рисунка по высоте, % полотна (с запасом): окно
+            // поиска точки земли под курсором.
+            public float MaxShiftPercent = 12f;
             public RenderTexture Target;
             public string Error = string.Empty;
             public double BuildMs;
@@ -128,6 +132,7 @@ namespace KingdomSurvival.MapLabBridge
         public static void Clear()
         {
             WorldMapObstacles.Clear();
+            WorldMapBridges.Clear();
             MapLabLiveFigures.ClearAll();
             if (current == null)
                 return;
@@ -273,11 +278,19 @@ namespace KingdomSurvival.MapLabBridge
                 w.Pitch = Mathf.Clamp(w.Assets.PitchDegrees, 20f, 80f);
                 w.Sin = Mathf.Sin(w.Pitch * Mathf.Deg2Rad);
                 w.Cos = Mathf.Cos(w.Pitch * Mathf.Deg2Rad);
-                float mean = 0f;
+                float mean = 0f, lowest = float.MaxValue, highest = float.MinValue;
                 for (int i = 0; i < 16; i++)
                     for (int j = 0; j < 16; j++)
-                        mean += data.SampleHeight(w.Play.xMin + (i + 0.5f) / 16f * w.Play.width, w.Play.yMin + (j + 0.5f) / 16f * w.Play.height);
+                    {
+                        float sample = data.SampleHeight(w.Play.xMin + (i + 0.5f) / 16f * w.Play.width, w.Play.yMin + (j + 0.5f) / 16f * w.Play.height);
+                        mean += sample;
+                        lowest = Mathf.Min(lowest, sample);
+                        highest = Mathf.Max(highest, sample);
+                    }
                 w.Mean = mean / 256f;
+                // Запас на уступы и настилы мостов, которых редкая сетка не видит.
+                float maxOffset = Mathf.Max(highest - w.Mean, w.Mean - lowest) * 1.3f + 4f;
+                w.MaxShiftPercent = Mathf.Max(2f, maxOffset * w.Cos / (w.Play.height * w.Sin) * 100f);
                 w.Paper = view.Palette.Paper;
                 w.Camera.backgroundColor = w.Paper;
                 foreach (MapLabServiceBuilding b in data.ServiceBuildings)
@@ -318,6 +331,7 @@ namespace KingdomSurvival.MapLabBridge
                     w.Features.Add((pair.Key, union, pair.Value));
                 }
                 WorldMapObstacles.Set(Obstacles(w, data));
+                WorldMapBridges.Set(BridgeSpans(w, data));
                 mapObject.SetActive(true);
             }
             w.BuildMs = w.Watch.Elapsed.TotalMilliseconds;
@@ -403,6 +417,47 @@ namespace KingdomSurvival.MapLabBridge
             return list;
         }
 
+        // Настоящие мосты рисунка → ядро (проценты карты пути): путь через
+        // реку идёт только по настилу.
+        private static List<WorldMapBridgeSpan> BridgeSpans(World w, MapLabData data)
+        {
+            List<WorldMapBridgeSpan> list = new List<WorldMapBridgeSpan>(data.Bridges.Count);
+            foreach (BridgeData b in data.Bridges)
+            {
+                Vector2 a = NavPercent(w, b.EndA.x, b.EndA.y);
+                Vector2 e = NavPercent(w, b.EndB.x, b.EndB.y);
+                list.Add(new WorldMapBridgeSpan(a.x, a.y, e.x, e.y, b.Width / w.Play.width * 100f));
+            }
+            return list;
+        }
+
+        // Высота опоры фигуры в точке мира: на настиле моста — настил (не ниже
+        // земли), иначе земля. Переход у краёв плавный: фигура не прыгает.
+        public static float GroundHeight(World w, float x, float z)
+        {
+            MapLabData data = w.View.Data;
+            float ground = data.SampleHeight(x, z);
+            List<BridgeData> bridges = data.Bridges;
+            for (int i = 0; i < bridges.Count; i++)
+            {
+                BridgeData b = bridges[i];
+                Vector2 ab = b.EndB - b.EndA;
+                float length = ab.magnitude;
+                if (length < 1e-3f || b.DeckHeight <= ground)
+                    continue;
+                Vector2 axis = ab / length;
+                Vector2 rel = new Vector2(x, z) - b.EndA;
+                float along = Vector2.Dot(rel, axis);
+                float across = Mathf.Abs(rel.x * axis.y - rel.y * axis.x);
+                float beyond = Mathf.Max(-along, along - length, 0f);
+                float half = b.Width * 0.5f + 0.3f;
+                float weight = (1f - Mathf.Clamp01((across - half) / 1f)) * (1f - Mathf.Clamp01(beyond / 1.5f));
+                if (weight > 0f)
+                    ground += (b.DeckHeight - ground) * weight;
+            }
+            return ground;
+        }
+
         // Точка земли → проценты карты пути (без сдвига рисунка по высоте):
         // в этих координатах ходят герой и группы.
         public static Vector2 NavPercent(World w, float x, float z) =>
@@ -423,8 +478,48 @@ namespace KingdomSurvival.MapLabBridge
                 return 0f;
             float x = w.Play.xMin + xPercent / 100f * w.Play.width;
             float z = w.Play.yMax - yPercent / 100f * w.Play.height;
-            float h = w.View.Data.SampleHeight(x, z);
+            float h = GroundHeight(w, x, z);
             return -(h - w.Mean) * w.Cos / (w.Play.height * w.Sin) * 100f;
+        }
+
+        // Экранная точка (x, y экрана — проценты полотна) → точка земли в
+        // процентах карты пути: y + сдвиг(x, y) = yЭкрана. Корней может быть
+        // несколько (уступы) — берётся ближайший к камере, то есть с большим y.
+        public static float GroundYFromScreenY(World w, float xPercent, float screenYPercent)
+        {
+            if (w == null || !w.Ready)
+                return screenYPercent;
+            return SolveGroundY(y => y + ElevationShiftPercent(w, xPercent, y), screenYPercent, w.MaxShiftPercent, 0.25f);
+        }
+
+        // Наибольший y из окна [цель − запас; цель + запас], где экранный y
+        // точки земли (screenOf) равен целевому; сдвиг может быть разрывным.
+        public static float SolveGroundY(Func<float, float> screenOf, float targetY, float maxShift, float step)
+        {
+            float hi = targetY + maxShift;
+            if (screenOf(hi) - targetY <= 0f)
+                return hi;
+            int count = Mathf.Max(1, Mathf.CeilToInt(2f * maxShift / Mathf.Max(0.01f, step)));
+            float previous = hi;
+            for (int i = 1; i <= count; i++)
+            {
+                float y = hi - 2f * maxShift * i / count;
+                if (screenOf(y) - targetY <= 0f)
+                {
+                    float above = previous, below = y;
+                    for (int k = 0; k < 16; k++)
+                    {
+                        float mid = (above + below) * 0.5f;
+                        if (screenOf(mid) - targetY > 0f)
+                            above = mid;
+                        else
+                            below = mid;
+                    }
+                    return (above + below) * 0.5f;
+                }
+                previous = y;
+            }
+            return targetY - (screenOf(targetY) - targetY);
         }
 
         // Нарисовать видимую часть: visible — видимый прямоугольник полотна в

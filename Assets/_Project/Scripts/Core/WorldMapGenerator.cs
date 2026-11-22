@@ -214,14 +214,10 @@ public static partial class WorldMapGenerator
                     terrain[i] = OpenGround;
             }
 
-            // Скалы — самые крутые горные клетки.
-            if (mountainCells.Count > 0 && settings.CliffsShare > 0f)
-            {
-                mountainCells.Sort((a, b) => Slope(b).CompareTo(Slope(a)));
-                int cliffs = (int)Math.Round(mountainCells.Count * settings.CliffsShare);
-                for (int i = 0; i < cliffs && i < mountainCells.Count; i++)
-                    terrain[mountainCells[i]] = Cliffs;
-            }
+            // Препятствия рельефа — уступы (дуги обрыва с проходами у концов);
+            // разбросанные «скалы среди гор» (CliffsShare) больше не создаются:
+            // их нельзя было увидеть на карте, а пройти нельзя.
+            BuildLedges();
         }
 
         private float Slope(int cell)
@@ -248,7 +244,7 @@ public static partial class WorldMapGenerator
             bool[] eligible = new bool[count];
             for (int i = 0; i < count; i++)
             {
-                eligible[i] = !protectedStart[i] && terrain[i] == OpenGround;
+                eligible[i] = !protectedStart[i] && terrain[i] == OpenGround && !ledgeNoLake[i];
                 grid.CellCenter(grid.CellAt(i), out double x, out double y);
                 lakeScore[i] = (float)((1.0 - elevation[i]) * 0.65 + (lakeNoise.Fbm(x / lakeScale, y / lakeScale, 3, 0.5) * 0.5 + 0.5) * 0.35);
             }

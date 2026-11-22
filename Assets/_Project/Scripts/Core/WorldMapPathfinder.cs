@@ -8,6 +8,9 @@ using System.Collections.Generic;
 // промежуточные точки, если прямой отрезок проходим и не дороже.
 // Результат — точки в пикселях полотна; первая — точный старт.
 // preferCheapTerrain = false — прямой путь героя без поиска выгоды.
+// crossings (22.11.2026) — переправы через реки: их клетки непроходимы для
+// обычных шагов, а переход идёт только по ребру «вход → выход» пролёта.
+// null — прежнее поведение.
 public static class WorldMapPathfinder
 {
     public readonly struct PathPoint
@@ -35,10 +38,13 @@ public static class WorldMapPathfinder
         double targetX,
         double targetY,
         out bool reachedTarget,
-        bool preferCheapTerrain = true)
+        bool preferCheapTerrain = true,
+        WorldMapCrossings crossings = null)
     {
         bool previous = uniformCost;
+        WorldMapCrossings previousCrossings = activeCrossings;
         uniformCost = !preferCheapTerrain;
+        activeCrossings = crossings != null && crossings.Count > 0 ? crossings : null;
         try
         {
             return FindPathCore(layer, rules, startX, startY, targetX, targetY, out reachedTarget);
@@ -46,6 +52,34 @@ public static class WorldMapPathfinder
         finally
         {
             uniformCost = previous;
+            activeCrossings = previousCrossings;
+        }
+    }
+
+    // Проходим ли отрезок (без клеток переправы, кроме старта) — для
+    // постобработки маршрута у мостов.
+    public static bool IsSegmentClear(
+        WorldMapTerrainLayer layer,
+        WorldMapMovementRules rules,
+        WorldMapCrossings crossings,
+        double ax,
+        double ay,
+        double bx,
+        double by,
+        double startX,
+        double startY)
+    {
+        layer = layer ?? WorldMapTerrainLayer.CreateDefault();
+        rules = rules ?? WorldMapMovementRules.Current;
+        WorldMapCrossings previous = activeCrossings;
+        activeCrossings = crossings != null && crossings.Count > 0 ? crossings : null;
+        try
+        {
+            return IsStraightLineClear(layer, rules, ax, ay, bx, by, layer.Grid.CellAtPixel(startX, startY));
+        }
+        finally
+        {
+            activeCrossings = previous;
         }
     }
 
@@ -53,6 +87,7 @@ public static class WorldMapPathfinder
     // все проходимые клетки стоят одинаково. Прямая до цели берётся без
     // поиска, иначе — геометрически кратчайший обход непроходимого.
     [ThreadStatic] private static bool uniformCost;
+    [ThreadStatic] private static WorldMapCrossings activeCrossings;
 
     private static List<PathPoint> FindPathCore(
         WorldMapTerrainLayer layer,
@@ -187,6 +222,26 @@ public static class WorldMapPathfinder
                 parent[nextIndex] = current;
                 open.Push(nextIndex, candidate + next.DistanceTo(target) * minCost);
             }
+
+            // Пролёты переправ: вход ↔ выход, цена — длина пролёта в клетках
+            // на цену дороги (в прямом пути — просто длина).
+            List<WorldMapCrossings.Edge> jumps = activeCrossings?.EdgesFrom(current);
+            if (jumps != null)
+            {
+                foreach (WorldMapCrossings.Edge jump in jumps)
+                {
+                    WorldMapHexCell next = grid.CellAt(jump.To);
+                    if (closed[jump.To] || !IsPassable(layer, rules, next, start))
+                        continue;
+                    double hexes = cell.DistanceTo(next);
+                    double candidate = g[current] + hexes * (uniformCost ? 1.0 : rules.PathCost(WorldMapGameplayTerrainType.Road));
+                    if (candidate >= g[jump.To])
+                        continue;
+                    g[jump.To] = candidate;
+                    parent[jump.To] = current;
+                    open.Push(jump.To, candidate + next.DistanceTo(target) * minCost);
+                }
+            }
         }
 
         int end = closed[targetIndex] && targetPassable ? targetIndex : best;
@@ -209,8 +264,15 @@ public static class WorldMapPathfinder
             return raw;
 
         double[] prefix = new double[raw.Count];
+        // Шаги по пролёту переправы сглаживание не трогает: считаем их
+        // отдельно и не даём срезать углы через них.
+        int[] spanSteps = new int[raw.Count];
         for (int i = 1; i < raw.Count; i++)
-            prefix[i] = prefix[i - 1] + SegmentCost(layer, rules, raw[i - 1], raw[i], start, out _);
+        {
+            bool jump = IsSpanStep(layer.Grid, raw[i - 1], raw[i]);
+            spanSteps[i] = spanSteps[i - 1] + (jump ? 1 : 0);
+            prefix[i] = prefix[i - 1] + (jump ? 0.0 : SegmentCost(layer, rules, raw[i - 1], raw[i], start, out _));
+        }
 
         List<PathPoint> result = new List<PathPoint> { raw[0] };
         int anchor = 0;
@@ -219,7 +281,7 @@ public static class WorldMapPathfinder
             int next = anchor + 1;
             // Сначала самая дальняя точка (частый случай — открытое поле),
             // затем жадно вперёд от якоря.
-            if (CanShortcut(layer, rules, raw, prefix, anchor, raw.Count - 1, start))
+            if (CanShortcut(layer, rules, raw, prefix, spanSteps, anchor, raw.Count - 1, start))
             {
                 next = raw.Count - 1;
             }
@@ -227,7 +289,7 @@ public static class WorldMapPathfinder
             {
                 for (int j = anchor + 2; j < raw.Count - 1; j++)
                 {
-                    if (!CanShortcut(layer, rules, raw, prefix, anchor, j, start))
+                    if (!CanShortcut(layer, rules, raw, prefix, spanSteps, anchor, j, start))
                         break;
                     next = j;
                 }
@@ -243,12 +305,25 @@ public static class WorldMapPathfinder
         WorldMapMovementRules rules,
         List<PathPoint> raw,
         double[] prefix,
+        int[] spanSteps,
         int from,
         int to,
         WorldMapHexCell start)
     {
+        if (spanSteps[to] != spanSteps[from])
+            return false;
         double cost = SegmentCost(layer, rules, raw[from], raw[to], start, out bool clear);
         return clear && cost <= (prefix[to] - prefix[from]) * SmoothingCostTolerance + 1e-9;
+    }
+
+    private static bool IsSpanStep(WorldMapHexGrid grid, PathPoint a, PathPoint b)
+    {
+        return activeCrossings != null &&
+            activeCrossings.TryGetSpan(
+                grid.IndexOf(grid.CellAtPixel(a.X, a.Y)),
+                grid.IndexOf(grid.CellAtPixel(b.X, b.Y)),
+                out _,
+                out _);
     }
 
     // Цена отрезка в клетках с учётом местности; clear = все клетки проходимы.
@@ -307,7 +382,13 @@ public static class WorldMapPathfinder
         WorldMapHexCell cell,
         WorldMapHexCell start)
     {
-        return cell.Equals(start) || rules.IsTraversable(layer.Get(cell));
+        if (cell.Equals(start))
+            return true;
+        if (!rules.IsTraversable(layer.Get(cell)))
+            return false;
+        // Клетки переправы — только по пролёту; со старта на мосту — свободно.
+        return activeCrossings == null ||
+            !activeCrossings.IsBlocked(layer.Grid.IndexOf(cell), layer.Grid.IndexOf(start));
     }
 
     private static double CellCost(WorldMapTerrainLayer layer, WorldMapMovementRules rules, WorldMapHexCell cell)

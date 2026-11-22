@@ -130,15 +130,49 @@ namespace KingdomSurvival.MapLabBridge
             // Холмы и горы: по клетке — пологий холм; соседние сливаются в гряду.
             // Широкие и низкие: иначе каждая клетка — крутой бугорок, и уклон
             // красится камнем посреди луга (серые пятна); горы остаются круче.
+            // Клетки Cliffs непроходимы и должны быть видны: на линии уступа их
+            // рисует обрыв (ниже), прочие — у карт, созданных до уступов, —
+            // горой.
+            HashSet<int> ledgeCells = new HashSet<int>();
+            if (plan.Ledges != null)
+                foreach (GeneratedMapLedge ledge in plan.Ledges)
+                    if (ledge?.Cells != null)
+                        foreach (int cell in ledge.Cells)
+                            ledgeCells.Add(cell);
             for (int i = 0; i < grid.CellCount; i++)
             {
                 WorldMapGameplayTerrainType t = terrain.Get(grid.CellAt(i));
-                if (t != WorldMapGameplayTerrainType.Hills && t != WorldMapGameplayTerrainType.Mountains)
+                bool strayCliff = t == WorldMapGameplayTerrainType.Cliffs && !ledgeCells.Contains(i);
+                if (t != WorldMapGameplayTerrainType.Hills && t != WorldMapGameplayTerrainType.Mountains && !strayCliff)
                     continue;
                 grid.CellCenter(grid.CellAt(i), out double px, out double py);
                 Vector2 w = m.ToWorld(grid.PixelToPercentX(px), (float)(py / grid.CanvasHeight * 100.0));
-                bool mountain = t == WorldMapGameplayTerrainType.Mountains;
+                bool mountain = t != WorldMapGameplayTerrainType.Hills;
                 c.Hills.Add(new MapLabComposition.Hill { Center = w, Radius = Vector2.one * hexWorld * (mountain ? 1.9f : 2.0f), Height = mountain ? 0.5f : 0.17f });
+            }
+
+            // Уступы: линия плана → обрыв MapLab. Концы линии MapLab сводит в
+            // травяной склон на первых и последних 22 ед. — это проходимые
+            // клетки плана (LedgeEndHexes). Плато — слева по ходу линии на
+            // экране; мир MapLab (x вправо, z вглубь) сохраняет эту сторону.
+            if (plan.Ledges != null && plan.Ledges.Count > 0)
+            {
+                if (settings.Cliffs.CliffHeight < 1f)
+                    settings.Cliffs.CliffHeight = 7f;
+                foreach (GeneratedMapLedge ledge in plan.Ledges)
+                {
+                    if (ledge?.Points == null || ledge.Points.Count < 2)
+                        continue;
+                    MapLabComposition.Cliff cliff = new MapLabComposition.Cliff
+                    {
+                        HeightScale = ledge.HeightScale > 0f ? ledge.HeightScale : 1f,
+                        UpperSide = ledge.UpperSide >= 0f ? 1f : -1f,
+                        PlateauWidth = hexWorld * 2.5f,
+                    };
+                    foreach (MapPointData p in ledge.Points)
+                        cliff.Control.Add(m.ToWorld(p.XPercent, p.YPercent));
+                    c.Cliffs.Add(cliff);
+                }
             }
 
             // Озёра: связные клетки озёр — одно озеро из долей по клеткам.

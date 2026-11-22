@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using KingdomSurvival.MapLabBridge;
 using KingdomSurvival.WorldMapVisual;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -181,9 +182,16 @@ public partial class PrototypeUIController
         Vector2 local = worldMap.WorldToLocal(panelPosition);
         float width = Math.Max(1f, worldMap.resolvedStyle.width);
         float height = Math.Max(1f, worldMap.resolvedStyle.height);
+        float xPercent = local.x / width * 100f;
+        float yPercent = local.y / height * 100f;
+        // Живая карта рисует землю со сдвигом по высоте рельефа: точка под
+        // курсором — та, что нарисована в этом пикселе, а не на средней высоте.
+        MapLabGameLive.World world = MapLabGameLive.Current;
+        if (worldMapMapLab != null && world != null && world.Ready)
+            yPercent = MapLabGameLive.GroundYFromScreenY(world, WorldMapNavigation.ClampMapX(xPercent), yPercent);
         return new Vector2(
-            WorldMapNavigation.ClampMapX(local.x / width * 100f),
-            WorldMapNavigation.ClampMapY(local.y / height * 100f));
+            WorldMapNavigation.ClampMapX(xPercent),
+            WorldMapNavigation.ClampMapY(yPercent));
     }
 
     // silent — пересчёт пути при зажатой кнопке: без донесений и без

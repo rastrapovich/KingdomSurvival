@@ -117,15 +117,23 @@ public static class WorldMapNavigation
         if (grid.DistanceHexes(startXPercent, startYPercent, targetX, targetY) <= 0.0001)
             return route;
 
+        WorldMapMovementRules rules = WorldMapMovementRules.Current;
+        WorldMapCrossings crossings = ActiveCrossings;
         List<WorldMapPathfinder.PathPoint> points = WorldMapPathfinder.FindPath(
             layer,
-            WorldMapMovementRules.Current,
+            rules,
             grid.PercentToPixelX(startXPercent),
             grid.PercentToPixelY(startYPercent),
             grid.PercentToPixelX(targetX),
             grid.PercentToPixelY(targetY),
             out _,
-            preferProfitable);
+            preferProfitable,
+            crossings);
+
+        // Переправы: участок «вход → выход» — по настилу моста.
+        List<int> decks = null;
+        if (crossings != null)
+            points = ApplyDecks(points, crossings, layer, rules, out decks);
 
         for (int i = 1; i < points.Count; i++)
         {
@@ -138,10 +146,167 @@ public static class WorldMapNavigation
             grid.DistanceHexes(route[0].XPercent, route[0].YPercent, route[1].XPercent, route[1].YPercent) <= 0.0001)
         {
             route.RemoveAt(1);
+            decks = null;
         }
-        // 12У-H: основания построек и предметов мест обходятся.
-        List<MapPointData> shaped = preferProfitable ? FollowRoads(route, layer, grid) : route;
+        // 12У-H: основания построек и предметов мест обходятся. Точки
+        // настила и всё между ними остаются на месте: подгонка идёт по
+        // участкам до и после мостов.
+        if (decks == null || decks.Count == 0)
+            return ShapeRoute(route, preferProfitable, layer, grid, crossings);
+
+        List<MapPointData> result = new List<MapPointData>();
+        int from = 0;
+        foreach (int deck in decks)
+        {
+            result.AddRange(ShapeRoute(route.GetRange(from, deck + 1 - from), preferProfitable, layer, grid, crossings));
+            from = deck + 1;
+        }
+        result.AddRange(ShapeRoute(route.GetRange(from, route.Count - from), preferProfitable, layer, grid, crossings));
+        return result;
+    }
+
+    private static List<MapPointData> ShapeRoute(
+        List<MapPointData> route,
+        bool preferProfitable,
+        WorldMapTerrainLayer layer,
+        WorldMapHexGrid grid,
+        WorldMapCrossings crossings)
+    {
+        List<MapPointData> shaped = preferProfitable ? FollowRoads(route, layer, grid, crossings) : route;
         return WorldMapObstacles.Avoid(shaped, IsTraversableAtPercent);
+    }
+
+    // Переправы активного определения; строятся один раз на определение карты
+    // (FindPath зовётся часто и для всех групп мира).
+    private static WorldMapCrossings cachedCrossings;
+    private static WorldMapDefinitionData crossingsDefinition;
+    private static WorldMapTerrainLayer crossingsLayer;
+    private static int crossingsSpanPoints = -1;
+
+    public static WorldMapCrossings ActiveCrossings
+    {
+        get
+        {
+            WorldMapDefinitionData definition = activeDefinition;
+            WorldMapTerrainLayer layer = ActiveLayer;
+            if (definition == null || definition.BridgeSpans == null || definition.BridgeSpans.Count < 2)
+                return null;
+            if (!ReferenceEquals(crossingsDefinition, definition) ||
+                !ReferenceEquals(crossingsLayer, layer) ||
+                crossingsSpanPoints != definition.BridgeSpans.Count)
+            {
+                crossingsDefinition = definition;
+                crossingsLayer = layer;
+                crossingsSpanPoints = definition.BridgeSpans.Count;
+                cachedCrossings = new WorldMapCrossings(layer, definition.BridgeSpans);
+            }
+            return cachedCrossings.Count > 0 ? cachedCrossings : null;
+        }
+    }
+
+    // Настоящий мост рисунка рядом с пролётом плана (середины не дальше
+    // полутора клеток) задаёт концы настила; иначе — концы пролёта плана.
+    private const double DeckMatchHexes = 1.5;
+
+    private static void DeckEnds(
+        WorldMapHexGrid grid,
+        WorldMapCrossings.Span span,
+        out WorldMapPathfinder.PathPoint entry,
+        out WorldMapPathfinder.PathPoint exit)
+    {
+        entry = new WorldMapPathfinder.PathPoint(span.AX, span.AY);
+        exit = new WorldMapPathfinder.PathPoint(span.BX, span.BY);
+        double midX = (span.AX + span.BX) * 0.5, midY = (span.AY + span.BY) * 0.5;
+        double best = DeckMatchHexes * grid.HexWidth;
+        IReadOnlyList<WorldMapBridgeSpan> bridges = WorldMapBridges.Items;
+        for (int i = 0; i < bridges.Count; i++)
+        {
+            WorldMapBridgeSpan bridge = bridges[i];
+            double ax = grid.PercentToPixelX(bridge.AXPercent), ay = grid.PercentToPixelY(bridge.AYPercent);
+            double bx = grid.PercentToPixelX(bridge.BXPercent), by = grid.PercentToPixelY(bridge.BYPercent);
+            double distance = Math.Sqrt(Math.Pow((ax + bx) * 0.5 - midX, 2) + Math.Pow((ay + by) * 0.5 - midY, 2));
+            if (distance > best)
+                continue;
+            best = distance;
+            // Концы моста — в порядке концов пролёта плана.
+            double straight = Math.Pow(ax - span.AX, 2) + Math.Pow(ay - span.AY, 2) + Math.Pow(bx - span.BX, 2) + Math.Pow(by - span.BY, 2);
+            double crossed = Math.Pow(bx - span.AX, 2) + Math.Pow(by - span.AY, 2) + Math.Pow(ax - span.BX, 2) + Math.Pow(ay - span.BY, 2);
+            if (straight <= crossed)
+            {
+                entry = new WorldMapPathfinder.PathPoint(ax, ay);
+                exit = new WorldMapPathfinder.PathPoint(bx, by);
+            }
+            else
+            {
+                entry = new WorldMapPathfinder.PathPoint(bx, by);
+                exit = new WorldMapPathfinder.PathPoint(ax, ay);
+            }
+        }
+    }
+
+    // Пары соседних точек пути, лежащие в концах пролёта, заменяются концами
+    // настила; центры клеток входа и выхода убираются, если от соседней
+    // точки до конца настила проходимо. deckStarts — индексы первых точек
+    // настила в результате (за ними сразу идёт вторая точка).
+    private static List<WorldMapPathfinder.PathPoint> ApplyDecks(
+        List<WorldMapPathfinder.PathPoint> points,
+        WorldMapCrossings crossings,
+        WorldMapTerrainLayer layer,
+        WorldMapMovementRules rules,
+        out List<int> deckStarts)
+    {
+        deckStarts = new List<int>();
+        WorldMapHexGrid grid = layer.Grid;
+        int n = points.Count;
+        bool any = false;
+        for (int i = 0; i + 1 < n && !any; i++)
+            any = crossings.TryGetSpan(
+                grid.IndexOf(grid.CellAtPixel(points[i].X, points[i].Y)),
+                grid.IndexOf(grid.CellAtPixel(points[i + 1].X, points[i + 1].Y)),
+                out _,
+                out _);
+        if (!any)
+            return points;
+
+        double startX = points[0].X, startY = points[0].Y;
+        bool Clear(WorldMapPathfinder.PathPoint a, WorldMapPathfinder.PathPoint b) =>
+            WorldMapPathfinder.IsSegmentClear(layer, rules, crossings, a.X, a.Y, b.X, b.Y, startX, startY);
+
+        List<WorldMapPathfinder.PathPoint> result = new List<WorldMapPathfinder.PathPoint>(n + 2);
+        bool afterSpan = false;
+        int index = 0;
+        while (index < n)
+        {
+            WorldMapPathfinder.PathPoint point = points[index];
+            if (index < n - 1 && crossings.TryGetSpan(
+                    grid.IndexOf(grid.CellAtPixel(point.X, point.Y)),
+                    grid.IndexOf(grid.CellAtPixel(points[index + 1].X, points[index + 1].Y)),
+                    out int spanIndex,
+                    out bool forward))
+            {
+                DeckEnds(grid, crossings.Spans[spanIndex], out WorldMapPathfinder.PathPoint a, out WorldMapPathfinder.PathPoint b);
+                WorldMapPathfinder.PathPoint first = forward ? a : b;
+                WorldMapPathfinder.PathPoint second = forward ? b : a;
+                if (index == 0 || !Clear(result[result.Count - 1], first))
+                    result.Add(point);
+                deckStarts.Add(result.Count);
+                result.Add(first);
+                result.Add(second);
+                afterSpan = true;
+                index++;
+                continue;
+            }
+            if (afterSpan && index < n - 1 && Clear(result[result.Count - 1], points[index + 1]))
+            {
+                afterSpan = false;
+                index++;
+                continue;
+            }
+            afterSpan = false;
+            result.Add(point);
+            index++;
+        }
+        return result;
     }
 
     // Взаимодействие только вплотную (22.11.2026): здание, место, группа,
@@ -175,6 +340,18 @@ public static class WorldMapNavigation
             WorldMapHexGrid grid = Grid;
             return grid.CellAtPercent(heroXPercent, heroYPercent).DistanceTo(grid.CellAtPercent(targetXPercent, targetYPercent)) <= 1;
         }
+
+        // Цель на мосту: путь выводит героя к ближайшему берегу — оттуда и засчитывается.
+        WorldMapCrossings crossings = ActiveCrossings;
+        if (crossings != null)
+        {
+            WorldMapHexGrid grid = Grid;
+            WorldMapHexCell targetCell = grid.CellAtPercent(targetXPercent, targetYPercent);
+            int targetIndex = grid.IndexOf(targetCell);
+            if (crossings.IsBlockedCell(targetIndex))
+                return grid.CellAtPercent(heroXPercent, heroYPercent).DistanceTo(targetCell) <=
+                    Math.Max(1, crossings.DistanceToNearestEnd(targetIndex));
+        }
         return false;
     }
 
@@ -185,7 +362,11 @@ public static class WorldMapNavigation
     private const double RoadSnapHexes = 0.75;
     private const double RoadStepHexes = 0.25;
 
-    private static List<MapPointData> FollowRoads(List<MapPointData> route, WorldMapTerrainLayer layer, WorldMapHexGrid grid)
+    private static List<MapPointData> FollowRoads(
+        List<MapPointData> route,
+        WorldMapTerrainLayer layer,
+        WorldMapHexGrid grid,
+        WorldMapCrossings crossings = null)
     {
         List<List<MapPointData>> lines = activeDefinition?.RoadLines;
         if (lines == null || lines.Count == 0 || route.Count < 2)
@@ -210,7 +391,8 @@ public static class WorldMapNavigation
                 float y = a.YPercent + (b.YPercent - a.YPercent) * t;
                 bool last = i == route.Count - 1 && s == steps;
                 if (!last && OnRoad(x, y) && NearestOnRoads(lines, grid, x, y, out float sx, out float sy)
-                    && rules.IsTraversable(layer.GetAtPercent(sx, sy)))
+                    && rules.IsTraversable(layer.GetAtPercent(sx, sy))
+                    && (crossings == null || !crossings.IsBlockedAtPercent(sx, sy)))
                 {
                     x = sx;
                     y = sy;

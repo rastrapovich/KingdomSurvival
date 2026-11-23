@@ -47,6 +47,10 @@ namespace KingdomSurvival.LocationRendering.Editor
         public LocationFrameSection Sections = LocationFrameSection.All;
         // Примечание над вкладками (что из разделов не действует).
         public string DirectNote;
+        // Прямая правка арены: где видны фигуры бойцов (вкладка «Персонажи») и
+        // кнопка перехода туда (null — фигуры есть на предпросмотре этого окна).
+        public string CharactersNote;
+        public Action OpenCharactersPreview;
 
         private bool Direct => DirectPost != null;
 
@@ -183,8 +187,14 @@ namespace KingdomSurvival.LocationRendering.Editor
                 case LocationFrameSection.LightLens: BuildLightLens(post); break;
                 case LocationFrameSection.Tone: BuildTone(post); BuildToneExtra(post); break;
                 case LocationFrameSection.Canvas: BuildCanvas(post); BuildCanvasExtra(post); break;
-                case LocationFrameSection.Sprites: BuildSprites(post); break;
-                case LocationFrameSection.Atmosphere: BuildAir(post); BuildAtmosphere(post); break;
+                case LocationFrameSection.Sprites:
+                    if (Direct) BuildArenaSprites(post);
+                    else BuildSprites(post);
+                    break;
+                case LocationFrameSection.Atmosphere:
+                    if (Direct) BuildArenaAtmosphere(post);
+                    else { BuildAir(post); BuildAtmosphere(post); }
+                    break;
                 case LocationFrameSection.Game: BuildGame(post); break;
                 case LocationFrameSection.Characters: BuildCharacters(post); break;
                 default: BuildQuality(post); BuildQualityLevel(); BuildCost(post); break;
@@ -781,21 +791,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             LocationSpriteEffects s = post.Sprites;
             LocationSpriteEffects fresh = new LocationSpriteEffects();
             Help("Эффекты общего шейдера рисунков: предметы, раскидка, люди. Включение и выключение ветра, обводки, дальнего плана и растворения пересобирает предпросмотр.");
-            Group("Ветер", "Wind", s.Wind, value => s.Wind = value, () =>
-            {
-                Help("Качает деревья и растительность (категории Базы ассетов) и ковёр раскидки; частицы атмосферы сносит туда же.");
-                Slider("Размах (ед. мира)", s.WindStrength, 0, .5f, value => s.WindStrength = value);
-                Slider("Скорость", s.WindSpeed, 0, 5, value => s.WindSpeed = value);
-                Slider("Порывы", s.WindGusts, 0, 1, value => s.WindGusts = value);
-                Slider("Высота полного размаха (ед. мира)", s.WindHeight, .2f, 10, value => s.WindHeight = value, "Ниже — качается меньше: у земли ствол стоит.");
-                Slider("Направление (− запад, + восток, 0 — качание)", s.WindDirection, -1, 1, value => s.WindDirection = value);
-                Slider("Деревья (доля)", s.WindTrees, 0, 2, value => s.WindTrees = value);
-                Slider("Растительность и трава (доля)", s.WindPlants, 0, 2, value => s.WindPlants = value);
-            }, () =>
-            {
-                s.WindStrength = fresh.WindStrength; s.WindSpeed = fresh.WindSpeed; s.WindGusts = fresh.WindGusts; s.WindHeight = fresh.WindHeight;
-                s.WindDirection = fresh.WindDirection; s.WindTrees = fresh.WindTrees; s.WindPlants = fresh.WindPlants;
-            });
+            BuildWind(s, "Качает деревья и растительность (категории Базы ассетов) и ковёр раскидки; частицы атмосферы сносит туда же.");
             Group("Обводка", "Outline", s.Outline, value => s.Outline = value, () =>
             {
                 Help("Тонкий край по контуру рисунка, изнутри (рисунок не растёт). Сводит рисунки разных художников к одной манере.");
@@ -841,6 +837,46 @@ namespace KingdomSurvival.LocationRendering.Editor
             });
         }
 
+        // Ветер рисунков: деревья и растительность качаются (места и арена).
+        private void BuildWind(LocationSpriteEffects s, string help)
+        {
+            LocationSpriteEffects fresh = new LocationSpriteEffects();
+            Group("Ветер", "Wind", s.Wind, value => s.Wind = value, () =>
+            {
+                Help(help);
+                Slider("Размах (ед. мира)", s.WindStrength, 0, .5f, value => s.WindStrength = value);
+                Slider("Скорость", s.WindSpeed, 0, 5, value => s.WindSpeed = value);
+                Slider("Порывы", s.WindGusts, 0, 1, value => s.WindGusts = value);
+                Slider("Высота полного размаха (ед. мира)", s.WindHeight, .2f, 10, value => s.WindHeight = value, "Ниже — качается меньше: у земли ствол стоит.");
+                Slider("Направление (− запад, + восток, 0 — качание)", s.WindDirection, -1, 1, value => s.WindDirection = value);
+                Slider("Деревья (доля)", s.WindTrees, 0, 2, value => s.WindTrees = value);
+                Slider("Растительность и трава (доля)", s.WindPlants, 0, 2, value => s.WindPlants = value);
+            }, () =>
+            {
+                s.WindStrength = fresh.WindStrength; s.WindSpeed = fresh.WindSpeed; s.WindGusts = fresh.WindGusts; s.WindHeight = fresh.WindHeight;
+                s.WindDirection = fresh.WindDirection; s.WindTrees = fresh.WindTrees; s.WindPlants = fresh.WindPlants;
+            });
+        }
+
+        // «Рисунки» на арене: ветер качает деревья, кусты, тростник и траву
+        // рисунка арены MapLab. Обводка, дальний план, подсветка огнём и
+        // растворение — эффекты шейдера рисунков мест, у арены их нет.
+        private void BuildArenaSprites(LocationPostEffects post)
+        {
+            BuildWind(post.Sprites, "Качает деревья, кусты, тростник и траву арены: основание стоит, верх ходит; соседние деревья — вразнобой, порывы проходят волной. " +
+                                    "Камни, постройки и фигуры не качаются. Размах и высота — в единицах мира мест (на арене пересчитываются по масштабу рисунков). " +
+                                    "Направление ветра ведёт и тени облаков вкладки «Атмосфера».");
+            Help("Обводка, дальний план, подсветка контура огнём и растворение при гибели — эффекты рисунков мест; на арене их нет.");
+        }
+
+        // «Атмосфера» на арене: тени облаков и лучи (проход «Холста»). Марева
+        // нет — у арены нет огней; частицы — свойства мира места.
+        private void BuildArenaAtmosphere(LocationPostEffects post)
+        {
+            BuildAir(post, false);
+            Help("Частицы (пыль, мошкара, дождь, листья, искры, пар) и марево над огнём — свойства мира места: у арены их пока нет.");
+        }
+
         // ------------------------------------------------------------------
         // Персонажи
         // ------------------------------------------------------------------
@@ -858,8 +894,17 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void BuildCharacters(LocationPostEffects post)
         {
             LocationCharacterEffects characters = post.Characters;
-            Help("Цвет существ на месте и в бою на месте — поверх рисунка, до света: подогнать рисунки разных художников под кадр. " +
-                 "Итог — общая поправка, затем своя у типа. Видно сразу на поле; сохраняется в стилях (раздел «Персонажи»).");
+            if (Direct)
+            {
+                Help("Цвет фигур бойцов на арене боя — подкраска × яркость поверх рисунка: подогнать рисунки разных художников под кадр. " +
+                     "Итог — общая поправка, затем своя у типа; сохраняется в стилях (раздел «Персонажи»).");
+                if (!string.IsNullOrEmpty(CharactersNote)) Help(CharactersNote);
+                if (OpenCharactersPreview != null)
+                    Buttons(("Открыть предпросмотр с бойцами ↗", OpenCharactersPreview, "Генератор арен → «Обработка кадра»: арена с фигурами бойцов"));
+            }
+            else
+                Help("Цвет существ на месте и в бою на месте — поверх рисунка, до света: подогнать рисунки разных художников под кадр. " +
+                     "Итог — общая поправка, затем своя у типа. Видно сразу на поле; сохраняется в стилях (раздел «Персонажи»).");
             if (ShowsCreatures)
             {
                 List<int> modes = new List<int> { 0, 1, 2 };
@@ -916,7 +961,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             };
             search.RegisterValueChangedCallback(evt => { CreatureQuery = evt.newValue; Rebuild?.Invoke(); });
             parent.Add(view);
-            Help("● — у существа своя поправка. Выбранное видно на поле: окно «Обработка кадра», «Показ на поле».");
+            Help(Direct ? "● — у существа своя поправка." : "● — у существа своя поправка. Выбранное видно на поле: окно «Обработка кадра», «Показ на поле».");
             parent = keep;
 
             if (selected == null) return;
@@ -1075,7 +1120,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             }, () => { canvas.FilmDust = fresh.FilmDust; canvas.FilmScratches = fresh.FilmScratches; canvas.FilmFlicker = fresh.FilmFlicker; });
         }
 
-        private void BuildAir(LocationPostEffects post)
+        private void BuildAir(LocationPostEffects post, bool heatHaze = true)
         {
             LocationAirEffects air = post.Air;
             LocationAirEffects fresh = new LocationAirEffects();
@@ -1108,6 +1153,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 air.RaysFollowSun = true; air.RaysAngle = fresh.RaysAngle; air.RaysIntensity = fresh.RaysIntensity; air.RaysColor = fresh.RaysColor;
                 air.RaysWidth = fresh.RaysWidth; air.RaysDensity = fresh.RaysDensity; air.RaysSpeed = fresh.RaysSpeed;
             });
+            if (!heatHaze) return;
             Group("Марево над огнём", "HeatHaze", air.HeatHaze, value => air.HeatHaze = value, () =>
             {
                 Help("Воздух дрожит над источниками света с «мерцанием» (костры, факелы). Только на высоком качестве.");

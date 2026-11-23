@@ -9,7 +9,8 @@ namespace KingdomSurvival.LocationRendering
     // места считает LocationWorldRenderer, — часы эффектов, удар (всплеск
     // линзы, вспышка, тряска), здоровье вождя (красные края), полосы и
     // затемнение. Источник прохода «Холста» для камеры арены. Арена — день и
-    // улица; огней и ветра рисунков у неё нет.
+    // улица; огней у неё нет. Ветер рисунков качает деревья в шейдере карточек
+    // (MapLabArena), здесь он ведёт тени облаков и требует перерисовки кадра.
     public sealed class ArenaFrameState : ILocationCanvasSource
     {
         private readonly float started = Time.realtimeSinceStartup;
@@ -96,6 +97,7 @@ namespace KingdomSurvival.LocationRendering
         {
             LocationPostEffects post = Post ?? new LocationPostEffects();
             LocationGameEffects game = post.Game;
+            LocationSpriteEffects sprites = post.Sprites;
             float threshold = Mathf.Max(.01f, game.LowHealthThreshold);
             float health = Mathf.Clamp01(LeaderHealth?.Invoke() ?? 1f);
             return new LocationFrameRuntime
@@ -104,7 +106,8 @@ namespace KingdomSurvival.LocationRendering
                 DayFactor = 1f,
                 Outdoor = true,
                 Sun = new Vector2(.6f, -.35f),
-                Wind = Vector2.zero,
+                // Ветер раздела «Рисунки» ведёт тени облаков (как в мире места).
+                Wind = sprites != null && sprites.Wind ? new Vector2(Mathf.Clamp(sprites.WindDirection, -1, 1), 0) : Vector2.zero,
                 Fires = noFires,
                 FireShare = .5f,
                 LowHealth = Mathf.Clamp01((threshold - health) / threshold),
@@ -125,7 +128,8 @@ namespace KingdomSurvival.LocationRendering
                 LocationFrameRuntime state = FrameRuntime();
                 LocationCanvasEffects canvas = post.Canvas;
                 return state.Flash > .001f || state.LowHealth > .001f || LensPulse > .001f || ShakeShare != Vector2.zero || post.Grain > .001f ||
-                       canvas.Film || canvas.Fog && canvas.FogSpeed > 0f || post.Air.Clouds || post.Air.Rays;
+                       canvas.Film || canvas.Fog && canvas.FogSpeed > 0f || post.Air.Clouds || post.Air.Rays ||
+                       post.Sprites != null && post.Sprites.Wind && post.Sprites.WindStrength > 0f;
             }
         }
 

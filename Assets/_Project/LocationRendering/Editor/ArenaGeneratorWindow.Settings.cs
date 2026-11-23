@@ -231,6 +231,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 DirectTitle = "Правится: обработка кадра арен боя",
                 Sections = ArenaFrameSections,
                 DirectNote = ArenaFrameNote,
+                CharactersNote = "Фигуры бойцов — на предпросмотре справа: правка видна сразу. Нет фигур — «Пересобрать» или другой seed.",
                 Change = (action, rebuild) =>
                 {
                     Undo.RecordObject(asset, "Обработка кадра арены");
@@ -248,12 +249,15 @@ namespace KingdomSurvival.LocationRendering.Editor
         }
 
         // Разделы обработки кадра, которые действуют на арене.
+        // «Рисунки» на арене — только ветер, «Атмосфера» — тени облаков и лучи.
         public const LocationFrameSection ArenaFrameSections = LocationFrameSection.Color | LocationFrameSection.LightLens | LocationFrameSection.Tone |
-                                                                LocationFrameSection.Canvas | LocationFrameSection.Game | LocationFrameSection.Characters | LocationFrameSection.Quality;
+                                                                LocationFrameSection.Canvas | LocationFrameSection.Sprites | LocationFrameSection.Characters |
+                                                                LocationFrameSection.Atmosphere | LocationFrameSection.Game | LocationFrameSection.Quality;
 
-        public const string ArenaFrameNote = "На арене действуют: цвет, свет и линза (со всплеском, вспышкой и тряской при ударе), тон, холст и воздух (облака, лучи), " +
-                                             "игровые состояния (красные края по здоровью вождя, вспышка, затемнение, полосы) и персонажи (подкраска и яркость фигур доски). " +
-                                             "Эффекты рисунков и частицы атмосферы — свойства мира места: у рисунка арены MapLab их нет.";
+        public const string ArenaFrameNote = "На арене действуют: цвет, свет и линза (со всплеском, вспышкой и тряской при ударе), тон, холст, " +
+                                             "рисунки (ветер качает деревья, кусты и траву), атмосфера (тени облаков, лучи), " +
+                                             "игровые состояния (красные края по здоровью вождя, вспышка, затемнение, полосы) и персонажи (подкраска и яркость фигур бойцов). " +
+                                             "Частицы атмосферы и прочие эффекты рисунков — свойства мира места: у арены их нет.";
 
         // ------------------------------------------------------------------
         // Поля

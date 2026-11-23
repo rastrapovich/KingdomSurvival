@@ -1408,6 +1408,9 @@ namespace KingdomSurvival.MapLab
             // Прогиб от прохода бойцов: своя настройка записи, иначе растения гнутся, деревья и камни — нет.
             bool plant = entry.Role == "grass_tuft" || entry.Role == "grass_ink_tuft" || entry.Kind == MapLabObjectKind.Bush || entry.Kind == MapLabObjectKind.Reed;
             m.SetFloat("_WalkBend", entry.WalkBend >= 0f ? entry.WalkBend : plant ? 1f : 0f);
+            // Ветер обработки кадра (арена): растения и трава — доля «растительности», прочая
+            // растительность — деревья; камни, постройки, фигуры стоят. Вне арены ветра нет.
+            m.SetFloat("_WindKind", plant || entry.Kind == MapLabObjectKind.Grass ? 2f : entry.Category == MapLabArtCategory.Vegetation ? 1f : 0f);
             // Силуэтная тень (только арена: глобальный переключатель выключен в остальных мирах).
             // На глобальной карте тень рисует отдельный проход по силуэту (MapCardShadow), здесь её нет.
             m.SetFloat("_CastShadow", !Settings.MapCardShadows && !entry.NoCastShadow && entry.Role != "grass_ink_tuft" && (entry.Category == MapLabArtCategory.Vegetation || entry.Category == MapLabArtCategory.Rock || entry.Category == MapLabArtCategory.Prop) ? 1f : 0f);

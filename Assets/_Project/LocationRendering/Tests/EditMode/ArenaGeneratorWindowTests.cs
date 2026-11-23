@@ -62,6 +62,104 @@ namespace KingdomSurvival.LocationRendering.Tests
             }
         }
 
+        // Обработка кадра арены: вкладки «Рисунки» (ветер), «Атмосфера» (облака,
+        // лучи) и «Персонажи» есть; ветер качает деревья — два кадра с ветром
+        // через долю секунды различаются, без ветра совпадают.
+        [UnityTest]
+        public IEnumerator FrameTab_HasWindAtmosphereCharacters_AndWindSwaysTrees()
+        {
+            if (!MapLabArena.Available)
+                Assert.Ignore("Нет MapLabGameAssets с профилем — арена MapLab выключена.");
+            EditorPrefs.SetInt("KS.ArenaGenerator.Mode", 0);
+            string tab = EditorPrefs.GetString("KS.FrameEffects.TabId", "Color");
+            ArenaGeneratorWindow.Open();
+            ArenaGeneratorWindow window = EditorWindow.GetWindow<ArenaGeneratorWindow>();
+            try
+            {
+                double until = EditorApplication.timeSinceStartup + 90;
+                while ((window.PreviewDriver == null || !window.PreviewDriver.Shown) && EditorApplication.timeSinceStartup < until)
+                    yield return null;
+                Assert.That(window.PreviewDriver, Is.Not.Null, window.StatusText);
+
+                EditorPrefs.SetString("KS.FrameEffects.TabId", "Sprites");
+                ArenaGeneratorWindow.OpenFrame();
+                yield return null;
+                System.Collections.Generic.List<string> buttons = window.rootVisualElement.Query<Button>().ToList().ConvertAll(button => button.text);
+                foreach (string title in new[] { "Рисунки", "Атмосфера", "Персонажи" })
+                    Assert.That(buttons, Does.Contain(title), "вкладка «" + title + "» на арене");
+                Assert.That(window.rootVisualElement.Query<Foldout>().ToList().Exists(block => block.text.Contains("Ветер")), Is.True, "блок «Ветер» на вкладке «Рисунки»");
+                EditorPrefs.SetString("KS.FrameEffects.TabId", "Atmosphere");
+                ArenaGeneratorWindow.OpenFrame();
+                yield return null;
+                Assert.That(window.rootVisualElement.Query<Foldout>().ToList().Exists(block => block.text.Contains("Тени облаков")), Is.True, "тени облаков на вкладке «Атмосфера»");
+
+                MapLabArena arena = window.PreviewDriver.Arena;
+                KingdomSurvival.BattlefieldDatabase.LocationPostEffects keep = arena.Spec.Frame;
+                KingdomSurvival.BattlefieldDatabase.LocationPostEffects windy = new KingdomSurvival.BattlefieldDatabase.LocationPostEffects { Enabled = true }.Repair();
+                windy.Sprites.Wind = true;
+                windy.Sprites.WindStrength = .4f;
+                windy.Sprites.WindSpeed = 3f;
+                windy.Sprites.WindTrees = 2f;
+                windy.Sprites.WindPlants = 2f;
+                windy.Sprites.WindDirection = 0f;
+                try
+                {
+                    arena.Spec.Frame = windy;
+                    Assert.That(arena.Windy, Is.True);
+                    Texture2D first = Shot(arena, windy);
+                    double wait = EditorApplication.timeSinceStartup + .4;
+                    while (EditorApplication.timeSinceStartup < wait) yield return null;
+                    Texture2D second = Shot(arena, windy);
+                    float moved = Difference(first, second);
+                    Save(arena, "wind.png");
+
+                    windy.Sprites.Wind = false;
+                    arena.Spec.Frame = windy;
+                    Assert.That(arena.Windy, Is.False);
+                    Texture2D calmA = Shot(arena, windy);
+                    wait = EditorApplication.timeSinceStartup + .4;
+                    while (EditorApplication.timeSinceStartup < wait) yield return null;
+                    Texture2D calmB = Shot(arena, windy);
+                    float calm = Difference(calmA, calmB);
+                    Debug.Log("Ветер арены: доля изменившихся пикселей " + moved.ToString("0.0000") + ", без ветра " + calm.ToString("0.0000"));
+                    Assert.That(moved, Is.GreaterThan(.002f), "с ветром деревья сдвинулись");
+                    Assert.That(moved, Is.GreaterThan(calm * 4f + .001f), "без ветра кадр стоит");
+                    foreach (Texture2D texture in new[] { first, second, calmA, calmB }) Object.DestroyImmediate(texture);
+                }
+                finally
+                {
+                    arena.Spec.Frame = keep;
+                }
+            }
+            finally
+            {
+                EditorPrefs.SetString("KS.FrameEffects.TabId", tab);
+                EditorPrefs.SetInt("KS.ArenaGenerator.Mode", 0);
+                window.Close();
+            }
+        }
+
+        // Слой объектов кадра (деревья и кусты) — копией.
+        private static Texture2D Shot(MapLabArena arena, KingdomSurvival.BattlefieldDatabase.LocationPostEffects frame)
+        {
+            arena.Spec.Frame = frame;
+            arena.Render(1280, 720);
+            return Read(arena.OverlayTexture);
+        }
+
+        // Доля пикселей, заметно различающихся по цвету или альфе.
+        private static float Difference(Texture2D a, Texture2D b)
+        {
+            Assert.That(a, Is.Not.Null, "слой объектов");
+            Assert.That(b, Is.Not.Null, "слой объектов");
+            Color32[] pa = a.GetPixels32(), pb = b.GetPixels32();
+            int changed = 0;
+            for (int i = 0; i < pa.Length; i++)
+                if (Mathf.Abs(pa[i].r - pb[i].r) + Mathf.Abs(pa[i].g - pb[i].g) + Mathf.Abs(pa[i].b - pb[i].b) + Mathf.Abs(pa[i].a - pb[i].a) > 24)
+                    changed++;
+            return changed / (float)pa.Length;
+        }
+
         // Земля и слой объектов одной картинкой (для осмотра).
         private static void Save(MapLabArena arena, string name)
         {

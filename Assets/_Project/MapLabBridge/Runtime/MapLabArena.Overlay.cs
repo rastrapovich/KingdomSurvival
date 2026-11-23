@@ -230,6 +230,8 @@ namespace KingdomSurvival.MapLabBridge
             Shader.SetGlobalFloat(FrontOnId, 1f);
             Shader.SetGlobalFloat(FrontZId, clipZ - 0.05f);
             ApplyWalkers();
+            // Тот же миг ветра, что у кадра (слой впереди бойца совпадает с ним).
+            ApplyWind(false);
             try
             {
                 bool graded = Spec.Frame != null && Spec.Frame.Enabled && framePost != null;
@@ -242,6 +244,7 @@ namespace KingdomSurvival.MapLabBridge
                 foreach (Renderer card in floorCards)
                     if (card != null) card.gameObject.layer = Layer;
                 ClearWalkers();
+                ClearWind();
                 foreach (Renderer renderer in frontHidden)
                     if (renderer != null) renderer.enabled = true;
                 frontHidden.Clear();

@@ -81,6 +81,8 @@ namespace KingdomSurvival.LocationRendering.Editor
                 DirectTitle = "Правится: обработка кадра арен боя (все дорожные бои и полигон)",
                 Sections = ArenaGeneratorWindow.ArenaFrameSections,
                 DirectNote = ArenaGeneratorWindow.ArenaFrameNote,
+                CharactersNote = "В этом окне арена показана без фигур бойцов. Подкраску бойцов видно в «Генераторе арен» на вкладке «Обработка кадра» (те же настройки) и в бою.",
+                OpenCharactersPreview = ArenaGeneratorWindow.OpenFrame,
                 Change = (action, rebuild) =>
                 {
                     Undo.RecordObject(arenaAsset, "Обработка кадра арены");

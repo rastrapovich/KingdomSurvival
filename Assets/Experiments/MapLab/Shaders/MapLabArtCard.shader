@@ -19,6 +19,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
         _Cutoff ("Alpha cutoff", Range(0.05, 0.95)) = 0.5
         _WalkBend ("Прогиб от прохода бойцов, 0 стоит", Float) = 0
         _CastShadow ("Отбрасывает силуэтную тень (арена)", Float) = 0
+        _WindKind ("Ветер: 0 стоит, 1 дерево, 2 растение", Float) = 0
         _CardLean ("Card lean", Range(0, 1)) = 0.35
         _TintColor ("Тон палитры", Color) = (0.5, 0.5, 0.4, 1)
         _TintStrength ("Сила оттенка палитры", Range(0, 1)) = 0
@@ -90,7 +91,37 @@ Shader "Kingdom Survival/MapLab/Art Card"
             float4 _ColorLevels;
             float4 _ColorLevelsOut;
             float _CastShadow;
+            float _WindKind;
         CBUFFER_END
+
+        // Ветер обработки кадра арены (раздел «Рисунки»): глобальные значения
+        // ставит MapLabArena только на время своего кадра, в остальных мирах — нули.
+        // _MapLabWind: x — размах (мир), y — скорость, z — порывы, w — высота полного размаха (мир);
+        // _MapLabWindShare: x — доля деревьев, y — растений, z — направление −1..1, w — время (с).
+        float4 _MapLabWind;
+        float4 _MapLabWindShare;
+
+        // Сдвиг вдоль кадра на высоте height над опорой (как KsWind рисунков мест):
+        // основание стоит, верх ходит; фаза — от опоры (соседи качаются вразнобой),
+        // порывы проходят волной. weight — доля полного размаха на этой высоте.
+        float MapLabWindOffset(float3 basePoint, float height, out float weight)
+        {
+            weight = 0.0;
+            float share = _WindKind > 1.5 ? _MapLabWindShare.y : (_WindKind > 0.5 ? _MapLabWindShare.x : 0.0);
+            if (share <= 0.0 || _MapLabWind.x <= 0.0 || height <= 0.0)
+                return 0.0;
+            float lift = saturate(height / max(_MapLabWind.w, 0.01));
+            weight = lift * sqrt(lift);
+            float t = _MapLabWindShare.w * _MapLabWind.y;
+            float2 origin = basePoint.xz;
+            float phase = origin.x * 0.37 + origin.y * 0.23;
+            float sway = sin(t * 1.7 + phase * 2.1) * 0.6 + sin(t * 0.83 + phase * 1.3 + 1.7) * 0.4;
+            float g = 0.5 + 0.5 * sin(t * 0.37 + origin.x * 0.11 - origin.y * 0.05);
+            float gust = _MapLabWind.z * g * g;
+            float direction = clamp(_MapLabWindShare.z, -1.0, 1.0);
+            float push = direction * (0.5 + gust) + sway * (1.0 - abs(direction) * 0.6) * (0.4 + gust);
+            return _MapLabWind.x * share * weight * push;
+        }
         ENDHLSL
 
 
@@ -341,6 +372,14 @@ Shader "Kingdom Survival/MapLab/Art Card"
                     world.xz += dir * lean;
                     world.y -= lean * 0.25;
                 }
+                // Ветер: верх уходит вдоль кадра и чуть опускается; основание неподвижно.
+                float windWeight;
+                float windOffset = MapLabWindOffset(basePoint, y, windWeight);
+                if (windWeight > 0.0)
+                {
+                    world += camRight * windOffset;
+                    world.y -= abs(windOffset) * 0.2 * windWeight;
+                }
                 o.positionCS = TransformWorldToHClip(world);
                 // Глубина карточки постоянна и равна глубине опоры (как порядок спрайтов):
                 // высокий ствол не проходит сквозь ближний куст — объект либо перекрывает, либо нет.
@@ -499,6 +538,9 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 camRight = normalize(float3(camRight.x, 0, camRight.z) + 1e-5);
                 float height = max(0.0, input.offset.y);
                 float3 world = basePoint + camRight * input.offset.x + float3(_MapLabShadow.x, 0.0, _MapLabShadow.y) * height;
+                // Тень качается вместе с рисунком.
+                float windWeight;
+                world += camRight * MapLabWindOffset(basePoint, height, windWeight);
                 world.y += 0.05;
                 o.positionCS = TransformWorldToHClip(world);
                 o.uv = input.uv;

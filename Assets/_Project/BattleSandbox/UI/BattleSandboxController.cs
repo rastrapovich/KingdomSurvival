@@ -47,6 +47,7 @@ namespace KingdomSurvival.BattleSandbox
             battleGeneration++;
             enemyStepScheduled = false;
             combatAnimationRunning = false;
+            DropHeldBattleLog();
             ClearAbilitySelection();
         }
 
@@ -1178,6 +1179,7 @@ namespace KingdomSurvival.BattleSandbox
             board.HexClicked += OnBoardHexClicked;
             board.UnitDetailsRequested += OnBoardUnitDetailsRequested;
             board.AttackRequested += OnBoardAttackRequested;
+            board.ImpactShown += OnBoardImpactForLog;
             board.AbilityCellClicked += OnAbilityCellClicked;
             board.AbilityTargetingCancelled += CancelAbilityTargeting;
             body.Add(CreateBattlefieldSurface(board));
@@ -1699,7 +1701,7 @@ namespace KingdomSurvival.BattleSandbox
                         : "Можно повторить бой тем же составом или вернуться к выбору бойцов.";
 
             RefreshAbilityUi(playerInteractionAvailable, current);
-            logLabel.text = string.Join("\n", battleLog.Skip(Math.Max(0, battleLog.Count - 9)));
+            ShowBattleLog();
             RefreshResultBanner();
             QueueEnemyStepIfNeeded();
         }
@@ -1858,13 +1860,14 @@ namespace KingdomSurvival.BattleSandbox
             // анимации ничего не пересчитывают; без анимации исход тот же.
             int firstRecord = battle.HitRecords.Count;
             string message;
+            HoldBattleLog(attackerId);
             bool attackApplied = battle.TryAttack(attackerId, targetId, out message);
             if (attackApplied)
             {
                 AddBattleLog(message);
                 string retaliationMessage;
                 if (battle.HasPendingRetaliation && battle.TryResolvePendingRetaliation(out retaliationMessage))
-                    AddBattleLog(retaliationMessage);
+                    AddRetaliationLog(retaliationMessage);
             }
 
             List<SandboxHitRecord> records = battle.GetHitRecordsSince(firstRecord);
@@ -1883,6 +1886,7 @@ namespace KingdomSurvival.BattleSandbox
 
         private void FinishAttackSequence(bool attackApplied, Action<bool> onComplete)
         {
+            ReleaseHeldBattleLog();
             combatAnimationRunning = false;
             onComplete?.Invoke(attackApplied);
             RefreshBattleScreen();
@@ -1934,8 +1938,19 @@ namespace KingdomSurvival.BattleSandbox
 
         private void AddBattleLog(string entry)
         {
-            if (!string.IsNullOrWhiteSpace(entry))
+            if (string.IsNullOrWhiteSpace(entry))
+                return;
+            // Идёт показ удара: строка ждёт попадания (BattleSandboxController.HitLog).
+            if (battleLogHeld)
+                heldActionLog.Add(entry);
+            else
                 battleLog.Add("• " + entry);
+        }
+
+        private void ShowBattleLog()
+        {
+            if (logLabel != null)
+                logLabel.text = string.Join("\n", battleLog.Skip(Math.Max(0, battleLog.Count - 9)));
         }
 
         private static VisualElement CreatePanel()

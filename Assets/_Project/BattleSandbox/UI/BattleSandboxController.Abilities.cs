@@ -404,10 +404,11 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             }
             int firstRecord = battle.HitRecords.Count;
+            HoldBattleLog(unitId);
             bool applied = battle.TryUseAbility(unitId, command, out string message);
             AddBattleLog(message);
             if (applied && battle.HasPendingRetaliation && battle.TryResolvePendingRetaliation(out string retaliation))
-                AddBattleLog(retaliation);
+                AddRetaliationLog(retaliation);
             PlayRecordsThen(firstRecord, applied, onComplete);
         }
 
@@ -477,6 +478,7 @@ namespace KingdomSurvival.BattleSandbox
                 case SandboxAiActionKind.ShootAndRetreat:
                 {
                     int first = battle.HitRecords.Count;
+                    HoldBattleLog(enemyId);
                     bool applied = battle.TryShootAndRetreat(enemyId, decision.TargetId, out string message);
                     AddBattleLog(message);
                     PlayRecordsThen(first, applied, done);

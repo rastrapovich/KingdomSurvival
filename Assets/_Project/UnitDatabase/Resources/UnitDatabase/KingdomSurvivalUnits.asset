@@ -289,7 +289,7 @@ MonoBehaviour:
     battlefieldSprite: {fileID: 21300000, guid: 9fa16a04d72b64a429e233fa0195e702, type: 3}
     battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
-    animationSetId: 
+    animationSetId: archer
     staticFigureOnly: 0
     tagIds:
     - species.human

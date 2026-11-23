@@ -558,6 +558,8 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             });
             setPanel.Add(mirror);
 
+            BuildProjectileBlock(set);
+
             CreatureAnimationSetData template = database.TemplateSet;
             bool isTemplate = template != null && ReferenceEquals(template, set);
             Label templateLabel = new Label(isTemplate
@@ -590,6 +592,60 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             canvas.style.fontSize = 10f;
             canvas.style.color = new Color(0.65f, 0.65f, 0.65f, 1f);
             setPanel.Add(canvas);
+        }
+
+        // Снаряд (стрела): картинка и ползунки полёта. Ползунки — только при заданной картинке.
+        private void BuildProjectileBlock(CreatureAnimationSetData set)
+        {
+            Label title = new Label("Снаряд (выстрел)");
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            title.style.marginTop = 6f;
+            setPanel.Add(title);
+
+            CreatureAnimationProjectileData projectile = set.Projectile;
+            ObjectField spriteField = new ObjectField("Картинка снаряда")
+            {
+                objectType = typeof(Sprite),
+                allowSceneObjects = false,
+                value = projectile.Sprite,
+                tooltip = "Стрела/снаряд, которым набор стреляет. Нарисована остриём вправо. " +
+                          "Пусто — без снаряда: урон показывается в момент удара, как раньше. " +
+                          "Если у набора нет «Выстрела», стреляет «Атака»."
+            };
+            spriteField.labelElement.style.minWidth = 110f;
+            spriteField.RegisterValueChangedCallback(evt =>
+            {
+                CreatureAnimationSetData s = SelectedSet;
+                if (s == null || s.Projectile.Sprite == evt.newValue as Sprite)
+                    return;
+                Undo.RecordObject(database, "Картинка снаряда");
+                s.Projectile.SetSprite(evt.newValue as Sprite);
+                EditorUtility.SetDirty(database);
+                ShowSelection();
+            });
+            setPanel.Add(spriteField);
+
+            if (!projectile.HasSprite)
+                return;
+
+            setPanel.Add(LiveSlider("Скорость, гексов/с", 1f, 40f, projectile.SpeedHexesPerSecond,
+                "Скорость полёта стрелы на поле, гексов в секунду.",
+                value => SelectedSet?.Projectile.SetSpeedHexesPerSecond(value)));
+            setPanel.Add(LiveSlider("Длина, гексов", 0.1f, 2f, projectile.LengthHexes,
+                "Длина стрелы на поле в размерах гекса.",
+                value => SelectedSet?.Projectile.SetLengthHexes(value)));
+            setPanel.Add(LiveSlider("Дуга", 0f, 0.4f, projectile.ArcHeight,
+                "Высота дуги полёта как доля его длины. 0 — прямой полёт.",
+                value => SelectedSet?.Projectile.SetArcHeight(value)));
+            setPanel.Add(LiveSlider("Вылет вперёд", -0.5f, 0.5f, projectile.LaunchPoint.x,
+                "Где стрела появляется в момент выпуска: доли холста кадра от точки опоры. Вперёд — в сторону цели.",
+                value => { CreatureAnimationSetData s = SelectedSet; s?.Projectile.SetLaunchPoint(new Vector2(value, s.Projectile.LaunchPoint.y)); }));
+            setPanel.Add(LiveSlider("Вылет вверх", 0f, 1f, projectile.LaunchPoint.y,
+                "Высота точки вылета: доля высоты холста кадра над точкой опоры (на уровне рук лучника).",
+                value => { CreatureAnimationSetData s = SelectedSet; s?.Projectile.SetLaunchPoint(new Vector2(s.Projectile.LaunchPoint.x, value)); }));
+            setPanel.Add(LiveSlider("Высота попадания, гексов", 0f, 2f, projectile.HitHeightHexes,
+                "Высота точки попадания над центром гекса цели, в размерах гекса.",
+                value => SelectedSet?.Projectile.SetHitHeightHexes(value)));
         }
 
         private Slider LiveSlider(string label, float low, float high, float value, string tooltip, Action<float> apply)

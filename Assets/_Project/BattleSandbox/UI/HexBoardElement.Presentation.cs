@@ -53,6 +53,14 @@ namespace KingdomSurvival.BattleSandbox
         private bool hitStepImpactShown;
         private bool hitStepLunge;
         private bool hitStepShake;
+        // Выстрел снарядом: попадание показывается только по прилёте. Набор
+        // стрелка и время выпуска (момент удара клипа); длительность полёта
+        // пересчитывается по текущей раскладке каждый кадр.
+        private CreatureAnimationSetData hitStepProjectileSet;
+        private bool hitStepStrikerMirrored;
+        private float hitStepReleaseAt;
+        private float hitStepFlightSeconds;
+        private Image projectileImage;
         private IVisualElementScheduledItem hitSequenceItem;
         private Action hitSequenceCompleted;
         private readonly HashSet<string> vanishAfterStep = new HashSet<string>(StringComparer.Ordinal);
@@ -84,6 +92,8 @@ namespace KingdomSurvival.BattleSandbox
             ClearStatusIcons();
             vanishAfterStep.Clear();
             depthOrder.Clear();
+            hitStepProjectileSet = null;
+            HideProjectile();
         }
 
         private SandboxUnitVisual GetVisual(string typeId)
@@ -235,6 +245,7 @@ namespace KingdomSurvival.BattleSandbox
         {
             presentationTicker?.Pause();
             hitSequenceItem?.Pause();
+            HideProjectile();
         }
 
         // Виден ли боец живым (здоровье, круги, стойка). Павший, чей удар
@@ -372,6 +383,8 @@ namespace KingdomSurvival.BattleSandbox
             targetFlash = 0f;
             hitStepImpactShown = false;
             hitStepShake = false;
+            hitStepProjectileSet = null;
+            hitStepFlightSeconds = 0f;
 
             UnitPresentation striker = GetPresentation(battle.GetUnit(record.StrikerId));
             SetFacing(striker, FacingBetween(record.StrikerPosition, record.TargetPosition, striker != null ? striker.Facing : HexFacing.East));
@@ -389,6 +402,11 @@ namespace KingdomSurvival.BattleSandbox
                     impactDelay = clip.ImpactSeconds;
                     strikerDuration = clip.Duration;
                     hitStepLunge = false;
+                    if (player.Set != null && player.Set.FiresProjectile(clip.Action))
+                    {
+                        hitStepProjectileSet = player.Set;
+                        hitStepStrikerMirrored = striker.Mirrored;
+                    }
                 }
                 else
                 {
@@ -399,6 +417,13 @@ namespace KingdomSurvival.BattleSandbox
 
             hitStepStartedAt = now;
             hitStepImpactAt = now + Mathf.Max(0f, impactDelay);
+            if (hitStepProjectileSet != null)
+            {
+                // Стрела вылетает в момент удара клипа, попадание — по прилёте.
+                hitStepReleaseAt = hitStepImpactAt;
+                hitStepFlightSeconds = ProjectileFlightSeconds(record, CalculateLayout());
+                hitStepImpactAt = hitStepReleaseAt + hitStepFlightSeconds;
+            }
             hitStepEndAt = Mathf.Max(now + strikerDuration, hitStepImpactAt + DamageFloatDuration);
             damageLabel.text = "−" + Mathf.Max(0, record.Damage);
             damageLabel.style.display = DisplayStyle.None;
@@ -415,10 +440,18 @@ namespace KingdomSurvival.BattleSandbox
 
             SandboxHitRecord record = hitSequence[hitStepIndex];
             float now = PresentationTime;
+            HexLayout layout = CalculateLayout();
+            if (hitStepProjectileSet != null && !hitStepImpactShown)
+            {
+                // Окно могли растянуть: полёт считается по текущей раскладке.
+                hitStepFlightSeconds = ProjectileFlightSeconds(record, layout);
+                hitStepImpactAt = hitStepReleaseAt + hitStepFlightSeconds;
+                hitStepEndAt = Mathf.Max(hitStepEndAt, hitStepImpactAt + DamageFloatDuration);
+            }
             if (!hitStepImpactShown && now >= hitStepImpactAt)
                 ShowImpact(record, now);
+            UpdateProjectile(record, layout, now);
 
-            HexLayout layout = CalculateLayout();
             Vector2 direction = layout.GetCenter(record.TargetPosition) - layout.GetCenter(record.StrikerPosition);
             direction = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.right;
             float lungeDistance = layout.Size * 0.34f;
@@ -454,7 +487,7 @@ namespace KingdomSurvival.BattleSandbox
                 damageLabel.style.opacity = 1f - floatProgress;
             }
 
-            if (now >= hitStepEndAt || now - hitStepStartedAt > StepSafetyCap)
+            if (now >= hitStepEndAt || now - hitStepStartedAt > StepSafetyCap + hitStepFlightSeconds)
                 BeginNextHitStep();
 
             SyncUnitImages();
@@ -465,6 +498,7 @@ namespace KingdomSurvival.BattleSandbox
         private void ShowImpact(SandboxHitRecord record, float now)
         {
             hitStepImpactShown = true;
+            HideProjectile();
             damageLabel.style.display = DisplayStyle.Flex;
             SandboxUnitState targetUnit = battle.GetUnit(record.TargetId);
             ImpactShown?.Invoke(record, targetUnit != null && targetUnit.Team == SandboxTeam.Player);
@@ -523,6 +557,89 @@ namespace KingdomSurvival.BattleSandbox
             targetFlash = 0f;
             damageLabel.style.display = DisplayStyle.None;
             damageLabel.style.opacity = 1f;
+            hitStepProjectileSet = null;
+            HideProjectile();
+        }
+
+        // ------------------------------------------------------------------
+        // Снаряд (стрела лучника)
+        // ------------------------------------------------------------------
+
+        // Показанный размер холста набора — тот же, что в LayoutAnimatedImage.
+        private static Vector2 FigureSize(CreatureAnimationSetData set, HexLayout layout)
+        {
+            Vector2 canvas = set.CanvasSize.x > 0 && set.CanvasSize.y > 0 ? (Vector2)set.CanvasSize : Vector2.one;
+            float height = layout.Size * FieldHeightInHexSizes * set.FieldScale;
+            return new Vector2(height * canvas.x / Mathf.Max(1f, canvas.y), height);
+        }
+
+        private void ProjectilePoints(SandboxHitRecord record, HexLayout layout, out Vector2 from, out Vector2 to)
+        {
+            CreatureAnimationProjectileData data = hitStepProjectileSet.Projectile;
+            Vector2 ground = layout.GetCenter(record.StrikerPosition);
+            Vector2 targetGround = layout.GetCenter(record.TargetPosition);
+            // Противник показан отражённым и смотрит влево.
+            from = CreatureAnimationProjectileMath.LaunchPosition(
+                ground, FigureSize(hitStepProjectileSet, layout), targetGround, data, hitStepStrikerMirrored ? -1f : 1f);
+            to = CreatureAnimationProjectileMath.HitPosition(targetGround, layout.Size, data);
+        }
+
+        private float ProjectileFlightSeconds(SandboxHitRecord record, HexLayout layout)
+        {
+            ProjectilePoints(record, layout, out Vector2 from, out Vector2 to);
+            float hexStep = NeighborScreenVectors(layout)[0].magnitude;
+            return Mathf.Max(0.01f, CreatureAnimationProjectileMath.FlightSeconds(from, to, hexStep, hitStepProjectileSet.Projectile));
+        }
+
+        private void UpdateProjectile(SandboxHitRecord record, HexLayout layout, float now)
+        {
+            CreatureAnimationProjectileData data = hitStepProjectileSet != null ? hitStepProjectileSet.Projectile : null;
+            if (data == null || !data.HasSprite || hitStepImpactShown || now < hitStepReleaseAt)
+            {
+                HideProjectile();
+                return;
+            }
+
+            if (projectileImage == null)
+            {
+                projectileImage = new Image();
+                projectileImage.name = "sandbox-projectile";
+                projectileImage.pickingMode = PickingMode.Ignore;
+                projectileImage.style.position = Position.Absolute;
+                projectileImage.scaleMode = ScaleMode.StretchToFill;
+                projectileImage.style.transformOrigin = new TransformOrigin(Length.Percent(50f), Length.Percent(50f));
+                Add(projectileImage);
+            }
+
+            ProjectilePoints(record, layout, out Vector2 from, out Vector2 to);
+            float t = Mathf.Clamp01((now - hitStepReleaseAt) / Mathf.Max(0.01f, hitStepFlightSeconds));
+            Vector2 position = CreatureAnimationProjectileMath.Evaluate(from, to, data.ArcHeight, t, out float angle);
+
+            Sprite sprite = data.Sprite;
+            if (projectileImage.sprite != sprite)
+                projectileImage.sprite = sprite;
+            float width = data.LengthHexes * layout.Size;
+            float height = width * sprite.rect.height / Mathf.Max(1f, sprite.rect.width);
+            projectileImage.style.width = width;
+            projectileImage.style.height = height;
+            projectileImage.style.left = position.x - width * 0.5f;
+            projectileImage.style.top = position.y - height * 0.5f;
+            projectileImage.style.rotate = new Rotate(angle);
+            projectileImage.style.display = DisplayStyle.Flex;
+            projectileImage.BringToFront();
+        }
+
+        private void HideProjectile()
+        {
+            if (projectileImage != null)
+                projectileImage.style.display = DisplayStyle.None;
+        }
+
+        // Вызывается после перестановки слоёв: стрела поверх фигур.
+        private void BringProjectileToFront()
+        {
+            if (projectileImage != null && projectileImage.style.display == DisplayStyle.Flex)
+                projectileImage.BringToFront();
         }
 
         private void FinishHitSequence()

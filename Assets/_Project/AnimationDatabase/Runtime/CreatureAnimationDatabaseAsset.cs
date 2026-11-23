@@ -257,9 +257,12 @@ namespace KingdomSurvival.AnimationDatabase
         // пары, картинка показывается отражённой (волк нарисован лицом вправо —
         // влево он смотрит отражённым). Действию хватает одного ракурса.
         [SerializeField] private bool mirrorMissingDirections;
+        // Снаряд набора (стрела лучника). Без картинки — снаряда нет.
+        [SerializeField] private CreatureAnimationProjectileData projectile = new CreatureAnimationProjectileData();
         [SerializeField] private List<CreatureAnimationClipData> clips = new List<CreatureAnimationClipData>();
 
         public string Id => id ?? string.Empty;
+        public CreatureAnimationProjectileData Projectile => projectile ?? (projectile = new CreatureAnimationProjectileData());
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? Id : displayName;
         public string RawDisplayName => displayName ?? string.Empty;
         public Vector2 Pivot => pivot;
@@ -305,6 +308,15 @@ namespace KingdomSurvival.AnimationDatabase
                 return byAction != 0 ? byAction : string.Compare(a.ClipKey, b.ClipKey, StringComparison.OrdinalIgnoreCase);
             });
             return clip;
+        }
+
+        // Стреляет ли проигранное действие снарядом: без отдельного «Выстрела»
+        // выстрел — это «Атака» (лучник); при наличии «Выстрела» — только он.
+        public bool FiresProjectile(CreatureAnimationAction playedAction)
+        {
+            return Projectile.HasSprite &&
+                   (playedAction == CreatureAnimationAction.Shoot ||
+                    (playedAction == CreatureAnimationAction.Attack && FindClip(CreatureAnimationAction.Shoot) == null));
         }
 
         public bool RemoveClip(CreatureAnimationAction action, string clipKey = null)

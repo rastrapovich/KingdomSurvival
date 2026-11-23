@@ -1319,6 +1319,7 @@ namespace KingdomSurvival.BattleSandbox
             SyncStatusIcons();
             attackCursorOverlay.BringToFront();
             damageLabel.BringToFront();
+            BringProjectileToFront();
         }
 
         private void SyncHealthBar(

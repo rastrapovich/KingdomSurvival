@@ -34,6 +34,12 @@ namespace KingdomSurvival.MapLabBridge
             public MapLabSettings Settings;
             public Rect Play;
             public float Mean, Pitch, Sin, Cos;
+            // Базовый наклон (из ресурсов) и наибольший сдвиг по высоте, ед. мира.
+            public float BasePitch, MaxOffset;
+            // Опоры карточек в мире (для пересчёта процентов при смене наклона): здания
+            // — параллельно Buildings, части мест — параллельно Features.
+            public readonly List<CardSource> BuildingSources = new List<CardSource>();
+            public readonly List<List<CardSource>> FeatureSources = new List<List<CardSource>>();
             // Наибольший сдвиг рисунка по высоте, % полотна (с запасом): окно
             // поиска точки земли под курсором.
             public float MaxShiftPercent = 12f;
@@ -290,16 +296,16 @@ namespace KingdomSurvival.MapLabBridge
                     }
                 w.Mean = mean / 256f;
                 // Запас на уступы и настилы мостов, которых редкая сетка не видит.
-                float maxOffset = Mathf.Max(highest - w.Mean, w.Mean - lowest) * 1.3f + 4f;
-                w.MaxShiftPercent = Mathf.Max(2f, maxOffset * w.Cos / (w.Play.height * w.Sin) * 100f);
+                w.BasePitch = w.Pitch;
+                w.MaxOffset = Mathf.Max(highest - w.Mean, w.Mean - lowest) * 1.3f + 4f;
+                w.MaxShiftPercent = Mathf.Max(2f, w.MaxOffset * w.Cos / (w.Play.height * w.Sin) * 100f);
                 w.Paper = view.Palette.Paper;
                 w.Camera.backgroundColor = w.Paper;
                 foreach (MapLabServiceBuilding b in data.ServiceBuildings)
                 {
-                    Vector2 basePercent = ToPercent(w, b.Base);
-                    float widthPercent = b.Width / w.Play.width * 100f;
-                    float heightPercent = b.Height * 100f / (w.Play.height * w.Sin);
-                    Rect rect = new Rect(basePercent.x - b.Pivot.x * widthPercent, basePercent.y - (1f - b.Pivot.y) * heightPercent, widthPercent, heightPercent);
+                    CardSource source = new CardSource { Base = b.Base, Width = b.Width, Height = b.Height, Pivot = b.Pivot };
+                    Rect rect = CardRect(w, source);
+                    w.BuildingSources.Add(source);
                     // Точка подхода — на земле перед зданием (к зрителю), за его
                     // основанием: герой встаёт рядом, а не внутри рисунка. Узкий
                     // столб объявлений — подходят сбоку.
@@ -310,26 +316,27 @@ namespace KingdomSurvival.MapLabBridge
                     w.Buildings.Add((b.SettlementId, b.Role, rect, NavPercent(w, approach.x, approach.z)));
                 }
                 // Детали мест: части — к месту плана по виду и ближайшей точке.
-                Dictionary<GeneratedMapSite, List<(Rect Rect, string ArtId)>> parts = new Dictionary<GeneratedMapSite, List<(Rect, string)>>();
+                Dictionary<GeneratedMapSite, List<(CardSource Source, string ArtId)>> parts = new Dictionary<GeneratedMapSite, List<(CardSource, string)>>();
                 foreach (MapLabFeatureSprite f in data.FeatureSprites)
                 {
                     GeneratedMapSite site = NearestFeature(w, f.Kind, f.Point);
                     if (site == null)
                         continue;
-                    Vector2 basePercent = ToPercent(w, f.Base);
-                    float widthPercent = f.Width / w.Play.width * 100f;
-                    float heightPercent = f.Height * 100f / (w.Play.height * w.Sin);
-                    Rect rect = new Rect(basePercent.x - f.Pivot.x * widthPercent, basePercent.y - (1f - f.Pivot.y) * heightPercent, widthPercent, heightPercent);
-                    if (!parts.TryGetValue(site, out List<(Rect Rect, string ArtId)> list))
-                        parts[site] = list = new List<(Rect, string)>();
-                    list.Add((rect, f.ArtId));
+                    if (!parts.TryGetValue(site, out List<(CardSource Source, string ArtId)> list))
+                        parts[site] = list = new List<(CardSource, string)>();
+                    list.Add((new CardSource { Base = f.Base, Width = f.Width, Height = f.Height, Pivot = f.Pivot }, f.ArtId));
                 }
-                foreach (KeyValuePair<GeneratedMapSite, List<(Rect Rect, string ArtId)>> pair in parts)
+                foreach (KeyValuePair<GeneratedMapSite, List<(CardSource Source, string ArtId)>> pair in parts)
                 {
-                    Rect union = pair.Value[0].Rect;
-                    foreach ((Rect r, string _) in pair.Value)
-                        union = Rect.MinMaxRect(Mathf.Min(union.xMin, r.xMin), Mathf.Min(union.yMin, r.yMin), Mathf.Max(union.xMax, r.xMax), Mathf.Max(union.yMax, r.yMax));
-                    w.Features.Add((pair.Key, union, pair.Value));
+                    List<(Rect Rect, string ArtId)> rects = new List<(Rect, string)>();
+                    List<CardSource> sources = new List<CardSource>();
+                    foreach ((CardSource source, string artId) in pair.Value)
+                    {
+                        rects.Add((CardRect(w, source), artId));
+                        sources.Add(source);
+                    }
+                    w.Features.Add((pair.Key, UnionOf(rects), rects));
+                    w.FeatureSources.Add(sources);
                 }
                 WorldMapObstacles.Set(Obstacles(w, data));
                 WorldMapBridges.Set(BridgeSpans(w, data));
@@ -339,6 +346,78 @@ namespace KingdomSurvival.MapLabBridge
             w.BuildMs = w.Watch.Elapsed.TotalMilliseconds;
             if (w.Ready)
                 Debug.Log($"MapLab: живая карта партии построена за {w.BuildMs / 1000.0:0.0} с, зданий услуг {w.Buildings.Count}.");
+        }
+
+        // Карточка в мире: основание, размер (ед. мира) и опора рисунка.
+        public struct CardSource
+        {
+            public Vector3 Base;
+            public float Width, Height;
+            public Vector2 Pivot;
+        }
+
+        // Прямоугольник карточки на полотне, % (для текущего наклона мира).
+        public static Rect CardRect(World w, CardSource s)
+        {
+            Vector2 basePercent = ToPercent(w, s.Base);
+            float widthPercent = s.Width / w.Play.width * 100f;
+            float heightPercent = s.Height * 100f / (w.Play.height * w.Sin);
+            return new Rect(basePercent.x - s.Pivot.x * widthPercent, basePercent.y - (1f - s.Pivot.y) * heightPercent, widthPercent, heightPercent);
+        }
+
+        private static Rect UnionOf(List<(Rect Rect, string ArtId)> rects)
+        {
+            Rect union = rects[0].Rect;
+            foreach ((Rect r, string _) in rects)
+                union = Rect.MinMaxRect(Mathf.Min(union.xMin, r.xMin), Mathf.Min(union.yMin, r.yMin), Mathf.Max(union.xMax, r.xMax), Mathf.Max(union.yMax, r.yMax));
+            return union;
+        }
+
+        // Наклон камеры от приближения (запрос 23.11.2026, MAP_STYLE_GUIDE §7): от
+        // базового на общем виде до closePitch на наибольшем приближении — плавно,
+        // со ступенью в последних 60% диапазона приближения (в логарифме).
+        public const float ClosePitch = 35f;
+
+        public static float PitchForZoom(float zoom, float minZoom, float maxZoom, float basePitch, float closePitch = ClosePitch)
+        {
+            if (minZoom <= 0f || maxZoom <= minZoom * 1.01f)
+                return basePitch;
+            // Первые 40% диапазона (в логарифме) — базовый наклон, затем плавная ступень к closePitch.
+            float u = Mathf.Clamp01(Mathf.Log(Mathf.Max(zoom, minZoom) / minZoom) / Mathf.Log(maxZoom / minZoom));
+            float t = Mathf.Clamp01((u - RampStart) / (1f - RampStart));
+            t = t * t * (3f - 2f * t);
+            return Mathf.Lerp(basePitch, closePitch, t);
+        }
+
+        public const float RampStart = 0.4f;
+
+        // Сменить наклон камеры мира: меняются только камера (Render берёт Pitch/Sin),
+        // сдвиг по высоте и проценты карточек (по сохранённым опорам). Карта и кэш не
+        // пересобираются. True — наклон изменился.
+        public static bool SetPitch(World w, float pitch)
+        {
+            if (w == null || !w.Ready)
+                return false;
+            pitch = Mathf.Clamp(pitch, 20f, 80f);
+            if (Mathf.Abs(pitch - w.Pitch) < 0.02f)
+                return false;
+            w.Pitch = pitch;
+            w.Sin = Mathf.Sin(pitch * Mathf.Deg2Rad);
+            w.Cos = Mathf.Cos(pitch * Mathf.Deg2Rad);
+            w.MaxShiftPercent = Mathf.Max(2f, w.MaxOffset * w.Cos / (w.Play.height * w.Sin) * 100f);
+            for (int i = 0; i < w.Buildings.Count && i < w.BuildingSources.Count; i++)
+            {
+                (string settlementId, string role, Rect _, Vector2 door) = w.Buildings[i];
+                w.Buildings[i] = (settlementId, role, CardRect(w, w.BuildingSources[i]), door);
+            }
+            for (int i = 0; i < w.Features.Count && i < w.FeatureSources.Count; i++)
+            {
+                (GeneratedMapSite site, Rect _, List<(Rect Rect, string ArtId)> parts) = w.Features[i];
+                for (int j = 0; j < parts.Count; j++)
+                    parts[j] = (CardRect(w, w.FeatureSources[i][j]), parts[j].ArtId);
+                w.Features[i] = (site, UnionOf(parts), parts);
+            }
+            return true;
         }
 
         public struct MapLabAssetsSnapshot
@@ -623,6 +702,7 @@ namespace KingdomSurvival.MapLabBridge
             w.Camera.nearClipPlane = Mathf.Max(0.3f, distance - size * 1.6f - 60f);
             w.Camera.farClipPlane = distance + size * 1.6f + 60f;
             w.Camera.transform.SetPositionAndRotation(target - rotation * Vector3.forward * distance, rotation);
+            w.Rig.PitchOverride = w.Pitch;
             w.Rig.Target = target;
             w.View.OnCameraChanged();
             w.View.PumpStreaming(false);

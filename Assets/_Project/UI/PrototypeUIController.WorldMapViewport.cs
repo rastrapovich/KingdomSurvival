@@ -53,6 +53,11 @@ public partial class PrototypeUIController
     // в пикселях (то же, в котором считается шестиугольная сетка).
     private float worldMapCanvasWidth;
     private float worldMapCanvasHeight;
+    // Высота полотна на базовом наклоне (по ней считается «вся карта») и без сжатия наклоном
+    // (высота сетки карты): живая карта меняет наклон от приближения, и высота полотна
+    // = плоская высота × sin(текущего наклона).
+    private float worldMapCanvasHeightBase;
+    private float worldMapCanvasHeightFlat;
 
     private void InitializeWorldMapViewport()
     {
@@ -81,13 +86,17 @@ public partial class PrototypeUIController
             // Канон v1.58 §9.9: полотно сгенерированной карты партии.
             worldMapCanvasWidth = gameState.GeneratedMap.CanvasWidth;
             worldMapCanvasHeight = gameState.GeneratedMap.CanvasHeight;
+            worldMapCanvasHeightFlat = worldMapCanvasHeight;
+            worldMapCanvasHeightBase = worldMapCanvasHeight;
             // 12У-F: живая карта MapLab рисуется камерой под наклоном — глубина
             // сжата на sin(наклона); проценты значков и рисунка совпадают.
             // Мир MapLab строится в следующих кадрах (экран успевает показать
             // «Рисуем карту…»), пока — бумага.
             if (WorldMapLiveWanted())
             {
-                worldMapCanvasHeight *= KingdomSurvival.MapLabBridge.MapLabGameLive.ExpectedHeightScale;
+                worldMapCanvasHeightBase = worldMapCanvasHeight * KingdomSurvival.MapLabBridge.MapLabGameLive.ExpectedHeightScale;
+                KingdomSurvival.MapLabBridge.MapLabGameLive.World liveWorld = KingdomSurvival.MapLabBridge.MapLabGameLive.Current;
+                worldMapCanvasHeight *= liveWorld != null && liveWorld.Ready ? liveWorld.Sin : KingdomSurvival.MapLabBridge.MapLabGameLive.ExpectedHeightScale;
                 ScheduleWorldMapLiveBuild();
             }
             else
@@ -97,6 +106,7 @@ public partial class PrototypeUIController
         {
             worldMapCanvasWidth = world != null ? world.MapCanvasWidth : WorldMapHexGrid.DefaultCanvasWidth;
             worldMapCanvasHeight = world != null ? world.MapCanvasHeight : WorldMapHexGrid.DefaultCanvasHeight;
+            worldMapCanvasHeightFlat = worldMapCanvasHeightBase = worldMapCanvasHeight;
         }
 
         worldMap.style.width = worldMapCanvasWidth;
@@ -156,7 +166,7 @@ public partial class PrototypeUIController
     // видимость всей карты целиком по кнопке "Вся карта".
     private void RecalculateWorldMapMinZoom()
     {
-        if (worldMapViewport == null || worldMapCanvasWidth <= 0f || worldMapCanvasHeight <= 0f)
+        if (worldMapViewport == null || worldMapCanvasWidth <= 0f || worldMapCanvasHeightBase <= 0f)
             return;
 
         float viewportWidth = Mathf.Max(1f, worldMapViewport.resolvedStyle.width);
@@ -164,7 +174,7 @@ public partial class PrototypeUIController
 
         worldMapMinZoom = Mathf.Min(
             viewportWidth / worldMapCanvasWidth,
-            viewportHeight / worldMapCanvasHeight);
+            viewportHeight / worldMapCanvasHeightBase);
     }
 
     // AM-06: единственный источник координат Дома для новых элементов
@@ -225,6 +235,9 @@ public partial class PrototypeUIController
     {
         if (worldMapViewport == null || worldMapCanvasWidth <= 0f)
             return;
+
+        // Наклон камеры уже должен соответствовать приближению: высота полотна — по нему.
+        SyncWorldMapPitch(new Vector2(worldMapViewport.resolvedStyle.width * 0.5f, worldMapViewport.resolvedStyle.height * 0.5f));
 
         float viewportWidth = Mathf.Max(1f, worldMapViewport.resolvedStyle.width);
         float viewportHeight = Mathf.Max(1f, worldMapViewport.resolvedStyle.height);
@@ -309,6 +322,8 @@ public partial class PrototypeUIController
         worldMapZoom = newZoom;
         worldMapPanOffsetX = pivotScreenPoint.x - canvasPointX * worldMapZoom;
         worldMapPanOffsetY = pivotScreenPoint.y - canvasPointY * worldMapZoom;
+        // Наклон камеры меняется с приближением: точка под курсором остаётся под курсором.
+        SyncWorldMapPitch(pivotScreenPoint);
 
         ClampWorldMapPan();
         ApplyWorldMapViewportTransform();
@@ -448,10 +463,52 @@ public partial class PrototypeUIController
         return Mathf.Clamp(offset, minOffset, 0f);
     }
 
+    // Наклон камеры живой карты зависит от приближения (канон MAP_STYLE_GUIDE §7):
+    // от базового на общем виде к 35° на наибольшем. Высота полотна = плоская высота ×
+    // sin(наклона), поэтому при смене наклона точка земли под anchor (точка экрана, например
+    // курсор при зуме) остаётся на месте: полотно пересчитывается заново. Карта и кэш не
+    // пересобираются — только камера, высота полотна и цели кликов (проценты карточек).
+    // True — наклон изменился.
+    private bool SyncWorldMapPitch(Vector2 anchor)
+    {
+        KingdomSurvival.MapLabBridge.MapLabGameLive.World world = KingdomSurvival.MapLabBridge.MapLabGameLive.Current;
+        if (worldMapMapLab == null || world == null || !world.Ready || worldMapCanvasHeightFlat <= 0f || worldMapCanvasWidth <= 0f)
+            return false;
+        float pitch = KingdomSurvival.MapLabBridge.MapLabGameLive.PitchForZoom(worldMapZoom, worldMapMinZoom, worldMapMaxZoom, world.BasePitch);
+        if (Mathf.Abs(pitch - world.Pitch) < 0.02f)
+            return false;
+        float zoom = Mathf.Max(0.0001f, worldMapZoom);
+        float xPercent = WorldMapNavigation.ClampMapX((anchor.x - worldMapPanOffsetX) / (zoom * worldMapCanvasWidth) * 100f);
+        float yScreenPercent = (anchor.y - worldMapPanOffsetY) / (zoom * Mathf.Max(1f, worldMapCanvasHeight)) * 100f;
+        // Земля под точкой — по старому наклону, до его смены.
+        float groundY = KingdomSurvival.MapLabBridge.MapLabGameLive.GroundYFromScreenY(world, xPercent, yScreenPercent);
+        KingdomSurvival.MapLabBridge.MapLabGameLive.SetPitch(world, pitch);
+        worldMapCanvasHeight = worldMapCanvasHeightFlat * world.Sin;
+        worldMap.style.height = worldMapCanvasHeight;
+        worldMapMapLab.HeightScale = world.Sin;
+        worldMapMapLab.Pitch = world.Pitch;
+        for (int i = 0; i < world.Buildings.Count && i < worldMapMapLab.Buildings.Count; i++)
+            worldMapMapLab.Buildings[i] = (world.Buildings[i].SettlementId, world.Buildings[i].Role, world.Buildings[i].Percent);
+        // Цели зданий и деталей мест — по новым процентам в этот же кадр (иначе один кадр они стоят по-старому).
+        if (worldMapBuildingLayer != null && worldMapBuildingsShownFor != null)
+            BuildWorldMapBuildingTargets(worldMapBuildingsShownFor);
+        if (worldMapFeaturesWorld != null)
+            BuildWorldMapFeatureTargets(world);
+        float screenPercent = groundY + KingdomSurvival.MapLabBridge.MapLabGameLive.ElevationShiftPercent(world, xPercent, groundY);
+        worldMapPanOffsetY = anchor.y - screenPercent / 100f * worldMapCanvasHeight * zoom;
+        RepositionWorldMapPlacePictures();
+        return true;
+    }
+
     private void ApplyWorldMapViewportTransform()
     {
         if (worldMap == null)
             return;
+
+        // Наклон камеры живой карты следует за приближением; якорь — центр рамки (прямой
+        // зум колесом уже сделал это с точкой под курсором).
+        if (worldMapViewport != null && SyncWorldMapPitch(new Vector2(worldMapViewport.resolvedStyle.width * 0.5f, worldMapViewport.resolvedStyle.height * 0.5f)))
+            ClampWorldMapPan();
 
         // 12И: сдвиг — translate, а не left/top: камера едет за героем каждый
         // кадр, и пересчёт раскладки всего полотна с маркерами давал рывки.

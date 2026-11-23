@@ -166,6 +166,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float2 rhythm : TEXCOORD4;
                 float fade : TEXCOORD5;
                 float3 cardPos : TEXCOORD6;   // мир в плоскости карточки (x вправо, y вверх), z — seed экземпляра
+                float baseZ : TEXCOORD7;      // z опоры (мир): ключ порядка для слоёв «впереди бойца»
             };
 
 
@@ -325,6 +326,9 @@ Shader "Kingdom Survival/MapLab/Art Card"
             float _MapLabBendMaxHeight;
             float _MapLabFrontOn;
             float _MapLabFrontZ;
+            // Слой-ключ (арена): вместо цвета — глубина опоры в 16 битах (R старший, G младший) и альфа.
+            float _MapLabKeyOut;
+            float2 _MapLabKeyRange;   // x — z нижней границы, y — 1 / длина диапазона
 
             float3 Hue(float h)
             {
@@ -400,6 +404,7 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 float4 s = SAMPLE_TEXTURE2D_LOD(_ShadeTex, sampler_ShadeTex, basePoint.xz / max(1.0, _MapSize), 0);
                 o.shade = saturate((1.0 - s.r) * 0.9 + (1.0 - s.g) * 0.35);
                 // Этап 05: плотность пикселей итогового кадра на единицу мира (орто).
+                o.baseZ = basePoint.z;
                 o.fade = 1.0;
                 if (_DetailFade.y > _DetailFade.x)
                 {
@@ -442,6 +447,15 @@ Shader "Kingdom Survival/MapLab/Art Card"
                 }
                 else
                     clip(tex.a - _Cutoff);
+                if (_MapLabKeyOut > 0.5)
+                {
+                    float key = saturate((i.baseZ - _MapLabKeyRange.x) * _MapLabKeyRange.y) * 65535.0;
+                    float hi = floor(key / 256.0);
+                    // Цель — sRGB: пишем так, чтобы после аппаратного кодирования в байтах остались hi и lo.
+                    float2 bytes = float2(hi, key - hi * 256.0) / 255.0;
+                    float2 lin = bytes <= 0.04045 ? bytes / 12.92 : pow((bytes + 0.055) / 1.055, 2.4);
+                    return float4(lin, 0, outAlpha);
+                }
                 if (_Ghost > 0.5)
                     return _GhostColor;
                 float3 c = tex.rgb;

@@ -180,8 +180,9 @@ public partial class PrototypeUIController
     private Vector2 WorldMapPanelToPercent(Vector2 panelPosition)
     {
         Vector2 local = worldMap.WorldToLocal(panelPosition);
-        float width = Math.Max(1f, worldMap.resolvedStyle.width);
-        float height = Math.Max(1f, worldMap.resolvedStyle.height);
+        float width = Math.Max(1f, worldMapCanvasWidth > 0f ? worldMapCanvasWidth : worldMap.resolvedStyle.width);
+        // Высота полотна меняется с наклоном камеры в тот же кадр, раскладка догоняет позже.
+        float height = Math.Max(1f, worldMapCanvasHeight > 0f ? worldMapCanvasHeight : worldMap.resolvedStyle.height);
         float xPercent = local.x / width * 100f;
         float yPercent = local.y / height * 100f;
         // Живая карта рисует землю со сдвигом по высоте рельефа: точка под

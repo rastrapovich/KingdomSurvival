@@ -7,7 +7,7 @@ namespace KingdomSurvival.ArtAssets.Editor
     // ПР-12Н: файлы управляемой папки Базы ассетов получают настройки сразу
     // при первом импорте — без второй записи .meta (на Windows только что
     // созданный .meta бывает кратко занят другим процессом). Рисунок — Sprite
-    // (sRGB, прозрачность), нормаль (`*_normal*.png`) — Normal map (линейная).
+    // (sRGB, прозрачность, мип-уровни — см. ApplyColorMipmaps), нормаль (`*_normal*.png`) — Normal map (линейная).
     // Уже настроенные файлы не трогаются: повторная загрузка сохраняет .meta.
     public sealed class ArtAssetTexturePostprocessor : AssetPostprocessor
     {
@@ -27,6 +27,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                 importer.textureType = TextureImporterType.NormalMap;
                 return;
             }
+            ArtAssetImporter.ApplyColorMipmaps(importer);
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;
             importer.alphaIsTransparency = true;

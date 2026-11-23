@@ -39,6 +39,8 @@ namespace KingdomSurvival.BattleSandbox
         private float readyAt = -1f;
         private Vector2Int lastSize;
         private float renderedAt = -1f;
+        // Сколько кадров арены нарисовано (замер плавности анимации в смоук-тесте).
+        public int RenderedFrames { get; private set; }
         private static MapLabArenaDriver current;
 
         private VisualElement loading, loadingFill;
@@ -404,6 +406,7 @@ namespace KingdomSurvival.BattleSandbox
                     : Time.realtimeSinceStartup - readyAt > SettleSeconds || Time.realtimeSinceStartup - renderedAt < 0.1f))
                 return;
             renderedAt = Time.realtimeSinceStartup;
+            RenderedFrames++;
             lastSize = size;
             // Сам кадр рисуется в LateUpdate (ArenaRenderPump), а не во время
             // обновления панелей UI: на D3D12 рендер камеры посреди обновления
@@ -421,40 +424,40 @@ namespace KingdomSurvival.BattleSandbox
         // очереди за ним весь Play Mode. Теперь: не больше одного кадра в работе у
         // видеокарты (AsyncGPUReadback отвечает, когда она закончила) и пауза после
         // кадра, кратная его реальной цене, — арена занимает не более ~1/3 времени,
-        // остальное — интерфейсу.
+        // остальное — интерфейсу. Пауза считается по цене кадра на ЦП: ответ чтения
+        // приходит через 2–3 кадра игры (задержка очереди, а не работа арены), и с ним
+        // в цене арена в плеере рисовалась 3 раза в секунду. Занятость видеокарты
+        // ограничена числом кадров в работе (плеер, GTX 1070, 5 рядов: один — арена
+        // 15 к/с при игре 46 к/с; два — 19 к/с при 41 к/с; плавность игры важнее).
         private const float AnimationFrameSeconds = 1f / 30f;
-        private const float AnimationLoadShare = 3f;
+        private const float AnimationLoadShare = 2f;
         private const float AnimationPendingLimit = 1f;
-        private bool gpuPending;
+        private const int AnimationFramesInFlight = 1;
+        private int gpuPending;
         private float gpuSubmittedAt;
-        private float cpuCostSeconds, gpuCostSeconds;
-        // Полная цена кадра: ЦП на отправку + то, что видеокарта доделывает после (без ответа — по ЦП вдвое).
-        private float frameCostSeconds => cpuCostSeconds + (gpuCostSeconds > 0f ? gpuCostSeconds : cpuCostSeconds);
+        private float cpuCostSeconds;
 
         // true — до следующего анимированного кадра ещё рано.
         private bool AnimationWaiting()
         {
             float now = Time.realtimeSinceStartup;
-            if (gpuPending && now - gpuSubmittedAt < AnimationPendingLimit)
+            if (gpuPending >= AnimationFramesInFlight && now - gpuSubmittedAt < AnimationPendingLimit)
                 return true;
-            return now - renderedAt < Mathf.Max(AnimationFrameSeconds, AnimationLoadShare * frameCostSeconds);
+            return now - renderedAt < Mathf.Max(AnimationFrameSeconds, AnimationLoadShare * cpuCostSeconds);
         }
 
-        // Цена только что отправленного кадра: ЦП — сразу, видеокарта — когда ответит чтение 1 пикселя.
+        // Цена только что отправленного кадра на ЦП; чтение 1 пикселя отвечает, когда видеокарта его закончила.
         private void TrackFrameCost(Texture last, float cpuSeconds)
         {
             cpuCostSeconds = cpuCostSeconds <= 0f ? cpuSeconds : Mathf.Lerp(cpuCostSeconds, cpuSeconds, 0.5f);
-            if (last == null || gpuPending || !SystemInfo.supportsAsyncGPUReadback)
+            if (last == null || gpuPending >= AnimationFramesInFlight || !SystemInfo.supportsAsyncGPUReadback)
                 return;
-            gpuPending = true;
-            float submitted = gpuSubmittedAt = Time.realtimeSinceStartup;
+            gpuPending++;
+            gpuSubmittedAt = Time.realtimeSinceStartup;
             UnityEngine.Rendering.AsyncGPUReadback.Request(last, 0, 0, 1, 0, 1, 0, 1, request =>
             {
                 if (disposed) return;
-                gpuPending = false;
-                if (request.hasError) return;
-                float seconds = Time.realtimeSinceStartup - submitted;
-                gpuCostSeconds = gpuCostSeconds <= 0f ? seconds : Mathf.Lerp(gpuCostSeconds, seconds, 0.5f);
+                gpuPending = Mathf.Max(0, gpuPending - 1);
             });
         }
 
@@ -470,6 +473,11 @@ namespace KingdomSurvival.BattleSandbox
             frontRowsSorted.Clear();
             frontRowsSorted.AddRange(board.FrontRows);
             frontRowsSorted.Sort((a, b) => a.KeyY.CompareTo(b.KeyY));
+            int rows = 0;
+            float seen = float.NegativeInfinity;
+            foreach ((float rowKey, float _) in frontRowsSorted)
+                if (rowKey - seen >= 1.5f) { seen = rowKey; rows++; }
+            arena.PrepareFronts(rows);
             float last = float.NegativeInfinity;
             int slot = 0;
             foreach ((float keyY, float shareY) in frontRowsSorted)

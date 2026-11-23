@@ -56,7 +56,10 @@ namespace KingdomSurvival.MapLab
         // ограничивается им). Его читают колесо, курсор, плавная цель, окно и экспорт.
         public float MaxZoom => view != null && view.Settings != null ? view.Settings.MaxZoom(ZoomLimits.y) : ZoomLimits.y;
 
-        public float Pitch => view != null && view.Settings != null ? view.Settings.PitchFor(zoom, ZoomLimits.y) : 60f;
+        // Игра (живая карта) ведёт камеру сама и задаёт наклон напрямую: > 0 — вместо кривой от приближения.
+        public float PitchOverride;
+
+        public float Pitch => PitchOverride > 0f ? PitchOverride : view != null && view.Settings != null ? view.Settings.PitchFor(zoom, ZoomLimits.y) : 60f;
 
         public float Azimuth => view != null && view.Settings != null ? view.Settings.Camera.AzimuthDegrees : 0f;
 

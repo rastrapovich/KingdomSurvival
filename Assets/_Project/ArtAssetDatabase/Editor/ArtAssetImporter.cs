@@ -407,9 +407,54 @@ namespace KingdomSurvival.ArtAssets.Editor
         // импорте; здесь — только если настройки всё же не те.
         public static void EnsureColorSettings(TextureImporter importer)
         {
-            if (importer.textureType == TextureImporterType.Sprite && importer.spriteImportMode == SpriteImportMode.Single && importer.sRGBTexture)
+            if (importer.textureType == TextureImporterType.Sprite && importer.spriteImportMode == SpriteImportMode.Single && importer.sRGBTexture && HasColorMipmaps(importer))
                 return;
             ConfigureColor(importer);
+        }
+
+        // Мип-уровни рисунка: карточки арены и карты рисуют его мелко (2048 px → десятки
+        // пикселей) — без мипов видеокарта читает полное изображение на каждый пиксель
+        // (кадр арены на треть дольше), мазки шейдера карточек берут уровни 3–4. Покрытие
+        // альфы сохраняется на порог отсечения карточек, чтобы вдали силуэт не истончался.
+        public const float CardAlphaCutoff = 0.5f;
+
+        public static void ApplyColorMipmaps(TextureImporter importer)
+        {
+            importer.mipmapEnabled = true;
+            importer.mipMapsPreserveCoverage = true;
+            importer.alphaTestReferenceValue = CardAlphaCutoff;
+        }
+
+        public static bool HasColorMipmaps(TextureImporter importer) =>
+            importer.mipmapEnabled && importer.mipMapsPreserveCoverage;
+
+        // Однократный перевод уже загруженных рисунков Базы ассетов на мип-уровни:
+        //   -executeMethod KingdomSurvival.ArtAssets.Editor.ArtAssetImporter.EnableColorMipmapsBatch
+        public static void EnableColorMipmapsBatch()
+        {
+            int changed = 0;
+            try
+            {
+                AssetDatabase.StartAssetEditing();
+                foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { ManagedRoot }))
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(guid);
+                    if (ArtAssetTexturePostprocessor.IsManagedNormal(path) || !(AssetImporter.GetAtPath(path) is TextureImporter importer))
+                        continue;
+                    if (importer.textureType != TextureImporterType.Sprite || HasColorMipmaps(importer))
+                        continue;
+                    ApplyColorMipmaps(importer);
+                    importer.SaveAndReimport();
+                    changed++;
+                }
+            }
+            finally
+            {
+                AssetDatabase.StopAssetEditing();
+            }
+            UnityEngine.Debug.Log("База ассетов: мип-уровни включены у рисунков: " + changed);
+            if (UnityEngine.Application.isBatchMode)
+                EditorApplication.Exit(0);
         }
 
         public static void ConfigureColor(TextureImporter importer)
@@ -419,7 +464,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             importer.spriteImportMode = SpriteImportMode.Single;
             importer.alphaIsTransparency = true;
             importer.sRGBTexture = true;
-            importer.mipmapEnabled = false;
+            ApplyColorMipmaps(importer);
             importer.maxTextureSize = MaxSize(width, height);
             SpriteNormalMaps.SaveVerified(importer, meta => SpriteNormalMaps.MetaValue(meta, "textureType") == SpriteType);
         }

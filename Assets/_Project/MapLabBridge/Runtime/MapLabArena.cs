@@ -427,6 +427,9 @@ namespace KingdomSurvival.MapLabBridge
             // Тени арены: край размыт (трава и кусты рядом с бойцами не «лужи»).
             s.Stage03.ShadowSoftEdge = Spec.HexWorld * 0.16f;
             s.Stage03.SilhouetteShadows = true;
+            // Арена мала: меш на рисунок целиком, без кусков подгрузки — втрое меньше
+            // рендереров и вызовов отрисовки в каждом проходе кадра.
+            s.Stage05.ArtChunkSize = 4096f;
             s.Stage05.FrameWidth = 0f;
             s.Stage05.PaintStreaming = MapLabPaintStreaming.Off;
             // Крупный план: покраска плотнее, чем на карте мира.
@@ -661,7 +664,7 @@ namespace KingdomSurvival.MapLabBridge
                     camera.Render();
                     camera.targetTexture = null;
                 }
-                RenderOverlay(graded);
+ RenderOverlay(graded);
             }
             finally
             {

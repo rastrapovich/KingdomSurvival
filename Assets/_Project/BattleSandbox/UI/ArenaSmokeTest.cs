@@ -172,14 +172,17 @@ namespace KingdomSurvival.BattleSandbox
                     ok = false;
                     break;
                 }
-                float frameMs = 0f;
+                float frameMs = 0f, worst = 0f;
+                int arenaFrames = driver.RenderedFrames;
                 for (int i = 0; i < 90; i++)
                 {
                     yield return null;
                     frameMs += Time.unscaledDeltaTime * 1000f;
+                    worst = Mathf.Max(worst, Time.unscaledDeltaTime * 1000f);
                 }
+                arenaFrames = driver.RenderedFrames - arenaFrames;
                 Log($"round {round + 1}: ready in {readyMs:0} ms (battle screen {invokeMs:0} ms, build {driver.Arena.BuildMs:0} ms), " +
-                    $"decor from asset database {driver.Arena.UsesAssetDatabase} ({driver.Arena.DecorFeatures}), frame {frameMs / 90f:0.0} ms, " +
+                    $"decor from asset database {driver.Arena.UsesAssetDatabase} ({driver.Arena.DecorFeatures}), frame {frameMs / 90f:0.0} ms (worst {worst:0} ms), arena {arenaFrames * 1000f / Mathf.Max(1f, frameMs):0.0} frames/s, " +
                     $"memory {UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong() / 1048576f:0} MB");
                 if (round == 0)
                     Save(surface);

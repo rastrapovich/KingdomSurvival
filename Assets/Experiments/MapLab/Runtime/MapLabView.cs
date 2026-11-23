@@ -1335,7 +1335,7 @@ namespace KingdomSurvival.MapLab
                 group = group != null ? group : Group(name);
                 Material material = ArtMaterial(entry);
                 CountUsage(entry, plan.Cards[entry].Count);
-                List<Mesh> meshes = MapLabArtBuilder.BuildMeshes(data, entry, plan.Cards[entry], 64f);
+                List<Mesh> meshes = MapLabArtBuilder.BuildMeshes(data, entry, plan.Cards[entry], Mathf.Max(16f, Settings.Stage05.ArtChunkSize));
                 for (int i = 0; i < meshes.Count; i++)
                     AddRenderer(group, meshes[i].name, meshes[i], material);
                 // Глобальная карта: тот же меш второй раз — силуэтная тень (проход без

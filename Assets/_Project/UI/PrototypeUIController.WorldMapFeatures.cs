@@ -104,6 +104,24 @@ public partial class PrototypeUIController
         return true;
     }
 
+    // Смена наклона камеры: скрытые места, нарисованные значком, встают на землю заново
+    // (сдвиг по высоте и высота полотна зависят от наклона).
+    private void RepositionWorldMapPlacePictures()
+    {
+        MapLabGameLive.World world = MapLabGameLive.Current;
+        if (world == null || !world.Ready || worldMapMarkers == null)
+            return;
+        foreach ((Label _, LocationData location, float height) in worldMapPlacePictures)
+        {
+            VisualElement picture = worldMapMarkers.Q<VisualElement>("world-map-place-" + location.Id);
+            if (picture == null || !MapLabGameMap.PlaceArt(location.PlaceKind, out Texture2D _, out float _, out float _, out Vector2 pivot))
+                continue;
+            float shift = MapLabGameLive.ElevationShiftPercent(world, location.MapXPercent, location.MapYPercent);
+            float baseY = (location.MapYPercent + shift) / 100f * worldMapCanvasHeight;
+            picture.style.top = baseY - (1f - pivot.y) * height;
+        }
+    }
+
     private void PlaceWorldMapPlacePictureLabels()
     {
         foreach ((Label label, LocationData location, float height) in worldMapPlacePictures)

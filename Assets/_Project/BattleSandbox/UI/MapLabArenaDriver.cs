@@ -393,6 +393,9 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             float scale = surface.panel != null ? surface.panel.scaledPixelsPerPoint : 1f;
             Vector2Int size = new Vector2Int(Mathf.RoundToInt(frame.width * scale), Mathf.RoundToInt(frame.height * scale));
+            // Кадр арены не выше MaxRenderHeight: интерфейс растягивает текстуру на поле.
+            if (MaxRenderHeight > 0 && size.y > MaxRenderHeight)
+                size = new Vector2Int(Mathf.RoundToInt(size.x * MaxRenderHeight / (float)size.y), MaxRenderHeight);
             // Тот же размер: после готовности кадр догружается (не чаще 10 раз
             // в секунду), дальше не перерисовывается.
             // Обработка кадра со временем (вспышка, тряска, плёнка, облака) — кадр
@@ -404,6 +407,8 @@ namespace KingdomSurvival.BattleSandbox
             bool animating = (frameBinding != null && frameBinding.Animating) || walking || arena.HasRiver || arena.ParticlesActive;
             if (shown != null && size == lastSize && (animating ? AnimationWaiting()
                     : Time.realtimeSinceStartup - readyAt > SettleSeconds || Time.realtimeSinceStartup - renderedAt < 0.1f))
+                return;
+            if (FreezeRendering)
                 return;
             renderedAt = Time.realtimeSinceStartup;
             RenderedFrames++;
@@ -417,6 +422,18 @@ namespace KingdomSurvival.BattleSandbox
 
         private Vector2Int requestedSize;
 
+        // Предел высоты кадра арены в пикселях (0 — по экрану). 23.11.2026: на экране 4K
+        // кадр рисовался в 3840×2160 — 47 мс видеокарты, игра в бою ~28 к/с, арена 14 к/с;
+        // с пределом 1440 — 28 мс, игра ~55 к/с, арена 27 к/с (плеер, GTX 1070, D3D12).
+        // Интерфейс растягивает кадр на поле (на 4K — в 1,5 раза).
+        public static int MaxRenderHeight = 1440;
+
+        // Замер смоук-теста: кадры арены не перерисовываются (цена интерфейса без арены).
+        internal static bool FreezeRendering;
+        // Последний нарисованный слой кадра (замер ждёт видеокарту по нему) и строк «впереди бойца».
+        internal Texture LastFrameTexture => frontOut.Count > 0 ? frontOut[frontOut.Count - 1].Texture : arena.OverlayTexture != null ? arena.OverlayTexture : shown;
+        internal int FrontRowCount => frontOut.Count;
+
         // ---------- нагрузка анимированных кадров ----------
         // Кадр арены — это 3 + 2 × (строк бойцов) проходов камеры; со временем он
         // перерисовывается каждые ~1/30 с (ветер, облака, зерно, река, частицы), и
@@ -427,12 +444,15 @@ namespace KingdomSurvival.BattleSandbox
         // остальное — интерфейсу. Пауза считается по цене кадра на ЦП: ответ чтения
         // приходит через 2–3 кадра игры (задержка очереди, а не работа арены), и с ним
         // в цене арена в плеере рисовалась 3 раза в секунду. Занятость видеокарты
-        // ограничена числом кадров в работе (плеер, GTX 1070, 5 рядов: один — арена
-        // 15 к/с при игре 46 к/с; два — 19 к/с при 41 к/с; плавность игры важнее).
+        // ограничена числом кадров в работе. 23.11.2026: кадр арены подешевел втрое
+        // (слои объектов без повторной обработки кадра, ключ без MSAA, предел высоты),
+        // и при одном кадре в работе арена упиралась в задержку ответа (~20 к/с);
+        // два кадра в работе — 28 к/с при игре ~57 к/с (плеер, GTX 1070, 4K).
         private const float AnimationFrameSeconds = 1f / 30f;
+        private const float AnimationFrameSlack = 0.005f;
         private const float AnimationLoadShare = 2f;
         private const float AnimationPendingLimit = 1f;
-        private const int AnimationFramesInFlight = 1;
+        private const int AnimationFramesInFlight = 2;
         private int gpuPending;
         private float gpuSubmittedAt;
         private float cpuCostSeconds;
@@ -443,7 +463,9 @@ namespace KingdomSurvival.BattleSandbox
             float now = Time.realtimeSinceStartup;
             if (gpuPending >= AnimationFramesInFlight && now - gpuSubmittedAt < AnimationPendingLimit)
                 return true;
-            return now - renderedAt < Mathf.Max(AnimationFrameSeconds, AnimationLoadShare * cpuCostSeconds);
+            // Запас в 5 мс: при vsync 60 Гц два кадра игры (≈33,2 мс с дрожанием) иначе
+            // иногда не дотягивали до 1/30 с, и арена ждала третий — 20 кадров/с вместо 30.
+            return now - renderedAt < Mathf.Max(AnimationFrameSeconds, AnimationLoadShare * cpuCostSeconds) - AnimationFrameSlack;
         }
 
         // Цена только что отправленного кадра на ЦП; чтение 1 пикселя отвечает, когда видеокарта его закончила.

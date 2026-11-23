@@ -79,6 +79,9 @@ namespace KingdomSurvival.BattleSandbox
                 Application.Quit(mapReady ? 0 : 1);
                 yield break;
             }
+            int maxHeightIndex = Array.IndexOf(args, "-arenaMaxHeight");
+            if (maxHeightIndex >= 0 && maxHeightIndex + 1 < args.Length && int.TryParse(args[maxHeightIndex + 1], out int maxHeight))
+                MapLabArenaDriver.MaxRenderHeight = maxHeight;
             if (args.Contains("-arenaMsaa"))
                 KingdomSurvival.MapLabBridge.MapLabArena.FrameMsaa = 4;
             if (args.Contains("-arenaBuildOnly") || args.Contains("-arenaRenderOnly"))
@@ -185,13 +188,99 @@ namespace KingdomSurvival.BattleSandbox
                     $"decor from asset database {driver.Arena.UsesAssetDatabase} ({driver.Arena.DecorFeatures}), frame {frameMs / 90f:0.0} ms (worst {worst:0} ms), arena {arenaFrames * 1000f / Mathf.Max(1f, frameMs):0.0} frames/s, " +
                     $"memory {UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong() / 1048576f:0} MB");
                 if (round == 0)
+                {
                     Save(surface);
+                    string screenPath = Path.Combine(Application.persistentDataPath, "arena-screen.png");
+                    ScreenCapture.CaptureScreenshot(screenPath);
+                    yield return null;
+                    yield return null;
+                    Log("battle screen saved " + screenPath);
+                }
+                if (round == 0 && args.Contains("-arenaBench"))
+                    yield return Bench(driver);
                 Invoke(sandbox, "BuildSetupScreen");
                 for (int i = 0; i < 10; i++)
                     yield return null;
             }
             Log(ok ? "PASS" : "FAIL");
             Application.Quit(ok ? 0 : 1);
+        }
+
+        // -arenaBench: цена кадра по частям. Кадр игры без перерисовки арены
+        // (интерфейс и доска), затем проходы арены с ожиданием видеокарты
+        // (чтение 1 пикселя): полный кадр драйвера, нижний кадр с верхним слоем,
+        // без обработки кадра, без MSAA, в половину высоты.
+        private IEnumerator Bench(MapLabArenaDriver driver)
+        {
+            MapLabArenaDriver.FreezeRendering = true;
+            for (int i = 0; i < 10; i++) yield return null;
+            float frameMs = 0f, worst = 0f;
+            for (int i = 0; i < 90; i++)
+            {
+                yield return null;
+                frameMs += Time.unscaledDeltaTime * 1000f;
+                worst = Mathf.Max(worst, Time.unscaledDeltaTime * 1000f);
+            }
+            Log($"bench: game frame with arena frozen {frameMs / 90f:0.0} ms (worst {worst:0} ms)");
+            KingdomSurvival.MapLabBridge.MapLabArena arena = driver.Arena;
+            Vector2Int size = (Vector2Int)Member(driver, "requestedSize");
+            Texture2D pixel = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            void Sync(Texture texture)
+            {
+                if (!(texture is RenderTexture rt)) return;
+                RenderTexture previous = RenderTexture.active;
+                RenderTexture.active = rt;
+                pixel.ReadPixels(new Rect(0, 0, 1, 1), 0, 0);
+                RenderTexture.active = previous;
+            }
+            string Measure(string name, Func<Texture> render)
+            {
+                Sync(render());
+                Sync(render());
+                double cpu = 0, total = 0;
+                const int n = 12;
+                for (int i = 0; i < n; i++)
+                {
+                    System.Diagnostics.Stopwatch w = System.Diagnostics.Stopwatch.StartNew();
+                    Texture t = render();
+                    cpu += w.Elapsed.TotalMilliseconds;
+                    Sync(t);
+                    total += w.Elapsed.TotalMilliseconds;
+                }
+                string line = $"bench {name}: {total / n:0.0} ms (CPU submit {cpu / n:0.0} ms)";
+                Log(line);
+                return line;
+            }
+            yield return null;
+            Log($"bench size {size.x}x{size.y}, msaa {KingdomSurvival.MapLabBridge.MapLabArena.EffectiveFrameMsaa}, front rows {driver.FrontRowCount}");
+            Measure("full driver frame", () => { driver.RenderRequested(); return driver.LastFrameTexture; });
+            yield return null;
+            Measure("ground+objects", () => arena.Render(size.x, size.y));
+            yield return null;
+            Measure("front key + 2 rows only", () =>
+            {
+                arena.PrepareFronts(2);
+                arena.RenderFront(0, arena.GroundZ(0.5f));
+                return arena.RenderFront(1, arena.GroundZ(0.7f));
+            });
+            Measure("ground only (overlay off)", () => arena.RenderGroundOnlyForBench(size.x, size.y));
+            yield return null;
+            var post = arena.Spec.Frame;
+            arena.Spec.Frame = null;
+            Measure("ground+objects, no frame post", () => arena.Render(size.x, size.y));
+            arena.Spec.Frame = post;
+            yield return null;
+            int msaa = KingdomSurvival.MapLabBridge.MapLabArena.FrameMsaa;
+            KingdomSurvival.MapLabBridge.MapLabArena.FrameMsaa = 1;
+            Measure("ground+objects, msaa 1", () => arena.Render(size.x, size.y));
+            Measure("full driver frame, msaa 1", () => { driver.RenderRequested(); return driver.LastFrameTexture; });
+            KingdomSurvival.MapLabBridge.MapLabArena.FrameMsaa = msaa;
+            yield return null;
+            Measure("full driver frame (again)", () => { driver.RenderRequested(); return driver.LastFrameTexture; });
+            yield return null;
+            Destroy(pixel);
+            MapLabArenaDriver.FreezeRendering = false;
+            for (int i = 0; i < 10; i++) yield return null;
         }
 
         private static void Save(BattlefieldView surface)

@@ -664,7 +664,8 @@ namespace KingdomSurvival.MapLabBridge
                     camera.Render();
                     camera.targetTexture = null;
                 }
- RenderOverlay(graded);
+                if (!SkipOverlayForBench)
+                    RenderOverlay(graded);
             }
             finally
             {
@@ -674,6 +675,16 @@ namespace KingdomSurvival.MapLabBridge
                 framePost?.End(camera);
             }
             return target;
+        }
+
+        // Замер смоук-теста: только нижний кадр, без слоя объектов.
+        private bool SkipOverlayForBench;
+
+        public RenderTexture RenderGroundOnlyForBench(int pixelWidth, int pixelHeight)
+        {
+            SkipOverlayForBench = true;
+            try { return Render(pixelWidth, pixelHeight); }
+            finally { SkipOverlayForBench = false; }
         }
 
         private static void SetLayer(Transform t)

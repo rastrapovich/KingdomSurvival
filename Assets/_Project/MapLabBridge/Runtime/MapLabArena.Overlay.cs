@@ -88,9 +88,11 @@ namespace KingdomSurvival.MapLabBridge
         }
 
         // Верхний слой: только объекты, земля — глубиной, фон прозрачный.
-        // С обработкой кадра (graded) слой рисуется дважды: без обработки —
-        // ради прозрачности, с обработкой — ради цвета; склейка — шейдером
-        // MapLabArenaAlphaMerge (URP после обработки выводит альфу 1).
+        // С обработкой кадра (graded) прозрачность — из прохода без обработки,
+        // цвет — из уже нарисованного нижнего кадра (там те же объекты в тех же
+        // пикселях и с той же обработкой); склейка — шейдером MapLabArenaAlphaMerge
+        // (URP после обработки выводит альфу 1). 23.11.2026: прежде цвет давал
+        // второй проход камеры с обработкой — лишние ~4 мс видеокарты на кадр.
         private void RenderOverlay(bool graded)
         {
             overlayGradedShown = false;
@@ -126,25 +128,23 @@ namespace KingdomSurvival.MapLabBridge
                 camera.backgroundColor = new Color(0f, 0f, 0f, 0f);
                 if (graded)
                     framePost.Suspend(camera);
-                // Ключевой режим (общий слой строк «впереди бойца»): альфа берётся из слоя-ключа, исходный цветной слой не нужен.
-                bool merging = graded && MergeMaterial() != null;
+                // Ключевой режим (общий слой строк «впереди бойца»): только ключ и альфа,
+                // цвет строки берётся из нижнего кадра (ComposeFront).
                 if (keyTarget != null)
                 {
                     Shader.SetGlobalFloat(KeyOutId, 1f);
-                    try { RenderLayer(keyTarget); }
+                    // Без MSAA: сведение усредняло бы закодированную глубину на краях
+                    // (ложные строки), а сам проход с MSAA 4× стоил ~17 мс вместо ~6.
+                    try { RenderLayer(keyTarget, false); }
                     finally { Shader.SetGlobalFloat(KeyOutId, 0f); }
+                    return false;
                 }
-                if (keyTarget == null || !merging)
-                    RenderLayer(rawTarget);
+                RenderLayer(rawTarget);
                 if (graded && MergeMaterial() != null)
                 {
-                    framePost.Begin(camera, Spec.Frame, LensPulse != null ? LensPulse() : 0f);
-                    RenderTexture colour = RenderTexture.GetTemporary(new RenderTextureDescriptor(rawTarget.width, rawTarget.height, GraphicsFormat.R8G8B8A8_SRGB, 24));
-                    RenderLayer(colour);
                     gradedTarget = EnsureLayerTexture(gradedTarget, "MapLab Arena Objects Graded");
-                    alphaMerge.SetTexture(GradedTexId, colour);
-                    Graphics.Blit(keyTarget != null ? keyTarget : rawTarget, gradedTarget, alphaMerge);
-                    RenderTexture.ReleaseTemporary(colour);
+                    alphaMerge.SetTexture(GradedTexId, target);
+                    Graphics.Blit(rawTarget, gradedTarget, alphaMerge);
                     gradedDone = true;
                 }
             }
@@ -232,11 +232,14 @@ namespace KingdomSurvival.MapLabBridge
             return done ? frontGraded[index] : frontRaw[index];
         }
 
-        // Строки «впереди бойца» из одного общего слоя: 2 прохода камеры вместо 2 на каждую строку.
-        // Вызывать после Render, до RenderFront; rows — сколько строк будет запрошено.
-        public const int FrontSourceMinRows = 3;
-        private bool frontSourceReady, frontSourceGraded;
-        private RenderTexture srcRaw, srcGraded, srcKey;
+        // Строки «впереди бойца» из одного общего слоя-ключа: один проход камеры без обработки
+        // кадра на все строки; цвет строки — из нижнего кадра (там те же объекты с той же
+        // обработкой). Вызывать после Render, до RenderFront; rows — сколько строк будет запрошено.
+        // 23.11.2026: общий слой и для 1–2 строк — прежде это были 2 прохода на строку (с обработкой),
+        // ~26 мс видеокарты из 45 мс кадра арены в плеере (GTX 1070, 1600×900).
+        public const int FrontSourceMinRows = 1;
+        private bool frontSourceReady;
+        private RenderTexture srcKey;
         private Material rowMaterial;
         private static Shader rowShader;
         private static readonly int KeyOutId = Shader.PropertyToID("_MapLabKeyOut");
@@ -255,11 +258,11 @@ namespace KingdomSurvival.MapLabBridge
             if (rowShader == null) rowShader = Resources.Load<Shader>("MapLabArenaFrontRow");
             if (rowShader == null || !rowShader.isSupported) return;
             if (rowMaterial == null) rowMaterial = new Material(rowShader) { name = "MapLab Arena Front Row", hideFlags = HideFlags.HideAndDontSave };
-            srcRaw = EnsureLayerTexture(srcRaw, "MapLab Arena Front Source");
             srcKey = EnsureLayerTexture(srcKey, "MapLab Arena Front Key");
             srcKey.filterMode = FilterMode.Point;
             Shader.SetGlobalVector(KeyRangeId, new Vector4(KeyMin, 1f / KeyLength, 0f, 0f));
-            frontSourceGraded = RenderFrontInto(srcRaw, ref srcGraded, srcKey, 0f);
+            RenderTexture unused = null;
+            RenderFrontInto(null, ref unused, srcKey, 0f);
             frontSourceReady = true;
         }
 
@@ -268,7 +271,8 @@ namespace KingdomSurvival.MapLabBridge
             frontRaw[index] = EnsureLayerTexture(frontRaw[index], "MapLab Arena Front " + index);
             rowMaterial.SetTexture(KeyTexId, srcKey);
             rowMaterial.SetFloat(ClipKeyId, Mathf.Clamp01((clipZ - 0.05f - KeyMin) / KeyLength));
-            Graphics.Blit(frontSourceGraded ? srcGraded : srcRaw, frontRaw[index], rowMaterial);
+            // Цвет — нижний кадр (с обработкой, если она есть), прозрачность — ключ строки.
+            Graphics.Blit(target, frontRaw[index], rowMaterial);
             return frontRaw[index];
         }
 
@@ -334,9 +338,9 @@ namespace KingdomSurvival.MapLabBridge
             return texture;
         }
 
-        private void RenderLayer(RenderTexture destination)
+        private void RenderLayer(RenderTexture destination, bool msaa = true)
         {
-            if (EffectiveFrameMsaa > 1)
+            if (msaa && EffectiveFrameMsaa > 1)
             {
                 RenderTextureDescriptor descriptor = new RenderTextureDescriptor(destination.width, destination.height, GraphicsFormat.R8G8B8A8_SRGB, 24) { msaaSamples = EffectiveFrameMsaa };
                 RenderTexture frame = RenderTexture.GetTemporary(descriptor);
@@ -387,7 +391,7 @@ namespace KingdomSurvival.MapLabBridge
 
         private void ReleaseOverlay()
         {
-            foreach (RenderTexture texture in new[] { overlayTarget, overlayGraded, srcRaw, srcGraded, srcKey })
+            foreach (RenderTexture texture in new[] { overlayTarget, overlayGraded, srcKey })
             {
                 if (texture == null)
                     continue;
@@ -408,7 +412,7 @@ namespace KingdomSurvival.MapLabBridge
             System.Array.Clear(frontGraded, 0, MaxFrontLayers);
             overlayTarget = null;
             overlayGraded = null;
-            srcRaw = srcGraded = srcKey = null;
+            srcKey = null;
             frontSourceReady = false;
             if (rowMaterial != null) { Object.DestroyImmediate(rowMaterial); rowMaterial = null; }
             if (depthOnly != null)

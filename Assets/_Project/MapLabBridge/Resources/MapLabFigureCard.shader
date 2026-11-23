@@ -25,7 +25,9 @@ Shader "Kingdom Survival/MapLab/Figure Card"
         {
             ZWrite [_ZWrite]
             ZTest [_ZTest]
-            Blend [_SrcBlend] [_DstBlend]
+            // Альфа кадра копится как у «Over» (One OneMinusSrcAlpha): иначе полупрозрачная
+            // тень/заливка уменьшала альфу карты в RT, и тень на экране светлела пятном.
+            Blend [_SrcBlend] [_DstBlend], One OneMinusSrcAlpha
             Cull Off
 
             HLSLPROGRAM

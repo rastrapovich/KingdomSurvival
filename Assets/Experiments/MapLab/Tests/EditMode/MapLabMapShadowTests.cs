@@ -39,6 +39,50 @@ namespace KingdomSurvival.MapLab.Tests
         private MapLabView View => mapObject.GetComponent<MapLabView>();
 
         [Test]
+        public void SunGround_FollowsHour_ShortAtNoon_NoDensityAtNight_NeverTowardsViewer()
+        {
+            MapLabStage05Settings s5 = settings.Stage05;
+            Vector2 morning = MapLabObjectShadows.SunGround(7f, s5, out float dMorning);
+            Vector2 noon = MapLabObjectShadows.SunGround(12f, s5, out float dNoon);
+            Vector2 evening = MapLabObjectShadows.SunGround(17f, s5, out float dEvening);
+            Assert.Less(morning.x, 0f, "утром тень влево");
+            Assert.Greater(evening.x, 0f, "вечером тень вправо");
+            Assert.Less(noon.magnitude, morning.magnitude, "в полдень короче, чем утром");
+            Assert.Less(noon.magnitude, evening.magnitude, "в полдень короче, чем вечером");
+            Assert.Greater(dMorning, 0.5f);
+            Assert.AreEqual(1f, dNoon, 1e-4f);
+            Assert.Greater(dEvening, 0.5f);
+            for (float h = 0f; h < 24f; h += 0.25f)
+            {
+                Vector2 g = MapLabObjectShadows.SunGround(h, s5, out float density);
+                if (density > 0f)
+                {
+                    float minSin = Mathf.Sin(s5.SunShadowMinAngle * Mathf.Deg2Rad);
+                    Assert.GreaterOrEqual(g.y, g.magnitude * minSin - 1e-4f, "тень не к зрителю и не нитью, час " + h);
+                }
+            }
+            foreach (float night in new[] { 0f, 2f, 4f, 21f, 23.5f })
+            {
+                MapLabObjectShadows.SunGround(night, s5, out float density);
+                Assert.AreEqual(0f, density, "ночью теней нет, час " + night);
+            }
+            MapLabObjectShadows.SunGround(6.2f, s5, out float dawn);
+            Assert.That(dawn, Is.GreaterThan(0f).And.LessThan(0.5f), "на рассвете тень бледная");
+        }
+
+        [Test]
+        public void SetSunHour_NightHidesMaterialShadow_DayShowsIt()
+        {
+            MapLabView view = View;
+            view.SetSunHour(12f);
+            Assert.Greater(view.SunDensity, 0.99f);
+            view.SetSunHour(23f);
+            Assert.AreEqual(0f, view.SunDensity);
+            view.SetSunHour(7f);
+            Assert.Less(view.SunGround.x, 0f);
+        }
+
+        [Test]
         public void MapCardShadows_OnForStage05Map_OffForArenaOrDisabledShadows()
         {
             Assert.IsTrue(settings.MapCardShadows);

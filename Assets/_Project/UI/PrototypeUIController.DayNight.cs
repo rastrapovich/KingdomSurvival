@@ -1,3 +1,4 @@
+using KingdomSurvival.MapLabBridge;
 using KingdomSurvival.WorldMapVisual;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -112,6 +113,8 @@ public partial class PrototypeUIController
         // Облака тумана лежат над картой — тот же свет суток, иначе они
         // светятся днём посреди ночной карты.
         SetWorldMapFogCloudsLight(tint);
+        // Тени предметов и фигур идут за солнцем по часу суток и гаснут ночью.
+        MapLabLiveFigures.SetSunHour((float)hourOfDay);
 
         if (worldMapLiveImage == null)
             return;

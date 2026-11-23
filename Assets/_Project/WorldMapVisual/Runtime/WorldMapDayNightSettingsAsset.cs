@@ -32,7 +32,7 @@ namespace KingdomSurvival.WorldMapVisual
         [Tooltip("Закат: охристые приглушённые цвета.")]
         [SerializeField] private Color duskTint = new Color(0.97f, 0.84f, 0.66f);
         [Tooltip("Ночь: холодный сине-серый и умеренно темнее. Не делать почти чёрным — дороги, реки и здания должны читаться.")]
-        [SerializeField] private Color nightTint = new Color(0.62f, 0.68f, 0.84f);
+        [SerializeField] private Color nightTint = new Color(0.30f, 0.36f, 0.58f);
 
         private static WorldMapDayNightSettingsAsset cached;
         private static bool loaded;

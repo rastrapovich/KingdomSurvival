@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using KingdomSurvival.BattlefieldDatabase;
+using KingdomSurvival.MapLabBridge;
 using KingdomSurvival.UnitDatabase;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -838,7 +839,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         }
 
         // Ветер рисунков: деревья и растительность качаются (места и арена).
-        private void BuildWind(LocationSpriteEffects s, string help)
+        private void BuildWind(LocationSpriteEffects s, string help, bool arena = false)
         {
             LocationSpriteEffects fresh = new LocationSpriteEffects();
             Group("Ветер", "Wind", s.Wind, value => s.Wind = value, () =>
@@ -847,13 +848,20 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Slider("Размах (ед. мира)", s.WindStrength, 0, .5f, value => s.WindStrength = value);
                 Slider("Скорость", s.WindSpeed, 0, 5, value => s.WindSpeed = value);
                 Slider("Порывы", s.WindGusts, 0, 1, value => s.WindGusts = value);
-                Slider("Высота полного размаха (ед. мира)", s.WindHeight, .2f, 10, value => s.WindHeight = value, "Ниже — качается меньше: у земли ствол стоит.");
+                if (arena)
+                {
+                    // Граница — доля роста самого рисунка: низ стоит, выше плавно нарастает до макушки.
+                    Slider("Граница деревьев (доля высоты)", s.WindTreeFloor, 0, .9f, value => s.WindTreeFloor = value, "Ниже этой доли роста дерево стоит (ствол у земли), выше — плавно раскачивается до макушки.");
+                    Slider("Граница кустов и травы (доля высоты)", s.WindPlantFloor, 0, .9f, value => s.WindPlantFloor = value, "То же для кустов, тростника и травы: ниже этой доли роста стоят.");
+                }
+                else
+                    Slider("Высота полного размаха (ед. мира)", s.WindHeight, .2f, 10, value => s.WindHeight = value, "Ниже — качается меньше: у земли ствол стоит.");
                 Slider("Направление (− запад, + восток, 0 — качание)", s.WindDirection, -1, 1, value => s.WindDirection = value);
                 Slider("Деревья (доля)", s.WindTrees, 0, 2, value => s.WindTrees = value);
                 Slider("Растительность и трава (доля)", s.WindPlants, 0, 2, value => s.WindPlants = value);
             }, () =>
             {
-                s.WindStrength = fresh.WindStrength; s.WindSpeed = fresh.WindSpeed; s.WindGusts = fresh.WindGusts; s.WindHeight = fresh.WindHeight;
+                s.WindStrength = fresh.WindStrength; s.WindSpeed = fresh.WindSpeed; s.WindGusts = fresh.WindGusts; s.WindHeight = fresh.WindHeight; s.WindTreeFloor = fresh.WindTreeFloor; s.WindPlantFloor = fresh.WindPlantFloor;
                 s.WindDirection = fresh.WindDirection; s.WindTrees = fresh.WindTrees; s.WindPlants = fresh.WindPlants;
             });
         }
@@ -864,17 +872,25 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void BuildArenaSprites(LocationPostEffects post)
         {
             BuildWind(post.Sprites, "Качает деревья, кусты, тростник и траву арены: основание стоит, верх ходит; соседние деревья — вразнобой, порывы проходят волной. " +
-                                    "Камни, постройки и фигуры не качаются. Размах и высота — в единицах мира мест (на арене пересчитываются по масштабу рисунков). " +
-                                    "Направление ветра ведёт и тени облаков вкладки «Атмосфера».");
+                                    "Пни, брёвна, коряги, камни, постройки и фигуры не качаются. Размах — в единицах мира мест (на арене пересчитывается по масштабу рисунков); граница высоты — доля роста самого рисунка. " +
+                                    "Направление ветра ведёт и тени облаков вкладки «Атмосфера».", true);
             Help("Обводка, дальний план, подсветка контура огнём и растворение при гибели — эффекты рисунков мест; на арене их нет.");
         }
 
-        // «Атмосфера» на арене: тени облаков и лучи (проход «Холста»). Марева
-        // нет — у арены нет огней; частицы — свойства мира места.
+        // «Атмосфера» на арене: тени облаков, лучи и марево над огнём (проход
+        // «Холста»; огонь — клетки боя с огнём) и частицы (пыль, мошкара, дождь,
+        // листья, искры, пар) — в плоскости кадра арены.
         private void BuildArenaAtmosphere(LocationPostEffects post)
         {
-            BuildAir(post, false);
-            Help("Частицы (пыль, мошкара, дождь, листья, искры, пар) и марево над огнём — свойства мира места: у арены их пока нет.");
+            ArenaFrameSettings frame = ArenaGeneratorAsset.Load().Frame;
+            Group("Час боя (для частиц)", "ArenaHour", null, null, () =>
+            {
+                Help("Арена всегда дневная по цвету, но слои частиц «Ночью» и «В часы» (мошкара — 17–22, пар изо рта — ночью) выбирают видимость по часу. " +
+                     "13 — день: ночные слои не видны. Одно значение на все арены.");
+                Slider("Час суток", frame.Hour, 0, 24, value => frame.Hour = value);
+            }, () => frame.Hour = 13f);
+            BuildAir(post);
+            BuildAtmosphere(post);
         }
 
         // ------------------------------------------------------------------
@@ -1156,7 +1172,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (!heatHaze) return;
             Group("Марево над огнём", "HeatHaze", air.HeatHaze, value => air.HeatHaze = value, () =>
             {
-                Help("Воздух дрожит над источниками света с «мерцанием» (костры, факелы). Только на высоком качестве.");
+                Help(Direct ? "Воздух дрожит над клетками боя с огнём (заклинания и эффекты огня). Только на высоком качестве." : "Воздух дрожит над источниками света с «мерцанием» (костры, факелы). Только на высоком качестве.");
                 Slider("Сила", air.HazeStrength, 0, 3, value => air.HazeStrength = value);
                 Slider("Ширина (ед. мира)", air.HazeRadius, .1f, 3, value => air.HazeRadius = value);
                 Slider("Высота (ед. мира)", air.HazeHeight, .2f, 6, value => air.HazeHeight = value);
@@ -1257,14 +1273,14 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void BuildAtmosphere(LocationPostEffects post)
         {
             LocationAtmosphereEffects a = post.Atmosphere;
-            Help("Частицы поверх места. Плотность — частиц в секунду на 100 кв. единиц мира (искры — на источник огня с мерцанием, пар — на человека). " +
+            Help((Direct ? "Частицы в плоскости кадра арены (под сеткой доски; бойцы — над кадром), размер и скорость — в единицах мира мест, как на месте. Искры — над клетками с огнём, пар — у голов живых бойцов. " : "Частицы поверх места. ") + "Плотность — частиц в секунду на 100 кв. единиц мира (искры — на источник огня с мерцанием, пар — на человека). " +
                  "Ветер раздела «Рисунки» сносит частицы по их доле ветра.");
             Particle("Пыль в лучах", "Dust", a.Dust, LocationParticleLayer.DefaultDust, value => a.Dust = value, 0, 40, note: "По умолчанию — только днём (смените «Когда видно»). Тёплые пылинки, медленно плавают.");
-            Particle("Мошкара", "Midges", a.Midges, LocationParticleLayer.DefaultMidges, value => a.Midges = value, 0, 120, true, note: "По умолчанию — только в часы 17–22: днём не видна (смените «Когда видно» или час предпросмотра). Рои плавают по месту.");
+            Particle("Мошкара", "Midges", a.Midges, LocationParticleLayer.DefaultMidges, value => a.Midges = value, 0, 120, true, note: Direct ? "По умолчанию — только в часы 17–22: днём не видна (смените «Когда видно» или «Час боя» выше). Рои плавают по кадру." : "По умолчанию — только в часы 17–22: днём не видна (смените «Когда видно» или час предпросмотра). Рои плавают по месту.");
             Particle("Дождь", "Rain", a.Rain, LocationParticleLayer.DefaultRain, value => a.Rain = value, 0, 400, false, true);
             Particle("Падающие листья", "Leaves", a.Leaves, LocationParticleLayer.DefaultLeaves, value => a.Leaves = value, 0, 10, note: "Листья сносит ветер раздела «Рисунки», если он включён.");
-            Particle("Искры от огня", "Sparks", a.Sparks, LocationParticleLayer.DefaultSparks, value => a.Sparks = value, 0, 40, note: "Нужен источник света с анимацией «Мерцает» (костёр, факел): искры летят только над ним. Лучше видны в сумерках и ночью.");
-            Particle("Пар изо рта", "Breath", a.Breath, LocationParticleLayer.DefaultBreath, value => a.Breath = value, 0, 4, note: "По умолчанию — только ночью, у голов людей на месте (в предпросмотре — герой у старта теста и противники).");
+            Particle("Искры от огня", "Sparks", a.Sparks, LocationParticleLayer.DefaultSparks, value => a.Sparks = value, 0, 40, note: Direct ? "Искры летят над клетками боя с огнём (огонь от заклинаний). Лучше видны в сумерках." : "Нужен источник света с анимацией «Мерцает» (костёр, факел): искры летят только над ним. Лучше видны в сумерках и ночью.");
+            Particle("Пар изо рта", "Breath", a.Breath, LocationParticleLayer.DefaultBreath, value => a.Breath = value, 0, 4, note: Direct ? "По умолчанию — только ночью (см. «Час боя» выше), у голов живых бойцов; в окне без боя — нет." : "По умолчанию — только ночью, у голов людей на месте (в предпросмотре — герой у старта теста и противники).");
         }
 
         private void Particle(string title, string key, LocationParticleLayer layer, Func<LocationParticleLayer> defaults, Action<LocationParticleLayer> replace,

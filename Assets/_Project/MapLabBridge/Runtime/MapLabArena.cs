@@ -117,12 +117,13 @@ namespace KingdomSurvival.MapLabBridge
         private static void ClearWalkers() => Shader.SetGlobalFloat("_MapLabWalkerCount", 0f);
 
         // Ветер обработки кадра (раздел «Рисунки» → «Ветер»): качает деревья и
-        // растения карточек (шейдер «Art Card», _WindKind материала). Размах и
-        // высота заданы в единицах мира мест — здесь переводятся масштабом
-        // рисунков арены. Ставится на время кадра, после — нули (карта партии
-        // рисуется тем же шейдером и не качается).
+        // растения карточек (шейдер «Art Card», _WindKind материала). Размах
+        // задан в единицах мира мест — здесь переводится масштабом рисунков арены;
+        // граница высоты — доля роста рисунка. Ставится на время кадра, после —
+        // нули (карта партии рисуется тем же шейдером и не качается).
         private static readonly int WindId = Shader.PropertyToID("_MapLabWind");
         private static readonly int WindShareId = Shader.PropertyToID("_MapLabWindShare");
+        private static readonly int WindFloorId = Shader.PropertyToID("_MapLabWindFloor");
         private float windScale = 1f;
         private float windSeconds;
 
@@ -146,7 +147,9 @@ namespace KingdomSurvival.MapLabBridge
             }
             KingdomSurvival.BattlefieldDatabase.LocationSpriteEffects s = Spec.Frame.Sprites;
             Shader.SetGlobalVector(WindId, new Vector4(Mathf.Max(0f, s.WindStrength) * windScale, Mathf.Max(0f, s.WindSpeed),
-                Mathf.Clamp01(s.WindGusts), Mathf.Max(0.05f, s.WindHeight) * windScale));
+                Mathf.Clamp01(s.WindGusts), 0f));
+            // Граница высоты — доля роста самого рисунка: у деревьев и у кустов/травы своя.
+            Shader.SetGlobalVector(WindFloorId, new Vector4(Mathf.Clamp(s.WindTreeFloor, 0f, 0.95f), Mathf.Clamp(s.WindPlantFloor, 0f, 0.95f), 0f, 0f));
             Shader.SetGlobalVector(WindShareId, new Vector4(Mathf.Max(0f, s.WindTrees), Mathf.Max(0f, s.WindPlants),
                 Mathf.Clamp(s.WindDirection, -1f, 1f), windSeconds));
         }
@@ -155,6 +158,7 @@ namespace KingdomSurvival.MapLabBridge
         {
             Shader.SetGlobalVector(WindId, Vector4.zero);
             Shader.SetGlobalVector(WindShareId, Vector4.zero);
+            Shader.SetGlobalVector(WindFloorId, Vector4.zero);
         }
 
         // Силуэтные тени карточек (проход «SilhouetteShadow» шейдера карточек): только в нижнем кадре,
@@ -635,6 +639,7 @@ namespace KingdomSurvival.MapLabBridge
             bool graded = BeginFrame();
             ApplyWalkers();
             ApplyWind(true);
+            UpdateParticles(focus, rotation, k * 0.5f * camera.aspect, k * 0.5f);
             SetShadows(true);
             try
             {
@@ -784,6 +789,7 @@ namespace KingdomSurvival.MapLabBridge
                 Object.DestroyImmediate(settings);
             ReleaseOverlay();
             framePost?.Dispose();
+            DisposeParticles();
             framePost = null;
             if (decorSet != null)
                 Object.DestroyImmediate(decorSet);

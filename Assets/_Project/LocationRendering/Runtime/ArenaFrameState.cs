@@ -9,12 +9,12 @@ namespace KingdomSurvival.LocationRendering
     // места считает LocationWorldRenderer, — часы эффектов, удар (всплеск
     // линзы, вспышка, тряска), здоровье вождя (красные края), полосы и
     // затемнение. Источник прохода «Холста» для камеры арены. Арена — день и
-    // улица; огней у неё нет. Ветер рисунков качает деревья в шейдере карточек
+    // улица; огни — клетки боя с огнём (марево над ними). Ветер рисунков качает деревья в шейдере карточек
     // (MapLabArena), здесь он ведёт тени облаков и требует перерисовки кадра.
     public sealed class ArenaFrameState : ILocationCanvasSource
     {
         private readonly float started = Time.realtimeSinceStartup;
-        private readonly List<Vector2> noFires = new List<Vector2>();
+        private readonly List<Vector2> fires = new List<Vector2>();
         private float pulseAt = float.NegativeInfinity, pulseStrength;
         private float flashAt = float.NegativeInfinity, flashStrength;
         private float shakeAt = float.NegativeInfinity, shakeStrength;
@@ -23,7 +23,13 @@ namespace KingdomSurvival.LocationRendering
         public Func<LocationPostEffects> PostSource;
         // Доля здоровья вождя 0..1 (1 — здоров).
         public Func<float> LeaderHealth;
+        // Огни боя (клетки с огнём) точками кадра 0..1, Y вверх — для марева; null — огней нет.
+        public Action<List<Vector2>> CollectFires;
+        // Единиц мира арены на единицу мира мест (размер марева).
+        public Func<float> UnitScale;
         public float Fade, Letterbox;
+        // Оглушение 0..1 (размытие, тусклее, темнее — раздел «Игра»); задаёт игра, как у места.
+        public float Stun;
 
         public float Seconds => Time.realtimeSinceStartup - started + 1f;
 
@@ -108,14 +114,23 @@ namespace KingdomSurvival.LocationRendering
                 Sun = new Vector2(.6f, -.35f),
                 // Ветер раздела «Рисунки» ведёт тени облаков (как в мире места).
                 Wind = sprites != null && sprites.Wind ? new Vector2(Mathf.Clamp(sprites.WindDirection, -1, 1), 0) : Vector2.zero,
-                Fires = noFires,
+                Fires = CollectedFires(),
+                FiresInViewport = true,
+                UnitScale = UnitScale?.Invoke() ?? 1f,
                 FireShare = .5f,
                 LowHealth = Mathf.Clamp01((threshold - health) / threshold),
-                Stun = 0f,
+                Stun = Mathf.Clamp01(Stun),
                 Flash = FlashNow(post),
                 Fade = Mathf.Clamp01(Fade),
                 Letterbox = Mathf.Max(Mathf.Clamp(game.Letterbox, 0f, .45f), Mathf.Clamp(Letterbox, 0f, .45f)),
             };
+        }
+
+        private List<Vector2> CollectedFires()
+        {
+            fires.Clear();
+            CollectFires?.Invoke(fires);
+            return fires;
         }
 
         // Кадр меняется со временем: перерисовывать каждый кадр, а не по запросу.
@@ -129,7 +144,8 @@ namespace KingdomSurvival.LocationRendering
                 LocationCanvasEffects canvas = post.Canvas;
                 return state.Flash > .001f || state.LowHealth > .001f || LensPulse > .001f || ShakeShare != Vector2.zero || post.Grain > .001f ||
                        canvas.Film || canvas.Fog && canvas.FogSpeed > 0f || post.Air.Clouds || post.Air.Rays ||
-                       post.Sprites != null && post.Sprites.Wind && post.Sprites.WindStrength > 0f;
+                       post.Sprites != null && post.Sprites.Wind && post.Sprites.WindStrength > 0f ||
+                       post.Air.HeatHaze && CollectedFires().Count > 0;
             }
         }
 

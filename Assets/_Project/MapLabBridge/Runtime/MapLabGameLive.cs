@@ -133,6 +133,7 @@ namespace KingdomSurvival.MapLabBridge
         {
             WorldMapObstacles.Clear();
             WorldMapBridges.Clear();
+            WorldMapWalls.Clear();
             MapLabLiveFigures.ClearAll();
             if (current == null)
                 return;
@@ -332,6 +333,7 @@ namespace KingdomSurvival.MapLabBridge
                 }
                 WorldMapObstacles.Set(Obstacles(w, data));
                 WorldMapBridges.Set(BridgeSpans(w, data));
+                WorldMapWalls.Set(LedgeWalls(data, w.Play), LedgeCells(w.Plan));
                 mapObject.SetActive(true);
             }
             w.BuildMs = w.Watch.Elapsed.TotalMilliseconds;
@@ -417,6 +419,65 @@ namespace KingdomSurvival.MapLabBridge
             return list;
         }
 
+        // Клетки уступов плана: у них стена рисунка точнее клетки (см. WorldMapWalls).
+        public static List<int> LedgeCells(GeneratedWorldMap plan)
+        {
+            List<int> cells = new List<int>();
+            if (plan?.Ledges != null)
+                foreach (GeneratedMapLedge ledge in plan.Ledges)
+                    if (ledge?.Cells != null)
+                        cells.AddRange(ledge.Cells);
+            return cells;
+        }
+
+        // Стены скальных обрывов рисунка → ядро: на каждый столб линии обрыва
+        // (и на зазор между столбами) — четырёхугольник от подножия (низ стены
+        // у основания перепада, 1,5 ширины перепада наружу) до края площадки
+        // (перепад кончается на ширине перепада за линией) с запасом. Герой и
+        // группы стену не пересекают, но подходят к ней вплотную.
+        public const float WallMargin = 0.3f;
+
+        // Полуширина стены: вниз — до подножия (1,5 ширины перепада), вверх — до конца
+        // склона (ширина перепада); сетка высот на больших картах грубее перепада, и склон
+        // шире ячейки сетки. Плюс запас WallMargin.
+        public static void WallExtents(MapLabData data, out float low, out float high)
+        {
+            float sharpness = Mathf.Max(0.4f, data.CliffSharpness);
+            low = Mathf.Max(sharpness * 1.5f, data.Cell) + WallMargin;
+            high = Mathf.Max(sharpness, data.Cell) + WallMargin;
+        }
+
+        public static List<WorldMapWall> LedgeWalls(MapLabData data, Rect play)
+        {
+            List<WorldMapWall> walls = new List<WorldMapWall>();
+            if (data == null)
+                return walls;
+            WallExtents(data, out float low, out float high);
+            Vector2 Percent(Vector2 p) => new Vector2((p.x - play.xMin) / play.width * 100f, (play.yMax - p.y) / play.height * 100f);
+            void Add(Vector2 start, Vector2 end, Vector2 outward)
+            {
+                Vector2 tangent = end - start;
+                tangent = tangent.sqrMagnitude > 1e-8f ? tangent.normalized : Vector2.right;
+                // Концы чуть длиннее: соседние части перекрываются без щелей.
+                start -= tangent * 0.25f;
+                end += tangent * 0.25f;
+                Vector2 a = Percent(start + outward * low), b = Percent(end + outward * low);
+                Vector2 c = Percent(end - outward * high), d = Percent(start - outward * high);
+                walls.Add(new WorldMapWall(a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y));
+            }
+            foreach (MapLabCliffLine line in data.CliffLines)
+            {
+                List<MapLabCliffColumn> columns = line.Columns;
+                for (int i = 0; i < columns.Count; i++)
+                {
+                    Add(columns[i].Start, columns[i].End, columns[i].Outward);
+                    if (i + 1 < columns.Count && Vector2.Distance(columns[i].End, columns[i + 1].Start) > 0.05f)
+                        Add(columns[i].End, columns[i + 1].Start, (columns[i].Outward + columns[i + 1].Outward).normalized);
+                }
+            }
+            return walls;
+        }
+
         // Настоящие мосты рисунка → ядро (проценты карты пути): путь через
         // реку идёт только по настилу.
         private static List<WorldMapBridgeSpan> BridgeSpans(World w, MapLabData data)
@@ -471,6 +532,11 @@ namespace KingdomSurvival.MapLabBridge
             return new Vector2(x, y);
         }
 
+        // Сдвиг точки на рисунке по её высоте, % полотна: выше среднего — выше на
+        // экране. Зависит от наклона камеры (sin, cos) и глубины игровой области.
+        public static float ShiftPercent(float height, float mean, float sin, float cos, float playHeight) =>
+            -(height - mean) * cos / (playHeight * sin) * 100f;
+
         // Высота земли в точке (проценты холста) → сдвиг точки на рисунке, %.
         public static float ElevationShiftPercent(World w, float xPercent, float yPercent)
         {
@@ -479,7 +545,7 @@ namespace KingdomSurvival.MapLabBridge
             float x = w.Play.xMin + xPercent / 100f * w.Play.width;
             float z = w.Play.yMax - yPercent / 100f * w.Play.height;
             float h = GroundHeight(w, x, z);
-            return -(h - w.Mean) * w.Cos / (w.Play.height * w.Sin) * 100f;
+            return ShiftPercent(h, w.Mean, w.Sin, w.Cos, w.Play.height);
         }
 
         // Экранная точка (x, y экрана — проценты полотна) → точка земли в

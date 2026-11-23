@@ -45,6 +45,29 @@ namespace KingdomSurvival.MapLab
             return g;
         }
 
+        // Солнце карты по часу суток (модель LocationSunDefinition прежнего рендерера
+        // мест): тень идёт от утреннего угла через «назад от зрителя» в полдень к
+        // вечернему, длиннее на восходе и закате, ночью плотность 0. Возвращает
+        // смещение по земле (x, z мира) на единицу высоты рисунка; density — 0..1.
+        public static Vector2 SunGround(float hour, MapLabStage05Settings s5, out float density)
+        {
+            density = 0f;
+            float rise = Mathf.Repeat(s5.SunriseHour, 24f), set = Mathf.Repeat(s5.SunsetHour, 24f);
+            float day = set > rise ? set - rise : set + 24f - rise;
+            float since = Mathf.Repeat(hour - rise, 24f);
+            if (day < 0.01f || since > day)
+                return new Vector2(0f, Mathf.Max(0.01f, s5.SunNoonLength) * 0.5f);
+            float t = since / day;
+            float fade = Mathf.Max(0.05f, s5.SunFadeHours);
+            density = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(since / fade)) * Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((day - since) / fade));
+            // Тень всегда в задней половине кадра и не ближе minAngle к его оси.
+            float min = Mathf.Clamp(s5.SunShadowMinAngle, 1f, 80f);
+            float angle = Mathf.Clamp(Mathf.LerpAngle(s5.SunMorningAngle, s5.SunEveningAngle, t), min, 180f - min);
+            float length = Mathf.Lerp(s5.SunNoonLength, s5.SunLowLength, 1f - Mathf.Sin(Mathf.PI * t)) * s5.CardShadowLength;
+            float rad = angle * Mathf.Deg2Rad;
+            return new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * length;
+        }
+
         public sealed class Result
         {
             public bool Gradient;

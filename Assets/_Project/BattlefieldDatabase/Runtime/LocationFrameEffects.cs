@@ -260,6 +260,10 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float WindSpeed = 1;
         public float WindGusts = .5f;
         public float WindHeight = 2.5f;
+        // Арена: доля высоты самого рисунка, ниже которой он стоит (деревья и кусты/трава — раздельно);
+        // выше граница плавно нарастает до полного размаха на макушке. Места берут WindHeight (мир).
+        public float WindTreeFloor = .35f;
+        public float WindPlantFloor = .15f;
         // Направление: −1 — на запад (влево), 1 — на восток (вправо), 0 — качание.
         public float WindDirection = .3f;
         public float WindTrees = .6f;

@@ -174,7 +174,7 @@ namespace KingdomSurvival.BattleSandbox
             generateVisualContent += DrawBoard;
             RegisterCallback<PointerDownEvent>(OnPointerDown);
             RegisterCallback<PointerMoveEvent>(OnPointerMove);
-            RegisterCallback<PointerLeaveEvent>(_ => ClearPointerPreview());
+            RegisterCallback<PointerLeaveEvent>(_ => { HideStatusTooltip(); ClearPointerPreview(); });
             RegisterCallback<DetachFromPanelEvent>(_ =>
             {
                 ClearPointerPreview(false);
@@ -329,6 +329,7 @@ namespace KingdomSurvival.BattleSandbox
         private void OnPointerMove(PointerMoveEvent evt)
         {
             Vector2 pointerPosition = new Vector2(evt.localPosition.x, evt.localPosition.y);
+            UpdateStatusTooltip(pointerPosition);
             UpdatePointerPreview(pointerPosition);
         }
 

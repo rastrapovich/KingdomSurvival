@@ -530,8 +530,16 @@ public static class WorldMapNavigation
     public static WorldMapGameplayTerrainType GetTerrainAtPercent(float xPercent, float yPercent) =>
         ActiveLayer.GetAtPercent(xPercent, yPercent);
 
-    public static bool IsTraversableAtPercent(float xPercent, float yPercent) =>
-        WorldMapMovementRules.Current.IsTraversable(GetTerrainAtPercent(xPercent, yPercent));
+    public static bool IsTraversableAtPercent(float xPercent, float yPercent)
+    {
+        bool traversable = WorldMapMovementRules.Current.IsTraversable(GetTerrainAtPercent(xPercent, yPercent));
+        if (WorldMapWalls.Count == 0)
+            return traversable;
+        // Стена обрыва непроходима; клетка уступа вне стены — проходима.
+        if (WorldMapWalls.Blocks(xPercent, yPercent))
+            return false;
+        return traversable || WorldMapWalls.IsLedgeCell(Grid.IndexOf(Grid.CellAtPercent(xPercent, yPercent)));
+    }
 
     // Игровые часы на оставшийся путь: каждый кусок пути — по местности под ним.
     public static double EstimateTravelHours(

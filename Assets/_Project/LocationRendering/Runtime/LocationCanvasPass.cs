@@ -118,16 +118,17 @@ namespace KingdomSurvival.LocationRendering
                 target.SetVector(PainterlyId, Vector4.zero);
 
             int fires = 0;
+            float unit = state.UnitScale > .001f ? state.UnitScale : 1f;
             if (air.HeatHaze && heavy)
                 foreach (Vector2 fire in state.Fires)
                 {
                     if (fires >= haze.Length) break;
-                    Vector3 viewport = camera.WorldToViewportPoint(new Vector3(fire.x, fire.y, 0));
+                    Vector3 viewport = state.FiresInViewport ? new Vector3(fire.x, fire.y, 0) : camera.WorldToViewportPoint(new Vector3(fire.x, fire.y, 0));
                     if (viewport.x < -.3f || viewport.x > 1.3f || viewport.y < -.3f || viewport.y > 1.3f) continue;
-                    haze[fires++] = new Vector4(viewport.x, viewport.y, Mathf.Max(.01f, air.HazeRadius) / (2 * halfHeight), Mathf.Clamp(air.HazeStrength, 0, 3) * state.FireShare);
+                    haze[fires++] = new Vector4(viewport.x, viewport.y, Mathf.Max(.01f, air.HazeRadius) * unit / (2 * halfHeight), Mathf.Clamp(air.HazeStrength, 0, 3) * state.FireShare);
                 }
             target.SetVectorArray(HazeId, haze);
-            target.SetVector(HazeParamsId, new Vector4(fires, Mathf.Max(.01f, air.HazeHeight) / (2 * halfHeight), seconds * air.HazeSpeed, 0));
+            target.SetVector(HazeParamsId, new Vector4(fires, Mathf.Max(.01f, air.HazeHeight) * unit / (2 * halfHeight), seconds * air.HazeSpeed, 0));
             target.SetVector(SharpenId, new Vector4(canvas.Sharpen ? Mathf.Clamp(canvas.SharpenStrength, 0, 3) : 0, 0, 0, 0));
             target.SetVector(TiltId, new Vector4(Mathf.Clamp01(canvas.TiltFocus), Mathf.Clamp01(canvas.TiltBand), canvas.TiltShift && heavy ? Mathf.Clamp(canvas.TiltBlur, 0, 16) : 0,
                 game.Stun ? Mathf.Clamp(game.StunBlur, 0, 16) * state.Stun : 0));

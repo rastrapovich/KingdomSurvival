@@ -19,6 +19,9 @@ namespace KingdomSurvival.MapLabBridge
             public Material Fill, XRayFill, XRayLine, ShadowMaterial;
             public Vector2 Size, Pivot;
             public Vector4 Uv;
+            // Тень на земле: чем построена (длина вдоль света, угол) и каким цветом показана.
+            public float ShadowHeight = -1f, ShadowLength;
+            public Color ShadowColor;
         }
 
         private static readonly Dictionary<string, Figure> figures = new Dictionary<string, Figure>();
@@ -59,7 +62,7 @@ namespace KingdomSurvival.MapLabBridge
             f.Root.SetActive(true);
             f.Card.position = new Vector3(x, y + lift, z);
             f.Shadow.position = new Vector3(x, y + 0.04f, z);
-            f.Shadow.gameObject.SetActive(shadow);
+            UpdateShadow(w.View, f, worldHeight, shadow);
             Vector2 size = new Vector2(worldHeight * aspect, worldHeight);
             if ((size - f.Size).sqrMagnitude > 1e-6f || (pivot - f.Pivot).sqrMagnitude > 1e-6f)
             {
@@ -68,7 +71,6 @@ namespace KingdomSurvival.MapLabBridge
                 f.Uv = uv;
                 BuildCard(f.CardMesh, size, pivot, uv);
                 BuildCard(f.LineMesh, size, pivot, LineUv(uv));
-                BuildShadow(f.ShadowMesh, worldHeight);
             }
             else if ((uv - f.Uv).sqrMagnitude > 1e-12f)
             {
@@ -85,6 +87,14 @@ namespace KingdomSurvival.MapLabBridge
             f.XRayLine.mainTexture = outline != null ? outline : texture;
             f.XRayLine.SetFloat("_Cutoff", outline != null ? 0.35f : 1.1f);
             return true;
+        }
+
+        // Час суток карты — тени предметов и фигур идут за солнцем (MapLabView.SetSunHour).
+        public static void SetSunHour(float hour)
+        {
+            MapLabGameLive.World w = MapLabGameLive.Current;
+            if (w != null && w.View != null)
+                w.View.SetSunHour(hour);
         }
 
         public static void Hide(string key)
@@ -191,12 +201,45 @@ namespace KingdomSurvival.MapLabBridge
         // Контур — целая текстура кадра, отражается вместе с кадром.
         private static Vector4 LineUv(Vector4 uv) => uv.x > uv.z ? new Vector4(1f, 0f, 0f, 1f) : FullUv;
 
-        // Плоская тень на земле: овал под ногами, чуть вправо (свет слева сверху).
-        private static void BuildShadow(Mesh mesh, float height)
+        // Тень фигуры — тот же цвет, плотность и направление солнца, что у теней
+        // карточек (MapLabView.SunGround / SunDensity): овал под ногами, вытянутый
+        // по тени; ночью (плотность 0) не рисуется. Мешу нужна пересборка только
+        // при смене роста, длины или угла.
+        private static void UpdateShadow(MapLabView view, Figure f, float height, bool wanted)
         {
-            float w = height * 0.24f, d = height * 0.1f, shift = height * 0.04f;
+            MapLabStage05Settings s5 = view.Settings.Stage05;
+            float density = view.SunDensity * s5.CardShadowOpacity;
+            bool on = wanted && density > 0.004f;
+            if (f.Shadow.gameObject.activeSelf != on)
+                f.Shadow.gameObject.SetActive(on);
+            if (!on)
+                return;
+            Color color = s5.CardShadowColor;
+            color.a = density;
+            if (color != f.ShadowColor)
+            {
+                f.ShadowColor = color;
+                f.ShadowMaterial.SetColor("_Color", color);
+            }
+            Vector2 ground = view.SunGround;
+            float length = ground.magnitude * height * s5.FigureShadowStretch;
+            float yaw = -Mathf.Atan2(ground.y, ground.x) * Mathf.Rad2Deg;
+            if (Mathf.Abs(f.ShadowHeight - height) > 1e-5f || Mathf.Abs(f.ShadowLength - length) > 1e-4f)
+            {
+                f.ShadowHeight = height;
+                f.ShadowLength = length;
+                BuildShadow(f.ShadowMesh, height, length);
+            }
+            f.Shadow.rotation = Quaternion.Euler(0f, yaw, 0f);
+        }
+
+        // Плоская тень на земле: овал под ногами, вытянутый вдоль +x на length
+        // (поворачивается по направлению тени).
+        private static void BuildShadow(Mesh mesh, float height, float length)
+        {
+            float w = height * 0.24f, d = height * 0.1f;
             mesh.Clear();
-            mesh.vertices = new[] { new Vector3(-w + shift, 0f, -d), new Vector3(w + shift, 0f, -d), new Vector3(w + shift, 0f, d), new Vector3(-w + shift, 0f, d) };
+            mesh.vertices = new[] { new Vector3(-w, 0f, -d), new Vector3(w + length, 0f, -d), new Vector3(w + length, 0f, d), new Vector3(-w, 0f, d) };
             mesh.uv = new[] { new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(0f, 1f) };
             mesh.uv2 = new Vector2[4];
             mesh.triangles = new[] { 0, 2, 1, 0, 3, 2 };

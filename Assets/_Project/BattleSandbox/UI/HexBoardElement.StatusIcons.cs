@@ -29,6 +29,7 @@ namespace KingdomSurvival.BattleSandbox
             public Label Charges;
             public string StatusId;
             public string Tooltip;
+            public List<SandboxStatusView> TipViews = new List<SandboxStatusView>();
         }
 
         private sealed class StatusGroup
@@ -46,7 +47,7 @@ namespace KingdomSurvival.BattleSandbox
         private readonly List<(SandboxUnitState Unit, Vector2 Anchor)> statusAnchors = new List<(SandboxUnitState, Vector2)>();
         private readonly List<Rect> placedStatusBounds = new List<Rect>();
         private readonly HashSet<string> seenStatusUnits = new HashSet<string>(StringComparer.Ordinal);
-        private Label statusTooltip;
+        private VisualElement statusTooltip;
         private StatusSlot pinnedStatusSlot;
         private int statusViewsKey = int.MinValue;
 
@@ -276,7 +277,7 @@ namespace KingdomSurvival.BattleSandbox
             root.Add(slot.Charges);
             slot.Root = root;
 
-            // На поле — только значки, без описаний; полный список состояний — в карточке бойца.
+            // Описание — подсказка по наведению (UpdateStatusTooltip); полный список — в карточке бойца.
             Add(root);
             // Появление: прозрачность и масштаб 0,9 → 1 на следующем кадре.
             root.schedule.Execute(() =>
@@ -361,6 +362,8 @@ namespace KingdomSurvival.BattleSandbox
             slot.Root.style.borderLeftWidth = width; slot.Root.style.borderRightWidth = width;
             SetRadius(slot.Root, StatusIconSize * 0.5f);
             slot.Tooltip = unit.DisplayLabel + " — " + view.Tooltip;
+            slot.TipViews.Clear();
+            slot.TipViews.Add(view);
         }
 
         private void FillMore(StatusSlot slot, StatusGroup group, int hidden)
@@ -378,6 +381,119 @@ namespace KingdomSurvival.BattleSandbox
             for (int i = 0; i < group.Views.Count; i++)
                 lines.Add("• " + group.Views[i].Tooltip);
             slot.Tooltip = string.Join("\n", lines);
+            slot.TipViews.Clear();
+            slot.TipViews.AddRange(group.Views);
+        }
+
+        // Подсказка по наведению на значок: строка «иконка слева, справа название,
+        // под названием описание»; для «+N» — строки всех состояний бойца.
+        // Значки не принимают указатель, поэтому попадание считается по их рамкам.
+        private void UpdateStatusTooltip(Vector2 pointer)
+        {
+            StatusSlot hit = null;
+            foreach (StatusGroup group in statusGroups.Values)
+            {
+                foreach (StatusSlot slot in group.Slots)
+                    if (slot.Root.resolvedStyle.display != DisplayStyle.None && slot.Root.layout.Contains(pointer)) { hit = slot; break; }
+                if (hit == null && group.More != null && group.More.Root.resolvedStyle.display != DisplayStyle.None && group.More.Root.layout.Contains(pointer))
+                    hit = group.More;
+                if (hit != null)
+                    break;
+            }
+            if (hit == null || hit.TipViews.Count == 0)
+            {
+                HideStatusTooltip();
+                return;
+            }
+            if (statusTooltip == null)
+            {
+                statusTooltip = new VisualElement { pickingMode = PickingMode.Ignore, focusable = false };
+                statusTooltip.style.position = Position.Absolute;
+                statusTooltip.style.width = 260f;
+                statusTooltip.style.paddingLeft = 8f; statusTooltip.style.paddingRight = 8f;
+                statusTooltip.style.paddingTop = 6f; statusTooltip.style.paddingBottom = 2f;
+                statusTooltip.style.backgroundColor = new Color(0.10f, 0.09f, 0.08f, 0.96f);
+                statusTooltip.style.borderTopColor = statusTooltip.style.borderBottomColor = statusTooltip.style.borderLeftColor = statusTooltip.style.borderRightColor = new Color(0.46f, 0.38f, 0.26f, 1f);
+                statusTooltip.style.borderTopWidth = statusTooltip.style.borderBottomWidth = statusTooltip.style.borderLeftWidth = statusTooltip.style.borderRightWidth = 1f;
+                SetRadius(statusTooltip, 3f);
+                Add(statusTooltip);
+            }
+            statusTooltip.Clear();
+            foreach (SandboxStatusView view in hit.TipViews)
+                statusTooltip.Add(BuildStatusTipRow(view));
+            statusTooltip.style.display = DisplayStyle.Flex;
+            statusTooltip.BringToFront();
+            // Над значком; у верхнего края — под ним; внутри поля по X.
+            Rect slotRect = hit.Root.layout;
+            float height = Mathf.Max(48f, hit.TipViews.Count * 64f);
+            float left = Mathf.Clamp(slotRect.center.x - 130f, 2f, Mathf.Max(2f, contentRect.width - 262f));
+            float top = slotRect.yMin - height - 6f;
+            if (top < 2f)
+                top = slotRect.yMax + 6f;
+            statusTooltip.style.left = left;
+            statusTooltip.style.top = top;
+        }
+
+        private void HideStatusTooltip()
+        {
+            if (statusTooltip != null)
+                statusTooltip.style.display = DisplayStyle.None;
+        }
+
+        private static VisualElement BuildStatusTipRow(SandboxStatusView view)
+        {
+            bool good = view.Polarity == SandboxStatusPolarity.Beneficial;
+            VisualElement row = new VisualElement { pickingMode = PickingMode.Ignore };
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.alignItems = Align.FlexStart;
+            row.style.marginBottom = 6f;
+
+            VisualElement icon = new VisualElement { pickingMode = PickingMode.Ignore };
+            icon.style.width = 32f; icon.style.height = 32f;
+            icon.style.flexShrink = 0f; icon.style.marginRight = 8f;
+            Sprite sprite = StatusSprite(view.IconId);
+            if (sprite != null)
+                icon.style.backgroundImage = new StyleBackground(sprite);
+            else
+            {
+                icon.style.backgroundColor = good ? new Color(0.22f, 0.36f, 0.26f, 1f) : new Color(0.42f, 0.16f, 0.14f, 1f);
+                SetRadius(icon, 16f);
+            }
+            row.Add(icon);
+
+            VisualElement text = new VisualElement { pickingMode = PickingMode.Ignore };
+            text.style.flexGrow = 1f; text.style.flexShrink = 1f;
+            Label name = new Label(view.Name) { pickingMode = PickingMode.Ignore };
+            name.style.fontSize = 12;
+            name.style.unityFontStyleAndWeight = FontStyle.Bold;
+            name.style.whiteSpace = WhiteSpace.Normal;
+            name.style.color = good ? new Color(0.72f, 0.86f, 0.62f, 1f) : new Color(0.95f, 0.66f, 0.55f, 1f);
+            text.Add(name);
+            // Описание — сразу под названием, с переносом строк.
+            if (!string.IsNullOrEmpty(view.Effect))
+            {
+                Label effect = new Label(view.Effect) { pickingMode = PickingMode.Ignore };
+                effect.style.fontSize = 10;
+                effect.style.whiteSpace = WhiteSpace.Normal;
+                effect.style.color = new Color(0.84f, 0.83f, 0.78f, 1f);
+                text.Add(effect);
+            }
+            string time = view.TriggerRound > 0 ? "срабатывает в раунде " + view.TriggerRound
+                : view.Dependent ? "пока действует связь"
+                : view.TurnsLeft > 0 ? "осталось ходов: " + view.TurnsLeft : string.Empty;
+            if (view.Charges > 1)
+                time += (time.Length > 0 ? " · " : string.Empty) + "заряды: " + view.Charges;
+            if (time.Length > 0)
+            {
+                Label meta = new Label(time) { pickingMode = PickingMode.Ignore };
+                meta.style.fontSize = 9;
+                meta.style.whiteSpace = WhiteSpace.Normal;
+                meta.style.color = new Color(0.62f, 0.62f, 0.58f, 1f);
+                meta.style.marginTop = 2f;
+                text.Add(meta);
+            }
+            row.Add(text);
+            return row;
         }
 
         private static void Place(StatusSlot slot, Vector2 center)

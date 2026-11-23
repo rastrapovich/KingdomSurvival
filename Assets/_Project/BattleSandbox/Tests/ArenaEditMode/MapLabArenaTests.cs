@@ -340,9 +340,13 @@ namespace KingdomSurvival.BattleSandbox.Tests
                     if (flowChecked || !author)
                         continue;
                     flowChecked = true;
+                    // Ветер обработки кадра (если автор его включил) качает траву и тени — для проверки реки кадр без обработки.
+                    KingdomSurvival.BattlefieldDatabase.LocationPostEffects authorFrame = arena.Spec.Frame;
+                    arena.Spec.Frame = null;
                     Color[] first = Frame(arena, "river_flow_0");
                     System.Threading.Thread.Sleep(900);
                     Color[] second = Frame(arena, "river_flow_1");
+                    arena.Spec.Frame = authorFrame;
                     int changed = 0;
                     for (int i = 0; i < first.Length; i++)
                         if (Mathf.Abs(first[i].r - second[i].r) + Mathf.Abs(first[i].g - second[i].g) + Mathf.Abs(first[i].b - second[i].b) > 0.03f)

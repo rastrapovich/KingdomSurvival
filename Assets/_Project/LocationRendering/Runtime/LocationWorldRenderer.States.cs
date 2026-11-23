@@ -18,6 +18,10 @@ namespace KingdomSurvival.LocationRendering
         public Vector2 Sun, Wind;
         // Огни (свет с мерцанием) в мире и доля их силы (днём слабее).
         public List<Vector2> Fires;
+        // Огни заданы точками кадра (0..1, Y вверх), а не мировыми (арена боя).
+        public bool FiresInViewport;
+        // Единиц мира камеры на единицу мира мест (арена боя; 0 — 1): размеры марева.
+        public float UnitScale;
         public float FireShare;
         // 0..1: красные края (уже по порогу), оглушение, вспышка, затемнение, кинополосы (доля высоты).
         public float LowHealth, Stun, Flash, Fade, Letterbox;

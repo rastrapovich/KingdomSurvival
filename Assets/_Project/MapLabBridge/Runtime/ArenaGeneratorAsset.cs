@@ -226,10 +226,15 @@ namespace KingdomSurvival.MapLabBridge
     public sealed class ArenaFrameSettings
     {
         public LocationPostEffects Common = new LocationPostEffects();
+        // Час суток боя для частиц атмосферы («Ночью», «В часы»): арена всегда
+        // дневная по цвету, а слои мошкары, пара и т. п. выбирают видимость по
+        // часу. 13 — день: ночные слои не видны.
+        public float Hour = 13f;
 
         public void Repair()
         {
             Common ??= new LocationPostEffects();
+            Hour = Mathf.Repeat(Hour, 24f);
             Common.Repair();
         }
     }

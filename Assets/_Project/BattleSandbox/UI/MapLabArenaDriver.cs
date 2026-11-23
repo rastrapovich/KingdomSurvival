@@ -397,9 +397,10 @@ namespace KingdomSurvival.BattleSandbox
             // каждые ~1/30 с, пока она идёт.
             // Идущий боец гнёт траву: кадр каждые ~1/30 с, пока он идёт и трава возвращается.
             bool walking = UpdateWalkers();
+            UpdateBreathSources();
             // Река течёт (штрихи воды плывут и пересобираются): кадр каждые ~1/30 с.
-            bool animating = (frameBinding != null && frameBinding.Animating) || walking || arena.HasRiver;
-            if (shown != null && size == lastSize && (animating ? Time.realtimeSinceStartup - renderedAt < 1f / 30f
+            bool animating = (frameBinding != null && frameBinding.Animating) || walking || arena.HasRiver || arena.ParticlesActive;
+            if (shown != null && size == lastSize && (animating ? AnimationWaiting()
                     : Time.realtimeSinceStartup - readyAt > SettleSeconds || Time.realtimeSinceStartup - renderedAt < 0.1f))
                 return;
             renderedAt = Time.realtimeSinceStartup;
@@ -412,6 +413,50 @@ namespace KingdomSurvival.BattleSandbox
         }
 
         private Vector2Int requestedSize;
+
+        // ---------- нагрузка анимированных кадров ----------
+        // Кадр арены — это 3 + 2 × (строк бойцов) проходов камеры; со временем он
+        // перерисовывается каждые ~1/30 с (ветер, облака, зерно, река, частицы), и
+        // при кадре дороже 33 мс (а он 45–150 мс, на 4K — до 300) игра стояла в
+        // очереди за ним весь Play Mode. Теперь: не больше одного кадра в работе у
+        // видеокарты (AsyncGPUReadback отвечает, когда она закончила) и пауза после
+        // кадра, кратная его реальной цене, — арена занимает не более ~1/3 времени,
+        // остальное — интерфейсу.
+        private const float AnimationFrameSeconds = 1f / 30f;
+        private const float AnimationLoadShare = 3f;
+        private const float AnimationPendingLimit = 1f;
+        private bool gpuPending;
+        private float gpuSubmittedAt;
+        private float cpuCostSeconds, gpuCostSeconds;
+        // Полная цена кадра: ЦП на отправку + то, что видеокарта доделывает после (без ответа — по ЦП вдвое).
+        private float frameCostSeconds => cpuCostSeconds + (gpuCostSeconds > 0f ? gpuCostSeconds : cpuCostSeconds);
+
+        // true — до следующего анимированного кадра ещё рано.
+        private bool AnimationWaiting()
+        {
+            float now = Time.realtimeSinceStartup;
+            if (gpuPending && now - gpuSubmittedAt < AnimationPendingLimit)
+                return true;
+            return now - renderedAt < Mathf.Max(AnimationFrameSeconds, AnimationLoadShare * frameCostSeconds);
+        }
+
+        // Цена только что отправленного кадра: ЦП — сразу, видеокарта — когда ответит чтение 1 пикселя.
+        private void TrackFrameCost(Texture last, float cpuSeconds)
+        {
+            cpuCostSeconds = cpuCostSeconds <= 0f ? cpuSeconds : Mathf.Lerp(cpuCostSeconds, cpuSeconds, 0.5f);
+            if (last == null || gpuPending || !SystemInfo.supportsAsyncGPUReadback)
+                return;
+            gpuPending = true;
+            float submitted = gpuSubmittedAt = Time.realtimeSinceStartup;
+            UnityEngine.Rendering.AsyncGPUReadback.Request(last, 0, 0, 1, 0, 1, 0, 1, request =>
+            {
+                if (disposed) return;
+                gpuPending = false;
+                if (request.hasError) return;
+                float seconds = Time.realtimeSinceStartup - submitted;
+                gpuCostSeconds = gpuCostSeconds <= 0f ? seconds : Mathf.Lerp(gpuCostSeconds, seconds, 0.5f);
+            });
+        }
 
         // ---------- объекты впереди бойцов ----------
 
@@ -437,6 +482,36 @@ namespace KingdomSurvival.BattleSandbox
                 slot++;
             }
             board.SetFrontLayers(frontOut);
+        }
+
+        // ---------- частицы атмосферы ----------
+
+        private readonly System.Collections.Generic.List<Vector2> headBuffer = new System.Collections.Generic.List<Vector2>();
+
+        // Пар изо рта: головы живых бойцов (кадр поля) — только когда слой включён.
+        private void UpdateBreathSources()
+        {
+            if (!arena.WantsHeads)
+            {
+                if (headBuffer.Count > 0)
+                {
+                    headBuffer.Clear();
+                    arena.SetHeads(headBuffer);
+                }
+                return;
+            }
+            headBuffer.Clear();
+            foreach (SandboxUnitState unit in battle.Units)
+            {
+                if (unit.IsDefeated || unit.IsOffBoard) continue;
+                foreach ((HexCoord cell, Vector2 center) in cellCenters)
+                    if (cell == unit.Position)
+                    {
+                        headBuffer.Add(center + new Vector2(0f, -1.3f * arena.Spec.HexNominal));
+                        break;
+                    }
+            }
+            arena.SetHeads(headBuffer);
         }
 
         // ---------- проход по траве ----------
@@ -489,6 +564,7 @@ namespace KingdomSurvival.BattleSandbox
         {
             if (disposed || !arena.Ready || requestedSize.x < 8)
                 return;
+            Stopwatch frameWatch = Stopwatch.StartNew();
             // Обработка кадра арены — общая (ArenaGeneratorAsset).
             arena.Spec.Frame = ArenaGeneratorAsset.CurrentFrame();
             frameBinding?.BeforeRender();
@@ -518,6 +594,7 @@ namespace KingdomSurvival.BattleSandbox
             board.ShadowAcross = shadowAcross;
             RenderFronts();
             board.SetTerrainOverlay(arena.OverlayTexture);
+            TrackFrameCost(frontOut.Count > 0 ? frontOut[frontOut.Count - 1].Texture : arena.OverlayTexture != null ? arena.OverlayTexture : shown, (float)frameWatch.Elapsed.TotalSeconds);
             board.MarkDirtyRepaint();
         }
 

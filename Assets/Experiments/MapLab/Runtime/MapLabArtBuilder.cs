@@ -347,6 +347,9 @@ namespace KingdomSurvival.MapLab
         // Карточки одного рисунка, по чанкам карты. Каждая карточка — два квада,
         // разрезанных по строке опоры: часть ниже опоры сдвигается шейдером к
         // камере (видимое основание не уходит под землю).
+        // Полос по высоте у качающегося рисунка (ветер арены).
+        public const int WindSegments = 8;
+
         public static List<Mesh> BuildMeshes(MapLabData data, MapLabArtEntry entry, List<MapLabArtInstance> instances, float chunkSize)
         {
             Dictionary<int, List<int>> byChunk = new Dictionary<int, List<int>>();
@@ -373,6 +376,7 @@ namespace KingdomSurvival.MapLab
                 List<Color> colors = new List<Color>(list.Count * 8);
                 List<Vector4> uv2 = new List<Vector4>(list.Count * 8);
                 List<Vector2> uv3 = new List<Vector2>(list.Count * 8);
+                List<Vector2> uv4 = new List<Vector2>(list.Count * 8);
                 List<int> indices = new List<int>(list.Count * 12);
                 Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
                 Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
@@ -381,12 +385,15 @@ namespace KingdomSurvival.MapLab
                     MapLabArtInstance o = instances[index];
                     // a — нижняя граница кроны (v): акцент не ложится на ствол.
                     Color color = new Color(Mathf.Clamp01(o.Brightness / 1.25f), Mathf.Clamp01(o.Tint), Mathf.Clamp01(o.GroundShade), Mathf.Clamp01(o.CrownMinV));
-                    AppendCard(o, color, positions, uv0, uv1, colors, indices);
+                    AppendCard(o, color, positions, uv0, uv1, colors, indices, entry.WindKind >= 1f ? WindSegments : 1);
                     Vector4 extra = new Vector4(o.Accent, o.Group, o.InkUv.y, o.InkUv.x);
                     while (uv2.Count < positions.Count)
                         uv2.Add(extra);
                     while (uv3.Count < positions.Count)
                         uv3.Add(new Vector2(o.Warmth, o.Ridge));
+                    // Полная высота рисунка над опорой: граница ветра считается от неё (арена).
+                    while (uv4.Count < positions.Count)
+                        uv4.Add(new Vector2(Mathf.Max(0f, (1f - o.Pivot.y) * o.Height), 0f));
                     float reach = Mathf.Max(o.Width, o.Height) * 2.5f + 4f;
                     min = Vector3.Min(min, o.Base - new Vector3(reach, reach, reach));
                     max = Vector3.Max(max, o.Base + new Vector3(reach, reach, reach));
@@ -399,6 +406,7 @@ namespace KingdomSurvival.MapLab
                 mesh.SetUVs(1, uv1);
                 mesh.SetUVs(2, uv2);
                 mesh.SetUVs(3, uv3);
+                mesh.SetUVs(4, uv4);
                 mesh.SetColors(colors);
                 mesh.SetTriangles(indices, 0, false);
                 // Карточки разворачиваются и сдвигаются в шейдере — границы с запасом.
@@ -408,7 +416,7 @@ namespace KingdomSurvival.MapLab
             return meshes;
         }
 
-        public static void AppendCard(MapLabArtInstance o, Color color, List<Vector3> positions, List<Vector2> uv0, List<Vector2> uv1, List<Color> colors, List<int> indices)
+        public static void AppendCard(MapLabArtInstance o, Color color, List<Vector3> positions, List<Vector2> uv0, List<Vector2> uv1, List<Color> colors, List<int> indices, int segments = 1)
         {
             float x0 = -o.Pivot.x * o.Width, x1 = (1f - o.Pivot.x) * o.Width;
             float y0 = -o.Pivot.y * o.Height, y1 = (1f - o.Pivot.y) * o.Height;
@@ -422,6 +430,26 @@ namespace KingdomSurvival.MapLab
                 if (yb - ya < 1e-4f)
                     continue;
                 int start = positions.Count;
+                // Качающийся рисунок (ветер арены): верхняя часть режется по высоте на полосы —
+                // ветер сдвигает вершины, и граница высоты (ствол стоит, крона качается) получает
+                // профиль внутри карточки, а не одну линию от основания до макушки.
+                if (part == 1 && segments > 1)
+                {
+                    float va2 = vs[2], vb2 = vs[3];
+                    for (int row = 0; row <= segments; row++)
+                    {
+                        float t = row / (float)segments, y = Mathf.Lerp(ya, yb, t), vv = Mathf.Lerp(va2, vb2, t);
+                        positions.Add(o.Base); colors.Add(color); uv0.Add(new Vector2(0f, vv)); uv1.Add(new Vector2(x0, y));
+                        positions.Add(o.Base); colors.Add(color); uv0.Add(new Vector2(1f, vv)); uv1.Add(new Vector2(x1, y));
+                    }
+                    for (int row = 0; row < segments; row++)
+                    {
+                        int a = start + row * 2, b = a + 1, c = a + 2, d = a + 3;
+                        indices.Add(a); indices.Add(c); indices.Add(d);
+                        indices.Add(a); indices.Add(d); indices.Add(b);
+                    }
+                    continue;
+                }
                 for (int k = 0; k < 4; k++)
                 {
                     positions.Add(o.Base);

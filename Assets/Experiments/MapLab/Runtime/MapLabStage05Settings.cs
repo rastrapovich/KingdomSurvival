@@ -120,6 +120,28 @@ namespace KingdomSurvival.MapLab
         [Tooltip("Мягкость края тени: сдвиг мипа рисунка (0 — чёткий силуэт).")]
         [Range(0f, 4f)] public float CardShadowSoft = 2f;
 
+        [Header("Солнце для теней карты (по часу суток)")]
+        [Tooltip("Тени карточек и фигур идут за солнцем по часам карты и пропадают ночью. Выключено — постоянный свет «Направление света».")]
+        public bool SunShadows = true;
+        [Tooltip("Час восхода (тени появляются).")]
+        [Range(0f, 12f)] public float SunriseHour = 6f;
+        [Tooltip("Час заката (тени исчезают).")]
+        [Range(12f, 24f)] public float SunsetHour = 18f;
+        [Tooltip("Куда падает тень на восходе, градусов на экране: 0 — вправо, 90 — назад от зрителя, 180 — влево.")]
+        [Range(0f, 180f)] public float SunMorningAngle = 160f;
+        [Tooltip("Куда падает тень на закате, градусов на экране.")]
+        [Range(0f, 180f)] public float SunEveningAngle = 20f;
+        [Tooltip("Длина тени в полдень, в долях высоты рисунка.")]
+        [Range(0.05f, 1.5f)] public float SunNoonLength = 0.35f;
+        [Tooltip("Длина тени на восходе и закате, в долях высоты рисунка.")]
+        [Range(0.2f, 3f)] public float SunLowLength = 1.3f;
+        [Tooltip("За сколько часов от восхода и до заката тени набирают и теряют плотность.")]
+        [Range(0.1f, 4f)] public float SunFadeHours = 1.5f;
+        [Tooltip("Наименьший угол солнечной тени к оси кадра, градусов: тень не ложится нитью вдоль кадра и не идёт к зрителю.")]
+        [Range(5f, 60f)] public float SunShadowMinAngle = 20f;
+        [Tooltip("Длина тени фигуры (герой, отряды) в долях её роста на единицу длины тени предметов.")]
+        [Range(0f, 1f)] public float FigureShadowStretch = 0.3f;
+
         [Header("Уступы")]
         [Tooltip("Ширина неравных плоскостей стены, ед.")]
         public Vector2 CliffPlaneWidth = new Vector2(1.6f, 5.2f);

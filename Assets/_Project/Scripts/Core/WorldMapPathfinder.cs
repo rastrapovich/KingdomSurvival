@@ -107,12 +107,26 @@ public static class WorldMapPathfinder
         targetX = Clamp(targetX, 0.0, grid.CanvasWidth);
         targetY = Clamp(targetY, 0.0, grid.CanvasHeight);
 
+        // Цель на стене обрыва встаёт у её края снаружи.
+        if (WallsOn)
+        {
+            float wallX = grid.PixelToPercentX(targetX), wallY = grid.PixelToPercentY(targetY);
+            if (WorldMapWalls.Blocks(wallX, wallY))
+            {
+                WorldMapWalls.PushOut(ref wallX, ref wallY);
+                targetX = Clamp(grid.PercentToPixelX(wallX), 0.0, grid.CanvasWidth);
+                targetY = Clamp(grid.PercentToPixelY(wallY), 0.0, grid.CanvasHeight);
+            }
+        }
+
         WorldMapHexCell start = grid.CellAtPixel(startX, startY);
         WorldMapHexCell target = grid.CellAtPixel(targetX, targetY);
         List<PathPoint> result = new List<PathPoint> { new PathPoint(startX, startY) };
 
-        bool targetPassable = IsPassable(layer, rules, target, start);
-        if (start.Equals(target))
+        // Клетка уступа проходима вне стены: точная цель принимается.
+        bool targetPassable = IsPassable(layer, rules, target, start) || (IsLedge(grid, target) && !WallAt(grid, targetX, targetY));
+        // Старт и цель в одной клетке: напрямую, если между ними нет стены обрыва.
+        if (start.Equals(target) && !LegCrossesWall(grid, startX, startY, targetX, targetY))
         {
             reachedTarget = true;
             if (targetPassable || IsStraightLineClear(layer, rules, startX, startY, targetX, targetY, start))
@@ -135,23 +149,133 @@ public static class WorldMapPathfinder
             return result;
         }
 
-        List<int> cells = Search(layer, rules, start, target, out reachedTarget);
-        if (cells == null || cells.Count < 2)
+        // Стены обрыва: поиск идёт по клеткам вне уступа, а точный старт и цель
+        // привязываются к ближайшей видимой (без стены между) клетке поиска.
+        WorldMapHexCell searchStart = Anchor(layer, rules, startX, startY, start, true);
+        WorldMapHexCell searchTarget = Anchor(layer, rules, targetX, targetY, target, false);
+        bool startAnchored = !searchStart.Equals(start);
+        bool targetAnchored = !searchTarget.Equals(target);
+
+        List<int> cells = Search(layer, rules, searchStart, searchTarget, out reachedTarget);
+        if (cells == null || (cells.Count < 2 && !startAnchored && !targetAnchored && !(WallsOn && reachedTarget && targetPassable)))
         {
             reachedTarget = false;
             return result;
         }
 
-        List<PathPoint> raw = new List<PathPoint>(cells.Count + 1) { new PathPoint(startX, startY) };
-        for (int i = 1; i < cells.Count; i++)
+        List<PathPoint> raw = new List<PathPoint>(cells.Count + 2) { new PathPoint(startX, startY) };
+        bool exactTarget = reachedTarget && targetPassable;
+        // Центр клетки старта остаётся точкой пути, если от точного старта до
+        // следующей точки между ними стена.
+        bool includeFirst = startAnchored;
+        if (!includeFirst && WallsOn)
+        {
+            if (cells.Count > 1)
+            {
+                grid.CellCenter(grid.CellAt(cells[1]), out double nx, out double ny);
+                includeFirst = LegCrossesWall(grid, startX, startY, nx, ny);
+            }
+            else if (exactTarget)
+                includeFirst = LegCrossesWall(grid, startX, startY, targetX, targetY);
+        }
+        for (int i = includeFirst ? 0 : 1; i < cells.Count; i++)
         {
             grid.CellCenter(grid.CellAt(cells[i]), out double x, out double y);
             raw.Add(new PathPoint(x, y));
         }
-        if (reachedTarget && targetPassable)
-            raw[raw.Count - 1] = new PathPoint(targetX, targetY);
+        if (exactTarget)
+        {
+            // Последняя клетка заменяется точной целью, если между ними нет стены.
+            if (targetAnchored || raw.Count < 2 || LegCrossesWall(grid, raw[raw.Count - 2].X, raw[raw.Count - 2].Y, targetX, targetY))
+                raw.Add(new PathPoint(targetX, targetY));
+            else
+                raw[raw.Count - 1] = new PathPoint(targetX, targetY);
+        }
+        if (raw.Count < 2)
+        {
+            reachedTarget = false;
+            return result;
+        }
 
         return Smooth(layer, rules, raw, start);
+    }
+
+    private static bool WallsOn => WorldMapWalls.Count > 0;
+
+    // Отрезок между точками пикселей задевает стену обрыва.
+    private static bool LegCrossesWall(WorldMapHexGrid grid, double ax, double ay, double bx, double by) =>
+        WallsOn && WorldMapWalls.Crosses(
+            grid.PixelToPercentX(ax), grid.PixelToPercentY(ay),
+            grid.PixelToPercentX(bx), grid.PixelToPercentY(by));
+
+    // Шаг поиска между центрами соседних клеток задевает стену обрыва.
+    private static bool StepCrossesWall(WorldMapHexGrid grid, WorldMapHexCell a, WorldMapHexCell b)
+    {
+        if (!WallsOn)
+            return false;
+        grid.CellCenter(a, out double ax, out double ay);
+        grid.CellCenter(b, out double bx, out double by);
+        return LegCrossesWall(grid, ax, ay, bx, by);
+    }
+
+    private static bool WallAt(WorldMapHexGrid grid, double x, double y) =>
+        WallsOn && WorldMapWalls.Blocks(grid.PixelToPercentX(x), grid.PixelToPercentY(y));
+
+    private static bool IsLedge(WorldMapHexGrid grid, WorldMapHexCell cell) =>
+        WallsOn && WorldMapWalls.IsLedgeCell(grid.IndexOf(cell));
+
+    // Центр клетки виден из точки: ни он, ни отрезок до него не задевают стену.
+    private static bool Visible(WorldMapHexGrid grid, double x, double y, WorldMapHexCell cell)
+    {
+        grid.CellCenter(cell, out double cx, out double cy);
+        return !WorldMapWalls.Crosses(
+            grid.PixelToPercentX(x), grid.PixelToPercentY(y),
+            grid.PixelToPercentX(cx), grid.PixelToPercentY(cy));
+    }
+
+    // Клетка поиска для точной точки. Обычно — её клетка. Клетка уступа и
+    // клетка, центр которой за стеной от точки, — ближайшая из соседних
+    // проходимых клеток вне уступа, центр которой виден из точки. Старт на
+    // самой стене (leaving) видимости не требует: герой должен выйти.
+    private static WorldMapHexCell Anchor(
+        WorldMapTerrainLayer layer,
+        WorldMapMovementRules rules,
+        double x,
+        double y,
+        WorldMapHexCell cell,
+        bool leaving)
+    {
+        if (!WallsOn)
+            return cell;
+        WorldMapHexGrid grid = layer.Grid;
+        bool onWall = leaving && WallAt(grid, x, y);
+        if (!IsLedge(grid, cell) && (!rules.IsTraversable(layer.Get(cell)) || onWall || Visible(grid, x, y, cell)))
+            return cell;
+
+        WorldMapHexCell best = cell;
+        double bestDistance = double.MaxValue;
+        for (int pass = 0; pass < 2 && bestDistance == double.MaxValue; pass++)
+        {
+            bool needVisible = pass == 0 && !onWall;
+            for (int direction = 0; direction < 6; direction++)
+            {
+                WorldMapHexCell next = cell.Neighbor(direction);
+                if (!grid.IsInside(next) || IsLedge(grid, next) || !rules.IsTraversable(layer.Get(next)))
+                    continue;
+                if (activeCrossings != null && activeCrossings.IsBlockedCell(grid.IndexOf(next)))
+                    continue;
+                if (needVisible && !Visible(grid, x, y, next))
+                    continue;
+                grid.CellCenter(next, out double cx, out double cy);
+                double d = (cx - x) * (cx - x) + (cy - y) * (cy - y);
+                if (d < bestDistance)
+                {
+                    bestDistance = d;
+                    best = next;
+                }
+            }
+        }
+        return best;
     }
 
     private static List<int> Search(
@@ -210,7 +334,7 @@ public static class WorldMapPathfinder
                 if (!grid.IsInside(next))
                     continue;
                 int nextIndex = grid.IndexOf(next);
-                if (closed[nextIndex] || !IsPassable(layer, rules, next, start))
+                if (closed[nextIndex] || !IsPassable(layer, rules, next, start) || StepCrossesWall(grid, cell, next))
                     continue;
 
                 // Цена шага — среднее двух клеток: граница местности посередине.
@@ -343,6 +467,13 @@ public static class WorldMapPathfinder
         if (length <= 1e-9)
             return 0.0;
 
+        // Стена обрыва: отрезок проверяется мелким шагом (угол стены короче шага клеток).
+        if (LegCrossesWall(grid, a.X, a.Y, b.X, b.Y))
+        {
+            clear = false;
+            return double.MaxValue;
+        }
+
         double sampleStep = grid.HexRadius * LineSampleFraction;
         int samples = Math.Max(1, (int)Math.Ceiling(length / sampleStep));
         double pieceHexes = length / samples / grid.HexWidth;
@@ -350,8 +481,10 @@ public static class WorldMapPathfinder
         for (int i = 0; i < samples; i++)
         {
             double t = (i + 0.5) / samples;
-            WorldMapHexCell cell = grid.CellAtPixel(a.X + dx * t, a.Y + dy * t);
-            if (!IsPassable(layer, rules, cell, start))
+            double sampleX = a.X + dx * t, sampleY = a.Y + dy * t;
+            WorldMapHexCell cell = grid.CellAtPixel(sampleX, sampleY);
+            // Клетка уступа проходима вне стены обрыва (сама стена — проверка отрезка выше).
+            if (!IsPassable(layer, rules, cell, start) && !IsLedge(grid, cell))
             {
                 clear = false;
                 return double.MaxValue;

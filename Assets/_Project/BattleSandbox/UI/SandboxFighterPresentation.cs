@@ -1291,6 +1291,15 @@ namespace KingdomSurvival.BattleSandbox
             name.style.whiteSpace = WhiteSpace.Normal;
             text.Add(name);
 
+            // Описание — сразу под названием; сроки и источник — ниже.
+            if (!string.IsNullOrEmpty(view.Effect))
+            {
+                Label effect = CreateLabel(view.Effect, 10, new Color(0.80f, 0.80f, 0.76f, 1f));
+                effect.style.whiteSpace = WhiteSpace.Normal;
+                effect.style.marginTop = 2f;
+                text.Add(effect);
+            }
+
             List<string> meta = new List<string>();
             if (view.TriggerRound > 0) meta.Add("срабатывает в раунде " + view.TriggerRound);
             else if (view.Dependent) meta.Add("пока действует связь");
@@ -1304,11 +1313,6 @@ namespace KingdomSurvival.BattleSandbox
                 metaLabel.style.marginTop = 2f;
                 text.Add(metaLabel);
             }
-
-            Label effect = CreateLabel(view.Effect, 10, new Color(0.80f, 0.80f, 0.76f, 1f));
-            effect.style.whiteSpace = WhiteSpace.Normal;
-            effect.style.marginTop = 3f;
-            text.Add(effect);
 
             if (!string.IsNullOrEmpty(view.Removal))
             {

@@ -31,7 +31,11 @@ namespace KingdomSurvival.BattleSandbox
                 LeaderHealth = () => board != null ? board.LeaderHealthShare : 1f,
             };
             if (arena != null)
+            {
                 arena.LensPulse = () => State.LensPulse;
+                State.CollectFires = arena.CollectFireViewport;
+                State.UnitScale = () => arena.AssetUnitScale;
+            }
             if (board != null)
             {
                 board.ImpactShown += OnImpact;
@@ -57,6 +61,8 @@ namespace KingdomSurvival.BattleSandbox
                 boundCamera = camera;
             }
             arena.ShakeShare = State.ShakeShare;
+            LocationFrameQualityLevel quality = LocationWorldRenderer.QualityLevel;
+            arena.ParticleDensityScale = quality == LocationFrameQualityLevel.High ? 1f : quality == LocationFrameQualityLevel.Medium ? .7f : .4f;
         }
 
         public void Dispose()

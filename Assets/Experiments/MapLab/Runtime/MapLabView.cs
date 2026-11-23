@@ -1360,6 +1360,43 @@ namespace KingdomSurvival.MapLab
                 || entry.Category == MapLabArtCategory.Prop || entry.Category == MapLabArtCategory.Building;
         }
 
+        // Час суток карты для солнечных теней; NaN — свет постоянный (настройка «Направление света»).
+        private float sunHour = float.NaN;
+        private Vector2 sunGround;
+        private float sunDensity = 1f;
+
+        // Смещение тени по земле на единицу высоты и её плотность (0..1) — по часу
+        // суток карты; без часа или при выключенном солнце — постоянный свет.
+        public Vector2 SunGround
+        {
+            get
+            {
+                MapLabStage05Settings s5 = Settings.Stage05;
+                if (float.IsNaN(sunHour) || !s5.SunShadows)
+                    return MapLabObjectShadows.CardGround(Settings.LightDirection, s5.CardShadowLength, s5.CardShadowMinAngle);
+                return sunGround;
+            }
+        }
+
+        public float SunDensity => float.IsNaN(sunHour) || !Settings.Stage05.SunShadows ? 1f : sunDensity;
+
+        // Час суток карты (0..24). Тени карточек поворачиваются и меняют длину и плотность
+        // без пересборки карты — меняются только числа в материалах теней. Не чаще,
+        // чем сдвинулся час на заметную долю (≈1 минута игровых суток).
+        public void SetSunHour(float hour)
+        {
+            if (Settings == null)
+                return;
+            hour = Mathf.Repeat(hour, 24f);
+            if (!float.IsNaN(sunHour) && Mathf.Abs(Mathf.DeltaAngle(hour * 15f, sunHour * 15f)) < 0.25f)
+                return;
+            sunHour = hour;
+            sunGround = MapLabObjectShadows.SunGround(hour, Settings.Stage05, out sunDensity);
+            foreach (KeyValuePair<MapLabArtEntry, Material> pair in shadowMaterials)
+                if (pair.Value != null)
+                    ConfigureShadowMaterial(pair.Value, pair.Key);
+        }
+
         private Material ShadowMaterial(MapLabArtEntry entry)
         {
             if (shadowMaterials.TryGetValue(entry, out Material material) && material != null)
@@ -1374,10 +1411,10 @@ namespace KingdomSurvival.MapLab
         private void ConfigureShadowMaterial(Material m, MapLabArtEntry entry)
         {
             MapLabStage05Settings s5 = Settings.Stage05;
-            Vector2 ground = MapLabObjectShadows.CardGround(Settings.LightDirection, s5.CardShadowLength, s5.CardShadowMinAngle);
+            Vector2 ground = SunGround;
             m.SetTexture("_MainTex", ArtTexture(entry));
             m.SetFloat("_Cutoff", entry.Cutoff);
-            m.SetVector("_SilShadow", new Vector4(ground.x, ground.y, s5.CardShadowOpacity, 1f));
+            m.SetVector("_SilShadow", new Vector4(ground.x, ground.y, s5.CardShadowOpacity * SunDensity, SunDensity > 0.003f ? 1f : 0f));
             m.SetColor("_SilShadowColor", s5.CardShadowColor);
             m.SetFloat("_SilShadowSoft", s5.CardShadowSoft);
         }
@@ -1408,9 +1445,10 @@ namespace KingdomSurvival.MapLab
             // Прогиб от прохода бойцов: своя настройка записи, иначе растения гнутся, деревья и камни — нет.
             bool plant = entry.Role == "grass_tuft" || entry.Role == "grass_ink_tuft" || entry.Kind == MapLabObjectKind.Bush || entry.Kind == MapLabObjectKind.Reed;
             m.SetFloat("_WalkBend", entry.WalkBend >= 0f ? entry.WalkBend : plant ? 1f : 0f);
-            // Ветер обработки кадра (арена): растения и трава — доля «растительности», прочая
-            // растительность — деревья; камни, постройки, фигуры стоят. Вне арены ветра нет.
-            m.SetFloat("_WindKind", plant || entry.Kind == MapLabObjectKind.Grass ? 2f : entry.Category == MapLabArtCategory.Vegetation ? 1f : 0f);
+            // Ветер обработки кадра (арена): признак записи WindKind (0 стоит — пень, бревно, камень;
+            // 1 дерево; 2 куст, трава, тростник); -1 — по виду: растения и трава — «растительность»,
+            // прочая растительность — деревья; камни, постройки, фигуры стоят. Вне арены ветра нет.
+            m.SetFloat("_WindKind", entry.WindKind >= 0f ? Mathf.Clamp(Mathf.Round(entry.WindKind), 0f, 2f) : plant || entry.Kind == MapLabObjectKind.Grass ? 2f : entry.Category == MapLabArtCategory.Vegetation ? 1f : 0f);
             // Силуэтная тень (только арена: глобальный переключатель выключен в остальных мирах).
             // На глобальной карте тень рисует отдельный проход по силуэту (MapCardShadow), здесь её нет.
             m.SetFloat("_CastShadow", !Settings.MapCardShadows && !entry.NoCastShadow && entry.Role != "grass_ink_tuft" && (entry.Category == MapLabArtCategory.Vegetation || entry.Category == MapLabArtCategory.Rock || entry.Category == MapLabArtCategory.Prop) ? 1f : 0f);

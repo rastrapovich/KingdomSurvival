@@ -27,6 +27,7 @@ namespace KingdomSurvival.MapLabBridge
         // Рисунки «пола» (низкая трава, настил моста) — не в верхнем слое.
         private readonly HashSet<string> groundArtIds = new HashSet<string>();
         private readonly List<Renderer> overlayRenderers = new List<Renderer>();
+        private List<Renderer> overlayOthers;
         private readonly List<Renderer> groundRenderers = new List<Renderer>();
         // Низкая трава и кусты «пола»: в кадре под сеткой, но перед бойцом они его закрывают.
         private readonly List<Renderer> floorCards = new List<Renderer>();
@@ -42,6 +43,7 @@ namespace KingdomSurvival.MapLabBridge
         private void SplitOverlay()
         {
             overlayRenderers.Clear();
+            overlayOthers = null;
             groundRenderers.Clear();
             floorCards.Clear();
             if (depthOnlyShader == null)
@@ -217,11 +219,20 @@ namespace KingdomSurvival.MapLabBridge
             frontRaw[index] = EnsureLayerTexture(frontRaw[index], "MapLab Arena Front " + index);
             frontHidden.Clear();
             // Клип есть только у шейдера карточек рисунков: прочие объекты в этом слое не нужны.
-            foreach (Renderer renderer in overlayRenderers)
+            // Список не-карточек собирается один раз (имя шейдера — строка, на каждый слой кадра это сотни выделений).
+            if (overlayOthers == null)
+            {
+                overlayOthers = new List<Renderer>();
+                foreach (Renderer renderer in overlayRenderers)
+                {
+                    Material material = renderer != null ? renderer.sharedMaterial : null;
+                    if (!(material != null && material.shader != null && material.shader.name == "Kingdom Survival/MapLab/Art Card"))
+                        overlayOthers.Add(renderer);
+                }
+            }
+            foreach (Renderer renderer in overlayOthers)
             {
                 if (renderer == null || !renderer.enabled) continue;
-                Material material = renderer.sharedMaterial;
-                if (material != null && material.shader != null && material.shader.name == "Kingdom Survival/MapLab/Art Card") continue;
                 renderer.enabled = false;
                 frontHidden.Add(renderer);
             }

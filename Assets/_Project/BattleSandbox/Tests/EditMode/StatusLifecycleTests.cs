@@ -44,6 +44,54 @@ namespace KingdomSurvival.BattleSandbox.Tests
             Assert.IsFalse(hero.HasStatus(SandboxBattle.SurroundedId), "окружение разорвано");
         }
 
+        // Гибель одного из окружающих от удара снимает «Окружён» сразу, без шага героя.
+        [Test]
+        public void Surrounded_RemovedImmediatelyWhenEncirclerKilledByAttack()
+        {
+            SandboxBattle b = Build(U("hero", SandboxTeam.Player, 5, 4, 9), U("e1", SandboxTeam.Enemy, 6, 4, 5), U("e2", SandboxTeam.Enemy, 4, 4, 4, hp: 1));
+            SandboxUnitState hero = b.GetUnit("hero");
+            Assert.IsTrue(hero.HasStatus(SandboxBattle.SurroundedId), "2 врага рядом, союзника нет");
+            Assert.IsTrue(b.GetStatusViews("hero", SandboxTeam.Player).Any(v => v.StatusId == SandboxBattle.SurroundedId));
+            Assert.IsTrue(b.TryAttack("hero", "e2", out string m), m);
+            Assert.IsTrue(b.GetUnit("e2").IsDefeated, "предусловие: e2 убит");
+            Assert.IsFalse(hero.HasStatus(SandboxBattle.SurroundedId), "остался один враг — не окружён");
+            Assert.IsFalse(b.GetStatusViews("hero", SandboxTeam.Player).Any(v => v.StatusId == SandboxBattle.SurroundedId), "значок тоже исчез");
+        }
+
+        // Гибель окружающего от ответного удара.
+        [Test]
+        public void Surrounded_RemovedWhenEncirclerKilledByRetaliation()
+        {
+            SandboxBattle b = Build(U("hero", SandboxTeam.Player, 5, 4, 9, hp: 40), U("e1", SandboxTeam.Enemy, 6, 4, 5), U("e2", SandboxTeam.Enemy, 4, 4, 4, hp: 1));
+            SandboxUnitState hero = b.GetUnit("hero");
+            Assert.IsTrue(hero.HasStatus(SandboxBattle.SurroundedId));
+            PassUntil(b, "e2");
+            Assert.IsTrue(b.TryAttack("e2", "hero", out string m), m);
+            if (b.HasPendingRetaliation)
+                Assert.IsTrue(b.TryResolvePendingRetaliation(out string r), r);
+            Assert.IsTrue(b.GetUnit("e2").IsDefeated, "предусловие: ответный удар убил e2");
+            Assert.IsFalse(hero.HasStatus(SandboxBattle.SurroundedId), "окружение снято сразу");
+        }
+
+        // Описание состояния доходит до игрока: у «Окружён» оно не пустое.
+        [Test]
+        public void Surrounded_ViewHasDescription()
+        {
+            SandboxBattle b = Build(U("hero", SandboxTeam.Player, 5, 4, 9), U("e1", SandboxTeam.Enemy, 6, 4, 5), U("e2", SandboxTeam.Enemy, 4, 4, 4));
+            SandboxStatusView view = b.GetStatusViews("hero", SandboxTeam.Player).First(v => v.StatusId == SandboxBattle.SurroundedId);
+            Assert.IsFalse(string.IsNullOrEmpty(view.Effect), "описание состояния «Окружён»");
+        }
+
+        // Каждое состояние с экземпляром (не фасад связи) имеет текст описания для подсказки и панели.
+        [Test]
+        public void AllInstanceStatuses_HaveDescription()
+        {
+            List<string> empty = SandboxStatusCatalog.All
+                .Where(def => def.Clock != SandboxStatusClock.LegacyFacade && string.IsNullOrEmpty(SandboxStatusText.Describe(def)))
+                .Select(def => def.Id + " " + def.Name).ToList();
+            Assert.IsEmpty(empty, "без описания: " + string.Join("; ", empty));
+        }
+
         [Test]
         public void Surrounded_FirstExitCostsOneMore_OncePerActivation()
         {

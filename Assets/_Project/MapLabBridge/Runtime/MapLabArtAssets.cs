@@ -170,6 +170,12 @@ namespace KingdomSurvival.MapLabBridge
                 entry.WalkBend = asset.WalkBend >= 0f ? asset.WalkBend
                     : role == MapLabDecorRole.LowGrass || role == MapLabDecorRole.TallPlant || role == MapLabDecorRole.TallGrass ? 1f : 0f;
                 entry.NoCastShadow = HasTagPrefix(asset, MapGrassInkPrefix);
+                // Качание на ветру — по роли рисунка: деревья, кусты и трава качаются, пни, коряги
+                // арены, брёвна и камни стоят (роль берётся из категории, тегов и имени записи Базы ассетов).
+                // Только на арене: карта ветра не знает, и её карточки остаются целыми квадами.
+                if (arena && role != null)
+                    entry.WindKind = role == MapLabDecorRole.Tree ? 1f
+                        : role == MapLabDecorRole.TallPlant || role == MapLabDecorRole.LowGrass || role == MapLabDecorRole.TallGrass ? 2f : 0f;
                 set.Entries.Add(entry);
                 if (decor == null || role == null)
                     continue;

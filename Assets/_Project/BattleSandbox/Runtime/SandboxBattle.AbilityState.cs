@@ -603,6 +603,8 @@ namespace KingdomSurvival.BattleSandbox
             dead.AttachedToId = null;
             if (dead.IsHidden)
                 dead.IsHidden = false;
+            // Гибель соседа сразу пересчитывает «Окружён» у остальных бойцов.
+            RecomputeSurrounded();
         }
 
         private void RemoveLink(SandboxLink link, string reason)

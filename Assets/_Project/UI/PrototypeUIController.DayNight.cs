@@ -23,6 +23,9 @@ public partial class PrototypeUIController
     private Color dayNightShownTint;
     private bool dayNightSettingsApplied;
 
+    // Подложка под кадром живой карты (видна сквозь полупрозрачные края).
+    private static readonly Color WorldMapLiveBackdrop = new Color(0.86f, 0.82f, 0.72f);
+
     // Цвета круга (рисунок карты: спокойные заливки, тёплая тушь).
     private static readonly Color DialDaySky = new Color(0.87f, 0.75f, 0.50f);
     private static readonly Color DialNightSky = new Color(0.17f, 0.21f, 0.33f);
@@ -130,6 +133,10 @@ public partial class PrototypeUIController
         dayNightTintedElement = worldMapLiveImage;
         dayNightShownTint = tint;
         worldMapLiveImage.style.unityBackgroundImageTintColor = tint;
+        // Края спрайтов в кадре живой карты полупрозрачны, и сквозь них видна
+        // подложка элемента. Без того же света ночью она проступала светлыми
+        // контурами вокруг деревьев, скал и дорог.
+        worldMapLiveImage.style.backgroundColor = WorldMapLiveBackdrop * tint;
     }
 
     // ---------- Рисунок круга ----------

@@ -34,7 +34,7 @@ public partial class PrototypeUIController
         worldMapLiveImage.style.top = 0;
         worldMapLiveImage.style.right = 0;
         worldMapLiveImage.style.bottom = 0;
-        worldMapLiveImage.style.backgroundColor = new Color(0.86f, 0.82f, 0.72f);
+        worldMapLiveImage.style.backgroundColor = WorldMapLiveBackdrop;
         worldMapViewport.Insert(0, worldMapLiveImage);
         worldMapLiveLabel = new Label("Рисуем карту…") { pickingMode = PickingMode.Ignore };
         worldMapLiveLabel.style.position = Position.Absolute;

@@ -614,11 +614,12 @@ namespace KingdomSurvival.MapLabBridge
         // Число лесных рисунков на арене (деревья, кусты, пни лесных клеток).
         public int ForestFeatures { get; private set; }
 
-        // Лесная клетка (24.11.2026): лес на одном гексе. Деревья — молодые
-        // (самые низкие породы, уменьшенные), у задней кромки клетки: крона не
-        // закрывает соседние клетки, середина гекса, где стоит боец, открыта.
-        // Кусты (бурьян Базы ассетов) — по бокам и сзади клетки, изредка пень.
-        // Все рисунки — слой объектов: над сеткой, под фигурами.
+        // Лесная клетка (24.11.2026): лес на одном гексе. Деревья (самые низкие
+        // породы Базы ассетов — доля ForestYoungShare) и кусты (бурьян Базы
+        // ассетов) — по всей клетке и чуть за её краем (ForestSpread), кроме
+        // самой середины (ForestCenterClear), где стоит боец; изредка пень.
+        // Все рисунки — слой объектов: над сеткой; объекты ближе к зрителю,
+        // чем боец, рисуются поверх него.
         private void PlaceForestCells(MapLabComposition c, List<MapLabDecorArt> trees, List<MapLabDecorArt> bushes,
             List<MapLabDecorArt> stumps, MapLabArenaLook look)
         {
@@ -631,14 +632,20 @@ namespace KingdomSurvival.MapLabBridge
             int keep = Mathf.Clamp(Mathf.CeilToInt(young.Count * Mathf.Clamp01(look.ForestYoungShare)), young.Count > 0 ? 1 : 0, young.Count);
             young.RemoveRange(keep, young.Count - keep);
             List<MapLabDecorArt> smallStumps = stumps.FindAll(stump => stump.HalfWidth < hex * 0.45f);
-            float treeScale = Mathf.Clamp(look.ForestTreeScale, 0.2f, 2f);
-            float bushScale = Mathf.Clamp(look.ForestBushScale, 0.2f, 3f);
+            float treeScale = Mathf.Clamp(look.ForestTreeScale, 0.1f, 6f);
+            float bushScale = Mathf.Clamp(look.ForestBushScale, 0.1f, 6f);
+            // Предел высоты дерева: 0 — без предела (размер — только ползунком).
+            float limit = look.ForestTreeHeightCap > 0f ? look.ForestTreeHeightCap * hex : float.MaxValue;
+            float spread = Mathf.Clamp(look.ForestSpread, 0.2f, 2f) * hex;
+            float clear = Mathf.Clamp(look.ForestCenterClear, 0f, 0.9f) * spread;
+            List<Vector2> cellPlaced = new List<Vector2>();
 
             void Put(MapLabDecorArt art, string suffix, float scale, Vector2 p)
             {
                 MapLabArtEntry sized = Mathf.Approximately(scale, 1f) ? null : MapLabArtAssets.AddSized(decorSet, art, suffix, art.Height * scale);
                 c.Features.Add((p, sized != null ? sized.Id : art.Id, ForestKind));
                 decorPlaced.Add((p, art.HalfWidth * scale * 0.5f));
+                cellPlaced.Add(p);
                 DecorFeatures++;
                 ForestFeatures++;
             }
@@ -649,40 +656,48 @@ namespace KingdomSurvival.MapLabBridge
                 return lo + (int)(r.Value() * (hi - lo + 1 - 1e-4f));
             }
 
+            // Точка в кольце clear..spread вокруг центра клетки, по площади
+            // равномерно; не вплотную к уже поставленным на этой клетке.
+            Vector2 Spot(Vector2 center, MapLabRandom r, float gap)
+            {
+                Vector2 best = center;
+                float bestDistance = -1f;
+                for (int attempt = 0; attempt < 8; attempt++)
+                {
+                    float angle = r.Value() * Mathf.PI * 2f;
+                    float radius = Mathf.Sqrt(Mathf.Lerp(clear * clear, spread * spread, r.Value()));
+                    Vector2 p = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+                    float nearest = float.MaxValue;
+                    foreach (Vector2 other in cellPlaced)
+                        nearest = Mathf.Min(nearest, Vector2.Distance(other, p));
+                    if (nearest >= gap)
+                        return p;
+                    if (nearest > bestDistance)
+                    {
+                        bestDistance = nearest;
+                        best = p;
+                    }
+                }
+                return best;
+            }
+
             for (int index = 0; index < Spec.Forest.Count; index++)
             {
                 Vector2 center = ToWorld(Spec.Forest[index]);
                 MapLabRandom rng = MapLabRandom.ForStream(Spec.Seed, "arena-forest-" + index, MapLabData.AlgorithmVersion);
-                // Деревья: задняя половина гекса (дальше от камеры), вразброс по ширине.
+                cellPlaced.Clear();
                 int treeCount = young.Count > 0 ? Count(look.ForestTreesMin, look.ForestTreesMax, rng) : 0;
-                float side = rng.Value() < 0.5f ? -1f : 1f;
                 for (int i = 0; i < treeCount; i++)
                 {
                     MapLabDecorArt art = MapLabArtAssets.Pick(young, rng.Value());
-                    float x = treeCount == 1 ? rng.Range(-0.35f, 0.35f) : side * (i % 2 == 0 ? 1f : -1f) * rng.Range(0.2f, 0.5f);
-                    Vector2 p = center + new Vector2(x, rng.Range(0.2f, 0.5f)) * hex;
-                    float limit = Mathf.Max(0.3f, look.ForestTreeMaxHexes) * hex;
-                    Put(art, "#forest", Mathf.Min(treeScale, limit / Mathf.Max(0.05f, art.Height)), p);
+                    float scale = Mathf.Min(treeScale, limit / Mathf.Max(0.05f, art.Height));
+                    Put(art, "#forest", scale, Spot(center, rng, hex * 0.45f));
                 }
-                // Кусты: по бокам и сзади клетки (дуга от правого бока через
-                // заднюю кромку к левому). Объекты ближе к зрителю, чем боец,
-                // рисуются поверх него — спереди куст закрыл бы бойцу ноги.
                 int bushCount = bushes.Count > 0 ? Count(look.ForestBushesMin, look.ForestBushesMax, rng) : 0;
-                const float arcFrom = -0.45f, arcTo = Mathf.PI + 0.45f;
                 for (int i = 0; i < bushCount; i++)
-                {
-                    MapLabDecorArt art = MapLabArtAssets.Pick(bushes, rng.Value());
-                    float slot = (i + rng.Range(0.15f, 0.85f)) / bushCount;
-                    float angle = Mathf.Lerp(arcFrom, arcTo, rng.Value() < 0.5f ? slot : 1f - slot);
-                    float radius = rng.Range(0.42f, 0.68f);
-                    Vector2 p = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius * hex;
-                    Put(art, "#forestbush", bushScale, p);
-                }
+                    Put(MapLabArtAssets.Pick(bushes, rng.Value()), "#forestbush", bushScale, Spot(center, rng, hex * 0.3f));
                 if (smallStumps.Count > 0 && rng.Value() < look.ForestStumpChance)
-                {
-                    float angle = Mathf.Lerp(arcFrom, arcTo, rng.Value());
-                    Put(MapLabArtAssets.Pick(smallStumps, rng.Value()), string.Empty, 1f, center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * 0.55f * hex);
-                }
+                    Put(MapLabArtAssets.Pick(smallStumps, rng.Value()), string.Empty, 1f, Spot(center, rng, hex * 0.3f));
             }
         }
     }

@@ -159,19 +159,25 @@ namespace KingdomSurvival.MapLabBridge
         // Лесные клетки (растительность «лес» правил боя): на гексе — молодые
         // деревья и кусты тех же рисунков Базы ассетов, что декор арены.
         // Молодые — самые низкие породы (доля ForestYoungShare от списка по
-        // высоте), чтобы кроны не закрывали соседние клетки. Бойцы рисуются
-        // поверх (деревья — слой объектов под фигурами).
+        // высоте). Раскладка — по всей клетке и чуть за её краем.
         public int ForestTreesMin = 1;
         public int ForestTreesMax = 2;
         public int ForestBushesMin = 1;
         public int ForestBushesMax = 3;
         // Какая доля пород (от самой низкой) идёт на лесные клетки.
         public float ForestYoungShare = 0.5f;
-        // Размер деревьев и кустов лесной клетки (1 — как в Базе ассетов).
-        public float ForestTreeScale = 0.75f;
-        // Предел высоты дерева на клетке, в радиусах гекса (выше — уменьшается).
-        public float ForestTreeMaxHexes = 1.6f;
+        // Размер деревьев и кустов лесной клетки (1 — как в Базе ассетов;
+        // поверх общего «Размера деревьев»).
+        public float ForestTreeScale = 1f;
+        // Предел высоты дерева на клетке, в радиусах гекса (выше — уменьшается);
+        // 0 — без предела. 25.11.2026: прежнее поле ForestTreeMaxHexes (1,6)
+        // глушило ползунок размера — заменено этим, по умолчанию выключено.
+        public float ForestTreeHeightCap;
         public float ForestBushScale = 1f;
+        // Разброс рисунков вокруг центра клетки, в радиусах гекса (1 — до края
+        // клетки, больше — чуть за край) и свободная середина (доля разброса).
+        public float ForestSpread = 1.15f;
+        public float ForestCenterClear = 0.2f;
         // Пень на лесной клетке, вероятность.
         public float ForestStumpChance = 0.2f;
 

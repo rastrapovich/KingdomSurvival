@@ -230,7 +230,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
                         continue;
                     Vector2 at = new Vector2(sprite.Base.x, sprite.Base.z);
                     float nearest = spec.Forest.Min(center => Vector2.Distance(arena.ToWorld(center), at));
-                    Assert.That(nearest, Is.LessThan(spec.HexWorld * 0.95f), $"Рисунок {sprite.ArtId} — на лесной клетке");
+                    Assert.That(nearest, Is.LessThan(spec.HexWorld * 1.25f), $"Рисунок {sprite.ArtId} — на лесной клетке");
                     onCells++;
                 }
                 Assert.That(onCells, Is.GreaterThan(0), "рисунки лесных клеток построены");
@@ -238,6 +238,48 @@ namespace KingdomSurvival.BattleSandbox.Tests
             finally
             {
                 arena.Dispose();
+            }
+
+            // 25.11.2026: ползунки лесной клетки действуют. Размер деревьев ×2,5 —
+            // самое высокое дерево больше чем вдвое выше; рисунки — по всей
+            // клетке (есть и перед центром, и за ним), не дальше разброса.
+            float TallestForest(MapLabArena built) => built.View.Data.FeatureSprites.Where(s => s.Kind == MapLabArena.ForestKind).Select(s => s.Height).DefaultIfEmpty(0f).Max();
+            MapLabArenaSpec small = DefaultSpec(battle);
+            small.Look.ForestBushesMin = small.Look.ForestBushesMax = 0;
+            small.Look.ForestStumpChance = 0f;
+            MapLabArenaSpec large = DefaultSpec(battle);
+            large.Look.ForestBushesMin = large.Look.ForestBushesMax = 0;
+            large.Look.ForestStumpChance = 0f;
+            large.Look.ForestTreeScale = 2.5f;
+            MapLabArenaSpec spread = DefaultSpec(battle);
+            spread.Look.ForestTreesMin = spread.Look.ForestTreesMax = 4;
+            spread.Look.ForestBushesMin = spread.Look.ForestBushesMax = 8;
+            MapLabArena a = MapLabArena.Build(small), b = MapLabArena.Build(large), wide = MapLabArena.Build(spread);
+            try
+            {
+                Assert.That(a.Ready && b.Ready && wide.Ready, Is.True, a.Error + b.Error + wide.Error);
+                float before = TallestForest(a), after = TallestForest(b);
+                Debug.Log($"Лесная клетка: самое высокое дерево {before:0.00} → {after:0.00} при размере 1 → 2,5.");
+                Assert.That(after, Is.GreaterThan(before * 2f), "размер деревьев на клетке меняет высоту");
+                int front = 0, back = 0;
+                float reach = spec.HexWorld * spread.Look.ForestSpread * 1.05f;
+                foreach (MapLabFeatureSprite sprite in wide.View.Data.FeatureSprites)
+                {
+                    if (sprite.Kind != MapLabArena.ForestKind)
+                        continue;
+                    Vector2 at = new Vector2(sprite.Base.x, sprite.Base.z);
+                    Vector2 cell = spread.Forest.Select(wide.ToWorld).OrderBy(w => Vector2.Distance(w, at)).First();
+                    Assert.That(Vector2.Distance(cell, at), Is.LessThan(reach), "не дальше разброса");
+                    if (at.y < cell.y) front++; else back++;
+                }
+                Assert.That(front, Is.GreaterThan(0), "рисунки есть и в передней половине клетки");
+                Assert.That(back, Is.GreaterThan(0), "и в задней");
+            }
+            finally
+            {
+                a.Dispose();
+                b.Dispose();
+                wide.Dispose();
             }
 
             // Кадр для глаз: сухая поляна с холмами и лесными клетками генератора

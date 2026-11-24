@@ -11,8 +11,9 @@ namespace KingdomSurvival.BattleSandbox
     // Скрытые (пень Срубника) и павшие не подсвечиваются.
     public sealed partial class HexBoardElement
     {
-        public static readonly Color PlayerHighlightColor = new Color(1f, 0.84f, 0.32f, 0.95f);
-        public static readonly Color EnemyHighlightColor = new Color(0.95f, 0.22f, 0.18f, 0.95f);
+        // Еле заметный контур (просьба 24.11.2026): тонкая линия, полупрозрачная.
+        public static readonly Color PlayerHighlightColor = new Color(1f, 0.86f, 0.38f, 0.42f);
+        public static readonly Color EnemyHighlightColor = new Color(0.95f, 0.26f, 0.20f, 0.42f);
 
         private readonly Dictionary<string, Image> unitOutlines = new Dictionary<string, Image>();
         private readonly HashSet<string> visibleOutlineIds = new HashSet<string>();
@@ -93,7 +94,7 @@ namespace KingdomSurvival.BattleSandbox
         }
     }
 
-    // Белый контур вокруг силуэта кадра (снаружи, ~2% высоты); цвет задаёт
+    // Белый контур вокруг силуэта кадра (снаружи, тонкий — ~0,7% высоты); цвет задаёт
     // tintColor картинки. Строится один раз на кадр (кэш), в уменьшенном
     // разрешении; читаемость исходной текстуры не нужна (Blit).
     internal static class SandboxFigureOutline
@@ -137,7 +138,7 @@ namespace KingdomSurvival.BattleSandbox
             bool[] mask = new bool[w * h];
             for (int i = 0; i < mask.Length; i++)
                 mask[i] = pixels[i].a > 90;
-            int radius = Mathf.Max(2, Mathf.RoundToInt(h * 0.018f));
+            int radius = Mathf.Max(1, Mathf.RoundToInt(h * 0.007f));
             // Расширение маски: по строкам, затем по столбцам (квадратное ядро).
             bool[] rows = new bool[w * h];
             for (int y = 0; y < h; y++)

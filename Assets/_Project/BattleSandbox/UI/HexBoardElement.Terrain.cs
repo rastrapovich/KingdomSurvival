@@ -103,8 +103,36 @@ namespace KingdomSurvival.BattleSandbox
 
         public void RefreshTerrainDebug() => MarkDirtyRepaint();
 
+        // Галочка «Сетка»: все клетки поля выделены — обычные светлым контуром,
+        // особые, опасные и закрытые — цветами логических клеток отладки.
+        private bool showAllCells;
+
+        public bool ShowAllCells
+        {
+            get => showAllCells;
+            set
+            {
+                if (showAllCells == value)
+                    return;
+                showAllCells = value;
+                MarkDirtyRepaint();
+            }
+        }
+
         private void DrawTerrainDebug(Painter2D painter, HexLayout layout, float radius)
         {
+            if (showAllCells && !DebugShowLogicalCells)
+            {
+                foreach (HexCoord cell in battle.DebugBoardCells().Where(IsBoardCell))
+                {
+                    string category = battle.DebugCellCategory(cell);
+                    Color color = category == "closed" ? new Color(0.85f, 0.20f, 0.18f, 0.85f)
+                        : category == "hazard" ? new Color(0.95f, 0.55f, 0.15f, 0.85f)
+                        : category == "special" ? new Color(0.90f, 0.82f, 0.30f, 0.75f)
+                        : new Color(0.96f, 0.93f, 0.82f, 0.55f);
+                    PaintHex(painter, layout.GetCenter(cell), radius * 0.92f, Color.clear, color, 1.6f, false, layout.VerticalScale);
+                }
+            }
             if (DebugShowLogicalCells)
             {
                 foreach (HexCoord cell in battle.DebugBoardCells().Where(IsBoardCell))

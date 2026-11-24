@@ -574,9 +574,6 @@ namespace KingdomSurvival.BattleSandbox
         private VisualElement statusColumn;
         private ScrollView statusList;
         private Label statusEmpty;
-        private VisualElement terrainBox;
-        private Label terrainName;
-        private Label terrainText;
         private SandboxBattle lastBattle;
         private string statusSignature;
         private Vector2? lastAnchor;
@@ -908,6 +905,10 @@ namespace KingdomSurvival.BattleSandbox
             dimmer.Focus();
         }
 
+        // Бой, в котором открыта карточка: нужен уже при открытии, чтобы
+        // сразу показать состояния от местности.
+        public void SetBattle(SandboxBattle battle) => lastBattle = battle;
+
         public void Refresh(SandboxBattle battle)
         {
             if (openedDefinition == null || window.resolvedStyle.display == DisplayStyle.None)
@@ -1173,29 +1174,7 @@ namespace KingdomSurvival.BattleSandbox
             title.style.marginBottom = 8f;
             statusColumn.Add(title);
 
-            // Местность под бойцом: что даёт клетка, на которой он стоит
-            // (холм, лес, заросли, топь…) — по тем же правилам, что подсказка клетки.
-            terrainBox = new VisualElement { name = "sandbox-fighter-terrain" };
-            terrainBox.style.marginBottom = 8f;
-            terrainBox.style.marginRight = 4f;
-            terrainBox.style.paddingLeft = 8f;
-            terrainBox.style.paddingRight = 6f;
-            terrainBox.style.paddingTop = 6f;
-            terrainBox.style.paddingBottom = 6f;
-            terrainBox.style.backgroundColor = new Color(0.12f, 0.135f, 0.12f, 1f);
-            SetBorder(terrainBox, new Color(0.36f, 0.40f, 0.30f, 1f));
-            SetRadius(terrainBox, 3f);
-            terrainName = CreateLabel(string.Empty, 12, new Color(0.86f, 0.80f, 0.60f, 1f));
-            terrainName.style.unityFontStyleAndWeight = FontStyle.Bold;
-            terrainName.style.whiteSpace = WhiteSpace.Normal;
-            terrainBox.Add(terrainName);
-            terrainText = CreateLabel(string.Empty, 10, new Color(0.80f, 0.80f, 0.76f, 1f));
-            terrainText.style.whiteSpace = WhiteSpace.Normal;
-            terrainText.style.marginTop = 2f;
-            terrainBox.Add(terrainText);
-            statusColumn.Add(terrainBox);
-
-            statusEmpty = CreateLabel("Действующих состояний нет.", 11, new Color(0.55f, 0.56f, 0.55f, 1f));
+            statusEmpty = CreateLabel("Действующих состояний и эффектов нет.", 11, new Color(0.55f, 0.56f, 0.55f, 1f));
             statusEmpty.style.whiteSpace = WhiteSpace.Normal;
             statusColumn.Add(statusEmpty);
 
@@ -1232,7 +1211,13 @@ namespace KingdomSurvival.BattleSandbox
             if (openedState == null || openedState.IsDefeated)
                 return new List<SandboxStatusView>();
             if (lastBattle != null && ReferenceEquals(lastBattle.GetUnit(openedState.Id), openedState))
-                return lastBattle.GetStatusViews(openedState.Id, SandboxTeam.Player);
+            {
+                // Сначала — состояния от местности (холм, лес, огонь под ногами…),
+                // затем — наложенные состояния бойца.
+                List<SandboxStatusView> all = lastBattle.GetTerrainStateViews(openedState);
+                all.AddRange(lastBattle.GetStatusViews(openedState.Id, SandboxTeam.Player));
+                return all;
+            }
             // Без ссылки на бой — собственные экземпляры бойца.
             List<SandboxStatusView> views = new List<SandboxStatusView>();
             foreach (SandboxStatusInstance instance in openedState.Statuses)
@@ -1258,12 +1243,11 @@ namespace KingdomSurvival.BattleSandbox
             statusToggleCount.style.display = views.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             if (!StatusPanelOpen)
                 return;
-            RefreshTerrain();
 
             // Пересборка только при изменении состава, сроков или зарядов.
             System.Text.StringBuilder signature = new System.Text.StringBuilder();
             foreach (SandboxStatusView view in views)
-                signature.Append(view.StatusId).Append(':').Append(view.TurnsLeft).Append(':').Append(view.Charges).Append(':').Append(view.TriggerRound).Append('|');
+                signature.Append(view.StatusId).Append(':').Append(view.TurnsLeft).Append(':').Append(view.Charges).Append(':').Append(view.TriggerRound).Append(':').Append(view.Effect).Append('|');
             string key = (openedState != null ? openedState.Id : string.Empty) + "#" + signature;
             if (key == statusSignature)
                 return;
@@ -1273,22 +1257,6 @@ namespace KingdomSurvival.BattleSandbox
             statusEmpty.style.display = views.Count == 0 ? DisplayStyle.Flex : DisplayStyle.None;
             foreach (SandboxStatusView view in views)
                 statusList.Add(BuildStatusRow(view));
-        }
-
-        // Местность клетки бойца: название и что она даёт (защита холма,
-        // укрытие леса и зарослей от дальних снарядов, штраф топи, опасности).
-        private void RefreshTerrain()
-        {
-            if (terrainBox == null)
-                return;
-            bool onBoard = lastBattle != null && openedState != null && !openedState.IsDefeated && !openedState.IsOffBoard &&
-                           ReferenceEquals(lastBattle.GetUnit(openedState.Id), openedState);
-            terrainBox.style.display = onBoard ? DisplayStyle.Flex : DisplayStyle.None;
-            if (!onBoard)
-                return;
-            SandboxBattle.SplitCellDescription(lastBattle.DescribeCell(openedState, openedState.Position), out string name, out string details);
-            terrainName.text = "Местность: " + name;
-            terrainText.text = details;
         }
 
         private VisualElement BuildStatusRow(SandboxStatusView view)

@@ -1154,6 +1154,7 @@ namespace KingdomSurvival.BattleSandbox
             roundLabel = CreateLabel(string.Empty, 12, new Color(0.68f, 0.66f, 0.61f, 1f));
             roundLabel.style.marginTop = 3f;
             heading.Add(roundLabel);
+            heading.Add(BuildBoardViewToggles());
             header.Add(heading);
 
             returnToSetupButton = new Button(BuildSetupScreen) { text = "НОВЫЙ СОСТАВ" };
@@ -1229,15 +1230,7 @@ namespace KingdomSurvival.BattleSandbox
             endActivationButton.style.marginTop = 8f;
             sidebar.Add(endActivationButton);
 
-            // Подсветка бойцов контуром: свои — жёлтым, противники — красным.
-            // В лесу боец подсвечен всегда; кнопка включает подсветку для всех.
-            board.HighlightAll = HighlightAllFighters;
-            highlightButton = new Button(ToggleFighterHighlight) { name = "sandbox-highlight-toggle" };
-            highlightButton.tooltip = "Контур вокруг бойцов: свои — жёлтым, противники — красным. В лесу подсветка включена всегда.";
-            StyleSecondaryButton(highlightButton);
-            highlightButton.style.marginTop = 8f;
-            RefreshHighlightButton();
-            sidebar.Add(highlightButton);
+            ApplyBoardViewToggles();
 
             Label logTitle = CreateSectionTitle("ХОД БОЯ");
             logTitle.style.marginTop = 18f;
@@ -1628,6 +1621,7 @@ namespace KingdomSurvival.BattleSandbox
             foreach (string entry in battle.TakeEventLog())
                 AddBattleLog(entry);
             board.SetBattle(battle, selectedTargetId);
+            fighterDetailsView.SetBattle(battle);
             fighterDetailsView.Refresh(battle);
             roundLabel.text = "Раунд " + battle.Round + " · движение + одно боевое действие";
             RefreshInitiativeRow();

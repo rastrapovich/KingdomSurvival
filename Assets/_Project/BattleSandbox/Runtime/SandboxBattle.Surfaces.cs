@@ -196,6 +196,60 @@ namespace KingdomSurvival.BattleSandbox
             return name + ": " + string.Join("; ", parts) + ".";
         }
 
+        // Состояния от местности для карточки бойца («Состояния и эффекты»):
+        // холм, лес, заросли, топь и действующие на клетке области (огонь,
+        // дым, паутина…). Это не экземпляры состояний — их нельзя снять или
+        // продлить: они действуют, пока боец стоит на клетке. Числа — те же
+        // правила, что у боя (SandboxSurfaceRules, SandboxHazardRules).
+        public List<SandboxStatusView> GetTerrainStateViews(SandboxUnitState unit)
+        {
+            List<SandboxStatusView> views = new List<SandboxStatusView>();
+            if (unit == null || unit.IsDefeated || unit.IsOffBoard || !IsInside(unit.Position))
+                return views;
+            SandboxSurfaceRules r = SandboxSurfaceRules.Current;
+            HexCoord cell = unit.Position;
+            bool hill = GetTerrain(cell) == SandboxTerrain.Difficult;
+            int hillBonus = hill ? r.HillDefense : 0;
+            const string removal = "Действует, пока боец стоит на этой клетке.";
+            void Add(string id, string name, SandboxStatusPolarity polarity, string effect) =>
+                views.Add(new SandboxStatusView
+                {
+                    StatusId = "terrain." + id, Name = name, Polarity = polarity, Effect = effect,
+                    Removal = removal, TurnsLeft = -1
+                });
+
+            if (hill)
+                Add("hill", "На холме", SandboxStatusPolarity.Beneficial,
+                    "+" + r.HillDefense + " к Защите от высоты." +
+                    (unit.HasTag(SandboxCombatTagRules.Ranged) ? " Стрелок бьёт дальше: +" + SandboxTerrainRules.HillRangedAttackRangeBonus + " к дальности." : string.Empty));
+            SandboxVegetation v = GetVegetation(cell);
+            if (v != SandboxVegetation.None)
+            {
+                int cover = Math.Min(v == SandboxVegetation.Forest ? r.ForestCover : r.BrushCover, Math.Max(0, r.TerrainDefenseCap - hillBonus));
+                Add(v == SandboxVegetation.Forest ? "forest" : "brush", v == SandboxVegetation.Forest ? "В лесу" : "В зарослях",
+                    SandboxStatusPolarity.Beneficial,
+                    (cover > 0 ? "+" + cover + " к Защите от дальних снарядов с расстояния больше 1 клетки (укрытие)." : "Укрытие сверх предела местности не добавляется.") +
+                    (unit.HasTag(SandboxTerrainTags.ForestWalker) ? " Лесной ходок: вход без лишней цены." : string.Empty));
+            }
+            if (GetGround(cell) == SandboxGround.Bog && !HasBridgeAt(cell))
+            {
+                bool walker = unit.HasTag(SandboxTerrainTags.SwampWalker);
+                Add("bog", "В топи", walker ? SandboxStatusPolarity.Mixed : SandboxStatusPolarity.Harmful,
+                    walker ? "Болотный ходок: штраф Защиты снят." : "−" + r.BogDefensePenalty + " к Защите, пока боец в топи.");
+            }
+            foreach (SandboxCellEffect effect in EffectsAt(cell))
+            {
+                string label = SandboxHazardRules.Label(effect.Kind);
+                bool hazard = SandboxHazardRules.IsHazard(effect.Kind);
+                int left = effect.RoundsLeft(Round);
+                string name = effect.Kind == SandboxEffectKind.Fire ? "Огонь под ногами" : char.ToUpperInvariant(label[0]) + label.Substring(1) + " на клетке";
+                Add("effect." + effect.Kind, name, hazard ? SandboxStatusPolarity.Harmful : SandboxStatusPolarity.Mixed,
+                    (hazard ? "Опасность клетки: −" + effect.Damage + " HP." : "На клетке: " + label + ".") +
+                    (left == 1 ? " До конца раунда." : left > 1 ? " Ещё раундов: " + (left - 1) + "." : string.Empty));
+            }
+            return views;
+        }
+
         // Описание клетки для карточки бойца: «Лесной холм: вход 2; +1 защиты
         // от высоты.» → название и строки эффектов («• …»). Без бонусов и
         // штрафов — отдельная строка, чтобы игрок видел: клетка ничего не даёт.

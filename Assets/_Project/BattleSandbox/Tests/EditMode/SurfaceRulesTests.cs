@@ -151,5 +151,37 @@ namespace KingdomSurvival.BattleSandbox.Tests
             SandboxBattle.SplitCellDescription(battle.DescribeCell(onPlain, plain), out _, out string plainText);
             Assert.That(plainText, Does.Contain("Бонусов и штрафов защиты нет"));
         }
+
+        // Карточка бойца: местность — строками состояний («На холме», «В лесу»,
+        // «Огонь под ногами»); на ровной земле без эффектов строк нет.
+        [Test]
+        public void FighterCardTerrainStates_ListHillForestAndFire()
+        {
+            HexCoord hill = new HexCoord(1, 0), forest = new HexCoord(2, 0), plain = new HexCoord(3, 0), fire = new HexCoord(4, 0);
+            SandboxUnitState onHill = Unit("hill", SandboxTeam.Player, hill);
+            SandboxUnitState inForest = Unit("forest", SandboxTeam.Player, forest);
+            SandboxUnitState onPlain = Unit("plain", SandboxTeam.Player, plain);
+            SandboxUnitState inFire = Unit("fire", SandboxTeam.Player, fire);
+            SandboxBattle battle = Battle(new Dictionary<HexCoord, SandboxTerrain> { { hill, SandboxTerrain.Difficult } },
+                onHill, inForest, onPlain, inFire, Unit("foe", SandboxTeam.Enemy, new HexCoord(7, 5)));
+            battle.SetVegetation(forest, SandboxVegetation.Forest);
+            battle.AddEffect(fire, SandboxEffectKind.Fire, 2, SandboxHazardRules.FireDamage);
+
+            List<SandboxStatusView> hillStates = battle.GetTerrainStateViews(onHill);
+            Assert.That(hillStates.ConvertAll(s => s.Name), Is.EqualTo(new[] { "На холме" }));
+            Assert.That(hillStates[0].Effect, Does.Contain("к Защите"));
+            Assert.That(hillStates[0].Polarity, Is.EqualTo(SandboxStatusPolarity.Beneficial));
+
+            List<SandboxStatusView> forestStates = battle.GetTerrainStateViews(inForest);
+            Assert.That(forestStates.ConvertAll(s => s.Name), Is.EqualTo(new[] { "В лесу" }));
+            Assert.That(forestStates[0].Effect, Does.Contain("дальних снарядов"));
+
+            List<SandboxStatusView> fireStates = battle.GetTerrainStateViews(inFire);
+            Assert.That(fireStates.ConvertAll(s => s.Name), Is.EqualTo(new[] { "Огонь под ногами" }));
+            Assert.That(fireStates[0].Polarity, Is.EqualTo(SandboxStatusPolarity.Harmful));
+            Assert.That(fireStates[0].Effect, Does.Contain("HP"));
+
+            Assert.That(battle.GetTerrainStateViews(onPlain), Is.Empty);
+        }
     }
 }

@@ -151,10 +151,14 @@ namespace KingdomSurvival.BattleSandbox
             SandboxGround g = GetGround(cell);
             SandboxVegetation v = GetVegetation(cell);
             bool hill = GetTerrain(cell) == SandboxTerrain.Difficult;
-            string name = (v == SandboxVegetation.Forest ? "Лесной " : v == SandboxVegetation.Brush ? "Заросший " : string.Empty);
-            string baseName = hill ? "холм" : SandboxSurfaceLabels.Ground(g).ToLowerInvariant();
-            name = name.Length > 0 ? name + baseName : char.ToUpperInvariant(baseName[0]) + baseName.Substring(1);
-            if (hill && g != SandboxGround.Default && g != SandboxGround.Ground)
+            // Холм: «Лесной холм», «Заросший холм», «Холм»; без холма лес и
+            // заросли называются сами («Лес», «Заросли»), иначе — основание.
+            string name = hill
+                ? (v == SandboxVegetation.Forest ? "Лесной холм" : v == SandboxVegetation.Brush ? "Заросший холм" : "Холм")
+                : v == SandboxVegetation.Forest ? "Лес"
+                : v == SandboxVegetation.Brush ? "Заросли"
+                : SandboxSurfaceLabels.Ground(g);
+            if ((hill || v != SandboxVegetation.None) && g != SandboxGround.Default && g != SandboxGround.Ground)
                 name += " (" + SandboxSurfaceLabels.Ground(g).ToLowerInvariant() + ")";
 
             List<string> parts = new List<string>();
@@ -172,7 +176,7 @@ namespace KingdomSurvival.BattleSandbox
             if (v != SandboxVegetation.None)
             {
                 int cover = v == SandboxVegetation.Forest ? r.ForestCover : r.BrushCover;
-                parts.Add((hill ? "ещё +" : "+") + Math.Min(cover, Math.Max(0, r.TerrainDefenseCap - (hill ? r.HillDefense : 0))) + " от дальних снарядов");
+                parts.Add((hill ? "ещё +" : "+") + Math.Min(cover, Math.Max(0, r.TerrainDefenseCap - (hill ? r.HillDefense : 0))) + " защиты от дальних снарядов (укрытие)");
             }
             if (g == SandboxGround.Bog)
                 parts.Add(unit != null && unit.HasTag(SandboxTerrainTags.SwampWalker)
@@ -190,6 +194,30 @@ namespace KingdomSurvival.BattleSandbox
             if (exempt.Count > 0)
                 parts.Add("облегчает: " + string.Join(", ", exempt));
             return name + ": " + string.Join("; ", parts) + ".";
+        }
+
+        // Описание клетки для карточки бойца: «Лесной холм: вход 2; +1 защиты
+        // от высоты.» → название и строки эффектов («• …»). Без бонусов и
+        // штрафов — отдельная строка, чтобы игрок видел: клетка ничего не даёт.
+        public static void SplitCellDescription(string description, out string name, out string details)
+        {
+            description = (description ?? string.Empty).Trim().TrimEnd('.');
+            int colon = description.IndexOf(": ", StringComparison.Ordinal);
+            name = colon > 0 ? description.Substring(0, colon) : description;
+            string rest = colon > 0 ? description.Substring(colon + 2) : string.Empty;
+            List<string> lines = new List<string>();
+            foreach (string part in rest.Split(';'))
+            {
+                string line = part.Trim();
+                if (line.Length == 0)
+                    continue;
+                if (line.StartsWith("вход ", StringComparison.Ordinal))
+                    line = "цена входа: " + line.Substring(5);
+                lines.Add("• " + char.ToUpperInvariant(line[0]) + line.Substring(1));
+            }
+            if (lines.Count <= 1)
+                lines.Add("• Бонусов и штрафов защиты нет");
+            details = string.Join("\n", lines);
         }
 
         private static List<string> ExemptionsAt(SandboxUnitState unit, HexCoord cell, bool hill, SandboxGround g, SandboxVegetation v)

@@ -126,5 +126,30 @@ namespace KingdomSurvival.BattleSandbox.Tests
             Assert.That(battle.HasCellState(ford, SandboxCellState.ShallowWater), Is.True);
             Assert.That(battle.GetStepCost(ford), Is.EqualTo(2));
         }
+
+        // Карточка бойца «Состояния и эффекты»: местность под ним — холм даёт
+        // защиту, лес — укрытие от дальних снарядов, ровная земля — ничего.
+        [Test]
+        public void FighterCardTerrain_NamesHillDefenseAndForestCover()
+        {
+            HexCoord hill = new HexCoord(1, 0), forest = new HexCoord(2, 0), plain = new HexCoord(3, 0);
+            SandboxUnitState onHill = Unit("hill", SandboxTeam.Player, hill);
+            SandboxUnitState inForest = Unit("forest", SandboxTeam.Player, forest);
+            SandboxUnitState onPlain = Unit("plain", SandboxTeam.Player, plain);
+            SandboxBattle battle = Battle(new Dictionary<HexCoord, SandboxTerrain> { { hill, SandboxTerrain.Difficult } },
+                onHill, inForest, onPlain, Unit("foe", SandboxTeam.Enemy, new HexCoord(7, 5)));
+            battle.SetVegetation(forest, SandboxVegetation.Forest);
+
+            SandboxBattle.SplitCellDescription(battle.DescribeCell(onHill, hill), out string hillName, out string hillText);
+            Assert.That(hillName, Is.EqualTo("Холм"));
+            Assert.That(hillText, Does.Contain("защиты от высоты"));
+
+            SandboxBattle.SplitCellDescription(battle.DescribeCell(inForest, forest), out string forestName, out string forestText);
+            Assert.That(forestName, Is.EqualTo("Лес"));
+            Assert.That(forestText, Does.Contain("защиты от дальних снарядов"));
+
+            SandboxBattle.SplitCellDescription(battle.DescribeCell(onPlain, plain), out _, out string plainText);
+            Assert.That(plainText, Does.Contain("Бонусов и штрафов защиты нет"));
+        }
     }
 }

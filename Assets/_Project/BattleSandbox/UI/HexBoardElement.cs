@@ -1216,6 +1216,7 @@ namespace KingdomSurvival.BattleSandbox
                     if (!corpse)
                         NoteFrontRow(layout, unitCenter);
                     SyncUnitShadow(unit, image, unitCenter, corpse, depthEntries);
+                    SyncUnitOutline(unit, image, shownAlive);
                 }
                 else if (visual != null && !string.IsNullOrEmpty(visual.TokenText))
                 {
@@ -1314,6 +1315,7 @@ namespace KingdomSurvival.BattleSandbox
             FinishUnitShadows();
             ApplyDepthOrder(depthEntries);
             SyncTerrainOverlay(layout);
+            FinishUnitOutlines();
             foreach (VisualElement healthBar in unitHealthBars.Values)
                 healthBar.BringToFront();
             SyncStatusIcons();
@@ -1402,6 +1404,7 @@ namespace KingdomSurvival.BattleSandbox
                 healthBar.RemoveFromHierarchy();
             unitHealthBars.Clear();
             unitHealthFills.Clear();
+            ClearUnitOutlines();
             ClearStatusIcons();
         }
 

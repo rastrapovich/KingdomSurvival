@@ -1229,6 +1229,16 @@ namespace KingdomSurvival.BattleSandbox
             endActivationButton.style.marginTop = 8f;
             sidebar.Add(endActivationButton);
 
+            // Подсветка бойцов контуром: свои — жёлтым, противники — красным.
+            // В лесу боец подсвечен всегда; кнопка включает подсветку для всех.
+            board.HighlightAll = HighlightAllFighters;
+            highlightButton = new Button(ToggleFighterHighlight) { name = "sandbox-highlight-toggle" };
+            highlightButton.tooltip = "Контур вокруг бойцов: свои — жёлтым, противники — красным. В лесу подсветка включена всегда.";
+            StyleSecondaryButton(highlightButton);
+            highlightButton.style.marginTop = 8f;
+            RefreshHighlightButton();
+            sidebar.Add(highlightButton);
+
             Label logTitle = CreateSectionTitle("ХОД БОЯ");
             logTitle.style.marginTop = 18f;
             sidebar.Add(logTitle);

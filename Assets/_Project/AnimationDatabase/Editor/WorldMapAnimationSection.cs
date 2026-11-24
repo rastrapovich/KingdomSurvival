@@ -442,26 +442,6 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             setPanel.Add(stride);
             setPanel.Add(speed);
 
-            Toggle stand = new Toggle("На стоянке — прежняя фигурка карты")
-            {
-                value = set.StandWithMarkerFigure,
-                tooltip = "Включено: стоящий герой показывается прежней статичной фигуркой фишки карты в ракурсе последнего движения, " +
-                          "анимация — только при беге. Выключено: на стоянке «Ожидание» набора, а без него первый кадр «Ходьбы». " +
-                          "Сейчас прежняя фигурка есть только у героя; у остальных наборов галочка пока ничего не меняет."
-            };
-            stand.style.marginTop = 4f;
-            stand.RegisterValueChangedCallback(evt =>
-            {
-                WorldMapAnimationSetData s = SelectedSet;
-                if (s == null)
-                    return;
-                Undo.RecordObject(database, "Стоянка: прежняя фигурка");
-                s.SetStandWithMarkerFigure(evt.newValue);
-                EditorUtility.SetDirty(database);
-                preview.Rebuild();
-            });
-            setPanel.Add(stand);
-
             pivotXSlider = LiveSlider("Опора X", 0f, 1f, set.Animation.Pivot.x,
                 "Точка опоры по горизонтали: доля ширины кадра слева. Обычно 0,5 — середина.",
                 value => { WorldMapAnimationSetData s = SelectedSet; s?.Animation.SetPivot(new Vector2(Mathf.Clamp01(value), s.Animation.Pivot.y)); });
@@ -656,9 +636,8 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             AddHeader("ДЕЙСТВИЯ И РАКУРСЫ");
             detailPanel.Add(BuildTable(set));
             Label hint = new Label("Ячейка: первый кадр и число кадров. Щёлкните ячейку, чтобы смотреть её. Папку PNG — на ячейку (кадры только этой ячейки) " +
-                                   "или в окно (всё сразу: Walk/<ракурс>). Нужна «Ходьба» во всех шести ракурсах. «Ожидание» необязательно: если у набора включено " +
-                                   "«На стоянке — прежняя фигурка карты» (у героя), стоящая фигура — прежняя фишка, а «Ожидание» не используется; " +
-                                   "иначе на стоянке показывается «Ожидание», а без него первый кадр ходьбы.");
+                                   "или в окно (всё сразу: Walk/<ракурс>). Нужна «Ходьба» во всех шести ракурсах. «Ожидание» необязательно: на стоянке показывается оно, " +
+                                   "а без него первый кадр ходьбы.");
             hint.style.whiteSpace = WhiteSpace.Normal;
             hint.style.fontSize = 10f;
             hint.style.color = HintColor;

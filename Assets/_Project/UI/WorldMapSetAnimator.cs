@@ -75,14 +75,6 @@ public sealed class WorldMapSetAnimator
         return frozen ? clip.GetFrame(0f) : player.Evaluate(clock);
     }
 
-    // Стоянка без вызова Tick (фигура рисуется иначе): следующий бег
-    // начнётся с первого кадра ходьбы.
-    public void MarkStanding()
-    {
-        wasRunning = false;
-        speedHexesPerSecond = 0f;
-    }
-
     private static bool HasIdle(CreatureAnimationSetData set)
     {
         CreatureAnimationClipData idle = set.FindClip(CreatureAnimationAction.Idle);

@@ -106,10 +106,6 @@ namespace KingdomSurvival.AnimationDatabase
         // Подгонять темп «Ходьбы» под фактическую скорость фигуры (по «Шагу
         // ходьбы»). Выключено — кадры идут ровно с «Кадров в секунду» набора.
         [SerializeField] private bool syncCadenceToSpeed;
-        // На стоянке — прежняя статичная фигурка карты (шесть ракурсов фишки
-        // MapLab), а не «Ожидание» / первый кадр «Ходьбы». Сейчас фигурка есть
-        // только у героя; у набора без неё флажок ничего не меняет.
-        [SerializeField] private bool standWithMarkerFigure = true;
 
         public CreatureAnimationSetData Animation => animation ?? (animation = new CreatureAnimationSetData());
         public string Id => Animation.Id;
@@ -131,8 +127,6 @@ namespace KingdomSurvival.AnimationDatabase
         public void SetStrideHexesPerCycle(float value) { strideHexesPerCycle = Mathf.Clamp(value, MinStrideHexesPerCycle, MaxStrideHexesPerCycle); }
         public bool SyncCadenceToSpeed => syncCadenceToSpeed;
         public void SetSyncCadenceToSpeed(bool value) { syncCadenceToSpeed = value; }
-        public bool StandWithMarkerFigure => standWithMarkerFigure;
-        public void SetStandWithMarkerFigure(bool value) { standWithMarkerFigure = value; }
 
         // Есть кадры передвижения хотя бы в одном ракурсе.
         public bool HasWalk

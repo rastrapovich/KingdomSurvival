@@ -304,11 +304,11 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             float shown = clip.Playback == CreatureAnimationPlayback.Loop && clip.Duration > 0f
                 ? clipTime % clip.Duration
                 : Mathf.Min(clipTime, clip.Duration);
-            WorldMapFacing facing = database != null ? database.GetFacing(clip.Direction) : WorldMapFacing.Down;
+            HexFacing facing = WorldMapAnimationDatabaseAsset.BattleFacing(clip.Direction);
             frameLabel.text = "Кадр " + (index + 1) + " / " + clip.FrameCount +
                               " · " + shown.ToString("0.00") + " / " + clip.Duration.ToString("0.00") + " с · " +
                               CreatureAnimationLabels.PlaybackTitle(clip.Playback) +
-                              " · смотрит " + WorldMapFacingLabels.Arrow(facing) + " " + WorldMapFacingLabels.Title(facing);
+                              " · смотрит " + CreatureAnimationLabels.FacingArrow(facing) + " " + CreatureAnimationLabels.FacingTitle(facing);
         }
 
         private void RefreshNotice()
@@ -493,8 +493,8 @@ namespace KingdomSurvival.AnimationDatabase.Editor
 
             if (database == null)
                 return;
-            WorldMapFacing facing = database.GetFacing(clip != null ? clip.Direction : direction);
-            Vector2 arrow = FacingScreenVector(facing) * cell * 0.5f;
+            HexFacing facing = WorldMapAnimationDatabaseAsset.BattleFacing(clip != null ? clip.Direction : direction);
+            Vector2 arrow = WorldMapAnimationDatabaseAsset.FacingScreenVector(facing) * cell * 0.5f;
             painter.strokeColor = new Color(1f, 1f, 1f, 0.9f);
             painter.lineWidth = 2f;
             painter.BeginPath();
@@ -577,7 +577,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
 
         private string DirectionChoiceLabel(CreatureAnimationDirection value)
         {
-            string arrow = database != null ? WorldMapFacingLabels.Arrow(database.GetFacing(value)) + " " : string.Empty;
+            string arrow = CreatureAnimationLabels.FacingArrow(WorldMapAnimationDatabaseAsset.BattleFacing(value)) + " ";
             return arrow + CreatureAnimationLabels.DirectionFolder(value);
         }
 

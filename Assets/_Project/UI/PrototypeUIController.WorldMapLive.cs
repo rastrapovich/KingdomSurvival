@@ -222,6 +222,9 @@ public partial class PrototypeUIController
     private bool worldMapHeroWalking;
     private System.Action worldMapHeroWalkArrived;
     private int worldMapHeroDirection;
+    // Сектор анимации героя — по шести направлениям боя (ракурс фишки —
+    // worldMapHeroDirection, по её собственным картинкам).
+    private HexFacing worldMapHeroAnimationFacing = HexFacing.SouthEast;
     private Vector2 worldMapHeroLastPercent;
     private float worldMapHeroBob;
 
@@ -301,7 +304,11 @@ public partial class PrototypeUIController
         // Ракурс — по направлению движения (на стоянке — последний).
         Vector2 motion = percent - worldMapHeroLastPercent;
         if (motion.sqrMagnitude > 1e-8f)
+        {
             worldMapHeroDirection = KingdomSurvivalDirection(motion.x, motion.y);
+            worldMapHeroAnimationFacing = WorldMapAnimationDatabaseAsset.FacingFromScreen(
+                new Vector2(motion.x * worldMapCanvasWidth, motion.y * worldMapCanvasHeight), worldMapHeroAnimationFacing);
+        }
         worldMapHeroLastPercent = percent;
 
         // Анимированный набор героя из раздела «Глобальная карта» Базы
@@ -393,7 +400,7 @@ public partial class PrototypeUIController
             worldMapMapLab != null ? worldMapMapLab.HeightScale : 1f,
             hexPercent);
 
-        CreatureAnimationDirection direction = database.GetDirection((WorldMapFacing)(((worldMapHeroDirection % 6) + 6) % 6));
+        CreatureAnimationDirection direction = WorldMapAnimationDatabaseAsset.BattleDirection(worldMapHeroAnimationFacing);
         bool sync = set.SyncCadenceToSpeed;
         Sprite sprite = worldMapHeroMapAnimator.Tick(set, direction, running, dt, stepHexes, sync);
         if (sprite == null || sprite.texture == null)

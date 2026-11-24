@@ -690,14 +690,14 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             header.Add(TableCellLabel(string.Empty, 96f));
             foreach (CreatureAnimationDirection direction in CreatureAnimationLabels.Directions)
             {
-                WorldMapFacing facing = database.GetFacing(direction);
+                HexFacing facing = WorldMapAnimationDatabaseAsset.BattleFacing(direction);
                 Label label = TableCellLabel(
-                    WorldMapFacingLabels.Arrow(facing) + "\n" + CreatureAnimationLabels.DirectionFolder(direction),
+                    CreatureAnimationLabels.FacingArrow(facing) + "\n" + CreatureAnimationLabels.DirectionFolder(direction),
                     TableCellWidth);
                 label.style.fontSize = 9f;
                 label.style.unityTextAlign = TextAnchor.MiddleCenter;
                 label.tooltip = "Папка " + CreatureAnimationLabels.DirectionFolder(direction) + " · на карте смотрит " +
-                                WorldMapFacingLabels.Title(facing);
+                                CreatureAnimationLabels.FacingTitle(facing) + " (как в бою)";
                 header.Add(label);
             }
             table.Add(header);
@@ -892,49 +892,24 @@ namespace KingdomSurvival.AnimationDatabase.Editor
 
         private void BuildDirectionMap()
         {
-            Foldout map = new Foldout { text = "Таблица ракурсов карты (общая для всех наборов карты)", value = directionMapOpen };
+            Foldout map = new Foldout { text = "Ракурсы карты — как в бою", value = directionMapOpen };
             map.RegisterValueChangedCallback(evt => { if (evt.target == map) directionMapOpen = evt.newValue; });
             map.style.marginTop = 10f;
-            Label note = new Label("Названия ракурсов — как у исходных картинок: Front — к зрителю (бег вниз), Front_Right — вправо-вниз, " +
-                                   "Back_Right — вправо-вверх, Back — от зрителя (вверх), Back_Left — влево-вверх, Front_Left — влево-вниз. " +
-                                   "Таблица общая для всех наборов карты и не связана с боевой. Проверьте по белой стрелке в просмотре: " +
-                                   "она должна совпадать со взглядом фигуры.");
+            Label note = new Label("Фигура на карте выбирает ракурс так же, как боец в бою: шесть направлений к соседним клеткам " +
+                                   "(вправо, вправо-вверх, влево-вверх, влево, влево-вниз, вправо-вниз), а какая папка кадров " +
+                                   "смотрит в какую сторону — по «Таблице ракурсов» боевых наборов Базы анимаций. " +
+                                   "Правьте её там — изменится и бой, и карта. Проверьте по белой стрелке в просмотре: она должна " +
+                                   "совпадать со взглядом фигуры.");
             note.style.whiteSpace = WhiteSpace.Normal;
             note.style.fontSize = 10f;
             map.Add(note);
-            List<WorldMapFacing> facings = Enum.GetValues(typeof(WorldMapFacing)).Cast<WorldMapFacing>().ToList();
             foreach (CreatureAnimationDirection direction in CreatureAnimationLabels.Directions)
             {
-                PopupField<WorldMapFacing> field = new PopupField<WorldMapFacing>(
-                    CreatureAnimationLabels.DirectionFolder(direction),
-                    facings,
-                    database.GetFacing(direction),
-                    FacingChoiceLabel,
-                    FacingChoiceLabel);
-                CreatureAnimationDirection captured = direction;
-                field.RegisterValueChangedCallback(evt =>
-                {
-                    Undo.RecordObject(database, "Таблица ракурсов карты");
-                    database.AssignFacing(captured, evt.newValue);
-                    EditorUtility.SetDirty(database);
-                    ShowSelection();
-                });
-                map.Add(field);
+                HexFacing facing = WorldMapAnimationDatabaseAsset.BattleFacing(direction);
+                map.Add(new Label(CreatureAnimationLabels.DirectionFolder(direction) + " → " +
+                                  CreatureAnimationLabels.FacingArrow(facing) + " " + CreatureAnimationLabels.FacingTitle(facing)));
             }
-            Button reset = new Button(() =>
-            {
-                Undo.RecordObject(database, "Таблица ракурсов карты по умолчанию");
-                database.ResetDirectionMap();
-                EditorUtility.SetDirty(database);
-                ShowSelection();
-            }) { text = "Сбросить по умолчанию" };
-            map.Add(reset);
             detailPanel.Add(map);
-        }
-
-        private static string FacingChoiceLabel(WorldMapFacing facing)
-        {
-            return WorldMapFacingLabels.Arrow(facing) + " " + WorldMapFacingLabels.Title(facing);
         }
 
         // ------------------------------------------------------------------

@@ -124,7 +124,7 @@ public partial class PrototypeUIController
     private float StandMarkerCardHeight(MapLabGameLive.World world, WorldMapAnimationDatabaseAsset database, WorldMapAnimationSetData set, int sector, Texture2D texture, float cardHeight, Vector2 pivot)
     {
         sector = ((sector % 6) + 6) % 6;
-        CreatureAnimationDirection direction = database.GetDirection((WorldMapFacing)sector);
+        CreatureAnimationDirection direction = WorldMapAnimationDatabaseAsset.BattleDirection(worldMapHeroAnimationFacing);
         float animationFraction = StandReferenceFraction(set, direction);
         Vector2 marker = TextureVisibleExtent(texture);
         float markerFraction = marker.y - marker.x;

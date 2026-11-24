@@ -209,7 +209,99 @@ namespace KingdomSurvival.AnimationDatabase
             }
         }
 
-        // Ракурсы карты названы по исходным картинкам (MapLabMarkerSet):
+        // ------------------------------------------------------------------
+        // Ракурсы анимаций карты — как в бою (24.11.2026). Клетки карты, как
+        // и гексы боя, «остриём вверх»: шаг к соседу идёт вправо, вправо-вверх,
+        // влево-вверх, влево, влево-вниз, вправо-вниз (порядок HexFacing).
+        // Сектор выбирается по этим шести векторам, ракурс кадров — по
+        // таблице ракурсов боевой Базы анимаций: один и тот же пакет кадров
+        // (Front — вправо, Front_Right — вправо-вверх, …) смотрит одинаково
+        // и в бою, и на карте. Прежняя таблица карты (directionMap,
+        // WorldMapFacing) остаётся только для статичной фишки MapLab.
+
+        // Экранные векторы к соседним клеткам (x вправо, y вниз).
+        public static readonly Vector2[] HexNeighborScreenVectors =
+        {
+            new Vector2(1f, 0f),
+            new Vector2(0.5f, -0.8660254f),
+            new Vector2(-0.5f, -0.8660254f),
+            new Vector2(-1f, 0f),
+            new Vector2(-0.5f, 0.8660254f),
+            new Vector2(0.5f, 0.8660254f)
+        };
+
+        // Запас, на который новый сектор должен быть ближе прежнего, — фигура
+        // не дёргается между ракурсами на границе секторов.
+        public const float FacingHysteresis = 0.05f;
+
+        // Сектор боя по смещению на плоском полотне карты (до наклона камеры).
+        // Нулевое смещение — прежний сектор.
+        public static HexFacing FacingFromScreen(Vector2 screen, HexFacing current)
+        {
+            if (screen.sqrMagnitude < 1e-10f)
+                return current;
+            HexFacing nearest = HexFacingMath.Nearest(screen, HexNeighborScreenVectors, current);
+            if (nearest == current)
+                return current;
+            Vector2 normalized = screen.normalized;
+            float currentDot = Vector2.Dot(normalized, HexNeighborScreenVectors[(int)current]);
+            float nearestDot = Vector2.Dot(normalized, HexNeighborScreenVectors[(int)nearest]);
+            return nearestDot - currentDot > FacingHysteresis ? nearest : current;
+        }
+
+        private static CreatureAnimationDatabaseAsset battleTable;
+        private static bool battleTableLoaded;
+
+        // Боевая База анимаций — источник таблицы ракурсов (кэш, как Current).
+        private static CreatureAnimationDatabaseAsset BattleTable
+        {
+            get
+            {
+                if (!battleTableLoaded || (battleTable == null && !Application.isPlaying))
+                {
+                    battleTable = Resources.Load<CreatureAnimationDatabaseAsset>(CreatureAnimationDatabaseAsset.ResourcesPath);
+                    battleTableLoaded = true;
+                }
+                return battleTable;
+            }
+        }
+
+        // Ракурс кадров, который смотрит в сектор facing, — по таблице боя.
+        public static CreatureAnimationDirection BattleDirection(HexFacing facing)
+        {
+            CreatureAnimationDatabaseAsset table = BattleTable;
+            if (table != null)
+                return table.GetDirection(facing);
+            foreach (CreatureAnimationDirectionMapping entry in CreatureAnimationDatabaseAsset.DefaultDirectionMap())
+            {
+                if (entry.Facing == facing)
+                    return entry.Direction;
+            }
+            return CreatureAnimationDirection.Front;
+        }
+
+        // Куда на карте смотрит ракурс кадров — по таблице боя.
+        public static HexFacing BattleFacing(CreatureAnimationDirection direction)
+        {
+            CreatureAnimationDatabaseAsset table = BattleTable;
+            if (table != null)
+                return table.GetFacing(direction);
+            foreach (CreatureAnimationDirectionMapping entry in CreatureAnimationDatabaseAsset.DefaultDirectionMap())
+            {
+                if (entry.Direction == direction)
+                    return entry.Facing;
+            }
+            return HexFacing.East;
+        }
+
+        // Единичный экранный вектор сектора боя (y вниз).
+        public static Vector2 FacingScreenVector(HexFacing facing)
+        {
+            int index = (int)facing;
+            return index >= 0 && index < HexNeighborScreenVectors.Length ? HexNeighborScreenVectors[index] : Vector2.right;
+        }
+
+        // Ракурсы фишки MapLab названы по исходным картинкам (MapLabMarkerSet):
         // Front — к зрителю, Front_Right — вправо-вниз, и т. д. по кругу.
         public static WorldMapDirectionMapping[] DefaultDirectionMap()
         {

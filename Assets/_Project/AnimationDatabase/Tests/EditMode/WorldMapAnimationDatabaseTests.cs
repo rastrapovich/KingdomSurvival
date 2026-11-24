@@ -127,6 +127,37 @@ namespace KingdomSurvival.AnimationDatabase.Tests
             }
         }
 
+        // Анимации карты выбирают ракурс как в бою: шаг к соседней клетке
+        // (клетки «остриём вверх») даёт ровно этот сектор, а ракурс кадров —
+        // тот же, что выбрал бы бой для этого гекса.
+        [Test]
+        public void AnimationFacing_StepToNeighbor_PicksBattleSectorAndDirection()
+        {
+            foreach (HexFacing facing in Enum.GetValues(typeof(HexFacing)))
+            {
+                Vector2 step = WorldMapAnimationDatabaseAsset.HexNeighborScreenVectors[(int)facing] * 37f;
+                HexFacing opposite = (HexFacing)(((int)facing + 3) % 6);
+                Assert.AreEqual(facing, WorldMapAnimationDatabaseAsset.FacingFromScreen(step, opposite), facing.ToString());
+                CreatureAnimationDirection direction = WorldMapAnimationDatabaseAsset.BattleDirection(facing);
+                Assert.AreEqual(facing, WorldMapAnimationDatabaseAsset.BattleFacing(direction), facing.ToString());
+
+                CreatureAnimationDatabaseAsset battle = Resources.Load<CreatureAnimationDatabaseAsset>(CreatureAnimationDatabaseAsset.ResourcesPath);
+                if (battle != null)
+                    Assert.AreEqual(battle.GetDirection(facing), direction, "Таблица боя: " + facing);
+            }
+        }
+
+        [Test]
+        public void AnimationFacing_KeepsSectorNearBoundary_AndOnZeroMotion()
+        {
+            Assert.AreEqual(HexFacing.East, WorldMapAnimationDatabaseAsset.FacingFromScreen(Vector2.zero, HexFacing.East));
+            // 31° вверх от оси вправо — чуть за границей сектора: запас держит прежний.
+            float radians = 31f * Mathf.Deg2Rad;
+            Vector2 nearBoundary = new Vector2(Mathf.Cos(radians), -Mathf.Sin(radians));
+            Assert.AreEqual(HexFacing.East, WorldMapAnimationDatabaseAsset.FacingFromScreen(nearBoundary, HexFacing.East));
+            Assert.AreEqual(HexFacing.NorthEast, WorldMapAnimationDatabaseAsset.FacingFromScreen(nearBoundary, HexFacing.West));
+        }
+
         // ------------------------------------------------------------------
         // Набор: клампы, герой
         // ------------------------------------------------------------------

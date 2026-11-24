@@ -309,7 +309,7 @@ public partial class PrototypeUIController
     }
 
     private readonly WorldMapSetAnimator worldMapHeroFlatAnimator = new WorldMapSetAnimator();
-    private WorldMapFacing worldMapHeroFlatFacing = WorldMapFacing.Down;
+    private HexFacing worldMapHeroFlatFacing = HexFacing.SouthEast;
     private Vector2 worldMapHeroFlatLastPercent;
     private bool worldMapHeroFlatHasLast;
 
@@ -329,7 +329,7 @@ public partial class PrototypeUIController
         worldMapHeroFlatHasLast = true;
         Vector2 screen = new Vector2(motion.x * worldMapCanvasWidth, motion.y * worldMapCanvasHeight);
         if (screen.sqrMagnitude > 1e-6f)
-            worldMapHeroFlatFacing = WorldMapFacingLabels.FromScreenDirection(screen.x, screen.y);
+            worldMapHeroFlatFacing = WorldMapAnimationDatabaseAsset.FacingFromScreen(screen, worldMapHeroFlatFacing);
 
         WorldMapHexGrid grid = WorldMapNavigation.Grid;
         float hexPercent = (float)(grid.HexWidth / grid.CanvasWidth * 100.0);
@@ -338,7 +338,7 @@ public partial class PrototypeUIController
             worldMapCanvasHeight / Mathf.Max(1f, worldMapCanvasWidth),
             1f,
             hexPercent);
-        CreatureAnimationDirection direction = database.GetDirection(worldMapHeroFlatFacing);
+        CreatureAnimationDirection direction = WorldMapAnimationDatabaseAsset.BattleDirection(worldMapHeroFlatFacing);
         bool sync = set.SyncCadenceToSpeed;
         Sprite sprite = worldMapHeroFlatAnimator.Tick(set, direction, running, dt, stepHexes, sync);
         if (sprite == null)

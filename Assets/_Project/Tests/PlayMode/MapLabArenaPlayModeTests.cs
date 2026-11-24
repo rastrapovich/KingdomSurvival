@@ -217,6 +217,40 @@ public sealed class MapLabArenaPlayModeTests
         Object.Destroy(shot);
     }
 
+    // 25.11.2026: полигон по умолчанию — правила «Генератора арен» (случайная
+    // тема): у боя есть отчёт генератора, лесные клетки, деревья на них
+    // нарисованы ареной (доска свой рисунок леса не кладёт).
+    [UnityTest]
+    public IEnumerator DefaultSandboxBattle_UsesArenaGenerator_WithForestTrees()
+    {
+        Assert.IsTrue(MapLabArena.Available);
+        List<MonoBehaviour> found = new List<MonoBehaviour>();
+        yield return LoadSandbox(found);
+        MonoBehaviour sandbox = found[0];
+        int withForest = 0;
+        for (int round = 0; round < 4 && withForest < 2; round++)
+        {
+            List<MapLabArenaDriver> drivers = new List<MapLabArenaDriver>();
+            yield return StartAndWait(sandbox, drivers);
+            SandboxBattle battle = (SandboxBattle)Member(sandbox, "battle");
+            Assert.IsNotNull(battle.ArenaReport, "Бой полигона идёт по правилам генератора арен (тема).");
+            List<HexCoord> forest = battle.VegetationCells.Where(p => p.Value == SandboxVegetation.Forest).Select(p => p.Key).ToList();
+            Debug.Log($"Полигон, бой {round + 1}: {battle.ArenaReport.Summary()}; лесных клеток {forest.Count}, рисунков леса {drivers[0].Arena.ForestFeatures}.");
+            if (forest.Count > 0)
+            {
+                withForest++;
+                Assert.Greater(drivers[0].Arena.ForestFeatures, 0, "Деревья и кусты лесных клеток нарисованы ареной.");
+                HexBoardElement board = (HexBoardElement)Member(sandbox, "Board");
+                Assert.IsTrue(forest.All(board.ArtBackedForest.Contains), "Доска знает, что лес нарисован ареной.");
+                BattlefieldView surface = (BattlefieldView)Member(sandbox, "BattlefieldSurface");
+                SaveShot(Member(surface, "sceneTexture") as Texture, $"sandbox_forest_{round + 1}.png");
+            }
+            Invoke(sandbox, "BuildSetupScreen");
+            for (int i = 0; i < 5; i++) yield return null;
+        }
+        Assert.Greater(withForest, 0, "Хотя бы в одном бою полигона есть лесные клетки.");
+    }
+
     [UnityTest]
     public IEnumerator TwentyBattles_DoNotAccumulateArenaObjectsOrTextures()
     {

@@ -311,9 +311,17 @@ namespace KingdomSurvival.BattleSandbox
             SandboxArenaTheme? arenaTheme = SandboxArenaThemes.TryParse(campaignBattle.ArenaTheme, out SandboxArenaTheme parsedTheme)
                 ? parsedTheme
                 : (SandboxArenaTheme?)null;
+            // 25.11.2026: бой на арене без темы в запросе — тоже по правилам
+            // «Генератора арен»: обычная тема по seed боя.
+            string themeSource = campaignBattle.ArenaThemeSource;
+            if (!arenaTheme.HasValue)
+            {
+                arenaTheme = SandboxArenaThemes.Ordinary[new System.Random(campaignBattle.Seed).Next(SandboxArenaThemes.Ordinary.Length)];
+                themeSource = "в запросе нет темы — обычная тема по seed боя";
+            }
             battle = SandboxRoster.CreateBattle(fighters, BuildCampaignEnemies(), campaignBattle.Seed,
                 campaignBattle.PlayerFirstRoundInitiativeBonus, BattlefieldFrame.DisabledCells(ActiveBattlefield()),
-                theme: arenaTheme, themeSource: campaignBattle.ArenaThemeSource);
+                theme: arenaTheme, themeSource: themeSource);
             if (battle.ArenaReport != null)
                 Debug.Log("Арена дорожного боя: " + battle.ArenaReport.Summary());
             ConfigureAbilityBattle();
@@ -1111,7 +1119,7 @@ namespace KingdomSurvival.BattleSandbox
             battle = SandboxRoster.CreateBattle(fighters, enemies, SandboxSeedChoice(),
                 disabledCells: BattlefieldFrame.DisabledCells(ActiveBattlefield()),
                 hiddenUnitsScouted: sandboxHiddenScouted,
-                theme: SandboxThemeChoice(), themeSource: "выбор в полигоне");
+                theme: SandboxThemeChoice(), themeSource: sandboxThemeLabel == RandomThemeLabel ? "случайная тема полигона" : "выбор в полигоне");
             ConfigureAbilityBattle();
             battleLog.Clear();
             battleLog.Add("Бой начался. Противник: " + string.Join(", ", enemies.GroupBy(enemy => enemy.RoleLabel)

@@ -13,8 +13,11 @@ namespace KingdomSurvival.BattleSandbox
     // в бою кампании панели нет.
     public sealed partial class BattleSandboxController
     {
-        private const string LegacyThemeLabel = "Прежний генератор";
-        private string sandboxThemeLabel = LegacyThemeLabel;
+        // 25.11.2026, просьба пользователя: правила «Генератора арен» — во всех
+        // боях на арене; прежний генератор без темы из полигона убран, по
+        // умолчанию — случайная обычная тема (по seed, если он задан).
+        private const string RandomThemeLabel = "Случайная тема";
+        private string sandboxThemeLabel = RandomThemeLabel;
         private string sandboxSeedText = string.Empty;
 
         private bool terrainBrushEnabled;
@@ -37,7 +40,7 @@ namespace KingdomSurvival.BattleSandbox
 
         private void AddArenaThemeControls(VisualElement center)
         {
-            List<string> options = new List<string> { LegacyThemeLabel };
+            List<string> options = new List<string> { RandomThemeLabel };
             options.AddRange(SandboxArenaThemes.All.Select(SandboxArenaThemes.Label));
             DropdownField theme = new DropdownField("Арена", options, Math.Max(0, options.IndexOf(sandboxThemeLabel))) { name = "sandbox-arena-theme" };
             theme.style.marginTop = 8f;
@@ -58,7 +61,10 @@ namespace KingdomSurvival.BattleSandbox
                 if (SandboxArenaThemes.Label(theme) == sandboxThemeLabel)
                     return theme;
             }
-            return null;
+            // Случайная обычная тема: при заданном seed — одна и та же.
+            int? seed = SandboxSeedChoice();
+            System.Random random = seed.HasValue ? new System.Random(seed.Value) : new System.Random();
+            return SandboxArenaThemes.Ordinary[random.Next(SandboxArenaThemes.Ordinary.Length)];
         }
 
         private int? SandboxSeedChoice() =>
@@ -98,7 +104,7 @@ namespace KingdomSurvival.BattleSandbox
             panel.Add(toggle);
             panel.Add(body);
 
-            Label summary = CreateLabel(battle?.ArenaReport != null ? battle.ArenaReport.Summary() : "Арена: прежний генератор (без темы).",
+            Label summary = CreateLabel(battle?.ArenaReport != null ? battle.ArenaReport.Summary() : "Арена: без отчёта генератора.",
                 10, new Color(0.62f, 0.64f, 0.60f, 1f));
             summary.style.whiteSpace = WhiteSpace.Normal;
             summary.style.marginTop = 4f;

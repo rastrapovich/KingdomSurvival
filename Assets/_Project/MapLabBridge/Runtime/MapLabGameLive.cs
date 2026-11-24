@@ -752,28 +752,10 @@ namespace KingdomSurvival.MapLabBridge
             return Mathf.Clamp(samples, 1, 8);
         }
 
-        // ---------- фигура героя ----------
+        // ---------- фигуры людей ----------
 
-        // Кадр героя для одного из шести ракурсов (набор фишки этапа 05):
-        // текстура, высота в единицах мира, соотношение сторон и опора.
-        public static bool HeroFrame(int direction, out Texture2D texture, out float worldHeight, out float aspect, out Vector2 pivot)
-        {
-            texture = null;
-            worldHeight = 0f;
-            aspect = 1f;
-            pivot = new Vector2(0.5f, 0f);
-            MapLabGameAssets assets = MapLabGameAssets.Load();
-            MapLabMarkerSet set = assets != null ? assets.MarkerSet05 ?? assets.MarkerSet04 : null;
-            if (set == null)
-                return false;
-            MapLabArtEntry entry = set.View((MapLabMarkerDirection)(((direction % 6) + 6) % 6));
-            if (entry == null || !entry.HasTexture)
-                return false;
-            texture = entry.Texture;
-            worldHeight = entry.CardHeight;
-            aspect = entry.Aspect;
-            pivot = entry.Pivot;
-            return true;
-        }
+        // Рост карточки фигуры человека на карте (единицы мира): по нему
+        // ставятся фигуры групп мира — рост прежней фишки героя.
+        public const float FigureCardHeight = MapLabArtBuilder.HeroFigureCardHeight;
     }
 }

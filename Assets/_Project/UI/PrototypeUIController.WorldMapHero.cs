@@ -225,7 +225,7 @@ public partial class PrototypeUIController
                        !ContinuousSimulationSystem.IsPaused(gameState);
         if (running)
             UpdateWorldMapHeroFacing(expedition);
-        // 12У-G: на живой карте MapLab герой — фигурка набора фишки (шесть ракурсов).
+        // На живой карте MapLab герой — анимация набора «Глобальной карты» в сцене.
         if (TickWorldMapHeroMapLab(dt, running))
             return;
 

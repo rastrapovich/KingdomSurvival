@@ -18,11 +18,11 @@ MonoBehaviour:
   PitchDegrees: 50
   TileSize: 2048
   ArtSet02: {fileID: 11400000, guid: 1e0c221c19d1f374faab702db07d55a3, type: 2}
-  MarkerSet02: {fileID: 11400000, guid: f134eb708cef33d45b030267ade4c401, type: 2}
+  MarkerSet02: {fileID: 0}
   ArtSet03: {fileID: 11400000, guid: 0daa4bf527a097c498b9688b5a668135, type: 2}
-  MarkerSet04: {fileID: 11400000, guid: c28401c0d6c058c4da9b5f16b96b861e, type: 2}
+  MarkerSet04: {fileID: 0}
   ArtSet05: {fileID: 11400000, guid: 165475db8d2fcc74e85fb3681b415ff7, type: 2}
-  MarkerSet05: {fileID: 11400000, guid: 7401bfb87608ac542981a69c11fe530f, type: 2}
+  MarkerSet05: {fileID: 0}
   ArtSet06: {fileID: 11400000, guid: 8e83fc3ac63a11349ace07d948a0cb45, type: 2}
   ArtSetPoi: {fileID: 11400000, guid: a2c79c0781583a14d939e7bb33404581, type: 2}
   Terrain: {fileID: 4800000, guid: 27c7fd7d33924d6499813e3e8260c88b, type: 3}

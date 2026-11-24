@@ -221,12 +221,9 @@ public partial class PrototypeUIController
     private Vector2 worldMapHeroWalkTarget;
     private bool worldMapHeroWalking;
     private System.Action worldMapHeroWalkArrived;
-    private int worldMapHeroDirection;
-    // Сектор анимации героя — по шести направлениям боя (ракурс фишки —
-    // worldMapHeroDirection, по её собственным картинкам).
+    // Сектор анимации героя — по шести направлениям боя.
     private HexFacing worldMapHeroAnimationFacing = HexFacing.SouthEast;
     private Vector2 worldMapHeroLastPercent;
-    private float worldMapHeroBob;
 
     // Скорость ходьбы по поселению — гексов в секунду реального времени.
     // Шаг по поселению — от общей скорости передвижения по карте.
@@ -244,7 +241,6 @@ public partial class PrototypeUIController
         if (WorldMapLiveWanted() && (worldMapMapLab == null || world == null || !world.Ready))
         {
             worldMapHeroImage.style.display = DisplayStyle.None;
-            HideHeroFigureLook();
             MapLabLiveFigures.Hide("hero");
             if (worldMapHeroFallback != null)
                 worldMapHeroFallback.style.display = DisplayStyle.None;
@@ -304,64 +300,19 @@ public partial class PrototypeUIController
         // Ракурс — по направлению движения (на стоянке — последний).
         Vector2 motion = percent - worldMapHeroLastPercent;
         if (motion.sqrMagnitude > 1e-8f)
-        {
-            worldMapHeroDirection = KingdomSurvivalDirection(motion.x, motion.y);
             worldMapHeroAnimationFacing = WorldMapAnimationDatabaseAsset.FacingFromScreen(
                 new Vector2(motion.x * worldMapCanvasWidth, motion.y * worldMapCanvasHeight), worldMapHeroAnimationFacing);
-        }
         worldMapHeroLastPercent = percent;
 
         // Анимированный набор героя из раздела «Глобальная карта» Базы
-        // анимаций: бег — «Ходьба», стоянка — «Ожидание»; без набора (или без
-        // шейдера фигур) — прежняя фишка.
+        // анимаций: бег — «Ходьба», стоянка — «Ожидание». Без набора (или без
+        // шейдера фигур) — false: герой рисуется поверх карты, как без MapLab.
         WorldMapAnimationDatabaseAsset mapAnimations = WorldMapAnimationDatabaseAsset.Current;
         WorldMapAnimationSetData heroSet = mapAnimations != null ? mapAnimations.HeroSet : null;
         if (heroSet != null && TickWorldMapHeroAnimatedMapLab(world, mapAnimations, heroSet, dt, running, percent, motion))
             return true;
-
-        if (!MapLabGameLive.HeroFrame(worldMapHeroDirection, out Texture2D texture, out float worldHeight, out float aspect, out Vector2 pivot))
-            return false;
-
-        float zoom = Mathf.Max(0.0001f, worldMapZoom);
-        float pxPerUnit = world.CanvasPixelsPerUnit(worldMapCanvasWidth) * zoom;
-        float height = worldHeight * pxPerUnit;
-        float width = height * aspect;
-        // Стоит на нарисованной земле: точка поднимается вместе с рельефом.
-        float shift = MapLabGameLive.ElevationShiftPercent(world, percent.x, percent.y);
-        Vector2 ground2 = MapPercentToWorldMapViewport(percent.x, percent.y + shift);
-        worldMapHeroBob = running ? worldMapHeroBob + dt * 9f : 0f;
-        float bob = running ? Mathf.Abs(Mathf.Sin(worldMapHeroBob)) * height * 0.03f : 0f;
-
-        // Фигура — в сцене карты: деревья и дома перед ней по опоре её
-        // закрывают (закрытая часть — контуром), за ней — нет. Картинка
-        // поверх карты тогда не нужна.
-        if (MapLabLiveFigures.Place(world, "hero", texture, FigureOutline(texture), percent, worldHeight, aspect, pivot, bob / Mathf.Max(0.0001f, pxPerUnit), true))
-        {
-            worldMapHeroImage.style.display = DisplayStyle.None;
-            HideHeroFigureLook();
-            if (worldMapHeroFallback != null)
-                worldMapHeroFallback.style.display = DisplayStyle.None;
-            return true;
-        }
-
-        if (worldMapHeroFallback != null && worldMapHeroFallback.style.display != DisplayStyle.None)
-            worldMapHeroFallback.style.display = DisplayStyle.None;
-        if (worldMapHeroImage.style.display != DisplayStyle.Flex)
-            worldMapHeroImage.style.display = DisplayStyle.Flex;
-        if (!ReferenceEquals(worldMapHeroImage.image, texture))
-        {
-            worldMapHeroImage.sprite = null;
-            worldMapHeroImage.image = texture;
-        }
-        if (Mathf.Abs(worldMapHeroAppliedSize.x - width) > 0.01f || Mathf.Abs(worldMapHeroAppliedSize.y - height) > 0.01f)
-        {
-            worldMapHeroImage.style.width = width;
-            worldMapHeroImage.style.height = height;
-            worldMapHeroAppliedSize = new Vector2(width, height);
-        }
-        worldMapHeroImage.style.translate = new Translate(ground2.x - pivot.x * width, ground2.y - (1f - pivot.y) * height - bob);
-        UpdateHeroFigureLook(percent, texture, ground2, width, height, pivot, bob);
-        return true;
+        MapLabLiveFigures.Hide("hero");
+        return false;
     }
 
     private readonly WorldMapSetAnimator worldMapHeroMapAnimator = new WorldMapSetAnimator();
@@ -406,15 +357,10 @@ public partial class PrototypeUIController
             return false;
 
         worldMapHeroImage.style.display = DisplayStyle.None;
-        HideHeroFigureLook();
         if (worldMapHeroFallback != null)
             worldMapHeroFallback.style.display = DisplayStyle.None;
         return true;
     }
-
-    // Ракурс из шести по направлению на полотне (y вниз — к зрителю), по
-    // правилу фишки MapLab: курс 180° — Front, далее через 60°.
-    private static int KingdomSurvivalDirection(float dx, float dy) => WorldMapActorMotion.DirectionIndex(dx, dy);
 
     // Вход в поселение на живой карте: карта наезжает на поселение, чтобы
     // были видны его дома и здания услуг.

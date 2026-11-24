@@ -499,11 +499,11 @@ public sealed class MapLabLiveMapPlayModeTests
         Assert.Less(Mathf.Abs(target.XPercent - shopDoor.x) + Mathf.Abs(target.YPercent - shopDoor.y), 0.8f, "Путь ведёт к двери лавки, а не в центр поселения.");
         Image hero = root.Q<Image>("world-map-hero-figure");
         Assert.IsNotNull(hero);
-        Assert.IsTrue(MapLabGameLive.HeroFrame(0, out Texture2D frame, out _, out _, out _), "Есть кадры фишки MapLab.");
+        Assert.IsNotNull(KingdomSurvival.AnimationDatabase.WorldMapAnimationDatabaseAsset.Current?.HeroSet, "Есть набор анимаций героя карты.");
         yield return Frames(30);
-        // Герой — фигура в сцене карты (кадр фишки MapLab), не картинка поверх.
+        // Герой — фигура в сцене карты (кадр анимации набора карты), не картинка поверх.
         Transform heroFigure = MapLabGameLive.Current.View.transform.Find("MapLab Figure hero");
-        Assert.IsNotNull(heroFigure, "Герой нарисован кадром фишки MapLab в сцене карты.");
+        Assert.IsNotNull(heroFigure, "Герой нарисован кадром анимации в сцене карты.");
         Assert.IsTrue(heroFigure.gameObject.activeSelf, "Фигура героя видна.");
         yield return Capture(main, "live_04_walking");
         // Дорогу пропускаем: отряд у двери, прибытие — вход и окно лавки.

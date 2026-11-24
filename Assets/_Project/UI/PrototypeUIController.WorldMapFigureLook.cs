@@ -9,12 +9,9 @@ using UnityEngine.UIElements;
 //   контур фигуры. Контур строится один раз на кадр рисунка (кэш).
 public partial class PrototypeUIController
 {
-    private VisualElement worldMapHeroShadow;
-    private Image worldMapHeroOutline;
     private readonly Dictionary<string, VisualElement> worldMapGroupShadows = new Dictionary<string, VisualElement>();
     private static readonly Dictionary<Texture2D, Texture2D> figureOutlines = new Dictionary<Texture2D, Texture2D>();
     private static readonly Color FigureOutlineColor = new Color(1f, 0.93f, 0.72f, 1f);
-    private const float HeroForestFillAlpha = 0.18f;
 
     private static VisualElement MakeFigureShadow(string name)
     {
@@ -42,47 +39,6 @@ public partial class PrototypeUIController
         shadow.style.width = w;
         shadow.style.height = h;
         shadow.style.translate = new Translate(ground.x - w * 0.4f, ground.y - h * 0.55f);
-    }
-
-    // Тень и вид героя в лесу — после того как фигура поставлена.
-    private void UpdateHeroFigureLook(Vector2 percent, Texture2D texture, Vector2 ground, float width, float height, Vector2 pivot, float bob)
-    {
-        if (worldMapHeroImage == null || worldMapViewport == null)
-            return;
-        if (worldMapHeroShadow == null)
-        {
-            worldMapHeroShadow = MakeFigureShadow("world-map-hero-shadow");
-            worldMapViewport.Insert(worldMapViewport.IndexOf(worldMapHeroImage), worldMapHeroShadow);
-        }
-        if (worldMapHeroOutline == null)
-        {
-            worldMapHeroOutline = new Image { name = "world-map-hero-outline", pickingMode = PickingMode.Ignore, scaleMode = ScaleMode.StretchToFill };
-            worldMapHeroOutline.style.position = Position.Absolute;
-            worldMapHeroOutline.style.left = 0f;
-            worldMapHeroOutline.style.top = 0f;
-            worldMapViewport.Insert(worldMapViewport.IndexOf(worldMapHeroImage) + 1, worldMapHeroOutline);
-        }
-        bool forest = WorldMapNavigation.GetTerrainAtPercent(percent.x, percent.y) == WorldMapGameplayTerrainType.Forest;
-        // В лесу тени под деревьями не видно.
-        PlaceFigureShadow(worldMapHeroShadow, ground, height, !forest);
-        worldMapHeroImage.tintColor = new Color(1f, 1f, 1f, forest ? HeroForestFillAlpha : 1f);
-        Texture2D outline = forest ? FigureOutline(texture) : null;
-        worldMapHeroOutline.style.display = outline != null ? DisplayStyle.Flex : DisplayStyle.None;
-        if (outline == null)
-            return;
-        if (!ReferenceEquals(worldMapHeroOutline.image, outline))
-            worldMapHeroOutline.image = outline;
-        worldMapHeroOutline.style.width = width;
-        worldMapHeroOutline.style.height = height;
-        worldMapHeroOutline.style.translate = new Translate(ground.x - pivot.x * width, ground.y - (1f - pivot.y) * height - bob);
-    }
-
-    private void HideHeroFigureLook()
-    {
-        if (worldMapHeroShadow != null)
-            worldMapHeroShadow.style.display = DisplayStyle.None;
-        if (worldMapHeroOutline != null)
-            worldMapHeroOutline.style.display = DisplayStyle.None;
     }
 
     // Тень группы — в слое групп под всеми фигурами.

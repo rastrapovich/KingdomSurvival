@@ -1293,9 +1293,7 @@ namespace KingdomSurvival.MapLab
         private MapLabArtBuilder.FeatureScale FeatureScaleNorm(MapLabArtSet set05)
         {
             MapLabArtBuilder.FeatureScale norm = default;
-            MapLabArtEntry hero = ActiveMarkerSet?.View(MapLabMarkerDirection.Front);
-            if (hero != null && hero.HasTexture)
-                norm.FigureHeight = hero.CardHeight;
+            norm.FigureHeight = MapLabArtBuilder.HeroFigureCardHeight;
             if (set05 != null)
                 foreach (MapLabArtEntry e in set05.Entries)
                     if (e != null && e.HasTexture && e.Category == MapLabArtCategory.Building && e.ViewTag == "FrontRight")

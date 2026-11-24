@@ -88,10 +88,10 @@ public partial class PrototypeUIController
         float figureHeight = hexPx * 1.1f;
         MapLabGameLive.World live = MapLabGameLive.Current;
         float sceneFigureHeight = 0f;
-        if (live != null && live.Ready && MapLabGameLive.HeroFrame(0, out Texture2D _, out float heroWorldHeight, out float _, out Vector2 _))
+        if (live != null && live.Ready)
         {
-            figureHeight = heroWorldHeight * live.CanvasPixelsPerUnit(worldMapCanvasWidth);
-            sceneFigureHeight = heroWorldHeight;
+            figureHeight = MapLabGameLive.FigureCardHeight * live.CanvasPixelsPerUnit(worldMapCanvasWidth);
+            sceneFigureHeight = MapLabGameLive.FigureCardHeight;
         }
 
         worldMapGroupSeen.Clear();

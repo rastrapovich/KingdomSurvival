@@ -676,12 +676,27 @@ namespace KingdomSurvival.MapLabBridge
         // Размер куска карточек растительности и мелочи на живой карте (см. Begin).
         private const float LiveArtChunkSize = 256f;
 
+        // Предел высоты кадра живой карты в пикселях (0 — по экрану), как у арены
+        // (MapLabArenaDriver.MaxRenderHeight). 24.11.2026: на экране 4K карта
+        // рисовалась в 3784×1920 и упиралась в видеокарту (GTX 1070: 14–21 мс
+        // кадра); интерфейс растягивает кадр на рамку просмотра.
+        public static int MaxRenderHeight = 1440;
+
         // Нарисовать видимую часть: visible — видимый прямоугольник полотна в
         // процентах, pixelWidth/Height — размер области экрана в пикселях.
         public static RenderTexture Render(World w, Rect visible, int pixelWidth, int pixelHeight)
         {
             if (w == null || !w.Ready || pixelWidth < 8 || pixelHeight < 8 || visible.width <= 0f || visible.height <= 0f)
                 return null;
+            // Кадр меньше экрана: толщина туши и порог мелочи — в пикселях
+            // экрана (доля кадра к экрану), чтобы на экране линии не толстели.
+            float pixelScale = 1f;
+            if (MaxRenderHeight > 0 && pixelHeight > MaxRenderHeight)
+            {
+                pixelScale = MaxRenderHeight / (float)pixelHeight;
+                pixelWidth = Mathf.Max(8, Mathf.RoundToInt(pixelWidth * pixelScale));
+                pixelHeight = MaxRenderHeight;
+            }
             pixelWidth = Mathf.Min(pixelWidth, 4096);
             pixelHeight = Mathf.Min(pixelHeight, 4096);
             if (w.Target == null || w.Target.width != pixelWidth || w.Target.height != pixelHeight)
@@ -695,6 +710,7 @@ namespace KingdomSurvival.MapLabBridge
                 {
                     name = "MapLab Live",
                     antiAliasing = SupportedMsaa(),
+                    filterMode = FilterMode.Bilinear,
                     hideFlags = HideFlags.DontSave,
                 };
                 w.Target.Create();
@@ -723,9 +739,10 @@ namespace KingdomSurvival.MapLabBridge
                     cameras[i].cullingMask &= ~(1 << Layer);
             w.Camera.targetTexture = w.Target;
             w.Camera.backgroundColor = w.Paper;
-            Shader.SetGlobalFloat("_MapLabPixelScale", 1f);
+            Shader.SetGlobalFloat("_MapLabPixelScale", pixelScale);
             w.Camera.Render();
             w.Camera.targetTexture = null;
+            Shader.SetGlobalFloat("_MapLabPixelScale", 1f);
             return w.Target;
         }
 

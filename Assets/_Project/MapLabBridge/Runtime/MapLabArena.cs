@@ -42,6 +42,9 @@ namespace KingdomSurvival.MapLabBridge
         public readonly List<(Vector2 Center, string Kind)> Objects = new List<(Vector2, string)>();
         // Поверхности клеток (центр, слои MapLabArenaSurfaces.Bit) — в краске земли.
         public readonly List<(Vector2 Center, ulong Layers)> Surfaces = new List<(Vector2, ulong)>();
+        // Лесные клетки (центры): на клетке — молодые деревья и кусты Базы
+        // ассетов (MapLabArena.Decor, «лесные клетки»). Лес в бою не выгорает.
+        public readonly List<Vector2> Forest = new List<Vector2>();
         // Плотность декора (трава, мелочь, число групп деревьев): 1 — обычная.
         // Свой поток случайности: рельеф, клетки и бонусы от неё не зависят.
         public float DecorDensity = 1f;

@@ -269,7 +269,12 @@ namespace KingdomSurvival.BattleSandbox
 
         // Растительность клетки нарисована рисунком (программный значок не нужен).
         private bool HasVegetationArt(HexCoord cell, SandboxVegetation vegetation) =>
-            (vegetation == SandboxVegetation.Forest || vegetation == SandboxVegetation.Brush) && VegetationArt(cell, vegetation).Texture != null;
+            ArenaForest(cell, vegetation) ||
+            ((vegetation == SandboxVegetation.Forest || vegetation == SandboxVegetation.Brush) && VegetationArt(cell, vegetation).Texture != null);
+
+        // Лес клетки нарисован самой MapLab-ареной.
+        private bool ArenaForest(HexCoord cell, SandboxVegetation vegetation) =>
+            vegetation == SandboxVegetation.Forest && Relief != null && ArtBackedForest.Contains(cell);
 
         private void SyncTerrainObjectImages(HexLayout layout, List<(string id, float key, VisualElement element)> depthEntries)
         {
@@ -315,7 +320,7 @@ namespace KingdomSurvival.BattleSandbox
                 // рисунок снимается.
                 foreach (KeyValuePair<HexCoord, SandboxVegetation> pair in battle.VegetationCells)
                 {
-                    if (!IsBoardCell(pair.Key) || !HasVegetationArt(pair.Key, pair.Value))
+                    if (!IsBoardCell(pair.Key) || ArenaForest(pair.Key, pair.Value) || !HasVegetationArt(pair.Key, pair.Value))
                         continue;
                     bool forest = pair.Value == SandboxVegetation.Forest;
                     (Texture2D texture, Vector2 pivot) = VegetationArt(pair.Key, pair.Value);

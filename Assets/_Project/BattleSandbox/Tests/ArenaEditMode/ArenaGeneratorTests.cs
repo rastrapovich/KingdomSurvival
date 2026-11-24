@@ -50,7 +50,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
         public void HillAndVegetationAmounts_ZeroRemoveThemFromPlans()
         {
             IReadOnlyCollection<SandboxUnitState> units = Units();
-            SandboxArenaGenerationSettings.Current = new SandboxArenaGenerationSettings { HillAmount = 0f, VegetationAmount = 0f };
+            SandboxArenaGenerationSettings.Current = new SandboxArenaGenerationSettings { HillAmount = 0f, VegetationAmount = 0f, ForestAmount = 0f };
             for (int seed = 0; seed < 10; seed++)
             {
                 SandboxArenaPlan plan = SandboxArenaGenerator.Generate(SandboxArenaTheme.DryGlade, seed, units);
@@ -67,6 +67,40 @@ namespace KingdomSurvival.BattleSandbox.Tests
                 SandboxArenaGenerationSettings.Current = new SandboxArenaGenerationSettings { HillAmount = 2.5f };
             }
             Assert.That(more, Is.GreaterThan(normal), "объём холмов 2,5 даёт больше холмов");
+        }
+
+        // 24.11.2026: лесные клетки у всех тем — как холмы, пятнами в средней
+        // части поля, только на пустых клетках; объём 0 — без них.
+        [Test]
+        public void ForestCells_AppearInAllThemes_OnFreeCellsOnly()
+        {
+            IReadOnlyCollection<SandboxUnitState> units = Units();
+            HashSet<HexCoord> spawns = new HashSet<HexCoord>(units.Select(u => u.Position));
+            SandboxArenaGenerationSettings.Current = new SandboxArenaGenerationSettings();
+            foreach (SandboxArenaTheme theme in SandboxArenaThemes.All)
+            {
+                int forest = 0;
+                for (int seed = 0; seed < 8; seed++)
+                {
+                    SandboxArenaPlan plan = SandboxArenaGenerator.Generate(theme, seed, units);
+                    foreach (KeyValuePair<HexCoord, SandboxVegetation> pair in plan.Vegetation.Where(p => p.Value == SandboxVegetation.Forest))
+                    {
+                        forest++;
+                        // Полоса леса опушки — свой рецепт (стволы в лесу, лес у края).
+                        if (theme == SandboxArenaTheme.ForestEdge)
+                            continue;
+                        Assert.That(plan.Blocks(pair.Key), Is.False, theme + ": лес на закрытой клетке " + pair.Key);
+                        Assert.That(plan.Terrain.ContainsKey(pair.Key), Is.False, theme + ": лес на холме " + pair.Key);
+                    }
+                    if (theme != SandboxArenaTheme.ForestEdge)
+                        foreach (HexCoord spawn in spawns)
+                            Assert.That(plan.Vegetation.TryGetValue(spawn, out SandboxVegetation v) && v == SandboxVegetation.Forest, Is.False, theme + ": лес на старте " + spawn);
+                }
+                Assert.That(forest, Is.GreaterThan(0), theme + ": лесные клетки есть");
+            }
+            SandboxArenaGenerationSettings.Current = new SandboxArenaGenerationSettings { ForestAmount = 0f };
+            for (int seed = 0; seed < 8; seed++)
+                Assert.That(SandboxArenaGenerator.Generate(SandboxArenaTheme.DryGlade, seed, units).Vegetation.ContainsValue(SandboxVegetation.Forest), Is.False, "объём 0 — без леса");
         }
 
         [Test]

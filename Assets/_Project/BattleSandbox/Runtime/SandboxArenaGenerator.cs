@@ -124,6 +124,15 @@ namespace KingdomSurvival.BattleSandbox
         public float GroundAmount = 1f;
         public float ObstacleAmount = 1f;
 
+        // 24.11.2026, просьба пользователя: лесные клетки у всех тем — лес на
+        // одном гексе (молодые деревья и кусты), в него заходит любое существо;
+        // правила клетки — растительность «лес» (вход дороже, укрытие от
+        // дальних снарядов). Распределяются как холмы: пятнами в средней части
+        // поля. Объём — множитель (0 — без лесных клеток); рощ — на сколько
+        // пятен делится бюджет.
+        public float ForestAmount = 1f;
+        public int ForestGroves = 2;
+
         // Река (берег и брод, берег с мостом): изгиб русла в клетках вбок от
         // прямой, ширина русла (1–2 клетки), число бродов (1–3).
         public int RiverBend = 2;
@@ -138,7 +147,8 @@ namespace KingdomSurvival.BattleSandbox
     {
         Hills,
         Vegetation,
-        Ground
+        Ground,
+        Forest
     }
 
     // Диагностика генерации: тема, источник выбора, seed, попытки, доли,
@@ -294,6 +304,7 @@ namespace KingdomSurvival.BattleSandbox
                     SandboxArenaPlan plan = BasePlan(theme, disabled);
                     Builder builder = new Builder(plan, random, players, enemies, settings, simple);
                     Recipe(theme, builder);
+                    ForestGroves(builder);
                     List<string> issues = Validate(plan, players, enemies, settings, theme);
                     if (issues.Count == 0)
                     {
@@ -717,6 +728,21 @@ namespace KingdomSurvival.BattleSandbox
             b.Scatter(SandboxObjectKind.Boulder, b.Obstacles(0.5), 2);
         }
 
+        // Лесные клетки всех тем: как холмы — пятнами в средней части поля,
+        // только на пустых клетках (не на холмах, воде, объектах и стартах).
+        private static void ForestGroves(Builder b)
+        {
+            int forest = b.Special(0.30, SandboxArenaPart.Forest);
+            int groves = Math.Max(1, Math.Min(6, b.Settings.ForestGroves));
+            for (int i = 0; i < groves && forest > 0; i++)
+            {
+                int left = groves - i;
+                int size = (forest + left - 1) / left;
+                b.Brush(b.Middle(b.Open), size, SandboxVegetation.Forest, b.Open);
+                forest -= size;
+            }
+        }
+
         private static double Angle(HexCoord center, HexCoord cell) =>
             Math.Atan2(cell.R - center.R, cell.Q - center.Q + (cell.R - center.R) * 0.5);
 
@@ -760,7 +786,11 @@ namespace KingdomSurvival.BattleSandbox
             // Бюджет особой проходимой местности / преград на долю рецепта.
             public int Special(double part, SandboxArenaPart kind = SandboxArenaPart.Ground) => Amount(kind) <= 0.0 ? 0 : Math.Max(Simple ? 0 : 1, (int)Math.Round(candidates * settings.SpecialShare * part * Scale * Amount(kind)));
 
-            private double Amount(SandboxArenaPart kind) => Math.Max(0.0, kind == SandboxArenaPart.Hills ? settings.HillAmount : kind == SandboxArenaPart.Vegetation ? settings.VegetationAmount : settings.GroundAmount);
+            private double Amount(SandboxArenaPart kind) => Math.Max(0.0,
+                kind == SandboxArenaPart.Hills ? settings.HillAmount
+                : kind == SandboxArenaPart.Vegetation ? settings.VegetationAmount
+                : kind == SandboxArenaPart.Forest ? settings.ForestAmount
+                : settings.GroundAmount);
             public int Obstacles(double part) => Math.Max(0, (int)Math.Round(candidates * settings.ObstacleShare * part * Scale * Math.Max(0.0, settings.ObstacleAmount)));
             public SandboxArenaGenerationSettings Settings => settings;
 
@@ -774,9 +804,14 @@ namespace KingdomSurvival.BattleSandbox
             public bool CanBlock(HexCoord cell) =>
                 Free(cell) && !spawns.Contains(cell) && spawns.All(s => s.DistanceTo(cell) > 1);
 
-            public HexCoord Middle()
+            // Пустая клетка не на старте бойца.
+            public bool Open(HexCoord cell) => Free(cell) && !spawns.Contains(cell);
+
+            public HexCoord Middle() => Middle(Free);
+
+            public HexCoord Middle(Func<HexCoord, bool> allowed)
             {
-                List<HexCoord> cells = SandboxArenaShape.Cells().Where(c => c.Q >= 3 && c.Q <= 6 && Free(c)).ToList();
+                List<HexCoord> cells = SandboxArenaShape.Cells().Where(c => c.Q >= 3 && c.Q <= 6 && allowed(c)).ToList();
                 return cells.Count > 0 ? cells[Rng.Next(cells.Count)] : ArenaCenter;
             }
 
@@ -826,9 +861,9 @@ namespace KingdomSurvival.BattleSandbox
                     Hill(cell);
             }
 
-            public void Brush(HexCoord center, int size, SandboxVegetation kind)
+            public void Brush(HexCoord center, int size, SandboxVegetation kind, Func<HexCoord, bool> allowed = null)
             {
-                foreach (HexCoord cell in Blob(center, size, Free))
+                foreach (HexCoord cell in Blob(center, size, allowed ?? Free))
                     Vegetation(cell, kind);
             }
 

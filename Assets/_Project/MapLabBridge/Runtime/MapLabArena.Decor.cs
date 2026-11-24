@@ -16,6 +16,8 @@ namespace KingdomSurvival.MapLabBridge
     public sealed partial class MapLabArena
     {
         private const string DecorKind = "arena-decor";
+        // Рисунки лесных клеток: стоят на клетке намеренно.
+        public const string ForestKind = "arena-forest";
 
         private readonly List<(Vector2 Point, float Half)> decorPlaced = new List<(Vector2, float)>();
         // Где легла трава (пятна, ковёр, россыпь) — для проверки густоты на поле и за ним.
@@ -177,8 +179,13 @@ namespace KingdomSurvival.MapLabBridge
                     }
                 }
 
-            // 2. Группы деревьев по краям и углам.
-            if (trees.Count > 0)
+            // 1г. Лесные клетки: молодые деревья у задней кромки гекса, кусты
+            // вокруг, изредка пень. Рисунки — те же, что декор арены; свой поток
+            // случайности — прочий декор от числа лесных клеток не зависит.
+            PlaceForestCells(c, trees, tall, stumps, look);
+
+            // 2. Группы деревьев по краям и углам (24.11.2026: по умолчанию выключены).
+            if (trees.Count > 0 && look.EdgeTrees)
             {
                 trees.Sort((a, b) => a.Height.CompareTo(b.Height));
                 float typical = trees[trees.Count / 2].Height, typicalHalf = trees[trees.Count / 2].HalfWidth;
@@ -603,6 +610,81 @@ namespace KingdomSurvival.MapLabBridge
         }
 
         private List<MapLabDecorArt> Role(MapLabDecorRole role) => decorArt.FindAll(art => art.Role == role && art.Priority > 0f);
+
+        // Число лесных рисунков на арене (деревья, кусты, пни лесных клеток).
+        public int ForestFeatures { get; private set; }
+
+        // Лесная клетка (24.11.2026): лес на одном гексе. Деревья — молодые
+        // (самые низкие породы, уменьшенные), у задней кромки клетки: крона не
+        // закрывает соседние клетки, середина гекса, где стоит боец, открыта.
+        // Кусты (бурьян Базы ассетов) — по бокам и сзади клетки, изредка пень.
+        // Все рисунки — слой объектов: над сеткой, под фигурами.
+        private void PlaceForestCells(MapLabComposition c, List<MapLabDecorArt> trees, List<MapLabDecorArt> bushes,
+            List<MapLabDecorArt> stumps, MapLabArenaLook look)
+        {
+            ForestFeatures = 0;
+            if (Spec.Forest.Count == 0 || (trees.Count == 0 && bushes.Count == 0))
+                return;
+            float hex = Spec.HexWorld;
+            List<MapLabDecorArt> young = new List<MapLabDecorArt>(trees);
+            young.Sort((a, b) => a.Height.CompareTo(b.Height));
+            int keep = Mathf.Clamp(Mathf.CeilToInt(young.Count * Mathf.Clamp01(look.ForestYoungShare)), young.Count > 0 ? 1 : 0, young.Count);
+            young.RemoveRange(keep, young.Count - keep);
+            List<MapLabDecorArt> smallStumps = stumps.FindAll(stump => stump.HalfWidth < hex * 0.45f);
+            float treeScale = Mathf.Clamp(look.ForestTreeScale, 0.2f, 2f);
+            float bushScale = Mathf.Clamp(look.ForestBushScale, 0.2f, 3f);
+
+            void Put(MapLabDecorArt art, string suffix, float scale, Vector2 p)
+            {
+                MapLabArtEntry sized = Mathf.Approximately(scale, 1f) ? null : MapLabArtAssets.AddSized(decorSet, art, suffix, art.Height * scale);
+                c.Features.Add((p, sized != null ? sized.Id : art.Id, ForestKind));
+                decorPlaced.Add((p, art.HalfWidth * scale * 0.5f));
+                DecorFeatures++;
+                ForestFeatures++;
+            }
+
+            int Count(int min, int max, MapLabRandom r)
+            {
+                int lo = Mathf.Max(0, Mathf.Min(min, max)), hi = Mathf.Max(0, Mathf.Max(min, max));
+                return lo + (int)(r.Value() * (hi - lo + 1 - 1e-4f));
+            }
+
+            for (int index = 0; index < Spec.Forest.Count; index++)
+            {
+                Vector2 center = ToWorld(Spec.Forest[index]);
+                MapLabRandom rng = MapLabRandom.ForStream(Spec.Seed, "arena-forest-" + index, MapLabData.AlgorithmVersion);
+                // Деревья: задняя половина гекса (дальше от камеры), вразброс по ширине.
+                int treeCount = young.Count > 0 ? Count(look.ForestTreesMin, look.ForestTreesMax, rng) : 0;
+                float side = rng.Value() < 0.5f ? -1f : 1f;
+                for (int i = 0; i < treeCount; i++)
+                {
+                    MapLabDecorArt art = MapLabArtAssets.Pick(young, rng.Value());
+                    float x = treeCount == 1 ? rng.Range(-0.35f, 0.35f) : side * (i % 2 == 0 ? 1f : -1f) * rng.Range(0.2f, 0.5f);
+                    Vector2 p = center + new Vector2(x, rng.Range(0.2f, 0.5f)) * hex;
+                    float limit = Mathf.Max(0.3f, look.ForestTreeMaxHexes) * hex;
+                    Put(art, "#forest", Mathf.Min(treeScale, limit / Mathf.Max(0.05f, art.Height)), p);
+                }
+                // Кусты: по бокам и сзади клетки (дуга от правого бока через
+                // заднюю кромку к левому). Объекты ближе к зрителю, чем боец,
+                // рисуются поверх него — спереди куст закрыл бы бойцу ноги.
+                int bushCount = bushes.Count > 0 ? Count(look.ForestBushesMin, look.ForestBushesMax, rng) : 0;
+                const float arcFrom = -0.45f, arcTo = Mathf.PI + 0.45f;
+                for (int i = 0; i < bushCount; i++)
+                {
+                    MapLabDecorArt art = MapLabArtAssets.Pick(bushes, rng.Value());
+                    float slot = (i + rng.Range(0.15f, 0.85f)) / bushCount;
+                    float angle = Mathf.Lerp(arcFrom, arcTo, rng.Value() < 0.5f ? slot : 1f - slot);
+                    float radius = rng.Range(0.42f, 0.68f);
+                    Vector2 p = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius * hex;
+                    Put(art, "#forestbush", bushScale, p);
+                }
+                if (smallStumps.Count > 0 && rng.Value() < look.ForestStumpChance)
+                {
+                    float angle = Mathf.Lerp(arcFrom, arcTo, rng.Value());
+                    Put(MapLabArtAssets.Pick(smallStumps, rng.Value()), string.Empty, 1f, center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * 0.55f * hex);
+                }
+            }
+        }
     }
 }
 

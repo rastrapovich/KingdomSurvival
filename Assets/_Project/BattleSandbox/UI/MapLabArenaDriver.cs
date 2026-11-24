@@ -141,6 +141,12 @@ namespace KingdomSurvival.BattleSandbox
             foreach (SandboxBattleObject item in battle.TerrainObjects)
                 if (item.Kind == SandboxObjectKind.Boulder || (SandboxTerrainObjects.Get(item.Kind).Indestructible && MapLabArtAssets.HasArenaObjectArt(ObjectKindId(item.Kind))))
                     board.ArtBackedObjects.UnionWith(item.Cells);
+            // Лесные клетки рисует арена (деревья Базы ассетов есть).
+            board.ArtBackedForest.Clear();
+            if (MapLabArtAssets.ArenaDecorTexture(MapLabDecorRole.Tree, 0, out _) != null)
+                foreach (System.Collections.Generic.KeyValuePair<HexCoord, SandboxVegetation> pair in battle.VegetationCells)
+                    if (pair.Value == SandboxVegetation.Forest)
+                        board.ArtBackedForest.Add(pair.Key);
             return new MapLabArenaDriver(BuildSpec(field, battle), surface, board, battle, ArenaCells(field), onReady, preview);
         }
 
@@ -176,6 +182,11 @@ namespace KingdomSurvival.BattleSandbox
                     : MapLabArenaCellKind.Open;
                 spec.Cells.Add((layout.GetCenter(cell.Q, cell.R), kind));
                 key.Append((int)kind);
+                if (battle.GetVegetation(cell) == SandboxVegetation.Forest && kind != MapLabArenaCellKind.Blocked)
+                {
+                    spec.Forest.Add(layout.GetCenter(cell.Q, cell.R));
+                    key.Append('f');
+                }
                 ulong surfaces = SurfaceMask(battle, cell);
                 if (surfaces != 0UL)
                     spec.Surfaces.Add((layout.GetCenter(cell.Q, cell.R), surfaces));

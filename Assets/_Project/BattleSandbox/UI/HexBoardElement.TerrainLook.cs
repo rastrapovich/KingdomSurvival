@@ -28,6 +28,9 @@ namespace KingdomSurvival.BattleSandbox
 
         // Клетки, где MapLab-арена уже нарисовала объект местности артом.
         public readonly HashSet<HexCoord> ArtBackedObjects = new HashSet<HexCoord>();
+        // Лесные клетки, деревья и кусты которых нарисовала MapLab-арена (доска
+        // не кладёт поверх свой рисунок леса). Лес в бою не выгорает.
+        public readonly HashSet<HexCoord> ArtBackedForest = new HashSet<HexCoord>();
 
         private void BeginTerrainFrame()
         {

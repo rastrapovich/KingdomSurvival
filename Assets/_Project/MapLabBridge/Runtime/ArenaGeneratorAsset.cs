@@ -135,7 +135,10 @@ namespace KingdomSurvival.MapLabBridge
         // Общая плотность декора (множитель числа групп, пятен травы, камней).
         public float DecorDensity = 1f;
 
-        // Деревья: группы по краям и углам кадра.
+        // Деревья: группы по краям и углам кадра. 24.11.2026, просьба
+        // пользователя: пока убраны (по умолчанию выключены) — на арене лес
+        // теперь клетками (ниже); включаются в «Генераторе арен».
+        public bool EdgeTrees;
         public float TreeGroupsMin = 9f;
         public float TreeGroupsMax = 13f;
         public int TreesPerGroupMin = 3;
@@ -152,6 +155,25 @@ namespace KingdomSurvival.MapLabBridge
         public float TreeYoungAtEdge = 0.5f;
         // Размер деревьев (1 — по Базе ассетов).
         public float TreeScale = 1f;
+
+        // Лесные клетки (растительность «лес» правил боя): на гексе — молодые
+        // деревья и кусты тех же рисунков Базы ассетов, что декор арены.
+        // Молодые — самые низкие породы (доля ForestYoungShare от списка по
+        // высоте), чтобы кроны не закрывали соседние клетки. Бойцы рисуются
+        // поверх (деревья — слой объектов под фигурами).
+        public int ForestTreesMin = 1;
+        public int ForestTreesMax = 2;
+        public int ForestBushesMin = 1;
+        public int ForestBushesMax = 3;
+        // Какая доля пород (от самой низкой) идёт на лесные клетки.
+        public float ForestYoungShare = 0.5f;
+        // Размер деревьев и кустов лесной клетки (1 — как в Базе ассетов).
+        public float ForestTreeScale = 0.75f;
+        // Предел высоты дерева на клетке, в радиусах гекса (выше — уменьшается).
+        public float ForestTreeMaxHexes = 1.6f;
+        public float ForestBushScale = 1f;
+        // Пень на лесной клетке, вероятность.
+        public float ForestStumpChance = 0.2f;
 
         // Пни и бурьян у края групп, со стороны поля (вероятность на группу).
         public float WeedChance = 0.65f;

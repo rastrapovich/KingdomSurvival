@@ -198,6 +198,68 @@ namespace KingdomSurvival.BattleSandbox.Tests
             }
         }
 
+        // 24.11.2026: лесная клетка — деревья и кусты на самой клетке (рядом с
+        // её центром), по умолчанию без деревьев по краям кадра.
+        [Test]
+        public void ForestCells_GetTreesAndBushesOnTheCell()
+        {
+            if (!MapLabArena.Available)
+                Assert.Ignore("Нет MapLabGameAssets с профилем — арена MapLab выключена.");
+            SandboxBattle battle = Battle(7);
+            HashSet<HexCoord> taken = new HashSet<HexCoord>(battle.Units.Select(u => u.Position));
+            List<HexCoord> forest = battle.DebugBoardCells()
+                .Where(c => c.Q >= 3 && c.Q <= 6 && battle.GetTerrain(c) == SandboxTerrain.Normal && battle.TerrainObjectAt(c) == null && !taken.Contains(c))
+                .Take(3).ToList();
+            Assume.That(forest.Count, Is.GreaterThan(0), "есть открытые клетки в середине поля");
+            foreach (HexCoord cell in forest)
+                battle.SetVegetation(cell, SandboxVegetation.Forest);
+            MapLabArenaSpec spec = DefaultSpec(battle);
+            Assert.That(spec.Forest.Count, Is.EqualTo(forest.Count), "лесные клетки переданы рисунку");
+            Assert.That(spec.Look.EdgeTrees, Is.False, "деревья по краям кадра по умолчанию выключены");
+            MapLabArena arena = MapLabArena.Build(spec);
+            try
+            {
+                Assert.That(arena.Ready, Is.True, arena.Error);
+                if (!arena.UsesAssetDatabase)
+                    Assert.Ignore("Нет деревьев Базы ассетов для арены.");
+                Assert.That(arena.ForestFeatures, Is.GreaterThanOrEqualTo(forest.Count), "на каждой лесной клетке есть рисунки");
+                int onCells = 0;
+                foreach (MapLabFeatureSprite sprite in arena.View.Data.FeatureSprites)
+                {
+                    if (sprite.Kind != MapLabArena.ForestKind)
+                        continue;
+                    Vector2 at = new Vector2(sprite.Base.x, sprite.Base.z);
+                    float nearest = spec.Forest.Min(center => Vector2.Distance(arena.ToWorld(center), at));
+                    Assert.That(nearest, Is.LessThan(spec.HexWorld * 0.95f), $"Рисунок {sprite.ArtId} — на лесной клетке");
+                    onCells++;
+                }
+                Assert.That(onCells, Is.GreaterThan(0), "рисунки лесных клеток построены");
+            }
+            finally
+            {
+                arena.Dispose();
+            }
+
+            // Кадр для глаз: сухая поляна с холмами и лесными клетками генератора
+            // (Logs/MapLabArena/arena_seed91xx.png).
+            for (int seed = 1; seed <= 2; seed++)
+            {
+                SandboxBattle themed = SandboxRoster.CreateBattle(SandboxRoster.PlayerRoster.Take(4).ToList(), SandboxRoster.EnemyRoster, seed,
+                    theme: SandboxArenaTheme.DryGlade);
+                MapLabArenaSpec themedSpec = DefaultSpec(themed);
+                MapLabArena preview = MapLabArena.Build(themedSpec);
+                try
+                {
+                    Assert.That(preview.Ready, Is.True, preview.Error);
+                    SavePreview(preview, themedSpec, BattlefieldFrame.ActiveCells(null).ToList(), themed, new Rect(0f, 0f, 1920f, 1080f), 9100 + seed);
+                }
+                finally
+                {
+                    preview.Dispose();
+                }
+            }
+        }
+
         private sealed class Relief : IBattlefieldRelief
         {
             private readonly MapLabArena arena;

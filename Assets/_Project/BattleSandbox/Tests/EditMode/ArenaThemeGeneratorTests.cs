@@ -69,9 +69,11 @@ namespace KingdomSurvival.BattleSandbox.Tests
                         Assert.That(report.SecondApproach, Is.True, "Второй подход. " + context);
                     Assert.That(report.ObstacleCells, Is.LessThanOrEqualTo(report.TotalCells * 0.25), context);
 
-                    // 2–3 значимых вида местности (не весь справочник).
+                    // 2–3 значимых вида местности темы (не весь справочник). Лесные
+                    // клетки (24.11.2026) — общий слой всех тем, в счёт темы не входят
+                    // (кроме опушки, где лес — часть рецепта).
                     int kinds = battle.GroundCells.Values.Where(g => g != SandboxGround.Default && g != SandboxGround.Ground && g != SandboxGround.DeepWater && g != SandboxGround.Cliff).Distinct().Count() +
-                                battle.DebugBoardCells().Select(battle.GetVegetation).Where(v => v != SandboxVegetation.None).Distinct().Count() +
+                                battle.DebugBoardCells().Select(battle.GetVegetation).Where(v => v != SandboxVegetation.None && (v != SandboxVegetation.Forest || theme == SandboxArenaTheme.ForestEdge)).Distinct().Count() +
                                 (battle.DebugBoardCells().Any(c => battle.GetTerrain(c) == SandboxTerrain.Difficult) ? 1 : 0);
                     Assert.That(kinds, Is.InRange(1, 4), context);
                 }

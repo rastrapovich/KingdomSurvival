@@ -198,6 +198,12 @@ namespace KingdomSurvival.MapLabBridge
                             st.Services.AddRange(roles);
                 // Подгрузка покраски — как в предпросмотре больших карт.
                 w.Settings.Stage05.PaintStreaming = MapLabPaintStreaming.On;
+                // Карточки растительности и мелочи — крупными кусками: при куске
+                // 64 карта держала ~4000 рендереров и ~500 смен шейдера за кадр
+                // (≈9 мс главного потока на отрисовку в редакторе), при 256 —
+                // ~1000 и ~200 (≈5 мс). Лишние вершины за краем кадра видеокарте
+                // почти ничего не стоят.
+                w.Settings.Stage05.ArtChunkSize = Mathf.Max(w.Settings.Stage05.ArtChunkSize, LiveArtChunkSize);
 
                 GameObject cameraObject = new GameObject("MapLab Live Camera") { hideFlags = HideFlags.HideAndDontSave, layer = Layer };
                 w.Camera = cameraObject.AddComponent<Camera>();
@@ -667,6 +673,9 @@ namespace KingdomSurvival.MapLabBridge
             return targetY - (screenOf(targetY) - targetY);
         }
 
+        // Размер куска карточек растительности и мелочи на живой карте (см. Begin).
+        private const float LiveArtChunkSize = 256f;
+
         // Нарисовать видимую часть: visible — видимый прямоугольник полотна в
         // процентах, pixelWidth/Height — размер области экрана в пикселях.
         public static RenderTexture Render(World w, Rect visible, int pixelWidth, int pixelHeight)
@@ -704,8 +713,9 @@ namespace KingdomSurvival.MapLabBridge
             w.Camera.transform.SetPositionAndRotation(target - rotation * Vector3.forward * distance, rotation);
             w.Rig.PitchOverride = w.Pitch;
             w.Rig.Target = target;
+            // Подкачку покраски OnCameraChanged уже прокачивает (второй вызов
+            // в кадре только выделял память).
             w.View.OnCameraChanged();
-            w.View.PumpStreaming(false);
             // Свой слой видит только эта камера.
             int cameraCount = MapLabArena.AllCameras(out Camera[] cameras);
             for (int i = 0; i < cameraCount; i++)

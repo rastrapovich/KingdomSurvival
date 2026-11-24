@@ -139,6 +139,39 @@ public partial class PrototypeUIController
             worldMapFogCloudsCheckTimer = 0f;
             worldMapFogCloudsVersion = WorldMapFog.Version;
             Vector2 hero = worldMapFogCloudsHeroValid ? worldMapFogCloudsHeroPx : Vector2.zero;
+            CheckWorldMapFogCloudsAgainstExplored(grid, settings, trigger, hero);
+        }
+
+        AnimateWorldMapFogClouds(settings);
+    }
+
+    // Открытые клетки на момент прошлой проверки облаков.
+    private bool[] worldMapFogCloudsExplored;
+    private readonly List<int> worldMapFogCloudsNewCells = new List<int>();
+
+    // Облако тает, когда в радиусе от его опоры появилась исследованная
+    // клетка (WorldMapFogClouds.IsCleared). 24.11.2026: раньше на каждое
+    // открытие проверялись все облака карты (5–27 мс за кадр); теперь —
+    // только облака рядом с клетками, открытыми с прошлой проверки (итог тот
+    // же: прежде открытые клетки уже растопили свои облака).
+    private void CheckWorldMapFogCloudsAgainstExplored(WorldMapHexGrid grid, WorldMapMovementSettingsAsset settings, float trigger, Vector2 hero)
+    {
+        int cellCount = grid.CellCount;
+        bool full = worldMapFogCloudsExplored == null || worldMapFogCloudsExplored.Length != cellCount || worldMapFogCloudBuckets == null;
+        if (full)
+            worldMapFogCloudsExplored = new bool[cellCount];
+        worldMapFogCloudsNewCells.Clear();
+        for (int index = 0; index < cellCount; index++)
+        {
+            bool explored = WorldMapFog.IsExplored(gameState, index);
+            if (explored && !worldMapFogCloudsExplored[index])
+                worldMapFogCloudsNewCells.Add(index);
+            worldMapFogCloudsExplored[index] = explored;
+        }
+
+        // Первая проверка или большое разом открытое (загрузка, событие) — все облака.
+        if (full || worldMapFogCloudsNewCells.Count > 512)
+        {
             foreach (WorldMapFogCloud cloud in worldMapFogCloudList)
             {
                 if (cloud.Gone || cloud.Progress >= 0f)
@@ -146,9 +179,39 @@ public partial class PrototypeUIController
                 if (WorldMapFogClouds.IsCleared(gameState, grid, cloud.Anchor.X, cloud.Anchor.Y, trigger))
                     StartWorldMapFogCloudDissolve(cloud, hero.x, hero.y, grid, settings);
             }
+            return;
         }
 
-        AnimateWorldMapFogClouds(settings);
+        // Та же граница, что в IsCleared: центр клетки в радиусе + полклетки.
+        double limit = System.Math.Max(0.0, trigger) * grid.HexWidth + grid.HexWidth * 0.5;
+        double limitSquared = limit * limit;
+        foreach (int index in worldMapFogCloudsNewCells)
+        {
+            grid.CellCenter(grid.CellAt(index), out double cx, out double cy);
+            int bx0 = Mathf.Clamp((int)((cx - limit) / worldMapFogCloudBucketSize) - 1, 0, worldMapFogCloudBucketColumns - 1);
+            int bx1 = Mathf.Clamp((int)((cx + limit) / worldMapFogCloudBucketSize) + 1, 0, worldMapFogCloudBucketColumns - 1);
+            int by0 = Mathf.Clamp((int)((cy - limit) / worldMapFogCloudBucketSize) - 1, 0, worldMapFogCloudBucketRows - 1);
+            int by1 = Mathf.Clamp((int)((cy + limit) / worldMapFogCloudBucketSize) + 1, 0, worldMapFogCloudBucketRows - 1);
+            for (int by = by0; by <= by1; by++)
+            {
+                for (int bx = bx0; bx <= bx1; bx++)
+                {
+                    List<int> bucket = worldMapFogCloudBuckets[by * worldMapFogCloudBucketColumns + bx];
+                    if (bucket == null)
+                        continue;
+                    foreach (int cloudIndex in bucket)
+                    {
+                        WorldMapFogCloud cloud = worldMapFogCloudList[cloudIndex];
+                        if (cloud.Gone || cloud.Progress >= 0f)
+                            continue;
+                        double dx = cloud.Anchor.X - cx;
+                        double dy = cloud.Anchor.Y - cy;
+                        if (dx * dx + dy * dy <= limitSquared)
+                            StartWorldMapFogCloudDissolve(cloud, hero.x, hero.y, grid, settings);
+                    }
+                }
+            }
+        }
     }
 
     private void EnsureWorldMapFogCloudsLayer()
@@ -180,6 +243,7 @@ public partial class PrototypeUIController
         worldMapFogCloudList.Clear();
         worldMapFogCloudsDissolving.Clear();
         worldMapFogCloudBuckets = null;
+        worldMapFogCloudsExplored = null;
         worldMapFogCloudsState = null;
         worldMapFogCloudsMap = null;
         worldMapFogCloudsLayoutKey = null;
@@ -199,6 +263,11 @@ public partial class PrototypeUIController
         worldMapFogCloudsTextureKey = null;
         worldMapFogCloudsVersion = WorldMapFog.Version;
         worldMapFogCloudsHeroValid = false;
+        // Облака у уже открытого не создаются — следующая проверка смотрит
+        // только на клетки, открытые после этой сборки.
+        worldMapFogCloudsExplored = new bool[grid.CellCount];
+        for (int index = 0; index < grid.CellCount; index++)
+            worldMapFogCloudsExplored[index] = WorldMapFog.IsExplored(gameState, index);
 
         float spacing = settings != null ? settings.FogCloudSpacingHexes : 4.5f;
         float rowSpacing = settings != null ? settings.FogCloudRowSpacingHexes : 1.2f;

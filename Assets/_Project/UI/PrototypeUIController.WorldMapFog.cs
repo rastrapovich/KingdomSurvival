@@ -19,6 +19,16 @@ public partial class PrototypeUIController
     private Color32[] worldMapFogPixels;
     private int[] worldMapFogPixelCells;
     private byte[] worldMapFogCellAlpha;
+    // Пиксели каждой клетки (по клетке подряд): перерисовка трогает только
+    // клетки, у которых сменилась прозрачность, а не всю текстуру.
+    private int[] worldMapFogCellPixelStart;
+    private int[] worldMapFogCellPixels;
+    private bool[] worldMapFogCellExplored;
+    private readonly System.Collections.Generic.List<int> worldMapFogDirtyCells = new System.Collections.Generic.List<int>();
+    private bool[] worldMapFogDirtyMark;
+    private bool worldMapFogDrawn;
+    private Color32 worldMapFogDrawnColor;
+    private byte worldMapFogDrawnEdge;
     private GameState worldMapFogState;
     private int worldMapFogVersion = -1;
     private float worldMapFogTimer;
@@ -118,6 +128,18 @@ public partial class PrototypeUIController
             }
         }
         worldMapFogCellAlpha = new byte[grid.CellCount];
+        worldMapFogCellExplored = new bool[grid.CellCount];
+        worldMapFogDirtyMark = new bool[grid.CellCount];
+        worldMapFogCellPixelStart = new int[grid.CellCount + 1];
+        foreach (int cell in worldMapFogPixelCells)
+            worldMapFogCellPixelStart[cell + 1]++;
+        for (int c = 0; c < grid.CellCount; c++)
+            worldMapFogCellPixelStart[c + 1] += worldMapFogCellPixelStart[c];
+        worldMapFogCellPixels = new int[worldMapFogPixelCells.Length];
+        int[] fill = (int[])worldMapFogCellPixelStart.Clone();
+        for (int i = 0; i < worldMapFogPixelCells.Length; i++)
+            worldMapFogCellPixels[fill[worldMapFogPixelCells[i]]++] = i;
+        worldMapFogDrawn = false;
         worldMapFog.style.backgroundImage = new StyleBackground(Background.FromTexture2D(worldMapFogTexture));
         worldMapFog.style.unityBackgroundImageTintColor = Color.white;
         worldMapFog.style.backgroundSize = new BackgroundSize(Length.Percent(100f), Length.Percent(100f));
@@ -137,32 +159,93 @@ public partial class PrototypeUIController
         float softness = settings != null ? settings.FogEdgeSoftness : 0.45f;
         byte full = (byte)Mathf.RoundToInt(Mathf.Clamp01(fogColor.a) * 255f);
         byte edge = (byte)Mathf.RoundToInt(full * (1f - softness));
+        Color32 rgb = fogColor;
+        rgb.a = full;
 
-        for (int index = 0; index < worldMapFogCellAlpha.Length; index++)
+        // Первый рисунок, новая сетка или другой цвет — вся текстура.
+        if (!worldMapFogDrawn || !worldMapFogDrawnColor.Equals(rgb) || worldMapFogDrawnEdge != edge)
         {
-            if (WorldMapFog.IsExplored(gameState, index))
-            {
-                worldMapFogCellAlpha[index] = 0;
+            for (int index = 0; index < worldMapFogCellAlpha.Length; index++)
+                worldMapFogCellExplored[index] = WorldMapFog.IsExplored(gameState, index);
+            for (int index = 0; index < worldMapFogCellAlpha.Length; index++)
+                worldMapFogCellAlpha[index] = WorldMapFogCellAlpha(grid, index, full, edge);
+            for (int i = 0; i < worldMapFogPixels.Length; i++)
+                worldMapFogPixels[i] = new Color32(rgb.r, rgb.g, rgb.b, worldMapFogCellAlpha[worldMapFogPixelCells[i]]);
+            worldMapFogTexture.SetPixels32(worldMapFogPixels);
+            worldMapFogTexture.Apply(false, false);
+            worldMapFogDrawn = true;
+            worldMapFogDrawnColor = rgb;
+            worldMapFogDrawnEdge = edge;
+            worldMapFog.MarkDirtyRepaint();
+            return;
+        }
+
+        // 24.11.2026: открытие нескольких клеток на бегу меняло всю текстуру
+        // (5–18 мс за кадр). Теперь — только открытые клетки и их соседи.
+        worldMapFogDirtyCells.Clear();
+        for (int index = 0; index < worldMapFogCellExplored.Length; index++)
+        {
+            bool explored = WorldMapFog.IsExplored(gameState, index);
+            if (explored == worldMapFogCellExplored[index])
                 continue;
-            }
+            worldMapFogCellExplored[index] = explored;
+            MarkWorldMapFogCellDirty(index);
             WorldMapHexCell cell = grid.CellAt(index);
-            bool border = false;
-            for (int direction = 0; direction < 6 && !border; direction++)
+            for (int direction = 0; direction < 6; direction++)
             {
                 WorldMapHexCell neighbor = cell.Neighbor(direction);
-                border = grid.IsInside(neighbor) && WorldMapFog.IsExplored(gameState, grid.IndexOf(neighbor));
+                if (grid.IsInside(neighbor))
+                    MarkWorldMapFogCellDirty(grid.IndexOf(neighbor));
             }
-            worldMapFogCellAlpha[index] = border ? edge : full;
         }
+        if (worldMapFogDirtyCells.Count == 0)
+            return;
 
-        Color32 rgb = fogColor;
-        for (int i = 0; i < worldMapFogPixels.Length; i++)
+        Unity.Collections.NativeArray<Color32> pixels = worldMapFogTexture.GetPixelData<Color32>(0);
+        bool changed = false;
+        foreach (int index in worldMapFogDirtyCells)
         {
-            int cell = worldMapFogPixelCells[i];
-            worldMapFogPixels[i] = new Color32(rgb.r, rgb.g, rgb.b, worldMapFogCellAlpha[cell]);
+            worldMapFogDirtyMark[index] = false;
+            byte alpha = WorldMapFogCellAlpha(grid, index, full, edge);
+            if (alpha == worldMapFogCellAlpha[index])
+                continue;
+            worldMapFogCellAlpha[index] = alpha;
+            Color32 color = new Color32(rgb.r, rgb.g, rgb.b, alpha);
+            for (int p = worldMapFogCellPixelStart[index]; p < worldMapFogCellPixelStart[index + 1]; p++)
+            {
+                int pixel = worldMapFogCellPixels[p];
+                worldMapFogPixels[pixel] = color;
+                pixels[pixel] = color;
+            }
+            changed = true;
         }
-        worldMapFogTexture.SetPixels32(worldMapFogPixels);
+        worldMapFogDirtyCells.Clear();
+        if (!changed)
+            return;
         worldMapFogTexture.Apply(false, false);
         worldMapFog.MarkDirtyRepaint();
+    }
+
+    private void MarkWorldMapFogCellDirty(int index)
+    {
+        if (worldMapFogDirtyMark[index])
+            return;
+        worldMapFogDirtyMark[index] = true;
+        worldMapFogDirtyCells.Add(index);
+    }
+
+    // Прозрачность тумана клетки: открыта — 0, у края открытого — светлее.
+    private byte WorldMapFogCellAlpha(WorldMapHexGrid grid, int index, byte full, byte edge)
+    {
+        if (worldMapFogCellExplored[index])
+            return 0;
+        WorldMapHexCell cell = grid.CellAt(index);
+        for (int direction = 0; direction < 6; direction++)
+        {
+            WorldMapHexCell neighbor = cell.Neighbor(direction);
+            if (grid.IsInside(neighbor) && worldMapFogCellExplored[grid.IndexOf(neighbor)])
+                return edge;
+        }
+        return full;
     }
 }

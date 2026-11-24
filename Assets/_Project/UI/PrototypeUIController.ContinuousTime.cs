@@ -24,6 +24,17 @@ public partial class PrototypeUIController
     private static readonly ProfilerMarker BatchStableMarker = new ProfilerMarker("KS.Batch.RefreshStableUi");
     private static readonly ProfilerMarker BatchTimeUiMarker = new ProfilerMarker("KS.Batch.RefreshTimeUi");
     private static readonly ProfilerMarker BatchNextModalMarker = new ProfilerMarker("KS.Batch.ShowNextModal");
+    // Покадровые части Update карты (замер WorldMapPerformancePlayModeTests).
+    private static readonly ProfilerMarker TickBuildingsMarker = new ProfilerMarker("KS.Tick.Buildings");
+    private static readonly ProfilerMarker TickGroupsMarker = new ProfilerMarker("KS.Tick.Groups");
+    private static readonly ProfilerMarker TickFeaturesMarker = new ProfilerMarker("KS.Tick.Features");
+    private static readonly ProfilerMarker TickQuestMarkersMarker = new ProfilerMarker("KS.Tick.QuestMarkers");
+    private static readonly ProfilerMarker TickLiveMarker = new ProfilerMarker("KS.Tick.LiveMap");
+    private static readonly ProfilerMarker TickFogMarker = new ProfilerMarker("KS.Tick.Fog");
+    private static readonly ProfilerMarker TickFogCloudsMarker = new ProfilerMarker("KS.Tick.FogClouds");
+    private static readonly ProfilerMarker TickClockMarker = new ProfilerMarker("KS.Tick.Clock");
+    private static readonly ProfilerMarker TickHeroMarker = new ProfilerMarker("KS.Tick.Hero");
+    private static readonly ProfilerMarker TickTimeUiMarker = new ProfilerMarker("KS.Tick.TimeUi");
 
     // 12И: без синхронизации с монитором (уровень качества Very Low) кадры
     // идут неровно, и карта за героем едет рывками. Синхронизация — на всю
@@ -173,18 +184,37 @@ public partial class PrototypeUIController
         TickLocalExploration(Time.unscaledDeltaTime);
         // 12Т: экран поселения — пока командир внутри и поверх ничего нет.
         TickSettlementScreen();
-        TickWorldMapBuildings();
-        TickWorldMapGroups();
-        TickWorldMapFeatures();
-        TickWorldMapQuestMarkers();
-        TickWorldMapLive();
+        using (TickBuildingsMarker.Auto())
+            TickWorldMapBuildings();
+        using (TickGroupsMarker.Auto())
+            TickWorldMapGroups();
         TickLoadingScreen();
         TickWorldMapSearchAreas();
-        TickWorldMapFog();
-        TickWorldMapFogClouds();
+        using (TickFogMarker.Auto())
+            TickWorldMapFog();
+        using (TickFogCloudsMarker.Auto())
+            TickWorldMapFogClouds();
         TickRewardToasts();
         TickEventDialogue();
 
+        TickContinuousTimeFrame();
+
+        // 24.11.2026: подписи, значки и рисунок живой карты — после шага
+        // времени, камеры и фигуры героя. Раньше карта рисовалась в начале
+        // кадра с прошлым положением камеры, а слои интерфейса над ней
+        // сдвигались уже в этом кадре — при следовании камеры они «плыли»
+        // относительно рисунка на кадр.
+        using (TickFeaturesMarker.Auto())
+            TickWorldMapFeatures();
+        using (TickQuestMarkersMarker.Auto())
+            TickWorldMapQuestMarkers();
+        using (TickLiveMarker.Auto())
+            TickWorldMapLive();
+    }
+
+    // Шаг времени мира, донесения, часы, камера и фигура героя.
+    private void TickContinuousTimeFrame()
+    {
         if (gameState == null)
             return;
 
@@ -228,14 +258,17 @@ public partial class PrototypeUIController
         HandleUserPauseHotkey();
         EnsureReportsDock();
         EnsureDeferredWorldMapUi();
-        RefreshContinuousClockOnly();
-        TickWorldMapHero(frameSeconds);
+        using (TickClockMarker.Auto())
+            RefreshContinuousClockOnly();
+        using (TickHeroMarker.Auto())
+            TickWorldMapHero(frameSeconds);
 
         continuousDetailsRefreshTimer += Time.unscaledDeltaTime;
         if (continuousDetailsRefreshTimer >= 0.20f)
         {
             continuousDetailsRefreshTimer = 0f;
-            RefreshContinuousTimeUi(true);
+            using (TickTimeUiMarker.Auto())
+                RefreshContinuousTimeUi(true);
         }
     }
 

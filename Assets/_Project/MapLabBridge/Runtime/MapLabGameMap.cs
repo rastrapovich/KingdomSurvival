@@ -190,6 +190,18 @@ namespace KingdomSurvival.MapLabBridge
                 foreach (GeneratedMapSite v in plan.Villages)
                     if (v != null)
                         b.Append(v.Cell).Append(':').Append(v.Size).Append(v.IsStart ? 's' : 'v').Append(';');
+            // 12Ф-2: линии рек и уступов (сторона и высота обрыва).
+            foreach (GeneratedMapLine r in plan.Rivers ?? new List<GeneratedMapLine>())
+                if (r?.Points != null)
+                    foreach (MapPointData p in r.Points)
+                        b.Append(p.XPercent.ToString("0.00")).Append(',').Append(p.YPercent.ToString("0.00")).Append(';');
+            foreach (GeneratedMapLedge l in plan.Ledges ?? new List<GeneratedMapLedge>())
+                if (l?.Points != null)
+                {
+                    b.Append('L').Append(l.UpperSide).Append(l.HeightScale.ToString("0.00"));
+                    foreach (MapPointData p in l.Points)
+                        b.Append(p.XPercent.ToString("0.00")).Append(',').Append(p.YPercent.ToString("0.00")).Append(';');
+                }
             return b.ToString();
         }
 

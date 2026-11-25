@@ -9,21 +9,23 @@ namespace KingdomSurvival.WorldMapVisual.Editor
     // автор сам собирает карту свободной игры. Холст-схема перерисовывается
     // на каждый мазок; рельеф, местность, деревни, лагерь и размер карты.
     // Данные — AuthoredWorldMapAsset; новая партия собирает карту из него.
-    public sealed class AuthoredWorldMapWindow : EditorWindow
+    public sealed partial class AuthoredWorldMapWindow : EditorWindow
     {
         private enum Tool
         {
             Relief,
+            Water,
             Terrain,
             Villages,
             Start,
             Size
         }
 
-        private static readonly string[] ToolTitles = { "⛰ Рельеф", "🌲 Местность", "🏠 Деревни", "⚑ Лагерь", "⬚ Размер" };
+        private static readonly string[] ToolTitles = { "⛰ Рельеф", "💧 Вода", "🌲 Местность", "🏠 Деревни", "⚑ Лагерь", "⬚ Размер" };
         private static readonly string[] ToolHints =
         {
-            "ЛКМ — поднять, Ctrl+ЛКМ — опустить (в режиме «Поднять»). Alt+клик — взять высоту для «Выровнять». [ ] — размер кисти.",
+            "ЛКМ — поднять, Ctrl+ЛКМ — опустить (в режиме «Поднять»). Alt+клик — взять высоту для «Выровнять». [ ] — размер кисти. Режим «Уступ» — обрыв линией по точкам.",
+            "Река: клики от истока к устью, Enter или ПКМ — закончить. Тянуть точку — двигать, клик по линии — вставить точку, Del — удалить реку. Озеро: клик в низину. Брод: клик по реке.",
             "ЛКМ — рисовать тип клетки или залить область. Alt+клик — взять тип с карты. [ ] — размер кисти.",
             "Клик по пустому месту — новая деревня. Клик по деревне — выбрать, тянуть — двигать, Del — удалить.",
             "Клик — поставить лагерь отряда: здесь начинается новая партия.",
@@ -167,8 +169,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 bool on = (int)tool == i;
                 if (GUILayout.Toggle(on, new GUIContent(ToolTitles[i], ToolHints[i] + "  Клавиша " + (i + 1) + "."), "Button", GUILayout.Height(30f)) && !on)
                 {
-                    tool = (Tool)i;
-                    selectedVillage = -1;
+                    SelectTool((Tool)i);
                 }
             }
             GUILayout.Space(8f);
@@ -183,6 +184,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             switch (tool)
             {
                 case Tool.Relief: DrawReliefInspector(); break;
+                case Tool.Water: DrawWaterInspector(); break;
                 case Tool.Terrain: DrawTerrainInspector(); break;
                 case Tool.Villages: DrawVillagesInspector(); break;
                 case Tool.Start: DrawStartInspector(); break;
@@ -204,6 +206,12 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
         private void DrawReliefInspector()
         {
+            reliefLedgeMode = GUILayout.Toolbar(reliefLedgeMode ? 1 : 0, new[] { "Кисть", "Уступ" }) == 1;
+            if (reliefLedgeMode)
+            {
+                DrawLedgeInspector();
+                return;
+            }
             Header("Кисть рельефа");
             heightBrush = (AuthoredWorldMapEditing.HeightBrush)GUILayout.SelectionGrid((int)heightBrush, HeightBrushTitles, 3);
             DrawBrushSliders(true);
@@ -376,7 +384,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             if (hoverCell >= 0 && hoverCell < Data.CellCount)
             {
                 WorldMapHexCell c = Data.Grid.CellAt(hoverCell);
-                WorldMapGameplayTerrainType effective = Data.EffectiveTerrain(hoverCell);
+                WorldMapGameplayTerrainType effective = (WorldMapGameplayTerrainType)Layout.Terrain[hoverCell];
                 GUILayout.Label($"Клетка {c.Column}:{c.Row}   высота {Data.HeightAt(hoverCell) * 100f:0}   {WorldMapTerrainLabels.Name(effective)}", EditorStyles.miniLabel);
             }
             GUILayout.FlexibleSpace();
@@ -406,6 +414,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             Rect local = new Rect(image.x - canvasRect.x, image.y - canvasRect.y, image.width, image.height);
             texture.filterMode = zoom * texture.width / Data.Columns > 14f ? FilterMode.Point : FilterMode.Bilinear;
             GUI.DrawTexture(local, texture, ScaleMode.StretchToFill, false);
+            DrawLines(local);
             DrawMarkers(local);
             DrawBrushCursor();
             GUI.EndClip();
@@ -510,7 +519,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
         private void DrawBrushCursor()
         {
-            if (tool != Tool.Relief && !(tool == Tool.Terrain && !fillMode))
+            if (!(tool == Tool.Relief && !reliefLedgeMode) && !(tool == Tool.Terrain && !fillMode))
                 return;
             Vector2 mouse = Event.current.mousePosition;
             if (!canvasRect.Contains(mouse) || texture == null)
@@ -577,6 +586,12 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 return;
             }
 
+            if (e.type == EventType.MouseDown && e.button == 1 && inside && IsLineTool)
+            {
+                FinishLine();
+                e.Use();
+                return;
+            }
             if (e.type == EventType.MouseDown && e.button == 0 && inside && ScreenToCanvas(mouse, out double px, out double py))
             {
                 GUIUtility.hotControl = control;
@@ -597,6 +612,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             if (dragging && e.rawType == EventType.MouseUp)
             {
                 dragging = false;
+                draggedPoint = -1;
+                draggingFord = false;
                 GUIUtility.hotControl = 0;
                 Undo.CollapseUndoOperations(strokeGroup);
                 e.Use();
@@ -616,11 +633,19 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 return;
             switch (e.keyCode)
             {
-                case KeyCode.Alpha1: tool = Tool.Relief; break;
-                case KeyCode.Alpha2: tool = Tool.Terrain; break;
-                case KeyCode.Alpha3: tool = Tool.Villages; break;
-                case KeyCode.Alpha4: tool = Tool.Start; break;
-                case KeyCode.Alpha5: tool = Tool.Size; break;
+                case KeyCode.Alpha1: SelectTool(Tool.Relief); break;
+                case KeyCode.Alpha2: SelectTool(Tool.Water); break;
+                case KeyCode.Alpha3: SelectTool(Tool.Terrain); break;
+                case KeyCode.Alpha4: SelectTool(Tool.Villages); break;
+                case KeyCode.Alpha5: SelectTool(Tool.Start); break;
+                case KeyCode.Alpha6: SelectTool(Tool.Size); break;
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                case KeyCode.Escape:
+                    if (!IsLineTool)
+                        return;
+                    FinishLine();
+                    break;
                 case KeyCode.LeftBracket: brushRadius = Mathf.Max(0.5f, brushRadius / 1.2f); break;
                 case KeyCode.RightBracket: brushRadius = Mathf.Min(20f, brushRadius * 1.2f); break;
                 case KeyCode.F: fitPending = true; break;
@@ -628,6 +653,15 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 case KeyCode.Backspace:
                     if (tool == Tool.Villages && selectedVillage >= 0)
                         DeleteSelectedVillage();
+                    else if (IsLineTool && HasSelectedLine)
+                    {
+                        if (e.keyCode == KeyCode.Backspace && drawingLine)
+                            RemoveLastPoint();
+                        else
+                            DeleteSelectedLine();
+                    }
+                    else if (tool == Tool.Water && waterMode == WaterMode.Ford && selectedFord >= 0)
+                        DeleteSelectedFord();
                     else
                         return;
                     break;
@@ -642,6 +676,16 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             WorldMapHexCell cell = Data.Grid.CellAtPixel(px, py);
             int index = Data.Grid.IndexOf(cell);
+            if (IsLineTool)
+            {
+                LinePointerDown(px, py, e);
+                return;
+            }
+            if (tool == Tool.Water)
+            {
+                WaterPointerDown(px, py, index, e);
+                return;
+            }
             switch (tool)
             {
                 case Tool.Relief:
@@ -699,6 +743,16 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         private void OnPointerDrag(double px, double py, Event e)
         {
             WorldMapHexCell cell = Data.Grid.CellAtPixel(px, py);
+            if (IsLineTool)
+            {
+                LinePointerDrag(px, py, e);
+                return;
+            }
+            if (tool == Tool.Water)
+            {
+                WaterPointerDrag(px, py);
+                return;
+            }
             switch (tool)
             {
                 case Tool.Relief:
@@ -783,7 +837,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 EditorUtility.SetDirty(asset);
             }
             textureDirty = true;
-            problems = AuthoredWorldMapValidation.Check(Data);
+            layout = AuthoredWorldMapLayout.Compute(Data);
+            problems = AuthoredWorldMapValidation.Check(Data, null, layout);
             Repaint();
         }
 
@@ -837,7 +892,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                     }
                 }
                 textureDirty = true;
-                problems = AuthoredWorldMapValidation.Check(Data);
+                layout = AuthoredWorldMapLayout.Compute(Data);
+                problems = AuthoredWorldMapValidation.Check(Data, null, layout);
             }
             if (!textureDirty)
                 return;
@@ -845,7 +901,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
             int count = g.CellCount;
             Color32[] cellColors = new Color32[count];
-            float[] h = Data.Heights;
+            float[] h = Layout.Heights;
             for (int i = 0; i < count; i++)
             {
                 WorldMapHexCell c = g.CellAt(i);
@@ -855,7 +911,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 float down = (HeightOr(g, h, c.Neighbor(4), h[i]) + HeightOr(g, h, c.Neighbor(5), h[i])) * 0.5f;
                 // Свет слева сверху: склон, поднимающийся вправо и вниз, освещён.
                 float shade = Mathf.Clamp(1f + ((right - left) + (down - up)) * 3.5f, 0.55f, 1.35f);
-                Color baseColor = TerrainColor(Data.EffectiveTerrain(i));
+                Color baseColor = TerrainColor((WorldMapGameplayTerrainType)Layout.Terrain[i]);
                 Color color = Color.Lerp(baseColor, new Color(0.95f, 0.93f, 0.86f), h[i] * 0.25f) * shade;
                 color.a = 1f;
                 cellColors[i] = color;

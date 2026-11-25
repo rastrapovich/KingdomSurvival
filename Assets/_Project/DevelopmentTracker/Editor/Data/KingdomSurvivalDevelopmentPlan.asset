@@ -10771,7 +10771,7 @@ MonoBehaviour:
       title: "12Ф-2 · Вода и уступы"
       details: "Реки линией с прорезкой русла и притоками, озёра до уровня, броды; уступ линией."
       category: 8
-      status: 0
+      status: 2
       required: 1
       order: 79
       priority: 0
@@ -10781,7 +10781,7 @@ MonoBehaviour:
       - PR12F-T01
       acceptanceCriteria:
       - text: "Река течёт под уклон, озеро с сухим берегом"
-        done: 0
+        done: 1
       manualChecks:
       - "Проверить в игре"
       fileReferences:

@@ -41,6 +41,10 @@ public sealed class AuthoredWorldMapData
     public int StartRow = 22;
     // Деревни (поселения): клетка, название автора, размер 1–3.
     public List<AuthoredVillage> Villages = new List<AuthoredVillage>();
+    // 12Ф-2: реки и уступы — линии по точкам автора (пиксели полотна), броды.
+    public List<AuthoredRiver> Rivers = new List<AuthoredRiver>();
+    public List<AuthoredLedge> Ledges = new List<AuthoredLedge>();
+    public List<AuthoredPoint> Fords = new List<AuthoredPoint>();
 
     [NonSerialized] private byte[] terrain;
     [NonSerialized] private float[] heights;
@@ -379,6 +383,14 @@ public static class AuthoredWorldMapEditing
             if (!newGrid.IsInside(new WorldMapHexCell(v.Column, v.Row)))
                 data.Villages.RemoveAt(i);
         }
+        // Линии и броды — в пикселях полотна: сдвиг на добавленные клетки.
+        float shiftX = (float)(addLeft * oldGrid.HexWidth);
+        float shiftY = (float)(addTop * oldGrid.RowStep);
+        foreach (AuthoredPoint p in AuthoredWorldMapLines.AllPoints(data))
+        {
+            p.X += shiftX;
+            p.Y += shiftY;
+        }
         data.Commit();
     }
 
@@ -405,15 +417,8 @@ public static class AuthoredWorldMapBuilder
         if (data == null)
             throw new ArgumentNullException(nameof(data));
         WorldMapHexGrid g = data.Grid;
-        byte[] effective = new byte[g.CellCount];
-        List<int> lakes = new List<int>();
-        for (int i = 0; i < effective.Length; i++)
-        {
-            WorldMapGameplayTerrainType type = data.EffectiveTerrain(i);
-            effective[i] = (byte)type;
-            if (type == WorldMapGameplayTerrainType.Water)
-                lakes.Add(i);
-        }
+        AuthoredWorldMapLayout layout = AuthoredWorldMapLayout.Compute(data);
+        byte[] effective = layout.Terrain;
 
         WorldMapHexCell start = new WorldMapHexCell(
             Math.Max(0, Math.Min(g.Columns - 1, data.StartColumn)),
@@ -428,12 +433,50 @@ public static class AuthoredWorldMapBuilder
             HexesAcross = AuthoredWorldMapData.ClampColumns(data.Columns),
             TerrainCells = new WorldMapTerrainLayer(g, effective).Encode(),
             Authored = true,
-            HeightCells = AuthoredWorldMapData.EncodeHeights(data.Heights),
-            LakeCells = lakes,
+            // Высоты — с прорезанными руслами рек.
+            HeightCells = AuthoredWorldMapData.EncodeHeights(layout.Heights),
+            LakeCells = new List<int>(layout.LakeCells),
+            RiverCells = new List<int>(layout.RiverOrder),
             StartXPercent = Clamp01To100(g.PixelToPercentX(sx)),
             StartYPercent = Clamp01To100(g.PixelToPercentY(sy))
         };
-        map.Elevation = (float[])data.Heights.Clone();
+        map.Elevation = (float[])layout.Heights.Clone();
+
+        // 12Ф-2: реки — сглаженная линия автора и клетки русла; ширина
+        // растёт от истока к устью.
+        for (int r = 0; r < layout.Rivers.Count; r++)
+        {
+            AuthoredWorldMapLayout.RiverInfo info = layout.Rivers[r];
+            map.Rivers.Add(new GeneratedMapLine
+            {
+                Kind = GeneratedMapLine.RiverKind,
+                StartWidthHexes = info.Source.StartWidth,
+                EndWidthHexes = info.Source.EndWidth,
+                Points = ToPercent(g, info.Smoothed),
+                Cells = new List<int>(info.Cells)
+            });
+        }
+        // Уступы: линия обрыва и клетки скал (без проходимых концов).
+        foreach (AuthoredWorldMapLayout.LedgeInfo info in layout.Ledges)
+        {
+            map.Ledges.Add(new GeneratedMapLedge
+            {
+                Points = ToPercent(g, info.Smoothed),
+                Cells = new List<int>(info.Cells),
+                UpperSide = info.Source.UpperLeft ? 1f : -1f,
+                HeightScale = Math.Max(0.3f, Math.Min(2.5f, info.Source.Height))
+            });
+        }
+        // Броды: пролёт «берег → берег» для навигации (мост не рисуется).
+        foreach (AuthoredWorldMapLayout.FordInfo ford in layout.Fords)
+        {
+            if (!ford.Ok)
+                continue;
+            g.CellCenter(g.CellAt(ford.Entry), out double ax, out double ay);
+            g.CellCenter(g.CellAt(ford.Exit), out double bx, out double by);
+            map.BridgeSpans.Add(new MapPointData(g.PixelToPercentX(ax), g.PixelToPercentY(ay)));
+            map.BridgeSpans.Add(new MapPointData(g.PixelToPercentX(bx), g.PixelToPercentY(by)));
+        }
 
         // Как у генератора: первая «деревня» — стоянка отряда (лагерь у
         // дороги, не поселение), затем поселения автора. Номера мест игры
@@ -475,6 +518,14 @@ public static class AuthoredWorldMapBuilder
     }
 
     private static float Clamp01To100(float value) => Math.Max(0f, Math.Min(100f, value));
+
+    private static List<MapPointData> ToPercent(WorldMapHexGrid g, List<AuthoredPoint> points)
+    {
+        List<MapPointData> result = new List<MapPointData>(points.Count);
+        foreach (AuthoredPoint p in points)
+            result.Add(new MapPointData(g.PixelToPercentX(p.X), g.PixelToPercentY(p.Y)));
+        return result;
+    }
 }
 
 // Живая проверка авторской карты (бриф §4.9): что помешает играть.
@@ -488,12 +539,13 @@ public static class AuthoredWorldMapValidation
         public int Row;
     }
 
-    public static List<Problem> Check(AuthoredWorldMapData data, WorldMapMovementRules rules = null)
+    public static List<Problem> Check(AuthoredWorldMapData data, WorldMapMovementRules rules = null, AuthoredWorldMapLayout layout = null)
     {
         rules ??= WorldMapMovementRules.Current;
-        List<Problem> problems = new List<Problem>();
         WorldMapHexGrid g = data.Grid;
-        bool Passable(int index) => rules.IsTraversable(data.EffectiveTerrain(index));
+        layout ??= AuthoredWorldMapLayout.Compute(data);
+        List<Problem> problems = new List<Problem>(layout.Problems);
+        bool Passable(int index) => rules.IsTraversable((WorldMapGameplayTerrainType)layout.Terrain[index]);
 
         WorldMapHexCell start = new WorldMapHexCell(data.StartColumn, data.StartRow);
         int startIndex = g.IsInside(start) ? g.IndexOf(start) : -1;

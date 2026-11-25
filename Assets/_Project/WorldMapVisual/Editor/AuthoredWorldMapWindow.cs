@@ -15,17 +15,19 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             Relief,
             Water,
+            Roads,
             Terrain,
             Villages,
             Start,
             Size
         }
 
-        private static readonly string[] ToolTitles = { "⛰ Рельеф", "💧 Вода", "🌲 Местность", "🏠 Деревни", "⚑ Лагерь", "⬚ Размер" };
+        private static readonly string[] ToolTitles = { "⛰ Рельеф", "💧 Вода", "═ Дороги", "🌲 Местность", "🏠 Деревни", "⚑ Лагерь", "⬚ Размер" };
         private static readonly string[] ToolHints =
         {
             "ЛКМ — поднять, Ctrl+ЛКМ — опустить (в режиме «Поднять»). Alt+клик — взять высоту для «Выровнять». [ ] — размер кисти. Режим «Уступ» — обрыв линией по точкам.",
             "Река: клики от истока к устью, Enter или ПКМ — закончить. Тянуть точку — двигать, клик по линии — вставить точку, Del — удалить реку. Озеро: клик в низину. Брод: клик по реке.",
+            "Клики — опорные точки, путь между ними прокладывается сам; концы прилипают к деревням, лагерю и дорогам. Enter или ПКМ — закончить, тянуть точку — двигать, Del — удалить.",
             "ЛКМ — рисовать тип клетки или залить область. Alt+клик — взять тип с карты. [ ] — размер кисти.",
             "Клик по пустому месту — новая деревня. Клик по деревне — выбрать, тянуть — двигать, Del — удалить.",
             "Клик — поставить лагерь отряда: здесь начинается новая партия.",
@@ -185,6 +187,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             {
                 case Tool.Relief: DrawReliefInspector(); break;
                 case Tool.Water: DrawWaterInspector(); break;
+                case Tool.Roads: DrawRoadsInspector(); break;
                 case Tool.Terrain: DrawTerrainInspector(); break;
                 case Tool.Villages: DrawVillagesInspector(); break;
                 case Tool.Start: DrawStartInspector(); break;
@@ -635,10 +638,11 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             {
                 case KeyCode.Alpha1: SelectTool(Tool.Relief); break;
                 case KeyCode.Alpha2: SelectTool(Tool.Water); break;
-                case KeyCode.Alpha3: SelectTool(Tool.Terrain); break;
-                case KeyCode.Alpha4: SelectTool(Tool.Villages); break;
-                case KeyCode.Alpha5: SelectTool(Tool.Start); break;
-                case KeyCode.Alpha6: SelectTool(Tool.Size); break;
+                case KeyCode.Alpha3: SelectTool(Tool.Roads); break;
+                case KeyCode.Alpha4: SelectTool(Tool.Terrain); break;
+                case KeyCode.Alpha5: SelectTool(Tool.Villages); break;
+                case KeyCode.Alpha6: SelectTool(Tool.Start); break;
+                case KeyCode.Alpha7: SelectTool(Tool.Size); break;
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
                 case KeyCode.Escape:

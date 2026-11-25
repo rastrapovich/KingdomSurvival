@@ -71,6 +71,12 @@ public static class AuthoredWorldMapLines
                     foreach (AuthoredPoint p in l.Points)
                         if (p != null)
                             yield return p;
+        if (data.Roads != null)
+            foreach (AuthoredRoad r in data.Roads)
+                if (r?.Points != null)
+                    foreach (AuthoredPoint p in r.Points)
+                        if (p != null)
+                            yield return p;
         if (data.Fords != null)
             foreach (AuthoredPoint p in data.Fords)
                 if (p != null)
@@ -266,7 +272,7 @@ public static class AuthoredWorldMapLines
 // Раскладка карты для игры и схемы: нарисованное автором + авто-холмы +
 // русла рек + скалы уступов + броды. Считается заново при каждой правке
 // (дёшево: линейно по клеткам и длине линий).
-public sealed class AuthoredWorldMapLayout
+public sealed partial class AuthoredWorldMapLayout
 {
     public sealed class RiverInfo
     {
@@ -317,6 +323,7 @@ public sealed class AuthoredWorldMapLayout
         layout.ComputeRivers(data, g);
         layout.ComputeLedges(data, g);
         layout.ComputeFords(data, g);
+        layout.ComputeRoads(data, g);
 
         for (int i = 0; i < count; i++)
             if (layout.Terrain[i] == (byte)WorldMapGameplayTerrainType.Water && !layout.RiverSet.Contains(i))

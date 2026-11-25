@@ -10798,7 +10798,7 @@ MonoBehaviour:
       title: "12Ф-3 · Дороги"
       details: "Автопрокладка по рельефу, прилипание и перекрёстки, мосты на пересечении с водой, «Соединить деревни», тропы к местам."
       category: 8
-      status: 0
+      status: 2
       required: 1
       order: 80
       priority: 0
@@ -10808,7 +10808,7 @@ MonoBehaviour:
       - PR12F-T01
       acceptanceCriteria:
       - text: "Три деревни соединены за несколько кликов, мост встал сам"
-        done: 0
+        done: 1
       manualChecks:
       - "Проверить в игре"
       fileReferences:

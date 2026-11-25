@@ -195,6 +195,14 @@ namespace KingdomSurvival.MapLabBridge
                 if (r?.Points != null)
                     foreach (MapPointData p in r.Points)
                         b.Append(p.XPercent.ToString("0.00")).Append(',').Append(p.YPercent.ToString("0.00")).Append(';');
+            // 12Ф-3: линии дорог.
+            foreach (GeneratedMapLine r in plan.Roads ?? new List<GeneratedMapLine>())
+                if (r?.Points != null)
+                {
+                    b.Append(r.Kind == GeneratedMapLine.TrailKind ? 'T' : 'R');
+                    foreach (MapPointData p in r.Points)
+                        b.Append(p.XPercent.ToString("0.00")).Append(',').Append(p.YPercent.ToString("0.00")).Append(';');
+                }
             foreach (GeneratedMapLedge l in plan.Ledges ?? new List<GeneratedMapLedge>())
                 if (l?.Points != null)
                 {

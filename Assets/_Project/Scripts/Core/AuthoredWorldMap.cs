@@ -45,6 +45,8 @@ public sealed class AuthoredWorldMapData
     public List<AuthoredRiver> Rivers = new List<AuthoredRiver>();
     public List<AuthoredLedge> Ledges = new List<AuthoredLedge>();
     public List<AuthoredPoint> Fords = new List<AuthoredPoint>();
+    // 12Ф-3: дороги и тропы — опорные точки, путь прокладывается сам.
+    public List<AuthoredRoad> Roads = new List<AuthoredRoad>();
 
     [NonSerialized] private byte[] terrain;
     [NonSerialized] private float[] heights;
@@ -466,6 +468,31 @@ public static class AuthoredWorldMapBuilder
                 UpperSide = info.Source.UpperLeft ? 1f : -1f,
                 HeightScale = Math.Max(0.3f, Math.Min(2.5f, info.Source.Height))
             });
+        }
+        // 12Ф-3: дороги и тропы — линия по клеткам пути; мосты — пролёт
+        // «берег → берег» для навигации и клетки моста для рисунка.
+        foreach (AuthoredWorldMapLayout.RoadInfo road in layout.Roads)
+        {
+            if (road.Cells.Count < 2)
+                continue;
+            map.Roads.Add(new GeneratedMapLine
+            {
+                Kind = road.Source.Trail ? GeneratedMapLine.TrailKind : GeneratedMapLine.RoadKind,
+                Points = ToPercent(g, road.Smoothed),
+                Cells = new List<int>(road.Cells)
+            });
+            foreach (AuthoredWorldMapLayout.CrossingInfo crossing in road.Crossings)
+            {
+                g.CellCenter(g.CellAt(crossing.Entry), out double ex, out double ey);
+                g.CellCenter(g.CellAt(crossing.Exit), out double xx, out double xy);
+                map.BridgeSpans.Add(new MapPointData(g.PixelToPercentX(ex), g.PixelToPercentY(ey)));
+                map.BridgeSpans.Add(new MapPointData(g.PixelToPercentX(xx), g.PixelToPercentY(xy)));
+                foreach (int w in crossing.Water)
+                {
+                    g.CellCenter(g.CellAt(w), out double wx, out double wy);
+                    map.Bridges.Add(new MapPointData(g.PixelToPercentX(wx), g.PixelToPercentY(wy)));
+                }
+            }
         }
         // Броды: пролёт «берег → берег» для навигации (мост не рисуется).
         foreach (AuthoredWorldMapLayout.FordInfo ford in layout.Fords)

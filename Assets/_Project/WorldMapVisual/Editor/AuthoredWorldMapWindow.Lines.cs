@@ -41,12 +41,34 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
         private bool IsRiverMode => tool == Tool.Water && waterMode == WaterMode.River;
         private bool IsLedgeMode => tool == Tool.Relief && reliefLedgeMode;
-        private bool IsLineTool => IsRiverMode || IsLedgeMode;
-        private int LineCount => IsRiverMode ? Data.Rivers.Count : IsLedgeMode ? Data.Ledges.Count : 0;
+        private bool IsRoadMode => tool == Tool.Roads;
+        private bool IsLineTool => IsRiverMode || IsLedgeMode || IsRoadMode;
+        private int LineCount => IsRiverMode ? Data.Rivers.Count : IsLedgeMode ? Data.Ledges.Count : IsRoadMode ? Data.Roads.Count : 0;
         private bool HasSelectedLine => selectedLine >= 0 && selectedLine < LineCount;
 
         private List<AuthoredPoint> LinePoints(int index) =>
-            IsRiverMode ? Data.Rivers[index].Points : Data.Ledges[index].Points;
+            IsRiverMode ? Data.Rivers[index].Points : IsRoadMode ? Data.Roads[index].Points : Data.Ledges[index].Points;
+
+        private void RemoveLine(int index)
+        {
+            if (IsRiverMode)
+                Data.Rivers.RemoveAt(index);
+            else if (IsRoadMode)
+                Data.Roads.RemoveAt(index);
+            else
+                Data.Ledges.RemoveAt(index);
+        }
+
+        private string LineWord => IsRiverMode ? "реки" : IsRoadMode ? "дороги" : "уступа";
+
+        // Прилипание точки к своему: река — к реке, дорога — к деревне, лагерю, дороге.
+        private void SnapPoint(int except, ref double px, ref double py)
+        {
+            if (IsRiverMode)
+                AuthoredWorldMapLines.SnapToRiver(Data, except, ref px, ref py);
+            else if (IsRoadMode && roadSnap)
+                AuthoredWorldMapRoads.Snap(Data, Layout, except, roadSnapHexes, ref px, ref py);
+        }
 
         private void SelectTool(Tool next)
         {
@@ -96,9 +118,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             // 2. Рисуется линия — следующая точка.
             if (drawingLine && HasSelectedLine)
             {
-                Undo.RecordObject(asset, IsRiverMode ? "Редактор карты: точка реки" : "Редактор карты: точка уступа");
-                if (IsRiverMode)
-                    AuthoredWorldMapLines.SnapToRiver(Data, selectedLine, ref px, ref py);
+                Undo.RecordObject(asset, "Редактор карты: точка " + LineWord);
+                SnapPoint(selectedLine, ref px, ref py);
                 LinePoints(selectedLine).Add(new AuthoredPoint(px, py));
                 draggedPoint = LinePoints(selectedLine).Count - 1;
                 MarkChanged(true);
@@ -129,12 +150,18 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             }
 
             // 4. Пусто — новая линия.
-            Undo.RecordObject(asset, IsRiverMode ? "Редактор карты: новая река" : "Редактор карты: новый уступ");
+            Undo.RecordObject(asset, "Редактор карты: новая линия " + LineWord);
+            SnapPoint(-1, ref px, ref py);
             if (IsRiverMode)
-            {
-                AuthoredWorldMapLines.SnapToRiver(Data, -1, ref px, ref py);
                 Data.Rivers.Add(new AuthoredRiver { Points = new List<AuthoredPoint> { new AuthoredPoint(px, py) } });
-            }
+            else if (IsRoadMode)
+                Data.Roads.Add(new AuthoredRoad
+                {
+                    Points = new List<AuthoredPoint> { new AuthoredPoint(px, py) },
+                    Trail = newRoadTrail,
+                    Straightness = newRoadStraightness,
+                    AvoidWater = newRoadAvoidWater
+                });
             else
                 Data.Ledges.Add(new AuthoredLedge { Points = new List<AuthoredPoint> { new AuthoredPoint(px, py) } });
             selectedLine = LineCount - 1;
@@ -151,8 +178,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             if (draggedPoint >= points.Count)
                 return;
             bool end = draggedPoint == 0 || draggedPoint == points.Count - 1;
-            if (IsRiverMode && end)
-                AuthoredWorldMapLines.SnapToRiver(Data, selectedLine, ref px, ref py);
+            if (end)
+                SnapPoint(selectedLine, ref px, ref py);
             Undo.RecordObject(asset, "Редактор карты: точка");
             points[draggedPoint].X = (float)px;
             points[draggedPoint].Y = (float)py;
@@ -169,10 +196,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             if (LinePoints(selectedLine).Count < 2)
             {
                 Undo.RecordObject(asset, "Редактор карты: убрать незаконченную линию");
-                if (IsRiverMode)
-                    Data.Rivers.RemoveAt(selectedLine);
-                else
-                    Data.Ledges.RemoveAt(selectedLine);
+                RemoveLine(selectedLine);
                 selectedLine = -1;
                 MarkChanged(true);
             }
@@ -190,10 +214,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             if (points.Count == 0)
             {
                 drawingLine = false;
-                if (IsRiverMode)
-                    Data.Rivers.RemoveAt(selectedLine);
-                else
-                    Data.Ledges.RemoveAt(selectedLine);
+                RemoveLine(selectedLine);
                 selectedLine = -1;
             }
             MarkChanged(true);
@@ -203,11 +224,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             if (!HasSelectedLine)
                 return;
-            Undo.RecordObject(asset, IsRiverMode ? "Редактор карты: удалить реку" : "Редактор карты: удалить уступ");
-            if (IsRiverMode)
-                Data.Rivers.RemoveAt(selectedLine);
-            else
-                Data.Ledges.RemoveAt(selectedLine);
+            Undo.RecordObject(asset, "Редактор карты: удалить линию " + LineWord);
+            RemoveLine(selectedLine);
             selectedLine = -1;
             drawingLine = false;
             MarkChanged(true);
@@ -453,6 +471,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
             for (int i = 0; i < l.Rivers.Count; i++)
                 DrawPolyline(local, g, l.Rivers[i].Smoothed, Mathf.Max(1.5f, hexPx * 0.12f), new Color(0.12f, 0.3f, 0.55f, 0.9f));
+
+            DrawRoads(local);
 
             foreach (AuthoredWorldMapLayout.LedgeInfo info in l.Ledges)
             {

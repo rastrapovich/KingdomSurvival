@@ -448,7 +448,7 @@ namespace KingdomSurvival.MapLab.Editor
                 });
             using (new EditorGUI.DisabledScope(MapLabPlanSource.ApplyToGame == null))
             {
-                if (GUILayout.Button(new GUIContent("Применить к новой партии", "Записать эти настройки в генератор игры и профиль рисунка игры: новая партия (меню игры → Новая игра) будет такой же картой по виду и устройству; seed у партии свой. Текущая партия не меняется."), GUILayout.Height(26)))
+                if (GUILayout.Button(new GUIContent("Применить облик к игре", "Записать облик (профиль рисунка) и настройки генератора в игру. Географию новой партии теперь задаёт «Редактор карты» (канон v1.71): генератор её больше не строит. Текущая партия не меняется."), GUILayout.Height(26)))
                     Guard(() =>
                     {
                         MapLabAuthor.ApplyStructure(s);

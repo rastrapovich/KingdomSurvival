@@ -61,7 +61,8 @@ public static class GeneratedMapPlaces
             templates.Add(new WorldMapLocationTemplateData
             {
                 Id = id,
-                Name = "Деревня",
+                // 12Ф: у деревни авторской карты — название автора.
+                Name = string.IsNullOrWhiteSpace(village.Name) ? "Деревня" : village.Name,
                 InteractionDescription = "Несколько срубов за плетнём, над крышами стелется дым.",
                 Threat = "низкая",
                 ExplorationHours = 0.0,

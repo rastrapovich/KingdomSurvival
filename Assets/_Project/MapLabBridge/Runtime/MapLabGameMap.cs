@@ -175,10 +175,22 @@ namespace KingdomSurvival.MapLabBridge
         {
             string print = plan.Passport != null ? plan.Passport.Fingerprint : string.Empty;
             uint hash = 2166136261;
-            foreach (char c in plan.TerrainCells + "|" + print + "|" + plan.HexesAcross)
+            // 12Ф: у авторской карты в ключ входят высоты, полотно и деревни.
+            string authored = plan.Authored ? "|" + plan.HeightCells + "|" + plan.CanvasHeight + "|" + VillagesKey(plan) : string.Empty;
+            foreach (char c in plan.TerrainCells + "|" + print + "|" + plan.HexesAcross + authored)
                 hash = (hash ^ c) * 16777619;
             // r — версия рисунка снимка (палитра, покраска): старый кэш не показывается.
             return $"s{plan.Seed}_h{hash:x8}_a{MapLabData.AlgorithmVersion}_r3_t{assets.TexelsPerUnit:0.#}_p{assets.PitchDegrees:0}";
+        }
+
+        private static string VillagesKey(GeneratedWorldMap plan)
+        {
+            System.Text.StringBuilder b = new System.Text.StringBuilder();
+            if (plan.Villages != null)
+                foreach (GeneratedMapSite v in plan.Villages)
+                    if (v != null)
+                        b.Append(v.Cell).Append(':').Append(v.Size).Append(v.IsStart ? 's' : 'v').Append(';');
+            return b.ToString();
         }
 
         private static string CacheFolder => Path.Combine(Application.persistentDataPath, "MapLabMapCache");

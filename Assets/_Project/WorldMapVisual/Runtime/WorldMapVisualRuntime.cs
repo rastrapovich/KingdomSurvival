@@ -30,6 +30,35 @@ namespace KingdomSurvival.WorldMapVisual
             return database != null ? database.Generator : null;
         }
 
+        // 12Ф: авторская карта свободной игры (Редактор карты).
+        public static AuthoredWorldMapAsset LoadAuthoredMap() =>
+            Resources.Load<AuthoredWorldMapAsset>(AuthoredWorldMapAsset.ResourcesPath);
+
+        // Карта новой партии: всегда авторская. Нет ассета — ровная открытая
+        // равнина по умолчанию (не откат к генератору).
+        public static GeneratedWorldMap BuildFreePlayMap(int seed)
+        {
+            AuthoredWorldMapAsset asset = LoadAuthoredMap();
+            AuthoredWorldMapData data = asset != null ? asset.Data : AuthoredWorldMapData.CreateDefault();
+            return AuthoredWorldMapBuilder.Build(data, seed);
+        }
+
+        // «▶ Играть на этой карте» (Редактор карты): флаг переживает
+        // перезагрузку домена при входе в Play Mode и снимается при чтении.
+        public const string EditorQuickStartKey = "KingdomSurvival.AuthoredMap.QuickStart";
+
+        public static bool ConsumeEditorQuickStart()
+        {
+#if UNITY_EDITOR
+            if (!UnityEditor.SessionState.GetBool(EditorQuickStartKey, false))
+                return false;
+            UnityEditor.SessionState.EraseBool(EditorQuickStartKey);
+            return true;
+#else
+            return false;
+#endif
+        }
+
         public static WorldMapVisualTheme LoadActiveTheme()
         {
             WorldMapDatabaseAsset database = LoadDatabase();

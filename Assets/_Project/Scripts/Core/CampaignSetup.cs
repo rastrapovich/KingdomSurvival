@@ -181,7 +181,7 @@ public sealed class CampaignSetup
 {
     public string CommanderProfileId = CampaignStartOptions.PlaceholderCommanderId;
     public int? WorldSeed;
-    // Клеток по ширине генерируемой карты (CampaignStartOptions.MapSizes).
+    // Клеток по ширине карты партии (12Ф: берётся из авторской карты).
     public int MapHexesAcross = CampaignStartOptions.DefaultMapHexesAcross;
     // Основные параметры карты (местность, рельеф, вода, лес, деревни, места, враги).
     public CampaignMapOptions MapOptions = new CampaignMapOptions();
@@ -194,9 +194,10 @@ public sealed class CampaignSetup
             reason = "неизвестный командир '" + CommanderProfileId + "'";
             return false;
         }
-        if (CampaignStartOptions.FindMapSize(MapHexesAcross) == null)
+        // 12Ф: размер задаёт авторская карта (любой в пределах сетки).
+        if (MapHexesAcross < WorldMapHexGrid.MinHexesAcross || MapHexesAcross > WorldMapHexGrid.MaxHexesAcross)
         {
-            reason = "неизвестный размер карты " + MapHexesAcross;
+            reason = "недопустимый размер карты " + MapHexesAcross;
             return false;
         }
         return true;

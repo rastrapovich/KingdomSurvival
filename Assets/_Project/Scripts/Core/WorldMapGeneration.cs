@@ -663,10 +663,29 @@ public sealed class GeneratedWorldMap
     public float StartXPercent = WorldMapNavigation.CapitalXPercent;
     public float StartYPercent = WorldMapNavigation.CapitalYPercent;
 
+    // 12Ф: карта собрана автором в «Редакторе карты» (не генератором).
+    // Высоты клеток автора (AuthoredWorldMapData.EncodeHeights) хранятся в
+    // партии: по ним рисуется рельеф MapLab.
+    public bool Authored;
+    public string HeightCells = string.Empty;
+
     // Только для показа в редакторе (карта высот и влажности); в сохранение
-    // не попадают — игре они не нужны.
+    // не попадают — игре они не нужны. У авторской карты Elevation
+    // восстанавливается из HeightCells (AuthoredElevation).
     [NonSerialized] public float[] Elevation;
     [NonSerialized] public float[] Moisture;
+
+    public bool HasAuthoredHeights => Authored && !string.IsNullOrEmpty(HeightCells);
+
+    public float[] AuthoredElevation()
+    {
+        if (!HasAuthoredHeights)
+            return null;
+        int count = CreateGrid().CellCount;
+        if (Elevation == null || Elevation.Length != count)
+            Elevation = AuthoredWorldMapData.DecodeHeights(HeightCells, count);
+        return Elevation;
+    }
 
     public bool IsValid => Version > 0 && CanvasWidth > 1f && CanvasHeight > 1f && HexesAcross > 0;
 

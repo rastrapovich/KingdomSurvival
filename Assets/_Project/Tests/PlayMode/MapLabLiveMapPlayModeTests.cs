@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using KingdomSurvival.MapLabBridge;
+using KingdomSurvival.WorldMapVisual;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -96,10 +97,10 @@ public sealed class MapLabLiveMapPlayModeTests
         yield return Frames(30);
     }
 
-    // 12У-H: экран «Новая игра» — восемь параметров карты; очень большая
-    // карта с «много врагов» создаётся, живая карта строится за экраном загрузки.
+    // 12Ф (канон v1.71 §9.9.1): на экране «Новая игра» параметров карты нет;
+    // партия начинается на авторской карте, живая карта строится за экраном загрузки.
     [UnityTest]
-    public IEnumerator NewGameScreen_EightMapOptions_HugeMapBuilds()
+    public IEnumerator NewGameScreen_NoMapOptions_AuthoredMapBuilds()
     {
         SceneManager.LoadScene(MainScene);
         for (int i = 0; i < 600 && SceneManager.GetActiveScene().name != MainScene; i++)
@@ -109,14 +110,8 @@ public sealed class MapLabLiveMapPlayModeTests
         VisualElement root = main.GetComponent<UIDocument>().rootVisualElement;
         Invoke(main, "OnMainMenuNewGameClicked");
         yield return Frames(5);
-        Assert.IsNotNull(root.Q("new-game-map-size-row"), "Строка размера карты.");
-        Assert.AreEqual(4, root.Q("new-game-map-size-row").childCount, "Четыре размера.");
-        VisualElement options = root.Q("new-game-map-options");
-        Assert.IsNotNull(options);
-        Assert.AreEqual(7, options.childCount, "Ещё семь строк: местность, рельеф, вода, лес, деревни, тайны, враги.");
-        Invoke(main, "SelectNewGameMapSize", CampaignStartOptions.HugeMapHexesAcross);
-        Invoke(main, "SelectNewGameMapOption", "enemies", CampaignMapOptions.High);
-        Invoke(main, "SelectNewGameMapOption", "region", (int)WorldMapRegionKind.RiverValley);
+        Assert.IsNull(root.Q("new-game-map-size-row"), "Выбора размера карты нет.");
+        Assert.IsNull(root.Q("new-game-map-options"), "Параметров карты нет.");
         yield return Frames(5);
         yield return Capture(main, "ng_01_new_game");
         Invoke(main, "OnNewGameStartClicked");
@@ -129,16 +124,15 @@ public sealed class MapLabLiveMapPlayModeTests
         }
         GameState campaign = CampaignSession.Current;
         Assert.IsNotNull(campaign);
-        Assert.AreEqual(CampaignStartOptions.HugeMapHexesAcross, campaign.GeneratedMap.HexesAcross, "Очень большая карта.");
-        Assert.AreEqual(CampaignMapOptions.High, campaign.Configuration.MapOptions.Enemies);
-        Assert.AreEqual(WorldMapRegionKind.RiverValley, campaign.Configuration.MapOptions.RegionKind);
+        Assert.IsTrue(campaign.GeneratedMap.Authored, "Карта партии — авторская.");
+        Assert.AreEqual(WorldMapVisualRuntime.LoadAuthoredMap().Data.Columns, campaign.GeneratedMap.HexesAcross);
         Assert.IsTrue(loading, "Был экран загрузки.");
         Assert.IsNotNull(MapLabGameLive.Current);
-        Assert.IsTrue(MapLabGameLive.Current.Ready, "Живая карта очень большой партии построена: " + MapLabGameLive.Current.Error);
-        Debug.Log($"MapLab live: очень большая карта ({campaign.GeneratedMap.HexesAcross} клеток) построена за {MapLabGameLive.Current.BuildMs / 1000.0:0.0} с, деревень {campaign.GeneratedMap.Villages.Count}, групп {campaign.GeneratedMap.Actors.Count}");
+        Assert.IsTrue(MapLabGameLive.Current.Ready, "Живая карта авторской партии построена: " + MapLabGameLive.Current.Error);
+        Debug.Log($"MapLab live: авторская карта ({campaign.GeneratedMap.HexesAcross} клеток) построена за {MapLabGameLive.Current.BuildMs / 1000.0:0.0} с, деревень {campaign.GeneratedMap.Villages.Count}, групп {campaign.GeneratedMap.Actors.Count}");
         yield return Frames(60);
         Assert.IsFalse(Get<bool>(main, "IsLoadingScreenOpen"));
-        yield return Capture(main, "ng_02_huge_map");
+        yield return Capture(main, "ng_02_authored_map");
     }
 
     // Настоящая дорога: клик по каждому зданию услуги из лагеря — отряд идёт

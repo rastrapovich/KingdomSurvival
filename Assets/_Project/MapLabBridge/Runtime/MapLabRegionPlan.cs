@@ -133,6 +133,21 @@ namespace KingdomSurvival.MapLabBridge
                 }
             }
 
+            // 12Ф: у авторской карты рельеф — высоты клеток автора, сглаженные
+            // между соседними клетками (без ступенек по гексам). Холмы-капли
+            // по типам клеток тогда не нужны.
+            float[] authored = plan.AuthoredElevation();
+            if (authored != null)
+            {
+                c.PlanHeight = new float[cols * rows];
+                for (int z = 0; z < rows; z++)
+                    for (int x = 0; x < cols; x++)
+                    {
+                        float xp = x / (float)(cols - 1) * 100f, yp = (1f - z / (float)(rows - 1)) * 100f;
+                        c.PlanHeight[z * cols + x] = SmoothHeight(grid, authored, grid.PercentToPixelX(xp), grid.PercentToPixelY(yp)) * AuthoredHeightScale;
+                    }
+            }
+
             // Холмы и горы: по клетке — пологий холм; соседние сливаются в гряду.
             // Широкие и низкие: иначе каждая клетка — крутой бугорок, и уклон
             // красится камнем посреди луга (серые пятна); горы остаются круче.
@@ -149,7 +164,7 @@ namespace KingdomSurvival.MapLabBridge
             {
                 WorldMapGameplayTerrainType t = terrain.Get(grid.CellAt(i));
                 bool strayCliff = t == WorldMapGameplayTerrainType.Cliffs && !ledgeCells.Contains(i);
-                if (t != WorldMapGameplayTerrainType.Hills && t != WorldMapGameplayTerrainType.Mountains && !strayCliff)
+                if (authored != null || t != WorldMapGameplayTerrainType.Hills && t != WorldMapGameplayTerrainType.Mountains && !strayCliff)
                     continue;
                 grid.CellCenter(grid.CellAt(i), out double px, out double py);
                 Vector2 w = m.ToWorld(grid.PixelToPercentX(px), (float)(py / grid.CanvasHeight * 100.0));
@@ -336,6 +351,33 @@ namespace KingdomSurvival.MapLabBridge
                 foreach (GeneratedMapSite site in plan.WorkSites)
                     c.Reserved.Add(new MapLabComposition.Zone { Center = m.ToWorld(site.XPercent, site.YPercent), Radius = hexWorld * 0.6f, Strength = 1f });
             return c;
+        }
+
+        // Высота 1 авторской карты — доля полного размаха рельефа MapLab.
+        public const float AuthoredHeightScale = 0.9f;
+
+        // Высота в точке полотна: клетка под точкой и шесть соседей с
+        // гауссовым весом по расстоянию до их центров.
+        public static float SmoothHeight(WorldMapHexGrid grid, float[] heights, double px, double py)
+        {
+            WorldMapHexCell center = grid.CellAtPixel(px, py);
+            double sigma = grid.HexWidth * 0.6;
+            double sum = 0.0, weight = 0.0;
+            for (int dir = -1; dir < 6; dir++)
+            {
+                WorldMapHexCell cell = dir < 0 ? center : center.Neighbor(dir);
+                if (!grid.IsInside(cell))
+                    continue;
+                int index = grid.IndexOf(cell);
+                if (index < 0 || index >= heights.Length)
+                    continue;
+                grid.CellCenter(cell, out double cx, out double cy);
+                double d2 = (cx - px) * (cx - px) + (cy - py) * (cy - py);
+                double w = System.Math.Exp(-d2 / (2.0 * sigma * sigma));
+                sum += heights[index] * w;
+                weight += w;
+            }
+            return weight > 0.0 ? (float)(sum / weight) : 0f;
         }
     }
 }

@@ -265,14 +265,12 @@ public partial class PrototypeUIController : MonoBehaviour
         WorldMapVisualRuntime.ApplyMovementRules();
         WorldMapDatabaseAsset mapDatabase = WorldMapVisualRuntime.LoadDatabase();
 
-        // Канон v1.58 §9.9: свободная игра получает свою карту из генератора.
-        GeneratedWorldMap generatedMap = null;
-        WorldMapGeneratorAsset generator = WorldMapVisualRuntime.LoadGenerator();
-        if (generator != null && generator.UseForFreePlay)
-        {
-            setup.WorldSeed ??= Guid.NewGuid().GetHashCode();
-            generatedMap = generator.Generate(setup.WorldSeed.Value, setup.MapHexesAcross, setup.MapOptions);
-        }
+        // Канон v1.71 §9.9.1 (12Ф): карта свободной игры — авторская, из
+        // «Редактора карты». Seed партии остаётся для наполнения (население,
+        // встречи), географию он не меняет.
+        setup.WorldSeed ??= Guid.NewGuid().GetHashCode();
+        GeneratedWorldMap generatedMap = WorldMapVisualRuntime.BuildFreePlayMap(setup.WorldSeed.Value);
+        setup.MapHexesAcross = generatedMap.HexesAcross;
 
         GameState created = setup.CreateCampaign(
             mapDatabase != null

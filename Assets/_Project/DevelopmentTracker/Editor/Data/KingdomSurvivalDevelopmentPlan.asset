@@ -10737,6 +10737,225 @@ MonoBehaviour:
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
+    - id: PR12F-T01
+      title: "12Ф-1 · Редактор карты: окно, рельеф, местность, деревни, лагерь, размер"
+      details: "Окно Kingdom Survival → Редактор карты; новая партия начинается на авторской карте, генератор географию не строит; экран «Новая игра» без параметров карты."
+      category: 8
+      status: 2
+      required: 1
+      order: 78
+      priority: 0
+      verificationType: 3
+      blockerReason: 0
+      dependencies: []
+      acceptanceCriteria:
+      - text: "Новая партия — на авторской карте (EditMode AuthoredWorldMapTests, PlayMode NewGameScreen_NoMapOptions_AuthoredMapBuilds)"
+        done: 1
+      - text: "Кисти, заливка, размер с краёв, сборка и сохранение высот (EditMode)"
+        done: 1
+      - text: "Окно проверено руками в Editor"
+        done: 0
+      manualChecks:
+      - "Проверить в игре"
+      fileReferences:
+      - ProjectDocs/WORLD_MAP_EDITOR_BRIEF_RU.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12F-T02
+      title: "12Ф-2 · Вода и уступы"
+      details: "Реки линией с прорезкой русла и притоками, озёра до уровня, броды; уступ линией."
+      category: 8
+      status: 0
+      required: 1
+      order: 79
+      priority: 0
+      verificationType: 3
+      blockerReason: 0
+      dependencies: 
+      - PR12F-T01
+      acceptanceCriteria:
+      - text: "Река течёт под уклон, озеро с сухим берегом"
+        done: 0
+      manualChecks:
+      - "Проверить в игре"
+      fileReferences:
+      - ProjectDocs/WORLD_MAP_EDITOR_BRIEF_RU.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12F-T03
+      title: "12Ф-3 · Дороги"
+      details: "Автопрокладка по рельефу, прилипание и перекрёстки, мосты на пересечении с водой, «Соединить деревни», тропы к местам."
+      category: 8
+      status: 0
+      required: 1
+      order: 80
+      priority: 0
+      verificationType: 3
+      blockerReason: 0
+      dependencies: 
+      - PR12F-T01
+      acceptanceCriteria:
+      - text: "Три деревни соединены за несколько кликов, мост встал сам"
+        done: 0
+      manualChecks:
+      - "Проверить в игре"
+      fileReferences:
+      - ProjectDocs/WORLD_MAP_EDITOR_BRIEF_RU.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12F-T04
+      title: "12Ф-4 · Зоны, лес и поселения"
+      details: "Именованные зоны, лес с опушкой, поля; профиль поселения из Базы поселений, планировка."
+      category: 8
+      status: 0
+      required: 1
+      order: 81
+      priority: 0
+      verificationType: 3
+      blockerReason: 0
+      dependencies: 
+      - PR12F-T01
+      acceptanceCriteria:
+      - text: "Лес с опушкой в рисунке MapLab, деревня с услугами в игре"
+        done: 0
+      manualChecks:
+      - "Проверить в игре"
+      fileReferences:
+      - ProjectDocs/WORLD_MAP_EDITOR_BRIEF_RU.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12F-T05
+      title: "12Ф-5 · Места, детали и ассеты"
+      details: "Палитра из баз, перетаскивание на карту, кисть раскидки."
+      category: 8
+      status: 0
+      required: 1
+      order: 82
+      priority: 0
+      verificationType: 3
+      blockerReason: 0
+      dependencies: 
+      - PR12F-T01
+      acceptanceCriteria:
+      - text: "Старая шахта открывается со своим экраном"
+        done: 0
+      manualChecks:
+      - "Проверить в игре"
+      fileReferences:
+      - ProjectDocs/WORLD_MAP_EDITOR_BRIEF_RU.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12F-T06
+      title: "12Ф-6 · Истории и группы мира"
+      details: "Якоря для квестов Мастерской, пулы встреч по зонам, лагеря и маршруты групп; генератор — для наполнения поверх авторской карты."
+      category: 8
+      status: 0
+      required: 1
+      order: 83
+      priority: 0
+      verificationType: 3
+      blockerReason: 0
+      dependencies: 
+      - PR12F-T01
+      acceptanceCriteria:
+      - text: "Тайник пилота встаёт на якорь автора"
+        done: 0
+      manualChecks:
+      - "Проверить в игре"
+      fileReferences:
+      - ProjectDocs/WORLD_MAP_EDITOR_BRIEF_RU.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12F-T07
+      title: "12Ф-7 · Проверка и перенос"
+      details: "Полная живая проверка, слой времени пути, перенос облика и «Времени и движения» из «Генератора карты», документы."
+      category: 8
+      status: 0
+      required: 1
+      order: 84
+      priority: 0
+      verificationType: 3
+      blockerReason: 0
+      dependencies: 
+      - PR12F-T01
+      acceptanceCriteria:
+      - text: "Критерии брифа §1 выполнены автором"
+        done: 0
+      manualChecks:
+      - "Проверить в игре"
+      fileReferences:
+      - ProjectDocs/WORLD_MAP_EDITOR_BRIEF_RU.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12F-T08
+      title: "12Ф-8 · Живой рисунок без задержки"
+      details: "Живописный рисунок MapLab сразу после правки: частичная перестройка по изменённой области."
+      category: 8
+      status: 0
+      required: 1
+      order: 85
+      priority: 0
+      verificationType: 3
+      blockerReason: 0
+      dependencies: 
+      - PR12F-T01
+      acceptanceCriteria:
+      - text: "Мазок виден в рисунке без задержки"
+        done: 0
+      manualChecks:
+      - "Проверить в игре"
+      fileReferences:
+      - ProjectDocs/WORLD_MAP_EDITOR_BRIEF_RU.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
   - id: PR15_HOME_WATER
     title: "\u041F\u0420-15. \xAB\u0414\u043E\u043C \u043D\u0430 \u0447\u0443\u0436\u043E\u0439
       \u0432\u043E\u0434\u0435\xBB \u043D\u0430 \u043E\u0431\u0449\u0435\u0439 \u043E\u0441\u043D\u043E\u0432\u0435"

@@ -1,4 +1,5 @@
 using System;
+using KingdomSurvival.WorldMapVisual;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
@@ -128,6 +129,12 @@ public partial class PrototypeUIController
 
         gameState = null;
         CloseMainScreen();
+        // 12Ф: «▶ Играть на этой карте» в Редакторе карты — сразу новая партия.
+        if (WorldMapVisualRuntime.ConsumeEditorQuickStart())
+        {
+            StartNewGame();
+            return;
+        }
         ShowMainMenu();
     }
 
@@ -274,183 +281,10 @@ public partial class PrototypeUIController
         if (newGameStartButton != null)
             newGameStartButton.clicked += OnNewGameStartClicked;
         BindMenuButton("new-game-back-button", CloseNewGameSummary);
-        BuildNewGameMapSizeChoice();
     }
 
-    private readonly System.Collections.Generic.List<(MapSizeOption Option, Button Button)> newGameMapSizeButtons =
-        new System.Collections.Generic.List<(MapSizeOption, Button)>();
-    private Label newGameMapSizeSummary;
-
-    // Размер карты свободной игры — перед «Начальными условиями».
-    private void BuildNewGameMapSizeChoice()
-    {
-        Label startTitle = newGameOverlay?.Q<Label>("new-game-start-title");
-        VisualElement panel = startTitle?.parent;
-        if (panel == null || newGameMapSizeButtons.Count > 0)
-            return;
-        int index = Mathf.Max(0, panel.IndexOf(startTitle) - 1);
-
-        Label section = new Label("КАРТА");
-        section.AddToClassList("new-game-section");
-        VisualElement row = new VisualElement { name = "new-game-map-size-row" };
-        row.style.flexDirection = FlexDirection.Row;
-        foreach (MapSizeOption option in CampaignStartOptions.MapSizes)
-        {
-            MapSizeOption captured = option;
-            Button button = new Button(() => SelectNewGameMapSize(captured.HexesAcross)) { text = option.Title + " · " + option.HexesAcross };
-            button.AddToClassList("game-menu-button");
-            button.AddToClassList("game-menu-button-small");
-            row.Add(button);
-            newGameMapSizeButtons.Add((option, button));
-        }
-        newGameMapSizeSummary = new Label();
-        newGameMapSizeSummary.AddToClassList("new-game-option-summary");
-        // 12У-H: остальные основные параметры карты — строками кнопок.
-        VisualElement options = BuildNewGameMapOptionRows();
-        panel.Insert(index, options);
-        panel.Insert(index, newGameMapSizeSummary);
-        panel.Insert(index, row);
-        panel.Insert(index, section);
-    }
-
-    // ---------- 12У-H: параметры карты новой партии ----------
-
-    private readonly System.Collections.Generic.List<(string Key, int Value, Button Button)> newGameMapOptionButtons =
-        new System.Collections.Generic.List<(string, int, Button)>();
-
-    private static readonly (WorldMapRegionKind Kind, string Title)[] NewGameRegionKinds =
-    {
-        (WorldMapRegionKind.BySeed, "Любая"),
-        (WorldMapRegionKind.RiverValley, "Речная долина"),
-        (WorldMapRegionKind.ForestLake, "Лес и озеро"),
-        (WorldMapRegionKind.HillAndLedge, "Холмы"),
-        (WorldMapRegionKind.SettledLand, "Обжитая")
-    };
-
-    private VisualElement BuildNewGameMapOptionRows()
-    {
-        VisualElement box = new VisualElement { name = "new-game-map-options" };
-        box.style.marginTop = 4;
-        box.style.marginBottom = 6;
-        VisualElement Row(string title)
-        {
-            VisualElement row = new VisualElement();
-            row.style.flexDirection = FlexDirection.Row;
-            row.style.alignItems = Align.Center;
-            row.style.marginTop = 2;
-            Label label = new Label(title);
-            label.AddToClassList("new-game-option-summary");
-            label.style.width = 130;
-            label.style.marginRight = 6;
-            row.Add(label);
-            box.Add(row);
-            return row;
-        }
-        void Choice(VisualElement row, string key, int value, string text)
-        {
-            Button button = new Button(() => SelectNewGameMapOption(key, value)) { text = text, name = "new-game-option-" + key + "-" + value };
-            button.AddToClassList("game-menu-button");
-            button.AddToClassList("game-menu-button-small");
-            row.Add(button);
-            newGameMapOptionButtons.Add((key, value, button));
-        }
-        VisualElement kind = Row("Местность");
-        foreach ((WorldMapRegionKind k, string title) in NewGameRegionKinds)
-            Choice(kind, "region", (int)k, title);
-        (string Key, string Title, string[] Levels)[] levels =
-        {
-            ("relief", "Рельеф", new[] { "Равнина", "Обычный", "Горы" }),
-            ("water", "Реки и озёра", CampaignMapOptions.LevelTitles),
-            ("forest", "Лес", CampaignMapOptions.LevelTitles),
-            ("settlements", "Деревни", CampaignMapOptions.LevelTitles),
-            ("discoveries", "Тайны и места", CampaignMapOptions.LevelTitles),
-            ("enemies", "Враги", CampaignMapOptions.LevelTitles),
-        };
-        foreach ((string key, string title, string[] names) in levels)
-        {
-            VisualElement row = Row(title);
-            for (int v = 0; v < names.Length; v++)
-                Choice(row, key, v, names[v]);
-        }
-        return box;
-    }
-
-    private static int GetMapOption(CampaignMapOptions o, string key)
-    {
-        switch (key)
-        {
-            case "region": return (int)o.RegionKind;
-            case "relief": return o.Relief;
-            case "water": return o.Water;
-            case "forest": return o.Forest;
-            case "settlements": return o.Villages;
-            case "discoveries": return o.Discoveries;
-            case "enemies": return o.Enemies;
-            default: return -1;
-        }
-    }
-
-    private void SelectNewGameMapOption(string key, int value)
-    {
-        if (pendingSetup == null)
-            return;
-        CampaignMapOptions o = pendingSetup.MapOptions ??= new CampaignMapOptions();
-        switch (key)
-        {
-            case "region": o.RegionKind = (WorldMapRegionKind)value; break;
-            case "relief": o.Relief = value; break;
-            case "water": o.Water = value; break;
-            case "forest": o.Forest = value; break;
-            case "settlements": o.Villages = value; break;
-            case "discoveries": o.Discoveries = value; break;
-            case "enemies": o.Enemies = value; break;
-        }
-        FillNewGameSummary();
-    }
-
-    private static void MarkSelected(Button button, bool on)
-    {
-        Color border = on ? new Color(0.83f, 0.69f, 0.42f) : new Color(0f, 0f, 0f, 0f);
-        button.style.borderTopColor = button.style.borderBottomColor = button.style.borderLeftColor = button.style.borderRightColor = border;
-        float width = on ? 2f : 0f;
-        button.style.borderTopWidth = button.style.borderBottomWidth = button.style.borderLeftWidth = button.style.borderRightWidth = width;
-    }
-
-    private void FillNewGameMapOptions()
-    {
-        CampaignMapOptions o = pendingSetup?.MapOptions ?? new CampaignMapOptions();
-        foreach ((string key, int value, Button button) in newGameMapOptionButtons)
-            MarkSelected(button, GetMapOption(o, key) == value);
-    }
-
-    private void SelectNewGameMapSize(int hexesAcross)
-    {
-        if (pendingSetup == null)
-            return;
-        pendingSetup.MapHexesAcross = hexesAcross;
-        FillNewGameSummary();
-    }
-
-    private void FillNewGameMapSize()
-    {
-        int selected = pendingSetup != null ? pendingSetup.MapHexesAcross : CampaignStartOptions.DefaultMapHexesAcross;
-        foreach ((MapSizeOption option, Button button) in newGameMapSizeButtons)
-        {
-            bool on = option.HexesAcross == selected;
-            Color border = on ? new Color(0.83f, 0.69f, 0.42f) : new Color(0f, 0f, 0f, 0f);
-            button.style.borderTopColor = border;
-            button.style.borderBottomColor = border;
-            button.style.borderLeftColor = border;
-            button.style.borderRightColor = border;
-            float width = on ? 2f : 0f;
-            button.style.borderTopWidth = width;
-            button.style.borderBottomWidth = width;
-            button.style.borderLeftWidth = width;
-            button.style.borderRightWidth = width;
-        }
-        if (newGameMapSizeSummary != null)
-            newGameMapSizeSummary.text = CampaignStartOptions.FindMapSize(selected)?.Summary ?? string.Empty;
-    }
+    // 12Ф (канон v1.71 §9.9.1): карта свободной игры — авторская, из
+    // «Редактора карты»; выбора размера и параметров карты на экране нет.
 
     private void OpenNewGameSummary()
     {
@@ -466,8 +300,6 @@ public partial class PrototypeUIController
     private void FillNewGameSummary()
     {
         FillOption("new-game-commander", CampaignStartOptions.Find(CampaignStartOptions.Commanders, pendingSetup.CommanderProfileId));
-        FillNewGameMapSize();
-        FillNewGameMapOptions();
 
         bool valid = pendingSetup.Validate(out string reason);
         newGameMessage.text = valid ? string.Empty : "Нельзя начать: " + reason + ".";

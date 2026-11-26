@@ -247,10 +247,10 @@ TextureImporter:
       name: Idle_Front_Left_000
       rect:
         serializedVersion: 2
-        x: 2
-        y: 3098
-        width: 512
-        height: 512
+        x: 10
+        y: 3103
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -269,10 +269,10 @@ TextureImporter:
       name: Idle_Front_Left_001
       rect:
         serializedVersion: 2
-        x: 518
-        y: 3098
-        width: 512
-        height: 512
+        x: 526
+        y: 3103
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -291,10 +291,10 @@ TextureImporter:
       name: Idle_Front_Left_002
       rect:
         serializedVersion: 2
-        x: 1034
-        y: 3098
-        width: 512
-        height: 512
+        x: 1042
+        y: 3103
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -313,10 +313,10 @@ TextureImporter:
       name: Idle_Front_Left_003
       rect:
         serializedVersion: 2
-        x: 1550
-        y: 3098
-        width: 512
-        height: 512
+        x: 1558
+        y: 3103
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -335,10 +335,10 @@ TextureImporter:
       name: Idle_Front_Left_004
       rect:
         serializedVersion: 2
-        x: 2066
-        y: 3098
-        width: 512
-        height: 512
+        x: 2074
+        y: 3103
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -357,10 +357,10 @@ TextureImporter:
       name: Idle_Front_Left_005
       rect:
         serializedVersion: 2
-        x: 2582
-        y: 3098
-        width: 512
-        height: 512
+        x: 2590
+        y: 3103
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -379,10 +379,10 @@ TextureImporter:
       name: Idle_Front_Left_006
       rect:
         serializedVersion: 2
-        x: 3098
-        y: 3098
-        width: 512
-        height: 512
+        x: 3106
+        y: 3103
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -401,10 +401,10 @@ TextureImporter:
       name: Idle_Front_Left_007
       rect:
         serializedVersion: 2
-        x: 2
-        y: 2582
-        width: 512
-        height: 512
+        x: 10
+        y: 2587
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -423,10 +423,10 @@ TextureImporter:
       name: Idle_Front_Left_008
       rect:
         serializedVersion: 2
-        x: 518
-        y: 2582
-        width: 512
-        height: 512
+        x: 526
+        y: 2587
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -445,10 +445,10 @@ TextureImporter:
       name: Idle_Front_Left_009
       rect:
         serializedVersion: 2
-        x: 1034
-        y: 2582
-        width: 512
-        height: 512
+        x: 1042
+        y: 2587
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -467,10 +467,10 @@ TextureImporter:
       name: Idle_Front_Left_010
       rect:
         serializedVersion: 2
-        x: 1550
-        y: 2582
-        width: 512
-        height: 512
+        x: 1558
+        y: 2587
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -489,10 +489,10 @@ TextureImporter:
       name: Idle_Front_Left_011
       rect:
         serializedVersion: 2
-        x: 2066
-        y: 2582
-        width: 512
-        height: 512
+        x: 2074
+        y: 2587
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -511,10 +511,10 @@ TextureImporter:
       name: Idle_Front_Left_012
       rect:
         serializedVersion: 2
-        x: 2582
-        y: 2582
-        width: 512
-        height: 512
+        x: 2590
+        y: 2587
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -533,10 +533,10 @@ TextureImporter:
       name: Idle_Front_Left_013
       rect:
         serializedVersion: 2
-        x: 3098
-        y: 2582
-        width: 512
-        height: 512
+        x: 3106
+        y: 2587
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -555,10 +555,10 @@ TextureImporter:
       name: Idle_Front_Left_014
       rect:
         serializedVersion: 2
-        x: 2
-        y: 2066
-        width: 512
-        height: 512
+        x: 10
+        y: 2071
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -577,10 +577,10 @@ TextureImporter:
       name: Idle_Front_Left_015
       rect:
         serializedVersion: 2
-        x: 518
-        y: 2066
-        width: 512
-        height: 512
+        x: 526
+        y: 2071
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -599,10 +599,10 @@ TextureImporter:
       name: Idle_Front_Left_016
       rect:
         serializedVersion: 2
-        x: 1034
-        y: 2066
-        width: 512
-        height: 512
+        x: 1042
+        y: 2071
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -621,10 +621,10 @@ TextureImporter:
       name: Idle_Front_Left_017
       rect:
         serializedVersion: 2
-        x: 1550
-        y: 2066
-        width: 512
-        height: 512
+        x: 1558
+        y: 2071
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -643,10 +643,10 @@ TextureImporter:
       name: Idle_Front_Left_018
       rect:
         serializedVersion: 2
-        x: 2066
-        y: 2066
-        width: 512
-        height: 512
+        x: 2074
+        y: 2071
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -665,10 +665,10 @@ TextureImporter:
       name: Idle_Front_Left_019
       rect:
         serializedVersion: 2
-        x: 2582
-        y: 2066
-        width: 512
-        height: 512
+        x: 2590
+        y: 2071
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -687,10 +687,10 @@ TextureImporter:
       name: Idle_Front_Left_020
       rect:
         serializedVersion: 2
-        x: 3098
-        y: 2066
-        width: 512
-        height: 512
+        x: 3106
+        y: 2071
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -709,10 +709,10 @@ TextureImporter:
       name: Idle_Front_Left_021
       rect:
         serializedVersion: 2
-        x: 2
-        y: 1550
-        width: 512
-        height: 512
+        x: 10
+        y: 1555
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -731,10 +731,10 @@ TextureImporter:
       name: Idle_Front_Left_022
       rect:
         serializedVersion: 2
-        x: 518
-        y: 1550
-        width: 512
-        height: 512
+        x: 526
+        y: 1555
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -753,10 +753,10 @@ TextureImporter:
       name: Idle_Front_Left_023
       rect:
         serializedVersion: 2
-        x: 1034
-        y: 1550
-        width: 512
-        height: 512
+        x: 1042
+        y: 1555
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -775,10 +775,10 @@ TextureImporter:
       name: Idle_Front_Left_024
       rect:
         serializedVersion: 2
-        x: 1550
-        y: 1550
-        width: 512
-        height: 512
+        x: 1558
+        y: 1555
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -797,10 +797,10 @@ TextureImporter:
       name: Idle_Front_Left_025
       rect:
         serializedVersion: 2
-        x: 2066
-        y: 1550
-        width: 512
-        height: 512
+        x: 2074
+        y: 1555
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -819,10 +819,10 @@ TextureImporter:
       name: Idle_Front_Left_026
       rect:
         serializedVersion: 2
-        x: 2582
-        y: 1550
-        width: 512
-        height: 512
+        x: 2590
+        y: 1555
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -841,10 +841,10 @@ TextureImporter:
       name: Idle_Front_Left_027
       rect:
         serializedVersion: 2
-        x: 3098
-        y: 1550
-        width: 512
-        height: 512
+        x: 3106
+        y: 1555
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -863,10 +863,10 @@ TextureImporter:
       name: Idle_Front_Left_028
       rect:
         serializedVersion: 2
-        x: 2
-        y: 1034
-        width: 512
-        height: 512
+        x: 10
+        y: 1039
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -885,10 +885,10 @@ TextureImporter:
       name: Idle_Front_Left_029
       rect:
         serializedVersion: 2
-        x: 518
-        y: 1034
-        width: 512
-        height: 512
+        x: 526
+        y: 1039
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -907,10 +907,10 @@ TextureImporter:
       name: Idle_Front_Left_030
       rect:
         serializedVersion: 2
-        x: 1034
-        y: 1034
-        width: 512
-        height: 512
+        x: 1042
+        y: 1039
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -929,10 +929,10 @@ TextureImporter:
       name: Idle_Front_Left_031
       rect:
         serializedVersion: 2
-        x: 1550
-        y: 1034
-        width: 512
-        height: 512
+        x: 1558
+        y: 1039
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -951,10 +951,10 @@ TextureImporter:
       name: Idle_Front_Left_032
       rect:
         serializedVersion: 2
-        x: 2066
-        y: 1034
-        width: 512
-        height: 512
+        x: 2074
+        y: 1039
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -973,10 +973,10 @@ TextureImporter:
       name: Idle_Front_Left_033
       rect:
         serializedVersion: 2
-        x: 2582
-        y: 1034
-        width: 512
-        height: 512
+        x: 2590
+        y: 1039
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -995,10 +995,10 @@ TextureImporter:
       name: Idle_Front_Left_034
       rect:
         serializedVersion: 2
-        x: 3098
-        y: 1034
-        width: 512
-        height: 512
+        x: 3106
+        y: 1039
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1017,10 +1017,10 @@ TextureImporter:
       name: Idle_Front_Left_035
       rect:
         serializedVersion: 2
-        x: 2
-        y: 518
-        width: 512
-        height: 512
+        x: 10
+        y: 523
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1039,10 +1039,10 @@ TextureImporter:
       name: Idle_Front_Left_036
       rect:
         serializedVersion: 2
-        x: 518
-        y: 518
-        width: 512
-        height: 512
+        x: 526
+        y: 523
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1061,10 +1061,10 @@ TextureImporter:
       name: Idle_Front_Left_037
       rect:
         serializedVersion: 2
-        x: 1034
-        y: 518
-        width: 512
-        height: 512
+        x: 1042
+        y: 523
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1083,10 +1083,10 @@ TextureImporter:
       name: Idle_Front_Left_038
       rect:
         serializedVersion: 2
-        x: 1550
-        y: 518
-        width: 512
-        height: 512
+        x: 1558
+        y: 523
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1105,10 +1105,10 @@ TextureImporter:
       name: Idle_Front_Left_039
       rect:
         serializedVersion: 2
-        x: 2066
-        y: 518
-        width: 512
-        height: 512
+        x: 2074
+        y: 523
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1127,10 +1127,10 @@ TextureImporter:
       name: Idle_Front_Left_040
       rect:
         serializedVersion: 2
-        x: 2582
-        y: 518
-        width: 512
-        height: 512
+        x: 2590
+        y: 523
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1149,10 +1149,10 @@ TextureImporter:
       name: Idle_Front_Left_041
       rect:
         serializedVersion: 2
-        x: 3098
-        y: 518
-        width: 512
-        height: 512
+        x: 3106
+        y: 523
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1171,10 +1171,10 @@ TextureImporter:
       name: Idle_Front_Left_042
       rect:
         serializedVersion: 2
-        x: 2
-        y: 2
-        width: 512
-        height: 512
+        x: 10
+        y: 7
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1193,10 +1193,10 @@ TextureImporter:
       name: Idle_Front_Left_043
       rect:
         serializedVersion: 2
-        x: 518
-        y: 2
-        width: 512
-        height: 512
+        x: 526
+        y: 7
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1215,10 +1215,10 @@ TextureImporter:
       name: Idle_Front_Left_044
       rect:
         serializedVersion: 2
-        x: 1034
-        y: 2
-        width: 512
-        height: 512
+        x: 1042
+        y: 7
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1237,10 +1237,10 @@ TextureImporter:
       name: Idle_Front_Left_045
       rect:
         serializedVersion: 2
-        x: 1550
-        y: 2
-        width: 512
-        height: 512
+        x: 1558
+        y: 7
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1259,10 +1259,10 @@ TextureImporter:
       name: Idle_Front_Left_046
       rect:
         serializedVersion: 2
-        x: 2066
-        y: 2
-        width: 512
-        height: 512
+        x: 2074
+        y: 7
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1281,10 +1281,10 @@ TextureImporter:
       name: Idle_Front_Left_047
       rect:
         serializedVersion: 2
-        x: 2582
-        y: 2
-        width: 512
-        height: 512
+        x: 2590
+        y: 7
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1303,10 +1303,10 @@ TextureImporter:
       name: Idle_Front_Left_048
       rect:
         serializedVersion: 2
-        x: 3098
-        y: 2
-        width: 512
-        height: 512
+        x: 3106
+        y: 7
+        width: 496
+        height: 496
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
